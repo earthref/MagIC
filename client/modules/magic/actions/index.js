@@ -1,7 +1,7 @@
-import parse_contribution from './parse_contribution';
+import parseContribution from './parse_contribution';
 
 const actions = {
-  parse_contribution
+  parseContribution
 };
 
 export default actions;
