@@ -8,13 +8,13 @@ const Home = React.createClass({
         <p>
           The website for Earth Science reference data and models.
         </p>
-        <p>
+        <div>
           <ul>
             <li>
               MagIC
             </li>
           </ul>
-        </p>
+        </div>
       </div>
     );
   }

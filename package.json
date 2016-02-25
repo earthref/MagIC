@@ -32,7 +32,7 @@
   "scripts": {
     "test": "npm run lint-only && npm run test-client",
     "lint-only": "eslint ./lib ./client ./server --ext .js --ext .jsx",
-    "lint-fix": "npm run lint -- --fix",
+    "lint-fix": "npm run lint-only -- --fix",
     "test-client": "mocha .scripts/mocha_boot.js client/**/tests/*.js --compilers js:babel-core/register",
     "test-watch": "npm run test-client -- --watch --watch-extensions js,jsx"
   }
