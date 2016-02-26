@@ -16,7 +16,7 @@ node_modules
 .idea/dynamic.xml
 .idea/uiDesigner.xml
 .idea/earthref.iml
-.idea\libraries\meteor_packages_auto_import_browser.xml
+.idea/libraries/meteor_packages_auto_import_browser.xml
 
 ## JetBrains File-based project format:
 *.iws
