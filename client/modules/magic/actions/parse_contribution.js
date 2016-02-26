@@ -1,4 +1,4 @@
-import { _ } from 'lodash';
+import {_} from 'lodash';
 
 export default class {
 
@@ -55,7 +55,7 @@ export default class {
       }
 
       // If this is the first line of a table, look for the table name
-      else if (tableLineNumber == 1) {
+      else if (tableLineNumber === 1) {
 
         // Split the table definition on the tab character
         let tableDefinition = line.split(/\s*\t\s*/);
@@ -75,7 +75,7 @@ export default class {
           skipTable = true;
         }
 
-        //tab has been found, check for table name
+        // Tab has been found, check for table name
         else if (tableDefinition[1] === undefined ) {
           this._appendError(`No table name following tab delimiter`);
           skipTable = true;
@@ -91,13 +91,13 @@ export default class {
       }
 
       // If this is the second line of a table, look for the column names
-      else if (tableLineNumber == 2) {
+      else if (tableLineNumber === 2) {
 
         // Split the column definition on the tab character
         columns = line.split(/\s*\t\s*/);
 
         // Check for column names
-        if (columns.length == 0) {
+        if (columns.length === 0) {
           this._appendError('No column names found.');
           skipTable = true;
         }
@@ -107,10 +107,9 @@ export default class {
 
         // Check for empty column names
         if (_.findIndex(columns, '') !== -1) {
-          this._appendError('Empty column names are not allowed.'); 
+          this._appendError('Empty column names are not allowed.');
           skipTable = true;
         }
-
 
         // Check for duplicate column names
         if (columns.length !== _.uniq(columns).length) {
@@ -143,7 +142,7 @@ export default class {
 
     // Look for empty tables to issue a warning
     for (let jsonTable in this.json) {
-      if (this.json[jsonTable].length == 0)
+      if (this.json[jsonTable].length === 0)
         this._appendWarning(`No data values were found in the ${jsonTable} table.`);
     }
 
@@ -153,16 +152,16 @@ export default class {
 
   _appendWarning(warningMessage) {
     const warnings = this.LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
-    const warning = {'line_number': this.lineNumber, 'message': warningMessage};
-    console.log("WARNING: ", warningMessage);
+    const warning = { lineNumber: this.lineNumber, message: warningMessage};
+    console.log('WARNING: ', warningMessage);
     warnings.push(warning);
     this.LocalState.set('PARSE_CONTRIBUTION_WARNINGS', warnings);
   }
 
   _appendError(errorMessage) {
     const errors = this.LocalState.get('PARSE_CONTRIBUTION_ERRORS');
-    const error = {'line_number': this.lineNumber, 'message': errorMessage};
-    console.log("ERROR: ", errorMessage);
+    const error = { lineNumber: this.lineNumber, message: errorMessage};
+    console.log('ERROR: ', errorMessage);
     errors.push(error);
     this.LocalState.set('PARSE_CONTRIBUTION_ERRORS', errors);
   }

@@ -36,7 +36,7 @@
   "rules": {
     "array-bracket-spacing": [
       2,
-      "always"
+      "never"
     ],
     "arrow-spacing": 2,
     "block-scoped-var": 0,
@@ -118,7 +118,7 @@
     "max-depth": 0,
     "max-len": [
       2,
-      100,
+      120,
       4
     ],
     "max-nested-callbacks": 0,
@@ -180,7 +180,7 @@
       true
     ],
     "no-mixed-spaces-and-tabs": 2,
-    "no-multi-spaces": 2,
+    //"no-multi-spaces": 2,
     "no-multi-str": 2,
     "no-multiple-empty-lines": 0,
     "no-native-reassign": 0,
