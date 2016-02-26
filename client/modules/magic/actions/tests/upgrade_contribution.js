@@ -1,12 +1,12 @@
 const {describe, it} = global;
 import {expect} from 'chai';
 import UpgradeContribution from '../upgrade_contribution';
-//import {default as contribution289  } from '/files/289.js';
-//import {default as contribution3552 } from '/files/3552.js';
-//import {default as contribution7527 } from '/files/7527.js';
-//import {default as contribution7661 } from '/files/7661.js';
-//import {default as contribution8054 } from '/files/8054.js';
-//import {default as contribution10507} from '/files/10507.js';
+//import {default as contribution289  } from '/test_files/289.js';
+//import {default as contribution3552 } from '/test_files/3552.js';
+//import {default as contribution7527 } from '/test_files/7527.js';
+//import {default as contribution7661 } from '/test_files/7661.js';
+//import {default as contribution8054 } from '/test_files/8054.js';
+//import {default as contribution10507} from '/test_files/10507.js';
 
 const upgradeContributionWarningTest = (jsonOld, reErrorMsg) => {
 
