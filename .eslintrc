@@ -48,12 +48,12 @@
       }
     ],*/
     "callback-return": 2,
-    "camelcase": [
+    /*"camelcase": [
       2,
       {
         "properties": "always"
       }
-    ],
+    ],*/
     "comma-dangle": 0,
     "comma-spacing": 0,
     "comma-style": [
@@ -313,10 +313,10 @@
         "nonwords": false
       }
     ],
-    "spaced-comment": [
+    /*"spaced-comment": [
       2,
       "always"
-    ],
+    ],*/
     "strict": 0,
     "use-isnan": 2,
     "valid-jsdoc": 0,

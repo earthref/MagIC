@@ -152,7 +152,7 @@ describe('magic.actions.parse_contribution', () => {
   });
   describe('parse files', () => {
     it('should parse contribution 289 with no errors', () => {
-        parseContributionNoErrorTest(contribution289);
+      parseContributionNoErrorTest(contribution289);
     });
     it('should parse contribution 3552 with no errors', () => {
       parseContributionNoErrorTest(contribution3552);
