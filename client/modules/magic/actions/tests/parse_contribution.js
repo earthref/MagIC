@@ -3,53 +3,73 @@ import {expect} from 'chai';
 import {spy} from 'sinon';
 import ParseContribution from '../parse_contribution';
 
-const parseContributionErrorTest = (text, reErrorMsg) => {
+const parseContributionWarningTest = (text, reErrorMsg) => {
 
-  // create a mock LocalState object and spy on its set() method
-  const LocalState = {set: spy()};
+  // create a mock Map instead of a Reactive Dict
+  const LocalState = new Map();
 
   // parse the test string
   const parser = new ParseContribution({LocalState});
   parser.parse(text);
 
   // retrieve the spied arguments from the 1st time LocalState.set was called
-  const args = LocalState.set.args[0];
-  const LocalState_key = args[0];
-  const LocalState_val = args[1];
+  const errors = LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
 
   // expect the parse errors to contain one error that matches the matchErrorMSG regex
-  expect(LocalState_key).to.be.equal('PARSE_CONTRIBUTION_ERROR');
-  expect(LocalState_val).to.match(reErrorMsg);
+  expect(errors.length).to.be.at.least(1);
+  expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
+
+};
+
+const parseContributionErrorTest = (text, reErrorMsg) => {
+
+  // create a mock Map instead of a Reactive Dict
+  const LocalState = new Map();
+
+  // parse the test string
+  const parser = new ParseContribution({LocalState});
+  parser.parse(text);
+
+  // retrieve the spied arguments from the 1st time LocalState.set was called
+  const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
+
+  // expect the parse errors to contain one error that matches the matchErrorMSG regex
+  expect(errors.length).to.be.at.least(1);
+  expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
+  
+};
+
+const parseContributionJSONTest = (text, jsonExpected) => {
+
+  // create a mock Map instead of a Reactive Dict
+  const LocalState = new Map();
+
+  // parse the test string
+  const parser = new ParseContribution({LocalState});
+  const json = parser.parse(text);
+
+  // retrieve the spied arguments from the 1st time LocalState.set was called
+  const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
+
+  // expect no errors and
+  expect(errors.length).to.equal(0);
+  expect(json).to.deepEqual(jsonExpected);
 
 };
 
 describe('magic.actions.parseContribution', () => {
   describe('parse', () => {
-    it('should reject if text is not there', () => {
-      parseContributionErrorTest(null, /Contribution text is required./);
+    it('should warn about parsing an empty string', () => {
+      parseContributionWarningTest(null, /empty/i);
     });
-
-    it('should reject nonsense with no tab header', () => {
-      parseContributionErrorTest('nonsense', /Start of table string \"tab\" expected but not found./);
+    it('should reject nonsense', () => {
+      parseContributionErrorTest('nonsense', /unrecognized column delimiter/i);
     });
-
-    it('should reject nonsense with tab header', () => {
-      parseContributionErrorTest('nonsense\ttable', /Start of table string \"tab\" expected but not found./);
+    it('should reject if table name is missing', () => {
+      parseContributionErrorTest('tab\t \n', /invalid table definition/i);
     });
-
-    it('should reject leading space nonsense with tab and column headers', () => {
-      parseContributionErrorTest('  nonsense  \ttable\ncol1\tcol2\nstr1\t1.2', /Start of table string \"tab\" expected but not found./);
+    it('should handle a valid string with no data', () => {
+      parseContributionJSONTest('tab\ttable\ncol1\tcol2\n', {});
     });
-
-    var noTableNames = ["tab\n",
-        " tab \n",
-        " tab \t",
-        "tab\t\n"];
-    for (var noTableName of noTableNames)
-    {
-      it('should reject if table name is missing', () => {
-        parseContributionErrorTest(noTableName, /Error, table delimiter \"tab\" has no table name./);
-      });
-    }
   });
 });

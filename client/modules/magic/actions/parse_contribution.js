@@ -3,220 +3,151 @@ export default class {
   constructor({Meteor, LocalState}) {
     this.Meteor = Meteor;
     this.LocalState = LocalState;
-    this.jsonContribution = {};
-    this.tableCounter = 0;
-    this.totalLineNumbersInFile;
+
+    // Clear errors and warnings
+    this.LocalState.set('PARSE_CONTRIBUTION_ERRORS', []);
+    this.LocalState.set('PARSE_CONTRIBUTION_WARNINGS', []);
+
+    // Initialize the contribution
+    this.json = {};
+    this.tableNumber = 0;
+    this.lineNumber = 0;
+
   }
 
   parse(text) {
 
+    // Check for a valid input
     if (!text) {
-      //GGG Shouldn't we throw an exception here?
-      return this.LocalState.set('PARSE_CONTRIBUTION_ERROR', 'Contribution text is required.');
+      return this._appendWarning('Contribution text is empty.');
     }
 
-    text = text.replace(/\n$/, ''); //Remove trailing
+    // Split the text on line breaks
+    const lines = text.match(/[^\r\n]+/g);
+    let table = undefined;
+    let columns = [];
 
-    var contribFileLines = text.split("\n");
-    var LOG = true;
-    var EXCEPTION = true;
-    var currentLine;
-    var columns = [];
+    // Process the text line by line
+    let skipTable = false;
+    let tableLineNumber = 0;
+    for (let i = 0; i < lines.length; i++) {
 
-    //*************** MAIN PROCESSING LOOP******************
-    var expectStartOfTableOrEOF = true;
-    var lineIndex = 0;
-    this.totalLineNumbersInFile =  contribFileLines.length;
-    console.log("Parsing...total line numbers: " + this.totalLineNumbersInFile);
+      // Trim leading and trailing whitespace from the line
+      let line = lines[i].trim();
 
-    //****************** THIS IS THE MAIN PROCESSING LOOP *******************
-    for (lineIndex = 0;
-         (lineIndex < contribFileLines.length); lineIndex++) {
+      // Skip empty lines
+      if (line === undefined || line == '') continue;
 
-      currentLine = contribFileLines[lineIndex];
+      // Skip lines if skipping table
+      if (skipTable) continue;
 
-      //***************
-      if (this.skipThisLine(currentLine)) {
-        //console.log("skipping inconsequential line: "+ currentLine) ;
-        lineIndex = lineIndex++; //GGG AGAIN, BAD PROGRAMMING PRACTICE BUT IT WORKS FOR NOW
-        currentLine = contribFileLines[lineIndex]; //Just eat the skipped line and continue
+      // Record the line number
+      this.lineNumber = i + 1;
+      tableLineNumber++;
+
+      // If this line ends a table
+      if (line.match(/^>+$/)) {
+        table = undefined;
+        columns = [];
+        tableLineNumber = 0;
+        skipTable = false;
       }
 
-      //***************
-      currentLine = this.cleanString(currentLine);
+      // If this is the first line of a table, look for the table name
+      else if (tableLineNumber == 1) {
 
-      //***************
-      if (this.startOfTable(currentLine)) {
-        var tableDefinition = this.tokenizeLine(currentLine);
-        var currentTableName = tableDefinition[1]; //tablename should be the second token in this row
+        // Split the table definition on the tab character
+        let tableDefinition = line.split(/\s*\t\s*/);
 
-        if (currentTableName == undefined) {
-          return this.LocalState.set('PARSE_CONTRIBUTION_ERROR', 'Error, table delimiter \"tab\" has no table name.');
-          //this.logAndException(EXCEPTION, LOG, "Error, table delimiter \"tab\" has no table name.", lineIndex);
+        // Check table definition has at least 2 elements in it
+        if (tableDefinition.length < 2) {
+          this._appendError('Invalid table definition. Expected something like "tab[tab]measurements[new line]".');
+          skipTable = true;
         }
 
-        //console.log("Processing table: " + currentTableName + " #" + this.tableCounter + " with columns: " + columns);
+        // Clean leading and trailing whitespace from each part of the table definition
+        tableDefinition.map((str) => { return str.trim(); });
 
-        if (!this.jsonContribution.hasOwnProperty(currentTableName)) //Don't read the table property if the table has already been added
-        {
-          this.jsonContribution[currentTableName] = [];
-        } // Set up the table with an empty array to later give name/value pair objects of column/data
-
-        //skip to the next line for the column headers
-        //console.log("skipping table definition line: "+ currentLine) ;
-        lineIndex++; //GGG, I realize this is poor programming practice, but it is due to the line by line requirement
-        currentLine = contribFileLines[lineIndex];
-        columns = this.tokenizeLine(currentLine);
-
-        try {
-          this.hasDuplicateStrings(columns)
-        } catch (e) {
-          this.logAndException(EXCEPTION, LOG, "Duplicate column name found. " + e.message, lineIndex);
+        // Check the column delimiter is "tab"
+        if (!tableDefinition[0].match(/^tab$/i)) {
+          this._appendError(`Unrecognized column delimiter "${tableDefinition[0]}". Expected "tab".`);
+          skipTable = true;
         }
 
-        //Test for columns with no data
-        if (this.arrayHasEmptyStrings(columns)) {
-          this.logAndException(EXCEPTION, LOG, "Warning, empty column header found  While processing table: " + currentTableName, lineIndex);
-        }
+        // Save the table name
+        table = tableDefinition[1];
 
-        expectStartOfTableOrEOF = false;
-      } //end ifStartIfTable
-      else if (expectStartOfTableOrEOF == true) // in this case we expected the start of a table but didn't find it
-      {
-        return this.LocalState.set('PARSE_CONTRIBUTION_ERROR','Start of table string \"tab\" expected but not found.');
-        //this.logAndException(EXCEPTION, LOG, "Start of table string \"tab\" expected but not found.", lineIndex);
+        // Initialize a new table in the JSON if necessary
+        if (!this.json.hasOwnProperty(table))
+          this.json[table] = [];
+
       }
 
-      //***********NOW PROCESS COLUMN DATA WITHIN THE CURRENT TABLE  ************
-      // console.log("skipping column header line: "+ currentLine) ;
-      lineIndex++; //GGG, I realize this is poor programming practice, but it is due to the line by line requirement
-      currentLine = contribFileLines[lineIndex];
-      do {
-        var rowValuesToAdd = this.tokenizeLine(currentLine);
-        var row = {};
+      // If this is the second line of a table, look for the column names
+      else if (tableLineNumber == 2) {
 
-        for (var columnNumber in columns) {
-          if (rowValuesToAdd[columnNumber] && rowValuesToAdd[columnNumber].length > 0) // weed out empty strings
-            row[columns[columnNumber]] = rowValuesToAdd[columnNumber];
+        // Split the column definition on the tab character
+        columns = line.split(/\s*\t\s*/);
+
+        // Check for column names
+        if (columns.length == 0) {
+          this._appendError('No column names found.');
+          skipTable = true;
         }
 
-        if (this.jsonContribution[currentTableName]) {
-          this.jsonContribution[currentTableName].push(row);
-          //console.log("added row: "+ currentLine) ;
-          lineIndex++; //GGG, I realize this is poor programming practice, but it is due to the line by line requirement
-          currentLine = contribFileLines[lineIndex];
+        // Clean leading and trailing whitespace from each column name
+        columns = columns.map(String.trim);
+
+        // Check for empty column names
+        if (_.findIndex(columns, '') !== -1) {
+          this._appendError('Empty column names are not allowed.');
+          skipTable = true;
         }
 
-      } while (!this.endOfTable(currentLine) && !this.isEndOfFile(lineIndex))
+        // Check for duplicate column names
+        if (columns.length !== _.uniq(columns).length) {
+          this._appendError('Found duplicate column names.');
+          skipTable = true;
+        }
 
-      //***************  SEARCH FOR THE END OF TABLE DELIMITER
-      if (this.endOfTable(currentLine)) {
-        expectStartOfTableOrEOF = true;
       }
-      if(this.isEndOfFile(lineIndex))   {break;}
-    }
-  }
 
-  isEndOfFile(lineIndex)
-  {
-    if (lineIndex < (this.totalLineNumbersInFile))  {return false;}
-    else                                            {return true;}
-  }
+      // Otherwise parse the row
+      else {
 
+        // Split the row values on the tab character
+        let values = line.split(/\s*\t\s*/);
 
-  hasDuplicateStrings(arrayToCheck) {
-    var stringSet = new Set();
-    for (var sIndex in arrayToCheck) {
-      if (stringSet.has(arrayToCheck[sIndex])) {
-        throw new Error("Duplicate value detected: " + arrayToCheck[sIndex]);
-      } else {
-        stringSet.add(arrayToCheck[sIndex])
-      };
-    }
-    return false;
-  }
+        // Check there are enough column names
+        if (values.length > columns.length) {
+          this._appendError('More values found than columns.');
+        }
 
-  arrayHasEmptyStrings(arrayOfStrings) {
-    for (var i in arrayOfStrings) {
-      if (arrayOfStrings[i] == "") {
-        return true;
+        // Append the row of values onto the table in the JSON
+        else {
+          values = values.map((str) => { return str.trim(); });
+          this.json[table].push(_.zipObject(columns.slice(0, value.length), values));
+        }
       }
-    }
-    return false;
-  }
 
-  tokenizeLine(currentLine) {
-    var rowValues = [];
-    if (currentLine) rowValues = currentLine.split("\t");
-    //console.log(rowValues);
-    rowValues = this.cleanArrayStringValues(rowValues);
-    return rowValues;
-  }
-
-  cleanArrayStringValues(arrayOfStrings) {
-    for (var i in arrayOfStrings) {
-      arrayOfStrings[i] = this.cleanString(arrayOfStrings[i]);
-    }
-    return arrayOfStrings;
-  }
-
-  //separate function as there may be more items to clean?
-  cleanString(currentLine) {
-    return currentLine.trim(); //remove leading and trailing spaces
-  }
-
-  //Test for blank lines and any other conditions leading to  skip a line
-  skipThisLine(currentLine) {
-    var skipLine = false;
-    const RE_skipLine = /^\s*$/;
-
-    if (currentLine == undefined) {
-      skipLine = true;
-    } else if (RE_skipLine.test(currentLine)) {
-      skipLine = true;
     }
 
-    return skipLine;
-  }
-
-  startOfTable(currentLine) {
-    const RE_TableStart = /^tab*/; //GGG need to make this regex better
-
-    var startOfTable = false;
-    if (RE_TableStart.test(currentLine)) {
-      startOfTable = true;
-      this.tableCounter++;
-     // console.log("Table #"+this.tableCounter+" detected via delimiter: " + RE_TableStart.exec(currentLine)[0]); //This prints the text pattern that was discovered
-    }
-
-    return startOfTable;
+    return this.json;
 
   }
 
-  //detects strings indicating the end of a table
-  endOfTable(currentLine) {
-    const RE_endTable = /^\s*>+\s*/;
-    var endOfTable = false;
-
-    if (RE_endTable.test(currentLine)) {
-      endOfTable = true;
-      //console.log("End of table detected at line via delimiter: " + RE_endTable.exec(currentLine)[0]); //This prints the text pattern that was discovered
-    }
-    return endOfTable;
+  _appendWarning(errorMessage) {
+    const warnings = this.LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
+    const warning = {'line_number': this.lineNumber, 'message': errorMessage};
+    warnings.push(warning);
+    this.LocalState.set('PARSE_CONTRIBUTION_WARNINGS', warnings);
   }
 
-  logAndException(EXCEPTION, LOG, messageString, lineNumber) {
-    if (LOG) {
-      console.log(messageString);
-    }
-    if (EXCEPTION) {
-      lineNumber++; //correct for zero based array index
-      var errorMessage = messageString + ". File line #" + lineNumber.toString()+".";
-      throw new Error(errorMessage);
-    }
+  _appendError(errorMessage) {
+    const errors = this.LocalState.get('PARSE_CONTRIBUTION_ERRORS');
+    const error = {'line_number': this.lineNumber, 'message': errorMessage};
+    errors.push(error);
+    this.LocalState.set('PARSE_CONTRIBUTION_ERRORS', errors);
   }
 
-  clearErrors() {
-    return this.LocalState.set('PARSE_CONTRIBUTION_ERROR', null);
-  }
-};
+}
