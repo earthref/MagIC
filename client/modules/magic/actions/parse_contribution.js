@@ -10,7 +10,7 @@ export default class {
 
     // Initialize the contribution
     this.json = {};
-    this.tableNumber = 0;
+    //this.tableNumber = 0;
     this.lineNumber = 0;
 
   }
@@ -36,14 +36,14 @@ export default class {
       let line = lines[i].trim();
 
       // Skip empty lines
-      if (line === undefined || line == '') continue;
+      if (line === undefined || line == '') continue;//shouldn't line number still be incremented for reporting, they might get out of sync
 
       // Skip lines if skipping table
-      if (skipTable) continue;
+      if (skipTable) continue; //shouldn't line number still be incremented for reporting errors, they might get out of sync
 
       // Record the line number
       this.lineNumber = i + 1;
-      tableLineNumber++;
+      tableLineNumber++; ///here we are adding to table line number before we verify we have a "tab"
 
       // If this line ends a table
       if (line.match(/^>+$/)) {
@@ -68,11 +68,21 @@ export default class {
         // Clean leading and trailing whitespace from each part of the table definition
         tableDefinition.map((str) => { return str.trim(); });
 
+
         // Check the column delimiter is "tab"
+        console.log("table delim " +tableDefinition[0] + "  table name:" + tableDefinition[1]);
         if (!tableDefinition[0].match(/^tab$/i)) {
           this._appendError(`Unrecognized column delimiter "${tableDefinition[0]}". Expected "tab".`);
           skipTable = true;
         }
+        else if //tab has been found, check for table name
+        (tableDefinition[1] === undefined )
+        {
+          this._appendError(`No table name following tab delimiter`);
+          skipTable = true;
+        }
+
+
 
         // Save the table name
         table = tableDefinition[1];
@@ -96,13 +106,15 @@ export default class {
         }
 
         // Clean leading and trailing whitespace from each column name
+        console.log("Column names: " + columns);
         columns = columns.map(String.trim);
 
         // Check for empty column names
         if (_.findIndex(columns, '') !== -1) {
-          this._appendError('Empty column names are not allowed.');
+          this._appendError('Empty column names are not allowed.'); 
           skipTable = true;
         }
+
 
         // Check for duplicate column names
         if (columns.length !== _.uniq(columns).length) {
@@ -136,9 +148,9 @@ export default class {
 
   }
 
-  _appendWarning(errorMessage) {
+  _appendWarning(warningMessage) {
     const warnings = this.LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
-    const warning = {'line_number': this.lineNumber, 'message': errorMessage};
+    const warning = {'line_number': this.lineNumber, 'message': warningMessage};
     warnings.push(warning);
     this.LocalState.set('PARSE_CONTRIBUTION_WARNINGS', warnings);
   }
