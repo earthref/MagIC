@@ -44,7 +44,7 @@ const parseContributionErrorTest = (text, reErrorMsg) => {
 
 };
 
-const parseContributionNoErrorTest = (text, reErrorMsg) => {
+const parseContributionNoErrorTest = (text) => {
 
   // create a mock Map instead of a Reactive Dict
   const LocalState = new Map();
@@ -131,12 +131,22 @@ describe('magic.actions.parseContribution', () => {
         parseContributionJSONTest(withBlank, json);
     });
 
-    it('should parse a contributions with no errors', () => {
+    it('should parse contribution 289 with no errors', () => {
       parseContributionNoErrorTest(contribution289);
+    });
+    it('should parse contribution 3552 with no errors', () => {
       parseContributionNoErrorTest(contribution3552);
+    });
+    it('should parse contribution 7527 with no errors', () => {
       parseContributionNoErrorTest(contribution7527);
+    });
+    it('should parse contribution 7661 with no errors', () => {
       parseContributionNoErrorTest(contribution7661);
+    });
+    it('should parse contribution 8054 with no errors', () => {
       parseContributionNoErrorTest(contribution8054);
+    });
+    it('should parse contribution 10507 with no errors', () => {
       parseContributionNoErrorTest(contribution10507);
     });
 

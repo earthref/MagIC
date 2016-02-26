@@ -40,13 +40,13 @@
     ],
     "arrow-spacing": 2,
     "block-scoped-var": 0,
-    "brace-style": [
+    /*"brace-style": [
       2,
       "1tbs",
       {
         "allowSingleLine": true
       }
-    ],
+    ],*/
     "callback-return": 2,
     "camelcase": [
       2,
@@ -67,10 +67,10 @@
     ],
     "consistent-return": 0,
     "consistent-this": 0,
-    "curly": [
+    /*"curly": [
       2,
       "all"
-    ],
+    ],*/
     "default-case": 0,
     "dot-location": [
       2,
@@ -113,7 +113,7 @@
         "afterColon": true
       }
     ],
-    "linebreak-style": 2,
+    //"linebreak-style": 2,
     "lines-around-comment": 0,
     "max-depth": 0,
     "max-len": [

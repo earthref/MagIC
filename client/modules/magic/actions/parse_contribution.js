@@ -12,7 +12,6 @@ export default class {
 
     // Initialize the contribution
     this.json = {};
-    //this.tableNumber = 0;
     this.lineNumber = 0;
 
   }
@@ -26,7 +25,7 @@ export default class {
 
     // Split the text on line breaks
     const lines = text.match(/[^\r\n]+/g);
-    let table = undefined;
+    let table;
     let columns = [];
 
     // Process the text line by line
@@ -38,14 +37,14 @@ export default class {
       let line = lines[i].trim();
 
       // Skip empty lines
-      if (line === undefined || line == '') continue;//shouldn't line number still be incremented for reporting, they might get out of sync
+      if (line === undefined || line === '') continue;
 
       // Skip lines if skipping table
-      if (skipTable) continue; //shouldn't line number still be incremented for reporting errors, they might get out of sync
+      if (skipTable) continue;
 
       // Record the line number
       this.lineNumber = i + 1;
-      tableLineNumber++; ///here we are adding to table line number before we verify we have a "tab"
+      tableLineNumber++;
 
       // If this line ends a table
       if (line.match(/^>+$/)) {
