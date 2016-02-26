@@ -71,7 +71,7 @@ export default class {
         tableDefinition.map((str) => { return str.trim(); });
 
         // Check the column delimiter is "tab"
-        if (!tableDefinition[0].match(/^tab$/i)) {
+        if (!tableDefinition[0].match(/^tab(\s|$)/i)) {
           this._appendError(`Unrecognized column delimiter "${tableDefinition[0]}". Expected "tab".`);
           skipTable = true;
         }
@@ -155,6 +155,7 @@ export default class {
   _appendWarning(warningMessage) {
     const warnings = this.LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
     const warning = {'line_number': this.lineNumber, 'message': warningMessage};
+    console.log("WARNING: ", warningMessage);
     warnings.push(warning);
     this.LocalState.set('PARSE_CONTRIBUTION_WARNINGS', warnings);
   }
@@ -162,6 +163,7 @@ export default class {
   _appendError(errorMessage) {
     const errors = this.LocalState.get('PARSE_CONTRIBUTION_ERRORS');
     const error = {'line_number': this.lineNumber, 'message': errorMessage};
+    console.log("ERROR: ", errorMessage);
     errors.push(error);
     this.LocalState.set('PARSE_CONTRIBUTION_ERRORS', errors);
   }

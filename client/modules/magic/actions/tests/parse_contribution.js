@@ -1,6 +1,12 @@
 const {describe, it} = global;
 import {expect} from 'chai';
 import ParseContribution from '../parse_contribution';
+import { default as contribution289   } from '/files/289.js';
+import { default as contribution3552  } from '/files/3552.js';
+import { default as contribution7527  } from '/files/7527.js';
+import { default as contribution7661  } from '/files/7661.js';
+import { default as contribution8054  } from '/files/8054.js';
+import { default as contribution10507 } from '/files/10507.js';
 
 const parseContributionWarningTest = (text, reErrorMsg) => {
 
@@ -35,7 +41,24 @@ const parseContributionErrorTest = (text, reErrorMsg) => {
   // expect the parse errors to contain one error that matches the matchErrorMSG regex
   expect(errors.length).to.be.at.least(1);
   expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
-  
+
+};
+
+const parseContributionNoErrorTest = (text, reErrorMsg) => {
+
+  // create a mock Map instead of a Reactive Dict
+  const LocalState = new Map();
+
+  // parse the test string
+  const parser = new ParseContribution({LocalState});
+  parser.parse(text);
+
+  // retrieve the spied arguments from the 1st time LocalState.set was called
+  const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
+
+  // expect no errors
+  expect(errors.length).to.equal(0);
+
 };
 
 const parseContributionJSONTest = (text, jsonExpected) => {
@@ -50,7 +73,7 @@ const parseContributionJSONTest = (text, jsonExpected) => {
   // retrieve the spied arguments from the 1st time LocalState.set was called
   const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
 
-  // expect no errors and
+  // expect no errors and check against expected JSON
   expect(errors.length).to.equal(0);
   expect(json).to.deep.equal(jsonExpected);
 
@@ -106,6 +129,15 @@ describe('magic.actions.parseContribution', () => {
       const json = { "table": [ { "col1": "str1", "col2": "1.2" } ] };
       for (var withBlank of withBlanks)
         parseContributionJSONTest(withBlank, json);
+    });
+
+    it('should parse a contributions with no errors', () => {
+      parseContributionNoErrorTest(contribution289);
+      parseContributionNoErrorTest(contribution3552);
+      parseContributionNoErrorTest(contribution7527);
+      parseContributionNoErrorTest(contribution7661);
+      parseContributionNoErrorTest(contribution8054);
+      parseContributionNoErrorTest(contribution10507);
     });
 
   });
