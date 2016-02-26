@@ -1,3 +1,5 @@
+import { _ } from 'lodash';
+
 export default class {
 
   constructor({Meteor, LocalState}) {
@@ -68,28 +70,24 @@ export default class {
         // Clean leading and trailing whitespace from each part of the table definition
         tableDefinition.map((str) => { return str.trim(); });
 
-
         // Check the column delimiter is "tab"
-        console.log("table delim " +tableDefinition[0] + "  table name:" + tableDefinition[1]);
         if (!tableDefinition[0].match(/^tab$/i)) {
           this._appendError(`Unrecognized column delimiter "${tableDefinition[0]}". Expected "tab".`);
           skipTable = true;
         }
-        else if //tab has been found, check for table name
-        (tableDefinition[1] === undefined )
-        {
+
+        //tab has been found, check for table name
+        else if (tableDefinition[1] === undefined ) {
           this._appendError(`No table name following tab delimiter`);
           skipTable = true;
         }
 
-
-
-        // Save the table name
-        table = tableDefinition[1];
-
-        // Initialize a new table in the JSON if necessary
-        if (!this.json.hasOwnProperty(table))
-          this.json[table] = [];
+        // Save the table name and add it to the JSON if necessary
+        else {
+          table = tableDefinition[1];
+          if (!this.json.hasOwnProperty(table))
+            this.json[table] = [];
+        }
 
       }
 
@@ -106,8 +104,7 @@ export default class {
         }
 
         // Clean leading and trailing whitespace from each column name
-        console.log("Column names: " + columns);
-        columns = columns.map(String.trim);
+        columns = columns.map((str) => { return str.trim(); });
 
         // Check for empty column names
         if (_.findIndex(columns, '') !== -1) {
@@ -138,10 +135,17 @@ export default class {
         // Append the row of values onto the table in the JSON
         else {
           values = values.map((str) => { return str.trim(); });
-          this.json[table].push(_.zipObject(columns.slice(0, value.length), values));
+          this.json[table].push(_.zipObject(columns.slice(0, values.length), values));
         }
+
       }
 
+    }
+
+    // Look for empty tables to issue a warning
+    for (let jsonTable in this.json) {
+      if (this.json[jsonTable].length == 0)
+        this._appendWarning(`No data values were found in the ${jsonTable} table.`);
     }
 
     return this.json;
