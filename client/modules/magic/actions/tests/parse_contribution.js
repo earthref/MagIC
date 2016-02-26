@@ -14,8 +14,8 @@ const parseContributionWarningTest = (text, reErrorMsg) => {
   const LocalState = new Map();
 
   // parse the test string
-  const parser = new ParseContribution({LocalState});
-  parser.parse(text);
+  const Parser = new ParseContribution({LocalState});
+  Parser.parse(text);
 
   // retrieve the spied arguments from the 1st time LocalState.set was called
   const errors = LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
@@ -32,8 +32,8 @@ const parseContributionErrorTest = (text, reErrorMsg) => {
   const LocalState = new Map();
 
   // parse the test string
-  const parser = new ParseContribution({LocalState});
-  parser.parse(text);
+  const Parser = new ParseContribution({LocalState});
+  Parser.parse(text);
 
   // retrieve the spied arguments from the 1st time LocalState.set was called
   const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
@@ -50,8 +50,8 @@ const parseContributionNoErrorTest = (text) => {
   const LocalState = new Map();
 
   // parse the test string
-  const parser = new ParseContribution({LocalState});
-  parser.parse(text);
+  const Parser = new ParseContribution({LocalState});
+  Parser.parse(text);
 
   // retrieve the spied arguments from the 1st time LocalState.set was called
   const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
@@ -67,8 +67,8 @@ const parseContributionJSONTest = (text, jsonExpected) => {
   const LocalState = new Map();
 
   // parse the test string
-  const parser = new ParseContribution({LocalState});
-  const json = parser.parse(text);
+  const Parser = new ParseContribution({LocalState});
+  const json = Parser.parse(text);
 
   // retrieve the spied arguments from the 1st time LocalState.set was called
   const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
@@ -79,10 +79,12 @@ const parseContributionJSONTest = (text, jsonExpected) => {
 
 };
 
-describe('magic.actions.parseContribution', () => {
-  describe('parse', () => {
+describe('magic.actions.parse_contribution', () => {
+  describe('parse invalid', () => {
     it('should warn about parsing an empty string', () => {
       parseContributionWarningTest(null, /empty/i);
+      parseContributionWarningTest(undefined, /empty/i);
+      parseContributionWarningTest('', /empty/i);
     });
 
     it('should reject nonsense', () => {
@@ -117,7 +119,8 @@ describe('magic.actions.parseContribution', () => {
       parseContributionWarningTest('tab\ttable\ncol1\tcol2\n', /no data values were found/i);
       parseContributionWarningTest('tab \t123\ncol1\tcol2\n', /no data values were found/i);
     });
-
+  });
+  describe('parse valid', () => {
     it('should keep numbers as strings', () => {
       const json = {
         table: [{
@@ -146,9 +149,10 @@ describe('magic.actions.parseContribution', () => {
       for (var withBlank of withBlanks)
         parseContributionJSONTest(withBlank, json);
     });
-
+  });
+  describe('parse files', () => {
     it('should parse contribution 289 with no errors', () => {
-      parseContributionNoErrorTest(contribution289);
+        parseContributionNoErrorTest(contribution289);
     });
     it('should parse contribution 3552 with no errors', () => {
       parseContributionNoErrorTest(contribution3552);
@@ -165,6 +169,5 @@ describe('magic.actions.parseContribution', () => {
     it('should parse contribution 10507 with no errors', () => {
       parseContributionNoErrorTest(contribution10507);
     });
-
   });
 });
