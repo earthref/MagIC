@@ -31,6 +31,8 @@ const upgradeContributionErrorTest = (jsonOld, reErrorMsg) => {
   // create a mock Map instead of a Reactive Dict
   const LocalState = new Map();
 
+  console.log(`Recieved by Error Tets test ${JSON.stringify(jsonOld)}`);
+
   // upgrade the old JSON
   const Upgrader = new UpgradeContribution({LocalState});
   Upgrader.upgrade(jsonOld);
@@ -79,14 +81,132 @@ const upgradeContributionJSONTest = (jsonOld, jsonExpected) => {
 
 };
 
+
 describe('magic.actions.upgrade_contribution', () => {
+
+  //**********DETECT INVALID
   describe('upgrade invalid', () => {
-    it('should warn about upgrading an empty object', () => {
-      upgradeContributionWarningTest(null, /empty/i);
-      upgradeContributionWarningTest(undefined, /empty/i);
-      upgradeContributionWarningTest({}, /empty/i);
+      it('should warn about upgrading an empty object', () => {
+      upgradeContributionWarningTest(null, /Contribution is empty/i);
+      upgradeContributionWarningTest(undefined, /Contribution is empty/i);
+      upgradeContributionWarningTest({}, /Contribution is empty/i);
     });
+
+
+
+    //NOTE:2.5 and before uses "magic_contributions" 3.0 uses "contributions"
+    //Failed to find the "magic_contributions" or "contribution" table.   XX
+    it('should reject when no contribution or magic_contributions table is found', () => {
+
+      const jsonNoContribTable =
+      {
+        notContribTable:
+            [
+              {
+                col1: 'str1',
+                col2: '1.23'
+              }
+            ],
+        otherTable:
+            [
+              {col1: '2.2'}
+            ]
+      };
+       upgradeContributionErrorTest(jsonNoContribTable, /Failed to find the "magic_contributions" or "contribution" table/i);
+    });
+
+
+    it('should reject when magic_contributions table does not have exactly one row', () => {
+      const jsonContribTwoColumns = {
+        magic_contributions: [
+          {
+            col1: 'str1',
+            col2: '1.2'
+          },
+          {
+            col1: 'str2',
+            col2: '1.2'
+          }
+        ]
+      };
+      upgradeContributionErrorTest(jsonContribTwoColumns, /The "magic_contributions" table does not have exactly one row/i);
+    });
+
+    it('should reject when "magic_contributions" table does not include the "magic_version" column.', () => {
+      const jsonContribNoMagicVersion = {
+        magic_contributions: [{
+          not_magic_version: '1.2',
+          col2: '1.2'
+        }]
+      };
+      upgradeContributionErrorTest(jsonContribNoMagicVersion, /The "magic_contributions" table does not include the "magic_version" column./i);
+    });
+
+    it('should reject when the "contribution" table does not have exactly one row.', () => {
+      const jsonContribTwoColumns = {
+        contribution: [
+          {
+            col1: 'str1',
+            col2: '1.2'
+          },
+          {
+            col1: 'str2',
+            col2: '1.2'
+          }
+        ]
+      };
+      upgradeContributionErrorTest(jsonContribTwoColumns, /The "contribution" table does not have exactly one row./i);
+    });
+
+    it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
+      const jsonContribNoMagicVersion = {
+        contribution: [{
+          not_magic_version: '1.2',
+          col2: '1.2'
+        }]
+      };
+      upgradeContributionErrorTest(jsonContribNoMagicVersion, /The "contribution" table does not include the "magic_version" column./i);
+    });
+
+    it('should reject if there exists both a "magic_contributions" and "contribution" table.', () => {
+      const jasonDoubleContributionTables =
+      {
+        magic_contributions:
+            [
+              {magic_version: '2.2'}
+            ],
+        contributions:
+            [
+              {magic_version: '2.2'}
+            ]
+      };
+      upgradeContributionErrorTest(jasonDoubleContributionTables, /Found both a "magic_contributions" and "contribution" table./i);
+    });
+
+   it('should reject there if requested data model is invalid.', () => {
+      const invalidMagicVersion = {
+        contribution: [{
+          magic_version: '6.9',
+          col2: '1.2'
+        }]
+      };
+      upgradeContributionErrorTest(invalidMagicVersion, /MagIC data model version/i); //rest of that string:  ${currentVersion} is invalid. Expected one of: ${strVersions}
+    });
+
+    it('should reject there if requested version is already the newest version.', () => {
+      const invalidMagicVersion = {
+        contribution: [{
+          magic_version: '3.0'
+        }]
+      };
+      upgradeContributionWarningTest(invalidMagicVersion, /This contribution is already at the latest MagIC data model version/i); //rest of that string:  ${currentVersion}
+    });
+
   });
+
+
+
+  //*******UPGRADE VALID FILES
   describe('upgrade valid', () => {
     it('should keep numbers as strings', () => {
       const jsonOld = {
@@ -99,7 +219,7 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew = {
         magic_contributions: [{
-          magic_version: '2.3'
+          magic_version: '3.0'
         }],
         er_locations: [{
           begin_latitude: '10.0'
@@ -108,4 +228,6 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, jsonNew);
     });
   });
+
+
 });

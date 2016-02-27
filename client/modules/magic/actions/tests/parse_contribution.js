@@ -120,6 +120,9 @@ describe('magic.actions.parse_contribution', () => {
       parseContributionWarningTest('tab \t123\ncol1\tcol2\n', /no data values were found/i);
     });
   });
+
+
+  //*****PARSE VALID FILES
   describe('parse valid', () => {
     it('should keep numbers as strings', () => {
       const json = {
