@@ -1,159 +1,113 @@
 const {describe, it} = global;
 import {expect} from 'chai';
+import ParseContribution from '../parse_contribution';
 import UpgradeContribution from '../upgrade_contribution';
-//import {default as contribution289  } from '/test_files/289.js';
-//import {default as contribution3552 } from '/test_files/3552.js';
-//import {default as contribution7527 } from '/test_files/7527.js';
-//import {default as contribution7661 } from '/test_files/7661.js';
-//import {default as contribution8054 } from '/test_files/8054.js';
-//import {default as contribution10507} from '/test_files/10507.js';
+//import {default as contribution289  } from './files/289.js';
+//import {default as contribution3552 } from './files/3552.js';
+//import {default as contribution7527 } from './files/7527.js';
+//import {default as contribution7661 } from './files/7661.js';
+//import {default as contribution8054 } from './files/8054.js';
+//import {default as contribution10507} from './files/10507.js';
+import {default as model20} from './files/data_models/2.0.js';
+import {default as model21} from './files/data_models/2.1.js';
+const dataModels = {'2.0': model20, '2.1': model21};
 
+// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
 const upgradeContributionWarningTest = (jsonOld, reErrorMsg) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // upgrade the old JSON
-  const Upgrader = new UpgradeContribution({LocalState});
+  const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('UPGRADE_CONTRIBUTION_WARNINGS');
-
-  // expect the parse errors to contain one error that matches the matchErrorMSG regex
-  expect(errors.length).to.be.at.least(1);
-  expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
-
+  expect(Upgrader.warnings().length).to.be.at.least(1);
+  expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reErrorMsg);
 };
 
+// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
 const upgradeContributionErrorTest = (jsonOld, reErrorMsg) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  console.log(`Recieved by Error Tets test ${JSON.stringify(jsonOld)}`);
-
-  // upgrade the old JSON
-  const Upgrader = new UpgradeContribution({LocalState});
+  const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('UPGRADE_CONTRIBUTION_ERRORS');
-
-  // expect the parse errors to contain one error that matches the matchErrorMSG regex
-  expect(errors.length).to.be.at.least(1);
-  expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
-
+  expect(Upgrader.errors().length).to.be.at.least(1);
+  expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
+// Expect no errors.
 const upgradeContributionNoErrorTest = (jsonOld) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // upgrade the old JSON
-  const Upgrader = new UpgradeContribution({LocalState});
+  const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('UPGRADE_CONTRIBUTION_ERRORS');
-
-  // expect no errors
-  expect(errors.length).to.equal(0);
-
+  expect(Upgrader.errors().length).to.equal(0);
 };
 
+// Expect no errors and check against expected JSON.
 const upgradeContributionJSONTest = (jsonOld, jsonExpected) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // upgrade the old JSON
-  const Upgrader = new UpgradeContribution({LocalState});
+  const Upgrader = new UpgradeContribution({});
   const jsonNew = Upgrader.upgrade(jsonOld);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('UPGRADE_CONTRIBUTION_ERRORS');
-
-  // expect no errors and check against expected JSON
-  expect(errors.length).to.equal(0);
+  expect(Upgrader.errors().length).to.equal(0);
   expect(jsonNew).to.deep.equal(jsonExpected);
-
 };
-
 
 describe('magic.actions.upgrade_contribution', () => {
 
-  //**********DETECT INVALID
+  // Test parsing invalid JSON.
   describe('upgrade invalid', () => {
-      it('should warn about upgrading an empty object', () => {
+
+    it('should warn about upgrading an empty object', () => {
       upgradeContributionWarningTest(null, /Contribution is empty/i);
       upgradeContributionWarningTest(undefined, /Contribution is empty/i);
       upgradeContributionWarningTest({}, /Contribution is empty/i);
     });
 
-
-
     //NOTE:2.5 and before uses "magic_contributions" 3.0 uses "contributions"
     //Failed to find the "magic_contributions" or "contribution" table.   XX
-    it('should reject when no contribution or magic_contributions table is found', () => {
+    it('should reject when no contribution table is found', () => {
 
       const jsonNoContribTable =
       {
         notContribTable:
-            [
-              {
-                col1: 'str1',
-                col2: '1.23'
-              }
-            ],
+        [
+          {
+            col1: 'str1',
+            col2: '1.23'
+          }
+        ],
         otherTable:
-            [
-              {col1: '2.2'}
-            ]
+        [
+          {col1: '2.2'}
+        ]
       };
-       upgradeContributionErrorTest(jsonNoContribTable, /Failed to find the "magic_contributions" or "contribution" table/i);
+       upgradeContributionErrorTest(jsonNoContribTable, /Failed to find the "contribution" table/i);
     });
 
 
     it('should reject when magic_contributions table does not have exactly one row', () => {
       const jsonContribTwoColumns = {
-        magic_contributions: [
-          {
-            col1: 'str1',
-            col2: '1.2'
-          },
-          {
-            col1: 'str2',
-            col2: '1.2'
-          }
-        ]
+        contribution: [{
+          col1: 'str1',
+          col2: '1.2'
+        }, {
+          col1: 'str2',
+          col2: '1.2'
+        }]
       };
-      upgradeContributionErrorTest(jsonContribTwoColumns, /The "magic_contributions" table does not have exactly one row/i);
+      upgradeContributionErrorTest(jsonContribTwoColumns, /The "contribution" table does not have exactly one row/i);
     });
 
     it('should reject when "magic_contributions" table does not include the "magic_version" column.', () => {
       const jsonContribNoMagicVersion = {
-        magic_contributions: [{
+        contribution: [{
           not_magic_version: '1.2',
           col2: '1.2'
         }]
       };
-      upgradeContributionErrorTest(jsonContribNoMagicVersion, /The "magic_contributions" table does not include the "magic_version" column./i);
+      upgradeContributionErrorTest(jsonContribNoMagicVersion, /The "contribution" table does not include the "magic_version" column./i);
     });
 
     it('should reject when the "contribution" table does not have exactly one row.', () => {
       const jsonContribTwoColumns = {
-        contribution: [
-          {
-            col1: 'str1',
-            col2: '1.2'
-          },
-          {
-            col1: 'str2',
-            col2: '1.2'
-          }
-        ]
+        contribution: [{
+          col1: 'str1',
+          col2: '1.2'
+        }, {
+          col1: 'str2',
+          col2: '1.2'
+        }]
       };
       upgradeContributionErrorTest(jsonContribTwoColumns, /The "contribution" table does not have exactly one row./i);
     });
@@ -166,21 +120,6 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       upgradeContributionErrorTest(jsonContribNoMagicVersion, /The "contribution" table does not include the "magic_version" column./i);
-    });
-
-    it('should reject if there exists both a "magic_contributions" and "contribution" table.', () => {
-      const jasonDoubleContributionTables =
-      {
-        magic_contributions:
-            [
-              {magic_version: '2.2'}
-            ],
-        contributions:
-            [
-              {magic_version: '2.2'}
-            ]
-      };
-      upgradeContributionErrorTest(jasonDoubleContributionTables, /Found both a "magic_contributions" and "contribution" table./i);
     });
 
    it('should reject there if requested data model is invalid.', () => {
@@ -204,13 +143,11 @@ describe('magic.actions.upgrade_contribution', () => {
 
   });
 
-
-
-  //*******UPGRADE VALID FILES
+  // Test upgrading valid JSON.
   describe('upgrade valid', () => {
     it('should keep numbers as strings', () => {
       const jsonOld = {
-        magic_contributions: [{
+        contribution: [{
           magic_version: '2.2'
         }],
         er_locations: [{
@@ -218,7 +155,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       const jsonNew = {
-        magic_contributions: [{
+        contribution: [{
           magic_version: '3.0'
         }],
         er_locations: [{
@@ -228,6 +165,8 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, jsonNew);
     });
   });
+
+  // Test upgrading valid files.
 
 
 });
