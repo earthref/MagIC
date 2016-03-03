@@ -40,9 +40,10 @@ const parseContributionJSONTest = (text, jsonExpected) => {
   expect(json).to.deep.equal(jsonExpected);
 };
 
-// Test parsing invalid strings.
 describe('magic.actions.parse_contribution', () => {
-  describe('parse invalid', () => {
+
+  // Test parsing invalid strings.
+  describe('when parsing invalid strings', () => {
     it('should warn about parsing an empty string', () => {
       parseContributionWarningTest(null, /empty/i);
       parseContributionWarningTest(undefined, /empty/i);
@@ -84,8 +85,8 @@ describe('magic.actions.parse_contribution', () => {
   });
 
 
-// Test parsing valid strings.
-  describe('parse valid', () => {
+  // Test parsing valid strings.
+  describe('when parsing valid strings', () => {
     it('should keep numbers as strings', () => {
       const json = {
         table: [{
@@ -117,7 +118,7 @@ describe('magic.actions.parse_contribution', () => {
   });
 
   // Test parsing valid files.
-  describe('parse files', () => {
+  describe('when parsing valid files', () => {
     it('should parse contribution 289 with no errors', () => {
       parseContributionNoErrorTest(contribution289);
     });
