@@ -150,4 +150,18 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test upgrading valid files.
 
 
+
+  //LIST OF TABLE/COLUMN CHANGES
+  // Test upgrading valid JSON.
+  describe('Temporary place to run column change list', () => {
+    it('Should list column changes', () => {
+      const Upgrader = new UpgradeContribution({});
+      Upgrader.upgrade('2.0', '2.0');
+
+
+    });
+  });
+
+
+
 });
