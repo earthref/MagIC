@@ -1,4 +1,5 @@
 export default {
+  'magic_version':'2.0',
   "tables": {
     "er_members": {
       "position": 5,
@@ -519,7 +520,7 @@ export default {
         },
         "er_section_name": {
           "group": "Sites",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Name",
@@ -1272,7 +1273,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Measurements",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 11,
           "label": "Experiment Name",
@@ -1345,7 +1349,10 @@ export default {
         },
         "measurement_k": {
           "group": "Measurements",
-          "next_columns": ["measurement_chi_volume"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_chi_volume"
+          }],
           "unit": "Number in SI",
           "position": 55,
           "label": "Measurement Susceptibility K",
@@ -1416,7 +1423,10 @@ export default {
         },
         "measurement_x": {
           "group": "Measurements",
-          "next_columns": ["measurement_chi_mass"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_chi_mass"
+          }],
           "unit": "Number in m3/kg",
           "position": 56,
           "label": "Measurement Susceptibility X",
@@ -1461,7 +1471,10 @@ export default {
         },
         "measurement_moment": {
           "group": "Measurements",
-          "next_columns": ["measurement_magn_moment"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 52,
           "label": "Measurement Moment",
@@ -1683,7 +1696,10 @@ export default {
         },
         "measurement_k_quadr": {
           "group": "Measurements",
-          "next_columns": ["measurement_chi_qdr_volume"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_chi_qdr_volume"
+          }],
           "unit": "Number in SI",
           "position": 57,
           "label": "Measurement Susceptibility K Quadrature",
@@ -1879,7 +1895,10 @@ export default {
         },
         "measurement_x_quadr": {
           "group": "Measurements",
-          "next_columns": ["measurement_chi_qdr_mass"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_chi_qdr_mass"
+          }],
           "unit": "Number in m3/kg",
           "position": 58,
           "label": "Measurement Susceptibility X Quadrature",
@@ -1925,7 +1944,10 @@ export default {
         },
         "measurement_magn_weight": {
           "group": "Measurements",
-          "next_columns": ["measurement_magn_mass"],
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 54,
           "label": "Measurement Magnetization Weight",
@@ -2021,7 +2043,7 @@ export default {
         },
         "er_section_name": {
           "group": "Measurements",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -2509,7 +2531,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Hysteresis Experiments",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 11,
           "label": "Experiment Name",
@@ -2532,7 +2557,7 @@ export default {
         },
         "hysteresis_bcr1": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in T",
           "position": 19,
           "label": "Hysteresis Bcr Wohlfarth",
@@ -2554,7 +2579,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 12,
           "label": "Measurement File Name",
@@ -2564,7 +2589,7 @@ export default {
         },
         "hysteresis_ms": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Am2",
           "position": 18,
           "label": "Hysteresis Ms",
@@ -2662,7 +2687,7 @@ export default {
         },
         "hysteresis_bc_plus": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in T",
           "position": 22,
           "label": "Hysteresis Bc+",
@@ -2748,7 +2773,7 @@ export default {
         },
         "hysteresis_bcr2": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in T",
           "position": 20,
           "label": "Hysteresis Bcr Jackson",
@@ -2757,7 +2782,7 @@ export default {
         },
         "hysteresis_mr": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Am2",
           "position": 17,
           "label": "Hysteresis Mr",
@@ -2791,7 +2816,7 @@ export default {
         },
         "hysteresis_bcr3": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in T",
           "position": 21,
           "label": "Hysteresis Bcr Tauxe",
@@ -2813,7 +2838,7 @@ export default {
         },
         "er_section_name": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -2823,7 +2848,7 @@ export default {
         },
         "hysteresis_bc_min": {
           "group": "Hysteresis Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in T",
           "position": 23,
           "label": "Hysteresis Bc-",
@@ -3251,7 +3276,7 @@ export default {
         },
         "er_section_name": {
           "group": "Samples",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Name",
@@ -3559,7 +3584,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Sample Data",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 10,
           "label": "Experiment Name",
@@ -3759,7 +3787,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Sample Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 11,
           "label": "Measurement File Name",
@@ -4081,7 +4109,10 @@ export default {
         },
         "sample_magn_weight": {
           "group": "Sample Data",
-          "next_columns": ["sample_magn_mass"],
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 45,
           "label": "Sample NRM Magnetization Weight",
@@ -4102,7 +4133,10 @@ export default {
         },
         "sample_moment": {
           "group": "Sample Data",
-          "next_columns": ["sample_magn_moment"],
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 43,
           "label": "Sample NRM Moment",
@@ -4162,7 +4196,7 @@ export default {
         },
         "er_section_name": {
           "group": "Sample Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -4367,7 +4401,7 @@ export default {
       "columns": {
         "er_member_name": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 5,
           "label": "Member Name",
@@ -4377,7 +4411,7 @@ export default {
         },
         "section_begin_lon": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 12,
           "label": "Section Begin Longitude",
@@ -4387,7 +4421,7 @@ export default {
         },
         "section_begin_elevation": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 13,
           "label": "Section Begin Elevation",
@@ -4397,7 +4431,7 @@ export default {
         },
         "section_definition": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Definition",
@@ -4407,7 +4441,7 @@ export default {
         },
         "er_scientist_mail_names": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 26,
           "label": "Research Scientist Names",
@@ -4417,7 +4451,7 @@ export default {
         },
         "section_type": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 9,
           "label": "Section Type",
@@ -4427,7 +4461,7 @@ export default {
         },
         "section_begin_lat": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 11,
           "label": "Section Begin Latitude",
@@ -4437,7 +4471,7 @@ export default {
         },
         "er_section_alternatives": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 1,
           "label": "Section Name Alternatives",
@@ -4446,7 +4480,7 @@ export default {
         },
         "section_end_height": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 20,
           "label": "Section End Stratigraphic Height",
@@ -4456,7 +4490,7 @@ export default {
         },
         "section_end_lat": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 17,
           "label": "Section End Latitude",
@@ -4466,7 +4500,7 @@ export default {
         },
         "section_begin_composite_depth": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 16,
           "label": "Section Begin Composite Depth",
@@ -4476,7 +4510,7 @@ export default {
         },
         "er_expedition_name": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 2,
           "label": "Expedition Name",
@@ -4486,7 +4520,7 @@ export default {
         },
         "section_begin_height": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 14,
           "label": "Section Begin Stratigraphic Height",
@@ -4496,7 +4530,7 @@ export default {
         },
         "section_description": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 25,
           "label": "Section Description",
@@ -4505,7 +4539,7 @@ export default {
         },
         "er_formation_name": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Formation Name",
@@ -4515,7 +4549,7 @@ export default {
         },
         "section_n": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Integer",
           "position": 10,
           "label": "Section N",
@@ -4524,7 +4558,7 @@ export default {
         },
         "section_end_lon": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 18,
           "label": "Section End Longitude",
@@ -4534,7 +4568,7 @@ export default {
         },
         "section_end_elevation": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 19,
           "label": "Section End Elevation",
@@ -4544,7 +4578,7 @@ export default {
         },
         "er_citation_names": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 27,
           "label": "Citation Names",
@@ -4554,7 +4588,7 @@ export default {
         },
         "section_begin_drill_depth": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 15,
           "label": "Section Begin Drill Depth",
@@ -4564,7 +4598,7 @@ export default {
         },
         "section_dip": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 24,
           "label": "Section Dip",
@@ -4574,7 +4608,7 @@ export default {
         },
         "section_lithology": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 8,
           "label": "Section Lithology",
@@ -4584,7 +4618,7 @@ export default {
         },
         "section_class": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 7,
           "label": "Section Class",
@@ -4594,7 +4628,7 @@ export default {
         },
         "section_end_composite_depth": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 22,
           "label": "Section End Composite Depth",
@@ -4604,7 +4638,7 @@ export default {
         },
         "section_azimuth": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 23,
           "label": "Section Azimuth",
@@ -4614,7 +4648,7 @@ export default {
         },
         "section_end_drill_depth": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in m",
           "position": 21,
           "label": "Section End Drill Depth",
@@ -4624,7 +4658,7 @@ export default {
         },
         "er_section_name": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 0,
           "label": "Section Name",
@@ -4634,7 +4668,7 @@ export default {
         },
         "er_location_name": {
           "group": "Sections",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 3,
           "label": "Location Name",
@@ -4931,7 +4965,7 @@ export default {
         },
         "er_section_name": {
           "group": "Synthetic Materials",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Name",
@@ -4999,7 +5033,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Remanence Experiments",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 11,
           "label": "Experiment Name",
@@ -5021,7 +5058,7 @@ export default {
         },
         "remanence_temp_mineral": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 24,
           "label": "Remanence Critical Mineral Type",
@@ -5068,7 +5105,7 @@ export default {
         },
         "remanence_mr": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Am2",
           "position": 18,
           "label": "Remanence Mr",
@@ -5125,7 +5162,7 @@ export default {
         },
         "remanence_hirm": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Am2",
           "position": 28,
           "label": "Remanence HIRM",
@@ -5158,7 +5195,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 12,
           "label": "Measurement File Name",
@@ -5218,7 +5255,7 @@ export default {
         },
         "remanence_temp_low": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in K",
           "position": 20,
           "label": "Remanence Temperature Low",
@@ -5251,7 +5288,7 @@ export default {
         },
         "remanence_temp_critical": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in K",
           "position": 22,
           "label": "Remanence Critical Temperature",
@@ -5260,7 +5297,7 @@ export default {
         },
         "remanence_dfc": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Am2",
           "position": 13,
           "label": "Remanence Delta Field Cooled",
@@ -5307,7 +5344,7 @@ export default {
         },
         "remanence_temp_type": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 23,
           "label": "Remanence Critical Temperature Type",
@@ -5404,7 +5441,7 @@ export default {
         },
         "remanence_dzfc": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Am2",
           "position": 14,
           "label": "Remanence Delta Zerofield Cooled",
@@ -5426,7 +5463,7 @@ export default {
         },
         "remanence_temp_high": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in K",
           "position": 21,
           "label": "Remanence Temperature High",
@@ -5472,7 +5509,7 @@ export default {
         },
         "er_section_name": {
           "group": "Remanence Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -6010,7 +6047,7 @@ export default {
         },
         "er_section_name": {
           "group": "Minerals",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Name",
@@ -6399,7 +6436,7 @@ export default {
         },
         "er_section_name": {
           "group": "Specimens",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Name",
@@ -6441,7 +6478,7 @@ export default {
         },
         "er_sample_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Sample Name List",
@@ -6450,7 +6487,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Anisotropy Data",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 9,
           "label": "Experiment Name",
@@ -6473,7 +6513,7 @@ export default {
         },
         "anisotropy_eta_dec": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 32,
           "label": "Anisotropy ETA Declination",
@@ -6542,7 +6582,7 @@ export default {
         },
         "anisotropy_zeta_inc": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 34,
           "label": "Anisotropy ZETA Inclination",
@@ -6551,7 +6591,7 @@ export default {
         },
         "er_fossil_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Fossil Name List",
@@ -6573,7 +6613,7 @@ export default {
         },
         "er_specimen_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 5,
           "label": "Specimen Name List",
@@ -6620,7 +6660,7 @@ export default {
         },
         "er_mineral_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 7,
           "label": "Mineral Name List",
@@ -6642,7 +6682,7 @@ export default {
         },
         "anisotropy_eta_inc": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 31,
           "label": "Anisotropy ETA Inclination",
@@ -6711,7 +6751,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 10,
           "label": "Measurement File Name",
@@ -6733,7 +6773,7 @@ export default {
         },
         "rmag_anisotropy_name": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 0,
           "label": "Anisotropy Name",
@@ -6818,7 +6858,7 @@ export default {
         },
         "er_synthetic_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 8,
           "label": "Synthetic Material Name List",
@@ -6874,7 +6914,7 @@ export default {
         },
         "anisotropy_zeta_semi_angle": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 36,
           "label": "Anisotropy ZETA Semi Angle",
@@ -6921,7 +6961,7 @@ export default {
         },
         "anisotropy_eta_semi_angle": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 33,
           "label": "Anisotropy ETA Semi Angle",
@@ -6943,7 +6983,7 @@ export default {
         },
         "er_site_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 3,
           "label": "Site Name List",
@@ -6953,7 +6993,7 @@ export default {
         },
         "er_section_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 2,
           "label": "Section Name List",
@@ -6963,7 +7003,7 @@ export default {
         },
         "anisotropy_zeta_dec": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in Degrees",
           "position": 35,
           "label": "Anisotropy ZETA Declination",
@@ -7009,7 +7049,7 @@ export default {
         },
         "er_location_names": {
           "group": "Anisotropy Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 1,
           "label": "Location Name List",
@@ -7076,7 +7116,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Specimen Data",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 10,
           "label": "Experiment Name",
@@ -7336,7 +7379,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Specimen Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 11,
           "label": "Measurement File Name",
@@ -7395,7 +7438,10 @@ export default {
         },
         "specimen_magn_weight": {
           "group": "Specimen Data",
-          "next_columns": ["specimen_magn_mass"],
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 60,
           "label": "Specimen NRM Magnetization Weight",
@@ -7492,7 +7538,10 @@ export default {
         },
         "specimen_moment": {
           "group": "Specimen Data",
-          "next_columns": ["specimen_magn_moment"],
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 58,
           "label": "Specimen NRM Moment",
@@ -7888,7 +7937,7 @@ export default {
         },
         "er_section_name": {
           "group": "Specimen Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -8353,7 +8402,7 @@ export default {
         },
         "er_section_name": {
           "group": "Ages Determinations",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -8447,7 +8496,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Site Data",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 10,
           "label": "Experiment Name",
@@ -8657,7 +8709,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Site Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 11,
           "label": "Measurement File Name",
@@ -8880,7 +8932,10 @@ export default {
         },
         "site_moment": {
           "group": "Site Data",
-          "next_columns": ["site_magn_moment"],
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 43,
           "label": "Site NRM Moment",
@@ -8915,7 +8970,10 @@ export default {
         },
         "site_magn_weight": {
           "group": "Site Data",
-          "next_columns": ["site_magn_mass"],
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 45,
           "label": "Site NRM Magnetization Weight",
@@ -9011,7 +9069,7 @@ export default {
         },
         "er_section_name": {
           "group": "Site Data",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -9067,7 +9125,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Susceptibility Experiments",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 11,
           "label": "Experiment Name",
@@ -9102,7 +9163,7 @@ export default {
         },
         "susceptibility_temp_critical": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in K",
           "position": 23,
           "label": "Susceptibility Critical Temperature",
@@ -9111,7 +9172,7 @@ export default {
         },
         "susceptibility_temp_mineral": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 25,
           "label": "Susceptibility Critical Mineral Type",
@@ -9121,7 +9182,7 @@ export default {
         },
         "susceptibility_temp_type": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 24,
           "label": "Susceptibility Critical Temperature Type",
@@ -9143,7 +9204,10 @@ export default {
         },
         "susceptibility_xfd": {
           "group": "Susceptibility Experiments",
-          "next_columns": ["susceptibility_f"],
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_f"
+          }],
           "unit": "Dimensionless",
           "position": 15,
           "label": "Susceptibility Xfd",
@@ -9165,7 +9229,7 @@ export default {
         },
         "susceptibility_temp_low": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in K",
           "position": 21,
           "label": "Susceptibility Temperature Low",
@@ -9174,7 +9238,10 @@ export default {
         },
         "susceptibility_k": {
           "group": "Susceptibility Experiments",
-          "next_columns": ["susceptibility_chi_volume"],
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_chi_volume"
+          }],
           "unit": "Number in SI",
           "position": 13,
           "label": "Susceptibility K",
@@ -9195,7 +9262,7 @@ export default {
         },
         "measurement_file_name": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 12,
           "label": "Measurement File Name",
@@ -9231,7 +9298,10 @@ export default {
         },
         "susceptibility_x": {
           "group": "Susceptibility Experiments",
-          "next_columns": ["susceptibility_chi_mass"],
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_chi_mass"
+          }],
           "unit": "Number in m3/kg",
           "position": 14,
           "label": "Susceptibility X",
@@ -9240,7 +9310,7 @@ export default {
         },
         "susceptibility_temp_high": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Number in K",
           "position": 22,
           "label": "Susceptibility Temperature High",
@@ -9338,7 +9408,10 @@ export default {
         },
         "susceptibility_xhd": {
           "group": "Susceptibility Experiments",
-          "next_columns": ["susceptibility_h"],
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_h"
+          }],
           "unit": "Dimensionless",
           "position": 18,
           "label": "Susceptibility Xhd",
@@ -9360,7 +9433,10 @@ export default {
         },
         "susceptibility_xx": {
           "group": "Susceptibility Experiments",
-          "next_columns": ["susceptibility_loss_tangent"],
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_loss_tangent"
+          }],
           "unit": "Dimensionless",
           "position": 26,
           "label": "Susceptibility X?? Over X?",
@@ -9395,7 +9471,7 @@ export default {
         },
         "er_section_name": {
           "group": "Susceptibility Experiments",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 4,
           "label": "Section Name",
@@ -9757,7 +9833,7 @@ export default {
         },
         "er_section_name": {
           "group": "Fossils",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 6,
           "label": "Section Name",
@@ -10838,7 +10914,7 @@ export default {
         },
         "er_section_names": {
           "group": "Results",
-          "next_columns": [],
+          "next_columns": [{}],
           "unit": "Text",
           "position": 2,
           "label": "Section Name List",
@@ -11073,7 +11149,10 @@ export default {
         },
         "magic_experiment_name": {
           "group": "Selection Criteria",
-          "next_columns": ["magic_experiment_names"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "magic_experiment_names"
+          }],
           "unit": "Text",
           "position": 2,
           "label": "Experiment Name",
@@ -11599,7 +11678,10 @@ export default {
         },
         "specimen_magn_weight": {
           "group": "Selection Criteria",
-          "next_columns": ["specimen_magn_mass"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 35,
           "label": "Specimen NRM Magnetization Weight",
@@ -11788,7 +11870,10 @@ export default {
         },
         "specimen_moment": {
           "group": "Selection Criteria",
-          "next_columns": ["specimen_magn_moment"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 33,
           "label": "Specimen NRM Moment",
@@ -12052,7 +12137,10 @@ export default {
         },
         "site_moment": {
           "group": "Selection Criteria",
-          "next_columns": ["site_magn_moment"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 74,
           "label": "Site NRM Moment",
@@ -12126,7 +12214,10 @@ export default {
         },
         "sample_magn_weight": {
           "group": "Selection Criteria",
-          "next_columns": ["sample_magn_mass"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 56,
           "label": "Sample NRM Magnetization Weight",
@@ -12136,7 +12227,10 @@ export default {
         },
         "site_magn_weight": {
           "group": "Selection Criteria",
-          "next_columns": ["site_magn_mass"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_magn_mass"
+          }],
           "unit": "Number in Am2/kg",
           "position": 76,
           "label": "Site NRM Magnetization Weight",
@@ -12146,7 +12240,10 @@ export default {
         },
         "sample_moment": {
           "group": "Selection Criteria",
-          "next_columns": ["sample_magn_moment"],
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_magn_moment"
+          }],
           "unit": "Number in Am2",
           "position": 54,
           "label": "Sample NRM Moment",
