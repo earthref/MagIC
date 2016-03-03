@@ -1,12436 +1,12329 @@
 export default {
-  'magic_version':'2.0',
-  'tables': {
-    'contribution': {
-      'label': 'Contribution',
-      'position': 1,
-      'description': 'Contribution metadata',
-      'columns': {
-        'id': {
-          'label': 'Contribution ID',
-          'group': 'Contribution',
-          'position': 1,
-          'type': 'Integer',
-          'description': 'Unique MagIC Contribution ID, Download Only, written during contribution activation',
-          'examples': ['5412'],
-          'validations': ['downloadOnly()'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'id'
-          }]
-        }, 'version': {
-          'label': 'Version',
-          'group': 'Contribution',
-          'position': 2,
-          'type': 'Integer',
-          'description': 'Contribution version number, Download Only, written during contribution activation',
-          'notes': '1 for original contribution, 6 for latest contribution if there are 6 versions, empty if the contribution is not activated',
-          'validations': ['downloadOnly()'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'version'
-          }]
-        }, 'utc_timestamp': {
-          'label': 'Activation Timestamp',
-          'group': 'Contribution',
-          'position': 3,
-          'type': 'Timestamp',
-          'description': 'UTC date and time of contribution activation, Download Only, written during contribution activation',
-          'notes': 'Date and time in the "yyyy:mm:dd:hh:mm:ss.ss" format',
-          'validations': ['downloadOnly()'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'utc_timestamp'
-          }]
-        }, 'magic_version': {
-          'label': 'MagIC Version',
-          'group': 'Contribution',
-          'position': 4,
-          'type': 'String',
-          'description': 'MagIC data model version, Download Only, written during contribution upload',
-          'examples': ['2.5', '3.0'],
-          'validations': ['downloadOnly()'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'magic_version'
-          }]
-        }, 'contributor': {
-          'label': 'Contributor',
-          'group': 'Contribution',
-          'position': 5,
-          'type': 'String',
-          'description': 'Contributor EarthRef handle, Download Only, written during contribution upload',
-          'examples': ['@njarboe'],
-          'validations': ['downloadOnly()'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'contributor'
-          }]
-        }, 'doi': {
-          'label': 'Reference',
-          'group': 'Contribution',
-          'position': 6,
-          'type': 'String',
-          'description': 'Contribution reference DOI',
-          'examples': ['10.1029/92JB01202', '10.1023/A:1015035228810'],
-          'validations': ['type("references")'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'doi'
-          }]
-        }, 'author': {
-          'label': 'Original Author',
-          'group': 'Contribution',
-          'position': 7,
-          'type': 'String',
-          'description': 'Original Author EarthRef handle or name and email',
-          'examples': ['@cconstable', 'Not A. Member <no.earthref.handle@gmail.com>'],
-          'validations': ['type("users")'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'author'
-          }]
-        }, 'description': {
-          'label': 'Description',
-          'group': 'Contribution',
-          'position': 8,
-          'type': 'String',
-          'description': 'Contribution description and update comments',
-          'examples': ['Fixes errors in latitudes and adds measurement data'],
-          'next_columns': [{
-            'table': 'contribution',
-            'column': 'description'
-          }]
-        }
-      }
-    },
-    'er_members': {
-      'position': 5,
-      'columns': {
-        'er_member_name': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'er_member_name'
+  "tables": {
+    "er_members": {
+      "position": 5,
+      "columns": {
+        "er_member_name": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "er_member_name"
           }],
-          'unit': 'Rock Member',
-          'position': 0,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 0,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'er_member_alternatives': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'er_member_alternatives'
+        "er_member_alternatives": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "er_member_alternatives"
           }],
-          'unit': 'Rock Member',
-          'position': 1,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member'
+          "unit": "Text",
+          "position": 1,
+          "label": "Site Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'member_paleo_environment': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'member_paleo_environment'
+        "member_paleo_environment": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "member_paleo_environment"
           }],
-          'unit': 'Rock Member',
-          'position': 5,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Fluvial', 'Continental Shelf', 'Eolian', 'Fringing Reef']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Paleo Environment",
+          "type": "String",
+          "description": "Depositional environment",
+          "examples": ["Fluvial", "Continental Shelf", "Eolian", "Fringing Reef"]
         },
-        'member_thickness': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'member_thickness'
+        "member_thickness": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "member_thickness"
           }],
-          'unit': 'Rock Member',
-          'position': 6,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member'
+          "unit": "Number in m",
+          "position": 6,
+          "label": "Member Thickness",
+          "type": "Number",
+          "description": "Member thickness"
         },
-        'member_class': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'member_class'
+        "member_class": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "member_class"
           }],
-          'unit': 'Rock Member',
-          'position': 3,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Igneous', 'Sedimentary', 'Metamorphic', 'Archeological', 'Intrusive', 'Extrusive']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Class",
+          "type": "String",
+          "description": "General lithology type",
+          "examples": ["Igneous", "Sedimentary", "Metamorphic", "Archeological", "Intrusive", "Extrusive"]
         },
-        'er_formation_name': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "er_formation_name"
           }],
-          'unit': 'Rock Member',
-          'position': 2,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_citation_names': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "er_citation_names"
           }],
-          'unit': 'Rock Member',
-          'position': 9,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 9,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_scientist_mail_names': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Rock Member',
-          'position': 8,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 8,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who described member",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'member_description': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'member_description'
+        "member_description": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "member_description"
           }],
-          'unit': 'Rock Member',
-          'position': 7,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member'
+          "unit": "Text",
+          "position": 7,
+          "label": "Member Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'member_lithology': {
-          'group': 'Rock Member',
-          'next_columns': [{
-            'table': 'er_members',
-            'column': 'member_lithology'
+        "member_lithology": {
+          "group": "Rock Member",
+          "next_columns": [{
+            "table": "er_members",
+            "column": "member_lithology"
           }],
-          'unit': 'Rock Member',
-          'position': 4,
-          'label': 'Rock Member',
-          'type': 'Rock Member',
-          'description': 'Rock Member',
-          'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
+          "unit": "Text",
+          "position": 4,
+          "label": "Member Lithology",
+          "type": "String",
+          "description": "Lithology",
+          "examples": ["Basalt", "Granite", "Mudstone", "Tuff", "Granodiorite", "Marl"]
         }
       },
-      'label': 'Rock Member',
-      'description': 'Unique rock member or section'
+      "label": "Rock Member",
+      "description": "Unique rock member or section"
     },
-    'magic_calibrations': {
-      'position': 19,
-      'columns': {
-        'calibration_time_zone': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'calibration_time_zone'
+    "magic_calibrations": {
+      "position": 19,
+      "columns": {
+        "calibration_time_zone": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "calibration_time_zone"
           }],
-          'unit': 'Calibrations',
-          'position': 5,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations'
+          "unit": "Text",
+          "position": 5,
+          "label": "Calibration Date Time Zone",
+          "type": "String",
+          "description": "Time zone"
         },
-        'er_specimen_name': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Calibrations',
-          'position': 1,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 1,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'magic_instrument_codes': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Calibrations',
-          'position': 8,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 8,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'magic_method_codes': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Calibrations',
-          'position': 7,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 7,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'er_mineral_name': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Calibrations',
-          'position': 2,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 2,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'er_synthetic_name': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'er_synthetic_name'
+        "er_synthetic_name": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "er_synthetic_name"
           }],
-          'unit': 'Calibrations',
-          'position': 3,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['STD1546-A1']
+          "unit": "Text",
+          "position": 3,
+          "label": "Synthetic Material Name",
+          "type": "String",
+          "description": "Name for synthetic material",
+          "examples": ["STD1546-A1"]
         },
-        'calibration_date': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'calibration_date'
+        "calibration_date": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "calibration_date"
           }],
-          'unit': 'Calibrations',
-          'position': 4,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['Number in the \'yyyy:mm:dd:hh:mm:ss.ss\' format']
+          "unit": "Text",
+          "position": 4,
+          "label": "Calibration Date",
+          "type": "Date",
+          "description": "Date of last calibration",
+          "examples": ["Number in the \"yyyy:mm:dd:hh:mm:ss.ss\" format"]
         },
-        'er_citation_names': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "er_citation_names"
           }],
-          'unit': 'Calibrations',
-          'position': 10,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 10,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'calibration_description': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'calibration_description'
+        "calibration_description": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "calibration_description"
           }],
-          'unit': 'Calibrations',
-          'position': 6,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations'
+          "unit": "Text",
+          "position": 6,
+          "label": "Calibration Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_analyst_mail_names': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Calibrations',
-          'position': 9,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 9,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'er_sample_name': {
-          'group': 'Calibrations',
-          'next_columns': [{
-            'table': 'magic_calibrations',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Calibrations",
+          "next_columns": [{
+            "table": "magic_calibrations",
+            "column": "er_sample_name"
           }],
-          'unit': 'Calibrations',
-          'position': 0,
-          'label': 'Calibrations',
-          'type': 'Calibrations',
-          'description': 'Calibrations',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 0,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         }
       },
-      'label': 'Calibrations',
-      'description': 'Calibrations'
+      "label": "Calibrations",
+      "description": "Calibrations"
     },
-    'er_sites': {
-      'position': 7,
-      'columns': {
-        'er_member_name': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_member_name'
+    "er_sites": {
+      "position": 7,
+      "columns": {
+        "er_member_name": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_member_name"
           }],
-          'unit': 'Sites',
-          'position': 5,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_method_codes': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Sites',
-          'position': 19,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 19,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'site_lon': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_lon'
+        "site_lon": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_lon"
           }],
-          'unit': 'Sites',
-          'position': 12,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 12,
+          "label": "Site Longitude",
+          "type": "Number",
+          "description": "Site location -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'er_formation_name': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_formation_name"
           }],
-          'unit': 'Sites',
-          'position': 4,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'site_lithology': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_lithology'
+        "site_lithology": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_lithology"
           }],
-          'unit': 'Sites',
-          'position': 9,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
+          "unit": "Text",
+          "position": 9,
+          "label": "Site Lithology",
+          "type": "String",
+          "description": "Site lithology or archeological classification",
+          "examples": ["Basalt", "Granite", "Mudstone", "Tuff", "Granodiorite", "Marl"]
         },
-        'site_definition': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_definition'
+        "site_definition": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_definition"
           }],
-          'unit': 'Sites',
-          'position': 7,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Single (s) site or composite (c) site including various geological units']
+          "unit": "Text",
+          "position": 7,
+          "label": "Site Definition",
+          "type": "String",
+          "description": "General definition of site",
+          "examples": ["Single (s) site or composite (c) site including various geological units"]
         },
-        'site_description': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_description'
+        "site_description": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_description"
           }],
-          'unit': 'Sites',
-          'position': 18,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites'
+          "unit": "Text",
+          "position": 18,
+          "label": "Site Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_scientist_mail_names': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Sites',
-          'position': 20,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 20,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who described site",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'site_location_precision': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_location_precision'
+        "site_location_precision": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_location_precision"
           }],
-          'unit': 'Sites',
-          'position': 13,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Decimal degrees']
+          "unit": "Number in Degrees",
+          "position": 13,
+          "label": "Site Location Precision",
+          "type": "Number",
+          "description": "Site location -- precision in latitude and longitude",
+          "examples": ["Decimal degrees"]
         },
-        'site_composite_depth': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_composite_depth'
+        "site_composite_depth": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_composite_depth"
           }],
-          'unit': 'Sites',
-          'position': 17,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 17,
+          "label": "Site Composite Depth",
+          "type": "Number",
+          "description": "Site location -- composite depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'er_site_alternatives': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_site_alternatives'
+        "er_site_alternatives": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_site_alternatives"
           }],
-          'unit': 'Sites',
-          'position': 1,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites'
+          "unit": "Text",
+          "position": 1,
+          "label": "Site Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'site_drill_depth': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_drill_depth'
+        "site_drill_depth": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_drill_depth"
           }],
-          'unit': 'Sites',
-          'position': 16,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 16,
+          "label": "Site Drill Depth",
+          "type": "Number",
+          "description": "Site location -- depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'site_type': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_type'
+        "site_type": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_type"
           }],
-          'unit': 'Sites',
-          'position': 10,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Flow Top', 'Glassy Margin', 'Pot Rim', 'Pillow', 'Kiln', 'Sediment Layer']
+          "unit": "Text",
+          "position": 10,
+          "label": "Site Type",
+          "type": "String",
+          "description": "Site type",
+          "examples": ["Flow Top", "Glassy Margin", "Pot Rim", "Pillow", "Kiln", "Sediment Layer"]
         },
-        'site_height': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_height'
+        "site_height": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_height"
           }],
-          'unit': 'Sites',
-          'position': 15,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Positive is up in section or core', 'while negative is down relative to reference height']
+          "unit": "Number in m",
+          "position": 15,
+          "label": "Site Stratigraphic Height",
+          "type": "Number",
+          "description": "Site location -- stratigraphic height",
+          "examples": ["Positive is up in section or core", "while negative is down relative to reference height"]
         },
-        'site_elevation': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_elevation'
+        "site_elevation": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_elevation"
           }],
-          'unit': 'Sites',
-          'position': 14,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 14,
+          "label": "Site Elevation",
+          "type": "Number",
+          "description": "Site location -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'site_class': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_class'
+        "site_class": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_class"
           }],
-          'unit': 'Sites',
-          'position': 8,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Igneous', 'Sedimentary', 'Metamorphic', 'Archeological', 'Intrusive', 'Extrusive']
+          "unit": "Text",
+          "position": 8,
+          "label": "Site Class",
+          "type": "String",
+          "description": "General lithology type",
+          "examples": ["Igneous", "Sedimentary", "Metamorphic", "Archeological", "Intrusive", "Extrusive"]
         },
-        'er_expedition_name': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Sites',
-          'position': 2,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'er_site_name': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_site_name"
           }],
-          'unit': 'Sites',
-          'position': 0,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 0,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_section_name': {
-          'group': 'Sites',
-          'next_columns': [],
-          'unit': 'Sites',
-          'position': 6,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Sites",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_citation_names': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_citation_names"
           }],
-          'unit': 'Sites',
-          'position': 21,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 21,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'site_lat': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_lat'
+        "site_lat": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "site_lat"
           }],
-          'unit': 'Sites',
-          'position': 11,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 11,
+          "label": "Site Latitude",
+          "type": "Number",
+          "description": "Site location -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'er_location_name': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Sites",
+          "next_columns": [{
+            "table": "er_sites",
+            "column": "er_location_name"
           }],
-          'unit': 'Sites',
-          'position': 3,
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Sites',
-      'description': 'Unique rock unit in terms of geological age'
+      "label": "Sites",
+      "description": "Unique rock unit in terms of geological age"
     },
-    'er_citations': {
-      'position': 14,
-      'columns': {
-        'issn': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'issn'
+    "er_citations": {
+      "position": 14,
+      "columns": {
+        "issn": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "issn"
           }],
-          'unit': 'Citations List',
-          'position': 4,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['1525-2027']
+          "unit": "Text",
+          "position": 4,
+          "label": "Citation ISSN",
+          "type": "String",
+          "description": "ISSN number",
+          "examples": ["1525-2027"]
         },
-        'er_citation_name': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'er_citation_name'
+        "er_citation_name": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "er_citation_name"
           }],
-          'unit': 'Citations List',
-          'position': 0,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Hart et al. 1999', 'Hart & Staudigel 1999', 'This Study']
+          "unit": "Text",
+          "position": 0,
+          "label": "Citation Name",
+          "type": "String",
+          "description": "Formal citation including its year of publication",
+          "examples": ["Hart et al. 1999", "Hart & Staudigel 1999", "This Study"]
         },
-        'keywords': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'keywords'
+        "keywords": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "keywords"
           }],
-          'unit': 'Citations List',
-          'position': 14,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Seamount', 'Alkali basalt', 'Hotspot']
+          "unit": "Text",
+          "position": 14,
+          "label": "Citation Keywords",
+          "type": "List",
+          "description": "Colon-delimited list of keywords",
+          "examples": ["Seamount", "Alkali basalt", "Hotspot"]
         },
-        'city': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'city'
+        "city": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "city"
           }],
-          'unit': 'Citations List',
-          'position': 13,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Dordrecht', 'the Netherlands']
+          "unit": "Text",
+          "position": 13,
+          "label": "Publisher City",
+          "type": "String",
+          "description": "Publisher city",
+          "examples": ["Dordrecht", "the Netherlands"]
         },
-        'publisher': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'publisher'
+        "publisher": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "publisher"
           }],
-          'unit': 'Citations List',
-          'position': 12,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Kluwer Academics']
+          "unit": "Text",
+          "position": 12,
+          "label": "Book Publisher",
+          "type": "String",
+          "description": "Publisher name",
+          "examples": ["Kluwer Academics"]
         },
-        'journal': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'journal'
+        "journal": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "journal"
           }],
-          'unit': 'Citations List',
-          'position': 7,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Always use non-abbreviated journal names']
+          "unit": "Text",
+          "position": 7,
+          "label": "Journal",
+          "type": "String",
+          "description": "Journal name",
+          "examples": ["Always use non-abbreviated journal names"]
         },
-        'doi': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'doi'
+        "doi": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "doi"
           }],
-          'unit': 'Citations List',
-          'position': 3,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['10.1029/2002GC000343']
+          "unit": "Text",
+          "position": 3,
+          "label": "Citation DOI",
+          "type": "String",
+          "description": "DOI number",
+          "examples": ["10.1029/2002GC000343"]
         },
-        'volume': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'volume'
+        "volume": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "volume"
           }],
-          'unit': 'Citations List',
-          'position': 8,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['34A or 101(4)']
+          "unit": "Text",
+          "position": 8,
+          "label": "Citation Volume",
+          "type": "String",
+          "description": "Volume of the journal, conference proceeding or serial book",
+          "examples": ["34A or 101(4)"]
         },
-        'citation_type': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'citation_type'
+        "citation_type": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "citation_type"
           }],
-          'unit': 'Citations List',
-          'position': 6,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Journal', 'Book', 'Edited Book', 'Serial Book', 'Abstract', 'Ph.D. Thesis']
+          "unit": "Text",
+          "position": 6,
+          "label": "Citation Type",
+          "type": "String",
+          "description": "Citation type",
+          "examples": ["Journal", "Book", "Edited Book", "Serial Book", "Abstract", "Ph.D. Thesis"]
         },
-        'long_authors': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'long_authors'
+        "long_authors": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "long_authors"
           }],
-          'unit': 'Citations List',
-          'position': 1,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Hart', 'S.R.', 'Blusztajn', 'J. and Meyer', 'P.S.']
+          "unit": "Text",
+          "position": 1,
+          "label": "Long Authors",
+          "type": "String",
+          "description": "Complete author string",
+          "examples": ["Hart", "S.R.", "Blusztajn", "J. and Meyer", "P.S."]
         },
-        'book_editors': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'book_editors'
+        "book_editors": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "book_editors"
           }],
-          'unit': 'Citations List',
-          'position': 11,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Hart', 'S.R.', 'Blusztajn', 'J. and Meyer', 'P.S.']
+          "unit": "Text",
+          "position": 11,
+          "label": "Book Editors",
+          "type": "String",
+          "description": "Book editors",
+          "examples": ["Hart", "S.R.", "Blusztajn", "J. and Meyer", "P.S."]
         },
-        'book_title': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'book_title'
+        "book_title": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "book_title"
           }],
-          'unit': 'Citations List',
-          'position': 10,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['No period required at end of title']
+          "unit": "Text",
+          "position": 10,
+          "label": "Book Title",
+          "type": "String",
+          "description": "Book title",
+          "examples": ["No period required at end of title"]
         },
-        'iaga_ref_no': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'iaga_ref_no'
+        "iaga_ref_no": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "iaga_ref_no"
           }],
-          'unit': 'Citations List',
-          'position': 16,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List'
+          "unit": "Integer",
+          "position": 16,
+          "label": "IAGA Database Reference Number",
+          "type": "Integer",
+          "description": "IAGA7 database -- internal record number for reference"
         },
-        'title': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'title'
+        "title": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "title"
           }],
-          'unit': 'Citations List',
-          'position': 5,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['No period required at end of title']
+          "unit": "Text",
+          "position": 5,
+          "label": "Citation Title",
+          "type": "String",
+          "description": "Paper title or chapter title in a book",
+          "examples": ["No period required at end of title"]
         },
-        'iaga_database': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'iaga_database'
+        "iaga_database": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "iaga_database"
           }],
-          'unit': 'Citations List',
-          'position': 15,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['ARCHEO', 'PGMDB', 'PINT', 'PSVRL', 'SECVR', 'TRANS']
+          "unit": "Text",
+          "position": 15,
+          "label": "IAGA Database Name",
+          "type": "String",
+          "description": "IAGA7 database -- name",
+          "examples": ["ARCHEO", "PGMDB", "PINT", "PSVRL", "SECVR", "TRANS"]
         },
-        'pages': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'pages'
+        "pages": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "pages"
           }],
-          'unit': 'Citations List',
-          'position': 9,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['2', '345-2', '367 or 123']
+          "unit": "Text",
+          "position": 9,
+          "label": "Citation Pages",
+          "type": "String",
+          "description": "Page range or total number of pages in a book",
+          "examples": ["2", "345-2", "367 or 123"]
         },
-        'year': {
-          'group': 'Citations List',
-          'next_columns': [{
-            'table': 'er_citations',
-            'column': 'year'
+        "year": {
+          "group": "Citations List",
+          "next_columns": [{
+            "table": "er_citations",
+            "column": "year"
           }],
-          'unit': 'Citations List',
-          'position': 2,
-          'label': 'Citations List',
-          'type': 'Citations List',
-          'description': 'Citations List',
-          'examples': ['Number in the \'yyyy\' format', 'where 2001a and 2001b are allowed']
+          "unit": "Text",
+          "position": 2,
+          "label": "Citation Year",
+          "type": "Year",
+          "description": "Year of publication",
+          "examples": ["Number in the \"yyyy\" format", "where 2001a and 2001b are allowed"]
         }
       },
-      'label': 'Citations List',
-      'description': 'List of references'
+      "label": "Citations List",
+      "description": "List of references"
     },
-    'er_expeditions': {
-      'position': 2,
-      'columns': {
-        'expedition_start_lon': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_start_lon'
+    "er_expeditions": {
+      "position": 2,
+      "columns": {
+        "expedition_start_lon": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_start_lon"
           }],
-          'unit': 'Expeditions',
-          'position': 11,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 11,
+          "label": "Expedition Start Longitude",
+          "type": "Number",
+          "description": "Start location -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'expedition_start_lat': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_start_lat'
+        "expedition_start_lat": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_start_lat"
           }],
-          'unit': 'Expeditions',
-          'position': 10,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 10,
+          "label": "Expedition Start Latitude",
+          "type": "Number",
+          "description": "Start location -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'expedition_box_lat_max': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_box_lat_max'
+        "expedition_box_lat_max": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_box_lat_max"
           }],
-          'unit': 'Expeditions',
-          'position': 21,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 21,
+          "label": "Expedition Box Latitude",
+          "type": "Number",
+          "description": "Encompassing latitude and longitude box -- latitude maximum",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'expedition_ssv_sensor': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_ssv_sensor'
+        "expedition_ssv_sensor": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_ssv_sensor"
           }],
-          'unit': 'Expeditions',
-          'position': 27,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 27,
+          "label": "Vessel SSV Sensor",
+          "type": "String",
+          "description": "Ship sensors -- SSV"
         },
-        'er_crew_mail_names': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'er_crew_mail_names'
+        "er_crew_mail_names": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "er_crew_mail_names"
           }],
-          'unit': 'Expeditions',
-          'position': 33,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Josh Coldheart', 'Jane Goodall']
+          "unit": "Text",
+          "position": 33,
+          "label": "Crew Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for marine technicians and other crew",
+          "examples": ["Josh Coldheart", "Jane Goodall"]
         },
-        'er_expedition_alternatives': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'er_expedition_alternatives'
+        "er_expedition_alternatives": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "er_expedition_alternatives"
           }],
-          'unit': 'Expeditions',
-          'position': 1,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 1,
+          "label": "Expedition Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'expedition_vru_sensor': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_vru_sensor'
+        "expedition_vru_sensor": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_vru_sensor"
           }],
-          'unit': 'Expeditions',
-          'position': 26,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 26,
+          "label": "Vessel VRU Sensor",
+          "type": "String",
+          "description": "Ship sensors -- VRU"
         },
-        'expedition_themes': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_themes'
+        "expedition_themes": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_themes"
           }],
-          'unit': 'Expeditions',
-          'position': 7,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 7,
+          "label": "Expedition Science Themes",
+          "type": "String",
+          "description": "Specific science themes and questions"
         },
-        'er_scientist_mail_names': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Expeditions',
-          'position': 32,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 32,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists participating in expedition",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'expedition_end_lon': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_end_lon'
+        "expedition_end_lon": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_end_lon"
           }],
-          'unit': 'Expeditions',
-          'position': 16,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 16,
+          "label": "Expedition End Longitude",
+          "type": "Number",
+          "description": "Ending location -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'expedition_end_date': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_end_date'
+        "expedition_end_date": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_end_date"
           }],
-          'unit': 'Expeditions',
-          'position': 17,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Number in the \'yyyy:mm:dd:hh:mm:ss.ss\' format']
+          "unit": "Text",
+          "position": 17,
+          "label": "Expedition End Date",
+          "type": "Date",
+          "description": "Ending location -- date",
+          "examples": ["Number in the \"yyyy:mm:dd:hh:mm:ss.ss\" format"]
         },
-        'expedition_end_time_zone': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_end_time_zone'
+        "expedition_end_time_zone": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_end_time_zone"
           }],
-          'unit': 'Expeditions',
-          'position': 18,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 18,
+          "label": "Expedition End Time Zone",
+          "type": "String",
+          "description": "Ending location -- time zone"
         },
-        'er_citation_names': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "er_citation_names"
           }],
-          'unit': 'Expeditions',
-          'position': 34,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 34,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'expedition_end_loc': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_end_loc'
+        "expedition_end_loc": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_end_loc"
           }],
-          'unit': 'Expeditions',
-          'position': 19,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 19,
+          "label": "Expedition End Location",
+          "type": "String",
+          "description": "Ending location -- name"
         },
-        'expedition_ship': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_ship'
+        "expedition_ship": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_ship"
           }],
-          'unit': 'Expeditions',
-          'position': 2,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['R/V Melville']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Ship",
+          "type": "String",
+          "description": "Expedition research vessel name",
+          "examples": ["R/V Melville"]
         },
-        'expedition_std_equipment': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_std_equipment'
+        "expedition_std_equipment": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_std_equipment"
           }],
-          'unit': 'Expeditions',
-          'position': 8,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 8,
+          "label": "Expedition Standard Equipment",
+          "type": "String",
+          "description": "Equipment available on vessel"
         },
-        'expedition_mdg_sensor': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_mdg_sensor'
+        "expedition_mdg_sensor": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_mdg_sensor"
           }],
-          'unit': 'Expeditions',
-          'position': 28,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 28,
+          "label": "Vessel MDG Sensor",
+          "type": "String",
+          "description": "Ship sensors -- MDG"
         },
-        'expedition_sci_equipment': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_sci_equipment'
+        "expedition_sci_equipment": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_sci_equipment"
           }],
-          'unit': 'Expeditions',
-          'position': 9,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 9,
+          "label": "Expedition Science Equipment",
+          "type": "String",
+          "description": "Equipment brought on ship by scientists"
         },
-        'expedition_box_lon_max': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_box_lon_max'
+        "expedition_box_lon_max": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_box_lon_max"
           }],
-          'unit': 'Expeditions',
-          'position': 23,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 23,
+          "label": "Expedition Box Longitude",
+          "type": "Number",
+          "description": "Encompassing latitude and longitude box -- longitude maximum",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'expedition_mb_sonar': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_mb_sonar'
+        "expedition_mb_sonar": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_mb_sonar"
           }],
-          'unit': 'Expeditions',
-          'position': 24,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 24,
+          "label": "Vessel Sonar Type",
+          "type": "String",
+          "description": "Ship sensors -- sonar"
         },
-        'expedition_description': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_description'
+        "expedition_description": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_description"
           }],
-          'unit': 'Expeditions',
-          'position': 29,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 29,
+          "label": "Expedition Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'expedition_start_loc': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_start_loc'
+        "expedition_start_loc": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_start_loc"
           }],
-          'unit': 'Expeditions',
-          'position': 14,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 14,
+          "label": "Expedition Start Location",
+          "type": "String",
+          "description": "Start location -- name"
         },
-        'expedition_start_time_zone': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_start_time_zone'
+        "expedition_start_time_zone": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_start_time_zone"
           }],
-          'unit': 'Expeditions',
-          'position': 13,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 13,
+          "label": "Expedition Start Time Zone",
+          "type": "String",
+          "description": "Start location -- time zone"
         },
-        'expedition_nav_sensor': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_nav_sensor'
+        "expedition_nav_sensor": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_nav_sensor"
           }],
-          'unit': 'Expeditions',
-          'position': 25,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 25,
+          "label": "Vessel NAV Sensor",
+          "type": "String",
+          "description": "Ship sensors -- NAV"
         },
-        'er_pi_mail_names': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'er_pi_mail_names'
+        "er_pi_mail_names": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "er_pi_mail_names"
           }],
-          'unit': 'Expeditions',
-          'position': 31,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Jean Smith', 'Conan H. Blacksun']
+          "unit": "Text",
+          "position": 31,
+          "label": "Principal Investigator Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for PI's of expedition",
+          "examples": ["Jean Smith", "Conan H. Blacksun"]
         },
-        'expedition_ngdc_numb': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_ngdc_numb'
+        "expedition_ngdc_numb": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_ngdc_numb"
           }],
-          'unit': 'Expeditions',
-          'position': 4,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 4,
+          "label": "Expedition NGDC Number",
+          "type": "String",
+          "description": "NGDC cruise identifier"
         },
-        'expedition_location': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_location'
+        "expedition_location": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_location"
           }],
-          'unit': 'Expeditions',
-          'position': 6,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 6,
+          "label": "Expedition Location",
+          "type": "List",
+          "description": "Colon-delimited list of locations"
         },
-        'er_expedition_name': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Expeditions',
-          'position': 0,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'expedition_sponsor': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_sponsor'
+        "expedition_sponsor": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_sponsor"
           }],
-          'unit': 'Expeditions',
-          'position': 5,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['NSF-OCE', 'NASA']
+          "unit": "Text",
+          "position": 5,
+          "label": "Expedition Sponsor",
+          "type": "String",
+          "description": "Name(s) of sponsors",
+          "examples": ["NSF-OCE", "NASA"]
         },
-        'expedition_start_date': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_start_date'
+        "expedition_start_date": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_start_date"
           }],
-          'unit': 'Expeditions',
-          'position': 12,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Number in the \'yyyy:mm:dd:hh:mm:ss.ss\' format']
+          "unit": "Text",
+          "position": 12,
+          "label": "Expedition Start Date",
+          "type": "Date",
+          "description": "Start location -- date",
+          "examples": ["Number in the \"yyyy:mm:dd:hh:mm:ss.ss\" format"]
         },
-        'expedition_end_lat': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_end_lat'
+        "expedition_end_lat": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_end_lat"
           }],
-          'unit': 'Expeditions',
-          'position': 15,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 15,
+          "label": "Expedition End Latitude",
+          "type": "Number",
+          "description": "Ending location -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'expedition_box_lon_min': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_box_lon_min'
+        "expedition_box_lon_min": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_box_lon_min"
           }],
-          'unit': 'Expeditions',
-          'position': 22,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 22,
+          "label": "Expedition Box Longitude",
+          "type": "Number",
+          "description": "Encompassing latitude and longitude box -- longitude minimum",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'expedition_url': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_url'
+        "expedition_url": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_url"
           }],
-          'unit': 'Expeditions',
-          'position': 30,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['http://earthref.org']
+          "unit": "Text",
+          "position": 30,
+          "label": "Expedition URL",
+          "type": "String",
+          "description": "Website URL for the expedition explicitly",
+          "examples": ["http://earthref.org"]
         },
-        'expedition_leg': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_leg'
+        "expedition_leg": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_leg"
           }],
-          'unit': 'Expeditions',
-          'position': 3,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions'
+          "unit": "Text",
+          "position": 3,
+          "label": "Expedition Leg",
+          "type": "String",
+          "description": "Leg number of a seagoing expedition"
         },
-        'expedition_box_lat_min': {
-          'group': 'Expeditions',
-          'next_columns': [{
-            'table': 'er_expeditions',
-            'column': 'expedition_box_lat_min'
+        "expedition_box_lat_min": {
+          "group": "Expeditions",
+          "next_columns": [{
+            "table": "er_expeditions",
+            "column": "expedition_box_lat_min"
           }],
-          'unit': 'Expeditions',
-          'position': 20,
-          'label': 'Expeditions',
-          'type': 'Expeditions',
-          'description': 'Expeditions',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 20,
+          "label": "Expedition Box Latitude",
+          "type": "Number",
+          "description": "Encompassing latitude and longitude box -- latitude minimum",
+          "examples": ["Decimal degrees between -90 and 90"]
         }
       },
-      'label': 'Expeditions',
-      'description': 'Expedition, fieldwork or cruise definition'
+      "label": "Expeditions",
+      "description": "Expedition, fieldwork or cruise definition"
     },
-    'magic_measurements': {
-      'position': 16,
-      'columns': {
-        'er_member_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_member_name'
+    "magic_measurements": {
+      "position": 16,
+      "columns": {
+        "er_member_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_member_name"
           }],
-          'unit': 'Measurements',
-          'position': 3,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'measurement_temp_change': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_temp_change'
+        "measurement_temp_change": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_temp_change"
           }],
-          'unit': 'Measurements',
-          'position': 43,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in K",
+          "position": 43,
+          "label": "Measurement Temperature Change",
+          "type": "Number",
+          "description": "Change in temperature during each measurement step"
         },
-        'magic_experiment_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'magic_experiment_name'
+        "magic_experiment_name": {
+          "group": "Measurements",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 11,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
+        },
+        "measurement_standard": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_standard"
           }],
-          'unit': 'Measurements',
-          'position': 11,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['KOPA-299-1']
+          "unit": "Flag",
+          "position": 13,
+          "label": "Measurement Standard Flag",
+          "type": "String",
+          "description": "Indicating if a standard (s) or an unknown (u) measurement",
+          "examples": ["Default = u"]
         },
-        'measurement_standard': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_standard'
+        "magic_method_codes": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Measurements',
-          'position': 13,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Default = u']
+          "unit": "Text",
+          "position": 65,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'magic_method_codes': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'magic_method_codes'
+        "treatment_ac_field_dc_on": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_ac_field_dc_on"
           }],
-          'unit': 'Measurements',
-          'position': 65,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Number in T",
+          "position": 33,
+          "label": "Lab Treatment AC Field DC Field On",
+          "type": "Number",
+          "description": "AC field in a pARM experiment at which DC field is turned on"
         },
-        'treatment_ac_field_dc_on': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_ac_field_dc_on'
+        "measurement_number": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_number"
           }],
-          'unit': 'Measurements',
-          'position': 33,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 14,
+          "label": "Measurement Number",
+          "type": "String",
+          "description": "Measurement identifier or lab number",
+          "examples": ["03C3012"]
         },
-        'measurement_number': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_number'
+        "treatment_ac_field_decay_rate": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_ac_field_decay_rate"
           }],
-          'unit': 'Measurements',
-          'position': 14,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['03C3012']
+          "unit": "Number in T/s",
+          "position": 32,
+          "label": "Lab Treatment AC Field Decay Rate",
+          "type": "Number",
+          "description": "Decay rate of AC field in AC field demagnetization experiment"
         },
-        'treatment_ac_field_decay_rate': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_ac_field_decay_rate'
+        "measurement_k": {
+          "group": "Measurements",
+          "next_columns": ["measurement_chi_volume"],
+          "unit": "Number in SI",
+          "position": 55,
+          "label": "Measurement Susceptibility K",
+          "type": "Number",
+          "description": "Magnetic susceptibility -- volume normalized"
+        },
+        "treatment_dc_field": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_dc_field"
           }],
-          'unit': 'Measurements',
-          'position': 32,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in T",
+          "position": 35,
+          "label": "Lab Treatment DC Field",
+          "type": "Number",
+          "description": "Applied DC field"
         },
-        'measurement_k': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 55,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'treatment_dc_field': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_dc_field'
+        "measurement_height": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_height"
           }],
-          'unit': 'Measurements',
-          'position': 35,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in m",
+          "position": 24,
+          "label": "Measurement Stratigraphic Height",
+          "type": "Number",
+          "description": "Measurement location -- stratigraphic height",
+          "examples": ["Positive is up in section or core", "while negative is down relative to reference height"]
         },
-        'measurement_height': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_height'
+        "treatment_dc_field_theta": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_dc_field_theta"
           }],
-          'unit': 'Measurements',
-          'position': 24,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Positive is up in section or core', 'while negative is down relative to reference height']
+          "unit": "Number in Degrees",
+          "position": 40,
+          "label": "Lab Treatment Orientation Theta",
+          "type": "Number",
+          "description": "Orientation of sample in magnetometer"
         },
-        'treatment_dc_field_theta': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_dc_field_theta'
+        "measurement_magn_volume": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_magn_volume"
           }],
-          'unit': 'Measurements',
-          'position': 40,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in A/m",
+          "position": 53,
+          "label": "Measurement Magnetization Volume",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized"
         },
-        'measurement_magn_volume': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_magn_volume'
+        "measurement_sd": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_sd"
           }],
-          'unit': 'Measurements',
-          'position': 53,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in Degrees",
+          "position": 63,
+          "label": "Measurement Standard Deviation",
+          "type": "Number",
+          "description": "Standard deviation in measurements",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'measurement_sd': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_sd'
+        "measurement_x": {
+          "group": "Measurements",
+          "next_columns": ["measurement_chi_mass"],
+          "unit": "Number in m3/kg",
+          "position": 56,
+          "label": "Measurement Susceptibility X",
+          "type": "Number",
+          "description": "Magnetic susceptibility -- mass normalized"
+        },
+        "treatment_dc_field_phi": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_dc_field_phi"
           }],
-          'unit': 'Measurements',
-          'position': 63,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in Degrees",
+          "position": 39,
+          "label": "Lab Treatment Orientation Phi",
+          "type": "Number",
+          "description": "Orientation of sample in magnetometer"
         },
-        'measurement_x': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 56,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'treatment_dc_field_phi': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_dc_field_phi'
+        "treatment_temp_dc_on": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_temp_dc_on"
           }],
-          'unit': 'Measurements',
-          'position': 39,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in K",
+          "position": 29,
+          "label": "Lab Treatment Temperature DC Field On",
+          "type": "Number",
+          "description": "Temperature in a pTRM experiment at which DC field is turned on"
         },
-        'treatment_temp_dc_on': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_temp_dc_on'
+        "treatment_dc_field_decay_rate": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_dc_field_decay_rate"
           }],
-          'unit': 'Measurements',
-          'position': 29,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in T/s",
+          "position": 36,
+          "label": "Lab Treatment DC Field Decay Rate",
+          "type": "Number",
+          "description": "Decay rate of DC field after switching off"
         },
-        'treatment_dc_field_decay_rate': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_dc_field_decay_rate'
+        "measurement_moment": {
+          "group": "Measurements",
+          "next_columns": ["measurement_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 52,
+          "label": "Measurement Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment"
+        },
+        "measurement_elevation": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_elevation"
           }],
-          'unit': 'Measurements',
-          'position': 36,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in m",
+          "position": 23,
+          "label": "Measurement Elevation",
+          "type": "Number",
+          "description": "Measurement location -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'measurement_moment': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 52,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'measurement_elevation': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_elevation'
+        "measurement_drill_depth": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_drill_depth"
           }],
-          'unit': 'Measurements',
-          'position': 23,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 25,
+          "label": "Measurement Drill Depth",
+          "type": "Number",
+          "description": "Measurement location -- depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'measurement_drill_depth': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_drill_depth'
+        "measurement_pos_z": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_pos_z"
           }],
-          'unit': 'Measurements',
-          'position': 25,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 21,
+          "label": "Measurement Z Position",
+          "type": "Number",
+          "description": "Position of the measurement relative to the specimen -- z"
         },
-        'measurement_pos_z': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_pos_z'
+        "measurement_magnitude": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_magnitude"
           }],
-          'unit': 'Measurements',
-          'position': 21,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Dimensionless",
+          "position": 51,
+          "label": "Measurement Magnitude",
+          "type": "Number",
+          "description": "Uncalibrated magnitude measurement"
         },
-        'measurement_magnitude': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_magnitude'
+        "measurement_charging_mode": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_charging_mode"
           }],
-          'unit': 'Measurements',
-          'position': 51,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 60,
+          "label": "Measurement Hysteresis Charging Mode",
+          "type": "String",
+          "description": "Measurement hysteresis charging mode",
+          "examples": ["Hysteresis", "Steady", "No Overshoot"]
         },
-        'measurement_charging_mode': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_charging_mode'
+        "measurement_inc": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_inc"
           }],
-          'unit': 'Measurements',
-          'position': 60,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Hysteresis', 'Steady', 'No Overshoot']
+          "unit": "Number in Degrees",
+          "position": 49,
+          "label": "Measurement Inclination",
+          "type": "Number",
+          "description": "Directions in sample coordinates -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'measurement_inc': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_inc'
+        "measurement_r2": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_r2"
           }],
-          'unit': 'Measurements',
-          'position': 49,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Dimensionless",
+          "position": 61,
+          "label": "Measurement Goodness of Fit",
+          "type": "Number",
+          "description": "Goodness of fit in regression",
+          "examples": ["Number between 0 and 1"]
         },
-        'measurement_r2': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_r2'
+        "measurement_description": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_description"
           }],
-          'unit': 'Measurements',
-          'position': 61,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Number between 0 and 1']
+          "unit": "Text",
+          "position": 64,
+          "label": "Measurement Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'measurement_description': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_description'
+        "er_synthetic_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_synthetic_name"
           }],
-          'unit': 'Measurements',
-          'position': 64,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 10,
+          "label": "Synthetic Material Name",
+          "type": "String",
+          "description": "Name for synthetic material",
+          "examples": ["STD1546-A1"]
         },
-        'er_synthetic_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_synthetic_name'
+        "measurement_flag": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_flag"
           }],
-          'unit': 'Measurements',
-          'position': 10,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['STD1546-A1']
+          "unit": "Flag",
+          "position": 12,
+          "label": "Measurement Flag",
+          "type": "String",
+          "description": "Indicating if good (g) or bad (b) measurement",
+          "examples": ["Default = g"]
         },
-        'measurement_flag': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_flag'
+        "er_expedition_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Measurements',
-          'position': 12,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Default = g']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'er_expedition_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_expedition_name'
+        "treatment_dc_field_ac_on": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_dc_field_ac_on"
           }],
-          'unit': 'Measurements',
-          'position': 0,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['AVON02MV']
+          "unit": "Number in T",
+          "position": 37,
+          "label": "Lab Treatment DC Field AC Field On",
+          "type": "Number",
+          "description": "DC field in DC field experiment at which AC field is turned on"
         },
-        'treatment_dc_field_ac_on': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_dc_field_ac_on'
+        "measurement_csd": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_csd"
           }],
-          'unit': 'Measurements',
-          'position': 37,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in Degrees",
+          "position": 62,
+          "label": "Measurement Circular Standard Deviation",
+          "type": "Number",
+          "description": "Circular standard deviation in measurements",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'measurement_csd': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_csd'
+        "measurement_lab_field_ac": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_lab_field_ac"
           }],
-          'unit': 'Measurements',
-          'position': 62,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in T",
+          "position": 47,
+          "label": "Measurement Lab Field AC",
+          "type": "Number",
+          "description": "Measured AC field in laboratory"
         },
-        'measurement_lab_field_ac': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_lab_field_ac'
+        "measurement_loop_x": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_loop_x"
           }],
-          'unit': 'Measurements',
-          'position': 47,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Integer",
+          "position": 17,
+          "label": "Measurement Hysteresis Loop Number",
+          "type": "Integer",
+          "description": "Hysteresis loop -- counter"
         },
-        'measurement_loop_x': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_loop_x'
+        "measurement_pos_x": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_pos_x"
           }],
-          'unit': 'Measurements',
-          'position': 17,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in m",
+          "position": 19,
+          "label": "Measurement X Position",
+          "type": "Number",
+          "description": "Position of the measurement relative to the specimen -- x"
         },
-        'measurement_pos_x': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_pos_x'
+        "measurement_positions": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_positions"
           }],
-          'unit': 'Measurements',
-          'position': 19,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Integer",
+          "position": 22,
+          "label": "Measurement Number of Positions",
+          "type": "Integer",
+          "description": "Number of different positions in measurement"
         },
-        'measurement_positions': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_positions'
+        "measurement_k_quadr": {
+          "group": "Measurements",
+          "next_columns": ["measurement_chi_qdr_volume"],
+          "unit": "Number in SI",
+          "position": 57,
+          "label": "Measurement Susceptibility K Quadrature",
+          "type": "Number",
+          "description": "Quadrature magnetic susceptibility -- volume normalized"
+        },
+        "er_formation_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_formation_name"
           }],
-          'unit': 'Measurements',
-          'position': 22,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'measurement_k_quadr': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 57,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'er_formation_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_formation_name'
+        "measurement_orient_phi": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_orient_phi"
           }],
-          'unit': 'Measurements',
-          'position': 2,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Bluebird Formation']
+          "unit": "Number in Degrees",
+          "position": 45,
+          "label": "Measurement Orientation Phi",
+          "type": "Number",
+          "description": "Orientation of sample in magnetometer"
         },
-        'measurement_orient_phi': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_orient_phi'
+        "er_analyst_mail_names": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Measurements',
-          'position': 45,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 67,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'er_analyst_mail_names': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_analyst_mail_names'
+        "treatment_temp": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_temp"
           }],
-          'unit': 'Measurements',
-          'position': 67,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Number in K",
+          "position": 27,
+          "label": "Lab Treatment Temperature",
+          "type": "Number",
+          "description": "Demagnetization temperature"
         },
-        'treatment_temp': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_temp'
+        "measurement_lab_field_dc": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_lab_field_dc"
           }],
-          'unit': 'Measurements',
-          'position': 27,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in T",
+          "position": 48,
+          "label": "Measurement Lab Field DC",
+          "type": "Number",
+          "description": "Measured DC field in laboratory"
         },
-        'measurement_lab_field_dc': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_lab_field_dc'
+        "treatment_dc_field_ac_off": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_dc_field_ac_off"
           }],
-          'unit': 'Measurements',
-          'position': 48,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in T",
+          "position": 38,
+          "label": "Lab Treatment DC Field AC Field Off",
+          "type": "Number",
+          "description": "DC field in DC field experiment at which AC field is turned off"
         },
-        'treatment_dc_field_ac_off': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_dc_field_ac_off'
+        "measurement_temp": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_temp"
           }],
-          'unit': 'Measurements',
-          'position': 38,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in K",
+          "position": 42,
+          "label": "Measurement Temperature",
+          "type": "Number",
+          "description": "Temperature"
         },
-        'measurement_temp': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_temp'
+        "treatment_ac_field_dc_off": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_ac_field_dc_off"
           }],
-          'unit': 'Measurements',
-          'position': 42,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in T",
+          "position": 34,
+          "label": "Lab Treatment AC Field DC Field Off",
+          "type": "Number",
+          "description": "AC field in a pARM experiment at which DC field is turned off"
         },
-        'treatment_ac_field_dc_off': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_ac_field_dc_off'
+        "er_citation_names": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_citation_names"
           }],
-          'unit': 'Measurements',
-          'position': 34,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 68,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_citation_names': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_citation_names'
+        "er_site_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_site_name"
           }],
-          'unit': 'Measurements',
-          'position': 68,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_site_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_site_name'
+        "measurement_freq": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_freq"
           }],
-          'unit': 'Measurements',
-          'position': 5,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Bas123a']
+          "unit": "Number in Hz",
+          "position": 44,
+          "label": "Measurement Frequency",
+          "type": "Number",
+          "description": "Frequency"
         },
-        'measurement_freq': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_freq'
+        "er_sample_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_sample_name"
           }],
-          'unit': 'Measurements',
-          'position': 44,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_sample_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_sample_name'
+        "measurement_loop_n": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_loop_n"
           }],
-          'unit': 'Measurements',
-          'position': 6,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Bas123a-01']
+          "unit": "Integer",
+          "position": 18,
+          "label": "Measurement Hysteresis Loop Total",
+          "type": "Integer",
+          "description": "Hysteresis loop -- total number of loops"
         },
-        'measurement_loop_n': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_loop_n'
+        "measurement_date": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_date"
           }],
-          'unit': 'Measurements',
-          'position': 18,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 15,
+          "label": "Measurement Date and Time",
+          "type": "Date",
+          "description": "Date and time of the measurement",
+          "examples": ["Number in the \"yyyy:mm:dd:hh:mm:ss.ss\" format"]
         },
-        'measurement_date': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_date'
+        "er_specimen_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Measurements',
-          'position': 15,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Number in the \'yyyy:mm:dd:hh:mm:ss.ss\' format']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'er_specimen_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_specimen_name'
+        "measurement_x_quadr": {
+          "group": "Measurements",
+          "next_columns": ["measurement_chi_qdr_mass"],
+          "unit": "Number in m3/kg",
+          "position": 58,
+          "label": "Measurement Susceptibility X Quadrature",
+          "type": "Number",
+          "description": "Quadrature magnetic susceptibility -- mass normalized"
+        },
+        "measurement_dec": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_dec"
           }],
-          'unit': 'Measurements',
-          'position': 7,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Bas123a-01x']
+          "unit": "Number in Degrees",
+          "position": 50,
+          "label": "Measurement Declination",
+          "type": "Number",
+          "description": "Directions in sample coordinates -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'measurement_x_quadr': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 58,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'measurement_dec': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_dec'
+        "measurement_orient_theta": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_orient_theta"
           }],
-          'unit': 'Measurements',
-          'position': 50,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 46,
+          "label": "Measurement Orientation Theta",
+          "type": "Number",
+          "description": "Orientation of sample in magnetometer"
         },
-        'measurement_orient_theta': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_orient_theta'
+        "measurement_demagn_code": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_demagn_code"
           }],
-          'unit': 'Measurements',
-          'position': 46,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 41,
+          "label": "Measurement Demagnetization Code",
+          "type": "String",
+          "description": "Demagnitization code for legacy data"
         },
-        'measurement_demagn_code': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_demagn_code'
+        "measurement_magn_weight": {
+          "group": "Measurements",
+          "next_columns": ["measurement_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 54,
+          "label": "Measurement Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized"
+        },
+        "measurement_sweep_rate": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_sweep_rate"
           }],
-          'unit': 'Measurements',
-          'position': 41,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in T/s",
+          "position": 59,
+          "label": "Measurement Hysteresis Sweep Rate",
+          "type": "Number",
+          "description": "Rate of field sweep during a hysteresis loop measurement"
         },
-        'measurement_magn_weight': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 54,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'measurement_sweep_rate': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_sweep_rate'
+        "measurement_time_zone": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_time_zone"
           }],
-          'unit': 'Measurements',
-          'position': 59,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 16,
+          "label": "Measurement Time Zone",
+          "type": "String",
+          "description": "Time zone"
         },
-        'measurement_time_zone': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_time_zone'
+        "magic_instrument_codes": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Measurements',
-          'position': 16,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 66,
+          "label": "Instrument Code",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'magic_instrument_codes': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'magic_instrument_codes'
+        "measurement_pos_y": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_pos_y"
           }],
-          'unit': 'Measurements',
-          'position': 66,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Number in m",
+          "position": 20,
+          "label": "Measurement Y Position",
+          "type": "Number",
+          "description": "Position of the measurement relative to the specimen -- y"
         },
-        'measurement_pos_y': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_pos_y'
+        "er_mineral_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Measurements',
-          'position': 20,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'er_mineral_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_mineral_name'
+        "measurement_composite_depth": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "measurement_composite_depth"
           }],
-          'unit': 'Measurements',
-          'position': 9,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['San03-001']
+          "unit": "Number in m",
+          "position": 26,
+          "label": "Measurement Composite Depth",
+          "type": "Number",
+          "description": "Measurement location -- composite depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'measurement_composite_depth': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_composite_depth'
+        "treatment_ac_field": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_ac_field"
           }],
-          'unit': 'Measurements',
-          'position': 26,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in T",
+          "position": 31,
+          "label": "Lab Treatment AC Field",
+          "type": "Number",
+          "description": "Peak field in AC demagnetization experiment"
         },
-        'treatment_ac_field': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_ac_field'
+        "er_section_name": {
+          "group": "Measurements",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
+        },
+        "er_fossil_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Measurements',
-          'position': 31,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_section_name': {
-          'group': 'Measurements',
-          'next_columns': [],
-          'unit': 'Measurements',
-          'position': 4,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
-        },
-        'er_fossil_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_fossil_name'
+        "treatment_temp_dc_off": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_temp_dc_off"
           }],
-          'unit': 'Measurements',
-          'position': 8,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['AMM43-03']
+          "unit": "Number in K",
+          "position": 30,
+          "label": "Lab Treatment Temperature DC Field Off",
+          "type": "Number",
+          "description": "Temperature in a pTRM experiment at which DC field is turned off"
         },
-        'treatment_temp_dc_off': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_temp_dc_off'
+        "er_location_name": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "er_location_name"
           }],
-          'unit': 'Measurements',
-          'position': 30,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         },
-        'er_location_name': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'er_location_name'
+        "treatment_temp_decay_rate": {
+          "group": "Measurements",
+          "next_columns": [{
+            "table": "magic_measurements",
+            "column": "treatment_temp_decay_rate"
           }],
-          'unit': 'Measurements',
-          'position': 1,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
-        },
-        'treatment_temp_decay_rate': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_temp_decay_rate'
-          }],
-          'unit': 'Measurements',
-          'position': 28,
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
+          "unit": "Number in K/s",
+          "position": 28,
+          "label": "Lab Treatment Temperature Decay Rate",
+          "type": "Number",
+          "description": "Decay rate of temperature on cooling"
         }
       },
-      'label': 'Measurements',
-      'description': 'Level zero analytical data'
+      "label": "Measurements",
+      "description": "Level zero analytical data"
     },
-    'rmag_criteria': {
-      'position': 30,
-      'columns': {
-        'rmag_criteria_code': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'rmag_criteria',
-            'column': 'rmag_criteria_code'
+    "rmag_criteria": {
+      "position": 30,
+      "columns": {
+        "rmag_criteria_code": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "rmag_criteria",
+            "column": "rmag_criteria_code"
           }],
-          'unit': 'Selection Criteria',
-          'position': 0,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['MY-ANIS567', 'MY-LOOPS-12']
+          "unit": "Text",
+          "position": 0,
+          "label": "Criteria Code",
+          "type": "String",
+          "description": "Criteria type name or number",
+          "examples": ["MY-ANIS567", "MY-LOOPS-12"]
         },
-        'er_citation_names': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'rmag_criteria',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "rmag_criteria",
+            "column": "er_citation_names"
           }],
-          'unit': 'Selection Criteria',
-          'position': 3,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 3,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'criteria_description': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'rmag_criteria',
-            'column': 'criteria_description'
+        "criteria_description": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "rmag_criteria",
+            "column": "criteria_description"
           }],
-          'unit': 'Selection Criteria',
-          'position': 2,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
+          "unit": "Text",
+          "position": 2,
+          "label": "Criteria Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'criteria_definition': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'rmag_criteria',
-            'column': 'criteria_definition'
+        "criteria_definition": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "rmag_criteria",
+            "column": "criteria_definition"
           }],
-          'unit': 'Selection Criteria',
-          'position': 1,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
+          "unit": "Text",
+          "position": 1,
+          "label": "Criteria Definition",
+          "type": "String",
+          "description": "Definition of the criteria"
         }
       },
-      'label': 'Selection Criteria',
-      'description': 'Selection criteria used in data selection'
+      "label": "Selection Criteria",
+      "description": "Selection criteria used in data selection"
     },
-    'magic_methods': {
-      'position': 17,
-      'columns': {
-        'method_type': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'method_type'
+    "magic_methods": {
+      "position": 17,
+      "columns": {
+        "method_type": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "method_type"
           }],
-          'unit': 'Methods',
-          'position': 1,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['Lab Protocol']
+          "unit": "Text",
+          "position": 1,
+          "label": "Method Type",
+          "type": "String",
+          "description": "Type of method",
+          "examples": ["Lab Protocol"]
         },
-        'magic_method_code': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'magic_method_code'
+        "magic_method_code": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "magic_method_code"
           }],
-          'unit': 'Methods',
-          'position': 0,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['AC-AARM']
+          "unit": "Text",
+          "position": 0,
+          "label": "Method Code",
+          "type": "String",
+          "description": "Unique code describing field, lab or statistical method",
+          "examples": ["AC-AARM"]
         },
-        'method_iaga7': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'method_iaga7'
+        "method_iaga7": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "method_iaga7"
           }],
-          'unit': 'Methods',
-          'position': 4,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['C', 'G', 'F', 'F*']
+          "unit": "Text",
+          "position": 4,
+          "label": "Method IAGA-7 Code",
+          "type": "String",
+          "description": "IAGA-7 method code",
+          "examples": ["C", "G", "F", "F*"]
         },
-        'method_url': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'method_url'
+        "method_url": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "method_url"
           }],
-          'unit': 'Methods',
-          'position': 5,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['http://earthref.org/MAGIC/books/Tauxe/2005/lecture.01.htm']
+          "unit": "Text",
+          "position": 5,
+          "label": "Method URLs",
+          "type": "String",
+          "description": "URL to website explaining method",
+          "examples": ["http://earthref.org/MAGIC/books/Tauxe/2005/lecture.01.htm"]
         },
-        'method_definition': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'method_definition'
+        "method_definition": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "method_definition"
           }],
-          'unit': 'Methods',
-          'position': 2,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['Paleo intensity experiment that uses a laboratory ARM to normalize NRM for paleofield estimation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Method Definition",
+          "type": "String",
+          "description": "Definition",
+          "examples": ["Paleo intensity experiment that uses a laboratory ARM to normalize NRM for paleofield estimation"]
         },
-        'er_citation_names': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "er_citation_names"
           }],
-          'unit': 'Methods',
-          'position': 7,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 7,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'method_url_tauxe': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'method_url_tauxe'
+        "method_url_tauxe": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "method_url_tauxe"
           }],
-          'unit': 'Methods',
-          'position': 6,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['http://earthref.org/MAGIC/books/Tauxe/2005/lecture.01.htm']
+          "unit": "Text",
+          "position": 6,
+          "label": "Method URLs",
+          "type": "String",
+          "description": "URL to electronic handbook of L. Tauxe explaining method",
+          "examples": ["http://earthref.org/MAGIC/books/Tauxe/2005/lecture.01.htm"]
         },
-        'method_description': {
-          'group': 'Methods',
-          'next_columns': [{
-            'table': 'magic_methods',
-            'column': 'method_description'
+        "method_description": {
+          "group": "Methods",
+          "next_columns": [{
+            "table": "magic_methods",
+            "column": "method_description"
           }],
-          'unit': 'Methods',
-          'position': 3,
-          'label': 'Methods',
-          'type': 'Methods',
-          'description': 'Methods',
-          'examples': ['Any paleo intensity experiment in which a laboratory ARM is used to normalize NRM for paleofield estimation as suggested by Levi and Banerjee (1976) or more detailed pseudo Thellier experiments by Tauxe et al. (1995).']
+          "unit": "Text",
+          "position": 3,
+          "label": "Method Description",
+          "type": "String",
+          "description": "Detailed description or glossary",
+          "examples": ["Any paleo intensity experiment in which a laboratory ARM is used to normalize NRM for paleofield estimation as suggested by Levi and Banerjee (1976) or more detailed pseudo Thellier experiments by Tauxe et al. (1995)."]
         }
       },
-      'label': 'Methods',
-      'description': 'Description sampling, laboratory and statistical techniques'
+      "label": "Methods",
+      "description": "Description sampling, laboratory and statistical techniques"
     },
-    'magic_instruments': {
-      'position': 18,
-      'columns': {
-        'instrument_software_version': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_software_version'
+    "magic_instruments": {
+      "position": 18,
+      "columns": {
+        "instrument_software_version": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_software_version"
           }],
-          'unit': 'Instruments',
-          'position': 13,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Version 1.53', 'Build 056']
+          "unit": "Text",
+          "position": 13,
+          "label": "Instrument Software Version",
+          "type": "String",
+          "description": "Software version",
+          "examples": ["Version 1.53", "Build 056"]
         },
-        'instrument_software': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_software'
+        "instrument_software": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_software"
           }],
-          'unit': 'Instruments',
-          'position': 12,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Dtech D2000 AF Demagnetizer', 'Custom', 'Ranger MS1200']
+          "unit": "Text",
+          "position": 12,
+          "label": "Instrument Software",
+          "type": "String",
+          "description": "Software name",
+          "examples": ["Dtech D2000 AF Demagnetizer", "Custom", "Ranger MS1200"]
         },
-        'instrument_dimension': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_dimension'
+        "instrument_dimension": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_dimension"
           }],
-          'unit': 'Instruments',
-          'position': 7,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['47', '80']
+          "unit": "Text",
+          "position": 7,
+          "label": "Instrument Dimensions",
+          "type": "String",
+          "description": "Diameter of sample access ",
+          "examples": ["47", "80"]
         },
-        'instrument_year': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_year'
+        "instrument_year": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_year"
           }],
-          'unit': 'Instruments',
-          'position': 1,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Number in the \'yyyy\' format']
+          "unit": "Integer",
+          "position": 1,
+          "label": "Instrument Year",
+          "type": "Year",
+          "description": "Instrument build year",
+          "examples": ["Number in the \"yyyy\" format"]
         },
-        'instrument_url_tauxe': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_url_tauxe'
+        "instrument_url_tauxe": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_url_tauxe"
           }],
-          'unit': 'Instruments',
-          'position': 16,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['http://lisa.tauxe.com/handbook/instrument.html']
+          "unit": "Text",
+          "position": 16,
+          "label": "Instrument URLs",
+          "type": "String",
+          "description": "URL to electronic handbook of L. Tauxe explaining instrument",
+          "examples": ["http://lisa.tauxe.com/handbook/instrument.html"]
         },
-        'instrument_atmosphere': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_atmosphere'
+        "instrument_atmosphere": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_atmosphere"
           }],
-          'unit': 'Instruments',
-          'position': 10,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Air', 'Nitrogen', 'Helium', 'Argon', 'Vacuum']
+          "unit": "Text",
+          "position": 10,
+          "label": "Instrument Atmosphere ",
+          "type": "String",
+          "description": "Instrument atmosphere ",
+          "examples": ["Air", "Nitrogen", "Helium", "Argon", "Vacuum"]
         },
-        'instrument_manufacturer': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_manufacturer'
+        "instrument_manufacturer": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_manufacturer"
           }],
-          'unit': 'Instruments',
-          'position': 4,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Bartington', 'Custom', 'Princeton Measurements Co.']
+          "unit": "Text",
+          "position": 4,
+          "label": "Instrument Manufacturer",
+          "type": "String",
+          "description": "Instrument manufacturer",
+          "examples": ["Bartington", "Custom", "Princeton Measurements Co."]
         },
-        'instrument_operation_mode': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_operation_mode'
+        "instrument_operation_mode": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_operation_mode"
           }],
-          'unit': 'Instruments',
-          'position': 6,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Rotating Field', 'Flowing He Gas']
+          "unit": "Text",
+          "position": 6,
+          "label": "Instrument Operation Mode",
+          "type": "String",
+          "description": "Manual or automated operation mode",
+          "examples": ["Rotating Field", "Flowing He Gas"]
         },
-        'instrument_model': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_model'
+        "instrument_model": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_model"
           }],
-          'unit': 'Instruments',
-          'position': 5,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['D2000', 'MS1200']
+          "unit": "Text",
+          "position": 5,
+          "label": "Instrument Model",
+          "type": "String",
+          "description": "Instrument model",
+          "examples": ["D2000", "MS1200"]
         },
-        'magic_instrument_code': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'magic_instrument_code'
+        "magic_instrument_code": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "magic_instrument_code"
           }],
-          'unit': 'Instruments',
-          'position': 0,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 0,
+          "label": "Instrument Code",
+          "type": "String",
+          "description": "Unique code describing instrument",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'instrument_url': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_url'
+        "instrument_url": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_url"
           }],
-          'unit': 'Instruments',
-          'position': 15,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['http://jcruiser.fu.edu/instrument.html']
+          "unit": "Text",
+          "position": 15,
+          "label": "Instrument URLs",
+          "type": "String",
+          "description": "URL to website explaining specific instrument",
+          "examples": ["http://jcruiser.fu.edu/instrument.html"]
         },
-        'er_citation_names': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "er_citation_names"
           }],
-          'unit': 'Instruments',
-          'position': 17,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 17,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'instrument_temp_control': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_temp_control'
+        "instrument_temp_control": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_temp_control"
           }],
-          'unit': 'Instruments',
-          'position': 9,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Flowing Gas Heater', 'Cryostat', 'Exchange Gas', 'Oven']
+          "unit": "Text",
+          "position": 9,
+          "label": "Instrument Temperature Control",
+          "type": "String",
+          "description": "Instrument temperature control",
+          "examples": ["Flowing Gas Heater", "Cryostat", "Exchange Gas", "Oven"]
         },
-        'instrument_field_control': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_field_control'
+        "instrument_field_control": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_field_control"
           }],
-          'unit': 'Instruments',
-          'position': 8,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Coil Constant', 'Hall Probe', 'Shielding']
+          "unit": "Text",
+          "position": 8,
+          "label": "Instrument Field Control",
+          "type": "String",
+          "description": "Instrument field control",
+          "examples": ["Coil Constant", "Hall Probe", "Shielding"]
         },
-        'instrument_shielding': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_shielding'
+        "instrument_shielding": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_shielding"
           }],
-          'unit': 'Instruments',
-          'position': 11,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Shielded Room', 'Instrument Shielding Only', 'Helmholtz Coils']
+          "unit": "Text",
+          "position": 11,
+          "label": "Instrument Laboratory Environment",
+          "type": "String",
+          "description": "Instrument laboratory environment",
+          "examples": ["Shielded Room", "Instrument Shielding Only", "Helmholtz Coils"]
         },
-        'instrument_category': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_category'
+        "instrument_category": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_category"
           }],
-          'unit': 'Instruments',
-          'position': 2,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['Magnetometer', 'Susceptometer', 'Domain Imager']
+          "unit": "Text",
+          "position": 2,
+          "label": "Instrument Category",
+          "type": "String",
+          "description": "Instrument category name",
+          "examples": ["Magnetometer", "Susceptometer", "Domain Imager"]
         },
-        'instrument_description': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_description'
+        "instrument_description": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_description"
           }],
-          'unit': 'Instruments',
-          'position': 14,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments'
+          "unit": "Text",
+          "position": 14,
+          "label": "Instrument Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'instrument_type': {
-          'group': 'Instruments',
-          'next_columns': [{
-            'table': 'magic_instruments',
-            'column': 'instrument_type'
+        "instrument_type": {
+          "group": "Instruments",
+          "next_columns": [{
+            "table": "magic_instruments",
+            "column": "instrument_type"
           }],
-          'unit': 'Instruments',
-          'position': 3,
-          'label': 'Instruments',
-          'type': 'Instruments',
-          'description': 'Instruments',
-          'examples': ['AC bridge', 'RF-SQUID', 'MÂ¿ssbauer']
+          "unit": "Text",
+          "position": 3,
+          "label": "Instrument Type",
+          "type": "String",
+          "description": "Instrument type",
+          "examples": ["AC bridge", "RF-SQUID", "MÂ¿ssbauer"]
         }
       },
-      'label': 'Instruments',
-      'description': 'Instrument listing based on institute, year of build and instrument name'
+      "label": "Instruments",
+      "description": "Instrument listing based on institute, year of build and instrument name"
     },
-    'rmag_hysteresis': {
-      'position': 28,
-      'columns': {
-        'er_member_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_member_name'
+    "rmag_hysteresis": {
+      "position": 28,
+      "columns": {
+        "er_member_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_member_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 3,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_experiment_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 11,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['KOPA-299-1']
+        "magic_experiment_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 11,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
         },
-        'magic_method_codes': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 27,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 27,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'hysteresis_bcr1': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 19,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_bcr1": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in T",
+          "position": 19,
+          "label": "Hysteresis Bcr Wohlfarth",
+          "type": "Number",
+          "description": "Coercivity of remanence -- back field method"
         },
-        'rmag_criteria_codes': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'rmag_criteria_codes'
+        "rmag_criteria_codes": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "rmag_criteria_codes"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 26,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['MY-MAD', 'MY-APLHA95']
+          "unit": "Text",
+          "position": 26,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
         },
-        'measurement_file_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 12,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Hart.et.al.2000.data.txt']
+        "measurement_file_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 12,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
         },
-        'hysteresis_ms': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 18,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_ms": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in Am2",
+          "position": 18,
+          "label": "Hysteresis Ms",
+          "type": "Number",
+          "description": "Measured intensity of saturation magnetization"
         },
-        'er_synthetic_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_synthetic_name'
+        "er_synthetic_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_synthetic_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 10,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['STD1546-A1']
+          "unit": "Text",
+          "position": 10,
+          "label": "Synthetic Material Name",
+          "type": "String",
+          "description": "Name for synthetic material",
+          "examples": ["STD1546-A1"]
         },
-        'er_expedition_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 0,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for expedition such as AVON02MV",
+          "examples": ["AVON02MV"]
         },
-        'hysteresis_ss': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_ss'
+        "hysteresis_ss": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "hysteresis_ss"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 15,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Number between 0 and 1']
+          "unit": "Dimensionless",
+          "position": 15,
+          "label": "Hysteresis S*",
+          "type": "Number",
+          "description": "Curvature of major loop in upper left quadrant",
+          "examples": ["Number between 0 and 1"]
         },
-        'hysteresis_xhf': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_xhf'
+        "hysteresis_xhf": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "hysteresis_xhf"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 24,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+          "unit": "Number in m3",
+          "position": 24,
+          "label": "Hysteresis Xhf",
+          "type": "Number",
+          "description": "High field slope"
         },
-        'measurement_loop_x': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'measurement_loop_x'
+        "measurement_loop_x": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "measurement_loop_x"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 13,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+          "unit": "Integer",
+          "position": 13,
+          "label": "Measurement Hysteresis Loop Number",
+          "type": "Integer",
+          "description": "Hysteresis loop counter"
         },
-        'er_formation_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_formation_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 2,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_analyst_mail_names': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 29,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 29,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'hysteresis_bc_plus': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 22,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_bc_plus": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in T",
+          "position": 22,
+          "label": "Hysteresis Bc+",
+          "type": "Number",
+          "description": "Coercivity in positive fields"
         },
-        'hysteresis_sq': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_sq'
+        "hysteresis_sq": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "hysteresis_sq"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 16,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Number between 0 and 1']
+          "unit": "Dimensionless",
+          "position": 16,
+          "label": "Hysteresis Squareness",
+          "type": "Number",
+          "description": "Squareness of major loop",
+          "examples": ["Number between 0 and 1"]
         },
-        'er_site_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_site_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 5,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_citation_names"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 30,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 30,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_sample_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 6,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_specimen_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 7,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'measurement_loop_n': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'measurement_loop_n'
+        "measurement_loop_n": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "measurement_loop_n"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 14,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+          "unit": "Integer",
+          "position": 14,
+          "label": "Measurement Hysteresis Loop Total",
+          "type": "Integer",
+          "description": "Total number of hysteresis loops in experiment"
         },
-        'hysteresis_bcr2': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 20,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_bcr2": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in T",
+          "position": 20,
+          "label": "Hysteresis Bcr Jackson",
+          "type": "Number",
+          "description": "Coercivity of remanence -- Half delta M"
         },
-        'hysteresis_mr': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 17,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_mr": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in Am2",
+          "position": 17,
+          "label": "Hysteresis Mr",
+          "type": "Number",
+          "description": "Measured intensity of remanent moment"
         },
-        'hysteresis_description': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_description'
+        "hysteresis_description": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "hysteresis_description"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 25,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+          "unit": "Text",
+          "position": 25,
+          "label": "Hysteresis Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'magic_instrument_codes': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 28,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 28,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'hysteresis_bcr3': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 21,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_bcr3": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in T",
+          "position": 21,
+          "label": "Hysteresis Bcr Tauxe",
+          "type": "Number",
+          "description": "Coercivity of remanence -- crossing of ascending / descending loops"
         },
-        'er_mineral_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 9,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'er_section_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 4,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'hysteresis_bc_min': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [],
-          'unit': 'Hysteresis Experiments',
-          'position': 23,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
+        "hysteresis_bc_min": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [],
+          "unit": "Number in T",
+          "position": 23,
+          "label": "Hysteresis Bc-",
+          "type": "Number",
+          "description": "Coercivity in negative fields"
         },
-        'er_fossil_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 8,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Hysteresis Experiments",
+          "next_columns": [{
+            "table": "rmag_hysteresis",
+            "column": "er_location_name"
           }],
-          'unit': 'Hysteresis Experiments',
-          'position': 1,
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Hysteresis Experiments',
-      'description': 'Experiment for hysteresis loops and FORCs'
+      "label": "Hysteresis Experiments",
+      "description": "Experiment for hysteresis loops and FORCs"
     },
-    'er_samples': {
-      'position': 8,
-      'columns': {
-        'er_member_name': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_member_name'
+    "er_samples": {
+      "position": 8,
+      "columns": {
+        "er_member_name": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_member_name"
           }],
-          'unit': 'Samples',
-          'position': 5,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_method_codes': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Samples',
-          'position': 29,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 29,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'sample_location_precision': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_location_precision'
+        "sample_location_precision": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_location_precision"
           }],
-          'unit': 'Samples',
-          'position': 16,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees']
+          "unit": "Number in Degrees",
+          "position": 16,
+          "label": "Sample Location Precision",
+          "type": "Number",
+          "description": "Sample location -- precision in latitude and longitude",
+          "examples": ["Decimal degrees"]
         },
-        'sample_elevation': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_elevation'
+        "sample_elevation": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_elevation"
           }],
-          'unit': 'Samples',
-          'position': 17,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 17,
+          "label": "Sample Elevation",
+          "type": "Number",
+          "description": "Sample location -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'er_scientist_mail_names': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Samples',
-          'position': 30,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 30,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who took sample",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'sample_alteration_type': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_alteration_type'
+        "sample_alteration_type": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_alteration_type"
           }],
-          'unit': 'Samples',
-          'position': 13,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Hydrothermal', 'Diagenetic', 'Weathering', 'Oxidation', 'Metamorphic']
+          "unit": "Text",
+          "position": 13,
+          "label": "Sample Alteration Type",
+          "type": "String",
+          "description": "Sample alteration type",
+          "examples": ["Hydrothermal", "Diagenetic", "Weathering", "Oxidation", "Metamorphic"]
         },
-        'sample_azimuth': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_azimuth'
+        "sample_azimuth": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_azimuth"
           }],
-          'unit': 'Samples',
-          'position': 23,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 23,
+          "label": "Sample Azimuth",
+          "type": "Number",
+          "description": "Sample azimuth as measured clockwise from the north",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'sample_bed_dip': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_bed_dip'
+        "sample_bed_dip": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_bed_dip"
           }],
-          'unit': 'Samples',
-          'position': 26,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 26,
+          "label": "Sample Bedding Dip",
+          "type": "Number",
+          "description": "Dip of the bedding as measured to the right of strike direction",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'sample_type': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_type'
+        "sample_type": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_type"
           }],
-          'unit': 'Samples',
-          'position': 10,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Flow Top', 'Glassy Margin', 'Pot Rim', 'Pillow', 'Kiln', 'Dike']
+          "unit": "Text",
+          "position": 10,
+          "label": "Sample Type",
+          "type": "String",
+          "description": "Sample type",
+          "examples": ["Flow Top", "Glassy Margin", "Pot Rim", "Pillow", "Kiln", "Dike"]
         },
-        'sample_description': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_description'
+        "sample_description": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_description"
           }],
-          'unit': 'Samples',
-          'position': 28,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples'
+          "unit": "Text",
+          "position": 28,
+          "label": "Sample Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'sample_alteration': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_alteration'
+        "sample_alteration": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_alteration"
           }],
-          'unit': 'Samples',
-          'position': 12,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Severe', 'High', 'Mild', 'Trace', 'Unaltered']
+          "unit": "Text",
+          "position": 12,
+          "label": "Sample Alteration",
+          "type": "String",
+          "description": "Sample alteration grade",
+          "examples": ["Severe", "High", "Mild", "Trace", "Unaltered"]
         },
-        'sample_date': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_date'
+        "sample_date": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_date"
           }],
-          'unit': 'Samples',
-          'position': 21,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Number in the \'yyyy:mm:dd:hh:mm:ss.ss\' format']
+          "unit": "Text",
+          "position": 21,
+          "label": "Sample Date",
+          "type": "Date",
+          "description": "Sampling date",
+          "examples": ["Number in the \"yyyy:mm:dd:hh:mm:ss.ss\" format"]
         },
-        'sample_texture': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_texture'
+        "sample_texture": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_texture"
           }],
-          'unit': 'Samples',
-          'position': 11,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Holocrystalline', 'Hawaiitic', 'Homogeneous']
+          "unit": "Text",
+          "position": 11,
+          "label": "Sample Texture",
+          "type": "String",
+          "description": "Sample texture",
+          "examples": ["Holocrystalline", "Hawaiitic", "Homogeneous"]
         },
-        'er_expedition_name': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Samples',
-          'position': 2,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'sample_cooling_rate': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_cooling_rate'
+        "sample_cooling_rate": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_cooling_rate"
           }],
-          'unit': 'Samples',
-          'position': 27,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples'
+          "unit": "Number in K/Ma",
+          "position": 27,
+          "label": "Sample Cooling Rate Estimate",
+          "type": "Number",
+          "description": "Estimated ancient in-situ cooling rate per Ma"
         },
-        'er_sample_alternatives': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_sample_alternatives'
+        "er_sample_alternatives": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_sample_alternatives"
           }],
-          'unit': 'Samples',
-          'position': 1,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples'
+          "unit": "Text",
+          "position": 1,
+          "label": "Sample Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'sample_lon': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_lon'
+        "sample_lon": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_lon"
           }],
-          'unit': 'Samples',
-          'position': 15,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 15,
+          "label": "Sample Longitude",
+          "type": "Number",
+          "description": "Sample location -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'sample_lithology': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_lithology'
+        "sample_lithology": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_lithology"
           }],
-          'unit': 'Samples',
-          'position': 9,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
+          "unit": "Text",
+          "position": 9,
+          "label": "Sample Lithology",
+          "type": "String",
+          "description": "Sample lithology or archeological classification",
+          "examples": ["Basalt", "Granite", "Mudstone", "Tuff", "Granodiorite", "Marl"]
         },
-        'er_formation_name': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_formation_name"
           }],
-          'unit': 'Samples',
-          'position': 4,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'sample_time_zone': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_time_zone'
+        "sample_time_zone": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_time_zone"
           }],
-          'unit': 'Samples',
-          'position': 22,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples'
+          "unit": "Text",
+          "position": 22,
+          "label": "Sample Time Zone",
+          "type": "String",
+          "description": "Sampling time zone"
         },
-        'sample_composite_depth': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_composite_depth'
+        "sample_composite_depth": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_composite_depth"
           }],
-          'unit': 'Samples',
-          'position': 20,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 20,
+          "label": "Sample Composite Depth",
+          "type": "Number",
+          "description": "Sample location -- composite depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'er_site_name': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_site_name"
           }],
-          'unit': 'Samples',
-          'position': 7,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 7,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_citation_names"
           }],
-          'unit': 'Samples',
-          'position': 31,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 31,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_sample_name"
           }],
-          'unit': 'Samples',
-          'position': 0,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 0,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'sample_drill_depth': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_drill_depth'
+        "sample_drill_depth": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_drill_depth"
           }],
-          'unit': 'Samples',
-          'position': 19,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 19,
+          "label": "Sample Drill Depth",
+          "type": "Number",
+          "description": "Sample location -- depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'sample_bed_dip_direction': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_bed_dip_direction'
+        "sample_bed_dip_direction": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_bed_dip_direction"
           }],
-          'unit': 'Samples',
-          'position': 25,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 25,
+          "label": "Sample Bedding Dip Direction",
+          "type": "Number",
+          "description": "Direction of the dip of a paleo-horizontal plane in the bedding",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'sample_dip': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_dip'
+        "sample_dip": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_dip"
           }],
-          'unit': 'Samples',
-          'position': 24,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 24,
+          "label": "Sample Dip",
+          "type": "Number",
+          "description": "Sample dip as measured into the outcrop",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'sample_height': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_height'
+        "sample_height": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_height"
           }],
-          'unit': 'Samples',
-          'position': 18,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Positive is up in section or core', 'while negative is down relative to reference height']
+          "unit": "Number in m",
+          "position": 18,
+          "label": "Sample Stratigraphic Height",
+          "type": "Number",
+          "description": "Sample location -- stratigraphic height",
+          "examples": ["Positive is up in section or core", "while negative is down relative to reference height"]
         },
-        'sample_lat': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_lat'
+        "sample_lat": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_lat"
           }],
-          'unit': 'Samples',
-          'position': 14,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 14,
+          "label": "Sample Latitude",
+          "type": "Number",
+          "description": "Sample location -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'sample_class': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_class'
+        "sample_class": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "sample_class"
           }],
-          'unit': 'Samples',
-          'position': 8,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Igneous', 'Sedimentary', 'Metamorphic', 'Archeological', 'Intrusive', 'Extrusive']
+          "unit": "Text",
+          "position": 8,
+          "label": "Sample Class",
+          "type": "String",
+          "description": "General lithology type",
+          "examples": ["Igneous", "Sedimentary", "Metamorphic", "Archeological", "Intrusive", "Extrusive"]
         },
-        'er_section_name': {
-          'group': 'Samples',
-          'next_columns': [],
-          'unit': 'Samples',
-          'position': 6,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Samples",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_location_name': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Samples",
+          "next_columns": [{
+            "table": "er_samples",
+            "column": "er_location_name"
           }],
-          'unit': 'Samples',
-          'position': 3,
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Samples',
-      'description': 'Sample from site'
+      "label": "Samples",
+      "description": "Sample from site"
     },
-    'er_locations': {
-      'position': 3,
-      'columns': {
-        'terrane': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'terrane'
+    "er_locations": {
+      "position": 3,
+      "columns": {
+        "terrane": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "terrane"
           }],
-          'unit': 'Locations',
-          'position': 14,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Colorado Plateau', 'Baltica', 'Grenville Province']
+          "unit": "Text",
+          "position": 14,
+          "label": "Terrane Name",
+          "type": "String",
+          "description": "Terrane name",
+          "examples": ["Colorado Plateau", "Baltica", "Grenville Province"]
         },
-        'location_description': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_description'
+        "location_description": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_description"
           }],
-          'unit': 'Locations',
-          'position': 16,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations'
+          "unit": "Text",
+          "position": 16,
+          "label": "Location Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_scientist_mail_names': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Locations',
-          'position': 18,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 18,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who described location",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'er_location_alternatives': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'er_location_alternatives'
+        "er_location_alternatives": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "er_location_alternatives"
           }],
-          'unit': 'Locations',
-          'position': 1,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations'
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'region': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'region'
+        "region": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "region"
           }],
-          'unit': 'Locations',
-          'position': 12,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Baja California', 'Gulf of Mexico']
+          "unit": "Text",
+          "position": 12,
+          "label": "Region Name",
+          "type": "String",
+          "description": "Region name",
+          "examples": ["Baja California", "Gulf of Mexico"]
         },
-        'location_end_lat': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_end_lat'
+        "location_end_lat": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_end_lat"
           }],
-          'unit': 'Locations',
-          'position': 6,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 6,
+          "label": "Geographic End Latitude",
+          "type": "Number",
+          "description": "Ending of section or core -- latitude ",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'location_begin_lon': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_begin_lon'
+        "location_begin_lon": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_begin_lon"
           }],
-          'unit': 'Locations',
-          'position': 4,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 4,
+          "label": "Geographic Begin Longitude",
+          "type": "Number",
+          "description": "Begin of section or core or outcrop -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'location_end_elevation': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_end_elevation'
+        "location_end_elevation": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_end_elevation"
           }],
-          'unit': 'Locations',
-          'position': 8,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 8,
+          "label": "Geographic End Elevation",
+          "type": "Number",
+          "description": "Ending of section or core -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'country': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'country'
+        "country": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "country"
           }],
-          'unit': 'Locations',
-          'position': 11,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Mexico', 'Costa Rica', 'the Netherlands']
+          "unit": "Text",
+          "position": 11,
+          "label": "Country Name",
+          "type": "String",
+          "description": "Country name",
+          "examples": ["Mexico", "Costa Rica", "the Netherlands"]
         },
-        'continent_ocean': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'continent_ocean'
+        "continent_ocean": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "continent_ocean"
           }],
-          'unit': 'Locations',
-          'position': 9,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['North America', 'Australia', 'Europe', 'Asia', 'Artic Ocean', 'Indian Ocean']
+          "unit": "Text",
+          "position": 9,
+          "label": "Continent or Ocean Island Region",
+          "type": "String",
+          "description": "Name for continent or ocean island region",
+          "examples": ["North America", "Australia", "Europe", "Asia", "Artic Ocean", "Indian Ocean"]
         },
-        'location_type': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_type'
+        "location_type": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_type"
           }],
-          'unit': 'Locations',
-          'position': 2,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Drill Site', 'Land Section', 'Submarine Section', 'Stratigraphic Section', 'Archeological Site', 'Outcrop']
+          "unit": "Text",
+          "position": 2,
+          "label": "Location Type",
+          "type": "String",
+          "description": "Location type",
+          "examples": ["Drill Site", "Land Section", "Submarine Section", "Stratigraphic Section", "Archeological Site", "Outcrop"]
         },
-        'location_end_lon': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_end_lon'
+        "location_end_lon": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_end_lon"
           }],
-          'unit': 'Locations',
-          'position': 7,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 7,
+          "label": "Geographic End Longitude",
+          "type": "Number",
+          "description": "Ending of section or core -- longitude ",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'location_begin_lat': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_begin_lat'
+        "location_begin_lat": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_begin_lat"
           }],
-          'unit': 'Locations',
-          'position': 3,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 3,
+          "label": "Geographic Begin Latitude",
+          "type": "Number",
+          "description": "Begin of section or core or outcrop -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'er_citation_names': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "er_citation_names"
           }],
-          'unit': 'Locations',
-          'position': 19,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 19,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'plate_block': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'plate_block'
+        "plate_block": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "plate_block"
           }],
-          'unit': 'Locations',
-          'position': 13,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['North American Plate', 'Xifon Block', 'Cocos Plate']
+          "unit": "Text",
+          "position": 13,
+          "label": "Plate or Block Name",
+          "type": "String",
+          "description": "Plate or tectonic block name",
+          "examples": ["North American Plate", "Xifon Block", "Cocos Plate"]
         },
-        'tectonic_setting': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'tectonic_setting'
+        "tectonic_setting": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "tectonic_setting"
           }],
-          'unit': 'Locations',
-          'position': 15,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Intra-Plate Volcanism', 'Subduction Zone', 'Mid-Oceanic Ridge']
+          "unit": "Text",
+          "position": 15,
+          "label": "Tectonic Setting",
+          "type": "String",
+          "description": "Tectonic setting",
+          "examples": ["Intra-Plate Volcanism", "Subduction Zone", "Mid-Oceanic Ridge"]
         },
-        'ocean_sea': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'ocean_sea'
+        "ocean_sea": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "ocean_sea"
           }],
-          'unit': 'Locations',
-          'position': 10,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Pacific Ocean', 'North Sea', 'Gulf of Mexico']
+          "unit": "Text",
+          "position": 10,
+          "label": "Ocean or Sea Name",
+          "type": "String",
+          "description": "Name for location in an ocean or sea",
+          "examples": ["Pacific Ocean", "North Sea", "Gulf of Mexico"]
         },
-        'location_url': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_url'
+        "location_url": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_url"
           }],
-          'unit': 'Locations',
-          'position': 17,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['http://earthref.org']
+          "unit": "Text",
+          "position": 17,
+          "label": "Location URL",
+          "type": "String",
+          "description": "Website URL for the location explicitly",
+          "examples": ["http://earthref.org"]
         },
-        'location_begin_elevation': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'location_begin_elevation'
+        "location_begin_elevation": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "location_begin_elevation"
           }],
-          'unit': 'Locations',
-          'position': 5,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 5,
+          "label": "Geographic Begin Elevation",
+          "type": "Number",
+          "description": "Begin of section or core or outcrop -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'er_location_name': {
-          'group': 'Locations',
-          'next_columns': [{
-            'table': 'er_locations',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Locations",
+          "next_columns": [{
+            "table": "er_locations",
+            "column": "er_location_name"
           }],
-          'unit': 'Locations',
-          'position': 0,
-          'label': 'Locations',
-          'type': 'Locations',
-          'description': 'Locations',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 0,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Locations',
-      'description': 'Location definition'
+      "label": "Locations",
+      "description": "Location definition"
     },
-    'pmag_samples': {
-      'position': 21,
-      'columns': {
-        'er_member_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_member_name'
+    "pmag_samples": {
+      "position": 21,
+      "columns": {
+        "er_member_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_member_name"
           }],
-          'unit': 'Sample Data',
-          'position': 3,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_experiment_name': {
-          'group': 'Sample Data',
-          'next_columns': [],
-          'unit': 'Sample Data',
-          'position': 10,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['KOPA-299-1']
+        "magic_experiment_name": {
+          "group": "Sample Data",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 10,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
         },
-        'magic_method_codes': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Sample Data',
-          'position': 49,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 49,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'sample_inc': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_inc'
+        "sample_inc": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_inc"
           }],
-          'unit': 'Sample Data',
-          'position': 26,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 26,
+          "label": "Sample Inclination",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'sample_magn_volume': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_magn_volume'
+        "sample_magn_volume": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_magn_volume"
           }],
-          'unit': 'Sample Data',
-          'position': 44,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Number in A/m",
+          "position": 44,
+          "label": "Sample NRM Magnetization Volume",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized"
         },
-        'er_fossil_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_fossil_names'
+        "er_fossil_names": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_fossil_names"
           }],
-          'unit': 'Sample Data',
-          'position': 8,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['AMM43-03', 'AMM43-19']
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name List",
+          "type": "List",
+          "description": "Colon-delimited list of fossil names",
+          "examples": ["AMM43-03", "AMM43-19"]
         },
-        'sample_sigma': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_sigma'
+        "sample_sigma": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_sigma"
           }],
-          'unit': 'Sample Data',
-          'position': 28,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in Degrees",
+          "position": 28,
+          "label": "Sample Sigma",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- standard deviation",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'sample_comp_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_comp_name'
+        "sample_comp_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_comp_name"
           }],
-          'unit': 'Sample Data',
-          'position': 20,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Characteristic', 'VRM', 'Overprint', 'A', 'B', 'C']
+          "unit": "Text",
+          "position": 20,
+          "label": "Sample Component Name",
+          "type": "String",
+          "description": "Sample component name",
+          "examples": ["Characteristic", "VRM", "Overprint", "A", "B", "C"]
         },
-        'er_specimen_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_specimen_names'
+        "er_specimen_names": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_specimen_names"
           }],
-          'unit': 'Sample Data',
-          'position': 7,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Bas123a-01x', 'Bas123a-01y']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name List",
+          "type": "List",
+          "description": "Colon-delimited list of specimen names",
+          "examples": ["Bas123a-01x", "Bas123a-01y"]
         },
-        'sample_inferred_age': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_inferred_age'
+        "sample_inferred_age": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_inferred_age"
           }],
-          'unit': 'Sample Data',
-          'position': 21,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Custom",
+          "position": 21,
+          "label": "Sample Inferred Age",
+          "type": "Number",
+          "description": "Sample inferred age"
         },
-        'sample_int_sigma': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int_sigma'
+        "sample_int_sigma": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int_sigma"
           }],
-          'unit': 'Sample Data',
-          'position': 37,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in T",
+          "position": 37,
+          "label": "Sample Paleo Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'er_mineral_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_mineral_names'
+        "er_mineral_names": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_mineral_names"
           }],
-          'unit': 'Sample Data',
-          'position': 9,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name List",
+          "type": "List",
+          "description": "Colon-delimited list of mineral names"
         },
-        'sample_polarity': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_polarity'
+        "sample_polarity": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_polarity"
           }],
-          'unit': 'Sample Data',
-          'position': 15,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Polarity is normal (n)', 'reversed (r)', 'transitional (t)', 'excursion (e) or intermediate (i)']
+          "unit": "Flag",
+          "position": 15,
+          "label": "Sample Magnetic Polarity",
+          "type": "String",
+          "description": "Polarity of sample",
+          "examples": ["Polarity is normal (n)", "reversed (r)", "transitional (t)", "excursion (e) or intermediate (i)"]
         },
-        'sample_comp_nmb': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_comp_nmb'
+        "sample_comp_nmb": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_comp_nmb"
           }],
-          'unit': 'Sample Data',
-          'position': 18,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Integer",
+          "position": 18,
+          "label": "Sample Component Number",
+          "type": "Integer",
+          "description": "Magnetic component number"
         },
-        'sample_int_rel_sigma': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int_rel_sigma'
+        "sample_int_rel_sigma": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int_rel_sigma"
           }],
-          'unit': 'Sample Data',
-          'position': 40,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Dimensionless",
+          "position": 40,
+          "label": "Sample Paleo Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'sample_description': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_description'
+        "sample_description": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_description"
           }],
-          'unit': 'Sample Data',
-          'position': 46,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Text",
+          "position": 46,
+          "label": "Sample Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'sample_dec': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_dec'
+        "sample_dec": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_dec"
           }],
-          'unit': 'Sample Data',
-          'position': 27,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 27,
+          "label": "Sample Declination",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'measurement_file_name': {
-          'group': 'Sample Data',
-          'next_columns': [],
-          'unit': 'Sample Data',
-          'position': 11,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Hart.et.al.2000.data.txt']
+        "measurement_file_name": {
+          "group": "Sample Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 11,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
         },
-        'sample_int_sigma_perc': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int_sigma_perc'
+        "sample_int_sigma_perc": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int_sigma_perc"
           }],
-          'unit': 'Sample Data',
-          'position': 38,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in %",
+          "position": 38,
+          "label": "Sample Paleo Intensity Sigma %",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'sample_inferred_age_sigma': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_inferred_age_sigma'
+        "sample_inferred_age_sigma": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_inferred_age_sigma"
           }],
-          'unit': 'Sample Data',
-          'position': 22,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Custom",
+          "position": 22,
+          "label": "Sample Inferred Age Sigma",
+          "type": "Number",
+          "description": "Sample inferred age -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'sample_k': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_k'
+        "sample_k": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_k"
           }],
-          'unit': 'Sample Data',
-          'position': 33,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Dimensionless",
+          "position": 33,
+          "label": "Sample K",
+          "type": "Number",
+          "description": "Fisher's dispersion parameter Kappa"
         },
-        'sample_int_rel_sigma_perc': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int_rel_sigma_perc'
+        "sample_int_rel_sigma_perc": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int_rel_sigma_perc"
           }],
-          'unit': 'Sample Data',
-          'position': 41,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in %",
+          "position": 41,
+          "label": "Sample Paleo Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'sample_inferred_age_low': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_inferred_age_low'
+        "sample_inferred_age_low": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_inferred_age_low"
           }],
-          'unit': 'Sample Data',
-          'position': 23,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Custom",
+          "position": 23,
+          "label": "Sample Inferred Age Low",
+          "type": "Number",
+          "description": "Sample inferred age -- low range"
         },
-        'er_expedition_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Sample Data',
-          'position': 0,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'sample_nrm': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_nrm'
+        "sample_nrm": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_nrm"
           }],
-          'unit': 'Sample Data',
-          'position': 16,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Flag",
+          "position": 16,
+          "label": "Sample NRM",
+          "type": "String",
+          "description": "Origin of the NRM is primary (p) or secondary (s)"
         },
-        'sample_n': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_n'
+        "sample_n": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_n"
           }],
-          'unit': 'Sample Data',
-          'position': 30,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Integer",
+          "position": 30,
+          "label": "Sample N",
+          "type": "Integer",
+          "description": "Number of specimens included in directional calculations"
         },
-        'sample_tilt_correction': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_tilt_correction'
+        "sample_tilt_correction": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_tilt_correction"
           }],
-          'unit': 'Sample Data',
-          'position': 35,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)']
+          "unit": "Number in %",
+          "position": 35,
+          "label": "Sample Tilt Correction",
+          "type": "Number",
+          "description": "Percentage tilt correction applied to the data",
+          "examples": ["Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)"]
         },
-        'measurement_step_unit': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'measurement_step_unit'
+        "measurement_step_unit": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "measurement_step_unit"
           }],
-          'unit': 'Sample Data',
-          'position': 14,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Text",
+          "position": 14,
+          "label": "Measurement Step Unit",
+          "type": "String",
+          "description": "Step included in calculation -- unit"
         },
-        'sample_alpha95': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_alpha95'
+        "sample_alpha95": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_alpha95"
           }],
-          'unit': 'Sample Data',
-          'position': 29,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Confidence Level = 95%']
+          "unit": "Number in Degrees",
+          "position": 29,
+          "label": "Sample Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Confidence Level = 95%"]
         },
-        'sample_int_n': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int_n'
+        "sample_int_n": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int_n"
           }],
-          'unit': 'Sample Data',
-          'position': 42,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Integer",
+          "position": 42,
+          "label": "Sample Paleo Intensity N",
+          "type": "Integer",
+          "description": "Number of specimens included in intensity calculations"
         },
-        'sample_inferred_age_high': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_inferred_age_high'
+        "sample_inferred_age_high": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_inferred_age_high"
           }],
-          'unit': 'Sample Data',
-          'position': 24,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Custom",
+          "position": 24,
+          "label": "Sample Inferred Age High",
+          "type": "Number",
+          "description": "Sample inferred age -- high range"
         },
-        'er_formation_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_formation_name"
           }],
-          'unit': 'Sample Data',
-          'position': 2,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_analyst_mail_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Sample Data',
-          'position': 51,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 51,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'sample_direction_type': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_direction_type'
+        "sample_direction_type": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_direction_type"
           }],
-          'unit': 'Sample Data',
-          'position': 17,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Flag",
+          "position": 17,
+          "label": "Sample Direction Type",
+          "type": "String",
+          "description": "Direction determined from (l) or plane (p)"
         },
-        'sample_int': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int'
+        "sample_int": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int"
           }],
-          'unit': 'Sample Data',
-          'position': 36,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Number in T",
+          "position": 36,
+          "label": "Sample Paleo Intensity",
+          "type": "Number",
+          "description": "Average field strength"
         },
-        'sample_n_planes': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_n_planes'
+        "sample_n_planes": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_n_planes"
           }],
-          'unit': 'Sample Data',
-          'position': 32,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Integer",
+          "position": 32,
+          "label": "Sample N Best-Fit Planes",
+          "type": "Integer",
+          "description": "Number of specimens included based on best-fit planes"
         },
-        'measurement_step_min': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'measurement_step_min'
+        "measurement_step_min": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "measurement_step_min"
           }],
-          'unit': 'Sample Data',
-          'position': 12,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Custom",
+          "position": 12,
+          "label": "Measurement Step Minimum",
+          "type": "Number",
+          "description": "Step included in calculation -- lower bound"
         },
-        'sample_comp_n': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_comp_n'
+        "sample_comp_n": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_comp_n"
           }],
-          'unit': 'Sample Data',
-          'position': 19,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Integer",
+          "position": 19,
+          "label": "Sample Component N",
+          "type": "Integer",
+          "description": "Total number of magnetic components in specimen"
         },
-        'er_site_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_site_name"
           }],
-          'unit': 'Sample Data',
-          'position': 5,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_citation_names"
           }],
-          'unit': 'Sample Data',
-          'position': 52,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 52,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_sample_name"
           }],
-          'unit': 'Sample Data',
-          'position': 6,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'pmag_rotation_codes': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'pmag_rotation_codes'
+        "pmag_rotation_codes": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "pmag_rotation_codes"
           }],
-          'unit': 'Sample Data',
-          'position': 48,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['MY-TILT1', 'MY-TILT2', 'MY-TRANS1']
+          "unit": "Text",
+          "position": 48,
+          "label": "Rotation Codes",
+          "type": "List",
+          "description": "Colon-delimited list of rotation codes",
+          "examples": ["MY-TILT1", "MY-TILT2", "MY-TRANS1"]
         },
-        'sample_n_lines': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_n_lines'
+        "sample_n_lines": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_n_lines"
           }],
-          'unit': 'Sample Data',
-          'position': 31,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Integer",
+          "position": 31,
+          "label": "Sample N Best-Fit Lines",
+          "type": "Integer",
+          "description": "Number of specimens included based on best-fit lines"
         },
-        'sample_magn_weight': {
-          'group': 'Sample Data',
-          'next_columns': [],
-          'unit': 'Sample Data',
-          'position': 45,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+        "sample_magn_weight": {
+          "group": "Sample Data",
+          "next_columns": ["sample_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 45,
+          "label": "Sample NRM Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized"
         },
-        'measurement_step_max': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'measurement_step_max'
+        "measurement_step_max": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "measurement_step_max"
           }],
-          'unit': 'Sample Data',
-          'position': 13,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Custom",
+          "position": 13,
+          "label": "Measurement Step Maximum",
+          "type": "Number",
+          "description": "Step included in calculation -- higher bound"
         },
-        'sample_moment': {
-          'group': 'Sample Data',
-          'next_columns': [],
-          'unit': 'Sample Data',
-          'position': 43,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+        "sample_moment": {
+          "group": "Sample Data",
+          "next_columns": ["sample_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 43,
+          "label": "Sample NRM Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment"
         },
-        'sample_inferred_age_unit': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_inferred_age_unit'
+        "sample_inferred_age_unit": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_inferred_age_unit"
           }],
-          'unit': 'Sample Data',
-          'position': 25,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Ma', 'Ka', 'Ga', 'Years BP', 'Years AD (+/-)', 'Years Cal BP', 'Years Cal AD (+/-)']
+          "unit": "Text",
+          "position": 25,
+          "label": "Sample Inferred Age Unit",
+          "type": "String",
+          "description": "Sample inferred age -- age unit",
+          "examples": ["Ma", "Ka", "Ga", "Years BP", "Years AD (+/-)", "Years Cal BP", "Years Cal AD (+/-)"]
         },
-        'sample_int_rel': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_int_rel'
+        "sample_int_rel": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_int_rel"
           }],
-          'unit': 'Sample Data',
-          'position': 39,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Dimensionless",
+          "position": 39,
+          "label": "Sample Paleo Intensity Relative",
+          "type": "Number",
+          "description": "Relative field strength"
         },
-        'magic_instrument_codes': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Sample Data',
-          'position': 50,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 50,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'pmag_criteria_codes': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'pmag_criteria_codes'
+        "pmag_criteria_codes": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "pmag_criteria_codes"
           }],
-          'unit': 'Sample Data',
-          'position': 47,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['MY-MAD', 'MY-APLHA95']
+          "unit": "Text",
+          "position": 47,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
         },
-        'er_section_name': {
-          'group': 'Sample Data',
-          'next_columns': [],
-          'unit': 'Sample Data',
-          'position': 4,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Sample Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_location_name': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "er_location_name"
           }],
-          'unit': 'Sample Data',
-          'position': 1,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         },
-        'sample_r': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_r'
+        "sample_r": {
+          "group": "Sample Data",
+          "next_columns": [{
+            "table": "pmag_samples",
+            "column": "sample_r"
           }],
-          'unit': 'Sample Data',
-          'position': 34,
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
+          "unit": "Dimensionless",
+          "position": 34,
+          "label": "Sample R",
+          "type": "Number",
+          "description": "Resultant Fisher vector"
         }
       },
-      'label': 'Sample Data',
-      'description': 'Sample from site'
+      "label": "Sample Data",
+      "description": "Sample from site"
     },
-    'er_mailinglist': {
-      'position': 15,
-      'columns': {
-        'department': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'department'
+    "er_mailinglist": {
+      "position": 15,
+      "columns": {
+        "department": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "department"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 2,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['Laboratory of Isotope Geology']
+          "unit": "Text",
+          "position": 2,
+          "label": "Department Name",
+          "type": "String",
+          "description": "Department or faculty name",
+          "examples": ["Laboratory of Isotope Geology"]
         },
-        'email': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'email'
+        "email": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "email"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 10,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['jcruiser@fu.edu']
+          "unit": "Text",
+          "position": 10,
+          "label": "Email Address",
+          "type": "String",
+          "description": "Email address",
+          "examples": ["jcruiser@fu.edu"]
         },
-        'url': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'url'
+        "url": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "url"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 11,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['http://jcruiser.fu.edu/home.html']
+          "unit": "Text",
+          "position": 11,
+          "label": "Personal URL",
+          "type": "String",
+          "description": "Personal url",
+          "examples": ["http://jcruiser.fu.edu/home.html"]
         },
-        'er_mail_name': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'er_mail_name'
+        "er_mail_name": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "er_mail_name"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 0,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['John A.B. Cruiser']
+          "unit": "Text",
+          "position": 0,
+          "label": "Name",
+          "type": "String",
+          "description": "Name",
+          "examples": ["John A.B. Cruiser"]
         },
-        'organization': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'organization'
+        "organization": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "organization"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 1,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['Free University Amsterdam']
+          "unit": "Text",
+          "position": 1,
+          "label": "Organization Name",
+          "type": "String",
+          "description": "Organization or university name",
+          "examples": ["Free University Amsterdam"]
         },
-        'country': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'country'
+        "country": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "country"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 7,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['U.S.A.']
+          "unit": "Text",
+          "position": 7,
+          "label": "Country",
+          "type": "String",
+          "description": "Country",
+          "examples": ["U.S.A."]
         },
-        'zip_code': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'zip_code'
+        "zip_code": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "zip_code"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 6,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['CA 92093']
+          "unit": "Text",
+          "position": 6,
+          "label": "Zip Code",
+          "type": "String",
+          "description": "Zip code",
+          "examples": ["CA 92093"]
         },
-        'state': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'state'
+        "state": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "state"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 5,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['California']
+          "unit": "Text",
+          "position": 5,
+          "label": "State",
+          "type": "String",
+          "description": "State or province",
+          "examples": ["California"]
         },
-        'address': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'address'
+        "address": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "address"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 3,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['Vessel Blvd. 2345']
+          "unit": "Text",
+          "position": 3,
+          "label": "Address",
+          "type": "String",
+          "description": "Street address",
+          "examples": ["Vessel Blvd. 2345"]
         },
-        'work_phone': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'work_phone'
+        "work_phone": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "work_phone"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 8,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['620-345-4567']
+          "unit": "Text",
+          "position": 8,
+          "label": "Work Phone",
+          "type": "String",
+          "description": "Work phone",
+          "examples": ["620-345-4567"]
         },
-        'city': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'city'
+        "city": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "city"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 4,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['Amsterdam']
+          "unit": "Text",
+          "position": 4,
+          "label": "City",
+          "type": "String",
+          "description": "City",
+          "examples": ["Amsterdam"]
         },
-        'work_fax': {
-          'group': 'Mailing List Contributors',
-          'next_columns': [{
-            'table': 'er_mailinglist',
-            'column': 'work_fax'
+        "work_fax": {
+          "group": "Mailing List Contributors",
+          "next_columns": [{
+            "table": "er_mailinglist",
+            "column": "work_fax"
           }],
-          'unit': 'Mailing List Contributors',
-          'position': 9,
-          'label': 'Mailing List Contributors',
-          'type': 'Mailing List Contributors',
-          'description': 'Mailing List Contributors',
-          'examples': ['621-345-4567']
+          "unit": "Text",
+          "position": 9,
+          "label": "Work Fax",
+          "type": "String",
+          "description": "Work fax",
+          "examples": ["621-345-4567"]
         }
       },
-      'label': 'Mailing List Contributors',
-      'description': 'List of addresses'
+      "label": "Mailing List Contributors",
+      "description": "List of addresses"
     },
-    'er_sections': {
-      'position': 6,
-      'columns': {
-        'er_member_name': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 5,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Glasshound Member']
+    "er_sections": {
+      "position": 6,
+      "columns": {
+        "er_member_name": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'section_begin_lon': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 12,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Decimal degrees between 0 and 360']
+        "section_begin_lon": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 12,
+          "label": "Section Begin Longitude",
+          "type": "Number",
+          "description": "Beginning as defined by bottom of section or top of core -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'section_begin_elevation': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 13,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Meters above sealevel']
+        "section_begin_elevation": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 13,
+          "label": "Section Begin Elevation",
+          "type": "Number",
+          "description": "Beginning as defined by bottom of section or top of core -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'section_definition': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 6,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Either a single (s) section or the data is based on composite (c) or average (a) sections including various geological units']
+        "section_definition": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Definition",
+          "type": "String",
+          "description": "General definition of section in terms of its data collection",
+          "examples": ["Either a single (s) section or the data is based on composite (c) or average (a) sections including various geological units"]
         },
-        'er_scientist_mail_names': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 26,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+        "er_scientist_mail_names": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 26,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who described section",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'section_type': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 9,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Subsection', 'Polarity Transition', 'Excursion']
+        "section_type": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 9,
+          "label": "Section Type",
+          "type": "String",
+          "description": "Section type",
+          "examples": ["Subsection", "Polarity Transition", "Excursion"]
         },
-        'section_begin_lat': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 11,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Decimal degrees between -90 and 90']
+        "section_begin_lat": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 11,
+          "label": "Section Begin Latitude",
+          "type": "Number",
+          "description": "Beginning as defined by bottom of section or top of core -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'er_section_alternatives': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 1,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections'
+        "er_section_alternatives": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 1,
+          "label": "Section Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'section_end_height': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 20,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Positive is up in section or core', 'negative is down']
+        "section_end_height": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 20,
+          "label": "Section End Stratigraphic Height",
+          "type": "Number",
+          "description": "End as defined by top of section or bottom of core -- stratigraphic height",
+          "examples": ["Positive is up in section or core", "negative is down"]
         },
-        'section_end_lat': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 17,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Decimal degrees between -90 and 90']
+        "section_end_lat": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 17,
+          "label": "Section End Latitude",
+          "type": "Number",
+          "description": "End as defined by top of section or bottom of core -- latitude ",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'section_begin_composite_depth': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 16,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Meters below seafloor']
+        "section_begin_composite_depth": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 16,
+          "label": "Section Begin Composite Depth",
+          "type": "Number",
+          "description": "Beginning as defined by bottom of section or top of core -- composite depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'er_expedition_name': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 2,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['AVON02MV']
+        "er_expedition_name": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'section_begin_height': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 14,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Positive is up in section or core', 'negative is down']
+        "section_begin_height": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 14,
+          "label": "Section Begin Stratigraphic Height",
+          "type": "Number",
+          "description": "Beginning as defined by bottom of section or top of core -- stratigraphic height",
+          "examples": ["Positive is up in section or core", "negative is down"]
         },
-        'section_description': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 25,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections'
+        "section_description": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 25,
+          "label": "Section Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_formation_name': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 4,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Bluebird Formation']
+        "er_formation_name": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'section_n': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 10,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections'
+        "section_n": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Integer",
+          "position": 10,
+          "label": "Section N",
+          "type": "Integer",
+          "description": "Number of subsections included composite (stacked) section"
         },
-        'section_end_lon': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 18,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Decimal degrees between 0 and 360']
+        "section_end_lon": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 18,
+          "label": "Section End Longitude",
+          "type": "Number",
+          "description": "End as defined by top of section or bottom of core -- longitude ",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'section_end_elevation': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 19,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Meters above sealevel']
+        "section_end_elevation": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 19,
+          "label": "Section End Elevation",
+          "type": "Number",
+          "description": "End as defined by top of section or bottom of core -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'er_citation_names': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 27,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+        "er_citation_names": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 27,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'section_begin_drill_depth': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 15,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Meters below seafloor']
+        "section_begin_drill_depth": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 15,
+          "label": "Section Begin Drill Depth",
+          "type": "Number",
+          "description": "Beginning as defined by bottom of section or top of core -- depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'section_dip': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 24,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Decimal degrees between -90 and 90']
+        "section_dip": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 24,
+          "label": "Section Dip",
+          "type": "Number",
+          "description": "Section dip as measured into the outcrop",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'section_lithology': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 8,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
+        "section_lithology": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 8,
+          "label": "Section Lithology",
+          "type": "String",
+          "description": "Section lithology or archeological classification",
+          "examples": ["Basalt", "Granite", "Mudstone", "Tuff", "Granodiorite", "Marl"]
         },
-        'section_class': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 7,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Igneous', 'Sedimentary', 'Metamorphic', 'Archeological', 'Intrusive', 'Extrusive']
+        "section_class": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 7,
+          "label": "Section Class",
+          "type": "String",
+          "description": "General lithology type",
+          "examples": ["Igneous", "Sedimentary", "Metamorphic", "Archeological", "Intrusive", "Extrusive"]
         },
-        'section_end_composite_depth': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 22,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Meters below seafloor']
+        "section_end_composite_depth": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 22,
+          "label": "Section End Composite Depth",
+          "type": "Number",
+          "description": "End as defined by top of section or bottom of core -- composite depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'section_azimuth': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 23,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Decimal degrees between 0 and 360']
+        "section_azimuth": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 23,
+          "label": "Section Azimuth",
+          "type": "Number",
+          "description": "Section azimuth as measured clockwise from the north",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'section_end_drill_depth': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 21,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Meters below seafloor']
+        "section_end_drill_depth": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Number in m",
+          "position": 21,
+          "label": "Section End Drill Depth",
+          "type": "Number",
+          "description": "End as defined by top of section or bottom of core -- depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'er_section_name': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 0,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 0,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_location_name': {
-          'group': 'Sections',
-          'next_columns': [],
-          'unit': 'Sections',
-          'position': 3,
-          'label': 'Sections',
-          'type': 'Sections',
-          'description': 'Sections',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+        "er_location_name": {
+          "group": "Sections",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Sections',
-      'description': 'Group of sites or subsection in one or more outcrops and/or cores'
+      "label": "Sections",
+      "description": "Group of sites or subsection in one or more outcrops and/or cores"
     },
-    'er_synthetics': {
-      'position': 12,
-      'columns': {
-        'er_member_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_member_name'
+    "er_synthetics": {
+      "position": 12,
+      "columns": {
+        "er_member_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_member_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 5,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_method_codes': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 22,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 22,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'synthetic_dope_material': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_dope_material'
+        "synthetic_dope_material": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_dope_material"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 20,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials'
+          "unit": "Text",
+          "position": 20,
+          "label": "Synthetic Material Dope",
+          "type": "String",
+          "description": "Synthetic dope material"
         },
-        'synthetic_shape': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_shape'
+        "synthetic_shape": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_shape"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 15,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Euhedral', 'Orthorhombic ']
+          "unit": "Text",
+          "position": 15,
+          "label": "Synthetic Material Shape",
+          "type": "String",
+          "description": "Synthetic material shape",
+          "examples": ["Euhedral", "Orthorhombic "]
         },
-        'er_scientist_mail_names': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 23,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 23,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who prepared synthetic material",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'synthetic_institution': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_institution'
+        "synthetic_institution": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_institution"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 12,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['IRM', 'SIO']
+          "unit": "Text",
+          "position": 12,
+          "label": "Synthetic Material Institution",
+          "type": "String",
+          "description": "Name for institution that created synthetic material",
+          "examples": ["IRM", "SIO"]
         },
-        'synthetic_size': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_size'
+        "synthetic_size": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_size"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 16,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['250-500 Â¿m']
+          "unit": "Text",
+          "position": 16,
+          "label": "Synthetic Material Size",
+          "type": "String",
+          "description": "Synthetic material grain size fraction",
+          "examples": ["250-500 Â¿m"]
         },
-        'er_synthetic_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_synthetic_name'
+        "er_synthetic_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_synthetic_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 0,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['STD1546-A1']
+          "unit": "Text",
+          "position": 0,
+          "label": "Synthetic Material Name",
+          "type": "String",
+          "description": "Name for synthetic material",
+          "examples": ["STD1546-A1"]
         },
-        'er_expedition_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 2,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'synthetic_density': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_density'
+        "synthetic_density": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_density"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 19,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials'
+          "unit": "Number in g/m3",
+          "position": 19,
+          "label": "Synthetic Material Density",
+          "type": "Number",
+          "description": "Synthetic material  density"
         },
-        'synthetic_volume': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_volume'
+        "synthetic_volume": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_volume"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 17,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials'
+          "unit": "Number in m3",
+          "position": 17,
+          "label": "Synthetic Material Volume",
+          "type": "Number",
+          "description": "Synthetic material  volume"
         },
-        'er_formation_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_formation_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 4,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_synthetic_alternatives': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_synthetic_alternatives'
+        "er_synthetic_alternatives": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_synthetic_alternatives"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 1,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials'
+          "unit": "Text",
+          "position": 1,
+          "label": "Synthetic Material Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'er_site_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_site_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 7,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 7,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_citation_names"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 24,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 24,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_sample_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 8,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 8,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_specimen_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 9,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 9,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'synthetic_weight': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_weight'
+        "synthetic_weight": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_weight"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 18,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials'
+          "unit": "Number in g",
+          "position": 18,
+          "label": "Synthetic Material Weight",
+          "type": "Number",
+          "description": "Synthetic material  weight"
         },
-        'synthetic_description': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_description'
+        "synthetic_description": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_description"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 21,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials'
+          "unit": "Text",
+          "position": 21,
+          "label": "Synthetic Material Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'synthetic_assemblage': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_assemblage'
+        "synthetic_assemblage": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_assemblage"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 14,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Single Crystal', 'Mineral Separate', 'Polycrystalline']
+          "unit": "Text",
+          "position": 14,
+          "label": "Synthetic Material Assemblage",
+          "type": "String",
+          "description": "Synthetic material assemblage",
+          "examples": ["Single Crystal", "Mineral Separate", "Polycrystalline"]
         },
-        'synthetic_type': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_type'
+        "synthetic_type": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "synthetic_type"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 13,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Rock', 'Biogenic', 'Ceramic']
+          "unit": "Text",
+          "position": 13,
+          "label": "Synthetic Material Type",
+          "type": "String",
+          "description": "Synthetic material type",
+          "examples": ["Rock", "Biogenic", "Ceramic"]
         },
-        'er_mineral_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 11,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 11,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'er_section_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [],
-          'unit': 'Synthetic Materials',
-          'position': 6,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_fossil_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 10,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 10,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Synthetic Materials',
-          'next_columns': [{
-            'table': 'er_synthetics',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Synthetic Materials",
+          "next_columns": [{
+            "table": "er_synthetics",
+            "column": "er_location_name"
           }],
-          'unit': 'Synthetic Materials',
-          'position': 3,
-          'label': 'Synthetic Materials',
-          'type': 'Synthetic Materials',
-          'description': 'Synthetic Materials',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Synthetic Materials',
-      'description': 'Synthetic material that is not necessarily related to geology'
+      "label": "Synthetic Materials",
+      "description": "Synthetic material that is not necessarily related to geology"
     },
-    'rmag_remanence': {
-      'position': 27,
-      'columns': {
-        'er_member_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_member_name'
+    "rmag_remanence": {
+      "position": 27,
+      "columns": {
+        "er_member_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_member_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 3,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'remanence_sratio': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_sratio'
+        "remanence_sratio": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_sratio"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 25,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Dimensionless",
+          "position": 25,
+          "label": "Remanence S Ratio",
+          "type": "Number",
+          "description": "SIRM ratio S(X)"
         },
-        'magic_experiment_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 11,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['KOPA-299-1']
+        "magic_experiment_name": {
+          "group": "Remanence Experiments",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 11,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
         },
-        'remanence_delta_ratio': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_delta_ratio'
+        "remanence_delta_ratio": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_delta_ratio"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 15,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Dimensionless",
+          "position": 15,
+          "label": "Remanence Delta FC/ZFC Ratio",
+          "type": "Number",
+          "description": "Ratio (Delta FC/Delta ZFC)"
         },
-        'remanence_temp_mineral': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 24,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Magnetite', 'hematite', 'maghemite']
+        "remanence_temp_mineral": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 24,
+          "label": "Remanence Critical Mineral Type",
+          "type": "List",
+          "description": "Interpreted mineral(s) causing the transition",
+          "examples": ["Magnetite", "hematite", "maghemite"]
         },
-        'magic_method_codes': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 42,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 42,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'remanence_cross_over': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_cross_over'
+        "remanence_cross_over": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_cross_over"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 30,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 30,
+          "label": "Remanence Cross Over Point",
+          "type": "Number",
+          "description": "Field at which demagnetization moment equals acquisition moment"
         },
-        'remanence_cmf': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_cmf'
+        "remanence_cmf": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_cmf"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 34,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 34,
+          "label": "Remanence Component Median Field",
+          "type": "Number",
+          "description": "Median field of remanence component"
         },
-        'remanence_mr': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 18,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_mr": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in Am2",
+          "position": 18,
+          "label": "Remanence Mr",
+          "type": "Number",
+          "description": "Measured intensity of remanent moment"
         },
-        'remanence_sa': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_sa'
+        "remanence_sa": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_sa"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 37,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments'
+          "unit": "Number in Am2/log(s)",
+          "position": 37,
+          "label": "Remanence Sa",
+          "type": "Number"
         },
-        'remanence_mdf': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_mdf'
+        "remanence_mdf": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_mdf"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 31,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 31,
+          "label": "Remanence MDF",
+          "type": "Number",
+          "description": "Median destructive field"
         },
-        'remanence_delta_temp_low': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_delta_temp_low'
+        "remanence_delta_temp_low": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_delta_temp_low"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 16,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in K",
+          "position": 16,
+          "label": "Remanence Delta Temperature Low",
+          "type": "Number",
+          "description": "Low Temperature of delta FC/ZFC calculation"
         },
-        'rmag_criteria_codes': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'rmag_criteria_codes'
+        "rmag_criteria_codes": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "rmag_criteria_codes"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 41,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['MY-MAD', 'MY-APLHA95']
+          "unit": "Text",
+          "position": 41,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
         },
-        'remanence_hirm': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 28,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_hirm": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in Am2",
+          "position": 28,
+          "label": "Remanence HIRM",
+          "type": "Number",
+          "description": "Hard IRM factor HIRM = SIRM - IRM(300 mT)"
         },
-        'remanence_maf': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_maf'
+        "remanence_maf": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_maf"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 32,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 32,
+          "label": "Remanence MAF",
+          "type": "Number",
+          "description": "Median acquisition field"
         },
-        'remanence_armx': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_armx'
+        "remanence_armx": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_armx"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 29,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Dimensionless",
+          "position": 29,
+          "label": "Remanence ARMx",
+          "type": "Number",
+          "description": "Anhysteretic susceptibility Xarm = ARM / Hdc"
         },
-        'measurement_file_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 12,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Hart.et.al.2000.data.txt']
+        "measurement_file_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 12,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
         },
-        'remanence_bcr': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_bcr'
+        "remanence_bcr": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_bcr"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 19,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 19,
+          "label": "Remanence Bcr",
+          "type": "Number",
+          "description": "Remanent coercivity by direct backfield measurement "
         },
-        'remanence_sratio_back': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_sratio_back'
+        "remanence_sratio_back": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_sratio_back"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 27,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 27,
+          "label": "Remanence S Ratio Back Field",
+          "type": "Number",
+          "description": "Backfield used to calculate S Ratio"
         },
-        'er_synthetic_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_synthetic_name'
+        "er_synthetic_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_synthetic_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 10,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['STD1546-A1']
+          "unit": "Text",
+          "position": 10,
+          "label": "Synthetic Material Name",
+          "type": "String",
+          "description": "Name for synthetic material",
+          "examples": ["STD1546-A1"]
         },
-        'er_expedition_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 0,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for expedition such as AVON02MV",
+          "examples": ["AVON02MV"]
         },
-        'remanence_temp_low': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 20,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_temp_low": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in K",
+          "position": 20,
+          "label": "Remanence Temperature Low",
+          "type": "Number",
+          "description": "Critical, Xfd or Xhd temperature calculation -- low range"
         },
-        'remanence_comp_n': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_comp_n'
+        "remanence_comp_n": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_comp_n"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 36,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Integer",
+          "position": 36,
+          "label": "Remanence Component N",
+          "type": "Integer",
+          "description": "Number of remanence components used"
         },
-        'remanence_description': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_description'
+        "remanence_description": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_description"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 40,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Text",
+          "position": 40,
+          "label": "Remanence Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'remanence_temp_critical': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 22,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_temp_critical": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in K",
+          "position": 22,
+          "label": "Remanence Critical Temperature",
+          "type": "Number",
+          "description": "Temperature at which some transition occurs"
         },
-        'remanence_dfc': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 13,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_dfc": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in Am2",
+          "position": 13,
+          "label": "Remanence Delta Field Cooled",
+          "type": "Number",
+          "description": "Fractional remanence loss at Tv (80K,130K) after field cooling"
         },
-        'er_formation_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_formation_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 2,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_analyst_mail_names': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 44,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 44,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'remanence_cd': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_cd'
+        "remanence_cd": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_cd"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 35,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Dimensionless",
+          "position": 35,
+          "label": "Remanence Component Dispersion",
+          "type": "Number",
+          "description": "Dispersion (standard deviation) of remanence components"
         },
-        'remanence_temp_type': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 23,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Verway', 'Morin', 'pyrrhotite', 'Neel', 'spin glass', 'Curie', 'Hopkinson', 'blocking', 'unblocking']
+        "remanence_temp_type": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 23,
+          "label": "Remanence Critical Temperature Type",
+          "type": "String",
+          "description": "Interpreted type of temperature transition",
+          "examples": ["Verway", "Morin", "pyrrhotite", "Neel", "spin glass", "Curie", "Hopkinson", "blocking", "unblocking"]
         },
-        'remanence_sratio_forward': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_sratio_forward'
+        "remanence_sratio_forward": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_sratio_forward"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 26,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in T",
+          "position": 26,
+          "label": "Remanence S Ratio Forward Field",
+          "type": "Number",
+          "description": "SIRM field used to calculate S Ratio"
         },
-        'er_site_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_site_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 5,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_citation_names"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 45,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 45,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_sample_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 6,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_specimen_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 7,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'remanence_sd': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_sd'
+        "remanence_sd": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_sd"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 38,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments'
+          "unit": "Number in Am2/log(s)",
+          "position": 38,
+          "label": "Remanence Sd",
+          "type": "Number"
         },
-        'remanence_delta_temp_high': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_delta_temp_high'
+        "remanence_delta_temp_high": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_delta_temp_high"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 17,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in K",
+          "position": 17,
+          "label": "Remanence Delta Temperature High",
+          "type": "Number",
+          "description": "High Temperature of delta FC/ZFC calculation"
         },
-        'remanence_dzfc': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 14,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_dzfc": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in Am2",
+          "position": 14,
+          "label": "Remanence Delta Zerofield Cooled",
+          "type": "Number",
+          "description": "Fractional remanence loss at Tv (80K,130K) after zero-field cooling"
         },
-        'magic_instrument_codes': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 43,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 43,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'remanence_temp_high': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 21,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+        "remanence_temp_high": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Number in K",
+          "position": 21,
+          "label": "Remanence Temperature High",
+          "type": "Number",
+          "description": "Critical, Xfd or Xhd temperature calculation -- high range"
         },
-        'remanence_q': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_q'
+        "remanence_q": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_q"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 39,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Dimensionless",
+          "position": 39,
+          "label": "Remanence Koenigsberger Ratio",
+          "type": "Number",
+          "description": "Koenigsberger ratio"
         },
-        'er_mineral_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 9,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'remanence_mdt': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_mdt'
+        "remanence_mdt": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "remanence_mdt"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 33,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments'
+          "unit": "Number in K",
+          "position": 33,
+          "label": "Remanence MDT",
+          "type": "Number",
+          "description": "Median destructive temperature"
         },
-        'er_section_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [],
-          'unit': 'Remanence Experiments',
-          'position': 4,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_fossil_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 8,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Remanence Experiments",
+          "next_columns": [{
+            "table": "rmag_remanence",
+            "column": "er_location_name"
           }],
-          'unit': 'Remanence Experiments',
-          'position': 1,
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Remanence Experiments',
-      'description': 'Experiment for magnetic remanence:  ARM, IRM, TRM, CRM, VRM and DRM'
+      "label": "Remanence Experiments",
+      "description": "Experiment for magnetic remanence:  ARM, IRM, TRM, CRM, VRM and DRM"
     },
-    'er_formations': {
-      'position': 4,
-      'columns': {
-        'formation_class': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'formation_class'
+    "er_formations": {
+      "position": 4,
+      "columns": {
+        "formation_class": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "formation_class"
           }],
-          'unit': 'Rock Formations',
-          'position': 2,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Igneous', 'Sedimentary', 'Metamorphic', 'Archeological', 'Intrusive', 'Extrusive']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Class",
+          "type": "String",
+          "description": "General lithology type",
+          "examples": ["Igneous", "Sedimentary", "Metamorphic", "Archeological", "Intrusive", "Extrusive"]
         },
-        'er_scientist_mail_names': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Rock Formations',
-          'position': 7,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 7,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who described formation",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'formation_paleo_enviroment': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'formation_paleo_enviroment'
+        "formation_paleo_enviroment": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "formation_paleo_enviroment"
           }],
-          'unit': 'Rock Formations',
-          'position': 4,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Fluvial', 'Continental Shelf', 'Eolian', 'Fringing Reef']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Paleo Environment",
+          "type": "String",
+          "description": "Depositional environment",
+          "examples": ["Fluvial", "Continental Shelf", "Eolian", "Fringing Reef"]
         },
-        'formation_description': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'formation_description'
+        "formation_description": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "formation_description"
           }],
-          'unit': 'Rock Formations',
-          'position': 6,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations'
+          "unit": "Text",
+          "position": 6,
+          "label": "Formation Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_formation_name': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "er_formation_name"
           }],
-          'unit': 'Rock Formations',
-          'position': 0,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 0,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_citation_names': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "er_citation_names"
           }],
-          'unit': 'Rock Formations',
-          'position': 8,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 8,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'formation_thickness': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'formation_thickness'
+        "formation_thickness": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "formation_thickness"
           }],
-          'unit': 'Rock Formations',
-          'position': 5,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations'
+          "unit": "Number in m",
+          "position": 5,
+          "label": "Formation Thickness",
+          "type": "Number",
+          "description": "Formation thickness"
         },
-        'er_formation_alternatives': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'er_formation_alternatives'
+        "er_formation_alternatives": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "er_formation_alternatives"
           }],
-          'unit': 'Rock Formations',
-          'position': 1,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations'
+          "unit": "Text",
+          "position": 1,
+          "label": "Formation Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'formation_lithology': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'formation_lithology'
+        "formation_lithology": {
+          "group": "Rock Formations",
+          "next_columns": [{
+            "table": "er_formations",
+            "column": "formation_lithology"
           }],
-          'unit': 'Rock Formations',
-          'position': 3,
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
+          "unit": "Text",
+          "position": 3,
+          "label": "Formation Lithology",
+          "type": "String",
+          "description": "Lithology",
+          "examples": ["Basalt", "Granite", "Mudstone", "Tuff", "Granodiorite", "Marl"]
         }
       },
-      'label': 'Rock Formations',
-      'description': 'Unique rock formation or sequence'
+      "label": "Rock Formations",
+      "description": "Unique rock formation or sequence"
     },
-    'pmag_rotations': {
-      'position': 24,
-      'columns': {
-        'rotation_phi': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'rotation_phi'
+    "pmag_rotations": {
+      "position": 24,
+      "columns": {
+        "rotation_phi": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "rotation_phi"
           }],
-          'unit': 'Rotation Data',
-          'position': 3,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data'
+          "unit": "Number in Degrees",
+          "position": 3,
+          "label": "Rotation Parameter Phi",
+          "type": "Number",
+          "description": "Finite rotation pole -- Axis in degrees from North (strike if lambda is zero)"
         },
-        'pmag_rotation_code': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'pmag_rotation_code'
+        "pmag_rotation_code": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "pmag_rotation_code"
           }],
-          'unit': 'Rotation Data',
-          'position': 0,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data',
-          'examples': ['MY-TILT1', 'MY-TILT2', 'MY-TRANS1', 'MY-ROT1', 'MY-ROT2']
+          "unit": "Text",
+          "position": 0,
+          "label": "Rotation Code",
+          "type": "String",
+          "description": "Rotation name or number",
+          "examples": ["MY-TILT1", "MY-TILT2", "MY-TRANS1", "MY-ROT1", "MY-ROT2"]
         },
-        'rotation_description': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'rotation_description'
+        "rotation_description": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "rotation_description"
           }],
-          'unit': 'Rotation Data',
-          'position': 5,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data'
+          "unit": "Text",
+          "position": 5,
+          "label": "Rotation Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_citation_names': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "er_citation_names"
           }],
-          'unit': 'Rotation Data',
-          'position': 6,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 6,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'rotation_omega': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'rotation_omega'
+        "rotation_omega": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "rotation_omega"
           }],
-          'unit': 'Rotation Data',
-          'position': 4,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data'
+          "unit": "Number in Degrees",
+          "position": 4,
+          "label": "Rotation Parameter Omega",
+          "type": "Number",
+          "description": "Finite rotation pole -- Degrees of clockwise rotation around axis (negative dip if lambda is zero)"
         },
-        'rotation_lambda': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'rotation_lambda'
+        "rotation_lambda": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "rotation_lambda"
           }],
-          'unit': 'Rotation Data',
-          'position': 2,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data'
+          "unit": "Number in Degrees",
+          "position": 2,
+          "label": "Rotation Parameter Lambda",
+          "type": "Number",
+          "description": "Finite rotation pole -- Tilt in degrees from horizontal"
         },
-        'rotation_definition': {
-          'group': 'Rotation Data',
-          'next_columns': [{
-            'table': 'pmag_rotations',
-            'column': 'rotation_definition'
+        "rotation_definition": {
+          "group": "Rotation Data",
+          "next_columns": [{
+            "table": "pmag_rotations",
+            "column": "rotation_definition"
           }],
-          'unit': 'Rotation Data',
-          'position': 1,
-          'label': 'Rotation Data',
-          'type': 'Rotation Data',
-          'description': 'Rotation Data'
+          "unit": "Text",
+          "position": 1,
+          "label": "Rotation Definition",
+          "type": "String",
+          "description": "Definition of the rotation applied"
         }
       },
-      'label': 'Rotation Data',
-      'description': 'Data used to perform complex rotations between coordinate systems'
+      "label": "Rotation Data",
+      "description": "Data used to perform complex rotations between coordinate systems"
     },
-    'er_minerals': {
-      'position': 11,
-      'columns': {
-        'er_member_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_member_name'
+    "er_minerals": {
+      "position": 11,
+      "columns": {
+        "er_member_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_member_name"
           }],
-          'unit': 'Minerals',
-          'position': 5,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_method_codes': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Minerals',
-          'position': 22,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 22,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'er_scientist_mail_names': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Minerals',
-          'position': 23,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 23,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who prepared mineral sample",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'mineral_size': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_size'
+        "mineral_size": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_size"
           }],
-          'unit': 'Minerals',
-          'position': 17,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['250-500 Â¿m']
+          "unit": "Text",
+          "position": 17,
+          "label": "Mineral Size",
+          "type": "String",
+          "description": "Mineral separate grain size fraction",
+          "examples": ["250-500 Â¿m"]
         },
-        'mineral_class_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_class_name'
+        "mineral_class_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_class_name"
           }],
-          'unit': 'Minerals',
-          'position': 12,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Magnetite', 'Plagioclase ']
+          "unit": "Text",
+          "position": 12,
+          "label": "Mineral Classification Name",
+          "type": "String",
+          "description": "Mineral classification name",
+          "examples": ["Magnetite", "Plagioclase "]
         },
-        'mineral_assemblage': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_assemblage'
+        "mineral_assemblage": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_assemblage"
           }],
-          'unit': 'Minerals',
-          'position': 13,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Single Crystal', 'Mineral Separate', 'Polycrystalline', 'In Situ']
+          "unit": "Text",
+          "position": 13,
+          "label": "Mineral Assemblage",
+          "type": "String",
+          "description": "Mineral assemblage",
+          "examples": ["Single Crystal", "Mineral Separate", "Polycrystalline", "In Situ"]
         },
-        'er_expedition_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Minerals',
-          'position': 2,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'mineral_shape': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_shape'
+        "mineral_shape": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_shape"
           }],
-          'unit': 'Minerals',
-          'position': 16,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Euhedral', 'Orthorhombic ']
+          "unit": "Text",
+          "position": 16,
+          "label": "Mineral Shape",
+          "type": "String",
+          "description": "Mineral shape",
+          "examples": ["Euhedral", "Orthorhombic "]
         },
-        'mineral_density': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_density'
+        "mineral_density": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_density"
           }],
-          'unit': 'Minerals',
-          'position': 20,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals'
+          "unit": "Number in g/m3",
+          "position": 20,
+          "label": "Mineral Density",
+          "type": "Number",
+          "description": "Mineral density"
         },
-        'mineral_alteration_type': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_alteration_type'
+        "mineral_alteration_type": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_alteration_type"
           }],
-          'unit': 'Minerals',
-          'position': 15,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Hydrothermal', 'Diagenetic', 'Weathering', 'Oxidation', 'Metamorphic']
+          "unit": "Text",
+          "position": 15,
+          "label": "Mineral Alteration Type",
+          "type": "String",
+          "description": "Mineral alteration type",
+          "examples": ["Hydrothermal", "Diagenetic", "Weathering", "Oxidation", "Metamorphic"]
         },
-        'er_mineral_alternatives': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_mineral_alternatives'
+        "er_mineral_alternatives": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_mineral_alternatives"
           }],
-          'unit': 'Minerals',
-          'position': 1,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals'
+          "unit": "Text",
+          "position": 1,
+          "label": "Mineral Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'er_formation_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_formation_name"
           }],
-          'unit': 'Minerals',
-          'position': 4,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'mineral_type': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_type'
+        "mineral_type": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_type"
           }],
-          'unit': 'Minerals',
-          'position': 11,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Phenocryst', 'Microcryst', 'Groundmass', 'Biogenic', 'Detrital Clasts']
+          "unit": "Text",
+          "position": 11,
+          "label": "Mineral Type",
+          "type": "String",
+          "description": "Mineral type",
+          "examples": ["Phenocryst", "Microcryst", "Groundmass", "Biogenic", "Detrital Clasts"]
         },
-        'mineral_description': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_description'
+        "mineral_description": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_description"
           }],
-          'unit': 'Minerals',
-          'position': 21,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals'
+          "unit": "Text",
+          "position": 21,
+          "label": "Mineral Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_site_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_site_name"
           }],
-          'unit': 'Minerals',
-          'position': 7,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 7,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_citation_names"
           }],
-          'unit': 'Minerals',
-          'position': 24,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 24,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_sample_name"
           }],
-          'unit': 'Minerals',
-          'position': 8,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 8,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_specimen_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Minerals',
-          'position': 9,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 9,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'mineral_volume': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_volume'
+        "mineral_volume": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_volume"
           }],
-          'unit': 'Minerals',
-          'position': 18,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals'
+          "unit": "Number in m3",
+          "position": 18,
+          "label": "Mineral Volume",
+          "type": "Number",
+          "description": "Mineral volume"
         },
-        'mineral_weight': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_weight'
+        "mineral_weight": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_weight"
           }],
-          'unit': 'Minerals',
-          'position': 19,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals'
+          "unit": "Number in g",
+          "position": 19,
+          "label": "Mineral Weight",
+          "type": "Number",
+          "description": "Mineral weight"
         },
-        'er_mineral_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Minerals',
-          'position': 0,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 0,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for natural occurring mineral",
+          "examples": ["San03-001"]
         },
-        'mineral_alteration': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_alteration'
+        "mineral_alteration": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "mineral_alteration"
           }],
-          'unit': 'Minerals',
-          'position': 14,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Severe', 'High', 'Mild', 'Trace', 'Unaltered']
+          "unit": "Text",
+          "position": 14,
+          "label": "Mineral Alteration",
+          "type": "String",
+          "description": "Mineral alteration grade",
+          "examples": ["Severe", "High", "Mild", "Trace", "Unaltered"]
         },
-        'er_section_name': {
-          'group': 'Minerals',
-          'next_columns': [],
-          'unit': 'Minerals',
-          'position': 6,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Minerals",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_fossil_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Minerals',
-          'position': 10,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 10,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Minerals',
-          'next_columns': [{
-            'table': 'er_minerals',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Minerals",
+          "next_columns": [{
+            "table": "er_minerals",
+            "column": "er_location_name"
           }],
-          'unit': 'Minerals',
-          'position': 3,
-          'label': 'Minerals',
-          'type': 'Minerals',
-          'description': 'Minerals',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Minerals',
-      'description': 'Naturally occurring minerals'
+      "label": "Minerals",
+      "description": "Naturally occurring minerals"
     },
-    'er_specimens': {
-      'position': 9,
-      'columns': {
-        'er_member_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_member_name'
+    "er_specimens": {
+      "position": 9,
+      "columns": {
+        "er_member_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_member_name"
           }],
-          'unit': 'Specimens',
-          'position': 5,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'specimen_alteration_type': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_alteration_type'
+        "specimen_alteration_type": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_alteration_type"
           }],
-          'unit': 'Specimens',
-          'position': 14,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Hydrothermal', 'Diagenetic', 'Weathering', 'Oxidation', 'Metamorphic']
+          "unit": "Text",
+          "position": 14,
+          "label": "Specimen Alteration Type",
+          "type": "String",
+          "description": "Specimen alteration type",
+          "examples": ["Hydrothermal", "Diagenetic", "Weathering", "Oxidation", "Metamorphic"]
         },
-        'magic_method_codes': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Specimens',
-          'position': 26,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 26,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'specimen_composite_depth': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_composite_depth'
+        "specimen_composite_depth": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_composite_depth"
           }],
-          'unit': 'Specimens',
-          'position': 18,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 18,
+          "label": "Specimen Composite Depth",
+          "type": "Number",
+          "description": "Specimen location -- composite depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'er_scientist_mail_names': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Specimens',
-          'position': 27,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 27,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who prepared specimen",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'specimen_lithology': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_lithology'
+        "specimen_lithology": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_lithology"
           }],
-          'unit': 'Specimens',
-          'position': 10,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
+          "unit": "Text",
+          "position": 10,
+          "label": "Specimen Lithology",
+          "type": "String",
+          "description": "Specimen lithology or archeological classification",
+          "examples": ["Basalt", "Granite", "Mudstone", "Tuff", "Granodiorite", "Marl"]
         },
-        'specimen_density': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_density'
+        "specimen_density": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_density"
           }],
-          'unit': 'Specimens',
-          'position': 23,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens'
+          "unit": "Number in g/m3",
+          "position": 23,
+          "label": "Specimen Density",
+          "type": "Number",
+          "description": "Specimen density"
         },
-        'specimen_azimuth': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_azimuth'
+        "specimen_azimuth": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_azimuth"
           }],
-          'unit': 'Specimens',
-          'position': 19,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 19,
+          "label": "Specimen Azimuth",
+          "type": "Number",
+          "description": "Specimen azimuth as measured clockwise from the north",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'specimen_drill_depth': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_drill_depth'
+        "specimen_drill_depth": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_drill_depth"
           }],
-          'unit': 'Specimens',
-          'position': 17,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Meters below seafloor']
+          "unit": "Number in m",
+          "position": 17,
+          "label": "Specimen Drill Depth",
+          "type": "Number",
+          "description": "Specimen location -- depth in MBSF as used by ODP",
+          "examples": ["Meters below seafloor"]
         },
-        'specimen_height': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_height'
+        "specimen_height": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_height"
           }],
-          'unit': 'Specimens',
-          'position': 16,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Positive is up in section or core', 'while negative is down relative to reference height']
+          "unit": "Number in m",
+          "position": 16,
+          "label": "Specimen Stratigraphic Height",
+          "type": "Number",
+          "description": "Specimen location -- stratigraphic height",
+          "examples": ["Positive is up in section or core", "while negative is down relative to reference height"]
         },
-        'specimen_type': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_type'
+        "specimen_type": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_type"
           }],
-          'unit': 'Specimens',
-          'position': 11,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Flow Top', 'Glassy Margin', 'Pot Rim', 'Pillow', 'Kiln', 'Dike']
+          "unit": "Text",
+          "position": 11,
+          "label": "Specimen Type",
+          "type": "String",
+          "description": "Specimen type",
+          "examples": ["Flow Top", "Glassy Margin", "Pot Rim", "Pillow", "Kiln", "Dike"]
         },
-        'specimen_dip': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_dip'
+        "specimen_dip": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_dip"
           }],
-          'unit': 'Specimens',
-          'position': 20,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 20,
+          "label": "Specimen Dip",
+          "type": "Number",
+          "description": "Specimen dip as measured into the outcrop",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'er_expedition_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Specimens',
-          'position': 2,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'specimen_texture': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_texture'
+        "specimen_texture": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_texture"
           }],
-          'unit': 'Specimens',
-          'position': 12,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Holocrystalline', 'Hawaiitic', 'Homogeneous']
+          "unit": "Text",
+          "position": 12,
+          "label": "Specimen Texture",
+          "type": "String",
+          "description": "Specimen texture",
+          "examples": ["Holocrystalline", "Hawaiitic", "Homogeneous"]
         },
-        'er_formation_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_formation_name"
           }],
-          'unit': 'Specimens',
-          'position': 4,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'specimen_description': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_description'
+        "specimen_description": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_description"
           }],
-          'unit': 'Specimens',
-          'position': 25,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens'
+          "unit": "Text",
+          "position": 25,
+          "label": "Specimen Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_site_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_site_name"
           }],
-          'unit': 'Specimens',
-          'position': 7,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 7,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_citation_names"
           }],
-          'unit': 'Specimens',
-          'position': 28,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 28,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_sample_name"
           }],
-          'unit': 'Specimens',
-          'position': 8,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 8,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_specimen_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Specimens',
-          'position': 0,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 0,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'er_specimen_alternatives': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_specimen_alternatives'
+        "er_specimen_alternatives": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_specimen_alternatives"
           }],
-          'unit': 'Specimens',
-          'position': 1,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens'
+          "unit": "Text",
+          "position": 1,
+          "label": "Specimen Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'specimen_alteration': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_alteration'
+        "specimen_alteration": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_alteration"
           }],
-          'unit': 'Specimens',
-          'position': 13,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Severe', 'High', 'Mild', 'Trace', 'Unaltered']
+          "unit": "Text",
+          "position": 13,
+          "label": "Specimen Alteration",
+          "type": "String",
+          "description": "Specimen alteration grade",
+          "examples": ["Severe", "High", "Mild", "Trace", "Unaltered"]
         },
-        'specimen_elevation': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_elevation'
+        "specimen_elevation": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_elevation"
           }],
-          'unit': 'Specimens',
-          'position': 15,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 15,
+          "label": "Specimen Elevation",
+          "type": "Number",
+          "description": "Specimen location -- elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'specimen_class': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_class'
+        "specimen_class": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_class"
           }],
-          'unit': 'Specimens',
-          'position': 9,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Igneous', 'Sedimentary', 'Metamorphic', 'Archeological', 'Intrusive', 'Extrusive']
+          "unit": "Text",
+          "position": 9,
+          "label": "Specimen Class",
+          "type": "String",
+          "description": "General lithology type",
+          "examples": ["Igneous", "Sedimentary", "Metamorphic", "Archeological", "Intrusive", "Extrusive"]
         },
-        'specimen_volume': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_volume'
+        "specimen_volume": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_volume"
           }],
-          'unit': 'Specimens',
-          'position': 21,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens'
+          "unit": "Number in m3",
+          "position": 21,
+          "label": "Specimen Volume",
+          "type": "Number",
+          "description": "Specimen volume"
         },
-        'specimen_size': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_size'
+        "specimen_size": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_size"
           }],
-          'unit': 'Specimens',
-          'position': 24,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['25-125 Â¿m', '250-500 Â¿m']
+          "unit": "Text",
+          "position": 24,
+          "label": "Specimen Grain Size",
+          "type": "String",
+          "description": "Specimen grain size fraction",
+          "examples": ["25-125 Â¿m", "250-500 Â¿m"]
         },
-        'specimen_weight': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_weight'
+        "specimen_weight": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "specimen_weight"
           }],
-          'unit': 'Specimens',
-          'position': 22,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens'
+          "unit": "Number in g",
+          "position": 22,
+          "label": "Specimen Weight",
+          "type": "Number",
+          "description": "Specimen weight"
         },
-        'er_section_name': {
-          'group': 'Specimens',
-          'next_columns': [],
-          'unit': 'Specimens',
-          'position': 6,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Specimens",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_location_name': {
-          'group': 'Specimens',
-          'next_columns': [{
-            'table': 'er_specimens',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Specimens",
+          "next_columns": [{
+            "table": "er_specimens",
+            "column": "er_location_name"
           }],
-          'unit': 'Specimens',
-          'position': 3,
-          'label': 'Specimens',
-          'type': 'Specimens',
-          'description': 'Specimens',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Specimens',
-      'description': 'Specimen from sample'
+      "label": "Specimens",
+      "description": "Specimen from sample"
     },
-    'rmag_anisotropy': {
-      'position': 29,
-      'columns': {
-        'anisotropy_fl': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_fl'
+    "rmag_anisotropy": {
+      "position": 29,
+      "columns": {
+        "anisotropy_fl": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_fl"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 45,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 45,
+          "label": "Anisotropy FL Ratio",
+          "type": "Number",
+          "description": "F/L"
         },
-        'er_sample_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 4,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "er_sample_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Sample Name List",
+          "type": "List",
+          "description": "Colon-delimited list of sample names"
         },
-        'magic_experiment_name': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 9,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['KOPA-299-1']
+        "magic_experiment_name": {
+          "group": "Anisotropy Data",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 9,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
         },
-        'magic_method_codes': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 50,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 50,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'anisotropy_eta_dec': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 32,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "anisotropy_eta_dec": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 32,
+          "label": "Anisotropy ETA Declination",
+          "type": "Number",
+          "description": "Minor axis -- declination"
         },
-        'anisotropy_p': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_p'
+        "anisotropy_p": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_p"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 41,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 41,
+          "label": "Anisotropy P",
+          "type": "Number",
+          "description": "T1/T3"
         },
-        'anisotropy_pp': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_pp'
+        "anisotropy_pp": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_pp"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 42,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 42,
+          "label": "Anisotropy P?",
+          "type": "Number",
+          "description": "Corrected anisotropy of Jelinek (1981)"
         },
-        'anisotropy_ll': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_ll'
+        "anisotropy_ll": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_ll"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 40,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 40,
+          "label": "Anisotropy L?",
+          "type": "Number",
+          "description": "ln(L)"
         },
-        'anisotropy_s5': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s5'
+        "anisotropy_s5": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_s5"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 16,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 16,
+          "label": "Anisotropy Tensor Element 5",
+          "type": "Number",
+          "description": "Anisotropy tensor element -- c23"
         },
-        'anisotropy_t2': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_t2'
+        "anisotropy_t2": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_t2"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 23,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 23,
+          "label": "Anisotropy Eigenvalue 2",
+          "type": "Number",
+          "description": "Intermediate eigenvalue"
         },
-        'anisotropy_zeta_inc': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 34,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "anisotropy_zeta_inc": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 34,
+          "label": "Anisotropy ZETA Inclination",
+          "type": "Number",
+          "description": "Major axis -- inclination"
         },
-        'er_fossil_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 6,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['AMM43-03', 'AMM43-19']
+        "er_fossil_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Fossil Name List",
+          "type": "List",
+          "description": "Colon-delimited list of fossil names included in calculation",
+          "examples": ["AMM43-03", "AMM43-19"]
         },
-        'anisotropy_l': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_l'
+        "anisotropy_l": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_l"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 39,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 39,
+          "label": "Anisotropy L",
+          "type": "Number",
+          "description": "T1/T2"
         },
-        'er_specimen_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 5,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "er_specimen_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 5,
+          "label": "Specimen Name List",
+          "type": "List",
+          "description": "Colon-delimited list of specimen names"
         },
-        'anisotropy_s6': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s6'
+        "anisotropy_s6": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_s6"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 17,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 17,
+          "label": "Anisotropy Tensor Element 6",
+          "type": "Number",
+          "description": "Anisotropy tensor element -- c13"
         },
-        'anisotropy_unit': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_unit'
+        "anisotropy_unit": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_unit"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 20,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Normalized by trace', 'Am2', 'm3/kg', 'SI', 'deviatoric']
+          "unit": "Text",
+          "position": 20,
+          "label": "Anisotropy Tensor Unit",
+          "type": "String",
+          "description": "Anisotropy tensor unit",
+          "examples": ["Normalized by trace", "Am2", "m3/kg", "SI", "deviatoric"]
         },
-        'anisotropy_deg1': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_deg1'
+        "anisotropy_deg1": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_deg1"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 46,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Number between 0 and 300% ']
+          "unit": "Number in %",
+          "position": 46,
+          "label": "Anisotropy Degree",
+          "type": "Number",
+          "description": "Total anisotropy -- 100 * (S1-S3) / Mean",
+          "examples": ["Number between 0 and 300% "]
         },
-        'er_mineral_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 7,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "er_mineral_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 7,
+          "label": "Mineral Name List",
+          "type": "List",
+          "description": "Colon-delimited list of mineral names"
         },
-        'rmag_criteria_codes': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'rmag_criteria_codes'
+        "rmag_criteria_codes": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "rmag_criteria_codes"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 49,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['MY-MAD', 'MY-APLHA95']
+          "unit": "Text",
+          "position": 49,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
         },
-        'anisotropy_eta_inc': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 31,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "anisotropy_eta_inc": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 31,
+          "label": "Anisotropy ETA Inclination",
+          "type": "Number",
+          "description": "Minor axis -- inclination"
         },
-        'anisotropy_v3_dec': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_v3_dec'
+        "anisotropy_v3_dec": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_v3_dec"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 27,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number in Degrees",
+          "position": 27,
+          "label": "Anisotropy Eigenvector 3 Declination",
+          "type": "Number",
+          "description": "Declination eigenvector associated with minimum eigenvalue"
         },
-        'anisotropy_t': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_t'
+        "anisotropy_t": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_t"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 43,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 43,
+          "label": "Anisotropy T",
+          "type": "Number",
+          "description": "Shape factor of Jelinek (1981)"
         },
-        'anisotropy_t3': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_t3'
+        "anisotropy_t3": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_t3"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 24,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 24,
+          "label": "Anisotropy Eigenvalue 3",
+          "type": "Number",
+          "description": "Minimum eigenvalue"
         },
-        'anisotropy_v1_inc': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_v1_inc'
+        "anisotropy_v1_inc": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_v1_inc"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 28,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number in Degrees",
+          "position": 28,
+          "label": "Anisotropy Eigenvector 1 Inclination",
+          "type": "Number",
+          "description": "Inclination eigenvector associated with maximum eigenvalue"
         },
-        'anisotropy_v3_inc': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_v3_inc'
+        "anisotropy_v3_inc": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_v3_inc"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 30,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number in Degrees",
+          "position": 30,
+          "label": "Anisotropy Eigenvector 3 Inclination",
+          "type": "Number",
+          "description": "Inclination eigenvector associated with minimum eigenvalue"
         },
-        'measurement_file_name': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 10,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Hart.et.al.2000.data.txt']
+        "measurement_file_name": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 10,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
         },
-        'anisotropy_description': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_description'
+        "anisotropy_description": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_description"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 48,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Text",
+          "position": 48,
+          "label": "Anisotropy Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'rmag_anisotropy_name': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 0,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Bas123-anis']
+        "rmag_anisotropy_name": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 0,
+          "label": "Anisotropy Name",
+          "type": "String",
+          "description": "Name or number for anisotropy determination",
+          "examples": ["Bas123-anis"]
         },
-        'anisotropy_s4': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s4'
+        "anisotropy_s4": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_s4"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 15,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 15,
+          "label": "Anisotropy Tensor Element 4",
+          "type": "Number",
+          "description": "Anisotropy tensor element -- c12"
         },
-        'anisotropy_f': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_f'
+        "anisotropy_f": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_f"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 37,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 37,
+          "label": "Anisotropy F",
+          "type": "Number",
+          "description": "T2/T3"
         },
-        'anisotropy_type': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_type'
+        "anisotropy_type": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_type"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 11,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['AMS', 'AARM', 'AIRM', 'ATRM']
+          "unit": "Text",
+          "position": 11,
+          "label": "Anisotropy Type",
+          "type": "String",
+          "description": "Anisotropy calculation type",
+          "examples": ["AMS", "AARM", "AIRM", "ATRM"]
         },
-        'anisotropy_v2_dec': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_v2_dec'
+        "anisotropy_v2_dec": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_v2_dec"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 26,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number in Degrees",
+          "position": 26,
+          "label": "Anisotropy Eigenvector 2 Declination",
+          "type": "Number",
+          "description": "Declination eigenvector associated with intermediate eigenvalue"
         },
-        'er_analyst_mail_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 52,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 52,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'anisotropy_sigma': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_sigma'
+        "anisotropy_sigma": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_sigma"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 19,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Sigma of Hext (1963)']
+          "unit": "Number",
+          "position": 19,
+          "label": "Anisotropy Tensor Sigma",
+          "type": "Number",
+          "description": "Anisotropy tensor standard deviation",
+          "examples": ["Sigma of Hext (1963)"]
         },
-        'er_synthetic_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 8,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "er_synthetic_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 8,
+          "label": "Synthetic Material Name List",
+          "type": "List",
+          "description": "Colon-delimited list of synthetic materials"
         },
-        'anisotropy_s3': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s3'
+        "anisotropy_s3": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_s3"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 14,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 14,
+          "label": "Anisotropy Tensor Element 3",
+          "type": "Number",
+          "description": "Anisotropy tensor element -- c33"
         },
-        'anisotropy_vg': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_vg'
+        "anisotropy_vg": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_vg"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 44,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 44,
+          "label": "Anisotropy Vg",
+          "type": "Number"
         },
-        'anisotropy_ff': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_ff'
+        "anisotropy_ff": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_ff"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 38,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Dimensionless",
+          "position": 38,
+          "label": "Anisotropy F?",
+          "type": "Number",
+          "description": "ln(F)"
         },
-        'anisotropy_v1_dec': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_v1_dec'
+        "anisotropy_v1_dec": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_v1_dec"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 25,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number in Degrees",
+          "position": 25,
+          "label": "Anisotropy Eigenvector 1 Declination",
+          "type": "Number",
+          "description": "Declination eigenvector associated with maximum eigenvalue"
         },
-        'anisotropy_zeta_semi_angle': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 36,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Confidence Level = 95%']
+        "anisotropy_zeta_semi_angle": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 36,
+          "label": "Anisotropy ZETA Semi Angle",
+          "type": "Number",
+          "description": "Major axis -- semi angle",
+          "examples": ["Confidence Level = 95%"]
         },
-        'er_citation_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "er_citation_names"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 53,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 53,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'anisotropy_mean': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_mean'
+        "anisotropy_mean": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_mean"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 18,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 18,
+          "label": "Anisotropy Tensor Mean",
+          "type": "Number",
+          "description": "Anisotropy tensor mean -- (c11 + c22 + c33) / 3"
         },
-        'anisotropy_v2_inc': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_v2_inc'
+        "anisotropy_v2_inc": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_v2_inc"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 29,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number in Degrees",
+          "position": 29,
+          "label": "Anisotropy Eigenvector 2 Inclination",
+          "type": "Number",
+          "description": "Inclination eigenvector associated with intermediate eigenvalue"
         },
-        'anisotropy_eta_semi_angle': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 33,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Confidence Level = 95%']
+        "anisotropy_eta_semi_angle": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 33,
+          "label": "Anisotropy ETA Semi Angle",
+          "type": "Number",
+          "description": "Minor axis -- semi angle",
+          "examples": ["Confidence Level = 95%"]
         },
-        'anisotropy_s2': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s2'
+        "anisotropy_s2": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_s2"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 13,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 13,
+          "label": "Anisotropy Tensor Element 2",
+          "type": "Number",
+          "description": "Anisotropy tensor element -- c22"
         },
-        'er_site_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 3,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Bas123a', 'Bas156z', 'Bas445c']
+        "er_site_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 3,
+          "label": "Site Name List",
+          "type": "List",
+          "description": "Colon-delimited list of site names",
+          "examples": ["Bas123a", "Bas156z", "Bas445c"]
         },
-        'er_section_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 2,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['810C', '810D']
+        "er_section_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 2,
+          "label": "Section Name List",
+          "type": "List",
+          "description": "Colon-delimited list of section or core names",
+          "examples": ["810C", "810D"]
         },
-        'anisotropy_zeta_dec': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 35,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+        "anisotropy_zeta_dec": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Number in Degrees",
+          "position": 35,
+          "label": "Anisotropy ZETA Declination",
+          "type": "Number",
+          "description": "Major axis -- declination"
         },
-        'magic_instrument_codes': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 51,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 51,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'anisotropy_t1': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_t1'
+        "anisotropy_t1": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_t1"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 22,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 22,
+          "label": "Anisotropy Eigenvalue 1",
+          "type": "Number",
+          "description": "Maximum eigenvalue"
         },
-        'anisotropy_n': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_n'
+        "anisotropy_n": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_n"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 21,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Integer",
+          "position": 21,
+          "label": "Anisotropy Number of Measurements",
+          "type": "Integer",
+          "description": "Number of measurements included in the calculation"
         },
-        'er_location_names': {
-          'group': 'Anisotropy Data',
-          'next_columns': [],
-          'unit': 'Anisotropy Data',
-          'position': 1,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Site 801', 'Site 1129']
+        "er_location_names": {
+          "group": "Anisotropy Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name List",
+          "type": "List",
+          "description": "Colon-delimited list of location or drill site names",
+          "examples": ["Site 801", "Site 1129"]
         },
-        'anisotropy_deg2': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_deg2'
+        "anisotropy_deg2": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_deg2"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 47,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data',
-          'examples': ['Number between 0 and 100% ']
+          "unit": "Number in %",
+          "position": 47,
+          "label": "Anisotropy Degree",
+          "type": "Number",
+          "description": "Percent anisotropy -- 100 * (S1-S3) / (S1+S2+S3)",
+          "examples": ["Number between 0 and 100% "]
         },
-        'anisotropy_s1': {
-          'group': 'Anisotropy Data',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s1'
+        "anisotropy_s1": {
+          "group": "Anisotropy Data",
+          "next_columns": [{
+            "table": "rmag_anisotropy",
+            "column": "anisotropy_s1"
           }],
-          'unit': 'Anisotropy Data',
-          'position': 12,
-          'label': 'Anisotropy Data',
-          'type': 'Anisotropy Data',
-          'description': 'Anisotropy Data'
+          "unit": "Number",
+          "position": 12,
+          "label": "Anisotropy Tensor Element 1",
+          "type": "Number",
+          "description": "Anisotropy tensor element -- c11"
         }
       },
-      'label': 'Anisotropy Data',
-      'description': 'Experiment for anisotropy parameters'
+      "label": "Anisotropy Data",
+      "description": "Experiment for anisotropy parameters"
     },
-    'pmag_specimens': {
-      'position': 20,
-      'columns': {
-        'er_member_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_member_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 3,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Glasshound Member']
-        },
-        'specimen_g': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_g'
-          }],
-          'unit': 'Specimen Data',
-          'position': 48,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'magic_experiment_name': {
-          'group': 'Specimen Data',
-          'next_columns': [],
-          'unit': 'Specimen Data',
-          'position': 10,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['KOPA-299-1']
-        },
-        'specimen_int_rel_sigma_perc': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_rel_sigma_perc'
-          }],
-          'unit': 'Specimen Data',
-          'position': 38,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'magic_method_codes': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'magic_method_codes'
-          }],
-          'unit': 'Specimen Data',
-          'position': 67,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
-        },
-        'specimen_f': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_f'
-          }],
-          'unit': 'Specimen Data',
-          'position': 43,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_inferred_age': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_inferred_age'
-          }],
-          'unit': 'Specimen Data',
-          'position': 22,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_correction': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_correction'
-          }],
-          'unit': 'Specimen Data',
-          'position': 17,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_inc': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_inc'
-          }],
-          'unit': 'Specimen Data',
-          'position': 27,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'specimen_int_sigma_perc': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_sigma_perc'
-          }],
-          'unit': 'Specimen Data',
-          'position': 35,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'specimen_b_sigma': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_b_sigma'
-          }],
-          'unit': 'Specimen Data',
-          'position': 46,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'specimen_drat': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_drat'
-          }],
-          'unit': 'Specimen Data',
-          'position': 52,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Normalized by hypotenuse ']
-        },
-        'specimen_int_corr_anisotropy': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_corr_anisotropy'
-          }],
-          'unit': 'Specimen Data',
-          'position': 63,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_q': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_q'
-          }],
-          'unit': 'Specimen Data',
-          'position': 42,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_md': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_md'
-          }],
-          'unit': 'Specimen Data',
-          'position': 50,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_inferred_age_sigma': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_inferred_age_sigma'
-          }],
-          'unit': 'Specimen Data',
-          'position': 23,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'specimen_mad': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_mad'
-          }],
-          'unit': 'Specimen Data',
-          'position': 29,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_tilt_correction': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_tilt_correction'
-          }],
-          'unit': 'Specimen Data',
-          'position': 32,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)']
-        },
-        'specimen_alpha95': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_alpha95'
-          }],
-          'unit': 'Specimen Data',
-          'position': 30,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Confidence Level = 95%']
-        },
-        'specimen_ptrm': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_ptrm'
-          }],
-          'unit': 'Specimen Data',
-          'position': 51,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_b': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_b'
-          }],
-          'unit': 'Specimen Data',
-          'position': 45,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_int_sigma': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_sigma'
-          }],
-          'unit': 'Specimen Data',
-          'position': 34,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'specimen_dang': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_dang'
-          }],
-          'unit': 'Specimen Data',
-          'position': 49,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'measurement_file_name': {
-          'group': 'Specimen Data',
-          'next_columns': [],
-          'unit': 'Specimen Data',
-          'position': 11,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Hart.et.al.2000.data.txt']
-        },
-        'specimen_b_beta': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_b_beta'
-          }],
-          'unit': 'Specimen Data',
-          'position': 47,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'specimen_int_corr_cooling_rate': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_corr_cooling_rate'
-          }],
-          'unit': 'Specimen Data',
-          'position': 62,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_n': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_n'
-          }],
-          'unit': 'Specimen Data',
-          'position': 31,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_int_n': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_n'
-          }],
-          'unit': 'Specimen Data',
-          'position': 40,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_magn_weight': {
-          'group': 'Specimen Data',
-          'next_columns': [],
-          'unit': 'Specimen Data',
-          'position': 60,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'er_expedition_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_expedition_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 0,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['AVON02MV']
-        },
-        'specimen_inferred_age_unit': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_inferred_age_unit'
-          }],
-          'unit': 'Specimen Data',
-          'position': 26,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Ma', 'Ka', 'Ga', 'Years BP', 'Years AD (+/-)', 'Years Cal BP', 'Years Cal AD (+/-)']
-        },
-        'specimen_int_rel_sigma': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_rel_sigma'
-          }],
-          'unit': 'Specimen Data',
-          'position': 37,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'specimen_rsc': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_rsc'
-          }],
-          'unit': 'Specimen Data',
-          'position': 54,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_comp_n': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_comp_n'
-          }],
-          'unit': 'Specimen Data',
-          'position': 20,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_polarity': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_polarity'
-          }],
-          'unit': 'Specimen Data',
-          'position': 15,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Polarity is normal (n)', 'reversed (r)', 'transitional (t)', 'excursion (e) or intermediate (i)']
-        },
-        'measurement_step_unit': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'measurement_step_unit'
-          }],
-          'unit': 'Specimen Data',
-          'position': 14,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_moment': {
-          'group': 'Specimen Data',
-          'next_columns': [],
-          'unit': 'Specimen Data',
-          'position': 58,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_int_mad': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_mad'
-          }],
-          'unit': 'Specimen Data',
-          'position': 39,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_direction_type': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_direction_type'
-          }],
-          'unit': 'Specimen Data',
-          'position': 18,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'er_formation_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_formation_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 2,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Bluebird Formation']
-        },
-        'specimen_viscosity_index': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_viscosity_index'
-          }],
-          'unit': 'Specimen Data',
-          'position': 55,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_lab_field_ac': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_lab_field_ac'
-          }],
-          'unit': 'Specimen Data',
-          'position': 57,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['No field equals 0 and ambient field equals -1']
-        },
-        'er_analyst_mail_names': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_analyst_mail_names'
-          }],
-          'unit': 'Specimen Data',
-          'position': 69,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
-        },
-        'specimen_int': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int'
-          }],
-          'unit': 'Specimen Data',
-          'position': 33,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_description': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_description'
-          }],
-          'unit': 'Specimen Data',
-          'position': 64,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_w': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_w'
-          }],
-          'unit': 'Specimen Data',
-          'position': 41,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_nrm': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_nrm'
-          }],
-          'unit': 'Specimen Data',
-          'position': 16,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_inferred_age_low': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_inferred_age_low'
-          }],
-          'unit': 'Specimen Data',
-          'position': 24,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'measurement_step_min': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'measurement_step_min'
-          }],
-          'unit': 'Specimen Data',
-          'position': 12,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_drats': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_drats'
-          }],
-          'unit': 'Specimen Data',
-          'position': 53,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Normalized by pTRM']
-        },
-        'er_site_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_site_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 5,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Bas123a']
-        },
-        'er_citation_names': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_citation_names'
-          }],
-          'unit': 'Specimen Data',
-          'position': 70,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
-        },
-        'er_sample_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_sample_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 6,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Bas123a-01']
-        },
-        'specimen_lab_field_dc': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_lab_field_dc'
-          }],
-          'unit': 'Specimen Data',
-          'position': 56,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['No field equals 0 and ambient field equals -1']
-        },
-        'specimen_fvds': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_fvds'
-          }],
-          'unit': 'Specimen Data',
-          'position': 44,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'pmag_rotation_codes': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'pmag_rotation_codes'
-          }],
-          'unit': 'Specimen Data',
-          'position': 66,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['MY-TILT1', 'MY-TILT2', 'MY-TRANS1']
-        },
-        'er_specimen_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_specimen_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 7,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Bas123a-01x']
-        },
-        'specimen_comp_nmb': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_comp_nmb'
-          }],
-          'unit': 'Specimen Data',
-          'position': 19,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'measurement_step_max': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'measurement_step_max'
-          }],
-          'unit': 'Specimen Data',
-          'position': 13,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_magn_volume': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_magn_volume'
-          }],
-          'unit': 'Specimen Data',
-          'position': 59,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'magic_instrument_codes': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'magic_instrument_codes'
-          }],
-          'unit': 'Specimen Data',
-          'position': 68,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
-        },
-        'pmag_criteria_codes': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'pmag_criteria_codes'
-          }],
-          'unit': 'Specimen Data',
-          'position': 65,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['MY-MAD', 'MY-APLHA95']
-        },
-        'specimen_comp_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_comp_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 21,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Characteristic', 'VRM', 'Overprint', 'A', 'B', 'C']
-        },
-        'specimen_dec': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_dec'
-          }],
-          'unit': 'Specimen Data',
-          'position': 28,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'specimen_int_ptrm_n': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_ptrm_n'
-          }],
-          'unit': 'Specimen Data',
-          'position': 61,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'er_mineral_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_mineral_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 9,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['San03-001']
-        },
-        'specimen_int_rel': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_int_rel'
-          }],
-          'unit': 'Specimen Data',
-          'position': 36,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_inferred_age_high': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_inferred_age_high'
-          }],
-          'unit': 'Specimen Data',
-          'position': 25,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'er_section_name': {
-          'group': 'Specimen Data',
-          'next_columns': [],
-          'unit': 'Specimen Data',
-          'position': 4,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
-        },
-        'er_fossil_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_fossil_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 8,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['AMM43-03']
-        },
-        'er_location_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_location_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 1,
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+    "pmag_specimens": {
+      "position": 20,
+      "columns": {
+        "er_member_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_member_name"
+          }],
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
+        },
+        "specimen_g": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_g"
+          }],
+          "unit": "Dimensionless",
+          "position": 48,
+          "label": "Specimen g",
+          "type": "Number",
+          "description": "COE's quality factors -- the GAP factor"
+        },
+        "magic_experiment_name": {
+          "group": "Specimen Data",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 10,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
+        },
+        "specimen_int_rel_sigma_perc": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_rel_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 38,
+          "label": "Specimen Paleo Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "magic_method_codes": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "magic_method_codes"
+          }],
+          "unit": "Text",
+          "position": 67,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
+        },
+        "specimen_f": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_f"
+          }],
+          "unit": "Dimensionless",
+          "position": 43,
+          "label": "Specimen f",
+          "type": "Number",
+          "description": "COE's quality factors -- amount of NRM in component"
+        },
+        "specimen_inferred_age": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_inferred_age"
+          }],
+          "unit": "Custom",
+          "position": 22,
+          "label": "Specimen Inferred Age",
+          "type": "Number",
+          "description": "Specimen inferred age"
+        },
+        "specimen_correction": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_correction"
+          }],
+          "unit": "Flag",
+          "position": 17,
+          "label": "Specimen Data Corrected",
+          "type": "String",
+          "description": "Indicating if an uncorrected (u) or corrected (c) estimate with regard to possible anisotropy and cooling rate corrections"
+        },
+        "specimen_inc": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_inc"
+          }],
+          "unit": "Number in Degrees",
+          "position": 27,
+          "label": "Specimen Inclination",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "specimen_int_sigma_perc": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 35,
+          "label": "Specimen Paleo Intensity Sigma %",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "specimen_b_sigma": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_b_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 46,
+          "label": "Specimen b Sigma",
+          "type": "Number",
+          "description": "COE's quality factors -- error on slope fit",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "specimen_drat": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_drat"
+          }],
+          "unit": "Number in %",
+          "position": 52,
+          "label": "Specimen Difference Ratio pTRM Checks",
+          "type": "Number",
+          "description": "Difference in first and second pTRM measurements",
+          "examples": ["Normalized by hypotenuse "]
+        },
+        "specimen_int_corr_anisotropy": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_corr_anisotropy"
+          }],
+          "unit": "Dimensionless",
+          "position": 63,
+          "label": "Specimen Correction Anisotropy",
+          "type": "Number",
+          "description": "Anisotropy correction factor for intensity"
+        },
+        "specimen_q": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_q"
+          }],
+          "unit": "Dimensionless",
+          "position": 42,
+          "label": "Specimen Q",
+          "type": "Number",
+          "description": "COE's quality factors -- overall quality"
+        },
+        "specimen_md": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_md"
+          }],
+          "unit": "Number in %",
+          "position": 50,
+          "label": "Specimen Maximum MD",
+          "type": "Number",
+          "description": "Maximum difference between first and second zero field steps"
+        },
+        "specimen_inferred_age_sigma": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_inferred_age_sigma"
+          }],
+          "unit": "Custom",
+          "position": 23,
+          "label": "Specimen Inferred Age Sigma",
+          "type": "Number",
+          "description": "Specimen inferred age -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "specimen_mad": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_mad"
+          }],
+          "unit": "Number in Degrees",
+          "position": 29,
+          "label": "Specimen MAD",
+          "type": "Number",
+          "description": "Maximum angle of deviation of the best fit direction or plane"
+        },
+        "specimen_tilt_correction": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_tilt_correction"
+          }],
+          "unit": "Number in %",
+          "position": 32,
+          "label": "Specimen Tilt Correction",
+          "type": "Number",
+          "description": "Percentage tilt correction applied to the data",
+          "examples": ["Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)"]
+        },
+        "specimen_alpha95": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 30,
+          "label": "Specimen Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "specimen_ptrm": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_ptrm"
+          }],
+          "unit": "Number in %",
+          "position": 51,
+          "label": "Specimen Maximum pTRM",
+          "type": "Number",
+          "description": "Classical pTRM check"
+        },
+        "specimen_b": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_b"
+          }],
+          "unit": "Dimensionless",
+          "position": 45,
+          "label": "Specimen b",
+          "type": "Number",
+          "description": "COE's quality factors -- slope of Arai diagram"
+        },
+        "specimen_int_sigma": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_sigma"
+          }],
+          "unit": "Number in T",
+          "position": 34,
+          "label": "Specimen Paleo Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "specimen_dang": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_dang"
+          }],
+          "unit": "Number in Degrees",
+          "position": 49,
+          "label": "Specimen DANG",
+          "type": "Number",
+          "description": "Deviation angle of direction of component with respect to origin"
+        },
+        "measurement_file_name": {
+          "group": "Specimen Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 11,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
+        },
+        "specimen_b_beta": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_b_beta"
+          }],
+          "unit": "Dimensionless",
+          "position": 47,
+          "label": "Specimen Sigma over b",
+          "type": "Number",
+          "description": "COE's quality factors -- relative error over slope",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "specimen_int_corr_cooling_rate": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_corr_cooling_rate"
+          }],
+          "unit": "Dimensionless",
+          "position": 62,
+          "label": "Specimen Correction Cooling Rate",
+          "type": "Number",
+          "description": "Cooling rate correction factor for intensity"
+        },
+        "specimen_n": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_n"
+          }],
+          "unit": "Integer",
+          "position": 31,
+          "label": "Specimen N",
+          "type": "Integer",
+          "description": "Number of measurements included in directional calculations"
+        },
+        "specimen_int_n": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_n"
+          }],
+          "unit": "Integer",
+          "position": 40,
+          "label": "Specimen Paleo Intensity N",
+          "type": "Integer",
+          "description": "Number of measurements included in intensity calculations"
+        },
+        "specimen_magn_weight": {
+          "group": "Specimen Data",
+          "next_columns": ["specimen_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 60,
+          "label": "Specimen NRM Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized"
+        },
+        "er_expedition_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_expedition_name"
+          }],
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
+        },
+        "specimen_inferred_age_unit": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_inferred_age_unit"
+          }],
+          "unit": "Text",
+          "position": 26,
+          "label": "Specimen Inferred Age Unit",
+          "type": "String",
+          "description": "Specimen inferred age -- age unit",
+          "examples": ["Ma", "Ka", "Ga", "Years BP", "Years AD (+/-)", "Years Cal BP", "Years Cal AD (+/-)"]
+        },
+        "specimen_int_rel_sigma": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_rel_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 37,
+          "label": "Specimen Paleo Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "specimen_rsc": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_rsc"
+          }],
+          "unit": "Number in %",
+          "position": 54,
+          "label": "Specimen Maximum RSC",
+          "type": "Number",
+          "description": "Maximum relative susceptibility change"
+        },
+        "specimen_comp_n": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_comp_n"
+          }],
+          "unit": "Integer",
+          "position": 20,
+          "label": "Specimen Component N",
+          "type": "Integer",
+          "description": "Total number of magnetic components in specimen"
+        },
+        "specimen_polarity": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_polarity"
+          }],
+          "unit": "Flag",
+          "position": 15,
+          "label": "Specimen Magnetic Polarity",
+          "type": "String",
+          "description": "Polarity of specimen",
+          "examples": ["Polarity is normal (n)", "reversed (r)", "transitional (t)", "excursion (e) or intermediate (i)"]
+        },
+        "measurement_step_unit": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "measurement_step_unit"
+          }],
+          "unit": "Text",
+          "position": 14,
+          "label": "Measurement Step Unit",
+          "type": "String",
+          "description": "Step included in calculation -- unit"
+        },
+        "specimen_moment": {
+          "group": "Specimen Data",
+          "next_columns": ["specimen_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 58,
+          "label": "Specimen NRM Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment"
+        },
+        "specimen_int_mad": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_mad"
+          }],
+          "unit": "Number in Degrees",
+          "position": 39,
+          "label": "Specimen Paleo Intensity MAD",
+          "type": "Number",
+          "description": "Maximum angle of deviation of the best fit line"
+        },
+        "specimen_direction_type": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_direction_type"
+          }],
+          "unit": "Flag",
+          "position": 18,
+          "label": "Specimen Direction Type",
+          "type": "String",
+          "description": "Direction determined from (l) or plane (p)"
+        },
+        "er_formation_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_formation_name"
+          }],
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
+        },
+        "specimen_viscosity_index": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_viscosity_index"
+          }],
+          "unit": "Number in %",
+          "position": 55,
+          "label": "Specimen Viscosity Index",
+          "type": "Number",
+          "description": "Viscosity index"
+        },
+        "specimen_lab_field_ac": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_lab_field_ac"
+          }],
+          "unit": "Number in T",
+          "position": 57,
+          "label": "Specimen Lab Field AC",
+          "type": "Number",
+          "description": "Applied maximum or peak AC field in laboratory",
+          "examples": ["No field equals 0 and ambient field equals -1"]
+        },
+        "er_analyst_mail_names": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_analyst_mail_names"
+          }],
+          "unit": "Text",
+          "position": 69,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
+        },
+        "specimen_int": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int"
+          }],
+          "unit": "Number in T",
+          "position": 33,
+          "label": "Specimen Paleo Intensity",
+          "type": "Number",
+          "description": "Average field strength"
+        },
+        "specimen_description": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_description"
+          }],
+          "unit": "Text",
+          "position": 64,
+          "label": "Specimen Description",
+          "type": "String",
+          "description": "Detailed description"
+        },
+        "specimen_w": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_w"
+          }],
+          "unit": "Dimensionless",
+          "position": 41,
+          "label": "Specimen Weighting Factor",
+          "type": "Number",
+          "description": "Weighting factor"
+        },
+        "specimen_nrm": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_nrm"
+          }],
+          "unit": "Flag",
+          "position": 16,
+          "label": "Specimen NRM",
+          "type": "String",
+          "description": "Origin of the NRM is primary (p) or secondary (s)"
+        },
+        "specimen_inferred_age_low": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_inferred_age_low"
+          }],
+          "unit": "Custom",
+          "position": 24,
+          "label": "Specimen Inferred Age Low",
+          "type": "Number",
+          "description": "Specimen inferred age -- low range"
+        },
+        "measurement_step_min": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "measurement_step_min"
+          }],
+          "unit": "Custom",
+          "position": 12,
+          "label": "Measurement Step Minimum",
+          "type": "Number",
+          "description": "Step included in calculation -- lower bound"
+        },
+        "specimen_drats": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_drats"
+          }],
+          "unit": "Number in %",
+          "position": 53,
+          "label": "Specimen Difference Ratio Sum",
+          "type": "Number",
+          "description": "Sum of difference in first and second pTRM measurements",
+          "examples": ["Normalized by pTRM"]
+        },
+        "er_site_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_site_name"
+          }],
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
+        },
+        "er_citation_names": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_citation_names"
+          }],
+          "unit": "Text",
+          "position": 70,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
+        },
+        "er_sample_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_sample_name"
+          }],
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
+        },
+        "specimen_lab_field_dc": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_lab_field_dc"
+          }],
+          "unit": "Number in T",
+          "position": 56,
+          "label": "Specimen Lab Field DC",
+          "type": "Number",
+          "description": "Applied DC field in laboratory",
+          "examples": ["No field equals 0 and ambient field equals -1"]
+        },
+        "specimen_fvds": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_fvds"
+          }],
+          "unit": "Dimensionless",
+          "position": 44,
+          "label": "Specimen f VDS",
+          "type": "Number",
+          "description": "COE's quality factors -- vector difference sum of NRM components"
+        },
+        "pmag_rotation_codes": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "pmag_rotation_codes"
+          }],
+          "unit": "Text",
+          "position": 66,
+          "label": "Rotation Codes",
+          "type": "List",
+          "description": "Colon-delimited list of rotation codes",
+          "examples": ["MY-TILT1", "MY-TILT2", "MY-TRANS1"]
+        },
+        "er_specimen_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_specimen_name"
+          }],
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
+        },
+        "specimen_comp_nmb": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_comp_nmb"
+          }],
+          "unit": "Integer",
+          "position": 19,
+          "label": "Specimen Component Number",
+          "type": "Integer",
+          "description": "Magnetic component number"
+        },
+        "measurement_step_max": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "measurement_step_max"
+          }],
+          "unit": "Custom",
+          "position": 13,
+          "label": "Measurement Step Maximum",
+          "type": "Number",
+          "description": "Step included in calculation -- higher bound"
+        },
+        "specimen_magn_volume": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_magn_volume"
+          }],
+          "unit": "Number in A/m",
+          "position": 59,
+          "label": "Specimen NRM Magnetization Volume",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized"
+        },
+        "magic_instrument_codes": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "magic_instrument_codes"
+          }],
+          "unit": "Text",
+          "position": 68,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
+        },
+        "pmag_criteria_codes": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "pmag_criteria_codes"
+          }],
+          "unit": "Text",
+          "position": 65,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
+        },
+        "specimen_comp_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_comp_name"
+          }],
+          "unit": "Text",
+          "position": 21,
+          "label": "Specimen Component Name",
+          "type": "String",
+          "description": "Specimen component name",
+          "examples": ["Characteristic", "VRM", "Overprint", "A", "B", "C"]
+        },
+        "specimen_dec": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_dec"
+          }],
+          "unit": "Number in Degrees",
+          "position": 28,
+          "label": "Specimen Declination",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "specimen_int_ptrm_n": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_ptrm_n"
+          }],
+          "unit": "Dimensionless",
+          "position": 61,
+          "label": "Specimen Number pTRM Checks",
+          "type": "Number",
+          "description": "Number of pTRM checks used in experiment"
+        },
+        "er_mineral_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_mineral_name"
+          }],
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
+        },
+        "specimen_int_rel": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_int_rel"
+          }],
+          "unit": "Dimensionless",
+          "position": 36,
+          "label": "Specimen Paleo Intensity Relative",
+          "type": "Number",
+          "description": "Relative field strength"
+        },
+        "specimen_inferred_age_high": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "specimen_inferred_age_high"
+          }],
+          "unit": "Custom",
+          "position": 25,
+          "label": "Specimen Inferred Age High",
+          "type": "Number",
+          "description": "Specimen inferred age -- high range"
+        },
+        "er_section_name": {
+          "group": "Specimen Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
+        },
+        "er_fossil_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_fossil_name"
+          }],
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
+        },
+        "er_location_name": {
+          "group": "Specimen Data",
+          "next_columns": [{
+            "table": "pmag_specimens",
+            "column": "er_location_name"
+          }],
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Specimen Data',
-      'description': 'Specimen from sample'
+      "label": "Specimen Data",
+      "description": "Specimen from sample"
     },
-    'er_ages': {
-      'position': 13,
-      'columns': {
-        'er_member_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_member_name'
+    "er_ages": {
+      "position": 13,
+      "columns": {
+        "er_member_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_member_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 3,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'age_sigma': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age_sigma'
+        "age_sigma": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age_sigma"
           }],
-          'unit': 'Ages Determinations',
-          'position': 17,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Custom",
+          "position": 17,
+          "label": "Age Sigma",
+          "type": "Number",
+          "description": "Age -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'magic_method_codes': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Ages Determinations',
-          'position': 33,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 33,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'tiepoint_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'tiepoint_name'
+        "tiepoint_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "tiepoint_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 10,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Text",
+          "position": 10,
+          "label": "Tiepoint Name",
+          "type": "String",
+          "description": "Name for tiepoint horizon"
         },
-        'oxygen_stage': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'oxygen_stage'
+        "oxygen_stage": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "oxygen_stage"
           }],
-          'unit': 'Ages Determinations',
-          'position': 30,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['5e', '19', 'Younger Dryas']
+          "unit": "Text",
+          "position": 30,
+          "label": "Oxygen Stage Name",
+          "type": "String",
+          "description": "Oxygen stage name",
+          "examples": ["5e", "19", "Younger Dryas"]
         },
-        'timescale_stage': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'timescale_stage'
+        "timescale_stage": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "timescale_stage"
           }],
-          'unit': 'Ages Determinations',
-          'position': 25,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Maastrichtian', 'Oxfordian', 'Frasnian']
+          "unit": "Text",
+          "position": 25,
+          "label": "Timescale Stage",
+          "type": "String",
+          "description": "Timescale stage",
+          "examples": ["Maastrichtian", "Oxfordian", "Frasnian"]
         },
-        'timescale_period': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'timescale_period'
+        "timescale_period": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "timescale_period"
           }],
-          'unit': 'Ages Determinations',
-          'position': 23,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Devonian', 'Permian', 'Cretaceous', 'Paleocene']
+          "unit": "Text",
+          "position": 23,
+          "label": "Timescale Period",
+          "type": "String",
+          "description": "Timescale period",
+          "examples": ["Devonian", "Permian", "Cretaceous", "Paleocene"]
         },
-        'tiepoint_height': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'tiepoint_height'
+        "tiepoint_height": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "tiepoint_height"
           }],
-          'unit': 'Ages Determinations',
-          'position': 12,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Positive is up in section or core', 'while negative is down relative to reference height']
+          "unit": "Number in m",
+          "position": 12,
+          "label": "Tiepoint Stratigraphic Height",
+          "type": "Number",
+          "description": "Tiepoint stratigraphic height relative to reference tiepoint",
+          "examples": ["Positive is up in section or core", "while negative is down relative to reference height"]
         },
-        'timescale_era': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'timescale_era'
+        "timescale_era": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "timescale_era"
           }],
-          'unit': 'Ages Determinations',
-          'position': 22,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Neoproterozoic', 'Paleozoic', 'Mesozoic', 'Cenozoic']
+          "unit": "Text",
+          "position": 22,
+          "label": "Timescale Era",
+          "type": "String",
+          "description": "Timescale era",
+          "examples": ["Neoproterozoic", "Paleozoic", "Mesozoic", "Cenozoic"]
         },
-        'tiepoint_alternatives': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'tiepoint_alternatives'
+        "tiepoint_alternatives": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "tiepoint_alternatives"
           }],
-          'unit': 'Ages Determinations',
-          'position': 11,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Text",
+          "position": 11,
+          "label": "Tiepoint Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'age_range_low': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age_range_low'
+        "age_range_low": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age_range_low"
           }],
-          'unit': 'Ages Determinations',
-          'position': 18,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Custom",
+          "position": 18,
+          "label": "Age Low",
+          "type": "Number",
+          "description": "Age -- low range"
         },
-        'astronomical_stage': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'astronomical_stage'
+        "astronomical_stage": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "astronomical_stage"
           }],
-          'unit': 'Ages Determinations',
-          'position': 29,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Text",
+          "position": 29,
+          "label": "Astronomical Stage Name",
+          "type": "String",
+          "description": "Astronomical stage name"
         },
-        'age_description': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age_description'
+        "age_description": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age_description"
           }],
-          'unit': 'Ages Determinations',
-          'position': 32,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Text",
+          "position": 32,
+          "label": "Age Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'age_culture_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age_culture_name'
+        "age_culture_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age_culture_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 31,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Halaf culture']
+          "unit": "Text",
+          "position": 31,
+          "label": "Age Culture Name",
+          "type": "String",
+          "description": "Age culture name",
+          "examples": ["Halaf culture"]
         },
-        'biostrat_zone': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'biostrat_zone'
+        "biostrat_zone": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "biostrat_zone"
           }],
-          'unit': 'Ages Determinations',
-          'position': 26,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['NN10', 'Wasatchian']
+          "unit": "Text",
+          "position": 26,
+          "label": "Biostratigraphic Zone",
+          "type": "String",
+          "description": "Biostratigraphic zone",
+          "examples": ["NN10", "Wasatchian"]
         },
-        'er_expedition_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 0,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'age_unit': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age_unit'
+        "age_unit": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age_unit"
           }],
-          'unit': 'Ages Determinations',
-          'position': 20,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Ma', 'Ka', 'Ga', 'Years BP', 'Years AD (+/-)', 'Years Cal BP', 'Years Cal AD (+/-)']
+          "unit": "Text",
+          "position": 20,
+          "label": "Age Unit",
+          "type": "String",
+          "description": "Age -- unit",
+          "examples": ["Ma", "Ka", "Ga", "Years BP", "Years AD (+/-)", "Years Cal BP", "Years Cal AD (+/-)"]
         },
-        'tiepoint_type': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'tiepoint_type'
+        "tiepoint_type": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "tiepoint_type"
           }],
-          'unit': 'Ages Determinations',
-          'position': 15,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Fossil Layer', 'Volcanic Tuff', 'Basalt Flow', 'Magnetic Anomaly']
+          "unit": "Text",
+          "position": 15,
+          "label": "Tiepoint Type",
+          "type": "String",
+          "description": "Tiepoint type",
+          "examples": ["Fossil Layer", "Volcanic Tuff", "Basalt Flow", "Magnetic Anomaly"]
         },
-        'er_formation_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_formation_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 2,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'magnetic_reversal_chron': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'magnetic_reversal_chron'
+        "magnetic_reversal_chron": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "magnetic_reversal_chron"
           }],
-          'unit': 'Ages Determinations',
-          'position': 28,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['C5n', 'C5n.2n']
+          "unit": "Text",
+          "position": 28,
+          "label": "Magnetic Reversal Chron",
+          "type": "String",
+          "description": "Magnetic reversal chron",
+          "examples": ["C5n", "C5n.2n"]
         },
-        'age_range_high': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age_range_high'
+        "age_range_high": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age_range_high"
           }],
-          'unit': 'Ages Determinations',
-          'position': 19,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Custom",
+          "position": 19,
+          "label": "Age High",
+          "type": "Number",
+          "description": "Age -- high range"
         },
-        'er_site_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_site_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 5,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_citation_names"
           }],
-          'unit': 'Ages Determinations',
-          'position': 35,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 35,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_timescale_citation_names': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_timescale_citation_names'
+        "er_timescale_citation_names": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_timescale_citation_names"
           }],
-          'unit': 'Ages Determinations',
-          'position': 34,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Harland et al. 1993', 'Cande & Kent 1992', 'This study']
+          "unit": "Text",
+          "position": 34,
+          "label": "Citation Names Timescale Definition",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Harland et al. 1993", "Cande & Kent 1992", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_sample_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 6,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'er_specimen_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 7,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'tiepoint_height_sigma': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'tiepoint_height_sigma'
+        "tiepoint_height_sigma": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "tiepoint_height_sigma"
           }],
-          'unit': 'Ages Determinations',
-          'position': 13,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in m",
+          "position": 13,
+          "label": "Tiepoint Stratigraphic Height Sigma",
+          "type": "Number",
+          "description": "Tiepoint stratigraphic height uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'conodont_zone': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'conodont_zone'
+        "conodont_zone": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "conodont_zone"
           }],
-          'unit': 'Ages Determinations',
-          'position': 27,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations'
+          "unit": "Text",
+          "position": 27,
+          "label": "Conodont Zone",
+          "type": "String",
+          "description": "Conodont zone"
         },
-        'age': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'age'
+        "age": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "age"
           }],
-          'unit': 'Ages Determinations',
-          'position': 16,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Preferred age']
+          "unit": "Custom",
+          "position": 16,
+          "label": "Age",
+          "type": "Number",
+          "description": "Age",
+          "examples": ["Preferred age"]
         },
-        'timescale_epoch': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'timescale_epoch'
+        "timescale_epoch": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "timescale_epoch"
           }],
-          'unit': 'Ages Determinations',
-          'position': 24,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Late Triassic', 'Early Cretaceous', 'Eocene', 'Miocene', 'Pleistocene']
+          "unit": "Text",
+          "position": 24,
+          "label": "Timescale Epoch",
+          "type": "String",
+          "description": "Timescale epoch",
+          "examples": ["Late Triassic", "Early Cretaceous", "Eocene", "Miocene", "Pleistocene"]
         },
-        'er_mineral_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 9,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'tiepoint_elevation': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'tiepoint_elevation'
+        "tiepoint_elevation": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "tiepoint_elevation"
           }],
-          'unit': 'Ages Determinations',
-          'position': 14,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Meters above sealevel']
+          "unit": "Number in m",
+          "position": 14,
+          "label": "Tiepoint Elevation",
+          "type": "Number",
+          "description": "Tiepoint elevation relative to sealevel",
+          "examples": ["Meters above sealevel"]
         },
-        'timescale_eon': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'timescale_eon'
+        "timescale_eon": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "timescale_eon"
           }],
-          'unit': 'Ages Determinations',
-          'position': 21,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Phanerozoic', 'Proterozoic', 'Archean']
+          "unit": "Text",
+          "position": 21,
+          "label": "Timescale Eon",
+          "type": "String",
+          "description": "Timescale eon",
+          "examples": ["Phanerozoic", "Proterozoic", "Archean"]
         },
-        'er_section_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [],
-          'unit': 'Ages Determinations',
-          'position': 4,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Ages Determinations",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_fossil_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 8,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Ages Determinations',
-          'next_columns': [{
-            'table': 'er_ages',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Ages Determinations",
+          "next_columns": [{
+            "table": "er_ages",
+            "column": "er_location_name"
           }],
-          'unit': 'Ages Determinations',
-          'position': 1,
-          'label': 'Ages Determinations',
-          'type': 'Ages Determinations',
-          'description': 'Ages Determinations',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Ages Determinations',
-      'description': 'Ages for discrete samples or horizons in stratigraphic sections or cores'
+      "label": "Ages Determinations",
+      "description": "Ages for discrete samples or horizons in stratigraphic sections or cores"
     },
-    'pmag_sites': {
-      'position': 22,
-      'columns': {
-        'er_member_name': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_member_name'
+    "pmag_sites": {
+      "position": 22,
+      "columns": {
+        "er_member_name": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_member_name"
           }],
-          'unit': 'Site Data',
-          'position': 3,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'er_sample_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_sample_names'
+        "er_sample_names": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_sample_names"
           }],
-          'unit': 'Site Data',
-          'position': 6,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Bas123a-01', 'Bas123a-04', 'Bas123a-19']
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name List",
+          "type": "List",
+          "description": "Colon-delimited list of sample names",
+          "examples": ["Bas123a-01", "Bas123a-04", "Bas123a-19"]
         },
-        'site_n': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_n'
+        "site_n": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_n"
           }],
-          'unit': 'Site Data',
-          'position': 30,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Integer",
+          "position": 30,
+          "label": "Site N",
+          "type": "Integer",
+          "description": "Number of samples included in directional calculations"
         },
-        'site_int_sigma': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int_sigma'
+        "site_int_sigma": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int_sigma"
           }],
-          'unit': 'Site Data',
-          'position': 37,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in T",
+          "position": 37,
+          "label": "Site Paleo Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'magic_experiment_name': {
-          'group': 'Site Data',
-          'next_columns': [],
-          'unit': 'Site Data',
-          'position': 10,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['KOPA-299-1']
+        "magic_experiment_name": {
+          "group": "Site Data",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 10,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
         },
-        'magic_method_codes': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Site Data',
-          'position': 49,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 49,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'site_r': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_r'
+        "site_r": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_r"
           }],
-          'unit': 'Site Data',
-          'position': 34,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Dimensionless",
+          "position": 34,
+          "label": "Site R",
+          "type": "Number",
+          "description": "Resultant Fisher vector"
         },
-        'site_inferred_age_sigma': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_inferred_age_sigma'
+        "site_inferred_age_sigma": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_inferred_age_sigma"
           }],
-          'unit': 'Site Data',
-          'position': 22,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Custom",
+          "position": 22,
+          "label": "Site Inferred Age Sigma",
+          "type": "Number",
+          "description": "Site inferred age -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'site_description': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_description'
+        "site_description": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_description"
           }],
-          'unit': 'Site Data',
-          'position': 46,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Text",
+          "position": 46,
+          "label": "Site Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'er_fossil_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_fossil_names'
+        "er_fossil_names": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_fossil_names"
           }],
-          'unit': 'Site Data',
-          'position': 8,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['AMM43-03', 'AMM43-19']
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name List",
+          "type": "List",
+          "description": "Colon-delimited list of fossil names",
+          "examples": ["AMM43-03", "AMM43-19"]
         },
-        'site_int_rel': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int_rel'
+        "site_int_rel": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int_rel"
           }],
-          'unit': 'Site Data',
-          'position': 39,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Dimensionless",
+          "position": 39,
+          "label": "Site Paleo Intensity Relative",
+          "type": "Number",
+          "description": "Relative field strength"
         },
-        'er_specimen_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_specimen_names'
+        "er_specimen_names": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_specimen_names"
           }],
-          'unit': 'Site Data',
-          'position': 7,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Bas123a-01x', 'Bas123a-01y']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name List",
+          "type": "List",
+          "description": "Colon-delimited list of specimen names",
+          "examples": ["Bas123a-01x", "Bas123a-01y"]
         },
-        'site_sigma': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_sigma'
+        "site_sigma": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_sigma"
           }],
-          'unit': 'Site Data',
-          'position': 28,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in Degrees",
+          "position": 28,
+          "label": "Site Sigma",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- standard deviation",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'site_int_n': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int_n'
+        "site_int_n": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int_n"
           }],
-          'unit': 'Site Data',
-          'position': 42,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Integer",
+          "position": 42,
+          "label": "Site Paleo Intensity N",
+          "type": "Integer",
+          "description": "Number of samples included in intensity calculations"
         },
-        'site_inc': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_inc'
+        "site_inc": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_inc"
           }],
-          'unit': 'Site Data',
-          'position': 26,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Decimal degrees between -90 and 90']
+          "unit": "Number in Degrees",
+          "position": 26,
+          "label": "Site Inclination",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
         },
-        'er_mineral_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_mineral_names'
+        "er_mineral_names": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_mineral_names"
           }],
-          'unit': 'Site Data',
-          'position': 9,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name List",
+          "type": "List",
+          "description": "Colon-delimited list of mineral names"
         },
-        'site_direction_type': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_direction_type'
+        "site_direction_type": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_direction_type"
           }],
-          'unit': 'Site Data',
-          'position': 17,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Flag",
+          "position": 17,
+          "label": "Site Direction Type",
+          "type": "String",
+          "description": "Direction determined from (l) or plane (p)"
         },
-        'site_comp_nmb': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_comp_nmb'
+        "site_comp_nmb": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_comp_nmb"
           }],
-          'unit': 'Site Data',
-          'position': 18,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Integer",
+          "position": 18,
+          "label": "Site Component Number",
+          "type": "Integer",
+          "description": "Magnetic component number"
         },
-        'site_nrm': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_nrm'
+        "site_nrm": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_nrm"
           }],
-          'unit': 'Site Data',
-          'position': 16,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Flag",
+          "position": 16,
+          "label": "Site NRM",
+          "type": "String",
+          "description": "Origin of the NRM is primary (p) or secondary (s)"
         },
-        'site_int_sigma_perc': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int_sigma_perc'
+        "site_int_sigma_perc": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int_sigma_perc"
           }],
-          'unit': 'Site Data',
-          'position': 38,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in %",
+          "position": 38,
+          "label": "Site Paleo Intensity Sigma %",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'site_dec': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_dec'
+        "site_dec": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_dec"
           }],
-          'unit': 'Site Data',
-          'position': 27,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Decimal degrees between 0 and 360']
+          "unit": "Number in Degrees",
+          "position": 27,
+          "label": "Site Declination",
+          "type": "Number",
+          "description": "Directions in coordinates specified by tilt correction -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
         },
-        'measurement_file_name': {
-          'group': 'Site Data',
-          'next_columns': [],
-          'unit': 'Site Data',
-          'position': 11,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Hart.et.al.2000.data.txt']
+        "measurement_file_name": {
+          "group": "Site Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 11,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
         },
-        'site_polarity': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_polarity'
+        "site_polarity": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_polarity"
           }],
-          'unit': 'Site Data',
-          'position': 15,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Polarity is normal (n)', 'reversed (r)', 'transitional (t)', 'excursion (e) or intermediate (i)']
+          "unit": "Flag",
+          "position": 15,
+          "label": "Site Magnetic Polarity",
+          "type": "String",
+          "description": "Polarity of site",
+          "examples": ["Polarity is normal (n)", "reversed (r)", "transitional (t)", "excursion (e) or intermediate (i)"]
         },
-        'site_inferred_age_high': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_inferred_age_high'
+        "site_inferred_age_high": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_inferred_age_high"
           }],
-          'unit': 'Site Data',
-          'position': 24,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Custom",
+          "position": 24,
+          "label": "Site Inferred Age High",
+          "type": "Number",
+          "description": "Site inferred age -- high range"
         },
-        'er_expedition_name': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Site Data',
-          'position': 0,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'site_int': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int'
+        "site_int": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int"
           }],
-          'unit': 'Site Data',
-          'position': 36,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Number in T",
+          "position": 36,
+          "label": "Site Paleo Intensity",
+          "type": "Number",
+          "description": "Average field strength"
         },
-        'site_inferred_age_low': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_inferred_age_low'
+        "site_inferred_age_low": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_inferred_age_low"
           }],
-          'unit': 'Site Data',
-          'position': 23,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Custom",
+          "position": 23,
+          "label": "Site Inferred Age Low",
+          "type": "Number",
+          "description": "Site inferred age -- low range"
         },
-        'site_comp_n': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_comp_n'
+        "site_comp_n": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_comp_n"
           }],
-          'unit': 'Site Data',
-          'position': 19,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Integer",
+          "position": 19,
+          "label": "Site Component N",
+          "type": "Integer",
+          "description": "Total number of magnetic components in specimen"
         },
-        'site_inferred_age': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_inferred_age'
+        "site_inferred_age": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_inferred_age"
           }],
-          'unit': 'Site Data',
-          'position': 21,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Custom",
+          "position": 21,
+          "label": "Site Inferred Age",
+          "type": "Number",
+          "description": "Site inferred age"
         },
-        'site_int_rel_sigma_perc': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int_rel_sigma_perc'
+        "site_int_rel_sigma_perc": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int_rel_sigma_perc"
           }],
-          'unit': 'Site Data',
-          'position': 41,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Number in %",
+          "position": 41,
+          "label": "Site Paleo Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'measurement_step_unit': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'measurement_step_unit'
+        "measurement_step_unit": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "measurement_step_unit"
           }],
-          'unit': 'Site Data',
-          'position': 14,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Text",
+          "position": 14,
+          "label": "Measurement Step Unit",
+          "type": "String",
+          "description": "Step included in calculation -- unit"
         },
-        'site_n_planes': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_n_planes'
+        "site_n_planes": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_n_planes"
           }],
-          'unit': 'Site Data',
-          'position': 32,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Integer",
+          "position": 32,
+          "label": "Site N Best-Fit Planes",
+          "type": "Integer",
+          "description": "Number of samples included based on best-fit planes"
         },
-        'site_alpha95': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_alpha95'
+        "site_alpha95": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_alpha95"
           }],
-          'unit': 'Site Data',
-          'position': 29,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Confidence Level = 95%']
+          "unit": "Number in Degrees",
+          "position": 29,
+          "label": "Site Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Confidence Level = 95%"]
         },
-        'er_formation_name': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_formation_name"
           }],
-          'unit': 'Site Data',
-          'position': 2,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'er_analyst_mail_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Site Data',
-          'position': 51,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 51,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'measurement_step_min': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'measurement_step_min'
+        "measurement_step_min": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "measurement_step_min"
           }],
-          'unit': 'Site Data',
-          'position': 12,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Custom",
+          "position": 12,
+          "label": "Measurement Step Minimum",
+          "type": "Number",
+          "description": "Step included in calculation -- lower bound"
         },
-        'er_site_name': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_site_name"
           }],
-          'unit': 'Site Data',
-          'position': 5,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_citation_names"
           }],
-          'unit': 'Site Data',
-          'position': 52,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 52,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'pmag_rotation_codes': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'pmag_rotation_codes'
+        "pmag_rotation_codes": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "pmag_rotation_codes"
           }],
-          'unit': 'Site Data',
-          'position': 48,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['MY-TILT1', 'MY-TILT2', 'MY-TRANS1']
+          "unit": "Text",
+          "position": 48,
+          "label": "Rotation Codes",
+          "type": "List",
+          "description": "Colon-delimited list of rotation codes",
+          "examples": ["MY-TILT1", "MY-TILT2", "MY-TRANS1"]
         },
-        'site_moment': {
-          'group': 'Site Data',
-          'next_columns': [],
-          'unit': 'Site Data',
-          'position': 43,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+        "site_moment": {
+          "group": "Site Data",
+          "next_columns": ["site_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 43,
+          "label": "Site NRM Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment"
         },
-        'site_inferred_age_unit': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_inferred_age_unit'
+        "site_inferred_age_unit": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_inferred_age_unit"
           }],
-          'unit': 'Site Data',
-          'position': 25,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Ma', 'Ka', 'Ga', 'Years BP', 'Years AD (+/-)', 'Years Cal BP', 'Years Cal AD (+/-)']
+          "unit": "Text",
+          "position": 25,
+          "label": "Site Inferred Age Unit",
+          "type": "String",
+          "description": "Site inferred age -- unit",
+          "examples": ["Ma", "Ka", "Ga", "Years BP", "Years AD (+/-)", "Years Cal BP", "Years Cal AD (+/-)"]
         },
-        'site_comp_name': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_comp_name'
+        "site_comp_name": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_comp_name"
           }],
-          'unit': 'Site Data',
-          'position': 20,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Characteristic', 'VRM', 'Overprint', 'A', 'B', 'C']
+          "unit": "Text",
+          "position": 20,
+          "label": "Site Component Name",
+          "type": "String",
+          "description": "Site component name",
+          "examples": ["Characteristic", "VRM", "Overprint", "A", "B", "C"]
         },
-        'site_magn_weight': {
-          'group': 'Site Data',
-          'next_columns': [],
-          'unit': 'Site Data',
-          'position': 45,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+        "site_magn_weight": {
+          "group": "Site Data",
+          "next_columns": ["site_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 45,
+          "label": "Site NRM Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized"
         },
-        'measurement_step_max': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'measurement_step_max'
+        "measurement_step_max": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "measurement_step_max"
           }],
-          'unit': 'Site Data',
-          'position': 13,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Custom",
+          "position": 13,
+          "label": "Measurement Step Maximum",
+          "type": "Number",
+          "description": "Step included in calculation -- higher bound"
         },
-        'magic_instrument_codes': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Site Data',
-          'position': 50,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 50,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'pmag_criteria_codes': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'pmag_criteria_codes'
+        "pmag_criteria_codes": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "pmag_criteria_codes"
           }],
-          'unit': 'Site Data',
-          'position': 47,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['MY-MAD', 'MY-APLHA95']
+          "unit": "Text",
+          "position": 47,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
         },
-        'site_magn_volume': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_magn_volume'
+        "site_magn_volume": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_magn_volume"
           }],
-          'unit': 'Site Data',
-          'position': 44,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Number in A/m",
+          "position": 44,
+          "label": "Site NRM Magnetization Volume",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized"
         },
-        'site_k': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_k'
+        "site_k": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_k"
           }],
-          'unit': 'Site Data',
-          'position': 33,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Dimensionless",
+          "position": 33,
+          "label": "Site K",
+          "type": "Number",
+          "description": "Fisher's dispersion parameter Kappa"
         },
-        'site_tilt_correction': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_tilt_correction'
+        "site_tilt_correction": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_tilt_correction"
           }],
-          'unit': 'Site Data',
-          'position': 35,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)']
+          "unit": "Number in %",
+          "position": 35,
+          "label": "Site Tilt Correction",
+          "type": "Number",
+          "description": "Percentage tilt correction applied to the data",
+          "examples": ["Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)"]
         },
-        'site_n_lines': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_n_lines'
+        "site_n_lines": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_n_lines"
           }],
-          'unit': 'Site Data',
-          'position': 31,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
+          "unit": "Integer",
+          "position": 31,
+          "label": "Site N Best-Fit Lines",
+          "type": "Integer",
+          "description": "Number of samples included based on best-fit lines"
         },
-        'er_section_name': {
-          'group': 'Site Data',
-          'next_columns': [],
-          'unit': 'Site Data',
-          'position': 4,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Site Data",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'site_int_rel_sigma': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_int_rel_sigma'
+        "site_int_rel_sigma": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "site_int_rel_sigma"
           }],
-          'unit': 'Site Data',
-          'position': 40,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Uncertainty = 1xSD']
+          "unit": "Dimensionless",
+          "position": 40,
+          "label": "Site Paleo Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
         },
-        'er_location_name': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Site Data",
+          "next_columns": [{
+            "table": "pmag_sites",
+            "column": "er_location_name"
           }],
-          'unit': 'Site Data',
-          'position': 1,
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Site Data',
-      'description': 'Unique rock unit in terms of magnetization and geological age'
+      "label": "Site Data",
+      "description": "Unique rock unit in terms of magnetization and geological age"
     },
-    'rmag_susceptibility': {
-      'position': 26,
-      'columns': {
-        'er_member_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_member_name'
+    "rmag_susceptibility": {
+      "position": 26,
+      "columns": {
+        "er_member_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_member_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 3,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 3,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_experiment_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 11,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['KOPA-299-1']
+        "magic_experiment_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 11,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
         },
-        'susceptibility_h_high': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'susceptibility_h_high'
+        "susceptibility_h_high": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_h_high"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 20,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+          "unit": "Number in T",
+          "position": 20,
+          "label": "Susceptibility Amplitude High",
+          "type": "Number",
+          "description": "Xhd calculation -- high amplitude"
         },
-        'magic_method_codes': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 29,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 29,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'susceptibility_temp_critical': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 23,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_temp_critical": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Number in K",
+          "position": 23,
+          "label": "Susceptibility Critical Temperature",
+          "type": "Number",
+          "description": "Temperature at which some transition occurs"
         },
-        'susceptibility_temp_mineral': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 25,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Magnetite', 'hematite', 'maghemite']
+        "susceptibility_temp_mineral": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 25,
+          "label": "Susceptibility Critical Mineral Type",
+          "type": "List",
+          "description": "Interpreted mineral(s) causing the transition",
+          "examples": ["Magnetite", "hematite", "maghemite"]
         },
-        'susceptibility_temp_type': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 24,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Verway', 'Morin', 'pyrrhotite', 'Neel', 'spin glass', 'Curie', 'Hopkinson', 'blocking', 'unblocking']
+        "susceptibility_temp_type": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 24,
+          "label": "Susceptibility Critical Temperature Type",
+          "type": "String",
+          "description": "Interpreted type of temperature transition",
+          "examples": ["Verway", "Morin", "pyrrhotite", "Neel", "spin glass", "Curie", "Hopkinson", "blocking", "unblocking"]
         },
-        'susceptibility_h_low': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'susceptibility_h_low'
+        "susceptibility_h_low": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_h_low"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 19,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+          "unit": "Number in T",
+          "position": 19,
+          "label": "Susceptibility Amplitude Low",
+          "type": "Number",
+          "description": "Xhd calculation -- low amplitude"
         },
-        'susceptibility_xfd': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 15,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_xfd": {
+          "group": "Susceptibility Experiments",
+          "next_columns": ["susceptibility_f"],
+          "unit": "Dimensionless",
+          "position": 15,
+          "label": "Susceptibility Xfd",
+          "type": "Number",
+          "description": "Frequency dependence "
         },
-        'rmag_criteria_codes': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'rmag_criteria_codes'
+        "rmag_criteria_codes": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "rmag_criteria_codes"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 28,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['MY-MAD', 'MY-APLHA95']
+          "unit": "Text",
+          "position": 28,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
         },
-        'susceptibility_temp_low': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 21,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_temp_low": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Number in K",
+          "position": 21,
+          "label": "Susceptibility Temperature Low",
+          "type": "Number",
+          "description": "Critical, Xfd or Xhd temperature calculation -- low range"
         },
-        'susceptibility_k': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 13,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_k": {
+          "group": "Susceptibility Experiments",
+          "next_columns": ["susceptibility_chi_volume"],
+          "unit": "Number in SI",
+          "position": 13,
+          "label": "Susceptibility K",
+          "type": "Number",
+          "description": "Average magnetic susceptibility -- volume normalized"
         },
-        'susceptibility_description': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'susceptibility_description'
+        "susceptibility_description": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_description"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 27,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+          "unit": "Text",
+          "position": 27,
+          "label": "Susceptibility Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'measurement_file_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 12,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Hart.et.al.2000.data.txt']
+        "measurement_file_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 12,
+          "label": "Measurement File Name",
+          "type": "String",
+          "description": "Name for MagIC format text file containing measurement data",
+          "examples": ["Hart.et.al.2000.data.txt"]
         },
-        'er_synthetic_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_synthetic_name'
+        "er_synthetic_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_synthetic_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 10,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['STD1546-A1']
+          "unit": "Text",
+          "position": 10,
+          "label": "Synthetic Material Name",
+          "type": "String",
+          "description": "Name for synthetic material",
+          "examples": ["STD1546-A1"]
         },
-        'er_expedition_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 0,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 0,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'susceptibility_x': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 14,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_x": {
+          "group": "Susceptibility Experiments",
+          "next_columns": ["susceptibility_chi_mass"],
+          "unit": "Number in m3/kg",
+          "position": 14,
+          "label": "Susceptibility X",
+          "type": "Number",
+          "description": "Average magnetic susceptibility -- mass normalized"
         },
-        'susceptibility_temp_high': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 22,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_temp_high": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Number in K",
+          "position": 22,
+          "label": "Susceptibility Temperature High",
+          "type": "Number",
+          "description": "Critical, Xfd or Xhd temperature calculation -- high range"
         },
-        'er_formation_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_formation_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 2,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 2,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'susceptibility_f_low': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'susceptibility_f_low'
+        "susceptibility_f_low": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_f_low"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 16,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+          "unit": "Number in Hz",
+          "position": 16,
+          "label": "Susceptibility Frequency Low",
+          "type": "Number",
+          "description": "Xfd calculation -- low frequency"
         },
-        'er_analyst_mail_names': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_analyst_mail_names'
+        "er_analyst_mail_names": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_analyst_mail_names"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 31,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 31,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'susceptibility_f_high': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'susceptibility_f_high'
+        "susceptibility_f_high": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "susceptibility_f_high"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 17,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+          "unit": "Number in Hz",
+          "position": 17,
+          "label": "Susceptibility Frequency High",
+          "type": "Number",
+          "description": "Xfd calculation -- high frequency"
         },
-        'er_site_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_site_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 5,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 5,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_citation_names"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 32,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 32,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_sample_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 6,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 6,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'susceptibility_xhd': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 18,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_xhd": {
+          "group": "Susceptibility Experiments",
+          "next_columns": ["susceptibility_h"],
+          "unit": "Dimensionless",
+          "position": 18,
+          "label": "Susceptibility Xhd",
+          "type": "Number",
+          "description": "Amplitude dependence"
         },
-        'er_specimen_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 7,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 7,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'susceptibility_xx': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 26,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments'
+        "susceptibility_xx": {
+          "group": "Susceptibility Experiments",
+          "next_columns": ["susceptibility_loss_tangent"],
+          "unit": "Dimensionless",
+          "position": 26,
+          "label": "Susceptibility X?? Over X?",
+          "type": "Number",
+          "description": "Loss tangent or X(quadrature) over X(inphase)"
         },
-        'magic_instrument_codes': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'magic_instrument_codes'
+        "magic_instrument_codes": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "magic_instrument_codes"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 30,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['SIO-Bubba', 'IRM-OldBlue']
+          "unit": "Text",
+          "position": 30,
+          "label": "Instrument Codes",
+          "type": "List",
+          "description": "Colon-delimited list of instrument codes",
+          "examples": ["SIO-Bubba", "IRM-OldBlue"]
         },
-        'er_mineral_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_mineral_name'
+        "er_mineral_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_mineral_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 9,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['San03-001']
+          "unit": "Text",
+          "position": 9,
+          "label": "Mineral Name",
+          "type": "String",
+          "description": "Name for mineral",
+          "examples": ["San03-001"]
         },
-        'er_section_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [],
-          'unit': 'Susceptibility Experiments',
-          'position': 4,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 4,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_fossil_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 8,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 8,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Susceptibility Experiments",
+          "next_columns": [{
+            "table": "rmag_susceptibility",
+            "column": "er_location_name"
           }],
-          'unit': 'Susceptibility Experiments',
-          'position': 1,
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Susceptibility Experiments',
-      'description': 'Experiment for susceptibility parameters'
+      "label": "Susceptibility Experiments",
+      "description": "Experiment for susceptibility parameters"
     },
-    'er_fossils': {
-      'position': 10,
-      'columns': {
-        'er_member_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_member_name'
+    "er_fossils": {
+      "position": 10,
+      "columns": {
+        "er_member_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_member_name"
           }],
-          'unit': 'Fossils',
-          'position': 5,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Glasshound Member']
+          "unit": "Text",
+          "position": 5,
+          "label": "Member Name",
+          "type": "String",
+          "description": "Name for member",
+          "examples": ["Glasshound Member"]
         },
-        'magic_method_codes': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'magic_method_codes'
+        "magic_method_codes": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "magic_method_codes"
           }],
-          'unit': 'Fossils',
-          'position': 25,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
+          "unit": "Text",
+          "position": 25,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
         },
-        'fossil_density': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_density'
+        "fossil_density": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_density"
           }],
-          'unit': 'Fossils',
-          'position': 23,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils'
+          "unit": "Number in g/m3",
+          "position": 23,
+          "label": "Fossil Density",
+          "type": "Number",
+          "description": "Fossil density"
         },
-        'er_scientist_mail_names': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_scientist_mail_names'
+        "er_scientist_mail_names": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_scientist_mail_names"
           }],
-          'unit': 'Fossils',
-          'position': 26,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+          "unit": "Text",
+          "position": 26,
+          "label": "Research Scientist Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for scientists who prepared fossil sample",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
         },
-        'fossil_class': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_class'
+        "fossil_class": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_class"
           }],
-          'unit': 'Fossils',
-          'position': 11,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Branchiopoda', 'Calcarea', 'Camptostromoidea']
+          "unit": "Text",
+          "position": 11,
+          "label": "Fossil Class",
+          "type": "String",
+          "description": "Fossil class",
+          "examples": ["Branchiopoda", "Calcarea", "Camptostromoidea"]
         },
-        'fossil_description': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_description'
+        "fossil_description": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_description"
           }],
-          'unit': 'Fossils',
-          'position': 24,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils'
+          "unit": "Text",
+          "position": 24,
+          "label": "Fossil Description",
+          "type": "String",
+          "description": "Detailed description"
         },
-        'fossil_volume': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_volume'
+        "fossil_volume": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_volume"
           }],
-          'unit': 'Fossils',
-          'position': 21,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils'
+          "unit": "Number in m3",
+          "position": 21,
+          "label": "Fossil Volume",
+          "type": "Number",
+          "description": "Fossil volume"
         },
-        'fossil_family': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_family'
+        "fossil_family": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_family"
           }],
-          'unit': 'Fossils',
-          'position': 13,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Aceraceae', 'Mucoraceae']
+          "unit": "Text",
+          "position": 13,
+          "label": "Fossil Family",
+          "type": "String",
+          "description": "Fossil family",
+          "examples": ["Aceraceae", "Mucoraceae"]
         },
-        'fossil_weight': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_weight'
+        "fossil_weight": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_weight"
           }],
-          'unit': 'Fossils',
-          'position': 22,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils'
+          "unit": "Number in g",
+          "position": 22,
+          "label": "Fossil Weight",
+          "type": "Number",
+          "description": "Fossil weight"
         },
-        'fossil_genus': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_genus'
+        "fossil_genus": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_genus"
           }],
-          'unit': 'Fossils',
-          'position': 14,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Acer', 'Canis', 'Rhizopus']
+          "unit": "Text",
+          "position": 14,
+          "label": "Fossil Genus",
+          "type": "String",
+          "description": "Fossil genus",
+          "examples": ["Acer", "Canis", "Rhizopus"]
         },
-        'er_expedition_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_expedition_name'
+        "er_expedition_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_expedition_name"
           }],
-          'unit': 'Fossils',
-          'position': 2,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['AVON02MV']
+          "unit": "Text",
+          "position": 2,
+          "label": "Expedition Name",
+          "type": "String",
+          "description": "Name for seagoing or land expedition",
+          "examples": ["AVON02MV"]
         },
-        'fossil_shape': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_shape'
+        "fossil_shape": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_shape"
           }],
-          'unit': 'Fossils',
-          'position': 20,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils'
+          "unit": "Text",
+          "position": 20,
+          "label": "Fossil Shape",
+          "type": "String",
+          "description": "Fossil shape"
         },
-        'er_formation_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_formation_name'
+        "er_formation_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_formation_name"
           }],
-          'unit': 'Fossils',
-          'position': 4,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Bluebird Formation']
+          "unit": "Text",
+          "position": 4,
+          "label": "Formation Name",
+          "type": "String",
+          "description": "Name for formation",
+          "examples": ["Bluebird Formation"]
         },
-        'fossil_alteration_type': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_alteration_type'
+        "fossil_alteration_type": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_alteration_type"
           }],
-          'unit': 'Fossils',
-          'position': 19,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Hydrothermal', 'Diagenetic', 'Weathering', 'Oxidation', 'Metamorphic']
+          "unit": "Text",
+          "position": 19,
+          "label": "Fossil Alteration Type",
+          "type": "String",
+          "description": "Fossil alteration type",
+          "examples": ["Hydrothermal", "Diagenetic", "Weathering", "Oxidation", "Metamorphic"]
         },
-        'er_fossil_alternatives': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_fossil_alternatives'
+        "er_fossil_alternatives": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_fossil_alternatives"
           }],
-          'unit': 'Fossils',
-          'position': 1,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils'
+          "unit": "Text",
+          "position": 1,
+          "label": "Fossil Name Alternatives",
+          "type": "List",
+          "description": "Colon-delimited list of alternative names and abbreviations"
         },
-        'fossil_preservation': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_preservation'
+        "fossil_preservation": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_preservation"
           }],
-          'unit': 'Fossils',
-          'position': 16,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Pristine', 'Altered']
+          "unit": "Text",
+          "position": 16,
+          "label": "Fossil Preservation",
+          "type": "String",
+          "description": "Fossil preservation",
+          "examples": ["Pristine", "Altered"]
         },
-        'fossil_phylum': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_phylum'
+        "fossil_phylum": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_phylum"
           }],
-          'unit': 'Fossils',
-          'position': 10,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Chordata', 'Magnoliophyta', 'Zygomycota', 'Firmicutes', 'Chlorophyta']
+          "unit": "Text",
+          "position": 10,
+          "label": "Fossil Phylum",
+          "type": "String",
+          "description": "Fossil phylum",
+          "examples": ["Chordata", "Magnoliophyta", "Zygomycota", "Firmicutes", "Chlorophyta"]
         },
-        'fossil_species': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_species'
+        "fossil_species": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_species"
           }],
-          'unit': 'Fossils',
-          'position': 15,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['A. Saccharum', 'R. Stolonifer']
+          "unit": "Text",
+          "position": 15,
+          "label": "Fossil Species",
+          "type": "String",
+          "description": "Fossil species",
+          "examples": ["A. Saccharum", "R. Stolonifer"]
         },
-        'er_site_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_site_name'
+        "er_site_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_site_name"
           }],
-          'unit': 'Fossils',
-          'position': 7,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Bas123a']
+          "unit": "Text",
+          "position": 7,
+          "label": "Site Name",
+          "type": "String",
+          "description": "Name for site",
+          "examples": ["Bas123a"]
         },
-        'er_citation_names': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_citation_names'
+        "er_citation_names": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_citation_names"
           }],
-          'unit': 'Fossils',
-          'position': 27,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
+          "unit": "Text",
+          "position": 27,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
         },
-        'er_sample_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_sample_name'
+        "er_sample_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_sample_name"
           }],
-          'unit': 'Fossils',
-          'position': 8,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Bas123a-01']
+          "unit": "Text",
+          "position": 8,
+          "label": "Sample Name",
+          "type": "String",
+          "description": "Name for sample",
+          "examples": ["Bas123a-01"]
         },
-        'fossil_alteration': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_alteration'
+        "fossil_alteration": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_alteration"
           }],
-          'unit': 'Fossils',
-          'position': 18,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Severe', 'High', 'Mild', 'Trace', 'Unaltered']
+          "unit": "Text",
+          "position": 18,
+          "label": "Fossil Alteration",
+          "type": "String",
+          "description": "Fossil alteration grade",
+          "examples": ["Severe", "High", "Mild", "Trace", "Unaltered"]
         },
-        'er_specimen_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_specimen_name'
+        "er_specimen_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_specimen_name"
           }],
-          'unit': 'Fossils',
-          'position': 9,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Bas123a-01x']
+          "unit": "Text",
+          "position": 9,
+          "label": "Specimen Name",
+          "type": "String",
+          "description": "Name for specimen",
+          "examples": ["Bas123a-01x"]
         },
-        'fossil_texture': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_texture'
+        "fossil_texture": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_texture"
           }],
-          'unit': 'Fossils',
-          'position': 17,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Crystalline', 'Porous', 'Homogeneous']
+          "unit": "Text",
+          "position": 17,
+          "label": "Fossil Texture",
+          "type": "String",
+          "description": "Fossil texture",
+          "examples": ["Crystalline", "Porous", "Homogeneous"]
         },
-        'fossil_order': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_order'
+        "fossil_order": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "fossil_order"
           }],
-          'unit': 'Fossils',
-          'position': 12,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Alcyonida', 'Strophomenida', 'Thecideida']
+          "unit": "Text",
+          "position": 12,
+          "label": "Fossil Order",
+          "type": "String",
+          "description": "Fossil order",
+          "examples": ["Alcyonida", "Strophomenida", "Thecideida"]
         },
-        'er_section_name': {
-          'group': 'Fossils',
-          'next_columns': [],
-          'unit': 'Fossils',
-          'position': 6,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['Berkeley Lava Flows', '810C', '1129D']
+        "er_section_name": {
+          "group": "Fossils",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 6,
+          "label": "Section Name",
+          "type": "String",
+          "description": "Name for section or core",
+          "examples": ["Berkeley Lava Flows", "810C", "1129D"]
         },
-        'er_fossil_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_fossil_name'
+        "er_fossil_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_fossil_name"
           }],
-          'unit': 'Fossils',
-          'position': 0,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['AMM43-03']
+          "unit": "Text",
+          "position": 0,
+          "label": "Fossil Name",
+          "type": "String",
+          "description": "Name for fossil",
+          "examples": ["AMM43-03"]
         },
-        'er_location_name': {
-          'group': 'Fossils',
-          'next_columns': [{
-            'table': 'er_fossils',
-            'column': 'er_location_name'
+        "er_location_name": {
+          "group": "Fossils",
+          "next_columns": [{
+            "table": "er_fossils",
+            "column": "er_location_name"
           }],
-          'unit': 'Fossils',
-          'position': 3,
-          'label': 'Fossils',
-          'type': 'Fossils',
-          'description': 'Fossils',
-          'examples': ['San Francisco Volcanic Province', 'Site 801']
+          "unit": "Text",
+          "position": 3,
+          "label": "Location Name",
+          "type": "String",
+          "description": "Name for location or drill site",
+          "examples": ["San Francisco Volcanic Province", "Site 801"]
         }
       },
-      'label': 'Fossils',
-      'description': 'Taxon or fossil'
+      "label": "Fossils",
+      "description": "Taxon or fossil"
     },
-    'pmag_results': {
-      'position': 23,
-      'columns': {
-        'average_nn': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_nn'
-          }],
-          'unit': 'Results',
-          'position': 29,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'er_sample_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_sample_names'
-          }],
-          'unit': 'Results',
-          'position': 4,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_int': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int'
-          }],
-          'unit': 'Results',
-          'position': 32,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_age': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_age'
-          }],
-          'unit': 'Results',
-          'position': 19,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'reversed_alpha95': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_alpha95'
-          }],
-          'unit': 'Results',
-          'position': 87,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'magic_method_codes': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'magic_method_codes'
-          }],
-          'unit': 'Results',
-          'position': 93,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['DE-DC0', 'FT-F1', 'LP-DCDMAG']
-        },
-        'tilt_inc_corr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_inc_corr'
-          }],
-          'unit': 'Results',
-          'position': 63,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'tilt_alpha95_uncorr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_alpha95_uncorr'
-          }],
-          'unit': 'Results',
-          'position': 70,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'vdm': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vdm'
-          }],
-          'unit': 'Results',
-          'position': 54,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'tilt_k_ratio': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_k_ratio'
-          }],
-          'unit': 'Results',
-          'position': 61,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'iaga_res_no': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'iaga_res_no'
-          }],
-          'unit': 'Results',
-          'position': 89,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_alpha95': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_alpha95'
-          }],
-          'unit': 'Results',
-          'position': 27,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'average_int_rel_sigma_perc': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int_rel_sigma_perc'
-          }],
-          'unit': 'Results',
-          'position': 36,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'fold_test_significance': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'fold_test_significance'
-          }],
-          'unit': 'Results',
-          'position': 71,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'antipodal': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'antipodal'
-          }],
-          'unit': 'Results',
-          'position': 73,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 180']
-        },
-        'reversed_lat': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_lat'
-          }],
-          'unit': 'Results',
-          'position': 81,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'eta_inc': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'eta_inc'
-          }],
-          'unit': 'Results',
-          'position': 39,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'er_fossil_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_fossil_names'
-          }],
-          'unit': 'Results',
-          'position': 6,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['AMM43-03', 'AMM43-19']
-        },
-        'tilt_k_uncorr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_k_uncorr'
-          }],
-          'unit': 'Results',
-          'position': 69,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'er_specimen_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_specimen_names'
-          }],
-          'unit': 'Results',
-          'position': 5,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_sigma'
-          }],
-          'unit': 'Results',
-          'position': 26,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'average_age_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_age_sigma'
-          }],
-          'unit': 'Results',
-          'position': 20,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'contact_test': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'contact_test'
-          }],
-          'unit': 'Results',
-          'position': 10,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['C+', 'IC+', '+ (pos)', 'Co', 'Ico', 'o (indeterminate)', 'C-', 'IC-', '- (neg)', 'ND (not done)']
-        },
-        'normal_lon': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_lon'
-          }],
-          'unit': 'Results',
-          'position': 75,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'average_int_rel': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int_rel'
-          }],
-          'unit': 'Results',
-          'position': 34,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'eta_semi_angle': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'eta_semi_angle'
-          }],
-          'unit': 'Results',
-          'position': 41,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'vadm_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vadm_sigma'
-          }],
-          'unit': 'Results',
-          'position': 58,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'average_height': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_height'
-          }],
-          'unit': 'Results',
-          'position': 18,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Positive is up in section or core', 'negative is down']
-        },
-        'vdm_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vdm_sigma'
-          }],
-          'unit': 'Results',
-          'position': 55,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'average_int_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int_sigma'
-          }],
-          'unit': 'Results',
-          'position': 33,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'zeta_semi_angle': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'zeta_semi_angle'
-          }],
-          'unit': 'Results',
-          'position': 44,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'er_mineral_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_mineral_names'
-          }],
-          'unit': 'Results',
-          'position': 7,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'vgp_lat': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_lat'
-          }],
-          'unit': 'Results',
-          'position': 47,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'normal_k': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_k'
-          }],
-          'unit': 'Results',
-          'position': 79,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_lon': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_lon'
-          }],
-          'unit': 'Results',
-          'position': 16,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'zeta_inc': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'zeta_inc'
-          }],
-          'unit': 'Results',
-          'position': 42,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'tilt_alpha95_corr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_alpha95_corr'
-          }],
-          'unit': 'Results',
-          'position': 66,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'average_age_low': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_age_low'
-          }],
-          'unit': 'Results',
-          'position': 21,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'model_lat_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'model_lat_sigma'
-          }],
-          'unit': 'Results',
-          'position': 46,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'normal_alpha95': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_alpha95'
-          }],
-          'unit': 'Results',
-          'position': 80,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'tilt_dec_corr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_dec_corr'
-          }],
-          'unit': 'Results',
-          'position': 64,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'percent_reversed': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'percent_reversed'
-          }],
-          'unit': 'Results',
-          'position': 72,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['200 indicates \'mixed\' polarity and negative numbers indicate \'unknown\' polarity']
-        },
-        'vgp_alpha95': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_alpha95'
-          }],
-          'unit': 'Results',
-          'position': 52,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Confidence Level = 95%']
-        },
-        'tilt_k_corr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_k_corr'
-          }],
-          'unit': 'Results',
-          'position': 65,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'fold_test': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'fold_test'
-          }],
-          'unit': 'Results',
-          'position': 8,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['F+', 'SF+', 'RF+', '+ (pos)', 'Fo', 'SFo', 'Rfo', 'o (indeterminate)', 'F-', 'SF-', 'RF-', '- (neg)', 'ND (not done) ']
-        },
-        'reversed_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_n'
-          }],
-          'unit': 'Results',
-          'position': 85,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'result_description': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'result_description'
-          }],
-          'unit': 'Results',
-          'position': 90,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_k': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_k'
-          }],
-          'unit': 'Results',
-          'position': 30,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'vgp_lon': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_lon'
-          }],
-          'unit': 'Results',
-          'position': 48,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'average_age_unit': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_age_unit'
-          }],
-          'unit': 'Results',
-          'position': 23,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Ma', 'Ka', 'Ga', 'Years BP', 'Years AD (+/-)', 'Years Cal BP', 'Years Cal AD (+/-)']
-        },
-        'model_lat': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'model_lat'
-          }],
-          'unit': 'Results',
-          'position': 45,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'tilt_dec_uncorr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_dec_uncorr'
-          }],
-          'unit': 'Results',
-          'position': 68,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'normal_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_n'
-          }],
-          'unit': 'Results',
-          'position': 78,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_int_nn': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int_nn'
-          }],
-          'unit': 'Results',
-          'position': 38,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'normal_lat': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_lat'
-          }],
-          'unit': 'Results',
-          'position': 74,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'reversed_lon': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_lon'
-          }],
-          'unit': 'Results',
-          'position': 82,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'vdm_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vdm_n'
-          }],
-          'unit': 'Results',
-          'position': 56,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'tilt_inc_uncorr': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_inc_uncorr'
-          }],
-          'unit': 'Results',
-          'position': 67,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'average_inc': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_inc'
-          }],
-          'unit': 'Results',
-          'position': 24,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'reversed_inc': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_inc'
-          }],
-          'unit': 'Results',
-          'position': 83,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'average_int_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int_n'
-          }],
-          'unit': 'Results',
-          'position': 37,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_age_high': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_age_high'
-          }],
-          'unit': 'Results',
-          'position': 22,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'eta_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'eta_dec'
-          }],
-          'unit': 'Results',
-          'position': 40,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'average_int_rel_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_int_rel_sigma'
-          }],
-          'unit': 'Results',
-          'position': 35,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'er_analyst_mail_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_analyst_mail_names'
-          }],
-          'unit': 'Results',
-          'position': 94,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
-        },
-        'pmag_result_name': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'pmag_result_name'
-          }],
-          'unit': 'Results',
-          'position': 0,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['MY-POLE-XX']
-        },
-        'average_lat_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_lat_sigma'
-          }],
-          'unit': 'Results',
-          'position': 15,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'tilt_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_n'
-          }],
-          'unit': 'Results',
-          'position': 62,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'vadm': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vadm'
-          }],
-          'unit': 'Results',
-          'position': 57,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_lon_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_lon_sigma'
-          }],
-          'unit': 'Results',
-          'position': 17,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'er_citation_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_citation_names'
-          }],
-          'unit': 'Results',
-          'position': 95,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
-        },
-        'tilt_correction': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'tilt_correction'
-          }],
-          'unit': 'Results',
-          'position': 60,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'reversed_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_dec'
-          }],
-          'unit': 'Results',
-          'position': 84,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'iaga_database': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'iaga_database'
-          }],
-          'unit': 'Results',
-          'position': 88,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['ARCHEO', 'PGMDB', 'PINT', 'PSVRL', 'SECVR', 'TRANS']
-        },
-        'vgp_dp': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_dp'
-          }],
-          'unit': 'Results',
-          'position': 49,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'pmag_rotation_codes': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'pmag_rotation_codes'
-          }],
-          'unit': 'Results',
-          'position': 92,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['MY-TILT1', 'MY-TILT2', 'MY-TRANS1']
-        },
-        'vgp_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_n'
-          }],
-          'unit': 'Results',
-          'position': 53,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'vgp_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_sigma'
-          }],
-          'unit': 'Results',
-          'position': 51,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'average_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_n'
-          }],
-          'unit': 'Results',
-          'position': 28,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'er_site_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_site_names'
-          }],
-          'unit': 'Results',
-          'position': 3,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Bas123a', 'Bas156z', 'Bas445c']
-        },
-        'average_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_dec'
-          }],
-          'unit': 'Results',
-          'position': 25,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'zeta_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'zeta_dec'
-          }],
-          'unit': 'Results',
-          'position': 43,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'er_section_names': {
-          'group': 'Results',
-          'next_columns': [],
-          'unit': 'Results',
-          'position': 2,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['810C', '810D']
-        },
-        'normal_inc': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_inc'
-          }],
-          'unit': 'Results',
-          'position': 76,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'vadm_n': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vadm_n'
-          }],
-          'unit': 'Results',
-          'position': 59,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'conglomerate_test': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'conglomerate_test'
-          }],
-          'unit': 'Results',
-          'position': 9,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['G+', 'IG+', '+ (pos)', 'Go', 'Igo', 'o (indeterminate)', 'G-', 'IG-', '- (neg)', 'ND (not done)']
-        },
-        'pmag_criteria_codes': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'pmag_criteria_codes'
-          }],
-          'unit': 'Results',
-          'position': 91,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['MY-MAD', 'MY-APLHA95']
-        },
-        'reversed_k': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversed_k'
-          }],
-          'unit': 'Results',
-          'position': 86,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'average_lat': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_lat'
-          }],
-          'unit': 'Results',
-          'position': 14,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
-        'reversal_test': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'reversal_test'
-          }],
-          'unit': 'Results',
-          'position': 11,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Ra', 'Rb', 'Rc', '+ (pos)', 'Ro', 'o (indeterminate)', 'R-', '- (neg)', 'ND (not done)']
-        },
-        'pole_comp_name': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'pole_comp_name'
-          }],
-          'unit': 'Results',
-          'position': 13,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Characteristic', 'VRM', 'Overprint', 'A', 'B', 'C']
-        },
-        'er_location_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_location_names'
-          }],
-          'unit': 'Results',
-          'position': 1,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Site 801', 'Site 1129']
-        },
-        'vgp_dm': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'vgp_dm'
-          }],
-          'unit': 'Results',
-          'position': 50,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'normal_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'normal_dec'
-          }],
-          'unit': 'Results',
-          'position': 77,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
-        'rock_magnetic_test': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'rock_magnetic_test'
-          }],
-          'unit': 'Results',
-          'position': 12,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['M (done)', 'ND (not done)']
-        },
-        'average_r': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'average_r'
-          }],
-          'unit': 'Results',
-          'position': 31,
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
+    "pmag_results": {
+      "position": 23,
+      "columns": {
+        "average_nn": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_nn"
+          }],
+          "unit": "Integer",
+          "position": 29,
+          "label": "Number of Samples",
+          "type": "Integer",
+          "description": "Number of samples included in directional calculations"
+        },
+        "er_sample_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_sample_names"
+          }],
+          "unit": "Text",
+          "position": 4,
+          "label": "Sample Name List",
+          "type": "List",
+          "description": "Colon-delimited list of sample names"
+        },
+        "average_int": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int"
+          }],
+          "unit": "Number in T",
+          "position": 32,
+          "label": "Average Intensity",
+          "type": "Number",
+          "description": "Average field strength"
+        },
+        "average_age": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_age"
+          }],
+          "unit": "Custom",
+          "position": 19,
+          "label": "Average Age",
+          "type": "Number",
+          "description": "Average magnetization age based on multiple sites"
+        },
+        "reversed_alpha95": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 87,
+          "label": "Reversed Alpha 95%",
+          "type": "Number",
+          "description": "Average direction Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "magic_method_codes": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "magic_method_codes"
+          }],
+          "unit": "Text",
+          "position": 93,
+          "label": "Method Codes",
+          "type": "List",
+          "description": "Colon-delimited list of method codes",
+          "examples": ["DE-DC0", "FT-F1", "LP-DCDMAG"]
+        },
+        "tilt_inc_corr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_inc_corr"
+          }],
+          "unit": "Number in Degrees",
+          "position": 63,
+          "label": "Tilt Corrected Inclination",
+          "type": "Number",
+          "description": "Tilt corrected inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "tilt_alpha95_uncorr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_alpha95_uncorr"
+          }],
+          "unit": "Number in Degrees",
+          "position": 70,
+          "label": "Tilt Uncorrected Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "vdm": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vdm"
+          }],
+          "unit": "Number in Am2",
+          "position": 54,
+          "label": "VDM",
+          "type": "Number",
+          "description": "Virtual dipole moment"
+        },
+        "tilt_k_ratio": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_k_ratio"
+          }],
+          "unit": "Dimensionless",
+          "position": 61,
+          "label": "Tilt K Ratio",
+          "type": "Number",
+          "description": "Comparison of Fisher dispersion K after and before tilt correction"
+        },
+        "iaga_res_no": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "iaga_res_no"
+          }],
+          "unit": "Integer",
+          "position": 89,
+          "label": "IAGA Database Result Number",
+          "type": "Integer",
+          "description": "IAGA7 database -- internal record number of result"
+        },
+        "average_alpha95": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 27,
+          "label": "Average Alpha 95%",
+          "type": "Number",
+          "description": "Average direction Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "average_int_rel_sigma_perc": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int_rel_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 36,
+          "label": "Average Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative average field strength -- uncertainty in percent",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "fold_test_significance": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "fold_test_significance"
+          }],
+          "unit": "Number in %",
+          "position": 71,
+          "label": "Fold Test Significance",
+          "type": "Number",
+          "description": "Significance level achieved in tilt correction calculations"
+        },
+        "antipodal": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "antipodal"
+          }],
+          "unit": "Number in Degrees",
+          "position": 73,
+          "label": "Antipodal Angle",
+          "type": "Number",
+          "description": "Great circle distance between normal and reversed poles",
+          "examples": ["Decimal degrees between 0 and 180"]
+        },
+        "reversed_lat": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_lat"
+          }],
+          "unit": "Number in Degrees",
+          "position": 81,
+          "label": "Reversed Pole Latitude",
+          "type": "Number",
+          "description": "Reversed pole -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "eta_inc": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "eta_inc"
+          }],
+          "unit": "Number in Degrees",
+          "position": 39,
+          "label": "Confidence Ellipse",
+          "type": "Number",
+          "description": "Definition of confidence ellipse -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "er_fossil_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_fossil_names"
+          }],
+          "unit": "Text",
+          "position": 6,
+          "label": "Fossil Name List",
+          "type": "List",
+          "description": "Colon-delimited list of fossil names included in calculation",
+          "examples": ["AMM43-03", "AMM43-19"]
+        },
+        "tilt_k_uncorr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_k_uncorr"
+          }],
+          "unit": "Dimensionless",
+          "position": 69,
+          "label": "Tilt Uncorrected K",
+          "type": "Number",
+          "description": "Average direction Fisher's dispersion parameter Kappa"
+        },
+        "er_specimen_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_specimen_names"
+          }],
+          "unit": "Text",
+          "position": 5,
+          "label": "Specimen Name List",
+          "type": "List",
+          "description": "Colon-delimited list of specimen names"
+        },
+        "average_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 26,
+          "label": "Average Sigma",
+          "type": "Number",
+          "description": "Average direction in stratigraphic coordinates -- standard deviation",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "average_age_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_age_sigma"
+          }],
+          "unit": "Custom",
+          "position": 20,
+          "label": "Average Age Sigma",
+          "type": "Number",
+          "description": "Average magnetization age based on multiple sites -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "contact_test": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "contact_test"
+          }],
+          "unit": "Flag",
+          "position": 10,
+          "label": "Baked Contact Test",
+          "type": "String",
+          "description": "Classification and result of the (inverse) contact test",
+          "examples": ["C+", "IC+", "+ (pos)", "Co", "Ico", "o (indeterminate)", "C-", "IC-", "- (neg)", "ND (not done)"]
+        },
+        "normal_lon": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_lon"
+          }],
+          "unit": "Number in Degrees",
+          "position": 75,
+          "label": "Normal Pole Longitude",
+          "type": "Number",
+          "description": "Normal pole -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "average_int_rel": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int_rel"
+          }],
+          "unit": "Dimensionless",
+          "position": 34,
+          "label": "Average Intensity Relative",
+          "type": "Number",
+          "description": "Relative average field strength"
+        },
+        "eta_semi_angle": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "eta_semi_angle"
+          }],
+          "unit": "Number in Degrees",
+          "position": 41,
+          "label": "Confidence Ellipse",
+          "type": "Number",
+          "description": "Definition of confidence ellipse -- semi angle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "vadm_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vadm_sigma"
+          }],
+          "unit": "Number in Am2",
+          "position": 58,
+          "label": "VADM Sigma",
+          "type": "Number",
+          "description": "Virtual axial dipole moment -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "average_height": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_height"
+          }],
+          "unit": "Number in m",
+          "position": 18,
+          "label": "Average Height",
+          "type": "Number",
+          "description": "Measurement stratigraphic height relative to reference height",
+          "examples": ["Positive is up in section or core", "negative is down"]
+        },
+        "vdm_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vdm_sigma"
+          }],
+          "unit": "Number in Am2",
+          "position": 55,
+          "label": "VDM Sigma",
+          "type": "Number",
+          "description": "Virtual dipole moment -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "average_int_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int_sigma"
+          }],
+          "unit": "Number in T",
+          "position": 33,
+          "label": "Average Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "zeta_semi_angle": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "zeta_semi_angle"
+          }],
+          "unit": "Number in Degrees",
+          "position": 44,
+          "label": "Confidence Ellipse",
+          "type": "Number",
+          "description": "Definition of confidence ellipse -- semi angle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "er_mineral_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_mineral_names"
+          }],
+          "unit": "Text",
+          "position": 7,
+          "label": "Mineral Name List",
+          "type": "List",
+          "description": "Colon-delimited list of mineral names"
+        },
+        "vgp_lat": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_lat"
+          }],
+          "unit": "Number in Degrees",
+          "position": 47,
+          "label": "VGP Latitude",
+          "type": "Number",
+          "description": "Virtual geomagnetic pole -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "normal_k": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_k"
+          }],
+          "unit": "Dimensionless",
+          "position": 79,
+          "label": "Normal K",
+          "type": "Number",
+          "description": "Average direction Fisher's dispersion parameter Kappa"
+        },
+        "average_lon": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_lon"
+          }],
+          "unit": "Number in Degrees",
+          "position": 16,
+          "label": "Average Longitude",
+          "type": "Number",
+          "description": "Average location based on multiple sites -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "zeta_inc": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "zeta_inc"
+          }],
+          "unit": "Number in Degrees",
+          "position": 42,
+          "label": "Confidence Ellipse",
+          "type": "Number",
+          "description": "Definition of confidence ellipse -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "tilt_alpha95_corr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_alpha95_corr"
+          }],
+          "unit": "Number in Degrees",
+          "position": 66,
+          "label": "Tilt Corrected Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "average_age_low": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_age_low"
+          }],
+          "unit": "Custom",
+          "position": 21,
+          "label": "Average Age Low",
+          "type": "Number",
+          "description": "Average magnetization age based on multiple sites -- low range"
+        },
+        "model_lat_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "model_lat_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 46,
+          "label": "Model Latitude Sigma",
+          "type": "Number",
+          "description": "Model latitude based on plate reconstruction -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "normal_alpha95": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 80,
+          "label": "Normal Alpha 95%",
+          "type": "Number",
+          "description": "Average direction Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "tilt_dec_corr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_dec_corr"
+          }],
+          "unit": "Number in Degrees",
+          "position": 64,
+          "label": "Tilt Corrected Declination",
+          "type": "Number",
+          "description": "Tilt corrected declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "percent_reversed": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "percent_reversed"
+          }],
+          "unit": "Number in %",
+          "position": 72,
+          "label": "Percentage Reversed Data",
+          "type": "Number",
+          "description": "Percentage of sites and samples that is reversed",
+          "examples": ["200 indicates \"mixed\" polarity and negative numbers indicate \"unknown\" polarity"]
+        },
+        "vgp_alpha95": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 52,
+          "label": "VGP Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Confidence Level = 95%"]
+        },
+        "tilt_k_corr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_k_corr"
+          }],
+          "unit": "Dimensionless",
+          "position": 65,
+          "label": "Tilt Corrected K",
+          "type": "Number",
+          "description": "Average direction Fisher's dispersion parameter Kappa"
+        },
+        "fold_test": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "fold_test"
+          }],
+          "unit": "Flag",
+          "position": 8,
+          "label": "Fold Test",
+          "type": "String",
+          "description": "Classification and result of the folding test",
+          "examples": ["F+", "SF+", "RF+", "+ (pos)", "Fo", "SFo", "Rfo", "o (indeterminate)", "F-", "SF-", "RF-", "- (neg)", "ND (not done) "]
+        },
+        "reversed_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_n"
+          }],
+          "unit": "Integer",
+          "position": 85,
+          "label": "Reversed N",
+          "type": "Integer",
+          "description": "Number of sites or samples included in reversed pole calculation"
+        },
+        "result_description": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "result_description"
+          }],
+          "unit": "Text",
+          "position": 90,
+          "label": "Result Description",
+          "type": "String",
+          "description": "Detailed description of results"
+        },
+        "average_k": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_k"
+          }],
+          "unit": "Dimensionless",
+          "position": 30,
+          "label": "Average K",
+          "type": "Number",
+          "description": "Average direction Fisher's dispersion parameter Kappa"
+        },
+        "vgp_lon": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_lon"
+          }],
+          "unit": "Number in Degrees",
+          "position": 48,
+          "label": "VGP Longitude",
+          "type": "Number",
+          "description": "Virtual geomagnetic pole -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "average_age_unit": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_age_unit"
+          }],
+          "unit": "Text",
+          "position": 23,
+          "label": "Average Age Unit",
+          "type": "String",
+          "description": "Average magnetization age based on multiple sites -- unit",
+          "examples": ["Ma", "Ka", "Ga", "Years BP", "Years AD (+/-)", "Years Cal BP", "Years Cal AD (+/-)"]
+        },
+        "model_lat": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "model_lat"
+          }],
+          "unit": "Number in Degrees",
+          "position": 45,
+          "label": "Model Latitude",
+          "type": "Number",
+          "description": "Model latitude based on plate reconstruction",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "tilt_dec_uncorr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_dec_uncorr"
+          }],
+          "unit": "Number in Degrees",
+          "position": 68,
+          "label": "Tilt Uncorrected Declination",
+          "type": "Number",
+          "description": "Tilt uncorrected declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "normal_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_n"
+          }],
+          "unit": "Integer",
+          "position": 78,
+          "label": "Normal N",
+          "type": "Integer",
+          "description": "Number of sites or samples included in normal pole calculation"
+        },
+        "average_int_nn": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int_nn"
+          }],
+          "unit": "Integer",
+          "position": 38,
+          "label": "Number of Samples",
+          "type": "Integer",
+          "description": "Number of samples included in intensity calculations"
+        },
+        "normal_lat": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_lat"
+          }],
+          "unit": "Number in Degrees",
+          "position": 74,
+          "label": "Normal Pole Latitude",
+          "type": "Number",
+          "description": "Normal pole -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "reversed_lon": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_lon"
+          }],
+          "unit": "Number in Degrees",
+          "position": 82,
+          "label": "Reversed Pole Longitude",
+          "type": "Number",
+          "description": "Reversed pole -- longitude",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "vdm_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vdm_n"
+          }],
+          "unit": "Integer",
+          "position": 56,
+          "label": "VDM N",
+          "type": "Integer",
+          "description": "Number of data points included in VDM calculations"
+        },
+        "tilt_inc_uncorr": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_inc_uncorr"
+          }],
+          "unit": "Number in Degrees",
+          "position": 67,
+          "label": "Tilt Uncorrected Inclination",
+          "type": "Number",
+          "description": "Tilt uncorrected inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "average_inc": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_inc"
+          }],
+          "unit": "Number in Degrees",
+          "position": 24,
+          "label": "Average Inclination",
+          "type": "Number",
+          "description": "Average direction in stratigraphic coordinates -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "reversed_inc": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_inc"
+          }],
+          "unit": "Number in Degrees",
+          "position": 83,
+          "label": "Reversed Inclination",
+          "type": "Number",
+          "description": "Reversed pole -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "average_int_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int_n"
+          }],
+          "unit": "Integer",
+          "position": 37,
+          "label": "Number of Sites",
+          "type": "Integer",
+          "description": "Number of sites included in intensity calculations"
+        },
+        "average_age_high": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_age_high"
+          }],
+          "unit": "Custom",
+          "position": 22,
+          "label": "Average Age High",
+          "type": "Number",
+          "description": "Average magnetization age based on multiple sites -- high range"
+        },
+        "eta_dec": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "eta_dec"
+          }],
+          "unit": "Number in Degrees",
+          "position": 40,
+          "label": "Confidence Ellipse",
+          "type": "Number",
+          "description": "Definition of confidence ellipse -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "average_int_rel_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_int_rel_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 35,
+          "label": "Average Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative average field strength -- uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "er_analyst_mail_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_analyst_mail_names"
+          }],
+          "unit": "Text",
+          "position": 94,
+          "label": "Analyst Names",
+          "type": "List",
+          "description": "Colon-delimited list of names for analysts",
+          "examples": ["Jim R.D. Hart", "Alexis Heard", "Bob McIntire"]
+        },
+        "pmag_result_name": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "pmag_result_name"
+          }],
+          "unit": "Text",
+          "position": 0,
+          "label": "Result Name",
+          "type": "String",
+          "description": "Name or number to identify results",
+          "examples": ["MY-POLE-XX"]
+        },
+        "average_lat_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_lat_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 15,
+          "label": "Average Latitude Sigma",
+          "type": "Number",
+          "description": "Average location based on multiple sites -- latitude uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "tilt_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_n"
+          }],
+          "unit": "Integer",
+          "position": 62,
+          "label": "Tilt N",
+          "type": "Integer",
+          "description": "Number of data points included in tilt correction"
+        },
+        "vadm": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vadm"
+          }],
+          "unit": "Number in Am2",
+          "position": 57,
+          "label": "VADM",
+          "type": "Number",
+          "description": "Virtual axial dipole moment"
+        },
+        "average_lon_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_lon_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 17,
+          "label": "Average Longitude Sigma",
+          "type": "Number",
+          "description": "Average location based on multiple sites -- longitude uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "er_citation_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_citation_names"
+          }],
+          "unit": "Text",
+          "position": 95,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
+        },
+        "tilt_correction": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "tilt_correction"
+          }],
+          "unit": "Number in %",
+          "position": 60,
+          "label": "Tilt Correction",
+          "type": "Number",
+          "description": "Tilt correction applied to the data"
+        },
+        "reversed_dec": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_dec"
+          }],
+          "unit": "Number in Degrees",
+          "position": 84,
+          "label": "Reversed Declination",
+          "type": "Number",
+          "description": "Reversed pole -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "iaga_database": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "iaga_database"
+          }],
+          "unit": "Text",
+          "position": 88,
+          "label": "IAGA Database Name",
+          "type": "String",
+          "description": "IAGA7 database -- name",
+          "examples": ["ARCHEO", "PGMDB", "PINT", "PSVRL", "SECVR", "TRANS"]
+        },
+        "vgp_dp": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_dp"
+          }],
+          "unit": "Number in Degrees",
+          "position": 49,
+          "label": "VGP DP",
+          "type": "Number",
+          "description": "Virtual geomagnetic pole -- parallel latitude uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "pmag_rotation_codes": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "pmag_rotation_codes"
+          }],
+          "unit": "Text",
+          "position": 92,
+          "label": "Rotation Codes",
+          "type": "List",
+          "description": "Colon-delimited list of rotation codes",
+          "examples": ["MY-TILT1", "MY-TILT2", "MY-TRANS1"]
+        },
+        "vgp_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_n"
+          }],
+          "unit": "Integer",
+          "position": 53,
+          "label": "VGP N",
+          "type": "Integer",
+          "description": "Number of data points included in VGP calculations"
+        },
+        "vgp_sigma": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 51,
+          "label": "VGP Sigma",
+          "type": "Number",
+          "description": "Virtual geomagnetic pole -- standard deviation",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "average_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_n"
+          }],
+          "unit": "Integer",
+          "position": 28,
+          "label": "Number of Sites",
+          "type": "Integer",
+          "description": "Number of sites included in directional calculations"
+        },
+        "er_site_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_site_names"
+          }],
+          "unit": "Text",
+          "position": 3,
+          "label": "Site Name List",
+          "type": "List",
+          "description": "Colon-delimited list of site names",
+          "examples": ["Bas123a", "Bas156z", "Bas445c"]
+        },
+        "average_dec": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_dec"
+          }],
+          "unit": "Number in Degrees",
+          "position": 25,
+          "label": "Average Declination",
+          "type": "Number",
+          "description": "Average direction in stratigraphic coordinates -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "zeta_dec": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "zeta_dec"
+          }],
+          "unit": "Number in Degrees",
+          "position": 43,
+          "label": "Confidence Ellipse",
+          "type": "Number",
+          "description": "Definition of confidence ellipse -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "er_section_names": {
+          "group": "Results",
+          "next_columns": [],
+          "unit": "Text",
+          "position": 2,
+          "label": "Section Name List",
+          "type": "List",
+          "description": "Colon-delimited list of section or core names",
+          "examples": ["810C", "810D"]
+        },
+        "normal_inc": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_inc"
+          }],
+          "unit": "Number in Degrees",
+          "position": 76,
+          "label": "Normal Inclination",
+          "type": "Number",
+          "description": "Normal pole -- inclination",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "vadm_n": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vadm_n"
+          }],
+          "unit": "Integer",
+          "position": 59,
+          "label": "VADM N",
+          "type": "Integer",
+          "description": "Number of data points included in VADM calculations"
+        },
+        "conglomerate_test": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "conglomerate_test"
+          }],
+          "unit": "Flag",
+          "position": 9,
+          "label": "Conglomerate Test",
+          "type": "String",
+          "description": "Classification and result of the (intra-formational) conglomerate test",
+          "examples": ["G+", "IG+", "+ (pos)", "Go", "Igo", "o (indeterminate)", "G-", "IG-", "- (neg)", "ND (not done)"]
+        },
+        "pmag_criteria_codes": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "pmag_criteria_codes"
+          }],
+          "unit": "Text",
+          "position": 91,
+          "label": "Criteria Codes",
+          "type": "List",
+          "description": "Colon-delimited list of criteria codes",
+          "examples": ["MY-MAD", "MY-APLHA95"]
+        },
+        "reversed_k": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversed_k"
+          }],
+          "unit": "Dimensionless",
+          "position": 86,
+          "label": "Reversed K",
+          "type": "Number",
+          "description": "Average direction Fisher's dispersion parameter Kappa"
+        },
+        "average_lat": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_lat"
+          }],
+          "unit": "Number in Degrees",
+          "position": 14,
+          "label": "Average Latitude",
+          "type": "Number",
+          "description": "Average location based on multiple sites -- latitude",
+          "examples": ["Decimal degrees between -90 and 90"]
+        },
+        "reversal_test": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "reversal_test"
+          }],
+          "unit": "Flag",
+          "position": 11,
+          "label": "Reversal Test",
+          "type": "String",
+          "description": "Classification and result of the reversal test",
+          "examples": ["Ra", "Rb", "Rc", "+ (pos)", "Ro", "o (indeterminate)", "R-", "- (neg)", "ND (not done)"]
+        },
+        "pole_comp_name": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "pole_comp_name"
+          }],
+          "unit": "Text",
+          "position": 13,
+          "label": "Pole Component Name",
+          "type": "String",
+          "description": "Name of magnetic component for which pole is calculated",
+          "examples": ["Characteristic", "VRM", "Overprint", "A", "B", "C"]
+        },
+        "er_location_names": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "er_location_names"
+          }],
+          "unit": "Text",
+          "position": 1,
+          "label": "Location Name List",
+          "type": "List",
+          "description": "Colon-delimited list of location or drill site names",
+          "examples": ["Site 801", "Site 1129"]
+        },
+        "vgp_dm": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "vgp_dm"
+          }],
+          "unit": "Number in Degrees",
+          "position": 50,
+          "label": "VGP DM",
+          "type": "Number",
+          "description": "Virtual geomagnetic pole -- meridian uncertainty",
+          "examples": ["Uncertainty = 1xSD"]
+        },
+        "normal_dec": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "normal_dec"
+          }],
+          "unit": "Number in Degrees",
+          "position": 77,
+          "label": "Normal Declination",
+          "type": "Number",
+          "description": "Normal pole -- declination",
+          "examples": ["Decimal degrees between 0 and 360"]
+        },
+        "rock_magnetic_test": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "rock_magnetic_test"
+          }],
+          "unit": "Flag",
+          "position": 12,
+          "label": "Rock Magnetic Test",
+          "type": "String",
+          "description": "Classification and result of the various rock magnetic tests",
+          "examples": ["M (done)", "ND (not done)"]
+        },
+        "average_r": {
+          "group": "Results",
+          "next_columns": [{
+            "table": "pmag_results",
+            "column": "average_r"
+          }],
+          "unit": "Dimensionless",
+          "position": 31,
+          "label": "Average R",
+          "type": "Number",
+          "description": "Average direction resultant Fisher vector"
         }
       },
-      'label': 'Results',
-      'description': 'Summary of results: Magnetic poles, VGP, VDM and VADM'
+      "label": "Results",
+      "description": "Summary of results: Magnetic poles, VGP, VDM and VADM"
     },
-    'pmag_criteria': {
-      'position': 25,
-      'columns': {
-        'average_nn': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_nn'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 84,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_g': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_g'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 25,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 63,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_int_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_int_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 69,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'magic_experiment_name': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 2,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['KOPA-299-1']
-        },
-        'specimen_int_rel_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_rel_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 16,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'specimen_f': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_f'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 21,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_r': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_r'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 67,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_magn_volume': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_magn_volume'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 55,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_int_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 14,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'average_alpha95': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_alpha95'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 82,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Confidence Level = 95%']
-        },
-        'average_int_rel_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_int_rel_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 89,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'sample_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 41,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'average_age_max': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_age_max'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 78,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'specimen_b_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_b_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 23,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'average_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 81,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'site_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 61,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'average_age_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_age_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 79,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'specimen_drat': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_drat'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 29,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'specimen_q': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_q'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 20,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_md': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_md'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 27,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'site_int_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_int_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 73,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'vadm_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vadm_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 99,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'sample_int_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_int_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 49,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'vdm_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vdm_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 97,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'average_int_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_int_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 87,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'site_direction_type': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_direction_type'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 59,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'average_age_min': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_age_min'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 77,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_mad': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_mad'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 10,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'sample_polarity': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_polarity'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 37,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Polarity is normal (n)', 'reversed (r)', 'transitional (t)', 'excursion (e) or intermediate (i)']
-        },
-        'site_comp_nmb': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_comp_nmb'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 60,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_alpha95': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_alpha95'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 11,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Confidence Level = 95%']
-        },
-        'sample_comp_nmb': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_comp_nmb'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 40,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'sample_int_rel_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_int_rel_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 51,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'site_nrm': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_nrm'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 58,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_ptrm': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_ptrm'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 28,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'site_int_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_int_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 70,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'specimen_int_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 13,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'specimen_dang': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_dang'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 26,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'specimen_b_beta': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_b_beta'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 24,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'sample_int_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_int_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 50,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'vgp_alpha95': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vgp_alpha95'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 95,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Confidence Level = 95%']
-        },
-        'site_polarity': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_polarity'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 57,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Polarity is normal (n)', 'reversed (r)', 'transitional (t)', 'excursion (e) or intermediate (i)']
-        },
-        'specimen_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 12,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_int_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 18,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_magn_weight': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 35,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_k': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_k'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 46,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_int_rel_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_int_rel_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 52,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'average_k': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_k'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 85,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'average_age_unit': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_age_unit'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 80,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Ma', 'Ka', 'Ga', 'Years BP', 'Years AD (+/-)', 'Years Cal BP', 'Years Cal AD (+/-)']
-        },
-        'specimen_int_rel_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_rel_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 15,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'sample_nrm': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_nrm'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 38,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'average_int_nn': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_int_nn'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 91,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_rsc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_rsc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 31,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'sample_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 43,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_tilt_correction': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_tilt_correction'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 48,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_polarity': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_polarity'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 6,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Polarity is normal (n)', 'reversed (r)', 'transitional (t)', 'excursion (e) or intermediate (i)']
-        },
-        'site_int_rel_sigma_perc': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_int_rel_sigma_perc'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 72,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'measurement_step_unit': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'measurement_step_unit'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 5,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'vdm_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vdm_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 98,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_moment': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 33,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_n_planes': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_n_planes'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 65,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_int_mad': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_mad'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 17,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'site_alpha95': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_alpha95'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 62,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Confidence Level = 95%']
-        },
-        'sample_int_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_int_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 53,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_alpha95': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_alpha95'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 42,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Confidence Level = 95%']
-        },
-        'specimen_direction_type': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_direction_type'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 8,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'average_int_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_int_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 90,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_viscosity_index': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_viscosity_index'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 32,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'average_int_rel_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_int_rel_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 88,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'sample_direction_type': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_direction_type'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 39,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_w': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_w'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 19,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'specimen_nrm': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_nrm'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 7,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'sample_n_planes': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_n_planes'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 45,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'measurement_step_min': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'measurement_step_min'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 3,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_drats': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_drats'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 30,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
-        'er_citation_names': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'er_citation_names'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 102,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
-        },
-        'vgp_dp': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vgp_dp'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 92,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'specimen_fvds': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_fvds'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 22,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_n_lines': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_n_lines'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 44,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_comp_nmb': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_comp_nmb'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 9,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'site_moment': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 74,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'vgp_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vgp_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 94,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'vgp_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vgp_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 96,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'pmag_criteria_code': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'pmag_criteria_code'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 0,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['MY-MAD', 'MY-APLHA95']
-        },
-        'average_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 83,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'criteria_description': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'criteria_description'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 101,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'sample_magn_weight': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 56,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_magn_weight': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 76,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'sample_moment': {
-          'group': 'Selection Criteria',
-          'next_columns': [],
-          'unit': 'Selection Criteria',
-          'position': 54,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'measurement_step_max': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'measurement_step_max'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 4,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'specimen_magn_volume': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_magn_volume'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 34,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'vadm_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vadm_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 100,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_magn_volume': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_magn_volume'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 75,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'specimen_int_ptrm_n': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_ptrm_n'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 36,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'criteria_definition': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'criteria_definition'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 1,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria'
-        },
-        'site_k': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_k'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 66,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_tilt_correction': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_tilt_correction'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 68,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'vgp_dm': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'vgp_dm'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 93,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'site_n_lines': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_n_lines'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 64,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'site_int_rel_sigma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'site_int_rel_sigma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 71,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum; Uncertainty = 1xSD']
-        },
-        'sample_r': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'sample_r'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 47,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
-        },
-        'average_r': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'average_r'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 86,
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = minimum']
+    "pmag_criteria": {
+      "position": 25,
+      "columns": {
+        "average_nn": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_nn"
+          }],
+          "unit": "Integer",
+          "position": 84,
+          "label": "Average N Samples",
+          "type": "Integer",
+          "description": "Number of samples included in directional calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_g": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_g"
+          }],
+          "unit": "Dimensionless",
+          "position": 25,
+          "label": "Specimen g",
+          "type": "Number",
+          "description": "COE's quality factors -- the GAP factor",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_n"
+          }],
+          "unit": "Integer",
+          "position": 63,
+          "label": "Site N",
+          "type": "Integer",
+          "description": "Number of samples included in directional calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_int_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_int_sigma"
+          }],
+          "unit": "Number in T",
+          "position": 69,
+          "label": "Site Paleo Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "magic_experiment_name": {
+          "group": "Selection Criteria",
+          "next_columns": ["magic_experiment_names"],
+          "unit": "Text",
+          "position": 2,
+          "label": "Experiment Name",
+          "type": "String",
+          "description": "Name for experiment",
+          "examples": ["KOPA-299-1"]
+        },
+        "specimen_int_rel_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_rel_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 16,
+          "label": "Specimen Paleo Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "specimen_f": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_f"
+          }],
+          "unit": "Dimensionless",
+          "position": 21,
+          "label": "Specimen f",
+          "type": "Number",
+          "description": "COE's quality factors -- amount of NRM in component",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_r": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_r"
+          }],
+          "unit": "Dimensionless",
+          "position": 67,
+          "label": "Site R",
+          "type": "Number",
+          "description": "Resultant Fisher vector",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_magn_volume": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_magn_volume"
+          }],
+          "unit": "Number in A/m",
+          "position": 55,
+          "label": "Sample NRM Magnetization Volume",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_int_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 14,
+          "label": "Specimen Paleo Intensity Sigma %",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "average_alpha95": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 82,
+          "label": "Average Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Criterion = maximum; Confidence Level = 95%"]
+        },
+        "average_int_rel_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_int_rel_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 89,
+          "label": "Average Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative VGP field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "sample_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 41,
+          "label": "Sample Sigma",
+          "type": "Number",
+          "description": "Directions in sample coordinates -- standard deviation",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "average_age_max": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_age_max"
+          }],
+          "unit": "Custom",
+          "position": 78,
+          "label": "Average Age Maximum",
+          "type": "Number",
+          "description": "Average age based on multiple sites or samples -- maximum",
+          "examples": ["Criterion = maximum"]
+        },
+        "specimen_b_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_b_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 23,
+          "label": "Specimen b Sigma",
+          "type": "Number",
+          "description": "COE's quality factors -- error on slope fit",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "average_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 81,
+          "label": "Average Sigma",
+          "type": "Number",
+          "description": "Directions in stratigraphic coordinates -- standard deviation",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "site_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 61,
+          "label": "Site Sigma",
+          "type": "Number",
+          "description": "Directions in stratigraphic coordinates -- standard deviation",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "average_age_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_age_sigma"
+          }],
+          "unit": "Custom",
+          "position": 79,
+          "label": "Average Age Sigma",
+          "type": "Number",
+          "description": "Average age based on multiple sites or samples -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "specimen_drat": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_drat"
+          }],
+          "unit": "Number in %",
+          "position": 29,
+          "label": "Specimen Difference Ratio pTRM Checks",
+          "type": "Number",
+          "description": "Difference in first and second pTRM measurements",
+          "examples": ["Criterion = maximum"]
+        },
+        "specimen_q": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_q"
+          }],
+          "unit": "Dimensionless",
+          "position": 20,
+          "label": "Specimen Q",
+          "type": "Number",
+          "description": "COE's quality factors -- overall quality",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_md": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_md"
+          }],
+          "unit": "Number in %",
+          "position": 27,
+          "label": "Specimen Maximum MD",
+          "type": "Number",
+          "description": "Maximum difference between first and second zero field steps",
+          "examples": ["Criterion = maximum"]
+        },
+        "site_int_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_int_n"
+          }],
+          "unit": "Integer",
+          "position": 73,
+          "label": "Site Paleo Intensity N",
+          "type": "Integer",
+          "description": "Number of samples included in intensity calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "vadm_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vadm_sigma"
+          }],
+          "unit": "Number in Am2",
+          "position": 99,
+          "label": "VADM Sigma",
+          "type": "Number",
+          "description": "Virtual axial dipole moment -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "sample_int_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_int_sigma"
+          }],
+          "unit": "Number in T",
+          "position": 49,
+          "label": "Sample Paleo Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "vdm_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vdm_sigma"
+          }],
+          "unit": "Number in Am2",
+          "position": 97,
+          "label": "VDM Sigma",
+          "type": "Number",
+          "description": "Virtual dipole moment -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "average_int_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_int_sigma"
+          }],
+          "unit": "Number in T",
+          "position": 87,
+          "label": "Average Intensity Sigma",
+          "type": "Number",
+          "description": "VGP field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "site_direction_type": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_direction_type"
+          }],
+          "unit": "Flag",
+          "position": 59,
+          "label": "Site Direction Type",
+          "type": "String",
+          "description": "Direction determined from (l) or plane (p)"
+        },
+        "average_age_min": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_age_min"
+          }],
+          "unit": "Custom",
+          "position": 77,
+          "label": "Average Age Minimum",
+          "type": "Number",
+          "description": "Average age based on multiple sites or samples -- minimum",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_mad": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_mad"
+          }],
+          "unit": "Number in Degrees",
+          "position": 10,
+          "label": "Specimen MAD",
+          "type": "Number",
+          "description": "Maximum angle of deviation of the best fit direction or plane",
+          "examples": ["Criterion = maximum"]
+        },
+        "sample_polarity": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_polarity"
+          }],
+          "unit": "Flag",
+          "position": 37,
+          "label": "Sample Magnetic Polarity",
+          "type": "String",
+          "description": "Polarity of sample",
+          "examples": ["Polarity is normal (n)", "reversed (r)", "transitional (t)", "excursion (e) or intermediate (i)"]
+        },
+        "site_comp_nmb": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_comp_nmb"
+          }],
+          "unit": "Integer",
+          "position": 60,
+          "label": "Site Component Number",
+          "type": "Integer",
+          "description": "Magnetic component number"
+        },
+        "specimen_alpha95": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 11,
+          "label": "Specimen Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Criterion = maximum; Confidence Level = 95%"]
+        },
+        "sample_comp_nmb": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_comp_nmb"
+          }],
+          "unit": "Integer",
+          "position": 40,
+          "label": "Sample Component Number",
+          "type": "Integer",
+          "description": "Magnetic component number"
+        },
+        "sample_int_rel_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_int_rel_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 51,
+          "label": "Sample Paleo Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "site_nrm": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_nrm"
+          }],
+          "unit": "Flag",
+          "position": 58,
+          "label": "Site NRM",
+          "type": "String",
+          "description": "Origin of the NRM is primary (p) or secondary (s)"
+        },
+        "specimen_ptrm": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_ptrm"
+          }],
+          "unit": "Number in %",
+          "position": 28,
+          "label": "Specimen Maximum pTRM",
+          "type": "Number",
+          "description": "Classical pTRM check",
+          "examples": ["Criterion = maximum"]
+        },
+        "site_int_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_int_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 70,
+          "label": "Site Paleo Intensity Sigma %",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "specimen_int_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_sigma"
+          }],
+          "unit": "Number in T",
+          "position": 13,
+          "label": "Specimen Paleo Intensity Sigma",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "specimen_dang": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_dang"
+          }],
+          "unit": "Number in Degrees",
+          "position": 26,
+          "label": "Specimen DANG",
+          "type": "Number",
+          "description": "Deviation angle of direction of component with respect to origin",
+          "examples": ["Criterion = maximum"]
+        },
+        "specimen_b_beta": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_b_beta"
+          }],
+          "unit": "Dimensionless",
+          "position": 24,
+          "label": "Specimen Sigma over b",
+          "type": "Number",
+          "description": "COE's quality factors -- relative error over slope",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "sample_int_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_int_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 50,
+          "label": "Sample Paleo Intensity Sigma %",
+          "type": "Number",
+          "description": "Average field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "vgp_alpha95": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vgp_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 95,
+          "label": "VGP Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Criterion = maximum; Confidence Level = 95%"]
+        },
+        "site_polarity": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_polarity"
+          }],
+          "unit": "Flag",
+          "position": 57,
+          "label": "Site Magnetic Polarity",
+          "type": "String",
+          "description": "Polarity of site",
+          "examples": ["Polarity is normal (n)", "reversed (r)", "transitional (t)", "excursion (e) or intermediate (i)"]
+        },
+        "specimen_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_n"
+          }],
+          "unit": "Integer",
+          "position": 12,
+          "label": "Specimen N",
+          "type": "Integer",
+          "description": "Number of measurements included in directional calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_int_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_n"
+          }],
+          "unit": "Integer",
+          "position": 18,
+          "label": "Specimen Paleo Intensity N",
+          "type": "Integer",
+          "description": "Number of measurements included in intensity calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_magn_weight": {
+          "group": "Selection Criteria",
+          "next_columns": ["specimen_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 35,
+          "label": "Specimen NRM Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_k": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_k"
+          }],
+          "unit": "Dimensionless",
+          "position": 46,
+          "label": "Sample K",
+          "type": "Number",
+          "description": "Fisher's dispersion parameter Kappa",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_int_rel_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_int_rel_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 52,
+          "label": "Sample Paleo Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "average_k": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_k"
+          }],
+          "unit": "Dimensionless",
+          "position": 85,
+          "label": "Average K",
+          "type": "Number",
+          "description": "Fisher's dispersion parameter Kappa",
+          "examples": ["Criterion = minimum"]
+        },
+        "average_age_unit": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_age_unit"
+          }],
+          "unit": "Text",
+          "position": 80,
+          "label": "Average Age Unit",
+          "type": "String",
+          "description": "Average age based on multiple sites or samples -- age unit",
+          "examples": ["Ma", "Ka", "Ga", "Years BP", "Years AD (+/-)", "Years Cal BP", "Years Cal AD (+/-)"]
+        },
+        "specimen_int_rel_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_rel_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 15,
+          "label": "Specimen Paleo Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "sample_nrm": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_nrm"
+          }],
+          "unit": "Flag",
+          "position": 38,
+          "label": "Sample NRM",
+          "type": "String",
+          "description": "Origin of the NRM is primary (p) or secondary (s)"
+        },
+        "average_int_nn": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_int_nn"
+          }],
+          "unit": "Integer",
+          "position": 91,
+          "label": "Number of Samples",
+          "type": "Integer",
+          "description": "Number of samples included in intensity calculations"
+        },
+        "specimen_rsc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_rsc"
+          }],
+          "unit": "Number in %",
+          "position": 31,
+          "label": "Specimen Maximum RSC",
+          "type": "Number",
+          "description": "Maximum relative susceptibility change",
+          "examples": ["Criterion = maximum"]
+        },
+        "sample_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_n"
+          }],
+          "unit": "Integer",
+          "position": 43,
+          "label": "Sample N",
+          "type": "Integer",
+          "description": "Number of specimens included in directional calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_tilt_correction": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_tilt_correction"
+          }],
+          "unit": "Number in %",
+          "position": 48,
+          "label": "Sample Tilt Correction",
+          "type": "Number",
+          "description": "Percentage tilt correction applied to the data",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_polarity": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_polarity"
+          }],
+          "unit": "Flag",
+          "position": 6,
+          "label": "Specimen Magnetic Polarity",
+          "type": "String",
+          "description": "Polarity of specimen",
+          "examples": ["Polarity is normal (n)", "reversed (r)", "transitional (t)", "excursion (e) or intermediate (i)"]
+        },
+        "site_int_rel_sigma_perc": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_int_rel_sigma_perc"
+          }],
+          "unit": "Number in %",
+          "position": 72,
+          "label": "Site Paleo Intensity Relative Sigma %",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty in percent",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "measurement_step_unit": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "measurement_step_unit"
+          }],
+          "unit": "Text",
+          "position": 5,
+          "label": "Measurement Step Unit",
+          "type": "String",
+          "description": "Step included in calculation -- unit"
+        },
+        "vdm_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vdm_n"
+          }],
+          "unit": "Integer",
+          "position": 98,
+          "label": "VDM N",
+          "type": "Integer",
+          "description": "Number of data points included in VDM calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_moment": {
+          "group": "Selection Criteria",
+          "next_columns": ["specimen_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 33,
+          "label": "Specimen NRM Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_n_planes": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_n_planes"
+          }],
+          "unit": "Integer",
+          "position": 65,
+          "label": "Site N Best-Fit Planes",
+          "type": "Integer",
+          "description": "Number of samples included based on best-fit planes",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_int_mad": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_mad"
+          }],
+          "unit": "Number in Degrees",
+          "position": 17,
+          "label": "Specimen Paleo Intensity MAD",
+          "type": "Number",
+          "description": "Maximum angle of deviation of the best fit line",
+          "examples": ["Criterion = maximum"]
+        },
+        "site_alpha95": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 62,
+          "label": "Site Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Criterion = maximum; Confidence Level = 95%"]
+        },
+        "sample_int_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_int_n"
+          }],
+          "unit": "Integer",
+          "position": 53,
+          "label": "Sample Paleo Intensity N",
+          "type": "Integer",
+          "description": "Number of specimens included in intensity calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_alpha95": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_alpha95"
+          }],
+          "unit": "Number in Degrees",
+          "position": 42,
+          "label": "Sample Alpha 95%",
+          "type": "Number",
+          "description": "Fisher circle",
+          "examples": ["Criterion = maximum; Confidence Level = 95%"]
+        },
+        "specimen_direction_type": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_direction_type"
+          }],
+          "unit": "Flag",
+          "position": 8,
+          "label": "Specimen Direction Type",
+          "type": "String",
+          "description": "Direction determined from (l) or plane (p)"
+        },
+        "average_int_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_int_n"
+          }],
+          "unit": "Integer",
+          "position": 90,
+          "label": "Number of Sites",
+          "type": "Integer",
+          "description": "Number of sites included in intensity calculations"
+        },
+        "specimen_viscosity_index": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_viscosity_index"
+          }],
+          "unit": "Number in %",
+          "position": 32,
+          "label": "Specimen Viscosity Index",
+          "type": "Number",
+          "description": "Viscosity index",
+          "examples": ["Criterion = maximum"]
+        },
+        "average_int_rel_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_int_rel_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 88,
+          "label": "Average Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative VGP field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "sample_direction_type": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_direction_type"
+          }],
+          "unit": "Flag",
+          "position": 39,
+          "label": "Sample Direction Type",
+          "type": "String",
+          "description": "Direction determined from (l) or plane (p)"
+        },
+        "specimen_w": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_w"
+          }],
+          "unit": "Dimensionless",
+          "position": 19,
+          "label": "Specimen Weighting Factor",
+          "type": "Number",
+          "description": "Weighting factor",
+          "examples": ["Criterion = maximum"]
+        },
+        "specimen_nrm": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_nrm"
+          }],
+          "unit": "Flag",
+          "position": 7,
+          "label": "Specimen NRM",
+          "type": "String",
+          "description": "Origin of the NRM is primary (p) or secondary (s)"
+        },
+        "sample_n_planes": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_n_planes"
+          }],
+          "unit": "Integer",
+          "position": 45,
+          "label": "Sample N Best-Fit Planes",
+          "type": "Integer",
+          "description": "Number of specimens included based on best-fit planes",
+          "examples": ["Criterion = minimum"]
+        },
+        "measurement_step_min": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "measurement_step_min"
+          }],
+          "unit": "Custom",
+          "position": 3,
+          "label": "Measurement Step Minimum",
+          "type": "Number",
+          "description": "Step included in calculation -- lower bound"
+        },
+        "specimen_drats": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_drats"
+          }],
+          "unit": "Number in %",
+          "position": 30,
+          "label": "Specimen Difference Ratio Sum",
+          "type": "Number",
+          "description": "Sum of difference in first and second pTRM measurements",
+          "examples": ["Criterion = maximum"]
+        },
+        "er_citation_names": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "er_citation_names"
+          }],
+          "unit": "Text",
+          "position": 102,
+          "label": "Citation Names",
+          "type": "List",
+          "description": "Colon-delimited list of citations",
+          "examples": ["Smith et al. 2003", "Hart & Heard 1967", "This study"]
+        },
+        "vgp_dp": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vgp_dp"
+          }],
+          "unit": "Number in Degrees",
+          "position": 92,
+          "label": "VGP DP",
+          "type": "Number",
+          "description": "Parallel latitude -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "specimen_fvds": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_fvds"
+          }],
+          "unit": "Dimensionless",
+          "position": 22,
+          "label": "Specimen f VDS",
+          "type": "Number",
+          "description": "COE's quality factors -- vector difference sum of NRM components",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_n_lines": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_n_lines"
+          }],
+          "unit": "Integer",
+          "position": 44,
+          "label": "Sample N Best-Fit Lines",
+          "type": "Integer",
+          "description": "Number of specimens included based on best-fit lines",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_comp_nmb": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_comp_nmb"
+          }],
+          "unit": "Integer",
+          "position": 9,
+          "label": "Specimen Component Number",
+          "type": "Integer",
+          "description": "Magnetic component number"
+        },
+        "site_moment": {
+          "group": "Selection Criteria",
+          "next_columns": ["site_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 74,
+          "label": "Site NRM Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment",
+          "examples": ["Criterion = minimum"]
+        },
+        "vgp_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vgp_sigma"
+          }],
+          "unit": "Number in Degrees",
+          "position": 94,
+          "label": "VGP Sigma",
+          "type": "Number",
+          "description": "Virtual geomagnetic pole -- Standard deviation",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "vgp_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vgp_n"
+          }],
+          "unit": "Integer",
+          "position": 96,
+          "label": "VGP N",
+          "type": "Integer",
+          "description": "Number of data points included in VGP calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "pmag_criteria_code": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "pmag_criteria_code"
+          }],
+          "unit": "Text",
+          "position": 0,
+          "label": "Criteria Code",
+          "type": "String",
+          "description": "Criteria type name or number",
+          "examples": ["MY-MAD", "MY-APLHA95"]
+        },
+        "average_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_n"
+          }],
+          "unit": "Integer",
+          "position": 83,
+          "label": "Average N Sites",
+          "type": "Integer",
+          "description": "Number of sites included in directional calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "criteria_description": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "criteria_description"
+          }],
+          "unit": "Text",
+          "position": 101,
+          "label": "Criteria Description",
+          "type": "String",
+          "description": "Detailed description"
+        },
+        "sample_magn_weight": {
+          "group": "Selection Criteria",
+          "next_columns": ["sample_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 56,
+          "label": "Sample NRM Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_magn_weight": {
+          "group": "Selection Criteria",
+          "next_columns": ["site_magn_mass"],
+          "unit": "Number in Am2/kg",
+          "position": 76,
+          "label": "Site NRM Magnetization Weight",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is weight normalized",
+          "examples": ["Criterion = minimum"]
+        },
+        "sample_moment": {
+          "group": "Selection Criteria",
+          "next_columns": ["sample_magn_moment"],
+          "unit": "Number in Am2",
+          "position": 54,
+          "label": "Sample NRM Moment",
+          "type": "Number",
+          "description": "Measured intensity -- remanent moment",
+          "examples": ["Criterion = minimum"]
+        },
+        "measurement_step_max": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "measurement_step_max"
+          }],
+          "unit": "Custom",
+          "position": 4,
+          "label": "Measurement Step Maximum",
+          "type": "Number",
+          "description": "Step included in calculation -- higher bound"
+        },
+        "specimen_magn_volume": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_magn_volume"
+          }],
+          "unit": "Number in A/m",
+          "position": 34,
+          "label": "Specimen NRM Magnetization Volume",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized",
+          "examples": ["Criterion = minimum"]
+        },
+        "vadm_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vadm_n"
+          }],
+          "unit": "Integer",
+          "position": 100,
+          "label": "VADM N",
+          "type": "Integer",
+          "description": "Number of data points included in VADM calculations",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_magn_volume": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_magn_volume"
+          }],
+          "unit": "Number in A/m",
+          "position": 75,
+          "label": "Site NRM Magnetization",
+          "type": "Number",
+          "description": "Measured intensity -- remanent magnetization that is volume normalized",
+          "examples": ["Criterion = minimum"]
+        },
+        "specimen_int_ptrm_n": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "specimen_int_ptrm_n"
+          }],
+          "unit": "Dimensionless",
+          "position": 36,
+          "label": "Specimen Number pTRM Checks",
+          "type": "Number",
+          "description": "Number of pTRM checks used in experiment",
+          "examples": ["Criterion = minimum"]
+        },
+        "criteria_definition": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "criteria_definition"
+          }],
+          "unit": "Text",
+          "position": 1,
+          "label": "Criteria Definition",
+          "type": "String",
+          "description": "Definition of the criteria"
+        },
+        "site_k": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_k"
+          }],
+          "unit": "Dimensionless",
+          "position": 66,
+          "label": "Site K",
+          "type": "Number",
+          "description": "Fisher's dispersion parameter Kappa",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_tilt_correction": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_tilt_correction"
+          }],
+          "unit": "Number in %",
+          "position": 68,
+          "label": "Site Tilt Correction",
+          "type": "Number",
+          "description": "Percentage tilt correction applied to the data",
+          "examples": ["Criterion = minimum"]
+        },
+        "vgp_dm": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "vgp_dm"
+          }],
+          "unit": "Number in Degrees",
+          "position": 93,
+          "label": "VGP DM",
+          "type": "Number",
+          "description": "Meridian -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "site_n_lines": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_n_lines"
+          }],
+          "unit": "Integer",
+          "position": 64,
+          "label": "Site N Best-Fit Lines",
+          "type": "Integer",
+          "description": "Number of samples included based on best-fit lines",
+          "examples": ["Criterion = minimum"]
+        },
+        "site_int_rel_sigma": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "site_int_rel_sigma"
+          }],
+          "unit": "Dimensionless",
+          "position": 71,
+          "label": "Site Paleo Intensity Relative Sigma",
+          "type": "Number",
+          "description": "Relative field strength -- uncertainty",
+          "examples": ["Criterion = maximum; Uncertainty = 1xSD"]
+        },
+        "sample_r": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "sample_r"
+          }],
+          "unit": "Dimensionless",
+          "position": 47,
+          "label": "Sample R",
+          "type": "Number",
+          "description": "Resultant Fisher vector",
+          "examples": ["Criterion = minimum"]
+        },
+        "average_r": {
+          "group": "Selection Criteria",
+          "next_columns": [{
+            "table": "pmag_criteria",
+            "column": "average_r"
+          }],
+          "unit": "Dimensionless",
+          "position": 86,
+          "label": "Average R",
+          "type": "Number",
+          "description": "Resultant Fisher vector",
+          "examples": ["Criterion = minimum"]
         }
       },
-      'label': 'Selection Criteria',
-      'description': 'Selection criteria used in data selection'
+      "label": "Selection Criteria",
+      "description": "Selection criteria used in data selection"
     }
   }
 };
