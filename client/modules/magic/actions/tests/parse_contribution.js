@@ -1,86 +1,49 @@
 const {describe, it} = global;
 import {expect} from 'chai';
 import ParseContribution from '../parse_contribution';
-import {default as contribution289  } from '/test_files/289.js';
-import {default as contribution3552 } from '/test_files/3552.js';
-import {default as contribution7527 } from '/test_files/7527.js';
-import {default as contribution7661 } from '/test_files/7661.js';
-import {default as contribution8054 } from '/test_files/8054.js';
-import {default as contribution10507} from '/test_files/10507.js';
+import {default as contribution289  } from './files/contributions/289.js';
+import {default as contribution3552 } from './files/contributions/3552.js';
+import {default as contribution7527 } from './files/contributions/7527.js';
+import {default as contribution7661 } from './files/contributions/7661.js';
+import {default as contribution8054 } from './files/contributions/8054.js';
+import {default as contribution10507} from './files/contributions/10507.js';
 
+// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
 const parseContributionWarningTest = (text, reErrorMsg) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // parse the test string
-  const Parser = new ParseContribution({LocalState});
+  const Parser = new ParseContribution({});
   Parser.parse(text);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('PARSE_CONTRIBUTION_WARNINGS');
-
-  // expect the parse errors to contain one error that matches the matchErrorMSG regex
-  expect(errors.length).to.be.at.least(1);
-  expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
-
+  expect(Parser.warnings().length).to.be.at.least(1);
+  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reErrorMsg);
 };
 
+// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
 const parseContributionErrorTest = (text, reErrorMsg) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // parse the test string
-  const Parser = new ParseContribution({LocalState});
+  const Parser = new ParseContribution({});
   Parser.parse(text);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
-
-  // expect the parse errors to contain one error that matches the matchErrorMSG regex
-  expect(errors.length).to.be.at.least(1);
-  expect(errors[errors.length - 1]['message']).to.match(reErrorMsg);
-
+  expect(Parser.errors().length).to.be.at.least(1);
+  expect(Parser.errors()[Parser.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
+// Expect no errors.
 const parseContributionNoErrorTest = (text) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // parse the test string
-  const Parser = new ParseContribution({LocalState});
+  const Parser = new ParseContribution({});
   Parser.parse(text);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
-
-  // expect no errors
-  expect(errors.length).to.equal(0);
+  expect(Parser.errors().length).to.equal(0);
 
 };
 
+// Expect no errors and check against expected JSON.
 const parseContributionJSONTest = (text, jsonExpected) => {
-
-  // create a mock Map instead of a Reactive Dict
-  const LocalState = new Map();
-
-  // parse the test string
-  const Parser = new ParseContribution({LocalState});
+  const Parser = new ParseContribution({});
   const json = Parser.parse(text);
-
-  // retrieve the spied arguments from the 1st time LocalState.set was called
-  const errors = LocalState.get('PARSE_CONTRIBUTION_ERRORS');
-
-  // expect no errors and check against expected JSON
-  expect(errors.length).to.equal(0);
+  expect(Parser.errors().length).to.equal(0);
   expect(json).to.deep.equal(jsonExpected);
-
 };
 
 describe('magic.actions.parse_contribution', () => {
-  describe('parse invalid', () => {
+
+  // Test parsing invalid strings.
+  describe('when parsing invalid strings', () => {
     it('should warn about parsing an empty string', () => {
       parseContributionWarningTest(null, /empty/i);
       parseContributionWarningTest(undefined, /empty/i);
@@ -122,8 +85,8 @@ describe('magic.actions.parse_contribution', () => {
   });
 
 
-  //*****PARSE VALID FILES
-  describe('parse valid', () => {
+  // Test parsing valid strings.
+  describe('when parsing valid strings', () => {
     it('should keep numbers as strings', () => {
       const json = {
         table: [{
@@ -153,7 +116,9 @@ describe('magic.actions.parse_contribution', () => {
         parseContributionJSONTest(withBlank, json);
     });
   });
-  describe('parse files', () => {
+
+  // Test parsing valid files.
+  describe('when parsing valid files', () => {
     it('should parse contribution 289 with no errors', () => {
       parseContributionNoErrorTest(contribution289);
     });

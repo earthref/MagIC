@@ -1,66 +1,60 @@
 import {_} from 'lodash';
+import Runner from './runner';
 
+// Temporarily import the models from the test files. These will be in MongoDB soon.
+import {default as model20} from './tests/files/data_models/2.0.js';
+import {default as model21} from './tests/files/data_models/2.1.js';
+import {default as model22} from './tests/files/data_models/2.2.js';
+import {default as model23} from './tests/files/data_models/2.3.js';
+import {default as model24} from './tests/files/data_models/2.4.js';
+import {default as model25} from './tests/files/data_models/2.5.js';
+import {default as model30} from './tests/files/data_models/3.0.js';
+const dataModels = {
+  '2.0': model20,
+  '2.1': model21,
+  '2.2': model22,
+  '2.3': model23,
+  '2.4': model24,
+  '2.5': model25,
+  '3.0': model30
+};
 const magicVersions = ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '3.0'];
 
-export default class {
+export default class extends Runner {
 
-  constructor({Meteor, LocalState}) {
-    this.Meteor = Meteor;
-    this.LocalState = LocalState;
-
-    // Clear errors and warnings
-    this.LocalState.set('UPGRADE_CONTRIBUTION_ERRORS', []);
-    this.LocalState.set('UPGRADE_CONTRIBUTION_WARNINGS', []);
-
-    // Initalize upgrading state
-    this.contributionTable; //Name of 2.5 and before uses "magic_contributions" 3.0 uses "contributions"
-    this.table;
-    this.rowNumber;
-    this.column;
-
+  constructor({LocalState}) {
+    super('UPGRADE_CONTRIBUTION', {LocalState});
   }
 
-  upgrade(jsonOld) {
+  upgrade(jsonOld, maxVersion) {
 
-    // Check for a valid input
+    // Initialize the upgrading state.
+    this.table = undefined;
+    this.rowNumber = undefined;
+    this.column = undefined;
+
+    // Check for a valid input.
     if (_.isEmpty(jsonOld)) {
-      this._appendWarning('Contribution is empty.');
+      this._appendWarning('The first argument (MagIC contribution in JSON format) is empty.');
       return jsonOld;
     }
 
-    // Look for the current MagIC data model version
-    let currentVersion;
+    // Check that the maximum MagIC data model version to upgrade to is valid (maxVersion is in magicVersions).
+    if (maxVersion && _.indexOf(magicVersions, maxVersion) === -1) {
+      let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(', ');
+      this._appendError(`The second argument (maximum MagIC data model version), "${maxVersion}", is invalid. ` +
+                        `Expected one of: ${strVersions}.`);
+      return jsonOld;
+    }
 
     //console.log("JSON file in parser: " + JSON.stringify(jsonOld));
-    if(!jsonOld || (!jsonOld['magic_contributions'] && !jsonOld['contribution']))
-    {
-      //console.log("Appending error: " + JSON.stringify(jsonOld));
-      this._appendError('Failed to find the "magic_contributions" or "contribution" table.');
+
+    // Look for the current MagIC data model version.
+    let currentVersion;
+    if(!jsonOld || !jsonOld['contribution']) {
+      this._appendError('Failed to find the "contribution" table.');
       return jsonOld;
     }
-
-    //before getting into contribution table specifics, check if there are both versions of the contribution table
-    console.log(`currentVersion before error append: ${currentVersion}`);
-    if (jsonOld['magic_contributions'] && jsonOld['contributions'])
-    {
-      this._appendError('Found both a "magic_contributions" and "contribution" table.');
-      return jsonOld;
-    }
-
-    //****If we are using the old contribution table
-    if (jsonOld['magic_contributions']) {
-      if (jsonOld['magic_contributions'].length !== 1) {
-        this._appendError('The "magic_contributions" table does not have exactly one row.');
-        return jsonOld;
-      }
-      if (!jsonOld['magic_contributions'][0]['magic_version']) {
-        this._appendError('The "magic_contributions" table does not include the "magic_version" column.');
-        return jsonOld;
-      }
-      this.contributionTable = 'magic_contributions';
-      currentVersion = jsonOld['magic_contributions'][0]['magic_version'];
-    }
-    //****If we are using the new contribution table
     if (jsonOld['contribution']) {
       if (jsonOld['contribution'].length !== 1) {
         this._appendError('The "contribution" table does not have exactly one row.');
@@ -70,40 +64,34 @@ export default class {
         this._appendError('The "contribution" table does not include the "magic_version" column.');
         return jsonOld;
       }
-
       this.contributionTable = 'contribution';
       currentVersion = jsonOld['contribution'][0]['magic_version'];
     }
 
-    // Check that the current MagIC data model version is valid, version must be in magicVersionsList
+    // Check that the current MagIC data model version is valid (currentVersion is in magicVersions).
     if (_.indexOf(magicVersions, currentVersion) === -1) {
       let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(", ");
       this._appendError(`MagIC data model version ${currentVersion} is invalid. Expected one of: ${strVersions}.`);
       return jsonOld;
     }
 
-    // Check that there is a newer MagIC data model
-    console.log(`Current Version: ${currentVersion}`);
+    //console.log(`Current Version: ${currentVersion}`);
+
+    // Check that there is a newer MagIC data model to use or that the maxVersion has been reached.
     if (_.indexOf(magicVersions, currentVersion) === magicVersions.length - 1) {
-      this._appendWarning(`This contribution is already at the latest MagIC data model version ${currentVersion}.`);
+      //this._appendWarning(`This contribution is already at the latest MagIC data model version ${currentVersion}.`);
       return jsonOld;
     }
 
-    // Get the next MagIC data model
-    let nextVersion = magicVersions[_.indexOf(magicVersions, currentVersion) + 1];
-
-    //GGG GRAB DATA MODEL HERE BASED ON nextVersion
-
-
-    // Upgrade the contribution
+    // Upgrade the contribution.
     let jsonNew = {};
     for (let table in jsonOld) {
       jsonNew[table] = [];
       for (let row of jsonOld[table]) {
         let newRow = {};
         for (let column in row) {
-          if (table === this.contributionTable && column === 'magic_version') {
-            newRow[column] = nextVersion;
+          if (table === 'contribution' && column === 'magic_version') {
+            newRow[column] = magicVersions[_.indexOf(magicVersions, currentVersion) + 1];
           } else {
             newRow[column] = row[column];
           }
@@ -112,29 +100,12 @@ export default class {
       }
     }
 
-    console.log("old: ", jsonOld);
-    console.log("new: ", jsonNew);
+    //console.log("old: ", jsonOld);
+    //console.log("new: ", jsonNew);
 
-    //if we have just processed the final version, simply retunr the json file
-    if(_.indexOf(magicVersions,nextVersion) === magicVersions.length - 1) return jsonNew;
-    else return this.upgrade(jsonNew);
+    // Recursively upgrade the contribution.
+    return this.upgrade(jsonNew, maxVersion);
 
-  }
-
-  _appendWarning(warningMessage) {
-    const warnings = this.LocalState.get('UPGRADE_CONTRIBUTION_WARNINGS');
-    const warning = { table: this.table, rowNumber: this.rowNumber, column: this.column, message: warningMessage};
-    console.log('WARNING: ', warningMessage);
-    warnings.push(warning);
-    this.LocalState.set('UPGRADE_CONTRIBUTION_WARNINGS', warnings);
-  }
-
-  _appendError(errorMessage) {
-    const errors = this.LocalState.get('UPGRADE_CONTRIBUTION_ERRORS');
-    const error = { table: this.table, rowNumber: this.rowNumber, column: this.column, message: errorMessage};
-    console.log('ERROR: ', errorMessage);
-    errors.push(error);
-    this.LocalState.set('UPGRADE_CONTRIBUTION_ERRORS', errors);
   }
 
 }
