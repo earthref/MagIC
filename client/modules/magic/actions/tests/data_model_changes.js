@@ -11,39 +11,41 @@ import {default as model30} from './files/data_models/3.0.js';
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const dataModelChangesWarningTest = (model, reWarningMsg) => {
-  const ChangeLog = new DataModelChanges({});
-  ChangeLog.changes(model);
-  expect(ChangeLog.warnings().length).to.be.at.least(1);
-  expect(ChangeLog.warnings()[ChangeLog.warnings().length - 1]['message']).to.match(reWarningMsg);
+  const ChangesLists = new DataModelChanges({});
+  ChangesLists.changes(model);
+  expect(ChangesLists.warnings().length).to.be.at.least(1);
+  expect(ChangesLists.warnings()[ChangesLists.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 const dataModelChangesErrorTest = (model, reErrorMsg) => {
-  const ChangeLog = new DataModelChanges({});
-  ChangeLog.changes(model);
-  expect(ChangeLog.errors().length).to.be.at.least(1);
-  expect(ChangeLog.errors()[ChangeLog.errors().length - 1]['message']).to.match(reErrorMsg);
+  const ChangesLists = new DataModelChanges({});
+  ChangesLists.changes(model);
+  expect(ChangesLists.errors().length).to.be.at.least(1);
+  expect(ChangesLists.errors()[ChangesLists.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
-// Expect no errors.
-const dataModelChangesNoErrorTest = (model) => {
-  const ChangeLog = new DataModelChanges({});
-  ChangeLog.changes(model);
-  expect(ChangeLog.errors().length).to.equal(0);
+// Expect no warnings nor errors.
+const dataModelChangesNoWarningNoErrorTest = (model) => {
+  const ChangesLists = new DataModelChanges({});
+  ChangesLists.changes(model);
+  expect(ChangesLists.warnings().length).to.equal(0);
+  expect(ChangesLists.errors().length).to.equal(0);
 };
 
-// Expect no errors and check against expected JSON.
+// Expect no warnings nor errors and check against expected JSON.
 const dataModelChangesModelTest = (model, modelExpectedChanges) => {
-  const ChangeLog = new DataModelChanges({});
-  const modelChanges = ChangeLog.changes(model);
-  expect(ChangeLog.errors().length).to.equal(0);
+  const ChangesLists = new DataModelChanges({});
+  const modelChanges = ChangesLists.changes(model);
+  expect(ChangesLists.warnings().length).to.equal(0);
+  expect(ChangesLists.errors().length).to.equal(0);
   expect(modelChanges).to.deep.equal(modelExpectedChanges);
 };
 
 describe('magic.actions.data_model_changes', () => {
 
-  // Test getting changes from an invalid model.
-  describe('when getting changes from an invalid model', () => {
+  // Test making lists of changes from an invalid model.
+  describe('when making lists of changes from an invalid model', () => {
 
     it('should reject getting changes from an empty model', () => {
       dataModelChangesErrorTest(null, /the model argument .* is empty/i);
@@ -53,6 +55,7 @@ describe('magic.actions.data_model_changes', () => {
 
     it('should reject when no tables list is found', () => {
       const model = {
+        magic_version: '3.0',
         no_tables: {}
       };
       dataModelChangesErrorTest(model, /has no "tables" property/i);
@@ -60,6 +63,7 @@ describe('magic.actions.data_model_changes', () => {
 
     it('should reject when no columns are in a table', () => {
       const model = {
+        magic_version: '3.0',
         tables: {
           contribution: {
             no_columns: {}
@@ -71,6 +75,7 @@ describe('magic.actions.data_model_changes', () => {
 
     it('should reject when the previous columns list is invalid', () => {
       const noTableModel = {
+        magic_version: '3.0',
         tables: {
           contribution: {
             columns: {
@@ -86,6 +91,7 @@ describe('magic.actions.data_model_changes', () => {
       };
       dataModelChangesErrorTest(noTableModel, /failed to find the previous table name for column .* in table .*/i);
       const noColumnModel = {
+        magic_version: '3.0',
         tables: {
           contribution: {
             columns: {
@@ -104,6 +110,7 @@ describe('magic.actions.data_model_changes', () => {
 
     it('should reject when the next columns list is invalid', () => {
       const noTableModel = {
+        magic_version: '2.5',
         tables: {
           contribution: {
             columns: {
@@ -119,6 +126,7 @@ describe('magic.actions.data_model_changes', () => {
       };
       dataModelChangesErrorTest(noTableModel, /failed to find the next table name for column .* in table .*/i);
       const noColumnModel = {
+        magic_version: '2.5',
         tables: {
           contribution: {
             columns: {
@@ -137,11 +145,29 @@ describe('magic.actions.data_model_changes', () => {
 
   });
 
-  // Test getting changes from a valid model.
-  describe('when getting changes from a valid model', () => {
+  // Test making lists of changes from a valid model.
+  describe('when making lists of changes from a valid model', () => {
+
+    it('should ignore unchanged columns', () => {
+      const model = {
+        magic_version: '2.5',
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                not_previous_not_next_columns: ''
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {};
+      dataModelChangesModelTest(model, modelChanges);
+    });
 
     it('should make a list of deleted columns', () => {
       const model = {
+        magic_version: '2.5',
         tables: {
           contribution: {
             columns: {
@@ -157,7 +183,31 @@ describe('magic.actions.data_model_changes', () => {
       };
       const modelChanges = {
         deleted_columns: [{
+          table: 'contribution',
+          column: 'magic_version'
+        }]
+      };
+      dataModelChangesModelTest(model, modelChanges);
+    });
 
+    it('should make a list of inserted columns', () => {
+      const model = {
+        magic_version: '2.5',
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                next_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version'
+                }]
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {
+        inserted_columns: [{
           table: 'contribution',
           column: 'magic_version'
         }]
@@ -167,6 +217,7 @@ describe('magic.actions.data_model_changes', () => {
 
     it('should make a list of renamed columns', () => {
       const model = {
+        magic_version: '2.5',
         tables: {
           contribution: {
             columns: {
@@ -188,21 +239,62 @@ describe('magic.actions.data_model_changes', () => {
         renamed_columns: [{
           table: 'contribution',
           column: 'magic_version',
-          previous_columns: [{
+          previous_column: {
             table: 'contribution',
             column: 'version'
-          }]
+          }
         }]
       };
       dataModelChangesModelTest(model, modelChanges);
     });
 
-    it('should make a list of inserted columns', () => {
+    it('should make a list of renaming columns', () => {
       const model = {
+        magic_version: '2.5',
         tables: {
           contribution: {
             columns: {
               magic_version: {
+                previous_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version'
+                }],
+                next_columns: [{
+                  table: 'location',
+                  column: 'version'
+                }]
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {
+        renaming_columns: [{
+          table: 'contribution',
+          column: 'magic_version',
+          next_column: {
+            table: 'location',
+            column: 'version'
+          }
+        }]
+      };
+      dataModelChangesModelTest(model, modelChanges);
+    });
+
+    it('should make a list of merged columns', () => {
+      const model = {
+        magic_version: '2.5',
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                previous_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version_1'
+                }, {
+                  table: 'contribution',
+                  column: 'magic_version_2'
+                }],
                 next_columns: [{
                   table: 'contribution',
                   column: 'magic_version'
@@ -213,12 +305,86 @@ describe('magic.actions.data_model_changes', () => {
         }
       };
       const modelChanges = {
-        inserted_columns: [{
+        merged_columns: [{
           table: 'contribution',
-          column: 'magic_version'
+          column: 'magic_version',
+          previous_columns: [{
+            table: 'contribution',
+            column: 'magic_version_1'
+          }, {
+            table: 'contribution',
+            column: 'magic_version_2'
+          }]
         }]
       };
       dataModelChangesModelTest(model, modelChanges);
+    });
+
+    it('should make a list of splitting columns', () => {
+      const model = {
+        magic_version: '2.5',
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                previous_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version'
+                }],
+                next_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version_1'
+                }, {
+                  table: 'contribution',
+                  column: 'magic_version_2'
+                }]
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {
+        splitting_columns: [{
+          table: 'contribution',
+          column: 'magic_version',
+          next_columns: [{
+            table: 'contribution',
+            column: 'magic_version_1'
+          }, {
+            table: 'contribution',
+            column: 'magic_version_2'
+          }]
+        }]
+      };
+      dataModelChangesModelTest(model, modelChanges);
+    });
+
+    it('should make lists of changes with the 2.0 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model20);
+    });
+
+    it('should make lists of changes with the 2.1 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model21);
+    });
+
+    it('should make lists of changes with the 2.2 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model22);
+    });
+
+    it('should make lists of changes with the 2.3 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model23);
+    });
+
+    it('should make lists of changes with the 2.4 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model24);
+    });
+
+    it('should make lists of changes with the 2.5 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model25);
+    });
+
+    it('should make lists of changes with the 3.0 model', () => {
+      dataModelChangesNoWarningNoErrorTest(model30);
     });
 
   });
