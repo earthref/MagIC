@@ -9,16 +9,15 @@ import UpgradeContribution from '../upgrade_contribution';
 //import {default as contribution8054 } from './files/8054.js';
 //import {default as contribution10507} from './files/10507.js';
 
-
-// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
-const upgradeContributionWarningTest = (jsonOld, maxVersion, reErrorMsg) => {
+// Expect the warnings to contain one warning that matches the reWarningMsg regex.
+const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
   const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld, maxVersion);
   expect(Upgrader.warnings().length).to.be.at.least(1);
-  expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reErrorMsg);
+  expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
 
-// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
+// Expect the errors to contain one error that matches the reErrorMsg regex.
 const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
   const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld, maxVersion);
@@ -74,21 +73,7 @@ describe('magic.actions.upgrade_contribution', () => {
        upgradeContributionErrorTest(jsonNoContribTable, undefined, /failed to find the "contribution" table/i);
     });
 
-
-    it('should reject when magic_contributions table does not have exactly one row', () => {
-      const jsonContribTwoColumns = {
-        contribution: [{
-          col1: 'str1',
-          col2: '1.2'
-        }, {
-          col1: 'str2',
-          col2: '1.2'
-        }]
-      };
-      upgradeContributionErrorTest(jsonContribTwoColumns, undefined, /table does not have exactly one row/i);
-    });
-
-    it('should reject when "magic_contributions" table does not include the "magic_version" column.', () => {
+    it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
       const jsonContribNoMagicVersion = {
         contribution: [{
           not_magic_version: '1.2',
@@ -115,7 +100,7 @@ describe('magic.actions.upgrade_contribution', () => {
    it('should reject if the requested data model is invalid.', () => {
       const invalidMagicVersion = {
         contribution: [{
-          magic_version: '6.9',
+          magic_version: '0.1',
           col2: '1.2'
         }]
       };

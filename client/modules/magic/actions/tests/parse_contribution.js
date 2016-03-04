@@ -8,15 +8,15 @@ import {default as contribution7661 } from './files/contributions/7661.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
 
-// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
-const parseContributionWarningTest = (text, reErrorMsg) => {
+// Expect the warnings to contain one warning that matches the reWarningMsg regex.
+const parseContributionWarningTest = (text, reWarningMsg) => {
   const Parser = new ParseContribution({});
   Parser.parse(text);
   expect(Parser.warnings().length).to.be.at.least(1);
-  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reErrorMsg);
+  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
 
-// Expect the parse errors to contain one error that matches the matchErrorMSG regex.
+// Expect the errors to contain one error that matches the reErrorMsg regex.
 const parseContributionErrorTest = (text, reErrorMsg) => {
   const Parser = new ParseContribution({});
   Parser.parse(text);
@@ -70,7 +70,7 @@ describe('magic.actions.parse_contribution', () => {
         'tab\t\n',
         'tab\t \n'
       ];
-      for (var noTableName of noTableNames)
+      for (let noTableName of noTableNames)
         parseContributionErrorTest(noTableName, /no table name following tab delimiter/i);
     });
 
@@ -112,7 +112,7 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.2'
         }]
       };
-      for (var withBlank of withBlanks)
+      for (let withBlank of withBlanks)
         parseContributionJSONTest(withBlank, json);
     });
   });
