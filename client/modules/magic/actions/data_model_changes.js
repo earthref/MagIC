@@ -31,6 +31,33 @@ export default class extends Runner {
       console.log(`--------------Ver ${dataModelVersionNumber} changes for table: ${table} ---------------`);
       for (let column in dataModel.tables[table].columns) {
 
+        //TEST FOR PROPER PREVIOUS COLUMN STRUCTURE
+        let prevColArray = dataModel.tables[table].columns[column].previous_columns;
+        if((prevColArray == undefined ||
+            prevColArray.length == 0 ||
+            !hasOwnProperty.call(prevColArray[0], 'table'))){
+          this._appendError(`failed to find the previous table name for column ${column} in table ${table}`);
+        }
+        //console.log("ARRHG: "+dataModel.tables[table].columns[column].previous_columns[0].table);
+        if(prevColArray == undefined ||
+            prevColArray.length == 0 ||
+            !hasOwnProperty.call(prevColArray, 'column')){
+          this._appendError(`failed to find the previous column name for column ${column} in table ${table}`);
+        }
+
+        //TEST FOR PROPER NEXT COLUMN STRUCTURE
+        let nextColArray = dataModel.tables[table].columns[column].next_columns;
+        if( nextColArray == undefined ||
+            nextColArray.length == 0 ||
+            !hasOwnProperty.call(nextColArray[0], 'table')){
+          this._appendError(`failed to find the next table name for column ${column} in table ${table}`);
+        }
+        if( nextColArray == undefined ||
+            nextColArray.length == 0 ||
+            !hasOwnProperty.call(nextColArray, 'column')){
+          this._appendError(`failed to find the next column name for column ${column} in table ${table}`);
+        }
+
         //TEST FOR NEW COLUMNS
         if (dataModelVersionNumber != '2.0')//All columns in 2.0 are considered "new"
         {
@@ -38,20 +65,19 @@ export default class extends Runner {
            empty array signifying no next/previous columns (v.2.2 - v2.4), other times there is an array with a single empty
            object (v 2.0, 2.1) and still other times the "previous" or "next" column properries don't exist at all (v2.5)*/
           let previousColArray = dataModel.tables[table].columns[column]['previous_columns']
-          if  ((previousColArray.length == 0) ||
-              (!hasOwnProperty.call(previousColArray[0], 'column')))
+          if  ( previousColArray == undefined ||
+                previousColArray.length == 0 ||
+                !hasOwnProperty.call(previousColArray[0], 'column'))
             console.log(`**** NEW column: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
         }
 
         //TEST FOR DELETED COLUMNS
-        let nextColArray = dataModel.tables[table].columns[column]['next_columns'];
-
+        nextColArray = dataModel.tables[table].columns[column]['next_columns'];
         if  ((nextColArray == undefined) ||
             (nextColArray.length == 0) ||
             (!(hasOwnProperty.call(nextColArray[0], 'column')))){
           console.log(`**** DELETED column: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
         }
-
         else {
           let currentColName = column;
           let nextColumnName = dataModel.tables[table].columns[column]['next_columns'][0]['column'];
@@ -60,7 +86,7 @@ export default class extends Runner {
             console.log(`**** Column name change detected, Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
             console.log(`Current: ${currentColName}`);
             console.log(`Next:    ${nextColumnName}`);
-          }l
+          }
         }
       }
     }

@@ -9,6 +9,20 @@ import {default as model24} from './files/data_models/2.4.js';
 import {default as model25} from './files/data_models/2.5.js';
 import {default as model30} from './files/data_models/3.0.js';
 
+
+// Expect the errors to contain one error that matches the reErrorMsg regex.
+function errorInCollection(reErrorMsg, ChangeLog) {
+  let errorInCollection = false;
+  for(let error in ChangeLog.errors() )
+  {
+    //console.log('YO: '+ JSON.stringify(ChangeLog.errors()[error]['message']));
+    console.log('YO: '+ ChangeLog.errors()[error]['message']);
+    if(reErrorMsg.test(ChangeLog.errors()[error]['message']))
+      errorInCollection = true;//expect(error['message']).to.match(reErrorMsg);
+  }
+  return errorInCollection;
+}
+
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const dataModelChangesWarningTest = (model, reWarningMsg) => {
   const ChangeLog = new DataModelChanges({});
@@ -17,12 +31,14 @@ const dataModelChangesWarningTest = (model, reWarningMsg) => {
   expect(ChangeLog.warnings()[ChangeLog.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
 
-// Expect the errors to contain one error that matches the reErrorMsg regex.
 const dataModelChangesErrorTest = (model, reErrorMsg) => {
   const ChangeLog = new DataModelChanges({});
   ChangeLog.changes(model);
+  //console.log("YO: " + ChangeLog.errors()[0]['message']);
   expect(ChangeLog.errors().length).to.be.at.least(1);
-  expect(ChangeLog.errors()[ChangeLog.errors().length - 1]['message']).to.match(reErrorMsg);
+  //expect(ChangeLog.errors()[ChangeLog.errors().length - 1]['message']).to.match(reErrorMsg);
+  let errorFound = errorInCollection(reErrorMsg, ChangeLog);
+  expect(errorFound).to.equal(true);
 };
 
 // Expect no errors.
@@ -69,14 +85,17 @@ describe('magic.actions.data_model_changes', () => {
       dataModelChangesErrorTest(model, /failed to find the columns list for table: .*/i);
     });
 
+
+
     it('should reject when the previous columns list is invalid', () => {
+
       const noTableModel = {
         tables: {
           contribution: {
             columns: {
               magic_version: {
                 previous_columns: [{
-                  no_table: '',
+                  no_table: '',//no_table
                   column: ''
                 }]
               }
@@ -84,7 +103,8 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      dataModelChangesErrorTest(noTableModel, /failed to find the previous table name for column .* in table .*/i);
+      dataModelChangesErrorTest(noTableModel, /failed to find the previous table name for column/i);
+
       const noColumnModel = {
         tables: {
           contribution: {
@@ -99,8 +119,9 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      dataModelChangesErrorTest(noColumnModel, /failed to find the previous column name for column .* in table .*/i);
+      dataModelChangesErrorTest(noColumnModel, /failed to find the previous column name for column/i);
     });
+
 
     it('should reject when the next columns list is invalid', () => {
       const noTableModel = {
