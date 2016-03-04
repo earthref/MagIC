@@ -66,7 +66,7 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      dataModelChangesErrorTest(model, undefined, /failed to find the columns list for table .*/i);
+      dataModelChangesErrorTest(model, /failed to find the columns list for table .*/i);
     });
 
     it('should reject when the previous columns list is invalid', () => {
@@ -75,31 +75,31 @@ describe('magic.actions.data_model_changes', () => {
           contribution: {
             columns: {
               magic_version: {
-                previous_columns: {
+                previous_columns: [{
                   no_table: '',
                   column: ''
-                }
+                }]
               }
             }
           }
         }
       };
-      dataModelChangesErrorTest(noTableModel, undefined, /failed to find the previous table name for column .* in table .*/i);
+      dataModelChangesErrorTest(noTableModel, /failed to find the previous table name for column .* in table .*/i);
       const noColumnModel = {
         tables: {
           contribution: {
             columns: {
               magic_version: {
-                previous_columns: {
+                previous_columns: [{
                   table: '',
                   no_column: ''
-                }
+                }]
               }
             }
           }
         }
       };
-      dataModelChangesErrorTest(noColumnModel, undefined, /failed to find the previous column name for column .* in table .*/i);
+      dataModelChangesErrorTest(noColumnModel, /failed to find the previous column name for column .* in table .*/i);
     });
 
     it('should reject when the next columns list is invalid', () => {
@@ -108,37 +108,117 @@ describe('magic.actions.data_model_changes', () => {
           contribution: {
             columns: {
               magic_version: {
-                next_columns: {
+                next_columns: [{
                   no_table: '',
                   column: ''
-                }
+                }]
               }
             }
           }
         }
       };
-      dataModelChangesErrorTest(noTableModel, undefined, /failed to find the next table name for column .* in table .*/i);
+      dataModelChangesErrorTest(noTableModel, /failed to find the next table name for column .* in table .*/i);
       const noColumnModel = {
         tables: {
           contribution: {
             columns: {
               magic_version: {
-                next_columns: {
+                next_columns: [{
                   table: '',
                   no_column: ''
-                }
+                }]
               }
             }
           }
         }
       };
-      dataModelChangesErrorTest(noColumnModel, undefined, /failed to find the next column name for column .* in table .*/i);
+      dataModelChangesErrorTest(noColumnModel, /failed to find the next column name for column .* in table .*/i);
     });
 
   });
 
   // Test getting changes from a valid model.
   describe('when getting changes from a valid model', () => {
+
+    it('should make a list of deleted columns', () => {
+      const model = {
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                previous_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version'
+                }]
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {
+        deleted_columns: [{
+          table: 'contribution',
+          column: 'magic_version'
+        }]
+      };
+      dataModelChangesModelTest(model, modelChanges);
+    });
+
+    it('should make a list of renamed columns', () => {
+      const model = {
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                previous_columns: [{
+                  table: 'contribution',
+                  column: 'version'
+                }],
+                next_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version'
+                }]
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {
+        renamed_columns: [{
+          table: 'contribution',
+          column: 'magic_version',
+          previous_columns: [{
+            table: 'contribution',
+            column: 'version'
+          }]
+        }]
+      };
+      dataModelChangesModelTest(model, modelChanges);
+    });
+
+    it('should make a list of inserted columns', () => {
+      const model = {
+        tables: {
+          contribution: {
+            columns: {
+              magic_version: {
+                next_columns: [{
+                  table: 'contribution',
+                  column: 'magic_version'
+                }]
+              }
+            }
+          }
+        }
+      };
+      const modelChanges = {
+        inserted_columns: [{
+          table: 'contribution',
+          column: 'magic_version'
+        }]
+      };
+      dataModelChangesModelTest(model, modelChanges);
+    });
 
   });
 
