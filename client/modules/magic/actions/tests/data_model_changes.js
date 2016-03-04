@@ -11,13 +11,13 @@ import {default as model30} from './files/data_models/3.0.js';
 
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
-function errorInCollection(reErrorMsg, ChangeLog) {
+function errorInCollection(reErrorMsg, ChangeLists) {
   let errorInCollection = false;
-  for(let error in ChangeLog.errors() )
+  for(let error in ChangeLists.errors() )
   {
-    //console.log('YO: '+ JSON.stringify(ChangeLog.errors()[error]['message']));
-    console.log('YO: '+ ChangeLog.errors()[error]['message']);
-    if(reErrorMsg.test(ChangeLog.errors()[error]['message']))
+    //console.log('YO: '+ JSON.stringify(ChangeLists.errors()[error]['message']));
+    console.log('YO: '+ ChangeLists.errors()[error]['message']);
+    if(reErrorMsg.test(ChangeLists.errors()[error]['message']))
       errorInCollection = true;//expect(error['message']).to.match(reErrorMsg);
   }
   return errorInCollection;
@@ -25,34 +25,34 @@ function errorInCollection(reErrorMsg, ChangeLog) {
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const dataModelChangesWarningTest = (model, reWarningMsg) => {
-  const ChangeLog = new DataModelChanges({});
-  ChangeLog.changes(model);
-  expect(ChangeLog.warnings().length).to.be.at.least(1);
-  expect(ChangeLog.warnings()[ChangeLog.warnings().length - 1]['message']).to.match(reWarningMsg);
+  const ChangeLists = new DataModelChanges({});
+  ChangeLists.changes(model);
+  expect(ChangeLists.warnings().length).to.be.at.least(1);
+  expect(ChangeLists.warnings()[ChangeLists.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
 
 const dataModelChangesErrorTest = (model, reErrorMsg) => {
-  const ChangeLog = new DataModelChanges({});
-  ChangeLog.changes(model);
-  //console.log("YO: " + ChangeLog.errors()[0]['message']);
-  expect(ChangeLog.errors().length).to.be.at.least(1);
-  //expect(ChangeLog.errors()[ChangeLog.errors().length - 1]['message']).to.match(reErrorMsg);
-  let errorFound = errorInCollection(reErrorMsg, ChangeLog);
+  const ChangeLists = new DataModelChanges({});
+  ChangeLists.changes(model);
+  //console.log("YO: " + ChangeLists.errors()[0]['message']);
+  expect(ChangeLists.errors().length).to.be.at.least(1);
+  //expect(ChangeLists.errors()[ChangeLists.errors().length - 1]['message']).to.match(reErrorMsg);
+  let errorFound = errorInCollection(reErrorMsg, ChangeLists);
   expect(errorFound).to.equal(true);
 };
 
 // Expect no errors.
 const dataModelChangesNoErrorTest = (model) => {
-  const ChangeLog = new DataModelChanges({});
-  ChangeLog.changes(model);
-  expect(ChangeLog.errors().length).to.equal(0);
+  const ChangeLists = new DataModelChanges({});
+  ChangeLists.changes(model);
+  expect(ChangeLists.errors().length).to.equal(0);
 };
 
 // Expect no errors and check against expected JSON.
 const dataModelChangesModelTest = (model, modelExpectedChanges) => {
-  const ChangeLog = new DataModelChanges({});
-  const modelChanges = ChangeLog.changes(model);
-  expect(ChangeLog.errors().length).to.equal(0);
+  const ChangeLists = new DataModelChanges({});
+  const modelChanges = ChangeLists.changes(model);
+  expect(ChangeLists.errors().length).to.equal(0);
   expect(modelChanges).to.deep.equal(modelExpectedChanges);
 };
 
