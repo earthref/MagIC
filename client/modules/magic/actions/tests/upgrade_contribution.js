@@ -111,6 +111,7 @@ describe('magic.actions.upgrade_contribution', () => {
 
   // Test upgrading valid JSON.
   describe('when upgrading valid JSON', () => {
+
     it('should keep numbers as strings', () => {
       const jsonOld = {
         contribution: [{
@@ -130,6 +131,41 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       upgradeContributionJSONTest(jsonOld, undefined, jsonNew);
     });
+
+    it('should stop upgrading at the given maximum version', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.2'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '2.5'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '2.5', jsonNew);
+    });
+
+    it('should update column names', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.0'
+        }],
+        rmag_susceptibility: [{
+          susceptibility_xx: '1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '2.1'
+        }],
+        rmag_susceptibility: [{
+          susceptibility_loss_tangent: '1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '2.1', jsonNew);
+    });
+
   });
 
   // Test upgrading valid files.
