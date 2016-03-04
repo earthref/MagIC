@@ -45,20 +45,20 @@ describe('magic.actions.data_model_changes', () => {
   // Test getting changes from an invalid model.
   describe('when getting changes from an invalid model', () => {
 
-    it('should warn about getting changes from an empty model', () => {
-      dataModelChangesWarningTest(null, /the first argument .* is empty/i);
-      dataModelChangesWarningTest(undefined, /the first argument .* is empty/i);
-      dataModelChangesWarningTest({}, /the first argument .* is empty/i);
+    it('should reject getting changes from an empty model', () => {
+      dataModelChangesErrorTest(null, /the model argument .* is empty/i);
+      dataModelChangesErrorTest(undefined, /the model argument .* is empty/i);
+      dataModelChangesErrorTest({}, /the model argument .* is empty/i);
     });
 
     it('should reject when no tables list is found', () => {
       const model = {
         no_tables: {}
       };
-      dataModelChangesErrorTest(model, undefined, /failed to find the tables list in the model/i);
+      dataModelChangesErrorTest(model, /has no "tables" property/i);
     });
 
-    it('should reject when no tables list is found', () => {
+    it('should reject when no columns are in a table', () => {
       const model = {
         tables: {
           contribution: {
@@ -66,7 +66,7 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      dataModelChangesErrorTest(model, /failed to find the columns list for table .*/i);
+      dataModelChangesErrorTest(model, /failed to find the columns list for table: .*/i);
     });
 
     it('should reject when the previous columns list is invalid', () => {
@@ -157,6 +157,7 @@ describe('magic.actions.data_model_changes', () => {
       };
       const modelChanges = {
         deleted_columns: [{
+
           table: 'contribution',
           column: 'magic_version'
         }]

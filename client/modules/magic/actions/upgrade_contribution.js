@@ -100,12 +100,13 @@ export default class extends Runner {
       }
     }
 
-
+    //GGG REMOVE THIS LOOP ONCE TRANSPLANTED
     let dataModel = dataModels['2.3'];
     let currentDataModel = dataModel.magic_version;
     console.log('Outlining changes for data model: :' + currentDataModel)
     for(let table in dataModel.tables)
     {
+      alertOnNewTableName = false;
       console.log(`--------------Ver ${currentDataModel} changes for table: ${table} ---------------`);
       for (let column in dataModel.tables[table].columns) {
 
@@ -113,8 +114,9 @@ export default class extends Runner {
         if (currentDataModel != '2.0')//All columns in 2.0 are considered "new"
         {
           /*The schemas aren't consistent when it comes to next and previous columns being absent. Sometimes there is an
-          empty array signifying no next/previous columns and other times there is an array with a single empty object*/
-          let previousColArray =dataModel.tables[table].columns[column]['previous_columns']
+          empty array signifying no next/previous columns (v.2.2 - v2.4), other times there is an array with a single empty
+          object (v 2.0, 2.1) and still other times the "previous" or "next" column properries don't exist at all (v2.5)*/
+          let previousColArray = dataModel.tables[table].columns[column]['previous_columns']
           if  ((previousColArray.length == 0) ||
               (!hasOwnProperty.call(previousColArray[0], 'column')))
               console.log(`**** NEW column: " ${column}  Ver: ${currentDataModel}, Table: ${table}  ****`);
