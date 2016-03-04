@@ -9,7 +9,6 @@ import {default as model24} from './files/data_models/2.4.js';
 import {default as model25} from './files/data_models/2.5.js';
 import {default as model30} from './files/data_models/3.0.js';
 
-
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 function errorInCollection(reErrorMsg, ChangeLists) {
   let errorInCollection = false;
