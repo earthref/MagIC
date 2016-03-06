@@ -298,7 +298,23 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      const modelChanges = {
+
+      ///GGG THE STRUCTURE OF THIS OBJECT LOOKS WEIRD TO ME
+      //RUPERT, ARE YOU CERTAIN YOU WANT THIS STRUCTURE? I
+      //TOOK IT DIRECTLY FROM THE COMMENTED OUT OBJECT BELOW.
+      //I'M NOT CERTAIN WHY THE FIRST TABLE/COLUMN PAIR IS NOT AN OBJECT
+      //BUT THE PREVIOUS COLUMN TABLE/PAIR IS AN OBJECT
+      expectedModelChanges.renamed_columns.push({
+        table: 'contribution',
+        column: 'magic_version',
+        previous_column: {
+          table: 'contribution',
+          column: 'version'
+        }
+      });
+
+
+      /*const modelChanges = {
         renamed_columns: [{
           table: 'contribution',
           column: 'magic_version',
@@ -307,8 +323,9 @@ describe('magic.actions.data_model_changes', () => {
             column: 'version'
           }
         }]
-      };
-      dataModelChangesModelTest(model, modelChanges, false);
+      };*/
+
+      dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     it('should make a list of renaming columns', () => {
