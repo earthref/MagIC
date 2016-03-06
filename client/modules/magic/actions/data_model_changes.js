@@ -3,16 +3,29 @@ import Runner from './runner';
 
 export default class extends Runner {
 
+
+
   constructor({LocalState}) {
     super('DATA_MODEL_CHANGE_LOG', {LocalState});
+
+    //model changes that must be reflected:
+    //deleted, inserted, renamed, renaming, merged, splitting
+    this.modelChanges = {};
   }
 
   changes(model) {
 
-    let changes = {};
+    //let changes = {};
+
+    this.modelChanges.deleted = [];
+    this.modelChanges.inserted = [];
+    this.modelChanges.renamed= [];
+    this.modelChanges.renaming = [];
+    this.modelChanges.merged= [];
+    this.modelChanges.splitting = [];
 
     try {
-      this.basicModelValidation(model);
+      this.criticalModelValidation(model);
     }
     catch (err){
      // console.log("Basic model validation failed. " + err);
@@ -21,6 +34,7 @@ export default class extends Runner {
 //    let dataModel = dataModels['2.3'];  //GGG this is from the original parser test
     let dataModel = model;
     let dataModelVersionNumber = dataModel.magic_version;
+
     console.log('Outlining changes for data model: ' + dataModelVersionNumber)
     for(let table in dataModel.tables)
     {
@@ -68,7 +82,7 @@ export default class extends Runner {
           if  ( previousColArray == undefined ||
                 previousColArray.length == 0 ||
                 !hasOwnProperty.call(previousColArray[0], 'column'))
-            console.log(`**** NEW column: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
+            console.log(`**** NEW columns: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
         }
 
         //TEST FOR DELETED COLUMNS
@@ -91,10 +105,10 @@ export default class extends Runner {
       }
     }
 
-    return changes;
+    return this.modelChanges;
   }
 
-  basicModelValidation(model) {
+  criticalModelValidation(model) {
     if(model == null || Object.keys(model).length === 0 || model == undefined)
     {
       console.log("Model: "+model);
@@ -108,6 +122,13 @@ export default class extends Runner {
       this._appendError(`the model argument ${model} has no "tables" property.`)
       throw "the model argument has no tables, can not proceed.";
     }
-//    throw "One or more errors found.";
+
+    if(!hasOwnProperty.call(model, 'magic_version'))
+    {
+      this._appendError(`has no "magic_version" property`);
+      throw "the model argument ${model} has no magic_version property, can not proceed.";
+    }
   }
+
+  //getModelChanges()  {return this.modelChanges;}
 }
