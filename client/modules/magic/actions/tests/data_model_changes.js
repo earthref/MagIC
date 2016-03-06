@@ -9,6 +9,22 @@ import {default as model24} from './files/data_models/2.4.js';
 import {default as model25} from './files/data_models/2.5.js';
 import {default as model30} from './files/data_models/3.0.js';
 
+
+
+let expectedModelChanges = {};
+
+function refreshExpectedModelChanges()
+{
+    expectedModelChanges.deleted_columns = [];
+    expectedModelChanges.inserted_columns = [];
+    expectedModelChanges.renamed_columns = [];
+    expectedModelChanges.renaming_columns = [];
+    expectedModelChanges.merged_columns = [];
+    expectedModelChanges.splitting_columns =[];
+}
+
+
+
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 function errorInCollection(reErrorMsg, ChangeLists) {
   let errorInCollection = false;
@@ -58,7 +74,7 @@ const dataModelChangesModelTest = (model, modelExpectedChanges, ignoreOtherError
     if(!ignoreOtherErrors) expect(dataModelChangeDetector.errors().length).to.equal(0);
 
   console.log("EXPECTED! " + JSON.stringify(modelExpectedChanges));
-  console.log("ACTUAL! " + JSON.stringify(dataModelChangeDetector.modelChanges));
+  console.log("ACTUAL  ! " + JSON.stringify(dataModelChangeDetector.modelChanges));
 
   expect( dataModelChangeDetector.modelChanges).to.deep.equal(modelExpectedChanges);
 };
@@ -179,6 +195,7 @@ describe('magic.actions.data_model_changes', () => {
   describe('when making lists of changes from a valid model', () => {
 
     it('should ignore unchanged columns', () => {
+      refreshExpectedModelChanges();
       const model = {
         magic_version: '2.5',
         tables: {
@@ -191,18 +208,12 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      const expectedModelChanges = {
-        deleted_columns: [],
-        inserted_columns: [],
-        renamed_columns: [],
-        renaming_columns: [],
-        merged_columns: [],
-        splitting_columns: []
-      };
+
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     it('should make a list of deleted columns', () => {
+      refreshExpectedModelChanges();
       const model = {
         magic_version: '2.5',
         tables: {
@@ -218,16 +229,24 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
+
+      expectedModelChanges.deleted_columns.push({
+        table: 'contribution',
+        column: 'magic_version'
+      });
+
+      /*
       const modelChanges = {
         deleted_columns: [{
           table: 'contribution',
           column: 'magic_version'
         }]
-      };
-      dataModelChangesModelTest(model, modelChanges, true);
+      };*/
+      dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     it('should make a list of inserted columns', () => {
+      refreshExpectedModelChanges();
       const model = {
         magic_version: '2.5',
         tables: {
@@ -243,16 +262,23 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      const modelChanges = {
+
+      expectedModelChanges.inserted_columns.push({
+          table: 'contribution',
+          column: 'magic_version'
+        });
+
+/*      const modelChanges = {
         inserted_columns: [{
           table: 'contribution',
           column: 'magic_version'
         }]
-      };
-      dataModelChangesModelTest(model, modelChanges, false);
+      };*/
+      dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     it('should make a list of renamed columns', () => {
+      refreshExpectedModelChanges();
       const model = {
         magic_version: '2.5',
         tables: {

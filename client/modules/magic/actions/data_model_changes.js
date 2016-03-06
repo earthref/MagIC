@@ -60,7 +60,6 @@ export default class extends Runner {
             !hasOwnProperty.call(prevColArray[0], 'table'))){
           this._appendError(`failed to find the previous table name for column ${column} in table ${table}`);
         }
-        //console.log("ARRHG: "+dataModel.tables[table].columns[column].previous_columns[0].table);
         if(prevColArray == undefined ||
             prevColArray.length == 0 ||
             !hasOwnProperty.call(prevColArray, 'column')){
@@ -68,7 +67,6 @@ export default class extends Runner {
         }
 
         //TEST FOR PROPER NEXT COLUMN STRUCTURE
-
         if( nextColArray == undefined ||
             nextColArray.length == 0 ||
             !hasOwnProperty.call(nextColArray[0], 'table')){
@@ -91,7 +89,11 @@ export default class extends Runner {
               previousColArray.length == 0 ||
               !hasOwnProperty.call(previousColArray[0], 'column')) {
             changedColumn = true;
-            console.log(`**** NEW columns: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
+
+            //console.log(`PUSHING: table:${table} and column: ${column}`);
+            let insertedElement = {table:table, column:column};
+            this.modelChanges.inserted_columns.push(insertedElement);
+            console.log(`**** INSERTED columns: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
           }
         }
 
@@ -101,6 +103,10 @@ export default class extends Runner {
             nextColArray.length == 0 ||
             !(hasOwnProperty.call(nextColArray[0], 'column'))){
           changedColumn = true;
+
+          //console.log(`PUSHING: table:${table} and column: ${column}`);
+          let deletedElement = {table:table, column:column};
+          this.modelChanges.deleted_columns.push(deletedElement);
           console.log(`**** DELETED column: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
         }
         else {
