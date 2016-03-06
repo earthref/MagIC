@@ -55,7 +55,7 @@ const dataModelChangesModelTest = (model, modelExpectedChanges, ignoreOtherError
   dataModelChangeDetector.changes(model);
 
   if(!ignoreOtherErrors)
-    if(!ignoreOtherErrors) expect(dataModelChangeDetector.modelChanges.errors().length).to.equal(0);
+    if(!ignoreOtherErrors) expect(dataModelChangeDetector.errors().length).to.equal(0);
 
   console.log("EXPECTED! " + JSON.stringify(modelExpectedChanges));
   console.log("ACTUAL! " + JSON.stringify(dataModelChangeDetector.modelChanges));
@@ -192,12 +192,12 @@ describe('magic.actions.data_model_changes', () => {
         }
       };
       const expectedModelChanges = {
-        deleted: [],
-        inserted: [],
-        renamed: [],
-        renaming: [],
-        merged: [],
-        splitting: []
+        deleted_columns: [],
+        inserted_columns: [],
+        renamed_columns: [],
+        renaming_columns: [],
+        merged_columns: [],
+        splitting_columns: []
       };
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
@@ -224,7 +224,7 @@ describe('magic.actions.data_model_changes', () => {
           column: 'magic_version'
         }]
       };
-      dataModelChangesModelTest(model, modelChanges, false);
+      dataModelChangesModelTest(model, modelChanges, true);
     });
 
     it('should make a list of inserted columns', () => {

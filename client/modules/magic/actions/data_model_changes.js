@@ -17,12 +17,12 @@ export default class extends Runner {
 
     //let changes = {};
 
-    this.modelChanges.deleted = [];
-    this.modelChanges.inserted = [];
-    this.modelChanges.renamed= [];
-    this.modelChanges.renaming = [];
-    this.modelChanges.merged= [];
-    this.modelChanges.splitting = [];
+    this.modelChanges.deleted_columns = [];
+    this.modelChanges.inserted_columns = [];
+    this.modelChanges.renamed_columns = [];
+    this.modelChanges.renaming_columns = [];
+    this.modelChanges.merged_columns = [];
+    this.modelChanges.splitting_columns = [];
 
     try {
       this.criticalModelValidation(model);
@@ -38,6 +38,8 @@ export default class extends Runner {
     console.log('Outlining changes for data model: ' + dataModelVersionNumber)
     for(let table in dataModel.tables)
     {
+      let changedColumn = false;
+
       if(!hasOwnProperty.call(dataModel.tables[table], 'columns')){
         this._appendError(`failed to find the columns list for table: ${table}`);
       }
@@ -47,6 +49,12 @@ export default class extends Runner {
 
         //TEST FOR PROPER PREVIOUS COLUMN STRUCTURE
         let prevColArray = dataModel.tables[table].columns[column].previous_columns;
+        let nextColArray = dataModel.tables[table].columns[column].next_columns;
+
+        //GGG Once again, i feel like I'm in the year 1991, programming in BASIC. I don't like scripting.
+        //If there is no mention of a previous or next column, then there is no change to be reported.
+        if(prevColArray == undefined && nextColArray == undefined)  {continue;}
+
         if((prevColArray == undefined ||
             prevColArray.length == 0 ||
             !hasOwnProperty.call(prevColArray[0], 'table'))){
@@ -60,7 +68,7 @@ export default class extends Runner {
         }
 
         //TEST FOR PROPER NEXT COLUMN STRUCTURE
-        let nextColArray = dataModel.tables[table].columns[column].next_columns;
+
         if( nextColArray == undefined ||
             nextColArray.length == 0 ||
             !hasOwnProperty.call(nextColArray[0], 'table')){
@@ -79,17 +87,20 @@ export default class extends Runner {
            empty array signifying no next/previous columns (v.2.2 - v2.4), other times there is an array with a single empty
            object (v 2.0, 2.1) and still other times the "previous" or "next" column properries don't exist at all (v2.5)*/
           let previousColArray = dataModel.tables[table].columns[column]['previous_columns']
-          if  ( previousColArray == undefined ||
-                previousColArray.length == 0 ||
-                !hasOwnProperty.call(previousColArray[0], 'column'))
+          if (previousColArray == undefined ||
+              previousColArray.length == 0 ||
+              !hasOwnProperty.call(previousColArray[0], 'column')) {
+            changedColumn = true;
             console.log(`**** NEW columns: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
+          }
         }
 
         //TEST FOR DELETED COLUMNS
         nextColArray = dataModel.tables[table].columns[column]['next_columns'];
-        if  ((nextColArray == undefined) ||
-            (nextColArray.length == 0) ||
-            (!(hasOwnProperty.call(nextColArray[0], 'column')))){
+        if  (nextColArray == undefined ||
+            nextColArray.length == 0 ||
+            !(hasOwnProperty.call(nextColArray[0], 'column'))){
+          changedColumn = true;
           console.log(`**** DELETED column: " ${column}  Ver: ${dataModelVersionNumber}, Table: ${table}  ****`);
         }
         else {
