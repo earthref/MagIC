@@ -15,6 +15,9 @@ const Home = React.createClass({
             </li>
           </ul>
         </div>
+        <button className="ui button">
+          Follow
+        </button>
       </div>
     );
   }
