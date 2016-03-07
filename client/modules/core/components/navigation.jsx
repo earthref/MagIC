@@ -1,17 +1,19 @@
 import React from 'react';
 
-const Header = React.createClass({
+export default class extends React.Component {
+
   render() {
+    const {location, portal} = this.props;
     return (
-      <div className="ui vertical inverted sidebar menu left">
-        <a className="active item">EarthRef.org</a>
-        <a className="item">GERM</a>
-        <a className="item">MagIC</a>
-        <a className="item">SBN</a>
-        <a className="item">ERESE</a>
+      <div className="left menu">
+          <a className={(portal === 'EarthRef' ? "active green  " : "") + "item"} href="/"      >EarthRef.org</a>
+          <a className={(portal === 'GERM'     ? "active orange " : "") + "item"} href="/GERM/" >GERM</a>
+          <a className={(portal === 'MagIC'    ? "active purple " : "") + "item"} href="/MagIC/">MagIC</a>
+          <a className={(portal === 'SBN'      ? "active teal   " : "") + "item"} href="/SBN/"  >SBN</a>
+          <a className={(portal === 'ERESE'    ? "active blue   " : "") + "item"} href="/ERESE/">ERESE</a>
       </div>
     );
   }
-});
 
-export default Header;
+}
+

@@ -1,46 +1,38 @@
 import React from 'react';
 import {mount} from 'react-mounter';
 
-import MainLayout from './main_layout.jsx';
-import Home from './components/home.jsx';
+import Layout from './components/layout.jsx';
 
 export default function (injectDeps, {FlowRouter}) {
-  const MainLayoutCtx = injectDeps(MainLayout);
+
+  const mounter = ({content = () => null}) => (content());
+  const mounterWithContext = injectDeps(mounter);
 
   FlowRouter.route('/', {
-    name: 'home',
-    action() {
-      mount(MainLayoutCtx, {
-        content: () => (<Home />)
+    name: 'erHome',
+    action({portal}) {
+      mount(mounterWithContext, {
+        content: () => (<Layout portal="EarthRef"/>)
       });
     }
   });
 
-  FlowRouter.route('/MagIC/', {
-    name: 'home',
-    action() {
-      mount(MainLayoutCtx, {
-        content: () => (<Home />)
+  FlowRouter.route('/:portal(GERM|MagIC|SBN|ERESE)', {
+    name: 'portalHome',
+    action({portal}) {
+      mount(mounterWithContext, {
+        content: () => (<Layout portal={portal}/>)
       });
     }
   });
 
-  FlowRouter.route('/GERM/', {
-    name: 'home',
-    action() {
-      mount(MainLayoutCtx, {
-        content: () => (<Home />)
+  FlowRouter.notFound = {
+    name: '404',
+    action({portal}) {
+      mount(mounterWithContext, {
+        content: () => (<Layout portal="404"/>)
       });
     }
-  });
-
-  FlowRouter.route('/ERESE/', {
-    name: 'home',
-    action() {
-      mount(MainLayoutCtx, {
-        content: () => (<Home />)
-      });
-    }
-  });
+  };
 
 }

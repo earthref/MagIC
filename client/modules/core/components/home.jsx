@@ -1,10 +1,12 @@
 import React from 'react';
 
-const Home = React.createClass({
+export default class extends React.Component {
+
   render() {
+    const {portal} = this.props;
     return (
       <div>
-        <h1>EarthRef.org</h1>
+        <h1>{portal}</h1>
         <p>
           The website for Earth Science reference data and models.
         </p>
@@ -15,12 +17,12 @@ const Home = React.createClass({
             </li>
           </ul>
         </div>
-        <button className="ui button">
-          Follow
-        </button>
+        <a className="ui button" href="/MagIC/">
+          MagIC
+        </a>
       </div>
-    );
+    )
   }
-});
 
-export default Home;
+}
+

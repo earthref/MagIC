@@ -1,0 +1,37 @@
+@import '../../../lib/semantic-ui/themes/default/globals/site.variables.import.less';
+
+#react-root {
+  height: 100%;
+}
+
+.search-earthref input.prompt {
+  border: none !important;
+  margin-top: -1px;
+  margin-bottom: -1px;
+}
+
+.layout-content {
+  padding-top: 4em;
+}
+
+@media only screen and (max-width: @largestMobileScreen) {
+  .horizontal-menu {
+    display: none !important;
+  }
+}
+
+@media only screen and (min-width: @tabletBreakpoint) {
+  .sidebar-button {
+    display: none !important;
+  }
+
+  .horizontal-menu > .menu > a.item {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-right: 1em !important;
+  }
+
+  .horizontal-menu > .menu > a.active.item {
+    font-weight: normal !important;
+  }
+}
