@@ -124,15 +124,56 @@ export default class extends Runner {
           }
         }
 
-        //TEST FOR RENAMED COLUMNS
         this.testForRenamedColumns(prevColArray,nextColArray,table, column);
-
         this.testForMergedColumns(prevColArray,nextColArray,table, column);
+        this.testForSplitColumns(prevColArray,nextColArray,table, column);
       }
     }
 
     return this.modelChanges;
   }
+
+
+  testForSplitColumns(prevColArray,nextColArray,currentTable,currentColumn) {
+    if (nextColArray == undefined ||
+        nextColArray.length == 0 || !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+        prevColArray == undefined ||
+        prevColArray.length == 0 || !(hasOwnProperty.call(prevColArray[0], 'column'))
+    ) {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
+      return false;
+    }
+    else {
+      //IF there are more next columns than previous columns, we have a Split
+      if (nextColArray.length > 1 && prevColArray.length == 1) {
+        let splitElement = {
+          table: currentTable,
+          column: currentColumn,
+          splitting_columns: [
+            /*table: currentTable,
+             column: splitColName*/
+          ]
+        };
+
+        for (let nextColumn in nextColArray) {
+          let splitColName = nextColArray[nextColumn].column;
+
+          splitElement.splitting_columns.push(
+              {
+                table: currentTable,
+                column: splitColName
+              }
+          );
+        }
+
+        this.modelChanges.splitting_columns.push(splitElement);
+        console.log(`**** SPLIT column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
+        return true;
+      }
+    }
+    return false;
+  }
+
+
 
   testForMergedColumns(prevColArray,nextColArray,currentTable,currentColumn)
   {
