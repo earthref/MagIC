@@ -299,11 +299,6 @@ describe('magic.actions.data_model_changes', () => {
         }
       };
 
-      ///GGG THE STRUCTURE OF THIS OBJECT LOOKS WEIRD TO ME
-      //RUPERT, ARE YOU CERTAIN YOU WANT THIS STRUCTURE? I
-      //TOOK IT DIRECTLY FROM THE COMMENTED OUT OBJECT BELOW.
-      //I'M NOT CERTAIN WHY THE FIRST TABLE/COLUMN PAIR IS NOT AN OBJECT
-      //BUT THE PREVIOUS COLUMN TABLE/PAIR IS AN OBJECT
       expectedModelChanges.renamed_columns.push({
         table: 'contribution',
         column: 'magic_version',
@@ -313,22 +308,13 @@ describe('magic.actions.data_model_changes', () => {
         }
       });
 
-
-      /*const modelChanges = {
-        renamed_columns: [{
-          table: 'contribution',
-          column: 'magic_version',
-          previous_column: {
-            table: 'contribution',
-            column: 'version'
-          }
-        }]
-      };*/
-
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
+
+    ///GGG I DON'T UNDERSTAND THE DIFFERENCE BETWEEN "renamed_colums" and "renaming_columns"
     it('should make a list of renaming columns', () => {
+      refreshExpectedModelChanges();
       const model = {
         magic_version: '2.5',
         tables: {
@@ -348,7 +334,17 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      const modelChanges = {
+
+      expectedModelChanges.renaming_columns.push({
+        table: 'contribution',
+        column: 'magic_version',
+        next_column: {
+          table: 'location',
+          column: 'version'
+        }
+      });
+
+      /*const modelChanges = {
         renaming_columns: [{
           table: 'contribution',
           column: 'magic_version',
@@ -357,12 +353,13 @@ describe('magic.actions.data_model_changes', () => {
             column: 'version'
           }
         }]
-      };
-      dataModelChangesModelTest(model, modelChanges, false);
+      };*/
+      dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     //THIS COMES FROM MULTIPLE PREVIOUS COLUMNS
     it('should make a list of merged columns', () => {
+      refreshExpectedModelChanges();
       const model = {
         magic_version: '2.5',
         tables: {
@@ -385,7 +382,34 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      const modelChanges = {
+
+
+      expectedModelChanges.merged_columns.push({
+        table: 'contribution',
+        column: 'magic_version',
+        merged_columns: [{
+          table: 'contribution',
+          column: 'magic_version_1'
+        }, {
+          table: 'contribution',
+          column: 'magic_version_2'
+        }]
+      });
+
+      //GGG DOING THIS BECAUSE MERGED COLUMNS ARE ALSO RENAMEING COLUMNS
+      //SUCH COLUMNS SHOULD SHOW UP IN BOTH CATEGORIES, BASED ONT HE CURRENT DEFINITION
+      //THIS IS A BIT OF A HACK BECUASE IT ONLY DEALS WITH ONE OF THE TWO COLUMNS "RENAMED" COLUMNS
+      // THAT THE ODE ADDRESSES
+      expectedModelChanges.renamed_columns.push({
+        table: 'contribution',
+        column: 'magic_version',
+        previous_column: {
+          table: 'contribution',
+          column: 'magic_version_1'
+        }
+      });
+
+      /*const modelChanges = {
         merged_columns: [{
           table: 'contribution',
           column: 'magic_version',
@@ -397,8 +421,8 @@ describe('magic.actions.data_model_changes', () => {
             column: 'magic_version_2'
           }]
         }]
-      };
-      dataModelChangesModelTest(model, modelChanges, false);
+      };*/
+      dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     //THIS COMES FROM MULTIPLE NEXT COLUMNS

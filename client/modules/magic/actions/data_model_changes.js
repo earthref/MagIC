@@ -124,14 +124,59 @@ export default class extends Runner {
           }
         }
 
-
         //TEST FOR RENAMED COLUMNS
         this.testForRenamedColumns(prevColArray,nextColArray,table, column);
 
+        this.testForMergedColumns(prevColArray,nextColArray,table, column);
       }
     }
 
     return this.modelChanges;
+  }
+
+  testForMergedColumns(prevColArray,nextColArray,currentTable,currentColumn)
+  {
+    if (nextColArray == undefined ||
+        nextColArray.length == 0 ||
+        !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+        prevColArray == undefined ||
+        prevColArray.length == 0 ||
+        !(hasOwnProperty.call(prevColArray[0], 'column'))
+    )
+    //if(this.previousAndNextNotExist())
+    {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
+      return false;
+    }
+    else
+    {
+      if (prevColArray.length > 1 && nextColArray.length == 1) {
+        let mergedElement = {
+          table: currentTable,
+          column: currentColumn,
+          merged_columns: [
+            /*table: currentTable,
+            column: prevColName*/
+          ]
+        };
+
+        for(let prevColumn in prevColArray)
+        {
+          let prevColName = prevColArray[prevColumn].column;
+
+          mergedElement.merged_columns.push(
+              {
+                table: currentTable,
+                column: prevColName
+              }
+          );
+        }
+
+        this.modelChanges.merged_columns.push(mergedElement);
+        console.log(`**** MERGED column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
+        return true;
+      }
+    }
+    return false;
   }
 
 
@@ -144,7 +189,9 @@ export default class extends Runner {
         prevColArray == undefined ||
         prevColArray.length == 0 ||
         !(hasOwnProperty.call(prevColArray[0], 'column'))
-    ) {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
+    )
+    //if(this.previousAndNextNotExist())
+    {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
       return false;
     }
     else
@@ -190,5 +237,17 @@ export default class extends Runner {
     }
   }
 
+  previousAndNextNotExist()
+{
+  let prevNextNotExist =
+  (nextColArray == undefined ||
+  nextColArray.length == 0 ||
+  !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+  prevColArray == undefined ||
+  prevColArray.length == 0 ||
+  !(hasOwnProperty.call(prevColArray[0], 'column')));
+
+  return prevNextNotExist;
+}
   //getModelChanges()  {return this.modelChanges;}
 }
