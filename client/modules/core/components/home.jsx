@@ -1,4 +1,5 @@
 import React from 'react';
+import {portals} from '../configs/portals.js';
 
 export default class extends React.Component {
 
@@ -6,20 +7,8 @@ export default class extends React.Component {
     const {portal} = this.props;
     return (
       <div>
-        <h1>{portal}</h1>
-        <p>
-          The website for Earth Science reference data and models.
-        </p>
-        <div>
-          <ul>
-            <li>
-              MagIC
-            </li>
-          </ul>
-        </div>
-        <a className="ui button" href="/MagIC/">
-          MagIC
-        </a>
+        <h1>{portals[portal].title}</h1>
+        <h4 style={{marginTop: 0}}>{portals[portal].subtitle}</h4>
       </div>
     )
   }

@@ -1,16 +1,18 @@
 import React from 'react';
+import {portals} from '../configs/portals.js';
 
 export default class extends React.Component {
 
   render() {
     const {location, portal} = this.props;
+    const navigationClasses = (location === 'top' ? 'left menu ' : '') + location + '-navigation';
+    const portalsOrder = ['EarthRef.org', 'GERM', 'MagIC', 'SBN', 'FeMO', 'SCC', 'ERESE'];
     return (
-      <div className="left menu">
-          <a className={(portal === 'EarthRef' ? "active green  " : "") + "item"} href="/"      >EarthRef.org</a>
-          <a className={(portal === 'GERM'     ? "active orange " : "") + "item"} href="/GERM/" >GERM</a>
-          <a className={(portal === 'MagIC'    ? "active purple " : "") + "item"} href="/MagIC/">MagIC</a>
-          <a className={(portal === 'SBN'      ? "active teal   " : "") + "item"} href="/SBN/"  >SBN</a>
-          <a className={(portal === 'ERESE'    ? "active blue   " : "") + "item"} href="/ERESE/">ERESE</a>
+      <div className={navigationClasses}>
+        {portalsOrder.map((p, i) => {
+          const classes = (p === portal ? portals[p].color + ' active ' : '') + 'item';
+          return (<a key={i} className={classes} href={portals[p].url}>{p}</a>);
+        })}
       </div>
     );
   }

@@ -1,37 +1,37 @@
 @import '../../../lib/semantic-ui/themes/default/globals/site.variables.import.less';
 
 #react-root {
-  height: 100%;
+  height: 100% !important;
+}
+
+.top-menu {
+  background: #F8F8F8 !important;
+}
+
+.right-menu {
+  width: auto !important;
+  left: auto !important;
+  right: 0 !important;
 }
 
 .search-earthref input.prompt {
   border: none !important;
   margin-top: -1px;
-  margin-bottom: -1px;
+  margin-bottom: -2px;
 }
 
 .layout-content {
-  padding-top: 4em;
+  padding: 4em @relativeLarge 0 !important;
 }
 
-@media only screen and (max-width: @largestMobileScreen) {
-  .horizontal-menu {
+@media only screen and (max-width: @largestTabletScreen) {
+  .top-menu-navigation {
     display: none !important;
   }
 }
 
-@media only screen and (min-width: @tabletBreakpoint) {
+@media only screen and (min-width: @computerBreakpoint) {
   .sidebar-button {
     display: none !important;
-  }
-
-  .horizontal-menu > .menu > a.item {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-    margin-right: 1em !important;
-  }
-
-  .horizontal-menu > .menu > a.active.item {
-    font-weight: normal !important;
   }
 }
