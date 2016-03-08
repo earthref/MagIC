@@ -16,14 +16,6 @@ export default class extends Runner {
 
   changes(model) {
 
-<<<<<<< HEAD
-    let modelChanges = {};
-
-    return modelChanges;
-
-  }
-
-=======
     //let changes = {};
 
     this.modelChanges.deleted_columns = [];
@@ -37,7 +29,7 @@ export default class extends Runner {
       this.criticalModelValidation(model);
     }
     catch (err){
-     // console.log("Basic model validation failed. " + err);
+      // console.log("Basic model validation failed. " + err);
       return "Basic model validation failed. " + err;
     }
 //    let dataModel = dataModels['2.3'];  //GGG this is from the original parser test
@@ -66,25 +58,25 @@ export default class extends Runner {
         if(prevColArray == undefined && nextColArray == undefined)  {continue;}
 
         if((prevColArray == undefined ||
-            prevColArray.length == 0 ||
-            !hasOwnProperty.call(prevColArray[0], 'table'))){
+          prevColArray.length == 0 ||
+          !hasOwnProperty.call(prevColArray[0], 'table'))){
           this._appendError(`failed to find the previous table name for column ${column} in table ${table}`);
         }
         if(prevColArray == undefined ||
-            prevColArray.length == 0 ||
-            !hasOwnProperty.call(prevColArray, 'column')){
+          prevColArray.length == 0 ||
+          !hasOwnProperty.call(prevColArray, 'column')){
           this._appendError(`failed to find the previous column name for column ${column} in table ${table}`);
         }
 
         //TEST FOR PROPER NEXT COLUMN STRUCTURE
         if( nextColArray == undefined ||
-            nextColArray.length == 0 ||
-            !hasOwnProperty.call(nextColArray[0], 'table')){
+          nextColArray.length == 0 ||
+          !hasOwnProperty.call(nextColArray[0], 'table')){
           this._appendError(`failed to find the next table name for column ${column} in table ${table}`);
         }
         if( nextColArray == undefined ||
-            nextColArray.length == 0 ||
-            !hasOwnProperty.call(nextColArray, 'column')){
+          nextColArray.length == 0 ||
+          !hasOwnProperty.call(nextColArray, 'column')){
           this._appendError(`failed to find the next column name for column ${column} in table ${table}`);
         }
 
@@ -98,8 +90,8 @@ export default class extends Runner {
            object (v 2.0, 2.1) and still other times the "previous" or "next" column properries don't exist at all (v2.5)*/
           //let prevColArray = dataModel.tables[table].columns[column]['previous_columns']
           if (prevColArray == undefined ||
-              prevColArray.length == 0 ||
-              !hasOwnProperty.call(prevColArray[0], 'column')) {
+            prevColArray.length == 0 ||
+            !hasOwnProperty.call(prevColArray[0], 'column')) {
             changedColumn = true;
 
             //console.log(`PUSHING: table:${table} and column: ${column}`);
@@ -112,8 +104,8 @@ export default class extends Runner {
         //TEST FOR DELETED COLUMNS
         //nextColArray = dataModel.tables[table].columns[column]['next_columns'];
         if  (nextColArray == undefined ||
-            nextColArray.length == 0 ||
-            !(hasOwnProperty.call(nextColArray[0], 'column'))){
+          nextColArray.length == 0 ||
+          !(hasOwnProperty.call(nextColArray[0], 'column'))){
           changedColumn = true;
 
           //console.log(`PUSHING: table:${table} and column: ${column}`);
@@ -132,24 +124,65 @@ export default class extends Runner {
           }
         }
 
-        //TEST FOR RENAMED COLUMNS
         this.testForRenamedColumns(prevColArray,nextColArray,table, column);
-
         this.testForMergedColumns(prevColArray,nextColArray,table, column);
+        this.testForSplitColumns(prevColArray,nextColArray,table, column);
       }
     }
 
     return this.modelChanges;
   }
 
+
+  testForSplitColumns(prevColArray,nextColArray,currentTable,currentColumn) {
+    if (nextColArray == undefined ||
+      nextColArray.length == 0 || !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+      prevColArray == undefined ||
+      prevColArray.length == 0 || !(hasOwnProperty.call(prevColArray[0], 'column'))
+    ) {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
+      return false;
+    }
+    else {
+      //IF there are more next columns than previous columns, we have a Split
+      if (nextColArray.length > 1 && prevColArray.length == 1) {
+        let splitElement = {
+          table: currentTable,
+          column: currentColumn,
+          splitting_columns: [
+            /*table: currentTable,
+             column: splitColName*/
+          ]
+        };
+
+        for (let nextColumn in nextColArray) {
+          let splitColName = nextColArray[nextColumn].column;
+
+          splitElement.splitting_columns.push(
+            {
+              table: currentTable,
+              column: splitColName
+            }
+          );
+        }
+
+        this.modelChanges.splitting_columns.push(splitElement);
+        console.log(`**** SPLIT column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
+        return true;
+      }
+    }
+    return false;
+  }
+
+
+
   testForMergedColumns(prevColArray,nextColArray,currentTable,currentColumn)
   {
     if (nextColArray == undefined ||
-        nextColArray.length == 0 ||
-        !(hasOwnProperty.call(nextColArray[0], 'column')) ||
-        prevColArray == undefined ||
-        prevColArray.length == 0 ||
-        !(hasOwnProperty.call(prevColArray[0], 'column'))
+      nextColArray.length == 0 ||
+      !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+      prevColArray == undefined ||
+      prevColArray.length == 0 ||
+      !(hasOwnProperty.call(prevColArray[0], 'column'))
     )
     //if(this.previousAndNextNotExist())
     {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
@@ -163,7 +196,7 @@ export default class extends Runner {
           column: currentColumn,
           merged_columns: [
             /*table: currentTable,
-            column: prevColName*/
+             column: prevColName*/
           ]
         };
 
@@ -172,10 +205,10 @@ export default class extends Runner {
           let prevColName = prevColArray[prevColumn].column;
 
           mergedElement.merged_columns.push(
-              {
-                table: currentTable,
-                column: prevColName
-              }
+            {
+              table: currentTable,
+              column: prevColName
+            }
           );
         }
 
@@ -192,11 +225,11 @@ export default class extends Runner {
     let renamedElement = '';
 
     if (nextColArray == undefined ||
-        nextColArray.length == 0 ||
-        !(hasOwnProperty.call(nextColArray[0], 'column')) ||
-        prevColArray == undefined ||
-        prevColArray.length == 0 ||
-        !(hasOwnProperty.call(prevColArray[0], 'column'))
+      nextColArray.length == 0 ||
+      !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+      prevColArray == undefined ||
+      prevColArray.length == 0 ||
+      !(hasOwnProperty.call(prevColArray[0], 'column'))
     )
     //if(this.previousAndNextNotExist())
     {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
@@ -246,17 +279,16 @@ export default class extends Runner {
   }
 
   previousAndNextNotExist()
-{
-  let prevNextNotExist =
-  (nextColArray == undefined ||
-  nextColArray.length == 0 ||
-  !(hasOwnProperty.call(nextColArray[0], 'column')) ||
-  prevColArray == undefined ||
-  prevColArray.length == 0 ||
-  !(hasOwnProperty.call(prevColArray[0], 'column')));
+  {
+    let prevNextNotExist =
+      (nextColArray == undefined ||
+      nextColArray.length == 0 ||
+      !(hasOwnProperty.call(nextColArray[0], 'column')) ||
+      prevColArray == undefined ||
+      prevColArray.length == 0 ||
+      !(hasOwnProperty.call(prevColArray[0], 'column')));
 
-  return prevNextNotExist;
-}
+    return prevNextNotExist;
+  }
   //getModelChanges()  {return this.modelChanges;}
->>>>>>> feature/magic-data-model-changes
 }

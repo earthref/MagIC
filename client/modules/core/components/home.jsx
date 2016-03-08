@@ -7,8 +7,10 @@ export default class extends React.Component {
     const {portal} = this.props;
     return (
       <div>
-        <h1>{portals[portal].title}</h1>
-        <h4 style={{marginTop: 0}}>{portals[portal].subtitle}</h4>
+        <h1 className="home-title">{portals[portal].title}</h1>
+        <h4 className="home-subtitle">{portals[portal].subtitle}</h4>
+        <div className="ui divider"></div>
+        {this.props.children}
       </div>
     )
   }

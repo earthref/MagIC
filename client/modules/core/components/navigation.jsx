@@ -1,12 +1,11 @@
 import React from 'react';
-import {portals} from '../configs/portals.js';
+import {portals, portalsOrder} from '../configs/portals.js';
 
 export default class extends React.Component {
 
   render() {
     const {location, portal} = this.props;
     const navigationClasses = (location === 'top' ? 'left menu ' : '') + location + '-navigation';
-    const portalsOrder = ['EarthRef.org', 'GERM', 'MagIC', 'SBN', 'FeMO', 'SCC', 'ERESE'];
     return (
       <div className={navigationClasses}>
         {portalsOrder.map((p, i) => {

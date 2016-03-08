@@ -1,3 +1,5 @@
+export const portalsOrder = ['EarthRef.org', 'GERM', 'MagIC', 'SBN', 'FeMO', 'SCC', 'ERESE'];
+
 export const portals = {
   'EarthRef.org': {
     url: '/',

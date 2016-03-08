@@ -1,23 +1,7 @@
 import {_} from 'lodash';
 import Runner from './runner';
 
-// Temporarily import the models from the test files. These will be in MongoDB soon.
-//import {default as model20} from './tests/files/data_models/2.0.js';
-//import {default as model21} from './tests/files/data_models/2.1.js';
-//import {default as model22} from './tests/files/data_models/2.2.js';
-//import {default as model23} from './tests/files/data_models/2.3.js';
-//import {default as model24} from './tests/files/data_models/2.4.js';
-//import {default as model25} from './tests/files/data_models/2.5.js';
-//import {default as model30} from './tests/files/data_models/3.0.js';
-//const dataModels = {
-//  '2.0': model20,
-//  '2.1': model21,
-//  '2.2': model22,
-//  '2.3': model23,
-//  '2.4': model24,
-//  '2.5': model25,
-//  '3.0': model30
-//};const magicVersions = ['2.0', '2.1', '2.2', '2.3', '2.4', '2.5', '3.0'];
+import {magicVersions} from '../configs/magic_versions.js';
 
 export default class extends Runner {
 

@@ -1,4 +1,4 @@
-export default {
+export const model = {
   'magic_version':'2.0',
   "tables": {
     "er_members": {

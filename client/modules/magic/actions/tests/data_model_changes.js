@@ -1,7 +1,7 @@
 const {describe, it} = global;
 import {expect} from 'chai';
 import DataModelChanges from '../data_model_changes';
-import {default as model20} from './files/data_models/2.0.js';
+import {default as model20} from './files/data_models/model_2.0.js';
 import {default as model21} from './files/data_models/2.1.js';
 import {default as model22} from './files/data_models/2.2.js';
 import {default as model23} from './files/data_models/2.3.js';
@@ -15,12 +15,12 @@ let expectedModelChanges = {};
 
 function refreshExpectedModelChanges()
 {
-    expectedModelChanges.deleted_columns = [];
-    expectedModelChanges.inserted_columns = [];
-    expectedModelChanges.renamed_columns = [];
-    expectedModelChanges.renaming_columns = [];
-    expectedModelChanges.merged_columns = [];
-    expectedModelChanges.splitting_columns =[];
+  expectedModelChanges.deleted_columns = [];
+  expectedModelChanges.inserted_columns = [];
+  expectedModelChanges.renamed_columns = [];
+  expectedModelChanges.renaming_columns = [];
+  expectedModelChanges.merged_columns = [];
+  expectedModelChanges.splitting_columns =[];
 }
 
 
@@ -64,7 +64,7 @@ const dataModelChangesNoErrorTest = (model) => {
 
 // Expect no errors and check against expected JSON.
 const dataModelChangesModelTest = (model, modelExpectedChanges, ignoreOtherErrors) => {
-   //model.modelChanges;
+  //model.modelChanges;
   //new DataModelChanges({});
   const dataModelChangeDetector = new DataModelChanges({});
 
@@ -236,12 +236,12 @@ describe('magic.actions.data_model_changes', () => {
       });
 
       /*
-      const modelChanges = {
-        deleted_columns: [{
-          table: 'contribution',
-          column: 'magic_version'
-        }]
-      };*/
+       const modelChanges = {
+       deleted_columns: [{
+       table: 'contribution',
+       column: 'magic_version'
+       }]
+       };*/
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
@@ -264,16 +264,16 @@ describe('magic.actions.data_model_changes', () => {
       };
 
       expectedModelChanges.inserted_columns.push({
-          table: 'contribution',
-          column: 'magic_version'
-        });
+        table: 'contribution',
+        column: 'magic_version'
+      });
 
-/*      const modelChanges = {
-        inserted_columns: [{
-          table: 'contribution',
-          column: 'magic_version'
-        }]
-      };*/
+      /*      const modelChanges = {
+       inserted_columns: [{
+       table: 'contribution',
+       column: 'magic_version'
+       }]
+       };*/
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
@@ -345,15 +345,15 @@ describe('magic.actions.data_model_changes', () => {
       });
 
       /*const modelChanges = {
-        renaming_columns: [{
-          table: 'contribution',
-          column: 'magic_version',
-          next_column: {
-            table: 'location',
-            column: 'version'
-          }
-        }]
-      };*/
+       renaming_columns: [{
+       table: 'contribution',
+       column: 'magic_version',
+       next_column: {
+       table: 'location',
+       column: 'version'
+       }
+       }]
+       };*/
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
@@ -410,18 +410,18 @@ describe('magic.actions.data_model_changes', () => {
       });
 
       /*const modelChanges = {
-        merged_columns: [{
-          table: 'contribution',
-          column: 'magic_version',
-          previous_columns: [{
-            table: 'contribution',
-            column: 'magic_version_1'
-          }, {
-            table: 'contribution',
-            column: 'magic_version_2'
-          }]
-        }]
-      };*/
+       merged_columns: [{
+       table: 'contribution',
+       column: 'magic_version',
+       previous_columns: [{
+       table: 'contribution',
+       column: 'magic_version_1'
+       }, {
+       table: 'contribution',
+       column: 'magic_version_2'
+       }]
+       }]
+       };*/
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
@@ -476,51 +476,51 @@ describe('magic.actions.data_model_changes', () => {
       });
 
       /*const modelChanges = {
-        splitting_columns: [{
-          table: 'contribution',
-          column: 'magic_version',
-          next_columns: [{
-            table: 'contribution',
-            column: 'magic_version_1'
-          }, {
-            table: 'contribution',
-            column: 'magic_version_2'
-          }]
-        }]
-      };
-      dataModelChangesModelTest(model, modelChanges, false);
+       splitting_columns: [{
+       table: 'contribution',
+       column: 'magic_version',
+       next_columns: [{
+       table: 'contribution',
+       column: 'magic_version_1'
+       }, {
+       table: 'contribution',
+       column: 'magic_version_2'
+       }]
+       }]
+       };*/
+      dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
     /*  THESE ARE SUPPOSED TO JUST PASS WITH NO ISSUES BUT WON'T QUITE - GGG
 
-    it('should make lists of changes with the 2.0 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model20);
-    });
+     it('should make lists of changes with the 2.0 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model20);
+     });
 
-    it('should make lists of changes with the 2.1 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model21);
-    });
+     it('should make lists of changes with the 2.1 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model21);
+     });
 
-    it('should make lists of changes with the 2.2 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model22);
-    });
+     it('should make lists of changes with the 2.2 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model22);
+     });
 
-    it('should make lists of changes with the 2.3 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model23);
-    });
+     it('should make lists of changes with the 2.3 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model23);
+     });
 
-    it('should make lists of changes with the 2.4 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model24);
-    });
+     it('should make lists of changes with the 2.4 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model24);
+     });
 
-    it('should make lists of changes with the 2.5 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model25);
-    });
+     it('should make lists of changes with the 2.5 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model25);
+     });
 
-    it('should make lists of changes with the 3.0 model', () => {
-      dataModelChangesNoWarningNoErrorTest(model30);
-    });
-*/
+     it('should make lists of changes with the 3.0 model', () => {
+     dataModelChangesNoWarningNoErrorTest(model30);
+     });
+     */
   });
 
 });
