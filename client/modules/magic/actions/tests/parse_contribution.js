@@ -1,10 +1,7 @@
 const {describe, it} = global;
 import {expect} from 'chai';
 import ParseContribution from '../parse_contribution';
-import {default as contribution289  } from './files/contributions/289.js';
 import {default as contribution3552 } from './files/contributions/3552.js';
-import {default as contribution7527 } from './files/contributions/7527.js';
-import {default as contribution7661 } from './files/contributions/7661.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
 
@@ -29,15 +26,16 @@ const parseContributionNoErrorTest = (text) => {
   const Parser = new ParseContribution({});
   Parser.parse(text);
   expect(Parser.errors().length).to.equal(0);
-
+  return Parser;
 };
 
 // Expect no errors and check against expected JSON.
-const parseContributionJSONTest = (text, jsonExpected) => {
-  const Parser = new ParseContribution({});
+const parseContributionJSONTest = (text, jsonExpected, Parser) => {
+  if(!Parser) Parser = new ParseContribution({});
   const json = Parser.parse(text);
   expect(Parser.errors().length).to.equal(0);
   expect(json).to.deep.equal(jsonExpected);
+  return Parser;
 };
 
 describe('magic.actions.parse_contribution', () => {
@@ -84,7 +82,6 @@ describe('magic.actions.parse_contribution', () => {
     });
   });
 
-
   // Test parsing valid strings.
   describe('when parsing valid strings', () => {
     it('should keep numbers as strings', () => {
@@ -115,26 +112,31 @@ describe('magic.actions.parse_contribution', () => {
       for (let withBlank of withBlanks)
         parseContributionJSONTest(withBlank, json);
     });
+
+    it('should combine strings', () => {
+      const json = {
+        table: [{
+          col1: 'str1',
+          col2: '1.2'
+        }, {
+          col1: 'str2',
+          col2: '1.0'
+        }]
+      };
+      const Parser = parseContributionNoErrorTest('tab\ttable\ncol1\tcol2\nstr1\t1.2');
+      parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr2\t1.0', json, Parser);
+    });
   });
 
   // Test parsing valid files.
   describe('when parsing valid files', () => {
-    it('should parse contribution 289 with no errors', () => {
-      parseContributionNoErrorTest(contribution289);
-    });
-    it('should parse contribution 3552 with no errors', () => {
+    it('should parse contribution 3552 (MagIC version 2.2) with no errors', () => {
       parseContributionNoErrorTest(contribution3552);
     });
-    it('should parse contribution 7527 with no errors', () => {
-      parseContributionNoErrorTest(contribution7527);
-    });
-    it('should parse contribution 7661 with no errors', () => {
-      parseContributionNoErrorTest(contribution7661);
-    });
-    it('should parse contribution 8054 with no errors', () => {
+    it('should parse contribution 8054 (MagIC version 2.4) with no errors', () => {
       parseContributionNoErrorTest(contribution8054);
     });
-    it('should parse contribution 10507 with no errors', () => {
+    it('should parse contribution 10507 (MagIC version 2.5) with no errors', () => {
       parseContributionNoErrorTest(contribution10507);
     });
   });
