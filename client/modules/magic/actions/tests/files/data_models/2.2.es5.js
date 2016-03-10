@@ -1,5 +1,5 @@
-export default {
-  'magic_version':'2.4',
+global.magicModels['2.2'] = {
+  'magic_version':'2.2',
   'tables': {
     'contribution': {
       'label': 'Contribution',
@@ -530,7 +530,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Sites',
-          'position': 23,
+          'position': 20,
           'previous_columns': [{
             'table': 'er_sites',
             'column': 'magic_method_codes'
@@ -565,10 +565,7 @@ export default {
           }],
           'unit': 'Sites',
           'position': 13,
-          'previous_columns': [{
-            'table': 'er_sites',
-            'column': 'site_location_geoid'
-          }],
+          'previous_columns': [],
           'label': 'Sites',
           'type': 'Sites',
           'description': 'Sites',
@@ -581,7 +578,7 @@ export default {
             'column': 'site_description'
           }],
           'unit': 'Sites',
-          'position': 22,
+          'position': 19,
           'previous_columns': [{
             'table': 'er_sites',
             'column': 'site_description'
@@ -597,7 +594,7 @@ export default {
             'column': 'er_scientist_mail_names'
           }],
           'unit': 'Sites',
-          'position': 24,
+          'position': 21,
           'previous_columns': [{
             'table': 'er_sites',
             'column': 'er_scientist_mail_names'
@@ -725,20 +722,6 @@ export default {
           'description': 'Sites',
           'examples': ['Decimal degrees between -90 and 90']
         },
-        'site_bed_dip': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_bed_dip'
-          }],
-          'unit': 'Sites',
-          'position': 19,
-          'previous_columns': [],
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
         'site_lon': {
           'group': 'Sites',
           'next_columns': [{
@@ -807,19 +790,6 @@ export default {
           'description': 'Sites',
           'examples': ['Meters above sealevel']
         },
-        'site_cooling_rate': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_cooling_rate'
-          }],
-          'unit': 'Sites',
-          'position': 20,
-          'previous_columns': [],
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites'
-        },
         'er_site_name': {
           'group': 'Sites',
           'next_columns': [{
@@ -844,7 +814,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Sites',
-          'position': 25,
+          'position': 22,
           'previous_columns': [{
             'table': 'er_sites',
             'column': 'er_citation_names'
@@ -854,20 +824,6 @@ export default {
           'description': 'Sites',
           'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
         },
-        'site_bed_dip_direction': {
-          'group': 'Sites',
-          'next_columns': [{
-            'table': 'er_sites',
-            'column': 'site_bed_dip_direction'
-          }],
-          'unit': 'Sites',
-          'position': 18,
-          'previous_columns': [],
-          'label': 'Sites',
-          'type': 'Sites',
-          'description': 'Sites',
-          'examples': ['Decimal degrees between 0 and 360']
-        },
         'site_igsn': {
           'group': 'Sites',
           'next_columns': [{
@@ -875,11 +831,8 @@ export default {
             'column': 'site_igsn'
           }],
           'unit': 'Sites',
-          'position': 21,
-          'previous_columns': [{
-            'table': 'er_sites',
-            'column': 'site_igsn'
-          }],
+          'position': 18,
+          'previous_columns': [],
           'label': 'Sites',
           'type': 'Sites',
           'description': 'Sites',
@@ -893,10 +846,7 @@ export default {
           }],
           'unit': 'Sites',
           'position': 16,
-          'previous_columns': [{
-            'table': 'er_sites',
-            'column': 'site_core_depth'
-          }],
+          'previous_columns': [],
           'label': 'Sites',
           'type': 'Sites',
           'description': 'Sites',
@@ -951,10 +901,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 43,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_zeta_semi_angle'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -968,10 +915,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 52,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_fl'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1001,10 +945,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 29,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_eta_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1016,7 +957,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Results',
-          'position': 64,
+          'position': 60,
           'previous_columns': [{
             'table': 'rmag_results',
             'column': 'magic_method_codes'
@@ -1051,10 +992,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 30,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_eta_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1067,10 +1005,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 48,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_p'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1083,10 +1018,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 49,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_pp'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1115,10 +1047,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 42,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_zeta_semi_angle'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1132,10 +1061,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 47,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_ll'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1148,10 +1074,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 18,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_t2'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1181,10 +1104,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 46,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_l'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1263,10 +1183,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 37,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_zeta_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1295,7 +1212,7 @@ export default {
             'column': 'rmag_criteria_codes'
           }],
           'unit': 'Results',
-          'position': 63,
+          'position': 59,
           'previous_columns': [{
             'table': 'rmag_results',
             'column': 'rmag_criteria_codes'
@@ -1313,10 +1230,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 15,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'hysteresis_bcr_bc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1329,10 +1243,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 22,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1345,10 +1256,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 50,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_t'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1378,10 +1286,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 19,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_t3'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1394,10 +1299,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 31,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_eta_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1410,10 +1312,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 23,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1426,41 +1325,10 @@ export default {
           }],
           'unit': 'Results',
           'position': 26,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_eta_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
-        },
-        'magic_software_packages': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Results',
-          'position': 60,
-          'previous_columns': [],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Results',
-          'position': 61,
-          'previous_columns': [],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
         },
         'anisotropy_v3_inc': {
           'group': 'Results',
@@ -1470,10 +1338,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 25,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1486,10 +1351,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 34,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_eta_semi_angle'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1503,10 +1365,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 55,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_ftest'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1519,10 +1378,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 27,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_eta_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1534,7 +1390,7 @@ export default {
             'column': 'result_description'
           }],
           'unit': 'Results',
-          'position': 59,
+          'position': 58,
           'previous_columns': [{
             'table': 'rmag_results',
             'column': 'result_description'
@@ -1551,10 +1407,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 35,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_zeta_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1567,10 +1420,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 53,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_total'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1584,10 +1434,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 57,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_ftest23'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1600,10 +1447,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 44,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_f'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1616,10 +1460,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 16,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_type'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1633,10 +1474,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 28,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_eta_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1649,10 +1487,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 21,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1665,10 +1500,20 @@ export default {
           }],
           'unit': 'Results',
           'position': 36,
-          'previous_columns': [{
+          'previous_columns': [],
+          'label': 'Results',
+          'type': 'Results',
+          'description': 'Results'
+        },
+        'hysteresis_mr_ms': {
+          'group': 'Results',
+          'next_columns': [{
             'table': 'rmag_results',
-            'column': 'anisotropy_v2_zeta_inc'
+            'column': 'hysteresis_mr_ms'
           }],
+          'unit': 'Results',
+          'position': 14,
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1680,7 +1525,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Results',
-          'position': 66,
+          'position': 62,
           'previous_columns': [{
             'table': 'rmag_results',
             'column': 'er_analyst_mail_names'
@@ -1690,22 +1535,6 @@ export default {
           'description': 'Results',
           'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
         },
-        'hysteresis_mr_ms': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'hysteresis_mr_ms'
-          }],
-          'unit': 'Results',
-          'position': 14,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'hysteresis_mr_ms'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
         'anisotropy_v2_eta_semi_angle': {
           'group': 'Results',
           'next_columns': [{
@@ -1714,10 +1543,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 33,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_eta_semi_angle'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1738,7 +1564,7 @@ export default {
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
-          'examples': ['STD1546-A1', 'STD1546-X23']
+          'examples': ['STD1546-A1']
         },
         'anisotropy_v1_zeta_semi_angle': {
           'group': 'Results',
@@ -1748,10 +1574,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 41,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_zeta_semi_angle'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1765,10 +1588,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 51,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_vg'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1782,10 +1602,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 8,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'magic_experiment_names'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1799,10 +1616,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 45,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_ff'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1815,10 +1629,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 20,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1830,7 +1641,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Results',
-          'position': 67,
+          'position': 63,
           'previous_columns': [{
             'table': 'rmag_results',
             'column': 'er_citation_names'
@@ -1840,23 +1651,6 @@ export default {
           'description': 'Results',
           'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
         },
-        'tilt_correction': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'tilt_correction'
-          }],
-          'unit': 'Results',
-          'position': 58,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'tilt_correction'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Correction between geographic (0%) and stratigraphic (100%); unoriented (-1%); partially oriented to horizontal only (-2%)']
-        },
         'anisotropy_v2_inc': {
           'group': 'Results',
           'next_columns': [{
@@ -1865,10 +1659,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 24,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_inc'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1881,10 +1672,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 32,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_eta_semi_angle'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1915,10 +1703,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 56,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_ftest12'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -1931,10 +1716,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 54,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_percent'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -1947,7 +1729,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Results',
-          'position': 65,
+          'position': 61,
           'previous_columns': [{
             'table': 'rmag_results',
             'column': 'magic_instrument_codes'
@@ -1965,58 +1747,7 @@ export default {
           }],
           'unit': 'Results',
           'position': 17,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_t1'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'anisotropy_v3_zeta_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_zeta_dec'
-          }],
-          'unit': 'Results',
-          'position': 40,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v3_zeta_dec'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'anisotropy_v2_zeta_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_zeta_dec'
-          }],
-          'unit': 'Results',
-          'position': 39,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v2_zeta_dec'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results'
-        },
-        'anisotropy_v1_zeta_dec': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_zeta_dec'
-          }],
-          'unit': 'Results',
-          'position': 38,
-          'previous_columns': [{
-            'table': 'rmag_results',
-            'column': 'anisotropy_v1_zeta_dec'
-          }],
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results'
@@ -2038,19 +1769,44 @@ export default {
           'description': 'Results',
           'examples': ['Site 801', 'Site 1129', 'Dredge AMAT02-D15']
         },
-        'external_database_ids': {
+        'anisotropy_v1_zeta_dec': {
           'group': 'Results',
           'next_columns': [{
             'table': 'rmag_results',
-            'column': 'external_database_ids'
+            'column': 'anisotropy_v1_zeta_dec'
           }],
           'unit': 'Results',
-          'position': 62,
+          'position': 38,
           'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
-          'description': 'Results',
-          'examples': ['1435', '23', '2329']
+          'description': 'Results'
+        },
+        'anisotropy_v2_zeta_dec': {
+          'group': 'Results',
+          'next_columns': [{
+            'table': 'rmag_results',
+            'column': 'anisotropy_v2_zeta_dec'
+          }],
+          'unit': 'Results',
+          'position': 39,
+          'previous_columns': [],
+          'label': 'Results',
+          'type': 'Results',
+          'description': 'Results'
+        },
+        'anisotropy_v3_zeta_dec': {
+          'group': 'Results',
+          'next_columns': [{
+            'table': 'rmag_results',
+            'column': 'anisotropy_v3_zeta_dec'
+          }],
+          'unit': 'Results',
+          'position': 40,
+          'previous_columns': [],
+          'label': 'Results',
+          'type': 'Results',
+          'description': 'Results'
         }
       },
       'label': 'Results',
@@ -2061,7 +1817,10 @@ export default {
       'columns': {
         'er_citation_name': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'er_citation_name'
+          }],
           'unit': 'Citations List',
           'position': 0,
           'previous_columns': [{
@@ -2075,7 +1834,10 @@ export default {
         },
         'keywords': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'keywords'
+          }],
           'unit': 'Citations List',
           'position': 14,
           'previous_columns': [{
@@ -2089,7 +1851,10 @@ export default {
         },
         'doi': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'doi'
+          }],
           'unit': 'Citations List',
           'position': 3,
           'previous_columns': [{
@@ -2103,7 +1868,10 @@ export default {
         },
         'book_editors': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'book_editors'
+          }],
           'unit': 'Citations List',
           'position': 11,
           'previous_columns': [{
@@ -2117,7 +1885,10 @@ export default {
         },
         'title': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'title'
+          }],
           'unit': 'Citations List',
           'position': 5,
           'previous_columns': [{
@@ -2131,7 +1902,10 @@ export default {
         },
         'pages': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'pages'
+          }],
           'unit': 'Citations List',
           'position': 9,
           'previous_columns': [{
@@ -2145,7 +1919,10 @@ export default {
         },
         'journal': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'journal'
+          }],
           'unit': 'Citations List',
           'position': 7,
           'previous_columns': [{
@@ -2159,7 +1936,10 @@ export default {
         },
         'long_authors': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'long_authors'
+          }],
           'unit': 'Citations List',
           'position': 1,
           'previous_columns': [{
@@ -2173,7 +1953,10 @@ export default {
         },
         'year': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'year'
+          }],
           'unit': 'Citations List',
           'position': 2,
           'previous_columns': [{
@@ -2187,7 +1970,10 @@ export default {
         },
         'publisher': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'publisher'
+          }],
           'unit': 'Citations List',
           'position': 12,
           'previous_columns': [{
@@ -2201,7 +1987,10 @@ export default {
         },
         'citation_type': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'citation_type'
+          }],
           'unit': 'Citations List',
           'position': 6,
           'previous_columns': [{
@@ -2215,7 +2004,10 @@ export default {
         },
         'book_title': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'book_title'
+          }],
           'unit': 'Citations List',
           'position': 10,
           'previous_columns': [{
@@ -2227,9 +2019,39 @@ export default {
           'description': 'Citations List',
           'examples': ['No period required at end of title']
         },
-        'issn': {
+        'iaga_ref_no': {
           'group': 'Citations List',
           'next_columns': [],
+          'unit': 'Citations List',
+          'position': 16,
+          'previous_columns': [{
+            'table': 'er_citations',
+            'column': 'iaga_ref_no'
+          }],
+          'label': 'Citations List',
+          'type': 'Citations List',
+          'description': 'Citations List'
+        },
+        'iaga_database': {
+          'group': 'Citations List',
+          'next_columns': [],
+          'unit': 'Citations List',
+          'position': 15,
+          'previous_columns': [{
+            'table': 'er_citations',
+            'column': 'iaga_database'
+          }],
+          'label': 'Citations List',
+          'type': 'Citations List',
+          'description': 'Citations List',
+          'examples': ['ARCHEO', 'PGMDB', 'PINT', 'PSVRL', 'SECVR', 'TRANS', 'GEOMAGIA50']
+        },
+        'issn': {
+          'group': 'Citations List',
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'issn'
+          }],
           'unit': 'Citations List',
           'position': 4,
           'previous_columns': [{
@@ -2243,7 +2065,10 @@ export default {
         },
         'city': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'city'
+          }],
           'unit': 'Citations List',
           'position': 13,
           'previous_columns': [{
@@ -2257,7 +2082,10 @@ export default {
         },
         'volume': {
           'group': 'Citations List',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_citations',
+            'column': 'volume'
+          }],
           'unit': 'Citations List',
           'position': 8,
           'previous_columns': [{
@@ -3236,7 +3064,7 @@ export default {
             'column': 'measurement_temp_change'
           }],
           'unit': 'Measurements',
-          'position': 46,
+          'position': 42,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_temp_change'
@@ -3286,7 +3114,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Measurements',
-          'position': 72,
+          'position': 67,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'magic_method_codes'
@@ -3336,7 +3164,7 @@ export default {
             'column': 'measurement_magn_moment'
           }],
           'unit': 'Measurements',
-          'position': 55,
+          'position': 51,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_magn_moment'
@@ -3417,7 +3245,7 @@ export default {
             'column': 'measurement_magn_volume'
           }],
           'unit': 'Measurements',
-          'position': 56,
+          'position': 52,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_magn_volume'
@@ -3433,7 +3261,7 @@ export default {
             'column': 'measurement_sd'
           }],
           'unit': 'Measurements',
-          'position': 66,
+          'position': 62,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_sd'
@@ -3443,32 +3271,6 @@ export default {
           'description': 'Measurements',
           'examples': ['Uncertainty = 1xSD']
         },
-        'treatment_mw_integral': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_mw_integral'
-          }],
-          'unit': 'Measurements',
-          'position': 43,
-          'previous_columns': [],
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'treatment_mw_time': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_mw_time'
-          }],
-          'unit': 'Measurements',
-          'position': 41,
-          'previous_columns': [],
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
         'measurement_chi_qdr_volume': {
           'group': 'Measurements',
           'next_columns': [{
@@ -3476,7 +3278,7 @@ export default {
             'column': 'measurement_chi_qdr_volume'
           }],
           'unit': 'Measurements',
-          'position': 60,
+          'position': 56,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_chi_qdr_volume'
@@ -3516,20 +3318,6 @@ export default {
           'label': 'Measurements',
           'type': 'Measurements',
           'description': 'Measurements'
-        },
-        'magic_software_packages': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Measurements',
-          'position': 71,
-          'previous_columns': [],
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
         },
         'treatment_dc_field_decay_rate': {
           'group': 'Measurements',
@@ -3587,7 +3375,7 @@ export default {
             'column': 'measurement_magnitude'
           }],
           'unit': 'Measurements',
-          'position': 54,
+          'position': 50,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_magnitude'
@@ -3603,7 +3391,7 @@ export default {
             'column': 'measurement_charging_mode'
           }],
           'unit': 'Measurements',
-          'position': 63,
+          'position': 59,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_charging_mode'
@@ -3620,7 +3408,7 @@ export default {
             'column': 'measurement_inc'
           }],
           'unit': 'Measurements',
-          'position': 52,
+          'position': 48,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_inc'
@@ -3630,19 +3418,6 @@ export default {
           'description': 'Measurements',
           'examples': ['Decimal degrees between -90 and 90']
         },
-        'treatment_mw_energy': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_mw_energy'
-          }],
-          'unit': 'Measurements',
-          'position': 42,
-          'previous_columns': [],
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
         'measurement_r2': {
           'group': 'Measurements',
           'next_columns': [{
@@ -3650,7 +3425,7 @@ export default {
             'column': 'measurement_r2'
           }],
           'unit': 'Measurements',
-          'position': 64,
+          'position': 60,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_r2'
@@ -3667,7 +3442,7 @@ export default {
             'column': 'measurement_sd_z'
           }],
           'unit': 'Measurements',
-          'position': 69,
+          'position': 65,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_sd_z'
@@ -3684,7 +3459,7 @@ export default {
             'column': 'measurement_description'
           }],
           'unit': 'Measurements',
-          'position': 70,
+          'position': 66,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_description'
@@ -3734,7 +3509,7 @@ export default {
             'column': 'measurement_magn_mass'
           }],
           'unit': 'Measurements',
-          'position': 57,
+          'position': 53,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_magn_mass'
@@ -3767,7 +3542,7 @@ export default {
             'column': 'measurement_chi_volume'
           }],
           'unit': 'Measurements',
-          'position': 58,
+          'position': 54,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_chi_volume'
@@ -3784,10 +3559,7 @@ export default {
           }],
           'unit': 'Measurements',
           'position': 24,
-          'previous_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_core_depth'
-          }],
+          'previous_columns': [],
           'label': 'Measurements',
           'type': 'Measurements',
           'description': 'Measurements',
@@ -3816,7 +3588,7 @@ export default {
             'column': 'measurement_chi_qdr_mass'
           }],
           'unit': 'Measurements',
-          'position': 61,
+          'position': 57,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_chi_qdr_mass'
@@ -3832,7 +3604,7 @@ export default {
             'column': 'measurement_csd'
           }],
           'unit': 'Measurements',
-          'position': 65,
+          'position': 61,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_csd'
@@ -3849,7 +3621,7 @@ export default {
             'column': 'measurement_lab_field_ac'
           }],
           'unit': 'Measurements',
-          'position': 50,
+          'position': 46,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_lab_field_ac'
@@ -3930,24 +3702,11 @@ export default {
             'column': 'measurement_orient_phi'
           }],
           'unit': 'Measurements',
-          'position': 48,
+          'position': 44,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_orient_phi'
           }],
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements'
-        },
-        'treatment_mw_power': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'treatment_mw_power'
-          }],
-          'unit': 'Measurements',
-          'position': 40,
-          'previous_columns': [],
           'label': 'Measurements',
           'type': 'Measurements',
           'description': 'Measurements'
@@ -3959,7 +3718,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Measurements',
-          'position': 74,
+          'position': 69,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'er_analyst_mail_names'
@@ -3992,7 +3751,7 @@ export default {
             'column': 'measurement_lab_field_dc'
           }],
           'unit': 'Measurements',
-          'position': 51,
+          'position': 47,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_lab_field_dc'
@@ -4024,7 +3783,7 @@ export default {
             'column': 'measurement_temp'
           }],
           'unit': 'Measurements',
-          'position': 45,
+          'position': 41,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_temp'
@@ -4040,7 +3799,7 @@ export default {
             'column': 'measurement_chi_mass'
           }],
           'unit': 'Measurements',
-          'position': 59,
+          'position': 55,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_chi_mass'
@@ -4089,7 +3848,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Measurements',
-          'position': 75,
+          'position': 70,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'er_citation_names'
@@ -4106,7 +3865,7 @@ export default {
             'column': 'measurement_freq'
           }],
           'unit': 'Measurements',
-          'position': 47,
+          'position': 43,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_freq'
@@ -4114,6 +3873,23 @@ export default {
           'label': 'Measurements',
           'type': 'Measurements',
           'description': 'Measurements'
+        },
+        'measurement_sd_x': {
+          'group': 'Measurements',
+          'next_columns': [{
+            'table': 'magic_measurements',
+            'column': 'measurement_sd_x'
+          }],
+          'unit': 'Measurements',
+          'position': 63,
+          'previous_columns': [{
+            'table': 'magic_measurements',
+            'column': 'measurement_sd_x'
+          }],
+          'label': 'Measurements',
+          'type': 'Measurements',
+          'description': 'Measurements',
+          'examples': ['Uncertainty = 1xSD']
         },
         'er_sample_name': {
           'group': 'Measurements',
@@ -4131,23 +3907,6 @@ export default {
           'type': 'Measurements',
           'description': 'Measurements',
           'examples': ['Bas123a-01']
-        },
-        'measurement_sd_x': {
-          'group': 'Measurements',
-          'next_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_sd_x'
-          }],
-          'unit': 'Measurements',
-          'position': 67,
-          'previous_columns': [{
-            'table': 'magic_measurements',
-            'column': 'measurement_sd_x'
-          }],
-          'label': 'Measurements',
-          'type': 'Measurements',
-          'description': 'Measurements',
-          'examples': ['Uncertainty = 1xSD']
         },
         'er_specimen_name': {
           'group': 'Measurements',
@@ -4206,7 +3965,7 @@ export default {
             'column': 'measurement_dec'
           }],
           'unit': 'Measurements',
-          'position': 53,
+          'position': 49,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_dec'
@@ -4223,7 +3982,7 @@ export default {
             'column': 'measurement_orient_theta'
           }],
           'unit': 'Measurements',
-          'position': 49,
+          'position': 45,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_orient_theta'
@@ -4239,7 +3998,7 @@ export default {
             'column': 'measurement_sd_y'
           }],
           'unit': 'Measurements',
-          'position': 68,
+          'position': 64,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_sd_y'
@@ -4256,7 +4015,7 @@ export default {
             'column': 'measurement_demagn_code'
           }],
           'unit': 'Measurements',
-          'position': 44,
+          'position': 40,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_demagn_code'
@@ -4272,7 +4031,7 @@ export default {
             'column': 'measurement_sweep_rate'
           }],
           'unit': 'Measurements',
-          'position': 62,
+          'position': 58,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'measurement_sweep_rate'
@@ -4305,7 +4064,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Measurements',
-          'position': 73,
+          'position': 68,
           'previous_columns': [{
             'table': 'magic_measurements',
             'column': 'magic_instrument_codes'
@@ -4529,7 +4288,10 @@ export default {
       'columns': {
         'method_type': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'method_type'
+          }],
           'unit': 'Methods',
           'position': 1,
           'previous_columns': [{
@@ -4543,7 +4305,10 @@ export default {
         },
         'magic_method_code': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'magic_method_code'
+          }],
           'unit': 'Methods',
           'position': 0,
           'previous_columns': [{
@@ -4557,7 +4322,10 @@ export default {
         },
         'method_iaga7': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'method_iaga7'
+          }],
           'unit': 'Methods',
           'position': 4,
           'previous_columns': [{
@@ -4571,7 +4339,10 @@ export default {
         },
         'method_url': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'method_url'
+          }],
           'unit': 'Methods',
           'position': 5,
           'previous_columns': [{
@@ -4585,7 +4356,10 @@ export default {
         },
         'method_definition': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'method_definition'
+          }],
           'unit': 'Methods',
           'position': 2,
           'previous_columns': [{
@@ -4599,7 +4373,10 @@ export default {
         },
         'er_citation_names': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'er_citation_names'
+          }],
           'unit': 'Methods',
           'position': 7,
           'previous_columns': [{
@@ -4613,7 +4390,10 @@ export default {
         },
         'method_url_tauxe': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'method_url_tauxe'
+          }],
           'unit': 'Methods',
           'position': 6,
           'previous_columns': [{
@@ -4627,7 +4407,10 @@ export default {
         },
         'method_description': {
           'group': 'Methods',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_methods',
+            'column': 'method_description'
+          }],
           'unit': 'Methods',
           'position': 3,
           'previous_columns': [{
@@ -4648,7 +4431,10 @@ export default {
       'columns': {
         'instrument_software_version': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_software_version'
+          }],
           'unit': 'Instruments',
           'position': 13,
           'previous_columns': [{
@@ -4662,7 +4448,10 @@ export default {
         },
         'instrument_software': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_software'
+          }],
           'unit': 'Instruments',
           'position': 12,
           'previous_columns': [{
@@ -4676,7 +4465,10 @@ export default {
         },
         'instrument_dimension': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_dimension'
+          }],
           'unit': 'Instruments',
           'position': 7,
           'previous_columns': [{
@@ -4690,7 +4482,10 @@ export default {
         },
         'instrument_year': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_year'
+          }],
           'unit': 'Instruments',
           'position': 1,
           'previous_columns': [{
@@ -4704,7 +4499,10 @@ export default {
         },
         'instrument_url_tauxe': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_url_tauxe'
+          }],
           'unit': 'Instruments',
           'position': 16,
           'previous_columns': [{
@@ -4718,7 +4516,10 @@ export default {
         },
         'instrument_atmosphere': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_atmosphere'
+          }],
           'unit': 'Instruments',
           'position': 10,
           'previous_columns': [{
@@ -4732,7 +4533,10 @@ export default {
         },
         'instrument_manufacturer': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_manufacturer'
+          }],
           'unit': 'Instruments',
           'position': 4,
           'previous_columns': [{
@@ -4746,7 +4550,10 @@ export default {
         },
         'instrument_operation_mode': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_operation_mode'
+          }],
           'unit': 'Instruments',
           'position': 6,
           'previous_columns': [{
@@ -4760,7 +4567,10 @@ export default {
         },
         'instrument_model': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_model'
+          }],
           'unit': 'Instruments',
           'position': 5,
           'previous_columns': [{
@@ -4774,7 +4584,10 @@ export default {
         },
         'magic_instrument_code': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'magic_instrument_code'
+          }],
           'unit': 'Instruments',
           'position': 0,
           'previous_columns': [{
@@ -4788,7 +4601,10 @@ export default {
         },
         'instrument_url': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_url'
+          }],
           'unit': 'Instruments',
           'position': 15,
           'previous_columns': [{
@@ -4802,7 +4618,10 @@ export default {
         },
         'er_citation_names': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'er_citation_names'
+          }],
           'unit': 'Instruments',
           'position': 17,
           'previous_columns': [{
@@ -4816,7 +4635,10 @@ export default {
         },
         'instrument_temp_control': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_temp_control'
+          }],
           'unit': 'Instruments',
           'position': 9,
           'previous_columns': [{
@@ -4830,7 +4652,10 @@ export default {
         },
         'instrument_field_control': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_field_control'
+          }],
           'unit': 'Instruments',
           'position': 8,
           'previous_columns': [{
@@ -4844,7 +4669,10 @@ export default {
         },
         'instrument_shielding': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_shielding'
+          }],
           'unit': 'Instruments',
           'position': 11,
           'previous_columns': [{
@@ -4858,7 +4686,10 @@ export default {
         },
         'instrument_category': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_category'
+          }],
           'unit': 'Instruments',
           'position': 2,
           'previous_columns': [{
@@ -4872,7 +4703,10 @@ export default {
         },
         'instrument_description': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_description'
+          }],
           'unit': 'Instruments',
           'position': 14,
           'previous_columns': [{
@@ -4885,7 +4719,10 @@ export default {
         },
         'instrument_type': {
           'group': 'Instruments',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'magic_instruments',
+            'column': 'instrument_type'
+          }],
           'unit': 'Instruments',
           'position': 3,
           'previous_columns': [{
@@ -4928,7 +4765,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 35,
+          'position': 31,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'magic_method_codes'
@@ -4945,7 +4782,7 @@ export default {
             'column': 'hysteresis_ms_moment'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 22,
+          'position': 21,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_ms_moment'
@@ -4961,7 +4798,7 @@ export default {
             'column': 'rmag_criteria_codes'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 34,
+          'position': 30,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'rmag_criteria_codes'
@@ -4978,7 +4815,7 @@ export default {
             'column': 'hysteresis_mr_moment'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 19,
+          'position': 18,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_mr_moment'
@@ -4994,7 +4831,7 @@ export default {
             'column': 'hysteresis_ms_volume'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 23,
+          'position': 22,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_ms_volume'
@@ -5010,7 +4847,7 @@ export default {
             'column': 'hysteresis_ms_mass'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 24,
+          'position': 23,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_ms_mass'
@@ -5026,7 +4863,7 @@ export default {
             'column': 'hysteresis_bc_offset'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 27,
+          'position': 26,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_bc_offset'
@@ -5035,34 +4872,6 @@ export default {
           'type': 'Hysteresis Experiments',
           'description': 'Hysteresis Experiments'
         },
-        'magic_software_packages': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Hysteresis Experiments',
-          'position': 31,
-          'previous_columns': [],
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Hysteresis Experiments',
-          'position': 32,
-          'previous_columns': [],
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'hysteresis_mr_mass': {
           'group': 'Hysteresis Experiments',
           'next_columns': [{
@@ -5070,7 +4879,7 @@ export default {
             'column': 'hysteresis_mr_mass'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 21,
+          'position': 20,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_mr_mass'
@@ -5086,7 +4895,7 @@ export default {
             'column': 'hysteresis_th'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 29,
+          'position': 28,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_th'
@@ -5102,7 +4911,7 @@ export default {
             'column': 'hysteresis_mr_volume'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 20,
+          'position': 19,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_mr_volume'
@@ -5152,7 +4961,7 @@ export default {
             'column': 'hysteresis_bcr'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 25,
+          'position': 24,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_bcr'
@@ -5168,7 +4977,7 @@ export default {
             'column': 'hysteresis_ss'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 17,
+          'position': 16,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_ss'
@@ -5185,7 +4994,7 @@ export default {
             'column': 'hysteresis_xhf'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 28,
+          'position': 27,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_xhf'
@@ -5201,7 +5010,7 @@ export default {
             'column': 'measurement_loop_x'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'measurement_loop_x'
@@ -5234,7 +5043,7 @@ export default {
             'column': 'measurement_orient_phi'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'measurement_orient_phi'
@@ -5250,7 +5059,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 37,
+          'position': 33,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'er_analyst_mail_names'
@@ -5267,7 +5076,7 @@ export default {
             'column': 'measurement_temp'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'measurement_temp'
@@ -5300,7 +5109,7 @@ export default {
             'column': 'hysteresis_sq'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 18,
+          'position': 17,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_sq'
@@ -5334,7 +5143,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 38,
+          'position': 34,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'er_citation_names'
@@ -5368,7 +5177,7 @@ export default {
             'column': 'measurement_loop_n'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'measurement_loop_n'
@@ -5401,7 +5210,7 @@ export default {
             'column': 'hysteresis_bc'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 26,
+          'position': 25,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'hysteresis_bc'
@@ -5417,26 +5226,10 @@ export default {
             'column': 'measurement_orient_theta'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'measurement_orient_theta'
-          }],
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments'
-        },
-        'hysteresis_description': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_description'
-          }],
-          'unit': 'Hysteresis Experiments',
-          'position': 30,
-          'previous_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_description'
           }],
           'label': 'Hysteresis Experiments',
           'type': 'Hysteresis Experiments',
@@ -5449,7 +5242,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Hysteresis Experiments',
-          'position': 36,
+          'position': 32,
           'previous_columns': [{
             'table': 'rmag_hysteresis',
             'column': 'magic_instrument_codes'
@@ -5458,6 +5251,22 @@ export default {
           'type': 'Hysteresis Experiments',
           'description': 'Hysteresis Experiments',
           'examples': ['SIO-Bubba', 'IRM-OldBlue']
+        },
+        'hysteresis_description': {
+          'group': 'Hysteresis Experiments',
+          'next_columns': [{
+            'table': 'rmag_hysteresis',
+            'column': 'hysteresis_description'
+          }],
+          'unit': 'Hysteresis Experiments',
+          'position': 29,
+          'previous_columns': [{
+            'table': 'rmag_hysteresis',
+            'column': 'hysteresis_description'
+          }],
+          'label': 'Hysteresis Experiments',
+          'type': 'Hysteresis Experiments',
+          'description': 'Hysteresis Experiments'
         },
         'er_mineral_name': {
           'group': 'Hysteresis Experiments',
@@ -5475,20 +5284,6 @@ export default {
           'type': 'Hysteresis Experiments',
           'description': 'Hysteresis Experiments',
           'examples': ['San03-001']
-        },
-        'hysteresis_flag': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'hysteresis_flag'
-          }],
-          'unit': 'Hysteresis Experiments',
-          'position': 11,
-          'previous_columns': [],
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['Default = g']
         },
         'er_fossil_name': {
           'group': 'Hysteresis Experiments',
@@ -5523,20 +5318,6 @@ export default {
           'type': 'Hysteresis Experiments',
           'description': 'Hysteresis Experiments',
           'examples': ['San Francisco Volcanic Province', 'Dredge AMAT02-D12', 'Site 801']
-        },
-        'external_database_ids': {
-          'group': 'Hysteresis Experiments',
-          'next_columns': [{
-            'table': 'rmag_hysteresis',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Hysteresis Experiments',
-          'position': 33,
-          'previous_columns': [],
-          'label': 'Hysteresis Experiments',
-          'type': 'Hysteresis Experiments',
-          'description': 'Hysteresis Experiments',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Hysteresis Experiments',
@@ -5569,11 +5350,8 @@ export default {
             'column': 'sample_declination_correction'
           }],
           'unit': 'Samples',
-          'position': 24,
-          'previous_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_declination_correction'
-          }],
+          'position': 23,
+          'previous_columns': [],
           'label': 'Samples',
           'type': 'Samples',
           'description': 'Samples',
@@ -5586,7 +5364,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Samples',
-          'position': 32,
+          'position': 31,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'magic_method_codes'
@@ -5638,10 +5416,7 @@ export default {
           }],
           'unit': 'Samples',
           'position': 16,
-          'previous_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_location_geoid'
-          }],
+          'previous_columns': [],
           'label': 'Samples',
           'type': 'Samples',
           'description': 'Samples',
@@ -5655,10 +5430,7 @@ export default {
           }],
           'unit': 'Samples',
           'position': 19,
-          'previous_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_core_depth'
-          }],
+          'previous_columns': [],
           'label': 'Samples',
           'type': 'Samples',
           'description': 'Samples',
@@ -5671,7 +5443,7 @@ export default {
             'column': 'er_scientist_mail_names'
           }],
           'unit': 'Samples',
-          'position': 33,
+          'position': 32,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'er_scientist_mail_names'
@@ -5705,7 +5477,7 @@ export default {
             'column': 'sample_azimuth'
           }],
           'unit': 'Samples',
-          'position': 25,
+          'position': 24,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'sample_azimuth'
@@ -5722,7 +5494,7 @@ export default {
             'column': 'sample_bed_dip'
           }],
           'unit': 'Samples',
-          'position': 28,
+          'position': 27,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'sample_bed_dip'
@@ -5731,20 +5503,6 @@ export default {
           'type': 'Samples',
           'description': 'Samples',
           'examples': ['Decimal degrees between -90 and 90']
-        },
-        'sample_orientation_flag': {
-          'group': 'Samples',
-          'next_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_orientation_flag'
-          }],
-          'unit': 'Samples',
-          'position': 23,
-          'previous_columns': [],
-          'label': 'Samples',
-          'type': 'Samples',
-          'description': 'Samples',
-          'examples': ['Default = g']
         },
         'sample_type': {
           'group': 'Samples',
@@ -5770,7 +5528,7 @@ export default {
             'column': 'sample_description'
           }],
           'unit': 'Samples',
-          'position': 31,
+          'position': 30,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'sample_description'
@@ -5854,7 +5612,7 @@ export default {
             'column': 'sample_cooling_rate'
           }],
           'unit': 'Samples',
-          'position': 29,
+          'position': 28,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'sample_cooling_rate'
@@ -5971,11 +5729,8 @@ export default {
             'column': 'sample_igsn'
           }],
           'unit': 'Samples',
-          'position': 30,
-          'previous_columns': [{
-            'table': 'er_samples',
-            'column': 'sample_igsn'
-          }],
+          'position': 29,
+          'previous_columns': [],
           'label': 'Samples',
           'type': 'Samples',
           'description': 'Samples',
@@ -6005,7 +5760,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Samples',
-          'position': 34,
+          'position': 33,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'er_citation_names'
@@ -6039,7 +5794,7 @@ export default {
             'column': 'sample_bed_dip_direction'
           }],
           'unit': 'Samples',
-          'position': 27,
+          'position': 26,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'sample_bed_dip_direction'
@@ -6056,7 +5811,7 @@ export default {
             'column': 'sample_dip'
           }],
           'unit': 'Samples',
-          'position': 26,
+          'position': 25,
           'previous_columns': [{
             'table': 'er_samples',
             'column': 'sample_dip'
@@ -6199,10 +5954,7 @@ export default {
           }],
           'unit': 'Locations',
           'position': 21,
-          'previous_columns': [{
-            'table': 'er_locations',
-            'column': 'location_lithology'
-          }],
+          'previous_columns': [],
           'label': 'Locations',
           'type': 'Locations',
           'description': 'Locations',
@@ -6249,10 +6001,7 @@ export default {
           }],
           'unit': 'Locations',
           'position': 20,
-          'previous_columns': [{
-            'table': 'er_locations',
-            'column': 'location_class'
-          }],
+          'previous_columns': [],
           'label': 'Locations',
           'type': 'Locations',
           'description': 'Locations',
@@ -6266,10 +6015,7 @@ export default {
           }],
           'unit': 'Locations',
           'position': 10,
-          'previous_columns': [{
-            'table': 'er_locations',
-            'column': 'location_geoid'
-          }],
+          'previous_columns': [],
           'label': 'Locations',
           'type': 'Locations',
           'description': 'Locations',
@@ -6470,10 +6216,7 @@ export default {
           }],
           'unit': 'Locations',
           'position': 9,
-          'previous_columns': [{
-            'table': 'er_locations',
-            'column': 'location_precision'
-          }],
+          'previous_columns': [],
           'label': 'Locations',
           'type': 'Locations',
           'description': 'Locations',
@@ -6612,7 +6355,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Sample Data',
-          'position': 53,
+          'position': 47,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'magic_method_codes'
@@ -6629,7 +6372,7 @@ export default {
             'column': 'sample_inc'
           }],
           'unit': 'Sample Data',
-          'position': 26,
+          'position': 24,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_inc'
@@ -6646,7 +6389,7 @@ export default {
             'column': 'sample_magn_volume'
           }],
           'unit': 'Sample Data',
-          'position': 45,
+          'position': 42,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_magn_volume'
@@ -6679,7 +6422,7 @@ export default {
             'column': 'sample_sigma'
           }],
           'unit': 'Sample Data',
-          'position': 28,
+          'position': 26,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_sigma'
@@ -6696,7 +6439,7 @@ export default {
             'column': 'sample_comp_name'
           }],
           'unit': 'Sample Data',
-          'position': 20,
+          'position': 18,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_comp_name'
@@ -6730,7 +6473,7 @@ export default {
             'column': 'sample_inferred_age'
           }],
           'unit': 'Sample Data',
-          'position': 21,
+          'position': 19,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_inferred_age'
@@ -6746,7 +6489,7 @@ export default {
             'column': 'sample_int_sigma'
           }],
           'unit': 'Sample Data',
-          'position': 38,
+          'position': 35,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int_sigma'
@@ -6763,7 +6506,7 @@ export default {
             'column': 'sample_magn_mass'
           }],
           'unit': 'Sample Data',
-          'position': 46,
+          'position': 43,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_magn_mass'
@@ -6796,7 +6539,7 @@ export default {
             'column': 'sample_polarity'
           }],
           'unit': 'Sample Data',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_polarity'
@@ -6813,7 +6556,7 @@ export default {
             'column': 'sample_comp_nmb'
           }],
           'unit': 'Sample Data',
-          'position': 18,
+          'position': 16,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_comp_nmb'
@@ -6829,7 +6572,7 @@ export default {
             'column': 'sample_int_rel_sigma'
           }],
           'unit': 'Sample Data',
-          'position': 41,
+          'position': 38,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int_rel_sigma'
@@ -6846,7 +6589,7 @@ export default {
             'column': 'sample_description'
           }],
           'unit': 'Sample Data',
-          'position': 47,
+          'position': 44,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_description'
@@ -6862,7 +6605,7 @@ export default {
             'column': 'sample_dec'
           }],
           'unit': 'Sample Data',
-          'position': 27,
+          'position': 25,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_dec'
@@ -6872,34 +6615,6 @@ export default {
           'description': 'Sample Data',
           'examples': ['Decimal degrees between 0 and 360']
         },
-        'magic_software_packages': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Sample Data',
-          'position': 48,
-          'previous_columns': [],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Sample Data',
-          'position': 49,
-          'previous_columns': [],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'sample_int_sigma_perc': {
           'group': 'Sample Data',
           'next_columns': [{
@@ -6907,7 +6622,7 @@ export default {
             'column': 'sample_int_sigma_perc'
           }],
           'unit': 'Sample Data',
-          'position': 39,
+          'position': 36,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int_sigma_perc'
@@ -6924,7 +6639,7 @@ export default {
             'column': 'sample_inferred_age_sigma'
           }],
           'unit': 'Sample Data',
-          'position': 22,
+          'position': 20,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_inferred_age_sigma'
@@ -6934,20 +6649,6 @@ export default {
           'description': 'Sample Data',
           'examples': ['Uncertainty = 1xSD']
         },
-        'sample_flag': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_flag'
-          }],
-          'unit': 'Sample Data',
-          'position': 17,
-          'previous_columns': [],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['Default = g']
-        },
         'sample_k': {
           'group': 'Sample Data',
           'next_columns': [{
@@ -6955,7 +6656,7 @@ export default {
             'column': 'sample_k'
           }],
           'unit': 'Sample Data',
-          'position': 34,
+          'position': 31,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_k'
@@ -6971,7 +6672,7 @@ export default {
             'column': 'sample_int_rel_sigma_perc'
           }],
           'unit': 'Sample Data',
-          'position': 42,
+          'position': 39,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int_rel_sigma_perc'
@@ -6988,7 +6689,7 @@ export default {
             'column': 'sample_inferred_age_low'
           }],
           'unit': 'Sample Data',
-          'position': 23,
+          'position': 21,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_inferred_age_low'
@@ -7021,7 +6722,7 @@ export default {
             'column': 'sample_nrm'
           }],
           'unit': 'Sample Data',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_nrm'
@@ -7038,7 +6739,7 @@ export default {
             'column': 'sample_n'
           }],
           'unit': 'Sample Data',
-          'position': 30,
+          'position': 28,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_n'
@@ -7054,7 +6755,7 @@ export default {
             'column': 'sample_tilt_correction'
           }],
           'unit': 'Sample Data',
-          'position': 36,
+          'position': 33,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_tilt_correction'
@@ -7071,24 +6772,11 @@ export default {
             'column': 'measurement_step_unit'
           }],
           'unit': 'Sample Data',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'measurement_step_unit'
           }],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
-        },
-        'sample_n_total': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_n_total'
-          }],
-          'unit': 'Sample Data',
-          'position': 33,
-          'previous_columns': [],
           'label': 'Sample Data',
           'type': 'Sample Data',
           'description': 'Sample Data'
@@ -7100,7 +6788,7 @@ export default {
             'column': 'sample_alpha95'
           }],
           'unit': 'Sample Data',
-          'position': 29,
+          'position': 27,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_alpha95'
@@ -7117,7 +6805,7 @@ export default {
             'column': 'sample_int_n'
           }],
           'unit': 'Sample Data',
-          'position': 43,
+          'position': 40,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int_n'
@@ -7133,7 +6821,7 @@ export default {
             'column': 'sample_inferred_age_high'
           }],
           'unit': 'Sample Data',
-          'position': 24,
+          'position': 22,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_inferred_age_high'
@@ -7166,7 +6854,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Sample Data',
-          'position': 55,
+          'position': 49,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'er_analyst_mail_names'
@@ -7183,7 +6871,7 @@ export default {
             'column': 'sample_direction_type'
           }],
           'unit': 'Sample Data',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_direction_type'
@@ -7193,23 +6881,6 @@ export default {
           'description': 'Sample Data',
           'examples': ['Default = l']
         },
-        'er_synthetic_names': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_synthetic_names'
-          }],
-          'unit': 'Sample Data',
-          'position': 9,
-          'previous_columns': [{
-            'table': 'pmag_samples',
-            'column': 'er_synthetic_names'
-          }],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['STD1546-A1', 'STD1546-X23']
-        },
         'sample_int': {
           'group': 'Sample Data',
           'next_columns': [{
@@ -7217,7 +6888,7 @@ export default {
             'column': 'sample_int'
           }],
           'unit': 'Sample Data',
-          'position': 37,
+          'position': 34,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int'
@@ -7233,7 +6904,7 @@ export default {
             'column': 'magic_experiment_names'
           }],
           'unit': 'Sample Data',
-          'position': 10,
+          'position': 9,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'magic_experiment_names'
@@ -7250,7 +6921,7 @@ export default {
             'column': 'sample_n_planes'
           }],
           'unit': 'Sample Data',
-          'position': 32,
+          'position': 30,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_n_planes'
@@ -7266,7 +6937,7 @@ export default {
             'column': 'measurement_step_min'
           }],
           'unit': 'Sample Data',
-          'position': 11,
+          'position': 10,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'measurement_step_min'
@@ -7282,7 +6953,7 @@ export default {
             'column': 'sample_comp_n'
           }],
           'unit': 'Sample Data',
-          'position': 19,
+          'position': 17,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_comp_n'
@@ -7315,7 +6986,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Sample Data',
-          'position': 56,
+          'position': 50,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'er_citation_names'
@@ -7349,7 +7020,7 @@ export default {
             'column': 'pmag_rotation_codes'
           }],
           'unit': 'Sample Data',
-          'position': 52,
+          'position': 46,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'pmag_rotation_codes'
@@ -7366,7 +7037,7 @@ export default {
             'column': 'sample_n_lines'
           }],
           'unit': 'Sample Data',
-          'position': 31,
+          'position': 29,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_n_lines'
@@ -7382,7 +7053,7 @@ export default {
             'column': 'sample_magn_moment'
           }],
           'unit': 'Sample Data',
-          'position': 44,
+          'position': 41,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_magn_moment'
@@ -7398,7 +7069,7 @@ export default {
             'column': 'measurement_step_max'
           }],
           'unit': 'Sample Data',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'measurement_step_max'
@@ -7414,7 +7085,7 @@ export default {
             'column': 'sample_inferred_age_unit'
           }],
           'unit': 'Sample Data',
-          'position': 25,
+          'position': 23,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_inferred_age_unit'
@@ -7431,7 +7102,7 @@ export default {
             'column': 'sample_int_rel'
           }],
           'unit': 'Sample Data',
-          'position': 40,
+          'position': 37,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'sample_int_rel'
@@ -7447,7 +7118,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Sample Data',
-          'position': 54,
+          'position': 48,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'magic_instrument_codes'
@@ -7464,7 +7135,7 @@ export default {
             'column': 'pmag_criteria_codes'
           }],
           'unit': 'Sample Data',
-          'position': 51,
+          'position': 45,
           'previous_columns': [{
             'table': 'pmag_samples',
             'column': 'pmag_criteria_codes'
@@ -7473,6 +7144,22 @@ export default {
           'type': 'Sample Data',
           'description': 'Sample Data',
           'examples': ['MY-MAD', 'MY-APLHA95']
+        },
+        'sample_r': {
+          'group': 'Sample Data',
+          'next_columns': [{
+            'table': 'pmag_samples',
+            'column': 'sample_r'
+          }],
+          'unit': 'Sample Data',
+          'position': 32,
+          'previous_columns': [{
+            'table': 'pmag_samples',
+            'column': 'sample_r'
+          }],
+          'label': 'Sample Data',
+          'type': 'Sample Data',
+          'description': 'Sample Data'
         },
         'er_location_name': {
           'group': 'Sample Data',
@@ -7490,36 +7177,6 @@ export default {
           'type': 'Sample Data',
           'description': 'Sample Data',
           'examples': ['San Francisco Volcanic Province', 'Dredge AMAT02-D12', 'Site 801']
-        },
-        'sample_r': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_r'
-          }],
-          'unit': 'Sample Data',
-          'position': 35,
-          'previous_columns': [{
-            'table': 'pmag_samples',
-            'column': 'sample_r'
-          }],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data'
-        },
-        'external_database_ids': {
-          'group': 'Sample Data',
-          'next_columns': [{
-            'table': 'pmag_samples',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Sample Data',
-          'position': 50,
-          'previous_columns': [],
-          'label': 'Sample Data',
-          'type': 'Sample Data',
-          'description': 'Sample Data',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Sample Data',
@@ -7530,7 +7187,10 @@ export default {
       'columns': {
         'department': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'department'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 2,
           'previous_columns': [{
@@ -7544,7 +7204,10 @@ export default {
         },
         'email': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'email'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 10,
           'previous_columns': [{
@@ -7558,7 +7221,10 @@ export default {
         },
         'url': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'url'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 11,
           'previous_columns': [{
@@ -7572,7 +7238,10 @@ export default {
         },
         'er_mail_name': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'er_mail_name'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 0,
           'previous_columns': [{
@@ -7586,7 +7255,10 @@ export default {
         },
         'organization': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'organization'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 1,
           'previous_columns': [{
@@ -7600,7 +7272,10 @@ export default {
         },
         'country': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'country'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 7,
           'previous_columns': [{
@@ -7610,11 +7285,14 @@ export default {
           'label': 'Mailing List Contributors',
           'type': 'Mailing List Contributors',
           'description': 'Mailing List Contributors',
-          'examples': ['USA']
+          'examples': ['U.S.A.']
         },
         'zip_code': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'zip_code'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 6,
           'previous_columns': [{
@@ -7628,7 +7306,10 @@ export default {
         },
         'state': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'state'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 5,
           'previous_columns': [{
@@ -7642,7 +7323,10 @@ export default {
         },
         'address': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'address'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 3,
           'previous_columns': [{
@@ -7656,7 +7340,10 @@ export default {
         },
         'work_phone': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'work_phone'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 8,
           'previous_columns': [{
@@ -7670,7 +7357,10 @@ export default {
         },
         'city': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'city'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 4,
           'previous_columns': [{
@@ -7684,7 +7374,10 @@ export default {
         },
         'work_fax': {
           'group': 'Mailing List Contributors',
-          'next_columns': [],
+          'next_columns': [{
+            'table': 'er_mailinglist',
+            'column': 'work_fax'
+          }],
           'unit': 'Mailing List Contributors',
           'position': 9,
           'previous_columns': [{
@@ -7864,10 +7557,7 @@ export default {
           }],
           'unit': 'Synthetic Materials',
           'position': 21,
-          'previous_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_igsn'
-          }],
+          'previous_columns': [],
           'label': 'Synthetic Materials',
           'type': 'Synthetic Materials',
           'description': 'Synthetic Materials',
@@ -7897,10 +7587,7 @@ export default {
           }],
           'unit': 'Synthetic Materials',
           'position': 11,
-          'previous_columns': [{
-            'table': 'er_synthetics',
-            'column': 'synthetic_parent_sample'
-          }],
+          'previous_columns': [],
           'label': 'Synthetic Materials',
           'type': 'Synthetic Materials',
           'description': 'Synthetic Materials',
@@ -8171,7 +7858,7 @@ export default {
             'column': 'remanence_sratio'
           }],
           'unit': 'Remanence Experiments',
-          'position': 28,
+          'position': 27,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_sratio'
@@ -8187,7 +7874,7 @@ export default {
             'column': 'remanence_hirm_moment'
           }],
           'unit': 'Remanence Experiments',
-          'position': 31,
+          'position': 30,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_hirm_moment'
@@ -8203,7 +7890,7 @@ export default {
             'column': 'remanence_delta_ratio'
           }],
           'unit': 'Remanence Experiments',
-          'position': 21,
+          'position': 20,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_delta_ratio'
@@ -8219,7 +7906,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Remanence Experiments',
-          'position': 50,
+          'position': 46,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'magic_method_codes'
@@ -8236,7 +7923,7 @@ export default {
             'column': 'remanence_cross_over'
           }],
           'unit': 'Remanence Experiments',
-          'position': 35,
+          'position': 34,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_cross_over'
@@ -8252,7 +7939,7 @@ export default {
             'column': 'remanence_cmf'
           }],
           'unit': 'Remanence Experiments',
-          'position': 39,
+          'position': 38,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_cmf'
@@ -8268,7 +7955,7 @@ export default {
             'column': 'remanence_sa'
           }],
           'unit': 'Remanence Experiments',
-          'position': 42,
+          'position': 41,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_sa'
@@ -8284,7 +7971,7 @@ export default {
             'column': 'remanence_hirm_mass'
           }],
           'unit': 'Remanence Experiments',
-          'position': 33,
+          'position': 32,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_hirm_mass'
@@ -8300,7 +7987,7 @@ export default {
             'column': 'remanence_mdf'
           }],
           'unit': 'Remanence Experiments',
-          'position': 36,
+          'position': 35,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_mdf'
@@ -8316,7 +8003,7 @@ export default {
             'column': 'remanence_delta_temp_low'
           }],
           'unit': 'Remanence Experiments',
-          'position': 22,
+          'position': 21,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_delta_temp_low'
@@ -8332,7 +8019,7 @@ export default {
             'column': 'remanence_dzfc_mass'
           }],
           'unit': 'Remanence Experiments',
-          'position': 20,
+          'position': 19,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_dzfc_mass'
@@ -8348,7 +8035,7 @@ export default {
             'column': 'rmag_criteria_codes'
           }],
           'unit': 'Remanence Experiments',
-          'position': 49,
+          'position': 45,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'rmag_criteria_codes'
@@ -8365,7 +8052,7 @@ export default {
             'column': 'remanence_maf'
           }],
           'unit': 'Remanence Experiments',
-          'position': 37,
+          'position': 36,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_maf'
@@ -8374,34 +8061,6 @@ export default {
           'type': 'Remanence Experiments',
           'description': 'Remanence Experiments'
         },
-        'magic_software_packages': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Remanence Experiments',
-          'position': 46,
-          'previous_columns': [],
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Remanence Experiments',
-          'position': 47,
-          'previous_columns': [],
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'remanence_mr_mass': {
           'group': 'Remanence Experiments',
           'next_columns': [{
@@ -8409,7 +8068,7 @@ export default {
             'column': 'remanence_mr_mass'
           }],
           'unit': 'Remanence Experiments',
-          'position': 26,
+          'position': 25,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_mr_mass'
@@ -8425,7 +8084,7 @@ export default {
             'column': 'remanence_armx'
           }],
           'unit': 'Remanence Experiments',
-          'position': 34,
+          'position': 33,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_armx'
@@ -8441,7 +8100,7 @@ export default {
             'column': 'remanence_dfc_moment'
           }],
           'unit': 'Remanence Experiments',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_dfc_moment'
@@ -8457,7 +8116,7 @@ export default {
             'column': 'remanence_bcr'
           }],
           'unit': 'Remanence Experiments',
-          'position': 27,
+          'position': 26,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_bcr'
@@ -8473,7 +8132,7 @@ export default {
             'column': 'remanence_sratio_back'
           }],
           'unit': 'Remanence Experiments',
-          'position': 30,
+          'position': 29,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_sratio_back'
@@ -8523,7 +8182,7 @@ export default {
             'column': 'remanence_comp_n'
           }],
           'unit': 'Remanence Experiments',
-          'position': 41,
+          'position': 40,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_comp_n'
@@ -8539,7 +8198,7 @@ export default {
             'column': 'remanence_description'
           }],
           'unit': 'Remanence Experiments',
-          'position': 45,
+          'position': 44,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_description'
@@ -8555,7 +8214,7 @@ export default {
             'column': 'remanence_mr_moment'
           }],
           'unit': 'Remanence Experiments',
-          'position': 24,
+          'position': 23,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_mr_moment'
@@ -8588,7 +8247,7 @@ export default {
             'column': 'remanence_hirm_volume'
           }],
           'unit': 'Remanence Experiments',
-          'position': 32,
+          'position': 31,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_hirm_volume'
@@ -8604,7 +8263,7 @@ export default {
             'column': 'measurement_orient_phi'
           }],
           'unit': 'Remanence Experiments',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'measurement_orient_phi'
@@ -8620,7 +8279,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Remanence Experiments',
-          'position': 52,
+          'position': 48,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'er_analyst_mail_names'
@@ -8637,7 +8296,7 @@ export default {
             'column': 'remanence_cd'
           }],
           'unit': 'Remanence Experiments',
-          'position': 40,
+          'position': 39,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_cd'
@@ -8653,7 +8312,7 @@ export default {
             'column': 'remanence_dfc_volume'
           }],
           'unit': 'Remanence Experiments',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_dfc_volume'
@@ -8669,7 +8328,7 @@ export default {
             'column': 'remanence_dfc_mass'
           }],
           'unit': 'Remanence Experiments',
-          'position': 17,
+          'position': 16,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_dfc_mass'
@@ -8685,7 +8344,7 @@ export default {
             'column': 'remanence_dzfc_volume'
           }],
           'unit': 'Remanence Experiments',
-          'position': 19,
+          'position': 18,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_dzfc_volume'
@@ -8701,7 +8360,7 @@ export default {
             'column': 'remanence_mr_volume'
           }],
           'unit': 'Remanence Experiments',
-          'position': 25,
+          'position': 24,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_mr_volume'
@@ -8717,7 +8376,7 @@ export default {
             'column': 'remanence_sratio_forward'
           }],
           'unit': 'Remanence Experiments',
-          'position': 29,
+          'position': 28,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_sratio_forward'
@@ -8733,7 +8392,7 @@ export default {
             'column': 'measurement_temp'
           }],
           'unit': 'Remanence Experiments',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'measurement_temp'
@@ -8783,7 +8442,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Remanence Experiments',
-          'position': 53,
+          'position': 49,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'er_citation_names'
@@ -8810,20 +8469,6 @@ export default {
           'description': 'Remanence Experiments',
           'examples': ['Bas123a-01']
         },
-        'remanence_flag': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'remanence_flag'
-          }],
-          'unit': 'Remanence Experiments',
-          'position': 11,
-          'previous_columns': [],
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['Default = g']
-        },
         'er_specimen_name': {
           'group': 'Remanence Experiments',
           'next_columns': [{
@@ -8848,7 +8493,7 @@ export default {
             'column': 'remanence_dzfc_moment'
           }],
           'unit': 'Remanence Experiments',
-          'position': 18,
+          'position': 17,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_dzfc_moment'
@@ -8864,7 +8509,7 @@ export default {
             'column': 'remanence_sd'
           }],
           'unit': 'Remanence Experiments',
-          'position': 43,
+          'position': 42,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_sd'
@@ -8880,7 +8525,7 @@ export default {
             'column': 'remanence_delta_temp_high'
           }],
           'unit': 'Remanence Experiments',
-          'position': 23,
+          'position': 22,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_delta_temp_high'
@@ -8896,7 +8541,7 @@ export default {
             'column': 'measurement_orient_theta'
           }],
           'unit': 'Remanence Experiments',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'measurement_orient_theta'
@@ -8912,7 +8557,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Remanence Experiments',
-          'position': 51,
+          'position': 47,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'magic_instrument_codes'
@@ -8929,7 +8574,7 @@ export default {
             'column': 'remanence_q'
           }],
           'unit': 'Remanence Experiments',
-          'position': 44,
+          'position': 43,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_q'
@@ -8962,7 +8607,7 @@ export default {
             'column': 'remanence_mdt'
           }],
           'unit': 'Remanence Experiments',
-          'position': 38,
+          'position': 37,
           'previous_columns': [{
             'table': 'rmag_remanence',
             'column': 'remanence_mdt'
@@ -9004,20 +8649,6 @@ export default {
           'type': 'Remanence Experiments',
           'description': 'Remanence Experiments',
           'examples': ['San Francisco Volcanic Province', 'Dredge AMAT02-D12', 'Site 801']
-        },
-        'external_database_ids': {
-          'group': 'Remanence Experiments',
-          'next_columns': [{
-            'table': 'rmag_remanence',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Remanence Experiments',
-          'position': 48,
-          'previous_columns': [],
-          'label': 'Remanence Experiments',
-          'type': 'Remanence Experiments',
-          'description': 'Remanence Experiments',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Remanence Experiments',
@@ -9059,6 +8690,23 @@ export default {
           'type': 'Rock Formations',
           'description': 'Rock Formations',
           'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
+        },
+        'formation_paleo_enviroment': {
+          'group': 'Rock Formations',
+          'next_columns': [{
+            'table': 'er_formations',
+            'column': 'formation_paleo_enviroment'
+          }],
+          'unit': 'Rock Formations',
+          'position': 4,
+          'previous_columns': [{
+            'table': 'er_formations',
+            'column': 'formation_paleo_enviroment'
+          }],
+          'label': 'Rock Formations',
+          'type': 'Rock Formations',
+          'description': 'Rock Formations',
+          'examples': ['Fluvial', 'Continental Shelf', 'Eolian', 'Fringing Reef']
         },
         'formation_description': {
           'group': 'Rock Formations',
@@ -9158,20 +8806,6 @@ export default {
           'type': 'Rock Formations',
           'description': 'Rock Formations',
           'examples': ['Basalt', 'Granite', 'Mudstone', 'Tuff', 'Granodiorite', 'Marl']
-        },
-        'formation_paleo_environment': {
-          'group': 'Rock Formations',
-          'next_columns': [{
-            'table': 'er_formations',
-            'column': 'formation_paleo_environment'
-          }],
-          'unit': 'Rock Formations',
-          'position': 4,
-          'previous_columns': [],
-          'label': 'Rock Formations',
-          'type': 'Rock Formations',
-          'description': 'Rock Formations',
-          'examples': ['Fluvial', 'Continental Shelf', 'Eolian', 'Fringing Reef']
         }
       },
       'label': 'Rock Formations',
@@ -9377,10 +9011,7 @@ export default {
           }],
           'unit': 'Minerals',
           'position': 20,
-          'previous_columns': [{
-            'table': 'er_minerals',
-            'column': 'mineral_igsn'
-          }],
+          'previous_columns': [],
           'label': 'Minerals',
           'type': 'Minerals',
           'description': 'Minerals',
@@ -9804,10 +9435,7 @@ export default {
           }],
           'unit': 'Specimens',
           'position': 24,
-          'previous_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_shape'
-          }],
+          'previous_columns': [],
           'label': 'Specimens',
           'type': 'Specimens',
           'description': 'Specimens',
@@ -9905,10 +9533,7 @@ export default {
           }],
           'unit': 'Specimens',
           'position': 25,
-          'previous_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_igsn'
-          }],
+          'previous_columns': [],
           'label': 'Specimens',
           'type': 'Specimens',
           'description': 'Specimens',
@@ -9973,10 +9598,7 @@ export default {
           }],
           'unit': 'Specimens',
           'position': 16,
-          'previous_columns': [{
-            'table': 'er_specimens',
-            'column': 'specimen_core_depth'
-          }],
+          'previous_columns': [],
           'label': 'Specimens',
           'type': 'Specimens',
           'description': 'Specimens',
@@ -10264,7 +9886,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 29,
+          'position': 25,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'magic_method_codes'
@@ -10281,7 +9903,7 @@ export default {
             'column': 'anisotropy_s5'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 17,
+          'position': 16,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_s5'
@@ -10297,7 +9919,7 @@ export default {
             'column': 'anisotropy_s6'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 18,
+          'position': 17,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_s6'
@@ -10313,7 +9935,7 @@ export default {
             'column': 'anisotropy_tilt_correction'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 23,
+          'position': 22,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_tilt_correction'
@@ -10330,7 +9952,7 @@ export default {
             'column': 'anisotropy_unit'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 21,
+          'position': 20,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_unit'
@@ -10347,7 +9969,7 @@ export default {
             'column': 'rmag_criteria_codes'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 28,
+          'position': 24,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'rmag_criteria_codes'
@@ -10357,34 +9979,6 @@ export default {
           'description': 'Anisotropy Experiments',
           'examples': ['MY-MAD', 'MY-APLHA95']
         },
-        'magic_software_packages': {
-          'group': 'Anisotropy Experiments',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Anisotropy Experiments',
-          'position': 25,
-          'previous_columns': [],
-          'label': 'Anisotropy Experiments',
-          'type': 'Anisotropy Experiments',
-          'description': 'Anisotropy Experiments',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Anisotropy Experiments',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Anisotropy Experiments',
-          'position': 26,
-          'previous_columns': [],
-          'label': 'Anisotropy Experiments',
-          'type': 'Anisotropy Experiments',
-          'description': 'Anisotropy Experiments',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'anisotropy_description': {
           'group': 'Anisotropy Experiments',
           'next_columns': [{
@@ -10392,7 +9986,7 @@ export default {
             'column': 'anisotropy_description'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 24,
+          'position': 23,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_description'
@@ -10442,7 +10036,7 @@ export default {
             'column': 'anisotropy_s4'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_s4'
@@ -10458,7 +10052,7 @@ export default {
             'column': 'anisotropy_type'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_type'
@@ -10492,7 +10086,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 31,
+          'position': 27,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'er_analyst_mail_names'
@@ -10509,7 +10103,7 @@ export default {
             'column': 'anisotropy_sigma'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 20,
+          'position': 19,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_sigma'
@@ -10526,7 +10120,7 @@ export default {
             'column': 'anisotropy_s3'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_s3'
@@ -10576,7 +10170,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 32,
+          'position': 28,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'er_citation_names'
@@ -10610,7 +10204,7 @@ export default {
             'column': 'anisotropy_mean'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 19,
+          'position': 18,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_mean'
@@ -10643,7 +10237,7 @@ export default {
             'column': 'anisotropy_s2'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_s2'
@@ -10652,20 +10246,6 @@ export default {
           'type': 'Anisotropy Experiments',
           'description': 'Anisotropy Experiments'
         },
-        'anisotropy_flag': {
-          'group': 'Anisotropy Experiments',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_flag'
-          }],
-          'unit': 'Anisotropy Experiments',
-          'position': 11,
-          'previous_columns': [],
-          'label': 'Anisotropy Experiments',
-          'type': 'Anisotropy Experiments',
-          'description': 'Anisotropy Experiments',
-          'examples': ['Default = g']
-        },
         'magic_instrument_codes': {
           'group': 'Anisotropy Experiments',
           'next_columns': [{
@@ -10673,7 +10253,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 30,
+          'position': 26,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'magic_instrument_codes'
@@ -10690,7 +10270,7 @@ export default {
             'column': 'anisotropy_n'
           }],
           'unit': 'Anisotropy Experiments',
-          'position': 22,
+          'position': 21,
           'previous_columns': [{
             'table': 'rmag_anisotropy',
             'column': 'anisotropy_n'
@@ -10716,6 +10296,22 @@ export default {
           'description': 'Anisotropy Experiments',
           'examples': ['San03-001']
         },
+        'anisotropy_s1': {
+          'group': 'Anisotropy Experiments',
+          'next_columns': [{
+            'table': 'rmag_anisotropy',
+            'column': 'anisotropy_s1'
+          }],
+          'unit': 'Anisotropy Experiments',
+          'position': 12,
+          'previous_columns': [{
+            'table': 'rmag_anisotropy',
+            'column': 'anisotropy_s1'
+          }],
+          'label': 'Anisotropy Experiments',
+          'type': 'Anisotropy Experiments',
+          'description': 'Anisotropy Experiments'
+        },
         'er_fossil_name': {
           'group': 'Anisotropy Experiments',
           'next_columns': [{
@@ -10732,36 +10328,6 @@ export default {
           'type': 'Anisotropy Experiments',
           'description': 'Anisotropy Experiments',
           'examples': ['AMM43-03']
-        },
-        'anisotropy_s1': {
-          'group': 'Anisotropy Experiments',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s1'
-          }],
-          'unit': 'Anisotropy Experiments',
-          'position': 13,
-          'previous_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'anisotropy_s1'
-          }],
-          'label': 'Anisotropy Experiments',
-          'type': 'Anisotropy Experiments',
-          'description': 'Anisotropy Experiments'
-        },
-        'external_database_ids': {
-          'group': 'Anisotropy Experiments',
-          'next_columns': [{
-            'table': 'rmag_anisotropy',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Anisotropy Experiments',
-          'position': 27,
-          'previous_columns': [],
-          'label': 'Anisotropy Experiments',
-          'type': 'Anisotropy Experiments',
-          'description': 'Anisotropy Experiments',
-          'examples': ['1435', '23', '2329']
         },
         'er_location_name': {
           'group': 'Anisotropy Experiments',
@@ -10811,7 +10377,7 @@ export default {
             'column': 'specimen_g'
           }],
           'unit': 'Specimen Data',
-          'position': 49,
+          'position': 46,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_g'
@@ -10827,7 +10393,7 @@ export default {
             'column': 'specimen_int_rel_sigma_perc'
           }],
           'unit': 'Specimen Data',
-          'position': 39,
+          'position': 36,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_rel_sigma_perc'
@@ -10844,7 +10410,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Specimen Data',
-          'position': 75,
+          'position': 65,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'magic_method_codes'
@@ -10861,7 +10427,7 @@ export default {
             'column': 'specimen_f'
           }],
           'unit': 'Specimen Data',
-          'position': 44,
+          'position': 41,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_f'
@@ -10877,7 +10443,7 @@ export default {
             'column': 'specimen_inferred_age'
           }],
           'unit': 'Specimen Data',
-          'position': 22,
+          'position': 20,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_inferred_age'
@@ -10893,7 +10459,7 @@ export default {
             'column': 'specimen_correction'
           }],
           'unit': 'Specimen Data',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_correction'
@@ -10910,7 +10476,7 @@ export default {
             'column': 'specimen_inc'
           }],
           'unit': 'Specimen Data',
-          'position': 27,
+          'position': 25,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_inc'
@@ -10927,7 +10493,7 @@ export default {
             'column': 'specimen_int_sigma_perc'
           }],
           'unit': 'Specimen Data',
-          'position': 36,
+          'position': 33,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_sigma_perc'
@@ -10944,7 +10510,7 @@ export default {
             'column': 'specimen_b_sigma'
           }],
           'unit': 'Specimen Data',
-          'position': 47,
+          'position': 44,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_b_sigma'
@@ -10961,7 +10527,7 @@ export default {
             'column': 'specimen_drat'
           }],
           'unit': 'Specimen Data',
-          'position': 53,
+          'position': 50,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_drat'
@@ -10978,7 +10544,7 @@ export default {
             'column': 'specimen_int_corr_anisotropy'
           }],
           'unit': 'Specimen Data',
-          'position': 65,
+          'position': 61,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_corr_anisotropy'
@@ -10994,7 +10560,7 @@ export default {
             'column': 'specimen_q'
           }],
           'unit': 'Specimen Data',
-          'position': 43,
+          'position': 40,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_q'
@@ -11010,7 +10576,7 @@ export default {
             'column': 'specimen_md'
           }],
           'unit': 'Specimen Data',
-          'position': 51,
+          'position': 48,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_md'
@@ -11026,7 +10592,7 @@ export default {
             'column': 'specimen_inferred_age_sigma'
           }],
           'unit': 'Specimen Data',
-          'position': 23,
+          'position': 21,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_inferred_age_sigma'
@@ -11043,7 +10609,7 @@ export default {
             'column': 'specimen_mad'
           }],
           'unit': 'Specimen Data',
-          'position': 29,
+          'position': 27,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_mad'
@@ -11059,7 +10625,7 @@ export default {
             'column': 'specimen_tilt_correction'
           }],
           'unit': 'Specimen Data',
-          'position': 33,
+          'position': 30,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_tilt_correction'
@@ -11076,7 +10642,7 @@ export default {
             'column': 'specimen_alpha95'
           }],
           'unit': 'Specimen Data',
-          'position': 30,
+          'position': 28,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_alpha95'
@@ -11093,7 +10659,7 @@ export default {
             'column': 'specimen_ptrm'
           }],
           'unit': 'Specimen Data',
-          'position': 52,
+          'position': 49,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_ptrm'
@@ -11109,7 +10675,7 @@ export default {
             'column': 'specimen_b'
           }],
           'unit': 'Specimen Data',
-          'position': 46,
+          'position': 43,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_b'
@@ -11118,20 +10684,6 @@ export default {
           'type': 'Specimen Data',
           'description': 'Specimen Data'
         },
-        'magic_software_packages': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Specimen Data',
-          'position': 70,
-          'previous_columns': [],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
         'specimen_int_sigma': {
           'group': 'Specimen Data',
           'next_columns': [{
@@ -11139,7 +10691,7 @@ export default {
             'column': 'specimen_int_sigma'
           }],
           'unit': 'Specimen Data',
-          'position': 35,
+          'position': 32,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_sigma'
@@ -11149,34 +10701,6 @@ export default {
           'description': 'Specimen Data',
           'examples': ['Uncertainty = 1xSD']
         },
-        'external_database_names': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Specimen Data',
-          'position': 71,
-          'previous_columns': [],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
-        'specimen_flag': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_flag'
-          }],
-          'unit': 'Specimen Data',
-          'position': 18,
-          'previous_columns': [],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Default = g']
-        },
         'specimen_dang': {
           'group': 'Specimen Data',
           'next_columns': [{
@@ -11184,7 +10708,7 @@ export default {
             'column': 'specimen_dang'
           }],
           'unit': 'Specimen Data',
-          'position': 50,
+          'position': 47,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_dang'
@@ -11200,7 +10724,7 @@ export default {
             'column': 'specimen_b_beta'
           }],
           'unit': 'Specimen Data',
-          'position': 48,
+          'position': 45,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_b_beta'
@@ -11217,7 +10741,7 @@ export default {
             'column': 'specimen_int_corr_cooling_rate'
           }],
           'unit': 'Specimen Data',
-          'position': 64,
+          'position': 60,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_corr_cooling_rate'
@@ -11233,24 +10757,11 @@ export default {
             'column': 'specimen_n'
           }],
           'unit': 'Specimen Data',
-          'position': 31,
+          'position': 29,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_n'
           }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_n_total': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_n_total'
-          }],
-          'unit': 'Specimen Data',
-          'position': 32,
-          'previous_columns': [],
           'label': 'Specimen Data',
           'type': 'Specimen Data',
           'description': 'Specimen Data'
@@ -11262,7 +10773,7 @@ export default {
             'column': 'specimen_int_n'
           }],
           'unit': 'Specimen Data',
-          'position': 41,
+          'position': 38,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_n'
@@ -11270,23 +10781,6 @@ export default {
           'label': 'Specimen Data',
           'type': 'Specimen Data',
           'description': 'Specimen Data'
-        },
-        'er_synthetic_name': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_synthetic_name'
-          }],
-          'unit': 'Specimen Data',
-          'position': 9,
-          'previous_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'er_synthetic_name'
-          }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['STD1546-A1']
         },
         'er_expedition_name': {
           'group': 'Specimen Data',
@@ -11312,7 +10806,7 @@ export default {
             'column': 'specimen_inferred_age_unit'
           }],
           'unit': 'Specimen Data',
-          'position': 26,
+          'position': 24,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_inferred_age_unit'
@@ -11329,7 +10823,7 @@ export default {
             'column': 'specimen_int_rel_sigma'
           }],
           'unit': 'Specimen Data',
-          'position': 38,
+          'position': 35,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_rel_sigma'
@@ -11346,7 +10840,7 @@ export default {
             'column': 'specimen_rsc'
           }],
           'unit': 'Specimen Data',
-          'position': 55,
+          'position': 52,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_rsc'
@@ -11362,7 +10856,7 @@ export default {
             'column': 'specimen_comp_n'
           }],
           'unit': 'Specimen Data',
-          'position': 20,
+          'position': 18,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_comp_n'
@@ -11378,7 +10872,7 @@ export default {
             'column': 'specimen_polarity'
           }],
           'unit': 'Specimen Data',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_polarity'
@@ -11395,7 +10889,7 @@ export default {
             'column': 'measurement_step_unit'
           }],
           'unit': 'Specimen Data',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'measurement_step_unit'
@@ -11411,7 +10905,7 @@ export default {
             'column': 'specimen_magn_moment'
           }],
           'unit': 'Specimen Data',
-          'position': 60,
+          'position': 56,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_magn_moment'
@@ -11427,7 +10921,7 @@ export default {
             'column': 'specimen_int_mad'
           }],
           'unit': 'Specimen Data',
-          'position': 40,
+          'position': 37,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_mad'
@@ -11443,7 +10937,7 @@ export default {
             'column': 'specimen_magn_mass'
           }],
           'unit': 'Specimen Data',
-          'position': 62,
+          'position': 58,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_magn_mass'
@@ -11459,7 +10953,7 @@ export default {
             'column': 'specimen_direction_type'
           }],
           'unit': 'Specimen Data',
-          'position': 17,
+          'position': 16,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_direction_type'
@@ -11493,7 +10987,7 @@ export default {
             'column': 'specimen_viscosity_index'
           }],
           'unit': 'Specimen Data',
-          'position': 57,
+          'position': 53,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_viscosity_index'
@@ -11509,7 +11003,7 @@ export default {
             'column': 'specimen_lab_field_ac'
           }],
           'unit': 'Specimen Data',
-          'position': 59,
+          'position': 55,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_lab_field_ac'
@@ -11526,7 +11020,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Specimen Data',
-          'position': 77,
+          'position': 67,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'er_analyst_mail_names'
@@ -11543,7 +11037,7 @@ export default {
             'column': 'specimen_int'
           }],
           'unit': 'Specimen Data',
-          'position': 34,
+          'position': 31,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int'
@@ -11559,7 +11053,7 @@ export default {
             'column': 'specimen_description'
           }],
           'unit': 'Specimen Data',
-          'position': 69,
+          'position': 62,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_description'
@@ -11575,7 +11069,7 @@ export default {
             'column': 'specimen_w'
           }],
           'unit': 'Specimen Data',
-          'position': 42,
+          'position': 39,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_w'
@@ -11591,7 +11085,7 @@ export default {
             'column': 'specimen_nrm'
           }],
           'unit': 'Specimen Data',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_nrm'
@@ -11608,7 +11102,7 @@ export default {
             'column': 'specimen_inferred_age_low'
           }],
           'unit': 'Specimen Data',
-          'position': 24,
+          'position': 22,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_inferred_age_low'
@@ -11624,7 +11118,7 @@ export default {
             'column': 'magic_experiment_names'
           }],
           'unit': 'Specimen Data',
-          'position': 10,
+          'position': 9,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'magic_experiment_names'
@@ -11641,7 +11135,7 @@ export default {
             'column': 'measurement_step_min'
           }],
           'unit': 'Specimen Data',
-          'position': 11,
+          'position': 10,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'measurement_step_min'
@@ -11650,23 +11144,6 @@ export default {
           'type': 'Specimen Data',
           'description': 'Specimen Data'
         },
-        'specimen_z': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_z'
-          }],
-          'unit': 'Specimen Data',
-          'position': 56,
-          'previous_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_z'
-          }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['Real number between -1 and 100']
-        },
         'specimen_drats': {
           'group': 'Specimen Data',
           'next_columns': [{
@@ -11674,7 +11151,7 @@ export default {
             'column': 'specimen_drats'
           }],
           'unit': 'Specimen Data',
-          'position': 54,
+          'position': 51,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_drats'
@@ -11708,7 +11185,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Specimen Data',
-          'position': 78,
+          'position': 68,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'er_citation_names'
@@ -11735,39 +11212,6 @@ export default {
           'description': 'Specimen Data',
           'examples': ['Bas123a-01']
         },
-        'specimen_lab_field_dc': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_lab_field_dc'
-          }],
-          'unit': 'Specimen Data',
-          'position': 58,
-          'previous_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_lab_field_dc'
-          }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['0 = no field  and -1 = ambient field']
-        },
-        'specimen_fvds': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_fvds'
-          }],
-          'unit': 'Specimen Data',
-          'position': 45,
-          'previous_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_fvds'
-          }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
         'pmag_rotation_codes': {
           'group': 'Specimen Data',
           'next_columns': [{
@@ -11775,7 +11219,7 @@ export default {
             'column': 'pmag_rotation_codes'
           }],
           'unit': 'Specimen Data',
-          'position': 74,
+          'position': 64,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'pmag_rotation_codes'
@@ -11784,6 +11228,39 @@ export default {
           'type': 'Specimen Data',
           'description': 'Specimen Data',
           'examples': ['MY-TILT1', 'MY-TILT2', 'MY-TRANS1']
+        },
+        'specimen_lab_field_dc': {
+          'group': 'Specimen Data',
+          'next_columns': [{
+            'table': 'pmag_specimens',
+            'column': 'specimen_lab_field_dc'
+          }],
+          'unit': 'Specimen Data',
+          'position': 54,
+          'previous_columns': [{
+            'table': 'pmag_specimens',
+            'column': 'specimen_lab_field_dc'
+          }],
+          'label': 'Specimen Data',
+          'type': 'Specimen Data',
+          'description': 'Specimen Data',
+          'examples': ['No field equals 0 and ambient field equals -1']
+        },
+        'specimen_fvds': {
+          'group': 'Specimen Data',
+          'next_columns': [{
+            'table': 'pmag_specimens',
+            'column': 'specimen_fvds'
+          }],
+          'unit': 'Specimen Data',
+          'position': 42,
+          'previous_columns': [{
+            'table': 'pmag_specimens',
+            'column': 'specimen_fvds'
+          }],
+          'label': 'Specimen Data',
+          'type': 'Specimen Data',
+          'description': 'Specimen Data'
         },
         'er_specimen_name': {
           'group': 'Specimen Data',
@@ -11809,7 +11286,7 @@ export default {
             'column': 'specimen_comp_nmb'
           }],
           'unit': 'Specimen Data',
-          'position': 19,
+          'position': 17,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_comp_nmb'
@@ -11825,7 +11302,7 @@ export default {
             'column': 'measurement_step_max'
           }],
           'unit': 'Specimen Data',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'measurement_step_max'
@@ -11841,24 +11318,11 @@ export default {
             'column': 'specimen_magn_volume'
           }],
           'unit': 'Specimen Data',
-          'position': 61,
+          'position': 57,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_magn_volume'
           }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_theta': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_theta'
-          }],
-          'unit': 'Specimen Data',
-          'position': 67,
-          'previous_columns': [],
           'label': 'Specimen Data',
           'type': 'Specimen Data',
           'description': 'Specimen Data'
@@ -11870,7 +11334,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Specimen Data',
-          'position': 76,
+          'position': 66,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'magic_instrument_codes'
@@ -11887,7 +11351,7 @@ export default {
             'column': 'pmag_criteria_codes'
           }],
           'unit': 'Specimen Data',
-          'position': 73,
+          'position': 63,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'pmag_criteria_codes'
@@ -11904,7 +11368,7 @@ export default {
             'column': 'specimen_comp_name'
           }],
           'unit': 'Specimen Data',
-          'position': 21,
+          'position': 19,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_comp_name'
@@ -11921,7 +11385,7 @@ export default {
             'column': 'specimen_dec'
           }],
           'unit': 'Specimen Data',
-          'position': 28,
+          'position': 26,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_dec'
@@ -11938,7 +11402,7 @@ export default {
             'column': 'specimen_int_ptrm_n'
           }],
           'unit': 'Specimen Data',
-          'position': 63,
+          'position': 59,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_ptrm_n'
@@ -11964,19 +11428,6 @@ export default {
           'description': 'Specimen Data',
           'examples': ['San03-001']
         },
-        'specimen_gamma': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_gamma'
-          }],
-          'unit': 'Specimen Data',
-          'position': 68,
-          'previous_columns': [],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
         'specimen_int_rel': {
           'group': 'Specimen Data',
           'next_columns': [{
@@ -11984,7 +11435,7 @@ export default {
             'column': 'specimen_int_rel'
           }],
           'unit': 'Specimen Data',
-          'position': 37,
+          'position': 34,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_int_rel'
@@ -12000,24 +11451,11 @@ export default {
             'column': 'specimen_inferred_age_high'
           }],
           'unit': 'Specimen Data',
-          'position': 25,
+          'position': 23,
           'previous_columns': [{
             'table': 'pmag_specimens',
             'column': 'specimen_inferred_age_high'
           }],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data'
-        },
-        'specimen_delta': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'specimen_delta'
-          }],
-          'unit': 'Specimen Data',
-          'position': 66,
-          'previous_columns': [],
           'label': 'Specimen Data',
           'type': 'Specimen Data',
           'description': 'Specimen Data'
@@ -12055,20 +11493,6 @@ export default {
           'type': 'Specimen Data',
           'description': 'Specimen Data',
           'examples': ['San Francisco Volcanic Province', 'Dredge AMAT02-D12', 'Site 801']
-        },
-        'external_database_ids': {
-          'group': 'Specimen Data',
-          'next_columns': [{
-            'table': 'pmag_specimens',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Specimen Data',
-          'position': 72,
-          'previous_columns': [],
-          'label': 'Specimen Data',
-          'type': 'Specimen Data',
-          'description': 'Specimen Data',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Specimen Data',
@@ -12716,7 +12140,7 @@ export default {
             'column': 'site_n'
           }],
           'unit': 'Site Data',
-          'position': 30,
+          'position': 28,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_n'
@@ -12732,7 +12156,7 @@ export default {
             'column': 'site_int_sigma'
           }],
           'unit': 'Site Data',
-          'position': 38,
+          'position': 35,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int_sigma'
@@ -12749,7 +12173,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Site Data',
-          'position': 53,
+          'position': 47,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'magic_method_codes'
@@ -12766,7 +12190,7 @@ export default {
             'column': 'site_r'
           }],
           'unit': 'Site Data',
-          'position': 35,
+          'position': 32,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_r'
@@ -12782,7 +12206,7 @@ export default {
             'column': 'site_inferred_age_sigma'
           }],
           'unit': 'Site Data',
-          'position': 22,
+          'position': 20,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_inferred_age_sigma'
@@ -12799,7 +12223,7 @@ export default {
             'column': 'site_description'
           }],
           'unit': 'Site Data',
-          'position': 47,
+          'position': 44,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_description'
@@ -12832,7 +12256,7 @@ export default {
             'column': 'site_int_rel'
           }],
           'unit': 'Site Data',
-          'position': 40,
+          'position': 37,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int_rel'
@@ -12865,7 +12289,7 @@ export default {
             'column': 'site_sigma'
           }],
           'unit': 'Site Data',
-          'position': 28,
+          'position': 26,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_sigma'
@@ -12882,7 +12306,7 @@ export default {
             'column': 'site_int_n'
           }],
           'unit': 'Site Data',
-          'position': 43,
+          'position': 40,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int_n'
@@ -12898,7 +12322,7 @@ export default {
             'column': 'site_inc'
           }],
           'unit': 'Site Data',
-          'position': 26,
+          'position': 24,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_inc'
@@ -12907,6 +12331,23 @@ export default {
           'type': 'Site Data',
           'description': 'Site Data',
           'examples': ['Decimal degrees between -90 and 90']
+        },
+        'site_direction_type': {
+          'group': 'Site Data',
+          'next_columns': [{
+            'table': 'pmag_sites',
+            'column': 'site_direction_type'
+          }],
+          'unit': 'Site Data',
+          'position': 15,
+          'previous_columns': [{
+            'table': 'pmag_sites',
+            'column': 'site_direction_type'
+          }],
+          'label': 'Site Data',
+          'type': 'Site Data',
+          'description': 'Site Data',
+          'examples': ['Default = l']
         },
         'er_mineral_names': {
           'group': 'Site Data',
@@ -12925,23 +12366,6 @@ export default {
           'description': 'Site Data',
           'examples': ['PLG33a', 'MAGN-MJ-034']
         },
-        'site_direction_type': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_direction_type'
-          }],
-          'unit': 'Site Data',
-          'position': 16,
-          'previous_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_direction_type'
-          }],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Default = l']
-        },
         'site_comp_nmb': {
           'group': 'Site Data',
           'next_columns': [{
@@ -12949,7 +12373,7 @@ export default {
             'column': 'site_comp_nmb'
           }],
           'unit': 'Site Data',
-          'position': 18,
+          'position': 16,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_comp_nmb'
@@ -12965,7 +12389,7 @@ export default {
             'column': 'site_nrm'
           }],
           'unit': 'Site Data',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_nrm'
@@ -12982,7 +12406,7 @@ export default {
             'column': 'site_int_sigma_perc'
           }],
           'unit': 'Site Data',
-          'position': 39,
+          'position': 36,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int_sigma_perc'
@@ -12999,7 +12423,7 @@ export default {
             'column': 'site_dec'
           }],
           'unit': 'Site Data',
-          'position': 27,
+          'position': 25,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_dec'
@@ -13009,34 +12433,6 @@ export default {
           'description': 'Site Data',
           'examples': ['Decimal degrees between 0 and 360']
         },
-        'magic_software_packages': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Site Data',
-          'position': 48,
-          'previous_columns': [],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Site Data',
-          'position': 49,
-          'previous_columns': [],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'site_polarity': {
           'group': 'Site Data',
           'next_columns': [{
@@ -13044,7 +12440,7 @@ export default {
             'column': 'site_polarity'
           }],
           'unit': 'Site Data',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_polarity'
@@ -13061,7 +12457,7 @@ export default {
             'column': 'site_inferred_age_high'
           }],
           'unit': 'Site Data',
-          'position': 24,
+          'position': 22,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_inferred_age_high'
@@ -13077,7 +12473,7 @@ export default {
             'column': 'site_magn_moment'
           }],
           'unit': 'Site Data',
-          'position': 44,
+          'position': 41,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_magn_moment'
@@ -13110,7 +12506,7 @@ export default {
             'column': 'site_int'
           }],
           'unit': 'Site Data',
-          'position': 37,
+          'position': 34,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int'
@@ -13126,7 +12522,7 @@ export default {
             'column': 'site_inferred_age_low'
           }],
           'unit': 'Site Data',
-          'position': 23,
+          'position': 21,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_inferred_age_low'
@@ -13142,7 +12538,7 @@ export default {
             'column': 'site_comp_n'
           }],
           'unit': 'Site Data',
-          'position': 19,
+          'position': 17,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_comp_n'
@@ -13158,7 +12554,7 @@ export default {
             'column': 'site_inferred_age'
           }],
           'unit': 'Site Data',
-          'position': 21,
+          'position': 19,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_inferred_age'
@@ -13174,7 +12570,7 @@ export default {
             'column': 'site_int_rel_sigma_perc'
           }],
           'unit': 'Site Data',
-          'position': 42,
+          'position': 39,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int_rel_sigma_perc'
@@ -13191,7 +12587,7 @@ export default {
             'column': 'measurement_step_unit'
           }],
           'unit': 'Site Data',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'measurement_step_unit'
@@ -13207,7 +12603,7 @@ export default {
             'column': 'site_n_planes'
           }],
           'unit': 'Site Data',
-          'position': 32,
+          'position': 30,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_n_planes'
@@ -13223,7 +12619,7 @@ export default {
             'column': 'site_alpha95'
           }],
           'unit': 'Site Data',
-          'position': 29,
+          'position': 27,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_alpha95'
@@ -13257,7 +12653,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Site Data',
-          'position': 55,
+          'position': 49,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'er_analyst_mail_names'
@@ -13274,7 +12670,7 @@ export default {
             'column': 'site_magn_mass'
           }],
           'unit': 'Site Data',
-          'position': 46,
+          'position': 43,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_magn_mass'
@@ -13283,23 +12679,6 @@ export default {
           'type': 'Site Data',
           'description': 'Site Data'
         },
-        'er_synthetic_names': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_synthetic_names'
-          }],
-          'unit': 'Site Data',
-          'position': 9,
-          'previous_columns': [{
-            'table': 'pmag_sites',
-            'column': 'er_synthetic_names'
-          }],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['STD1546-A1', 'STD1546-X23']
-        },
         'magic_experiment_names': {
           'group': 'Site Data',
           'next_columns': [{
@@ -13307,7 +12686,7 @@ export default {
             'column': 'magic_experiment_names'
           }],
           'unit': 'Site Data',
-          'position': 10,
+          'position': 9,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'magic_experiment_names'
@@ -13324,7 +12703,7 @@ export default {
             'column': 'measurement_step_min'
           }],
           'unit': 'Site Data',
-          'position': 11,
+          'position': 10,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'measurement_step_min'
@@ -13357,7 +12736,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Site Data',
-          'position': 56,
+          'position': 50,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'er_citation_names'
@@ -13367,20 +12746,6 @@ export default {
           'description': 'Site Data',
           'examples': ['Smith et al. 2003', 'Hart & Heard 1967', 'This study']
         },
-        'site_flag': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_flag'
-          }],
-          'unit': 'Site Data',
-          'position': 17,
-          'previous_columns': [],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['Default = g']
-        },
         'pmag_rotation_codes': {
           'group': 'Site Data',
           'next_columns': [{
@@ -13388,7 +12753,7 @@ export default {
             'column': 'pmag_rotation_codes'
           }],
           'unit': 'Site Data',
-          'position': 52,
+          'position': 46,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'pmag_rotation_codes'
@@ -13405,7 +12770,7 @@ export default {
             'column': 'site_inferred_age_unit'
           }],
           'unit': 'Site Data',
-          'position': 25,
+          'position': 23,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_inferred_age_unit'
@@ -13422,7 +12787,7 @@ export default {
             'column': 'site_comp_name'
           }],
           'unit': 'Site Data',
-          'position': 20,
+          'position': 18,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_comp_name'
@@ -13432,19 +12797,6 @@ export default {
           'description': 'Site Data',
           'examples': ['Characteristic', 'VRM', 'Overprint', 'A', 'B', 'C']
         },
-        'site_n_total': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'site_n_total'
-          }],
-          'unit': 'Site Data',
-          'position': 33,
-          'previous_columns': [],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data'
-        },
         'measurement_step_max': {
           'group': 'Site Data',
           'next_columns': [{
@@ -13452,7 +12804,7 @@ export default {
             'column': 'measurement_step_max'
           }],
           'unit': 'Site Data',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'measurement_step_max'
@@ -13468,7 +12820,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Site Data',
-          'position': 54,
+          'position': 48,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'magic_instrument_codes'
@@ -13485,7 +12837,7 @@ export default {
             'column': 'pmag_criteria_codes'
           }],
           'unit': 'Site Data',
-          'position': 51,
+          'position': 45,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'pmag_criteria_codes'
@@ -13502,7 +12854,7 @@ export default {
             'column': 'site_magn_volume'
           }],
           'unit': 'Site Data',
-          'position': 45,
+          'position': 42,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_magn_volume'
@@ -13518,7 +12870,7 @@ export default {
             'column': 'site_k'
           }],
           'unit': 'Site Data',
-          'position': 34,
+          'position': 31,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_k'
@@ -13534,7 +12886,7 @@ export default {
             'column': 'site_tilt_correction'
           }],
           'unit': 'Site Data',
-          'position': 36,
+          'position': 33,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_tilt_correction'
@@ -13551,7 +12903,7 @@ export default {
             'column': 'site_n_lines'
           }],
           'unit': 'Site Data',
-          'position': 31,
+          'position': 29,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_n_lines'
@@ -13567,7 +12919,7 @@ export default {
             'column': 'site_int_rel_sigma'
           }],
           'unit': 'Site Data',
-          'position': 41,
+          'position': 38,
           'previous_columns': [{
             'table': 'pmag_sites',
             'column': 'site_int_rel_sigma'
@@ -13593,20 +12945,6 @@ export default {
           'type': 'Site Data',
           'description': 'Site Data',
           'examples': ['San Francisco Volcanic Province', 'Dredge AMAT02-D12', 'Site 801']
-        },
-        'external_database_ids': {
-          'group': 'Site Data',
-          'next_columns': [{
-            'table': 'pmag_sites',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Site Data',
-          'position': 50,
-          'previous_columns': [],
-          'label': 'Site Data',
-          'type': 'Site Data',
-          'description': 'Site Data',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Site Data',
@@ -13632,20 +12970,6 @@ export default {
           'description': 'Susceptibility Experiments',
           'examples': ['Glasshound Member']
         },
-        'susceptibility_flag': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'susceptibility_flag'
-          }],
-          'unit': 'Susceptibility Experiments',
-          'position': 11,
-          'previous_columns': [],
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['Default = g']
-        },
         'susceptibility_h_high': {
           'group': 'Susceptibility Experiments',
           'next_columns': [{
@@ -13653,7 +12977,7 @@ export default {
             'column': 'susceptibility_h_high'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 19,
+          'position': 18,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_h_high'
@@ -13669,7 +12993,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 26,
+          'position': 22,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'magic_method_codes'
@@ -13686,7 +13010,7 @@ export default {
             'column': 'susceptibility_h_low'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 18,
+          'position': 17,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_h_low'
@@ -13702,7 +13026,7 @@ export default {
             'column': 'susceptibility_loss_tangent'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 20,
+          'position': 19,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_loss_tangent'
@@ -13718,7 +13042,7 @@ export default {
             'column': 'rmag_criteria_codes'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 25,
+          'position': 21,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'rmag_criteria_codes'
@@ -13735,7 +13059,7 @@ export default {
             'column': 'susceptibility_chi_mass'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_chi_mass'
@@ -13744,34 +13068,6 @@ export default {
           'type': 'Susceptibility Experiments',
           'description': 'Susceptibility Experiments'
         },
-        'magic_software_packages': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Susceptibility Experiments',
-          'position': 22,
-          'previous_columns': [],
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Susceptibility Experiments',
-          'position': 23,
-          'previous_columns': [],
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'susceptibility_description': {
           'group': 'Susceptibility Experiments',
           'next_columns': [{
@@ -13779,7 +13075,7 @@ export default {
             'column': 'susceptibility_description'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 21,
+          'position': 20,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_description'
@@ -13795,7 +13091,7 @@ export default {
             'column': 'susceptibility_f'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_f'
@@ -13845,7 +13141,7 @@ export default {
             'column': 'susceptibility_chi_volume'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_chi_volume'
@@ -13878,7 +13174,7 @@ export default {
             'column': 'susceptibility_f_low'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_f_low'
@@ -13894,7 +13190,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 28,
+          'position': 24,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'er_analyst_mail_names'
@@ -13928,7 +13224,7 @@ export default {
             'column': 'susceptibility_f_high'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_f_high'
@@ -13961,7 +13257,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 29,
+          'position': 25,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'er_citation_names'
@@ -14012,7 +13308,7 @@ export default {
             'column': 'susceptibility_h'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 17,
+          'position': 16,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'susceptibility_h'
@@ -14028,7 +13324,7 @@ export default {
             'column': 'magic_instrument_codes'
           }],
           'unit': 'Susceptibility Experiments',
-          'position': 27,
+          'position': 23,
           'previous_columns': [{
             'table': 'rmag_susceptibility',
             'column': 'magic_instrument_codes'
@@ -14088,20 +13384,6 @@ export default {
           'type': 'Susceptibility Experiments',
           'description': 'Susceptibility Experiments',
           'examples': ['San Francisco Volcanic Province', 'Dredge AMAT02-D12', 'Site 801']
-        },
-        'external_database_ids': {
-          'group': 'Susceptibility Experiments',
-          'next_columns': [{
-            'table': 'rmag_susceptibility',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Susceptibility Experiments',
-          'position': 24,
-          'previous_columns': [],
-          'label': 'Susceptibility Experiments',
-          'type': 'Susceptibility Experiments',
-          'description': 'Susceptibility Experiments',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Susceptibility Experiments',
@@ -14185,10 +13467,7 @@ export default {
           }],
           'unit': 'Fossils',
           'position': 23,
-          'previous_columns': [{
-            'table': 'er_fossils',
-            'column': 'fossil_igsn'
-          }],
+          'previous_columns': [],
           'label': 'Fossils',
           'type': 'Fossils',
           'description': 'Fossils',
@@ -14594,7 +13873,7 @@ export default {
             'column': 'average_nn'
           }],
           'unit': 'Results',
-          'position': 31,
+          'position': 30,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_nn'
@@ -14627,7 +13906,7 @@ export default {
             'column': 'average_int'
           }],
           'unit': 'Results',
-          'position': 34,
+          'position': 33,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int'
@@ -14643,7 +13922,7 @@ export default {
             'column': 'average_age'
           }],
           'unit': 'Results',
-          'position': 21,
+          'position': 20,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_age'
@@ -14659,7 +13938,7 @@ export default {
             'column': 'reversed_alpha95'
           }],
           'unit': 'Results',
-          'position': 92,
+          'position': 89,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_alpha95'
@@ -14676,7 +13955,7 @@ export default {
             'column': 'magic_method_codes'
           }],
           'unit': 'Results',
-          'position': 99,
+          'position': 95,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'magic_method_codes'
@@ -14693,7 +13972,7 @@ export default {
             'column': 'tilt_inc_corr'
           }],
           'unit': 'Results',
-          'position': 68,
+          'position': 65,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_inc_corr'
@@ -14710,7 +13989,7 @@ export default {
             'column': 'tilt_alpha95_uncorr'
           }],
           'unit': 'Results',
-          'position': 75,
+          'position': 72,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_alpha95_uncorr'
@@ -14727,7 +14006,7 @@ export default {
             'column': 'vdm'
           }],
           'unit': 'Results',
-          'position': 59,
+          'position': 56,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vdm'
@@ -14743,7 +14022,7 @@ export default {
             'column': 'data_type'
           }],
           'unit': 'Results',
-          'position': 9,
+          'position': 8,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'data_type'
@@ -14760,10 +14039,23 @@ export default {
             'column': 'tilt_k_ratio'
           }],
           'unit': 'Results',
-          'position': 66,
+          'position': 63,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_k_ratio'
+          }],
+          'label': 'Results',
+          'type': 'Results',
+          'description': 'Results'
+        },
+        'iaga_res_no': {
+          'group': 'Results',
+          'next_columns': [],
+          'unit': 'Results',
+          'position': 91,
+          'previous_columns': [{
+            'table': 'pmag_results',
+            'column': 'iaga_res_no'
           }],
           'label': 'Results',
           'type': 'Results',
@@ -14776,7 +14068,7 @@ export default {
             'column': 'average_alpha95'
           }],
           'unit': 'Results',
-          'position': 29,
+          'position': 28,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_alpha95'
@@ -14793,27 +14085,10 @@ export default {
             'column': 'average_int_rel_sigma_perc'
           }],
           'unit': 'Results',
-          'position': 39,
+          'position': 38,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_rel_sigma_perc'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Uncertainty = 1xSD']
-        },
-        'model_lon_sigma': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'model_lon_sigma'
-          }],
-          'unit': 'Results',
-          'position': 51,
-          'previous_columns': [{
-            'table': 'pmag_results',
-            'column': 'model_lon_sigma'
           }],
           'label': 'Results',
           'type': 'Results',
@@ -14827,7 +14102,7 @@ export default {
             'column': 'fold_test_significance'
           }],
           'unit': 'Results',
-          'position': 76,
+          'position': 73,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'fold_test_significance'
@@ -14843,7 +14118,7 @@ export default {
             'column': 'antipodal'
           }],
           'unit': 'Results',
-          'position': 78,
+          'position': 75,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'antipodal'
@@ -14860,7 +14135,7 @@ export default {
             'column': 'reversed_lat'
           }],
           'unit': 'Results',
-          'position': 86,
+          'position': 83,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_lat'
@@ -14877,7 +14152,7 @@ export default {
             'column': 'eta_inc'
           }],
           'unit': 'Results',
-          'position': 42,
+          'position': 41,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'eta_inc'
@@ -14911,7 +14186,7 @@ export default {
             'column': 'tilt_k_uncorr'
           }],
           'unit': 'Results',
-          'position': 74,
+          'position': 71,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_k_uncorr'
@@ -14944,7 +14219,7 @@ export default {
             'column': 'average_sigma'
           }],
           'unit': 'Results',
-          'position': 28,
+          'position': 27,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_sigma'
@@ -14961,7 +14236,7 @@ export default {
             'column': 'average_age_sigma'
           }],
           'unit': 'Results',
-          'position': 22,
+          'position': 21,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_age_sigma'
@@ -14978,7 +14253,7 @@ export default {
             'column': 'contact_test'
           }],
           'unit': 'Results',
-          'position': 12,
+          'position': 11,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'contact_test'
@@ -14995,7 +14270,7 @@ export default {
             'column': 'normal_lon'
           }],
           'unit': 'Results',
-          'position': 80,
+          'position': 77,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_lon'
@@ -15012,7 +14287,7 @@ export default {
             'column': 'average_int_rel'
           }],
           'unit': 'Results',
-          'position': 37,
+          'position': 36,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_rel'
@@ -15028,7 +14303,7 @@ export default {
             'column': 'eta_semi_angle'
           }],
           'unit': 'Results',
-          'position': 44,
+          'position': 43,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'eta_semi_angle'
@@ -15045,7 +14320,7 @@ export default {
             'column': 'vadm_sigma'
           }],
           'unit': 'Results',
-          'position': 63,
+          'position': 60,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vadm_sigma'
@@ -15062,7 +14337,7 @@ export default {
             'column': 'average_height'
           }],
           'unit': 'Results',
-          'position': 20,
+          'position': 19,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_height'
@@ -15079,7 +14354,7 @@ export default {
             'column': 'vdm_sigma'
           }],
           'unit': 'Results',
-          'position': 60,
+          'position': 57,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vdm_sigma'
@@ -15096,7 +14371,7 @@ export default {
             'column': 'average_int_sigma'
           }],
           'unit': 'Results',
-          'position': 35,
+          'position': 34,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_sigma'
@@ -15113,7 +14388,7 @@ export default {
             'column': 'zeta_semi_angle'
           }],
           'unit': 'Results',
-          'position': 47,
+          'position': 46,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'zeta_semi_angle'
@@ -15147,7 +14422,7 @@ export default {
             'column': 'vgp_lat'
           }],
           'unit': 'Results',
-          'position': 52,
+          'position': 49,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_lat'
@@ -15164,7 +14439,7 @@ export default {
             'column': 'normal_k'
           }],
           'unit': 'Results',
-          'position': 84,
+          'position': 81,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_k'
@@ -15180,7 +14455,7 @@ export default {
             'column': 'average_lon'
           }],
           'unit': 'Results',
-          'position': 18,
+          'position': 17,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_lon'
@@ -15197,7 +14472,7 @@ export default {
             'column': 'zeta_inc'
           }],
           'unit': 'Results',
-          'position': 45,
+          'position': 44,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'zeta_inc'
@@ -15214,7 +14489,7 @@ export default {
             'column': 'tilt_alpha95_corr'
           }],
           'unit': 'Results',
-          'position': 71,
+          'position': 68,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_alpha95_corr'
@@ -15231,7 +14506,7 @@ export default {
             'column': 'average_age_low'
           }],
           'unit': 'Results',
-          'position': 23,
+          'position': 22,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_age_low'
@@ -15247,7 +14522,7 @@ export default {
             'column': 'model_lat_sigma'
           }],
           'unit': 'Results',
-          'position': 49,
+          'position': 48,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'model_lat_sigma'
@@ -15264,7 +14539,7 @@ export default {
             'column': 'normal_alpha95'
           }],
           'unit': 'Results',
-          'position': 85,
+          'position': 82,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_alpha95'
@@ -15274,34 +14549,6 @@ export default {
           'description': 'Results',
           'examples': ['Confidence Level = 95%']
         },
-        'magic_software_packages': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'magic_software_packages'
-          }],
-          'unit': 'Results',
-          'position': 94,
-          'previous_columns': [],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['PmagPy v1.67b', 'FORCinel v1.11 ']
-        },
-        'external_database_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'external_database_names'
-          }],
-          'unit': 'Results',
-          'position': 95,
-          'previous_columns': [],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['GEOMAGIA50', 'CALS7K.2', 'ARCHEO00']
-        },
         'tilt_dec_corr': {
           'group': 'Results',
           'next_columns': [{
@@ -15309,7 +14556,7 @@ export default {
             'column': 'tilt_dec_corr'
           }],
           'unit': 'Results',
-          'position': 69,
+          'position': 66,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_dec_corr'
@@ -15326,7 +14573,7 @@ export default {
             'column': 'percent_reversed'
           }],
           'unit': 'Results',
-          'position': 77,
+          'position': 74,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'percent_reversed'
@@ -15343,7 +14590,7 @@ export default {
             'column': 'vgp_alpha95'
           }],
           'unit': 'Results',
-          'position': 57,
+          'position': 54,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_alpha95'
@@ -15360,7 +14607,7 @@ export default {
             'column': 'tilt_k_corr'
           }],
           'unit': 'Results',
-          'position': 70,
+          'position': 67,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_k_corr'
@@ -15376,7 +14623,7 @@ export default {
             'column': 'fold_test'
           }],
           'unit': 'Results',
-          'position': 10,
+          'position': 9,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'fold_test'
@@ -15393,7 +14640,7 @@ export default {
             'column': 'reversed_n'
           }],
           'unit': 'Results',
-          'position': 90,
+          'position': 87,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_n'
@@ -15409,7 +14656,7 @@ export default {
             'column': 'result_description'
           }],
           'unit': 'Results',
-          'position': 93,
+          'position': 92,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'result_description'
@@ -15425,7 +14672,7 @@ export default {
             'column': 'average_k'
           }],
           'unit': 'Results',
-          'position': 32,
+          'position': 31,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_k'
@@ -15441,7 +14688,7 @@ export default {
             'column': 'vgp_lon'
           }],
           'unit': 'Results',
-          'position': 53,
+          'position': 50,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_lon'
@@ -15458,7 +14705,7 @@ export default {
             'column': 'average_age_unit'
           }],
           'unit': 'Results',
-          'position': 25,
+          'position': 24,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_age_unit'
@@ -15475,7 +14722,7 @@ export default {
             'column': 'model_lat'
           }],
           'unit': 'Results',
-          'position': 48,
+          'position': 47,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'model_lat'
@@ -15492,7 +14739,7 @@ export default {
             'column': 'tilt_dec_uncorr'
           }],
           'unit': 'Results',
-          'position': 73,
+          'position': 70,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_dec_uncorr'
@@ -15509,7 +14756,7 @@ export default {
             'column': 'normal_n'
           }],
           'unit': 'Results',
-          'position': 83,
+          'position': 80,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_n'
@@ -15525,7 +14772,7 @@ export default {
             'column': 'average_int_nn'
           }],
           'unit': 'Results',
-          'position': 41,
+          'position': 40,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_nn'
@@ -15541,7 +14788,7 @@ export default {
             'column': 'normal_lat'
           }],
           'unit': 'Results',
-          'position': 79,
+          'position': 76,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_lat'
@@ -15558,7 +14805,7 @@ export default {
             'column': 'reversed_lon'
           }],
           'unit': 'Results',
-          'position': 87,
+          'position': 84,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_lon'
@@ -15568,23 +14815,6 @@ export default {
           'description': 'Results',
           'examples': ['Decimal degrees between 0 and 360']
         },
-        'model_lon': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'model_lon'
-          }],
-          'unit': 'Results',
-          'position': 50,
-          'previous_columns': [{
-            'table': 'pmag_results',
-            'column': 'model_lon'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['Decimal degrees between -90 and 90']
-        },
         'vdm_n': {
           'group': 'Results',
           'next_columns': [{
@@ -15592,7 +14822,7 @@ export default {
             'column': 'vdm_n'
           }],
           'unit': 'Results',
-          'position': 61,
+          'position': 58,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vdm_n'
@@ -15608,7 +14838,7 @@ export default {
             'column': 'average_inc'
           }],
           'unit': 'Results',
-          'position': 26,
+          'position': 25,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_inc'
@@ -15625,7 +14855,7 @@ export default {
             'column': 'tilt_inc_uncorr'
           }],
           'unit': 'Results',
-          'position': 72,
+          'position': 69,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_inc_uncorr'
@@ -15642,7 +14872,7 @@ export default {
             'column': 'reversed_inc'
           }],
           'unit': 'Results',
-          'position': 88,
+          'position': 85,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_inc'
@@ -15659,7 +14889,7 @@ export default {
             'column': 'average_int_n'
           }],
           'unit': 'Results',
-          'position': 40,
+          'position': 39,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_n'
@@ -15675,7 +14905,7 @@ export default {
             'column': 'average_int_sigma_perc'
           }],
           'unit': 'Results',
-          'position': 36,
+          'position': 35,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_sigma_perc'
@@ -15692,7 +14922,7 @@ export default {
             'column': 'average_age_high'
           }],
           'unit': 'Results',
-          'position': 24,
+          'position': 23,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_age_high'
@@ -15708,7 +14938,7 @@ export default {
             'column': 'eta_dec'
           }],
           'unit': 'Results',
-          'position': 43,
+          'position': 42,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'eta_dec'
@@ -15725,7 +14955,7 @@ export default {
             'column': 'average_int_rel_sigma'
           }],
           'unit': 'Results',
-          'position': 38,
+          'position': 37,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_int_rel_sigma'
@@ -15742,7 +14972,7 @@ export default {
             'column': 'er_analyst_mail_names'
           }],
           'unit': 'Results',
-          'position': 100,
+          'position': 96,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'er_analyst_mail_names'
@@ -15750,7 +14980,7 @@ export default {
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
-          'examples': ['Jim R.D. Hart <user1@email.com>', 'Alexis Heard <user1@email.com>:Bob McIntire <user2@email.com>']
+          'examples': ['Jim R.D. Hart', 'Alexis Heard', 'Bob McIntire']
         },
         'average_lat_sigma': {
           'group': 'Results',
@@ -15759,7 +14989,7 @@ export default {
             'column': 'average_lat_sigma'
           }],
           'unit': 'Results',
-          'position': 17,
+          'position': 16,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_lat_sigma'
@@ -15786,23 +15016,6 @@ export default {
           'description': 'Results',
           'examples': ['MY-POLE-XX']
         },
-        'er_synthetic_names': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_synthetic_names'
-          }],
-          'unit': 'Results',
-          'position': 7,
-          'previous_columns': [{
-            'table': 'pmag_results',
-            'column': 'er_synthetic_names'
-          }],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['STD1546-A1', 'STD1546-X23']
-        },
         'tilt_n': {
           'group': 'Results',
           'next_columns': [{
@@ -15810,7 +15023,7 @@ export default {
             'column': 'tilt_n'
           }],
           'unit': 'Results',
-          'position': 67,
+          'position': 64,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_n'
@@ -15826,7 +15039,7 @@ export default {
             'column': 'vadm'
           }],
           'unit': 'Results',
-          'position': 62,
+          'position': 59,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vadm'
@@ -15842,11 +15055,8 @@ export default {
             'column': 'magic_experiment_names'
           }],
           'unit': 'Results',
-          'position': 8,
-          'previous_columns': [{
-            'table': 'pmag_results',
-            'column': 'magic_experiment_names'
-          }],
+          'position': 7,
+          'previous_columns': [],
           'label': 'Results',
           'type': 'Results',
           'description': 'Results',
@@ -15859,7 +15069,7 @@ export default {
             'column': 'average_lon_sigma'
           }],
           'unit': 'Results',
-          'position': 19,
+          'position': 18,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_lon_sigma'
@@ -15876,7 +15086,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Results',
-          'position': 101,
+          'position': 97,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'er_citation_names'
@@ -15893,7 +15103,7 @@ export default {
             'column': 'tilt_correction'
           }],
           'unit': 'Results',
-          'position': 65,
+          'position': 62,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'tilt_correction'
@@ -15910,7 +15120,7 @@ export default {
             'column': 'reversed_dec'
           }],
           'unit': 'Results',
-          'position': 89,
+          'position': 86,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_dec'
@@ -15920,6 +15130,20 @@ export default {
           'description': 'Results',
           'examples': ['Decimal degrees between 0 and 360']
         },
+        'iaga_database': {
+          'group': 'Results',
+          'next_columns': [],
+          'unit': 'Results',
+          'position': 90,
+          'previous_columns': [{
+            'table': 'pmag_results',
+            'column': 'iaga_database'
+          }],
+          'label': 'Results',
+          'type': 'Results',
+          'description': 'Results',
+          'examples': ['ARCHEO', 'PGMDB', 'PINT', 'PSVRL', 'SECVR', 'TRANS']
+        },
         'vgp_dp': {
           'group': 'Results',
           'next_columns': [{
@@ -15927,7 +15151,7 @@ export default {
             'column': 'vgp_dp'
           }],
           'unit': 'Results',
-          'position': 54,
+          'position': 51,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_dp'
@@ -15944,7 +15168,7 @@ export default {
             'column': 'pmag_rotation_codes'
           }],
           'unit': 'Results',
-          'position': 98,
+          'position': 94,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'pmag_rotation_codes'
@@ -15961,7 +15185,7 @@ export default {
             'column': 'vgp_n'
           }],
           'unit': 'Results',
-          'position': 58,
+          'position': 55,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_n'
@@ -15977,7 +15201,7 @@ export default {
             'column': 'vgp_sigma'
           }],
           'unit': 'Results',
-          'position': 56,
+          'position': 53,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_sigma'
@@ -15994,7 +15218,7 @@ export default {
             'column': 'average_n'
           }],
           'unit': 'Results',
-          'position': 30,
+          'position': 29,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_n'
@@ -16027,7 +15251,7 @@ export default {
             'column': 'average_dec'
           }],
           'unit': 'Results',
-          'position': 27,
+          'position': 26,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_dec'
@@ -16044,7 +15268,7 @@ export default {
             'column': 'zeta_dec'
           }],
           'unit': 'Results',
-          'position': 46,
+          'position': 45,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'zeta_dec'
@@ -16061,7 +15285,7 @@ export default {
             'column': 'normal_inc'
           }],
           'unit': 'Results',
-          'position': 81,
+          'position': 78,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_inc'
@@ -16078,7 +15302,7 @@ export default {
             'column': 'vadm_n'
           }],
           'unit': 'Results',
-          'position': 64,
+          'position': 61,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vadm_n'
@@ -16094,7 +15318,7 @@ export default {
             'column': 'conglomerate_test'
           }],
           'unit': 'Results',
-          'position': 11,
+          'position': 10,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'conglomerate_test'
@@ -16111,7 +15335,7 @@ export default {
             'column': 'pmag_criteria_codes'
           }],
           'unit': 'Results',
-          'position': 97,
+          'position': 93,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'pmag_criteria_codes'
@@ -16128,7 +15352,7 @@ export default {
             'column': 'reversed_k'
           }],
           'unit': 'Results',
-          'position': 91,
+          'position': 88,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversed_k'
@@ -16144,7 +15368,7 @@ export default {
             'column': 'average_lat'
           }],
           'unit': 'Results',
-          'position': 16,
+          'position': 15,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_lat'
@@ -16161,7 +15385,7 @@ export default {
             'column': 'reversal_test'
           }],
           'unit': 'Results',
-          'position': 13,
+          'position': 12,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'reversal_test'
@@ -16178,7 +15402,7 @@ export default {
             'column': 'pole_comp_name'
           }],
           'unit': 'Results',
-          'position': 15,
+          'position': 14,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'pole_comp_name'
@@ -16212,7 +15436,7 @@ export default {
             'column': 'vgp_dm'
           }],
           'unit': 'Results',
-          'position': 55,
+          'position': 52,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'vgp_dm'
@@ -16229,7 +15453,7 @@ export default {
             'column': 'normal_dec'
           }],
           'unit': 'Results',
-          'position': 82,
+          'position': 79,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'normal_dec'
@@ -16246,7 +15470,7 @@ export default {
             'column': 'average_r'
           }],
           'unit': 'Results',
-          'position': 33,
+          'position': 32,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'average_r'
@@ -16262,7 +15486,7 @@ export default {
             'column': 'rock_magnetic_test'
           }],
           'unit': 'Results',
-          'position': 14,
+          'position': 13,
           'previous_columns': [{
             'table': 'pmag_results',
             'column': 'rock_magnetic_test'
@@ -16271,20 +15495,6 @@ export default {
           'type': 'Results',
           'description': 'Results',
           'examples': ['M (done)', 'ND (not done)']
-        },
-        'external_database_ids': {
-          'group': 'Results',
-          'next_columns': [{
-            'table': 'pmag_results',
-            'column': 'external_database_ids'
-          }],
-          'unit': 'Results',
-          'position': 96,
-          'previous_columns': [],
-          'label': 'Results',
-          'type': 'Results',
-          'description': 'Results',
-          'examples': ['1435', '23', '2329']
         }
       },
       'label': 'Results',
@@ -16300,7 +15510,7 @@ export default {
             'column': 'average_nn'
           }],
           'unit': 'Selection Criteria',
-          'position': 87,
+          'position': 84,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_nn'
@@ -16334,7 +15544,7 @@ export default {
             'column': 'site_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 66,
+          'position': 63,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_n'
@@ -16351,7 +15561,7 @@ export default {
             'column': 'site_int_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 72,
+          'position': 69,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_int_sigma'
@@ -16402,7 +15612,7 @@ export default {
             'column': 'site_r'
           }],
           'unit': 'Selection Criteria',
-          'position': 70,
+          'position': 67,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_r'
@@ -16419,7 +15629,7 @@ export default {
             'column': 'sample_magn_volume'
           }],
           'unit': 'Selection Criteria',
-          'position': 58,
+          'position': 55,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_magn_volume'
@@ -16453,7 +15663,7 @@ export default {
             'column': 'average_alpha95'
           }],
           'unit': 'Selection Criteria',
-          'position': 85,
+          'position': 82,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_alpha95'
@@ -16470,7 +15680,7 @@ export default {
             'column': 'average_int_rel_sigma_perc'
           }],
           'unit': 'Selection Criteria',
-          'position': 92,
+          'position': 89,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_int_rel_sigma_perc'
@@ -16487,7 +15697,7 @@ export default {
             'column': 'sample_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 44,
+          'position': 41,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_sigma'
@@ -16504,7 +15714,7 @@ export default {
             'column': 'average_age_max'
           }],
           'unit': 'Selection Criteria',
-          'position': 81,
+          'position': 78,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_age_max'
@@ -16538,7 +15748,7 @@ export default {
             'column': 'average_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 84,
+          'position': 81,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_sigma'
@@ -16555,7 +15765,7 @@ export default {
             'column': 'site_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 64,
+          'position': 61,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_sigma'
@@ -16572,7 +15782,7 @@ export default {
             'column': 'average_age_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 82,
+          'position': 79,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_age_sigma'
@@ -16640,7 +15850,7 @@ export default {
             'column': 'site_int_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 76,
+          'position': 73,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_int_n'
@@ -16657,7 +15867,7 @@ export default {
             'column': 'vadm_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 102,
+          'position': 99,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vadm_sigma'
@@ -16674,7 +15884,7 @@ export default {
             'column': 'sample_int_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 52,
+          'position': 49,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_int_sigma'
@@ -16691,7 +15901,7 @@ export default {
             'column': 'vdm_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 100,
+          'position': 97,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vdm_sigma'
@@ -16708,7 +15918,7 @@ export default {
             'column': 'average_int_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 90,
+          'position': 87,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_int_sigma'
@@ -16725,7 +15935,7 @@ export default {
             'column': 'sample_magn_mass'
           }],
           'unit': 'Selection Criteria',
-          'position': 59,
+          'position': 56,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_magn_mass'
@@ -16742,7 +15952,7 @@ export default {
             'column': 'site_direction_type'
           }],
           'unit': 'Selection Criteria',
-          'position': 62,
+          'position': 59,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_direction_type'
@@ -16758,7 +15968,7 @@ export default {
             'column': 'average_age_min'
           }],
           'unit': 'Selection Criteria',
-          'position': 80,
+          'position': 77,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_age_min'
@@ -16771,9 +15981,6 @@ export default {
         'specimen_mad': {
           'group': 'Selection Criteria',
           'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_mad'
-          }, {
             'table': 'pmag_criteria',
             'column': 'specimen_mad'
           }],
@@ -16795,7 +16002,7 @@ export default {
             'column': 'sample_polarity'
           }],
           'unit': 'Selection Criteria',
-          'position': 40,
+          'position': 37,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_polarity'
@@ -16811,7 +16018,7 @@ export default {
             'column': 'site_comp_nmb'
           }],
           'unit': 'Selection Criteria',
-          'position': 63,
+          'position': 60,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_comp_nmb'
@@ -16844,7 +16051,7 @@ export default {
             'column': 'sample_comp_nmb'
           }],
           'unit': 'Selection Criteria',
-          'position': 43,
+          'position': 40,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_comp_nmb'
@@ -16860,7 +16067,7 @@ export default {
             'column': 'sample_int_rel_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 54,
+          'position': 51,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_int_rel_sigma'
@@ -16877,7 +16084,7 @@ export default {
             'column': 'site_nrm'
           }],
           'unit': 'Selection Criteria',
-          'position': 61,
+          'position': 58,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_nrm'
@@ -16910,7 +16117,7 @@ export default {
             'column': 'site_int_sigma_perc'
           }],
           'unit': 'Selection Criteria',
-          'position': 73,
+          'position': 70,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_int_sigma_perc'
@@ -16978,7 +16185,7 @@ export default {
             'column': 'sample_int_sigma_perc'
           }],
           'unit': 'Selection Criteria',
-          'position': 53,
+          'position': 50,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_int_sigma_perc'
@@ -16995,7 +16202,7 @@ export default {
             'column': 'vgp_alpha95'
           }],
           'unit': 'Selection Criteria',
-          'position': 98,
+          'position': 95,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vgp_alpha95'
@@ -17012,7 +16219,7 @@ export default {
             'column': 'site_polarity'
           }],
           'unit': 'Selection Criteria',
-          'position': 60,
+          'position': 57,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_polarity'
@@ -17062,7 +16269,7 @@ export default {
             'column': 'sample_k'
           }],
           'unit': 'Selection Criteria',
-          'position': 49,
+          'position': 46,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_k'
@@ -17079,7 +16286,7 @@ export default {
             'column': 'sample_int_rel_sigma_perc'
           }],
           'unit': 'Selection Criteria',
-          'position': 55,
+          'position': 52,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_int_rel_sigma_perc'
@@ -17096,7 +16303,7 @@ export default {
             'column': 'site_magn_moment'
           }],
           'unit': 'Selection Criteria',
-          'position': 77,
+          'position': 74,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_magn_moment'
@@ -17113,7 +16320,7 @@ export default {
             'column': 'average_k'
           }],
           'unit': 'Selection Criteria',
-          'position': 88,
+          'position': 85,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_k'
@@ -17130,7 +16337,7 @@ export default {
             'column': 'average_age_unit'
           }],
           'unit': 'Selection Criteria',
-          'position': 83,
+          'position': 80,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_age_unit'
@@ -17164,7 +16371,7 @@ export default {
             'column': 'sample_nrm'
           }],
           'unit': 'Selection Criteria',
-          'position': 41,
+          'position': 38,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_nrm'
@@ -17180,7 +16387,7 @@ export default {
             'column': 'average_int_nn'
           }],
           'unit': 'Selection Criteria',
-          'position': 94,
+          'position': 91,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_int_nn'
@@ -17213,7 +16420,7 @@ export default {
             'column': 'sample_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 46,
+          'position': 43,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_n'
@@ -17230,7 +16437,7 @@ export default {
             'column': 'sample_tilt_correction'
           }],
           'unit': 'Selection Criteria',
-          'position': 51,
+          'position': 48,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_tilt_correction'
@@ -17263,7 +16470,7 @@ export default {
             'column': 'site_int_rel_sigma_perc'
           }],
           'unit': 'Selection Criteria',
-          'position': 75,
+          'position': 72,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_int_rel_sigma_perc'
@@ -17296,7 +16503,7 @@ export default {
             'column': 'vdm_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 101,
+          'position': 98,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vdm_n'
@@ -17330,7 +16537,7 @@ export default {
             'column': 'site_n_planes'
           }],
           'unit': 'Selection Criteria',
-          'position': 68,
+          'position': 65,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_n_planes'
@@ -17343,9 +16550,6 @@ export default {
         'specimen_int_mad': {
           'group': 'Selection Criteria',
           'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_int_mad'
-          }, {
             'table': 'pmag_criteria',
             'column': 'specimen_int_mad'
           }],
@@ -17367,7 +16571,7 @@ export default {
             'column': 'site_alpha95'
           }],
           'unit': 'Selection Criteria',
-          'position': 65,
+          'position': 62,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_alpha95'
@@ -17384,7 +16588,7 @@ export default {
             'column': 'sample_int_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 56,
+          'position': 53,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_int_n'
@@ -17401,7 +16605,7 @@ export default {
             'column': 'sample_alpha95'
           }],
           'unit': 'Selection Criteria',
-          'position': 45,
+          'position': 42,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_alpha95'
@@ -17451,7 +16655,7 @@ export default {
             'column': 'average_int_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 93,
+          'position': 90,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_int_n'
@@ -17484,7 +16688,7 @@ export default {
             'column': 'average_int_rel_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 91,
+          'position': 88,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_int_rel_sigma'
@@ -17501,7 +16705,7 @@ export default {
             'column': 'site_magn_mass'
           }],
           'unit': 'Selection Criteria',
-          'position': 79,
+          'position': 76,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_magn_mass'
@@ -17518,7 +16722,7 @@ export default {
             'column': 'sample_direction_type'
           }],
           'unit': 'Selection Criteria',
-          'position': 42,
+          'position': 39,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_direction_type'
@@ -17584,7 +16788,7 @@ export default {
             'column': 'sample_n_planes'
           }],
           'unit': 'Selection Criteria',
-          'position': 48,
+          'position': 45,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_n_planes'
@@ -17634,7 +16838,7 @@ export default {
             'column': 'er_citation_names'
           }],
           'unit': 'Selection Criteria',
-          'position': 105,
+          'position': 102,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'er_citation_names'
@@ -17651,7 +16855,7 @@ export default {
             'column': 'vgp_dp'
           }],
           'unit': 'Selection Criteria',
-          'position': 95,
+          'position': 92,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vgp_dp'
@@ -17685,7 +16889,7 @@ export default {
             'column': 'sample_n_lines'
           }],
           'unit': 'Selection Criteria',
-          'position': 47,
+          'position': 44,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_n_lines'
@@ -17718,7 +16922,7 @@ export default {
             'column': 'vgp_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 97,
+          'position': 94,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vgp_sigma'
@@ -17735,7 +16939,7 @@ export default {
             'column': 'vgp_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 99,
+          'position': 96,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vgp_n'
@@ -17752,7 +16956,7 @@ export default {
             'column': 'sample_magn_moment'
           }],
           'unit': 'Selection Criteria',
-          'position': 57,
+          'position': 54,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_magn_moment'
@@ -17786,7 +16990,7 @@ export default {
             'column': 'average_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 86,
+          'position': 83,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_n'
@@ -17803,7 +17007,7 @@ export default {
             'column': 'criteria_description'
           }],
           'unit': 'Selection Criteria',
-          'position': 104,
+          'position': 101,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'criteria_description'
@@ -17827,20 +17031,6 @@ export default {
           'label': 'Selection Criteria',
           'type': 'Selection Criteria',
           'description': 'Selection Criteria'
-        },
-        'specimen_theta': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_theta'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 38,
-          'previous_columns': [],
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
         },
         'specimen_magn_volume': {
           'group': 'Selection Criteria',
@@ -17866,7 +17056,7 @@ export default {
             'column': 'vadm_n'
           }],
           'unit': 'Selection Criteria',
-          'position': 103,
+          'position': 100,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vadm_n'
@@ -17883,7 +17073,7 @@ export default {
             'column': 'site_magn_volume'
           }],
           'unit': 'Selection Criteria',
-          'position': 78,
+          'position': 75,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_magn_volume'
@@ -17926,20 +17116,6 @@ export default {
           'type': 'Selection Criteria',
           'description': 'Selection Criteria'
         },
-        'specimen_gamma': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_gamma'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 39,
-          'previous_columns': [],
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
         'site_k': {
           'group': 'Selection Criteria',
           'next_columns': [{
@@ -17947,7 +17123,7 @@ export default {
             'column': 'site_k'
           }],
           'unit': 'Selection Criteria',
-          'position': 69,
+          'position': 66,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_k'
@@ -17964,7 +17140,7 @@ export default {
             'column': 'site_tilt_correction'
           }],
           'unit': 'Selection Criteria',
-          'position': 71,
+          'position': 68,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_tilt_correction'
@@ -17974,20 +17150,6 @@ export default {
           'description': 'Selection Criteria',
           'examples': ['Criterion = minimum']
         },
-        'specimen_delta': {
-          'group': 'Selection Criteria',
-          'next_columns': [{
-            'table': 'pmag_criteria',
-            'column': 'specimen_delta'
-          }],
-          'unit': 'Selection Criteria',
-          'position': 37,
-          'previous_columns': [],
-          'label': 'Selection Criteria',
-          'type': 'Selection Criteria',
-          'description': 'Selection Criteria',
-          'examples': ['Criterion = maximum']
-        },
         'vgp_dm': {
           'group': 'Selection Criteria',
           'next_columns': [{
@@ -17995,7 +17157,7 @@ export default {
             'column': 'vgp_dm'
           }],
           'unit': 'Selection Criteria',
-          'position': 96,
+          'position': 93,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'vgp_dm'
@@ -18012,7 +17174,7 @@ export default {
             'column': 'site_n_lines'
           }],
           'unit': 'Selection Criteria',
-          'position': 67,
+          'position': 64,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_n_lines'
@@ -18029,7 +17191,7 @@ export default {
             'column': 'site_int_rel_sigma'
           }],
           'unit': 'Selection Criteria',
-          'position': 74,
+          'position': 71,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'site_int_rel_sigma'
@@ -18046,7 +17208,7 @@ export default {
             'column': 'sample_r'
           }],
           'unit': 'Selection Criteria',
-          'position': 50,
+          'position': 47,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'sample_r'
@@ -18063,7 +17225,7 @@ export default {
             'column': 'average_r'
           }],
           'unit': 'Selection Criteria',
-          'position': 89,
+          'position': 86,
           'previous_columns': [{
             'table': 'pmag_criteria',
             'column': 'average_r'

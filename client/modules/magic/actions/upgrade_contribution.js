@@ -32,8 +32,8 @@ export default class extends Runner {
 
     //console.log("JSON file in parser: " + JSON.stringify(jsonOld));
 
-    // Look for the current MagIC data model version.
-    let currentVersion;
+    // Look for the old MagIC data model version.
+    let oldVersion;
     if(!jsonOld || !jsonOld['contribution']) {
       this._appendError('Failed to find the "contribution" table.');
       return jsonOld;
@@ -48,35 +48,62 @@ export default class extends Runner {
         return jsonOld;
       }
       this.contributionTable = 'contribution';
-      currentVersion = jsonOld['contribution'][0]['magic_version'];
+      oldVersion = jsonOld['contribution'][0]['magic_version'];
     }
 
-    // Check that the current MagIC data model version is valid (currentVersion is in magicVersions).
-    if (_.indexOf(magicVersions, currentVersion) === -1) {
-      let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(", ");
-      this._appendError(`MagIC data model version ${currentVersion} is invalid. Expected one of: ${strVersions}.`);
+    // Check that the old MagIC data model version is valid (oldVersion is in magicVersions).
+    if (_.indexOf(magicVersions, oldVersion) === -1) {
+      const strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(", ");
+      this._appendError(`MagIC data model version ${oldVersion} is invalid. Expected one of: ${strVersions}.`);
       return jsonOld;
     }
 
-    //console.log(`Current Version: ${currentVersion}`);
+    // Check if the maxVersion has been reached.
+    if (oldVersion === maxVersion) return jsonOld;
 
-    // Check that there is a newer MagIC data model to use or that the maxVersion has been reached.
-    if (_.indexOf(magicVersions, currentVersion) === magicVersions.length - 1) {
-      //this._appendWarning(`This contribution is already at the latest MagIC data model version ${currentVersion}.`);
-      return jsonOld;
-    }
+    // Check that there is a newer MagIC data model to use.
+    if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return jsonOld;
+    const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1]
+
+    // TODO: Get the model from a subscription instead of from the testing global.
+    const oldModel = globals.magicModels[oldVersion];
+    const newModel = globals.magicModels[newVersion];
+
+    const upgradeMap = this.getUpgradeMap(newModel);
 
     // Upgrade the contribution.
     let jsonNew = {};
     for (let table in jsonOld) {
-      jsonNew[table] = [];
+
+      // Check that the old table is defined in the old data model.
+      if (!oldModel['tables'][table]) {
+        this._appendError(`Table "${table}" is not defined in MagIC data model version ${oldVersion}.`);
+        continue;
+      }
+
       for (let row of jsonOld[table]) {
         let newRow = {};
         for (let column in row) {
-          if (table === 'contribution' && column === 'magic_version') {
-            newRow[column] = magicVersions[_.indexOf(magicVersions, currentVersion) + 1];
-          } else {
-            newRow[column] = row[column];
+
+          // Check that the old table and column are defined in the old data model.
+          if (!oldModel['tables'][table]) {
+            this._appendError(`Column "${column}" in table "${table}" is not defined in MagIC data model version ${oldVersion}.`);
+            continue;
+          }
+
+          // Check that the old table and column are defined in the new data model.
+          if (!upgradeMap[table] || !upgradeMap[table][column]) {
+            this._appendWarning(`Column "${column}" in table "${table}" was deleted in MagIC data model version ${newVersion}.`);
+            continue;
+          }
+
+          else {
+
+            if (table === 'contribution' && column === 'magic_version') {
+              newRow[column] = newVersion;
+            } else {
+              newRow[column] = row[column];
+            }
           }
         }
         jsonNew[table].push(newRow);
@@ -88,6 +115,14 @@ export default class extends Runner {
 
     // Recursively upgrade the contribution.
    return this.upgrade(jsonNew, maxVersion);
+
+  }
+
+  getUpgradeMap(newModel) {
+
+    let upgradeMap = {};
+
+    return upgradeMap;
 
   }
 

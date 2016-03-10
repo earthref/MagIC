@@ -1,4 +1,4 @@
-export default {
+global.magicModels['3.0'] = {
   'magic_version':'3.0',
   'tables': {
     'contribution': {

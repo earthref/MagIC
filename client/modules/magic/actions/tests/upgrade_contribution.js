@@ -17,12 +17,19 @@ const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
   expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
 
-// Expect the errors to contain one error that matches the reErrorMsg regex.
+// Expect the last error to match the reErrorMsg regex.
 const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
   const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld, maxVersion);
   expect(Upgrader.errors().length).to.be.at.least(1);
   expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
+};
+
+// Expect N errors.
+const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
+  const Upgrader = new UpgradeContribution({});
+  Upgrader.upgrade(jsonOld, maxVersion);
+  expect(Upgrader.errors().length).to.equal(nErrors);
 };
 
 // Expect no errors.
@@ -40,6 +47,14 @@ const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
   expect(jsonNew).to.deep.equal(jsonExpected);
 };
 
+// Expect no errors and check the upgrade map against expected map.
+const upgradeContributionMapTest = (newModel, expectedMap) => {
+  const Upgrader = new UpgradeContribution({});
+  const upgradeMap = Upgrader.getUpgradeMap(newModel);
+  expect(Upgrader.errors().length).to.equal(0);
+  expect(upgradeMap).to.deep.equal(expectedMap);
+};
+
 describe('magic.actions.upgrade_contribution', () => {
 
   // Test upgrading invalid JSON.
@@ -54,7 +69,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should reject when the maximum upgrade version is invalid.', () => {
       const invalidMagicVersion = {
         contribution: [{
-          magic_version: '2.0'
+          magic_version: '2.2'
         }]
       };
       upgradeContributionErrorTest(invalidMagicVersion, '1.0', /the second argument .* is invalid/i);
@@ -62,12 +77,11 @@ describe('magic.actions.upgrade_contribution', () => {
 
     it('should reject when no contribution table is found', () => {
       const jsonNoContribTable = {
-        notContribTable: [{
-          col1: 'str1',
-          col2: '1.23'
+        not_contribution: [{
+          magic_version: '2.2'
         }],
-        otherTable: [{
-          col1: '2.2'
+        er_locations: [{
+          region: 'California'
         }]
       };
        upgradeContributionErrorTest(jsonNoContribTable, undefined, /failed to find the "contribution" table/i);
@@ -76,8 +90,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
       const jsonContribNoMagicVersion = {
         contribution: [{
-          not_magic_version: '1.2',
-          col2: '1.2'
+          not_magic_version: '2.2'
         }]
       };
       upgradeContributionErrorTest(jsonContribNoMagicVersion, undefined,
@@ -85,26 +98,64 @@ describe('magic.actions.upgrade_contribution', () => {
     });
 
     it('should reject when the "contribution" table does not have exactly one row.', () => {
-      const jsonContribTwoColumns = {
+      const jsonContribTwoRows = {
         contribution: [{
-          col1: 'str1',
-          col2: '1.2'
+          magic_version: '2.2'
         }, {
-          col1: 'str2',
-          col2: '1.2'
+          magic_version: '2.3'
         }]
       };
-      upgradeContributionErrorTest(jsonContribTwoColumns, undefined, /table does not have exactly one row./i);
+      upgradeContributionErrorTest(jsonContribTwoRows, undefined, /table does not have exactly one row./i);
     });
 
-   it('should reject if the requested data model is invalid.', () => {
+   it('should reject if the data model version is invalid.', () => {
       const invalidMagicVersion = {
         contribution: [{
-          magic_version: '0.1',
-          col2: '1.2'
+          magic_version: '0.1'
         }]
       };
       upgradeContributionErrorTest(invalidMagicVersion, undefined, /data model version .* is invalid/i);
+    });
+
+    it('should reject if the table name is invalid.', () => {
+      const invalidTable = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        not_er_locations: [{
+          region: 'California'
+        }]
+      };
+      upgradeContributionErrorTest(invalidTable, undefined, /table .* is not defined in magic data model/i);
+    });
+
+    it('should reject if the column name is invalid.', () => {
+      const invalidColumn = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_locations: [{
+          not_region: 'California'
+        }]
+      };
+      upgradeContributionErrorTest(invalidColumn, undefined,
+        /column .* in table .* is not defined in magic data model/i);
+    });
+
+    it('should report two errors if two columns are invalid.', () => {
+      const invalidColumns = {
+        contribution: [{
+          magic_version: '2.4'
+        }],
+        er_locations: [{
+          not_region: 'California'
+        },{
+          not_region: 'California'
+        }]
+      };
+      upgradeContributionNErrorsTest(invalidColumn, '2.5', 2);
+      upgradeContributionErrorTest(invalidColumn, '2.5',
+        /column .* in table .* is not defined in magic data model/i);
     });
 
   });
@@ -140,10 +191,10 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '2.4'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '2.5', jsonNew);
+      upgradeContributionJSONTest(jsonOld, '2.4', jsonNew);
     });
 
     it('should update column names', () => {
@@ -166,23 +217,91 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '2.1', jsonNew);
     });
 
+    it('should warn about deleted columns', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_expeditions: [{
+          expedition_start_loc: '1'
+        }]
+      };
+      upgradeContributionWarningTest(jsonOld, '3.0',
+        /column .* in table .* was deleted in magic data model/i);
+    });
+
   });
 
   // Test upgrading valid files.
 
+  // Test calculating the upgrade map.
+  describe('when calculating the upgrade map', () => {
+    it('should handle renamed tables', () => {
+      const newModel = {
+        tables: { locations: {
+          columns: { location_name: {
+            previous_columns: [{
+              table: 'er_locations',
+              column: 'location_name'
+            }]
+          }}
+        }}
+      };
+      const upgradeMap = {
+        er_locations: { location_name: { table: 'location', column: 'location_name'}}
+      };
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
 
+    it('should handle renamed columns', () => {
+      const newModel = {
+        tables: { er_locations: {
+          columns: { location_name: {
+            previous_columns: [{
+              table: 'er_locations',
+              column: 'name'
+            }]
+          }}
+        }}
+      };
+      const upgradeMap = {
+        er_locations: { name: { table: 'er_locations', column: 'location_name'}}
+      };
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
 
-  //LIST OF TABLE/COLUMN CHANGES
-  // Test upgrading valid JSON.
-  describe('Temporary place to run column change list', () => {
-    it('Should list column changes', () => {
-      const Upgrader = new UpgradeContribution({});
-      Upgrader.upgrade('2.0', '2.0');
+    it('should handle inserted columns', () => {
+      const newModel = {
+        tables: { er_locations: {
+          columns: { location_name: {}}
+        }}
+      };
+      const upgradeMap = {};
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
 
-
+    it('should handle merged columns', () => {
+      const newModel = {
+        tables: { er_locations: {
+          columns: { location_name: {
+            previous_columns: [{
+              table: 'er_locations',
+              column: 'name1'
+            }, {
+              table: 'er_locations',
+              column: 'name2'
+            }]
+          }}
+        }}
+      };
+      const upgradeMap = {
+        er_locations: {
+          name1: { table: 'er_locations', column: 'location_name'},
+          name2: { table: 'er_locations', column: 'location_name'}
+        }
+      };
+      upgradeContributionMapTest(newModel, upgradeMap);
     });
   });
-
-
-
+  
 });

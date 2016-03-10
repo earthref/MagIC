@@ -2,10 +2,16 @@
          Site Overrides
 *******************************/
 
+// Make a composed icon in a step the same as a regular icon
 @import (multiple) '../../themes/default/elements/step.variables.import.less';
-
 .ui.steps .step > .icons {
   line-height: 1;
   font-size: @iconSize;
   margin: 0em @iconDistance 0em 0em;
+}
+
+// Remove the shadow on a bottom attached message
+@import (multiple) '../../themes/default/collections/message.variables.import.less';
+.ui.bottom.attached.message {
+  box-shadow: @attachedBoxShadow !important;
 }

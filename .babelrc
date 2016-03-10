@@ -1,4 +1,5 @@
 {
   "presets": ["es2015", "stage-2", "react"],
-  "plugins": ["react-require", "babel-root-slash-import"]
+  "plugins": ["react-require", "babel-root-slash-import"],
+  "ignore": ["*.es5.js"]
 }
