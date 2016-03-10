@@ -1,7 +1,8 @@
 import {_} from 'lodash';
-import Runner from './runner';
+import Runner from './runner.js';
 
 import {magicVersions} from '../configs/magic_versions.js';
+import {magicDataModels} from './tests/files/data_models/data_models.js';
 
 export default class extends Runner {
 
@@ -65,9 +66,8 @@ export default class extends Runner {
     if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return jsonOld;
     const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1]
 
-    // TODO: Get the model from a subscription instead of from the testing global.
-    const oldModel = globals.magicModels[oldVersion];
-    const newModel = globals.magicModels[newVersion];
+    const oldModel = magicDataModels[oldVersion];
+    const newModel = magicDataModels[newVersion];
 
     const upgradeMap = this.getUpgradeMap(newModel);
 
@@ -80,6 +80,8 @@ export default class extends Runner {
         this._appendError(`Table "${table}" is not defined in MagIC data model version ${oldVersion}.`);
         continue;
       }
+
+      if (!jsonNew[table]) jsonNew[table] = [];
 
       for (let row of jsonOld[table]) {
         let newRow = {};
@@ -97,16 +99,23 @@ export default class extends Runner {
             continue;
           }
 
-          else {
-
-            if (table === 'contribution' && column === 'magic_version') {
-              newRow[column] = newVersion;
-            } else {
-              newRow[column] = row[column];
-            }
+          // Upgrade the version number
+          if (table === 'contribution' && column === 'magic_version') {
+            newRow[column] = newVersion;
+            continue;
           }
+
+          // TODO: this doesn't handle changes in table names properly yet
+          for (let newTableColumn in upgradeMap[table][column]) {
+            //if (!jsonNew[newTableColumn.table]) jsonNew[newTableColumn.table] = [];
+            newRow[newTableColumn.column] = row[column];
+          }
+
         }
+
+        // TODO: this doesn't handle changes in table names properly yet
         jsonNew[table].push(newRow);
+
       }
     }
 

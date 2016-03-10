@@ -1,20 +1,11 @@
 const {describe, it} = global;
 import {expect} from 'chai';
-import DataModelChanges from '../data_model_changes';
-import {default as model20} from './files/data_models/model_2.0.js';
-import {default as model21} from './files/data_models/2.1.js';
-import {default as model22} from './files/data_models/2.2.es5.js';
-import {default as model23} from './files/data_models/2.3.es5.js';
-import {default as model24} from './files/data_models/2.4.es5.js';
-import {default as model25} from './files/data_models/2.5.es5.js';
-import {default as model30} from './files/data_models/3.0.es5.js';
-
-
+import DataModelChanges from '../data_model_changes.js';
+import {magicDataModels} from './files/data_models/data_models.js';
 
 let expectedModelChanges = {};
 
-function refreshExpectedModelChanges()
-{
+function refreshExpectedModelChanges() {
   expectedModelChanges.deleted_columns = [];
   expectedModelChanges.inserted_columns = [];
   expectedModelChanges.renamed_columns = [];
@@ -22,8 +13,6 @@ function refreshExpectedModelChanges()
   expectedModelChanges.merged_columns = [];
   expectedModelChanges.splitting_columns =[];
 }
-
-
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 function errorInCollection(reErrorMsg, ChangeLists) {
@@ -55,6 +44,14 @@ const dataModelChangesErrorTest = (model, reErrorMsg) => {
   expect(errorFound).to.equal(true);
 };
 
+// Expect no warnings.
+const dataModelChangesNoWarningNoErrorTest = (model) => {
+  const modelChanges = new DataModelChanges({});
+  modelChanges.changes(model);
+  expect(modelChanges.warnings().length).to.equal(0);
+  expect(modelChanges.errors().length).to.equal(0);
+};
+
 // Expect no errors.
 const dataModelChangesNoErrorTest = (model) => {
   const modelChanges = new DataModelChanges({});
@@ -64,14 +61,9 @@ const dataModelChangesNoErrorTest = (model) => {
 
 // Expect no errors and check against expected JSON.
 const dataModelChangesModelTest = (model, modelExpectedChanges, ignoreOtherErrors) => {
-  //model.modelChanges;
-  //new DataModelChanges({});
   const dataModelChangeDetector = new DataModelChanges({});
-
   dataModelChangeDetector.changes(model);
-
-  if(!ignoreOtherErrors)
-    if(!ignoreOtherErrors) expect(dataModelChangeDetector.errors().length).to.equal(0);
+  if(!ignoreOtherErrors) expect(dataModelChangeDetector.errors().length).to.equal(0);
 
   console.log("EXPECTED! " + JSON.stringify(modelExpectedChanges));
   console.log("ACTUAL  ! " + JSON.stringify(dataModelChangeDetector.modelChanges));
@@ -491,36 +483,28 @@ describe('magic.actions.data_model_changes', () => {
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
-    /*  THESE ARE SUPPOSED TO JUST PASS WITH NO ISSUES BUT WON'T QUITE - GGG
+    //THESE ARE SUPPOSED TO JUST PASS WITH NO ISSUES BUT WON'T QUITE - GGG
+    it('should make lists of changes with the 2.2 model', () => {
+      dataModelChangesNoWarningNoErrorTest(magicDataModels['2.2']);
+    });
 
-     it('should make lists of changes with the 2.0 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model20);
-     });
+    it('should make lists of changes with the 2.3 model', () => {
+      dataModelChangesNoWarningNoErrorTest(magicDataModels['2.3']);
+    });
 
-     it('should make lists of changes with the 2.1 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model21);
-     });
+    it('should make lists of changes with the 2.4 model', () => {
+      dataModelChangesNoWarningNoErrorTest(magicDataModels['2.4']);
+    });
 
-     it('should make lists of changes with the 2.2 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model22);
-     });
+    it('should make lists of changes with the 2.5 model', () => {
+      dataModelChangesNoWarningNoErrorTest(magicDataModels['2.5']);
+    });
 
-     it('should make lists of changes with the 2.3 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model23);
-     });
+    it('should make lists of changes with the 3.0 model', () => {
+      dataModelChangesNoWarningNoErrorTest(magicDataModels['3.0']);
+    });
 
-     it('should make lists of changes with the 2.4 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model24);
-     });
 
-     it('should make lists of changes with the 2.5 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model25);
-     });
-
-     it('should make lists of changes with the 3.0 model', () => {
-     dataModelChangesNoWarningNoErrorTest(model30);
-     });
-     */
   });
 
 });

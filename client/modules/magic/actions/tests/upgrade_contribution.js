@@ -1,7 +1,7 @@
 const {describe, it} = global;
 import {expect} from 'chai';
-import ParseContribution from '../parse_contribution';
-import UpgradeContribution from '../upgrade_contribution';
+import ParseContribution from '../parse_contribution.js';
+import UpgradeContribution from '../upgrade_contribution.js';
 //import {default as contribution289  } from './files/289.js';
 //import {default as contribution3552 } from './files/3552.js';
 //import {default as contribution7527 } from './files/7527.js';
@@ -248,7 +248,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }}
       };
       const upgradeMap = {
-        er_locations: { location_name: { table: 'location', column: 'location_name'}}
+        er_locations: { location_name: [{ table: 'location', column: 'location_name'}]}
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
@@ -265,7 +265,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }}
       };
       const upgradeMap = {
-        er_locations: { name: { table: 'er_locations', column: 'location_name'}}
+        er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
@@ -296,12 +296,46 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const upgradeMap = {
         er_locations: {
-          name1: { table: 'er_locations', column: 'location_name'},
-          name2: { table: 'er_locations', column: 'location_name'}
+          name1: [{ table: 'er_locations', column: 'location_name'}],
+          name2: [{ table: 'er_locations', column: 'location_name'}]
         }
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
+
+    it('should handle split columns', () => {
+      const newModel = {
+        tables: { er_locations: {
+          columns: {
+            location_name1: {
+              previous_columns: [{
+                table: 'er_locations',
+                column: 'name'
+              }]
+            },
+            location_name2: {
+              previous_columns: [{
+                table: 'er_locations',
+                column: 'name'
+              }]
+            }
+          }
+        }}
+      };
+      const upgradeMap = {
+        er_locations: {
+          name: [
+            { table: 'er_locations', column: 'location_name1'},
+            { table: 'er_locations', column: 'location_name2'}
+          ]
+        }
+      };
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
+
+    // TODO: write more difficult tests for table names changing,
+    // merging from different tables, splitting into different tables,
+    // tables with columns renamed into different tables
+
   });
-  
 });

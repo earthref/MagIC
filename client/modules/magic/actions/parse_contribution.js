@@ -1,5 +1,5 @@
 import {_} from 'lodash';
-import Runner from './runner';
+import Runner from './runner.js';
 
 export default class extends Runner {
 
