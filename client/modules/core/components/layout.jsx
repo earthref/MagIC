@@ -46,6 +46,32 @@ export default class extends React.Component {
               <i className="dropdown icon"/>
             </a>
           </div>
+          <div className="ui bottom fixed small menu footer">
+            <div className="ui container">
+              <div className="left menu">
+                <div className="ui vertical segment">
+                  <div>
+                    Sponsored by <a href="https://www.nsf.gov">NSF</a>.
+                  </div>
+                  <div>
+                    Supported by <a href="https://scripps.ucsd.edu/">UCSD-SIO</a>
+                    &nbsp;and&nbsp;
+                    <a href="http://ceoas.oregonstate.edu/">OSU-CEOAS</a>.
+                  </div>
+                </div>
+              </div>
+              <div className="right menu">
+                <div className="ui right aligned vertical segment">
+                  <div>
+                    Unless otherwise noted, <a href="https://earthref.org/">EarthRef.org</a>
+                  </div>
+                  <div>
+                    content is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           <div className="ui main container layout-content">
             {this.props.children}
           </div>

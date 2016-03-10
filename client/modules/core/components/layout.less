@@ -21,8 +21,13 @@
   margin-bottom: -2px;
 }
 
+.layout-content, .footer > .ui.container {
+  padding-left:  @relativeLarge !important;
+  padding-right: @relativeLarge !important;
+}
+
 .layout-content {
-  padding: 4em @relativeLarge 0 !important;
+  padding-top: 4em !important;
 }
 
 @media only screen and (max-width: @largestTabletScreen) {
@@ -35,4 +40,9 @@
   .sidebar-button {
     display: none !important;
   }
+}
+
+.footer .segment {
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
 }
