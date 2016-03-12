@@ -51,6 +51,10 @@ const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
 const upgradeContributionMapTest = (newModel, expectedMap) => {
   const Upgrader = new UpgradeContribution({});
   const upgradeMap = Upgrader.getUpgradeMap(newModel);
+
+  console.log("EXPECTED! " + JSON.stringify(expectedMap));
+  console.log("ACTUAL  ! " + JSON.stringify(upgradeMap));
+
   expect(Upgrader.errors().length).to.equal(0);
   expect(upgradeMap).to.deep.equal(expectedMap);
 };
@@ -237,7 +241,7 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test calculating the upgrade map.
   describe('when calculating the upgrade map', () => {
     it('should handle renamed tables', () => {
-      const newModel = {
+      const newModel = {//indicates that table "er_locations" has been changed to "locations"
         tables: { locations: {
           columns: { location_name: {
             previous_columns: [{
@@ -247,14 +251,15 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = {
-        er_locations: { location_name: [{ table: 'location', column: 'location_name'}]}
-      };
+      const upgradeMap = [{
+        er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}
+      }];
+
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
     it('should handle renamed columns', () => {
-      const newModel = {
+      const newModel = {//indicates that column er_locations.name has been changed  to er_locations.location_name
         tables: { er_locations: {
           columns: { location_name: {
             previous_columns: [{
@@ -264,9 +269,9 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = {
+      const upgradeMap = [{
         er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}
-      };
+      }];
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
@@ -276,10 +281,13 @@ describe('magic.actions.upgrade_contribution', () => {
           columns: { location_name: {}}
         }}
       };
-      const upgradeMap = {};
+      //RUPERT, NOT SURE HOW YOU WANT TO REPRESENT INSERTED COLUMNS. Does this test need some additions?
+      const upgradeMap = [];
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
+    //GGG THIS CURRENTLY HAS THE LIMITATION OF MERGING TWO COLUMNS (AND NO MORE)
+    //NOT SURE IF WE NEED THE ABILITY TO DO THREE
     it('should handle merged columns', () => {
       const newModel = {
         tables: { er_locations: {
@@ -294,12 +302,12 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = {
+      const upgradeMap = [{
         er_locations: {
           name1: [{ table: 'er_locations', column: 'location_name'}],
           name2: [{ table: 'er_locations', column: 'location_name'}]
         }
-      };
+      }];
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 

@@ -129,10 +129,50 @@ export default class extends Runner {
 
   getUpgradeMap(newModel) {
 
-    let upgradeMap = {};
+    let returnUpgradeMap = [];
 
-    return upgradeMap;
+    for (let newTableName in newModel.tables) {//this gets the STRING name of the property into 'table'
+      let newTableObject = newModel.tables[newTableName];//this on the other hand, gets the whole table object
 
+      for (let newColumn in newTableObject.columns) {
+        {
+          let prevColArray = newTableObject.columns[newColumn].previous_columns;
+
+          if (prevColArray && prevColArray.length === 1){
+            let previousTableName = prevColArray[0].table;
+            let previousColumnName = prevColArray[0].column;
+            if ((newTableName != previousTableName) || newColumn != previousColumnName) {
+              //GGG I think i need to find a new way to do this,looks like this is good for only ONE addition to the upgradeMap
+              returnUpgradeMap.push({
+                [previousTableName]: {
+                  [previousColumnName]: [{
+                    table: newTableName,
+                    column: newColumn
+                  }]
+                }
+              });
+            }
+          }
+          else if (prevColArray && (prevColArray.length > 1))//If there are two previous columns that indicates a MERGE to this version
+          {
+    //        for(let prevColIndex in prevColArray){
+              /*console.log("YO: " + prevColArray[prevColIndex].table );
+              console.log("YO: " + prevColArray[prevColIndex].column );
+              let previousColumn = prevColArray[prevColIndex].column;
+              let previousTable = prevColArray[prevColIndex].table;
+*/
+              returnUpgradeMap.push({
+                [newTableName]:
+                {
+                  [prevColArray[0].column]:[{table:newTableName, column:newColumn}],
+                  [prevColArray[1].column]:[{table:newTableName, column:newColumn}]
+                }
+              });
+  //          }
+          }
+        }
+      }
+    }
+    return returnUpgradeMap;
   }
-
 }
