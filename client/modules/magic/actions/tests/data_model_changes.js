@@ -10,7 +10,6 @@ function refreshExpectedModelChanges() {
   expectedModelChanges.inserted_columns = [];
   expectedModelChanges.renamed_columns = [];
   expectedModelChanges.merged_columns = [];
-  expectedModelChanges.splitting_columns =[];
 }
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
@@ -354,87 +353,9 @@ describe('magic.actions.data_model_changes', () => {
         }
       });
 
-      /*const modelChanges = {
-       merged_columns: [{
-       table: 'contribution',
-       column: 'magic_version',
-       previous_columns: [{
-       table: 'contribution',
-       column: 'magic_version_1'
-       }, {
-       table: 'contribution',
-       column: 'magic_version_2'
-       }]
-       }]
-       };*/
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
-
-    it('should make a list of splitting columns', () => {
-      refreshExpectedModelChanges();
-      const model = {
-        magic_version: '2.5',
-        tables: {
-          contribution: {
-            columns: {
-              magic_version: {
-                previous_columns: [{
-                  table: 'contribution',
-                  column: 'magic_version'
-                }],
-                next_columns: [{
-                  table: 'contribution',
-                  column: 'magic_version_1'
-                }, {
-                  table: 'contribution',
-                  column: 'magic_version_2'
-                }]
-              }
-            }
-          }
-        }
-      };
-
-      expectedModelChanges.splitting_columns.push({
-        table: 'contribution',
-        column: 'magic_version',
-        splitting_columns: [{
-          table: 'contribution',
-          column: 'magic_version_1'
-        }, {
-          table: 'contribution',
-          column: 'magic_version_2'
-        }]});
-
-      //GGG DOING THIS BECAUSE MERGED COLUMNS ARE ALSO RENAMEING COLUMNS
-      //SUCH COLUMNS SHOULD SHOW UP IN BOTH CATEGORIES, BASED ONT HE CURRENT DEFINITION
-      //THIS IS A BIT OF A HACK BECUASE IT ONLY DEALS WITH ONE OF THE TWO COLUMNS "RENAMED" COLUMNS
-      // THAT THE ODE ADDRESSES
-      expectedModelChanges.renamed_columns.push({
-        table: 'contribution',
-        column: 'magic_version',
-        previous_column: {
-          table: 'contribution',
-          column: 'magic_version'
-        }
-      });
-
-      /*const modelChanges = {
-       splitting_columns: [{
-       table: 'contribution',
-       column: 'magic_version',
-       next_columns: [{
-       table: 'contribution',
-       column: 'magic_version_1'
-       }, {
-       table: 'contribution',
-       column: 'magic_version_2'
-       }]
-       }]
-       };*/
-      dataModelChangesModelTest(model, expectedModelChanges, true);
-    });
 
     //THESE ARE SUPPOSED TO JUST PASS WITH NO ISSUES BUT WON'T QUITE - GGG
     it('should make lists of changes with the 2.2 model', () => {
