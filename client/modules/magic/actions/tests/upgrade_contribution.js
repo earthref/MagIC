@@ -251,9 +251,9 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = [{
+      const upgradeMap = {
         er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}
-      }];
+      };
 
       upgradeContributionMapTest(newModel, upgradeMap);
     });
@@ -269,9 +269,9 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = [{
+      const upgradeMap = {
         er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}
-      }];
+      };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
@@ -281,8 +281,7 @@ describe('magic.actions.upgrade_contribution', () => {
           columns: { location_name: {}}
         }}
       };
-      //RUPERT, NOT SURE HOW YOU WANT TO REPRESENT INSERTED COLUMNS. Does this test need some additions?
-      const upgradeMap = [];
+      const upgradeMap = {};
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
@@ -302,12 +301,13 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = [{
+
+      const upgradeMap = {
         er_locations: {
           name1: [{ table: 'er_locations', column: 'location_name'}],
           name2: [{ table: 'er_locations', column: 'location_name'}]
         }
-      }];
+      };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
@@ -318,21 +318,22 @@ describe('magic.actions.upgrade_contribution', () => {
             location_name1: {
               previous_columns: [{
                 table: 'er_locations',
-                column: 'name'
+                column: 'splitColName'
               }]
             },
             location_name2: {
               previous_columns: [{
                 table: 'er_locations',
-                column: 'name'
+                column: 'splitColName'
               }]
             }
           }
         }}
       };
+
       const upgradeMap = {
         er_locations: {
-          name: [
+          splitColName: [
             { table: 'er_locations', column: 'location_name1'},
             { table: 'er_locations', column: 'location_name2'}
           ]
