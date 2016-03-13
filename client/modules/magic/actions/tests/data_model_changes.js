@@ -9,7 +9,6 @@ function refreshExpectedModelChanges() {
   expectedModelChanges.deleted_columns = [];
   expectedModelChanges.inserted_columns = [];
   expectedModelChanges.renamed_columns = [];
-  expectedModelChanges.renaming_columns = [];
   expectedModelChanges.merged_columns = [];
   expectedModelChanges.splitting_columns =[];
 }
@@ -303,52 +302,6 @@ describe('magic.actions.data_model_changes', () => {
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
-
-    ///GGG I DON'T UNDERSTAND THE DIFFERENCE BETWEEN "renamed_colums" and "renaming_columns"
-    it('should make a list of renaming columns', () => {
-      refreshExpectedModelChanges();
-      const model = {
-        magic_version: '2.5',
-        tables: {
-          contribution: {
-            columns: {
-              magic_version: {
-                previous_columns: [{
-                  table: 'contribution',
-                  column: 'magic_version'
-                }],
-                next_columns: [{
-                  table: 'location',
-                  column: 'version'
-                }]
-              }
-            }
-          }
-        }
-      };
-
-      expectedModelChanges.renaming_columns.push({
-        table: 'contribution',
-        column: 'magic_version',
-        next_column: {
-          table: 'location',
-          column: 'version'
-        }
-      });
-
-      /*const modelChanges = {
-       renaming_columns: [{
-       table: 'contribution',
-       column: 'magic_version',
-       next_column: {
-       table: 'location',
-       column: 'version'
-       }
-       }]
-       };*/
-      dataModelChangesModelTest(model, expectedModelChanges, true);
-    });
-
     //THIS COMES FROM MULTIPLE PREVIOUS COLUMNS
     it('should make a list of merged columns', () => {
       refreshExpectedModelChanges();
@@ -388,7 +341,7 @@ describe('magic.actions.data_model_changes', () => {
         }]
       });
 
-      //GGG DOING THIS BECAUSE MERGED COLUMNS ARE ALSO RENAMEING COLUMNS
+      //GGG DOING THIS BECAUSE MERGED COLUMNS ARE ALSO RENAMED COLUMNS
       //SUCH COLUMNS SHOULD SHOW UP IN BOTH CATEGORIES, BASED ONT HE CURRENT DEFINITION
       //THIS IS A BIT OF A HACK BECUASE IT ONLY DEALS WITH ONE OF THE TWO COLUMNS "RENAMED" COLUMNS
       // THAT THE ODE ADDRESSES

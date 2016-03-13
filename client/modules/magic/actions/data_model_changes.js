@@ -9,7 +9,7 @@ export default class extends Runner {
     super('DATA_MODEL_CHANGE_LOG', {LocalState});
 
     //model changes that must be reflected:
-    //deleted, inserted, renamed, renaming, merged, splitting
+    //deleted, inserted, renamed, merged, splitting
     this.modelChanges = {};
     this.dataModelVersionNumber = '0';
   }
@@ -21,7 +21,6 @@ export default class extends Runner {
     this.modelChanges.deleted_columns = [];
     this.modelChanges.inserted_columns = [];
     this.modelChanges.renamed_columns = [];
-    this.modelChanges.renaming_columns = [];
     this.modelChanges.merged_columns = [];
     this.modelChanges.splitting_columns = [];
 
