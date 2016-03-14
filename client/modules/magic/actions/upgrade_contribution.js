@@ -34,8 +34,6 @@ export default class extends Runner {
       return jsonOld;
     }
 
-    //console.log("JSON file in parser: " + JSON.stringify(jsonOld));
-
     // Look for the old MagIC data model version.
     let oldVersion;
     if(!jsonOld || !jsonOld['contribution']) {
@@ -75,11 +73,11 @@ export default class extends Runner {
     const upgradeMap = this.getUpgradeMap(newModel);
     let jsonNew = {};
     for (let table in jsonOld) {
-
+console.log("EXAMINING jsonOld TABLE: " + table);
       // Check that the old table is defined in the old data model.
       if (!oldModel['tables'][table]) {
         this._appendError(`Table "${table}" is not defined in magic data model version ${oldVersion}.`);
-        return jsonOld;
+        continue;
       }
 
       if (!jsonNew[table]) jsonNew[table] = [];
@@ -88,9 +86,9 @@ export default class extends Runner {
         let newRow = {};
         for (let column in row) {
 
-          // Check that the old table and column are defined in the old data model.
-          if (!oldModel['tables'][table]) {
-            this._appendError(`Column "${column}" in table "${table}" is not defined in MagIC data model version ${oldVersion}.`);
+          // Check that the old column is defined in the old data model.
+          if (!oldModel['tables'][table][column]) {
+            this._appendError(`Column "${column}" in table "${table}" is not defined in magic data model ${oldVersion}.`);
             continue;
           }
 
@@ -120,11 +118,17 @@ export default class extends Runner {
       }
     }
 
-    //console.log("old: ", jsonOld);
-    //console.log("new: ", jsonNew);
+    console.log("old: ", jsonOld);
+    console.log("new: ", jsonNew);
 
+    /*GGG I feel this "clever" recursion trick causes more problems than it is worth
+    It causes prblems with testing, as the upgrade process to  create JSON new is not complete,
+    and the result is passing a trash version of jsonNew back into the system, accuring more errors
+    and warnings and causing exceptions to be throw. I don't see the problem with just calling the function
+    as many times as needed in a loop.*/
+    return jsonNew;
     // Recursively upgrade the contribution.
-   return this.upgrade(jsonNew, maxVersion);
+   //return this.upgrade(jsonNew, maxVersion);
 
   }
 
@@ -142,7 +146,8 @@ export default class extends Runner {
           let prevColArray = newColumnsObj[newColumn].previous_columns;
 
           //TEST FOR SPLIT COLUMN
-          if (prevColArray){
+          if (prevColArray &&
+              prevColArray.length > 1){
             let splitColNames = prevColArray[0].column;
             let prevColTable = prevColArray[0].table;
             let prevColKey = prevColArray[0].table + prevColArray[0].column;
@@ -175,7 +180,7 @@ export default class extends Runner {
           //TEST FOR MERGED COLUMNS...If there is more than one previous column, that indicates a MERGE to this version
           if (prevColArray && (prevColArray.length > 1))
           {
-            console.log("MERGED column detected in table " +newTableName);
+//            console.log("MERGED column detected in table " +newTableName);
             returnUpgradeMap[newTableName]=
               {
                 [prevColArray[0].column]:[{table:newTableName, column:newColumn}],
