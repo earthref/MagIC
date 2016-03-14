@@ -1,9 +1,9 @@
 import {_} from 'lodash';
 import Runner from './runner';
 
+
+/*This class makes a lists of changes from the "previous" model to the "current" model*/
 export default class extends Runner {
-
-
 
   constructor({LocalState}) {
     super('DATA_MODEL_CHANGE_LOG', {LocalState});
@@ -245,5 +245,4 @@ export default class extends Runner {
 
     return prevNextNotExist;
   }
-  //getModelChanges()  {return this.modelChanges;}
 }

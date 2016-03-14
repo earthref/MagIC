@@ -130,7 +130,7 @@ describe('magic.actions.upgrade_contribution', () => {
           region: 'California'
         }]
       };
-      upgradeContributionErrorTest(invalidTable, undefined, /table .* is not defined in magic data model/i);
+      upgradeContributionErrorTest(invalidTable, undefined, /Table .* is not defined in magic data model version /i);
     });
 
     it('should reject if the column name is invalid.', () => {

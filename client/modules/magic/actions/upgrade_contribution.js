@@ -4,6 +4,9 @@ import Runner from './runner.js';
 import {magicVersions} from '../configs/magic_versions.js';
 import {magicDataModels} from './tests/files/data_models/data_models.js';
 
+
+/**This class upgrades the json data from its current model to the next model if a newer model is available
+ * It can optionally upgrade the model several times until it reaches a maxVersion*/
 export default class extends Runner {
 
   constructor({LocalState}) {
@@ -65,20 +68,18 @@ export default class extends Runner {
     // Check that there is a newer MagIC data model to use.
     if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return jsonOld;
     const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1]
-
     const oldModel = magicDataModels[oldVersion];
     const newModel = magicDataModels[newVersion];
 
-    const upgradeMap = this.getUpgradeMap(newModel);
-
     // Upgrade the contribution.
+    const upgradeMap = this.getUpgradeMap(newModel);
     let jsonNew = {};
     for (let table in jsonOld) {
 
       // Check that the old table is defined in the old data model.
       if (!oldModel['tables'][table]) {
-        this._appendError(`Table "${table}" is not defined in MagIC data model version ${oldVersion}.`);
-        continue;
+        this._appendError(`Table "${table}" is not defined in magic data model version ${oldVersion}.`);
+        return jsonOld;
       }
 
       if (!jsonNew[table]) jsonNew[table] = [];
