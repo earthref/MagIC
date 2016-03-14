@@ -1,6 +1,8 @@
 import {_} from 'lodash';
 import Runner from './runner';
 
+import {magicVersions} from '../configs/magic_versions.js';
+import {magicDataModels} from './tests/files/data_models/data_models.js';
 
 /*This class makes a lists of changes from the "previous" model to the "current" model*/
 export default class extends Runner {
@@ -16,7 +18,7 @@ export default class extends Runner {
 
   changes(model) {
 
-    this.modelChanges.deleted_columns = [];
+    this.modelChanges.deleted_columns = [];//GGG we need to fill this list with all the prior columns and remove them as we find other columns
     this.modelChanges.inserted_columns = [];
     this.modelChanges.renamed_columns = [];
     this.modelChanges.merged_columns = [];
@@ -109,7 +111,7 @@ export default class extends Runner {
           this.modelChanges.deleted_columns.push(deletedElement);
           console.log(`**** DELETED column: " ${column}  Ver: ${this.dataModelVersionNumber}, Table: ${table}  ****`);
         }
-        else {
+        else {//test for name change
           let currentColName = column;
           let nextColumnName = dataModel.tables[table].columns[column]['next_columns'][0]['column'];
           //console.log("Next Column: " + nextColumnName);
@@ -178,6 +180,7 @@ export default class extends Runner {
 
   testForRenamedColumns(prevColArray,nextColArray,currentTable,currentColumn) {
     let renamedElement = '';
+
 
     if (nextColArray == undefined ||
       nextColArray.length == 0 ||
