@@ -160,6 +160,7 @@ describe('magic.actions.data_model_changes', () => {
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });*/
 
+    // The inserted_columns list
     it('should make a list of inserted columns', () => {
       let expectedModelChanges = emptyExpectedModelChanges();
       const model = {
@@ -174,7 +175,9 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      _.set(expectedModelChanges.inserted_columns, 'contribution.magic_version', true);
+      // Set inserted_columns.tables.contribution.columns.magic_version to an empty object which we might use later
+      // to store notes extracted from the model about why the column was inserted.
+      _.set(expectedModelChanges.inserted_columns, 'tables.contribution.columns.magic_version', {});
       dataModelChangesModelTest(model, expectedModelChanges, true);
     });
 
@@ -195,7 +198,8 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      _.set(expectedModelChanges.renamed_columns, 'contribution.magic_version', {
+      // Set renamed_columns.tables.contribution.columns.magic_version to the old table name and column name.
+      _.set(expectedModelChanges.renamed_columns, 'tables.contribution.columns.magic_version', {
         table: 'contribution',
         column: 'version'
       });
@@ -208,21 +212,22 @@ describe('magic.actions.data_model_changes', () => {
       const model = {
         magic_version: '2.5',
         tables: {
-          contribution: {
+          er_locations: {
             columns: {
-              magic_version: {
+              type: {
                 previous_columns: [{
                   table: 'contribution',
                   column: 'magic_version_1'
                 }, {
-                  table: 'contribution',
-                  column: 'magic_version_2'
+                  table: 'er_sites',
+                  column: 'site_type'
                 }]
               }
             }
           }
         }
       };
+      // Set merged_columns.tables.contribution.columns.magic_version to the merged table names and column names.
       _.set(expectedModelChanges.merged_columns, 'tables.contribution.columns.magic_version', [{
         table: 'contribution',
         column: 'magic_version_1'
