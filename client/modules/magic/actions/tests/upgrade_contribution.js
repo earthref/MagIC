@@ -26,7 +26,7 @@ const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
   expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
-// Expect N errors.
+
 function logErrors(errors) {
   for(let errorIdx in errors)
   console.log(`ERROR: ${errors[errorIdx]['message']}`);
