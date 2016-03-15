@@ -76,42 +76,6 @@ describe('magic.actions.data_model_changes', () => {
       dataModelChangesErrorTest(noTableModel, /failed to find the previous table name for column/i);
       dataModelChangesErrorTest(noColumnModel, /failed to find the previous column name for column/i);
     });
-
-    it('should reject when the next columns list is invalid', () => {
-      const noTableModel = {
-        magic_version: '3.0',
-        tables: {
-          contribution: {
-            columns: {
-              magic_version: {
-                next_columns: [{
-                  no_table: '',
-                  column: ''
-                }]
-              }
-            }
-          }
-        }
-      };
-      dataModelChangesErrorTest(noTableModel, /failed to find the next table name for column .* in table .*/i);
-      const noColumnModel = {
-        magic_version: '3.0',
-        tables: {
-          contribution: {
-            columns: {
-              magic_version: {
-                next_columns: [{
-                  table: '',
-                  no_column: ''
-                }]
-              }
-            }
-          }
-        }
-      };
-      dataModelChangesErrorTest(noColumnModel, /failed to find the next column name for column .* in table .*/i);
-    });
-
   });
 
   // Test making lists of changes from a valid model.
@@ -126,8 +90,8 @@ describe('magic.actions.data_model_changes', () => {
             columns: {
               magic_version: {
                 previous_columns: [{
-                  table: 'contribution',
-                  column: 'magic_version'
+                  table: 'contribution', //should equal parent table,
+                  column: 'magic_version'//should equal parent column
                 }]
               }
             }
@@ -191,7 +155,7 @@ describe('magic.actions.data_model_changes', () => {
               magic_version: {
                 previous_columns: [{
                   table: 'contribution',
-                  column: 'version'
+                  column: 'version' //if this doesn't equal the parent column name (magic_version) then it has been renamed
                 }]
               }
             }
@@ -237,22 +201,8 @@ describe('magic.actions.data_model_changes', () => {
       }]);
       dataModelChangesModelTest(model, expectedModelChanges, true);
 
-      //GGG DOING THIS BECAUSE MERGED COLUMNS ARE ALSO RENAMED COLUMNS
-      //SUCH COLUMNS SHOULD SHOW UP IN BOTH CATEGORIES, BASED ONT HE CURRENT DEFINITION
-      //THIS IS A BIT OF A HACK BECAUSE IT ONLY DEALS WITH ONE OF THE TWO COLUMNS "RENAMED" COLUMNS
-      //THAT THE OLD ADDRESSES
-
       //RCJM: Merged columns shouldn't be in the renamed_columns list.
       //Any data model column with multiple previous_columns, should only be in the merged_columns list.
-      /*expectedModelChanges.renamed_columns.push({
-        table: 'contribution',
-        column: 'magic_version',
-        previous_column: {
-          table: 'contribution',
-          column: 'magic_version_1'
-        }
-      });*/
-
     });
 
     //THESE ARE SUPPOSED TO JUST PASS WITH NO ISSUES BUT WON'T QUITE - GGG
@@ -280,6 +230,12 @@ describe('magic.actions.data_model_changes', () => {
   });
 
 });
+
+
+function logErrors(errors) {
+  for(let errorIdx in errors)
+    console.log(`ERROR: ${errors[errorIdx]['message']}`);
+}
 
 function emptyExpectedModelChanges() {
   let expectedModelChanges = {};
@@ -339,6 +295,7 @@ function dataModelChangesNoErrorTest(model) {
 function dataModelChangesModelTest(model, modelExpectedChanges, ignoreOtherErrors) {
   const dataModelChangeDetector = new DataModelChanges({});
   dataModelChangeDetector.changes(model);
+  logErrors(dataModelChangeDetector.errors());
   if(!ignoreOtherErrors) expect(dataModelChangeDetector.errors().length).to.equal(0);
 
   console.log("EXPECTED! " + JSON.stringify(modelExpectedChanges));
