@@ -197,8 +197,8 @@ describe('magic.actions.data_model_changes', () => {
         table: 'contribution',
         column: 'magic_version_1'
       }, {
-        table: 'contribution',
-        column: 'magic_version_2'
+        table: 'er_sites',
+        column: 'site_type'
       }]);
       dataModelChangesModelTest(model, expectedModelChanges, true);
 

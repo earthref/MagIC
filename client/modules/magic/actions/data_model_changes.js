@@ -90,7 +90,7 @@ export default class extends Runner {
         if (currentColumnName ===  previousColumnName) {//There is no change at all
           continue;
         }
-        else{//THERE IS A COLUMN NAME CHANGE
+        else if(prevColArray.length === 1){//THERE IS A COLUMN NAME CHANGE
           console.log(`**** Column name change detected, Ver: ${this.dataModelVersionNumber}, Table: ${currentTableName}  ****`);
           console.log(`Current: ${currentColumnName}`);
           console.log(`Next:    ${previousColumnName}`);
@@ -99,8 +99,7 @@ export default class extends Runner {
             column: previousColumnName
           });
         }
-        //this.testForRenamedColumns(prevColArray,nextColArray,currentTableName, currentColumnName);
-        //this.testForMergedColumns(prevColArray,nextColArray,currentTableName, currentColumnName);
+        else this.testForMergedColumns(prevColArray, currentTableName, currentColumnName);
       }
     }
 
@@ -108,9 +107,27 @@ export default class extends Runner {
   }
 
 
-  testForMergedColumns()
+  testForMergedColumns(prevColArray, currentTable, currentColumn)
   {
+    if(prevColArray.length > 1)
+    {
+      console.log(`**** MERGED column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
 
+      let mergedColArray = [];
+      for(let idx in prevColArray)
+      {
+        mergedColArray.push(
+        {
+          table: prevColArray[idx].table,
+          column: prevColArray[idx].column
+        });
+      }
+
+      _.set(this.modelChanges.merged_columns, 'tables.contribution.columns.magic_version', mergedColArray);
+      return true;
+    }
+
+    return false;//no merged column detected
   }
 
   //SOON TO BE DELETED, KEEPING AS REFERENCE
