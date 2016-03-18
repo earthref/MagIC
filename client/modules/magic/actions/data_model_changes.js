@@ -111,22 +111,10 @@ export default class extends Runner {
       });
       }
 
-
-  processMergedColumns(prevColArray, currentTable, currentColumn)
+  processMergedColumns(prevColArray, currentTableName, currentColumnName)
   {
-      console.log(`**** MERGED column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
-
-      let mergedColArray = [];
-      for(let idx in prevColArray)
-      {
-        mergedColArray.push(
-        {
-          table: prevColArray[idx].table,
-          column: prevColArray[idx].column
-        });
-      }
-
-      _.set(this.modelChanges.merged_columns, 'tables.contribution.columns.magic_version', mergedColArray);
+      console.log(`**** MERGED column: " ${currentColumnName}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTableName}  ****`);
+     _.set(this.modelChanges.merged_columns, `tables[${currentTableName}].columns.${currentColumnName}`, prevColArray);
   }
 
   criticalModelValidation(model) {
