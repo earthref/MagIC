@@ -253,8 +253,11 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test upgrading valid files.
 
   // Test calculating the upgrade map.
+  //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
+  //The upgradeMap is "forward looking" from perspecitve of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
   describe('when calculating the upgrade map', () => {
     it('should handle renamed tables', () => {
+      //This represents the model we are upgrading to
       const newModel = {//indicates that table "er_locations" has been changed to "locations"
         tables: { locations: {
           columns: { location_name: {
@@ -266,12 +269,14 @@ describe('magic.actions.upgrade_contribution', () => {
         }}
       };
       const upgradeMap = {
-        er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}
+        er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}//the map from the old model to the new
       };
 
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
+    //If a the current column name is different than the previous column name on a one to one basis. By contrast, multiple columns with
+    //the same previous column indicate that a split was made from the previous version
     it('should handle renamed columns', () => {
       const newModel = {//indicates that column er_locations.name has been changed  to er_locations.location_name
         tables: { er_locations: {
@@ -283,7 +288,7 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-      const upgradeMap = {
+      const upgradeMap  = {
         er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}
       };
       upgradeContributionMapTest(newModel, upgradeMap);
@@ -299,7 +304,7 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
-    //GGG THIS CURRENTLY HAS THE LIMITATION OF MERGING TWO COLUMNS (AND NO MORE)
+    //GGG THE FUNCTIONALITY THAT PASSES THIS TEST CURRENTLY HAS THE LIMITATION OF MERGING TWO COLUMNS (AND NO MORE)
     //NOT SURE IF WE NEED THE ABILITY TO DO THREE
     it('should handle merged columns', () => {
       const newModel = {
@@ -307,10 +312,10 @@ describe('magic.actions.upgrade_contribution', () => {
           columns: { location_name: {
             previous_columns: [{
               table: 'er_locations',
-              column: 'name1'
+              column: 'col_name1'
             }, {
               table: 'er_locations',
-              column: 'name2'
+              column: 'col_name2'
             }]
           }}
         }}
@@ -318,13 +323,14 @@ describe('magic.actions.upgrade_contribution', () => {
 
       const upgradeMap = {
         er_locations: {
-          name1: [{ table: 'er_locations', column: 'location_name'}],
-          name2: [{ table: 'er_locations', column: 'location_name'}]
+          col_name1: [{ table: 'er_locations', column: 'location_name'}],
+          col_name2: [{ table: 'er_locations', column: 'location_name'}]
         }
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
+    //If there are two columns with different names that have the same previous table and previous column name, we have a split
     it('should handle split columns', () => {
       const newModel = {
         tables: { er_locations: {

@@ -91,26 +91,29 @@ export default class extends Runner {
           continue;
         }
         else if(prevColArray.length === 1){//THERE IS A COLUMN NAME CHANGE
-          console.log(`**** Column name change detected, Ver: ${this.dataModelVersionNumber}, Table: ${currentTableName}  ****`);
-          console.log(`Current: ${currentColumnName}`);
-          console.log(`Next:    ${previousColumnName}`);
-          _.set(this.modelChanges.renamed_columns, `tables[${currentTableName}].columns[${currentColumnName}]`, {
-            table:currentTableName,
-            column: previousColumnName
-          });
+          this.processColumnNameChange(currentTableName, currentColumnName, previousColumnName);
         }
-        else this.testForMergedColumns(prevColArray, currentTableName, currentColumnName);
+        else if(prevColArray.length > 1)
+          this.processMergedColumns(prevColArray, currentTableName, currentColumnName);
       }
     }
 
     return this.modelChanges;
   }
 
+  processColumnNameChange(currentTableName, currentColumnName, previousColumnName){
+      console.log(`**** Column name change detected, Ver: ${this.dataModelVersionNumber}, Table: ${currentTableName}  ****`);
+      console.log(`Current: ${currentColumnName}`);
+      console.log(`Next:    ${previousColumnName}`);
+      _.set(this.modelChanges.renamed_columns, `tables[${currentTableName}].columns[${currentColumnName}]`, {
+        table:currentTableName,
+        column: previousColumnName
+      });
+      }
 
-  testForMergedColumns(prevColArray, currentTable, currentColumn)
+
+  processMergedColumns(prevColArray, currentTable, currentColumn)
   {
-    if(prevColArray.length > 1)
-    {
       console.log(`**** MERGED column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
 
       let mergedColArray = [];
@@ -124,56 +127,6 @@ export default class extends Runner {
       }
 
       _.set(this.modelChanges.merged_columns, 'tables.contribution.columns.magic_version', mergedColArray);
-      return true;
-    }
-
-    return false;//no merged column detected
-  }
-
-  //SOON TO BE DELETED, KEEPING AS REFERENCE
-  testForMergedColumnsOld(prevColArray,nextColArray,currentTable,currentColumn)
-  {
-    if (nextColArray == undefined ||
-      nextColArray.length == 0 ||
-      !(hasOwnProperty.call(nextColArray[0], 'column')) ||
-      prevColArray == undefined ||
-      prevColArray.length == 0 ||
-      !(hasOwnProperty.call(prevColArray[0], 'column'))
-    )
-    //if(this.previousAndNextNotExist())
-    {//IF EITHER PREV/NEXT PROPERTY DOES NOT EXIST, THIS IS NOT A RENAMED COLUMN
-      return false;
-    }
-    else
-    {
-      if (prevColArray.length > 1 && nextColArray.length == 1) {
-        let mergedElement = {
-          table: currentTable,
-          column: currentColumn,
-          merged_columns: [
-            /*table: currentTable,
-             column: prevColName*/
-          ]
-        };
-
-        for(let prevColumn in prevColArray)
-        {
-          let prevColName = prevColArray[prevColumn].column;
-
-          mergedElement.merged_columns.push(
-            {
-              table: currentTable,
-              column: prevColName
-            }
-          );
-        }
-
-        this.modelChanges.merged_columns.push(mergedElement);
-        console.log(`**** MERGED column: " ${currentColumn}  Ver: ${this.dataModelVersionNumber}, Table: ${currentTable}  ****`);
-        return true;
-      }
-    }
-    return false;
   }
 
   criticalModelValidation(model) {

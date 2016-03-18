@@ -65,7 +65,7 @@ export default class extends Runner {
 
     // Check that there is a newer MagIC data model to use.
     if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return jsonOld;
-    const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1]
+    const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1];
     const oldModel = magicDataModels[oldVersion];
     const newModel = magicDataModels[newVersion];
 
@@ -73,7 +73,7 @@ export default class extends Runner {
     const upgradeMap = this.getUpgradeMap(newModel);
     let jsonNew = {};
     for (let table in jsonOld) {
-console.log("EXAMINING jsonOld TABLE: " + table);
+
       // Check that the old table is defined in the old data model.
       if (!oldModel['tables'][table]) {
         this._appendError(`Table "${table}" is not defined in magic data model version ${oldVersion}.`);
@@ -132,43 +132,49 @@ console.log("EXAMINING jsonOld TABLE: " + table);
 
   }
 
+  //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
+  //The upgradeMap is "forward looking" from perspecitve of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
   getUpgradeMap(newModel) {
 
-    let returnUpgradeMap = {};
+    let upgradeMap = {};
 
     for (let newTableName in newModel.tables) {//this gets the STRING name of the property into 'table'
       let newTableObject = newModel.tables[newTableName];//this on the other hand, gets the whole table object
 
-      let columnMap =  new Map();
-      for (let newColumn in newTableObject.columns) {
-        {
-          let newColumnsObj = newTableObject.columns;
-          let prevColArray = newColumnsObj[newColumn].previous_columns;
+      let previousTableColumnMap =  new Map();
+      for (let newColumn in newTableObject.columns)
+      {
+        let currentColumnsObj = newTableObject.columns;
+        let currentColumnObj = currentColumnsObj[newColumn];
+        let prevColArray = currentColumnObj.previous_columns;
 
-          //TEST FOR SPLIT COLUMN
-          if (prevColArray &&
-              prevColArray.length > 1){
-            let splitColNames = prevColArray[0].column;
-            let prevColTable = prevColArray[0].table;
-            let prevColKey = prevColArray[0].table + prevColArray[0].column;
-            if (columnMap.has(prevColKey)) {// If we have seen this "previous column" before
-              console.log("SPLIT of previous column detcted: " + prevColTable + "  " + splitColNames);
-              let newColName1 = columnMap.get(prevColKey);
-              returnUpgradeMap[newTableName] = {[splitColNames]:[{table:newTableName,column:newColName1},{table:newTableName,column:newColumn}]};
-            }
-            else {columnMap.set(prevColKey, newColumn);}
+        //this tests for the situation where we don't have "previous" information, which means we have an inserted (new) column
+        if((currentColumnObj.previous_columns == undefined) || currentColumnObj.previous_columns.length==0)
+          continue;
+
+          //TEST FOR SPLIT COLUMN. HACK NOTE: It is important that this test comes before the test for renamed columns as
+          //split columns have a lot in common with renamed columns
+          let previousColTableName = prevColArray[0].table;
+          let previousColumnName = prevColArray[0].column;
+          let prevColKey = previousColTableName + previousColumnName;
+          if (previousTableColumnMap.has(prevColKey)) // If we have seen this "previous column" before
+          {
+              console.log("SPLIT of previous column detcted: " + previousColTableName + "  " + previousColumnName);
+              let newColName1 = previousTableColumnMap.get(prevColKey);
+              upgradeMap[newTableName] = {[previousColumnName]:[{table:newTableName,column:newColName1},{table:newTableName,column:newColumn}]};
+              continue; //if it is a split column, it isn't any other kind of column
           }
+          else {previousTableColumnMap.set(prevColKey, newColumn);}//keep track that we have seen this previous table+column combination
 
 
           //TEST FOR RENAMED COLUMNS
           if (prevColArray &&
-              prevColArray.length === 1 &&
-              Object.keys(newColumnsObj).length === 1) {///GGG CHANG THIS CONDITION
-            let previousTableName = prevColArray[0].table;
-            let previousColumnName = prevColArray[0].column;
-            if ((newTableName != previousTableName) || newColumn != previousColumnName) {
+              prevColArray.length === 1) {///GGG CHANG THIS CONDITION
+            //let previousColTableName = prevColArray[0].table;
+            //let previousColumnName = prevColArray[0].column;
+            if ((newTableName != previousColTableName) || newColumn != previousColumnName) {
               console.log("RENAMED column detected in table " +newTableName);
-              returnUpgradeMap[previousTableName] =
+              upgradeMap[previousColTableName] =
                  {
                   [previousColumnName]: [{
                     table: newTableName,
@@ -180,16 +186,16 @@ console.log("EXAMINING jsonOld TABLE: " + table);
           //TEST FOR MERGED COLUMNS...If there is more than one previous column, that indicates a MERGE to this version
           if (prevColArray && (prevColArray.length > 1))
           {
-//            console.log("MERGED column detected in table " +newTableName);
-            returnUpgradeMap[newTableName]=
+            console.log("MERGED column detected in table " +newTableName);
+            upgradeMap[newTableName]=
               {
                 [prevColArray[0].column]:[{table:newTableName, column:newColumn}],
                 [prevColArray[1].column]:[{table:newTableName, column:newColumn}]
               };
           }
-        }
+
       }
     }
-    return returnUpgradeMap;
+    return upgradeMap;
   }
 }
