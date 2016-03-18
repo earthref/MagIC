@@ -191,8 +191,8 @@ describe('magic.actions.data_model_changes', () => {
           }
         }
       };
-      // Set merged_columns.tables.contribution.columns.magic_version to the merged table names and column names.
-      _.set(expectedModelChanges.merged_columns, 'tables.contribution.columns.magic_version', [{
+
+      _.set(expectedModelChanges.merged_columns, 'tables.er_locations.columns.type', [{
         table: 'contribution',
         column: 'magic_version_1'
       }, {
