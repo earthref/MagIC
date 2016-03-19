@@ -2,7 +2,7 @@ import {_} from 'lodash';
 import Runner from './runner.js';
 
 import {magicVersions} from '../configs/magic_versions.js';
-import {magicDataModels} from './tests/files/data_models/data_models.js';
+import {magicDataModels} from '../configs/data_models/data_models.js';
 
 
 /**This class upgrades the json data from its current model to the next model if a newer model is available
