@@ -121,11 +121,7 @@ export default class extends Runner {
     console.log("old: ", jsonOld);
     console.log("new: ", jsonNew);
 
-    /*GGG I feel this "clever" recursion trick causes more problems than it is worth
-    It causes prblems with testing, as the upgrade process to  create JSON new is not complete,
-    and the result is passing a trash version of jsonNew back into the system, accuring more errors
-    and warnings and causing exceptions to be throw. I don't see the problem with just calling the function
-    as many times as needed in a loop.*/
+    /*GGG Reintroduce recursion when we are building reasonable upgraded versions.*/
     return jsonNew;
     // Recursively upgrade the contribution.
    //return this.upgrade(jsonNew, maxVersion);
@@ -141,30 +137,32 @@ export default class extends Runner {
     for (let newTableName in newModel.tables) {//this gets the STRING name of the property into 'table'
       let newTableObject = newModel.tables[newTableName];//this on the other hand, gets the whole table object
 
-      //let previousTableColumnMap =  new Map();
-      let mapping = {};
+      let mappingArray = [];
       for (let newColumn in newTableObject.columns)
       {
         let currentColumnsObj = newTableObject.columns;
         let currentColumnObj = currentColumnsObj[newColumn];
         let prevColArray = currentColumnObj.previous_columns;
 
-        //this tests for the situation where we don't have "previous" information, which means we have a new/
         if((currentColumnObj.previous_columns == undefined) || currentColumnObj.previous_columns.length==0)
           continue;
 
-          //TEST FOR TABLES AND RENAMED COLUMNS
+          //TEST FOR RENAMED TABLES AND RENAMED COLUMNS
           if (prevColArray &&
               prevColArray.length === 1) {
             let previousColTableName = prevColArray[0].table;
             let previousColumnName = prevColArray[0].column;
-            let tableColMapping = {[previousColumnName]:[]};
+            let tableColMapping = {[previousColumnName]:mappingArray};
             
-            if ((newTableName != previousColTableName) || newColumn != previousColumnName) {
-              console.log("RENAMED table/column detected in table " +newTableName);
-
+            if ((newTableName != previousColTableName)) {
+              console.log(`RENAMED table detected. Previous table name : ${previousColTableName} New table: ${newTableName}.` );
               tableColMapping[previousColumnName].push({table:newTableName,column:newColumn});
-
+              _.set(upgradeMap,previousColTableName,tableColMapping);
+            }
+            if(newColumn != previousColumnName)
+            {
+              console.log(`RENAMED (potentially a split) column  detected in table ${newTableName}. Previous column name = ${previousColumnName}. New column name = ${newColumn}` );
+              tableColMapping[previousColumnName].push({table:newTableName,column:newColumn});
               _.set(upgradeMap,previousColTableName,tableColMapping);
             }
           }
