@@ -141,61 +141,63 @@ export default class extends Runner {
     for (let newTableName in newModel.tables) {//this gets the STRING name of the property into 'table'
       let newTableObject = newModel.tables[newTableName];//this on the other hand, gets the whole table object
 
-      let previousTableColumnMap =  new Map();
+      //let previousTableColumnMap =  new Map();
+      let mapping = {};
       for (let newColumn in newTableObject.columns)
       {
         let currentColumnsObj = newTableObject.columns;
         let currentColumnObj = currentColumnsObj[newColumn];
         let prevColArray = currentColumnObj.previous_columns;
 
-        //this tests for the situation where we don't have "previous" information, which means we have an inserted (new) column
+        //this tests for the situation where we don't have "previous" information, which means we have a new/
         if((currentColumnObj.previous_columns == undefined) || currentColumnObj.previous_columns.length==0)
           continue;
 
-          //TEST FOR SPLIT COLUMN. HACK NOTE: It is important that this test comes before the test for renamed columns as
-          //split columns have a lot in common with renamed columns
-          let previousColTableName = prevColArray[0].table;
-          let previousColumnName = prevColArray[0].column;
-          let prevColKey = previousColTableName + previousColumnName;
-          if (previousTableColumnMap.has(prevColKey)) // If we have seen this "previous column" before
-          {
-              console.log("SPLIT of previous column detcted: " + previousColTableName + "  " + previousColumnName);
-              let newColName1 = previousTableColumnMap.get(prevColKey);
-              upgradeMap[newTableName] = {[previousColumnName]:[{table:newTableName,column:newColName1},{table:newTableName,column:newColumn}]};
-              continue; //if it is a split column, it isn't any other kind of column
-          }
-          else {previousTableColumnMap.set(prevColKey, newColumn);}//keep track that we have seen this previous table+column combination
-
-
-          //TEST FOR RENAMED COLUMNS
+          //TEST FOR TABLES AND RENAMED COLUMNS
           if (prevColArray &&
-              prevColArray.length === 1) {///GGG CHANG THIS CONDITION
-            //let previousColTableName = prevColArray[0].table;
-            //let previousColumnName = prevColArray[0].column;
+              prevColArray.length === 1) {
+            let previousColTableName = prevColArray[0].table;
+            let previousColumnName = prevColArray[0].column;
+            let tableColMapping = {[previousColumnName]:[]};
+            
             if ((newTableName != previousColTableName) || newColumn != previousColumnName) {
-              console.log("RENAMED column detected in table " +newTableName);
-              upgradeMap[previousColTableName] =
-                 {
-                  [previousColumnName]: [{
-                    table: newTableName,
-                    column: newColumn
-                  }]
-                };
+              console.log("RENAMED table/column detected in table " +newTableName);
+
+              tableColMapping[previousColumnName].push({table:newTableName,column:newColumn});
+
+              _.set(upgradeMap,previousColTableName,tableColMapping);
             }
           }
-          //TEST FOR MERGED COLUMNS...If there is more than one previous column, that indicates a MERGE to this version
-          if (prevColArray && (prevColArray.length > 1))
-          {
-            console.log("MERGED column detected in table " +newTableName);
-            upgradeMap[newTableName]=
-              {
-                [prevColArray[0].column]:[{table:newTableName, column:newColumn}],
-                [prevColArray[1].column]:[{table:newTableName, column:newColumn}]
-              };
-          }
 
+          //TEST FOR MERGED COLUMNS...If there is more than one previous column, that indicates a MERGE to this version
+           if (prevColArray && (prevColArray.length > 1))
+          {
+            upgradeMap[newTableName] = {};
+            console.log("MERGED column detected in table " +newTableName);
+
+            for(let prevColIdx in prevColArray)
+            {
+              let tmpPreviousColTableName = prevColArray[prevColIdx].table;
+              let tmpPreviousColumnName = prevColArray[prevColIdx].column;//:${tmpPreviousColumnName}
+              upgradeMap[newTableName][tmpPreviousColumnName] = [{table:newTableName, column:newColumn}];
+            }
+          }
       }
     }
     return upgradeMap;
   }
 }
+
+
+
+//GGG THIS IS THE OLD SPLIT COL SOLUTION, holding onto it for a bit as i might want to copy some
+/*let prevColKey = previousColTableName + previousColumnName;
+ if (previousTableColumnMap.has(prevColKey)) // If we have seen this "previous column" before
+ {
+ console.log("SPLIT of previous column detcted: " + previousColTableName + "  " + previousColumnName);
+ let newColName1 = previousTableColumnMap.get(prevColKey);
+ _.set(upgradeMap[newTableName],previousColumnName,[{table:newTableName,column:newColName1},{table:newTableName,column:newColumn}]);
+ continue; //if it is a split column, it isn't any other kind of column
+ }
+ else {previousTableColumnMap.set(prevColKey, newColumn);}//keep track that we have seen this previous table+column combination
+ */

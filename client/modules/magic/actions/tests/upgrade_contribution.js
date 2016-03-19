@@ -288,8 +288,9 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
+
       const upgradeMap  = {
-        er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}
+        er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}//from the previous table and column to new table and column
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
@@ -322,9 +323,9 @@ describe('magic.actions.upgrade_contribution', () => {
       };
 
       const upgradeMap = {
-        er_locations: {
-          col_name1: [{ table: 'er_locations', column: 'location_name'}],
-          col_name2: [{ table: 'er_locations', column: 'location_name'}]
+        er_locations: {//the table in the new model
+          col_name1: [{ table: 'er_locations', column: 'location_name'}],//from previous column (old JSON) TO new table and column
+          col_name2: [{ table: 'er_locations', column: 'location_name'}] //from previous column (old JSON) TO new table and column
         }
       };
       upgradeContributionMapTest(newModel, upgradeMap);
