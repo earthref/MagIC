@@ -275,6 +275,17 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionMapTest(newModel, upgradeMap);
     });
 
+
+    it('should handle inserted columns', () => {
+      const newModel = {
+        tables: { er_locations: {
+          columns: { location_name: {}}
+        }}
+      };
+      const upgradeMap = {};
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
+
     //If a the current column name is different than the previous column name on a one to one basis. By contrast, multiple columns with
     //the same previous column indicate that a split was made from the previous version
     it('should handle renamed columns', () => {
@@ -291,42 +302,6 @@ describe('magic.actions.upgrade_contribution', () => {
 
       const upgradeMap  = {
         er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}//from the previous table and column to new table and column
-      };
-      upgradeContributionMapTest(newModel, upgradeMap);
-    });
-
-    it('should handle inserted columns', () => {
-      const newModel = {
-        tables: { er_locations: {
-          columns: { location_name: {}}
-        }}
-      };
-      const upgradeMap = {};
-      upgradeContributionMapTest(newModel, upgradeMap);
-    });
-
-    //GGG THE FUNCTIONALITY THAT PASSES THIS TEST CURRENTLY HAS THE LIMITATION OF MERGING TWO COLUMNS (AND NO MORE)
-    //NOT SURE IF WE NEED THE ABILITY TO DO THREE
-    it('should handle merged columns', () => {
-      const newModel = {
-        tables: { er_locations: {
-          columns: { location_name: {
-            previous_columns: [{
-              table: 'er_locations',
-              column: 'col_name1'
-            }, {
-              table: 'er_locations',
-              column: 'col_name2'
-            }]
-          }}
-        }}
-      };
-
-      const upgradeMap = {
-        er_locations: {//the table in the new model
-          col_name1: [{ table: 'er_locations', column: 'location_name'}],//from previous column (old JSON) TO new table and column
-          col_name2: [{ table: 'er_locations', column: 'location_name'}] //from previous column (old JSON) TO new table and column
-        }
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
@@ -362,6 +337,31 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       upgradeContributionMapTest(newModel, upgradeMap);
     });
+
+    it('should handle merged columns', () => {
+      const newModel = {
+        tables: { er_locations: {
+          columns: { location_name: {
+            previous_columns: [{
+              table: 'er_locations',
+              column: 'col_name1'
+            }, {
+              table: 'er_locations',
+              column: 'col_name2'
+            }]
+          }}
+        }}
+      };
+
+      const upgradeMap = {
+        er_locations: {//the table in the new model
+          col_name1: [{ table: 'er_locations', column: 'location_name'}],//from previous column (old JSON) TO new table and column
+          col_name2: [{ table: 'er_locations', column: 'location_name'}] //from previous column (old JSON) TO new table and column
+        }
+      };
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
+
 
     // TODO: write more difficult tests for table names changing,
     // merging from different tables, splitting into different tables,
