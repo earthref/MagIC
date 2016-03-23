@@ -2,6 +2,7 @@ import {_} from 'lodash';
 import React from 'react';
 import {magicVersions} from '../configs/magic_versions.js';
 import {magicDataModels} from '../configs/data_models/data_models.js';
+import DataModelColumn from './data_model_column.jsx';
 
 export default class extends React.Component {
 
@@ -12,7 +13,7 @@ export default class extends React.Component {
   tablesList(version) {
     const tables = magicDataModels[version].tables;
     const names = _.keys(tables);
-    let list = new Array(names.length);
+    let list = [];
     for (let i in names) {
       list[tables[names[i]].position-1] = names[i];
     }
@@ -22,7 +23,7 @@ export default class extends React.Component {
   groupsList(version, table) {
     const columns = magicDataModels[version].tables[table].columns;
     const names = _.keys(columns);
-    let list = []
+    let list = [];
     for (let i in names) {
       list[columns[names[i]].position-1] = columns[names[i]].group;
     }
@@ -32,16 +33,16 @@ export default class extends React.Component {
   columnsList(version, table, group) {
     const columns = magicDataModels[version].tables[table].columns;
     const names = _.keys(columns);
-    let list = []
+    let list = [];
     for (let i in names) {
       if (columns[names[i]].group === group)
         list[columns[names[i]].position-1] = names[i];
     }
-    return list;
+    return _.pull(list, undefined);
   }
 
   render() {
-    let {version} = this.props;
+    let {version, search} = this.props;
     let previous_version;
     if (_.indexOf(magicVersions, version) > 0)
       previous_version = magicVersions[_.indexOf(magicVersions, version)-1];
@@ -52,7 +53,7 @@ export default class extends React.Component {
           <div className="item">
             <div className="ui category search">
               <div className="ui icon input">
-                <input className="prompt" type="text" placeholder="Search data models ..."/>
+                <input className="prompt" type="text" placeholder="Search data models ..." value={search}/>
                 <i className="search icon"></i>
               </div>
               <div className="results"></div>
@@ -64,8 +65,8 @@ export default class extends React.Component {
               {magicVersions.slice().reverse().map((v,i) => {
                 const classes = (v === version ? 'active ' : '') + 'ui button';
                 let n_columns = 0;
-                for (let table in magicDataModels[v].tables)
-                  n_columns += _.keys(magicDataModels[v].tables[table].columns).length;
+                for (let t in magicDataModels[v].tables)
+                  n_columns += _.keys(magicDataModels[v].tables[t].columns).length;
                 return (
                   <a key={i} className={classes} href={`../${v}/`}>
                     {v}
@@ -77,26 +78,39 @@ export default class extends React.Component {
               })}
             </div>
           </div>
+          <div className="item">
+            <div className="ui basic buttons">
+              <div className="ui button disabled">
+                Download
+              </div>
+              <div className="ui button">
+                .json
+              </div>
+              <div className="ui button disabled">
+                .xls
+              </div>
+            </div>
+          </div>
         </div>
         <div ref="accordion" className="ui styled fluid accordion">
-          {this.tablesList(version).map((table,i) => {
+          {this.tablesList(version).map((t,i) => {
             return (
               <div key={i}>
                 <div className={(i === 0 ? 'active ' : '') + 'title'}>
                   <i className="dropdown icon"></i>
-                  {model.tables[table].label}&nbsp;
+                  {model.tables[t].label}&nbsp;
                   <div className="ui circular small basic label">
-                    {_.keys(model.tables[table].columns).length}
+                    {_.keys(model.tables[t].columns).length}
                   </div>
                   <div className="ui right floated statistic">
                     <em>
-                      {table}&nbsp;
-                      ({model.tables[table].position},0)
+                      {t}&nbsp;
+                      ({model.tables[t].position},0)
                     </em>
                   </div>
                 </div>
                 <div className={(i === 0 ? 'active ' : '') + 'content'}>
-                  {this.groupsList(version, table).map((group,j) => {
+                  {this.groupsList(version, t).map((group,j) => {
                     return (
                       <div key={j}>
                         <div className={(j === 0 ? 'active ' : '') + 'title'}>
@@ -104,82 +118,9 @@ export default class extends React.Component {
                           {group} Group
                         </div>
                         <div className={(j === 0 ? 'active ' : '') + 'content'}>
-                          {this.columnsList(version, table, group).map((column,k) => {
+                          {this.columnsList(version, t, group).map((c,k) => {
                             return (
-                              <div key={k}>
-                                <div className={(k === 0 ? 'active ' : '') + 'title'}>
-                                  <i className="dropdown icon"></i>
-                                  {model.tables[table].columns[column].label}&nbsp;
-                                  <div className="ui basic horizontal small label">
-                                    {model.tables[table].columns[column].type}
-                                  </div>
-                                  <div className="ui right floated statistic">
-                                    <em>
-                                      {column}&nbsp;
-                                      ({model.tables[table].position},
-                                      {model.tables[table].columns[column].position})
-                                    </em>
-                                  </div>
-                                </div>
-                                <div className={(k === 0 ? 'active ' : '') + 'content'}>
-                                  <table className="ui very basic table"><tbody>
-                                    {(model.tables[table].columns[column].description ?
-                                      <tr>
-                                        <td className="top aligned collapsing"><b>Description</b></td>
-                                        <td>{model.tables[table].columns[column].description}</td>
-                                      </tr> : undefined)}
-                                    {(model.tables[table].columns[column].notes ?
-                                      <tr>
-                                        <td className="top aligned collapsing"><b>Notes</b></td>
-                                        <td>{model.tables[table].columns[column].notes}</td>
-                                      </tr> : undefined)}
-                                    {(model.tables[table].columns[column].examples ?
-                                      <tr>
-                                        <td className="top aligned collapsing"><b>Examples</b></td>
-                                        <td>
-                                          {model.tables[table].columns[column].examples.map((x,l) => {
-                                            return (
-                                              <span key={l}>
-                                                {(l > 0 ? <br/> : undefined)}
-                                                {x}
-                                              </span>
-                                            );
-                                          })}
-                                        </td>
-                                      </tr> : undefined)}
-                                    {(model.tables[table].columns[column].validations ?
-                                      <tr>
-                                        <td className="top aligned collapsing"><b>Validations</b></td>
-                                        <td>
-                                          {model.tables[table].columns[column].validations.map((x,l) => {
-                                            return (
-                                              <span key={l}>
-                                                {(l > 0 ? <br/> : undefined)}
-                                                {x}
-                                              </span>
-                                            );
-                                          })}
-                                        </td>
-                                      </tr> : undefined)}
-                                    {(model.tables[table].columns[column].previous_columns ?
-                                      <tr>
-                                        <td className="top aligned collapsing"><b>Previous Columns</b></td>
-                                        <td>
-                                          {model.tables[table].columns[column].previous_columns.map((x,l) => {
-                                            return (
-                                              <span key={l}>
-                                                {(l > 0 ? <br/> : undefined)}
-                                                <a href={'../' + previous_version + '/' + x.table + '/' + x.column + '/'}>
-                                                  {x.table}.{x.column}
-                                                </a>
-                                              </span>
-                                            );
-                                          })}
-                                        </td>
-                                      </tr> : undefined)}
-                                  </tbody></table>
-                                </div>
-                              </div>
+                              <DataModelColumn key={k} version={version} table={t} column={c} />
                             );
                           })}
                         </div>
@@ -192,7 +133,7 @@ export default class extends React.Component {
           })}
         </div>
       </div>
-    )
+    );
   }
 
 }

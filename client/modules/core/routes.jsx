@@ -41,14 +41,14 @@ export default function (injectDeps, {FlowRouter}) {
   FlowRouter.route(`/MagIC/data-model/`, {
     action() { FlowRouter.redirect(`/MagIC/data-model/${magicVersions.slice(-1)[0]}/`); }
   });
-  FlowRouter.route(`/MagIC/data-model/:magicVersion?`, {
+  FlowRouter.route(`/MagIC/data-model/:v`, {
     name: 'magicDataModel',
-    action({magicVersion}) {
+    action({v}, {q}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="MagIC">
             <Home portal="MagIC">
-              <MagICDataModel version={magicVersion}/>
+              <MagICDataModel version={v} search={q}/>
             </Home>
           </Layout>
         )
@@ -58,7 +58,7 @@ export default function (injectDeps, {FlowRouter}) {
 
   FlowRouter.route(`/MagIC/upgrade/`, {
     name: 'magicDataModel',
-    action({magicVersion}) {
+    action({}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="MagIC">
@@ -73,7 +73,7 @@ export default function (injectDeps, {FlowRouter}) {
 
   FlowRouter.notFound = {
     name: '404',
-    action({portal}) {
+    action({}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="404">
