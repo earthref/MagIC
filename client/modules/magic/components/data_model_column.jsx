@@ -30,10 +30,10 @@ export default class extends React.Component {
       <div>
         <div className="title">
           <i className="dropdown icon"/>
-          {model.label}&nbsp;
-          <div className="ui basic horizontal small label">
-            {model.type}
-          </div>
+          <span>{models[version].tables[table].position}.{model.position}</span>
+          <span>{model.label}</span>
+          <div className="ui basic horizontal small label">{model.type}</div>
+          <span className="description">{model.description}</span>
           {(_.some(validations, (x) => { return _.includes(x, 'required('); }) ?
             <div className="ui red horizontal small label">
               Required
@@ -50,13 +50,6 @@ export default class extends React.Component {
             <div className="ui orange horizontal small label">
               Suggested
             </div>  : undefined)}
-          <div className="ui right floated statistic">
-            <em>
-              {column}&nbsp;
-              ({models[version].tables[table].position},
-              {model.position})
-            </em>
-          </div>
         </div>
         <div className="content">
           <table className="ui very basic small compact table"><tbody>
@@ -106,6 +99,14 @@ export default class extends React.Component {
                   })}
                 </td>
               </tr> : undefined)}
+            <tr>
+              <td className="top aligned collapsing">
+                <b>{version} Column:</b>
+              </td>
+              <td>
+                {table}.{column}
+              </td>
+            </tr>
             {(previous_version && previous ?
               <tr>
                 <td className="top aligned collapsing">

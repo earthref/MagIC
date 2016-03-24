@@ -151,7 +151,7 @@ export default class extends React.Component {
                     ref="search"
                     className="prompt"
                     type="text"
-                    placeholder="Search data model columns ..."
+                    placeholder="Search the data model columns ..."
                     value={this.state.search}
                     onChange={this.onSearchChange.bind(this)}
                   />
@@ -181,16 +181,12 @@ export default class extends React.Component {
                 <div className="data-model-table" key={i}>
                   <div className="title">
                     <i className="dropdown icon"/>
-                    {model.tables[t].label}&nbsp;
+                    <span>{model.tables[t].position + '.'}</span>
+                    <span>{model.tables[t].label}</span>
                     <div className="ui circular small basic label data-model-table-count">
                       {_.keys(model.tables[t].columns).length}
                     </div>
-                    <div className="ui right floated statistic">
-                      <em>
-                        {t}&nbsp;
-                        ({model.tables[t].position},0)
-                      </em>
-                    </div>
+                    <span className="description">{model.tables[t].description}</span>
                   </div>
                   <div className="content">
                     {this.groupsList(version, t).map((group,j) => {
@@ -198,7 +194,7 @@ export default class extends React.Component {
                         <div className="data-model-group" key={j}>
                           <div className={(j === 0 ? 'active ' : '') + 'title'}>
                             <i className="dropdown icon"/>
-                            {group} Group&nbsp;
+                            {group} Group
                             <div className="ui circular small basic label data-model-group-count">
                               {this.columnsList(version, t, group).length}
                             </div>
@@ -225,7 +221,7 @@ export default class extends React.Component {
             })}
           </div>
         </div>
-        <div ref="no-match-message" className="ui hidden error attached message">
+        <div ref="no-match-message" className="ui hidden error bottom attached message">
           No columns match your search. Please edit the search string.
         </div>
       </div>

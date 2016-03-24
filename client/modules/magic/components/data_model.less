@@ -13,13 +13,34 @@
 
 .data-model .accordion .title {
   padding: 0.5em 0em !important;
+  display: flex;
+}
+
+.data-model .accordion .title > * {
+  white-space: nowrap !important;
+  min-width: inherit !important;
+  flex-shrink: 0 !important;
+  margin-right: 0.5em !important;
+}
+
+.data-model .accordion .title .description {
+  font-weight: normal !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  flex-shrink: 1 !important;
+  flex-grow: 1 !important;
+}
+
+.data-model .accordion .data-model-column .title.active .description {
+  visibility: hidden !important;
 }
 
 /*.data-model .accordion .data-model-table:first-of-type > .title {
   border-top: none !important;
 }*/
 
-.data-model .accordion .title > span {
+.data-model .accordion .title > span:not(.description) {
   color: black;
 }
 
