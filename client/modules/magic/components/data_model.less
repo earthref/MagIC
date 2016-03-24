@@ -2,12 +2,25 @@
   position: relative !important;
 }
 
+.data-model .search input.prompt {
+  width: 300px !important;
+}
+
 .data-model .accordion {
+  margin-top: 1em !important;
   box-shadow: none !important;
 }
 
 .data-model .accordion .title {
   padding: 0.5em 0em !important;
+}
+
+/*.data-model .accordion .data-model-table:first-of-type > .title {
+  border-top: none !important;
+}*/
+
+.data-model .accordion .title > span {
+  color: black;
 }
 
 .data-model .accordion .content {
@@ -18,4 +31,10 @@
   font-weight: normal !important;
   color: rgba(0, 0, 0, 0.6) !important;
   padding: 0.4em !important;
+}
+
+.data-model .accordion .data-model-table.no-match,
+.data-model .accordion .data-model-group.no-match,
+.data-model .accordion .data-model-column.no-match {
+  display: none !important;
 }

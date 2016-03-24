@@ -4,7 +4,7 @@ import {default as model24} from './2.4.js';
 import {default as model25} from './2.5.js';
 import {default as model30} from './3.0.js';
 
-export const magicDataModels = {
+export default {
   '2.2': model22,
   '2.3': model23,
   '2.4': model24,

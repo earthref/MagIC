@@ -1,49 +1,84 @@
 import {_} from 'lodash';
 import React from 'react';
-import {magicVersions} from '../configs/magic_versions.js';
-import {magicDataModels} from '../configs/data_models/data_models.js';
+import {default as versions} from '../configs/magic_versions.js';
+import {default as models} from '../configs/data_models/data_models.js';
+import {default as cvs} from '../configs/data_models/controlled_vocabularies.js';
+import {default as svs} from '../configs/data_models/suggested_vocabularies.js';
+import {default as codes} from '../configs/data_models/method_codes.js';
 
 export default class extends React.Component {
 
   render() {
-    let {version, table, column} = this.props;
+    const {version, table, column} = this.props;
+    const model = models[version].tables[table].columns[column];
+
+    let validations = model.validations;
+
+
+    let examples = model.examples;
+    let cv_validation = _.find(validations, (x) => { return _.includes(x, 'cv(') });
+    let sv_validation = _.find(validations, (x) => { return _.includes(x, 'sv(') });
+
+    let previous = model.previous_columns;
+
+
     let previous_version;
-    if (_.indexOf(magicVersions, version) > 0)
-      previous_version = magicVersions[_.indexOf(magicVersions, version)-1];
-    let model = magicDataModels[version];
+    if (_.indexOf(versions, version) > 0)
+      previous_version = versions[_.indexOf(versions, version)-1];
+
     return (
       <div>
         <div className="title">
-          <i className="dropdown icon"></i>
-          {model.tables[table].columns[column].label}&nbsp;
+          <i className="dropdown icon"/>
+          {model.label}&nbsp;
           <div className="ui basic horizontal small label">
-            {model.tables[table].columns[column].type}
+            {model.type}
           </div>
+          {(_.some(validations, (x) => { return _.includes(x, 'required('); }) ?
+            <div className="ui red horizontal small label">
+              Required
+            </div>  : undefined)}
+          {(_.some(validations, (x) => { return _.includes(x, 'downloadOnly('); }) ?
+            <div className="ui black horizontal small label">
+              Download Only
+            </div>  : undefined)}
+          {(_.some(validations, (x) => { return _.includes(x, 'cv('); }) ?
+            <div className="ui yellow horizontal small label">
+              Controlled
+            </div>  : undefined)}
+          {(_.some(validations, (x) => { return _.includes(x, 'sv('); }) ?
+            <div className="ui orange horizontal small label">
+              Suggested
+            </div>  : undefined)}
           <div className="ui right floated statistic">
             <em>
               {column}&nbsp;
-              ({model.tables[table].position},
-              {model.tables[table].columns[column].position})
+              ({models[version].tables[table].position},
+              {model.position})
             </em>
           </div>
         </div>
-        <div className={'content'}>
-          <table className="ui very basic table"><tbody>
-            {(model.tables[table].columns[column].description ?
+        <div className="content">
+          <table className="ui very basic small compact table"><tbody>
+            {(model.description ?
               <tr>
-                <td className="top aligned collapsing"><b>Description</b></td>
-                <td>{model.tables[table].columns[column].description}</td>
+                <td className="top aligned collapsing"><b>Description:</b></td>
+                <td>{model.description}</td>
               </tr> : undefined)}
-            {(model.tables[table].columns[column].notes ?
+            {(model.notes ?
               <tr>
-                <td className="top aligned collapsing"><b>Notes</b></td>
-                <td>{model.tables[table].columns[column].notes}</td>
+                <td className="top aligned collapsing"><b>Notes:</b></td>
+                <td>{model.notes}</td>
               </tr> : undefined)}
-            {(model.tables[table].columns[column].examples ?
+            {(examples ?
               <tr>
-                <td className="top aligned collapsing"><b>Examples</b></td>
+                <td className="top aligned collapsing">
+                  <b>
+                    {'Example' + (examples && examples.length > 1 ? 's' : '')}:
+                  </b>
+                </td>
                 <td>
-                  {model.tables[table].columns[column].examples.map((x,l) => {
+                  {examples.map((x,l) => {
                     return (
                       <span key={l}>
                         {(l > 0 ? <br/> : undefined)}
@@ -53,11 +88,15 @@ export default class extends React.Component {
                   })}
                 </td>
               </tr> : undefined)}
-            {(model.tables[table].columns[column].validations ?
+            {(validations ?
               <tr>
-                <td className="top aligned collapsing"><b>Validations</b></td>
+                <td className="top aligned collapsing">
+                  <b>
+                    {'Validation' + (validations && validations.length > 1 ? 's' : '')}:
+                  </b>
+                </td>
                 <td>
-                  {model.tables[table].columns[column].validations.map((x,l) => {
+                  {validations.map((x,l) => {
                     return (
                       <span key={l}>
                         {(l > 0 ? <br/> : undefined)}
@@ -67,11 +106,15 @@ export default class extends React.Component {
                   })}
                 </td>
               </tr> : undefined)}
-            {(model.tables[table].columns[column].previous_columns ?
+            {(previous_version && previous ?
               <tr>
-                <td className="top aligned collapsing"><b>Previous Columns</b></td>
+                <td className="top aligned collapsing">
+                  <b>
+                    {previous_version + ' Column' + (previous && previous.length > 1 ? 's' : '')}:
+                  </b>
+                </td>
                 <td>
-                  {model.tables[table].columns[column].previous_columns.map((x,l) => {
+                  {previous.map((x,l) => {
                     return (
                       <span key={l}>
                         {(l > 0 ? <br/> : undefined)}
