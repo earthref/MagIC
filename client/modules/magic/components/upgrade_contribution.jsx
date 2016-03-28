@@ -29,10 +29,6 @@ export default class extends React.Component {
   render() {
     return (
       <div className="upgrade-contribution">
-        <h3>
-          Upgrade an outdated MagIC contribution to the&nbsp;
-          <a className="purple" href="../data-model/">latest MagIC data model version</a>:
-        </h3>
         <div className="ui top attached stackable three steps">
           <a ref="select step" className="active step" onClick={this.restart.bind(this)}>
             <i className="file text outline icon"></i>

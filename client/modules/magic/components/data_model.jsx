@@ -1,33 +1,46 @@
 import {_} from 'lodash';
+import moment from 'moment';
 import React from 'react';
-import {default as magicVersions} from '../configs/magic_versions.js';
-import {default as magicDataModels} from '../configs/data_models/data_models.js';
+import {portals} from '../../core/configs/portals.js';
+import {default as versions} from '../configs/magic_versions.js';
+import {default as models} from '../configs/data_models/data_models.js';
 import DataModelColumn from './data_model_column.jsx';
 
 export default class extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {search: this.props.search};
+    this.state = {
+      search: this.props.search,
+      loaded: false,
+      updating: false
+    };
+    console.log('new cache');
+    this.dataModelColumnCache = {};
   }
 
   componentDidMount() {
     $(this.refs['accordion']).accordion({exclusive: false});
-    this.search(this.refs['search'].value);
-  }
-
-  componentWillUpdate() {
-    $(this.refs['loading']).addClass('active');
+    setTimeout(() => { this.setState({loaded: true}); }, 1);
   }
 
   componentDidUpdate() {
     this.search(this.refs['search'].value);
     $(this.refs['loading']).removeClass('active');
+    this.setState({updating: false});
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    this.search(this.refs['search'].value);
-    return (nextProps.version !== this.props.version);
+    if (nextState.updating ||
+        nextState.search != this.state.search ||
+        nextState.loaded != this.state.loaded) {
+      return true;
+    }
+    if (nextProps.version !== this.props.version) {
+      $(this.refs['loading']).addClass('active');
+      setTimeout(() => { this.setState({updating: true}); }, 1);
+    }
+    return false;
   }
 
   componentWillReceiveProps(nextProps) {
@@ -35,7 +48,7 @@ export default class extends React.Component {
   }
 
   tablesList(version) {
-    const tables = magicDataModels[version].tables;
+    const tables = models[version].tables;
     const names = _.keys(tables);
     let list = [];
     for (let i in names) {
@@ -45,7 +58,7 @@ export default class extends React.Component {
   }
 
   groupsList(version, table) {
-    const columns = magicDataModels[version].tables[table].columns;
+    const columns = models[version].tables[table].columns;
     const names = _.keys(columns);
     let list = [];
     for (let i in names) {
@@ -54,12 +67,23 @@ export default class extends React.Component {
     return _.uniq(list);
   }
 
-  columnsList(version, table, group) {
-    const columns = magicDataModels[version].tables[table].columns;
+  groupsValidationList(version, table, group) {
+    const columns = models[version].tables[table].columns;
     const names = _.keys(columns);
     let list = [];
     for (let i in names) {
       if (columns[names[i]].group === group)
+        list.push.apply(list, columns[names[i]].validations);
+    }
+    return _.uniq(list);
+  }
+
+  columnsList(version, table, group) {
+    const columns = models[version].tables[table].columns;
+    const names = _.keys(columns);
+    let list = [];
+    for (let i in names) {
+      if (!group || columns[names[i]].group === group)
         list[columns[names[i]].position-1] = names[i];
     }
     return _.pull(list, undefined);
@@ -70,31 +94,37 @@ export default class extends React.Component {
   }
 
   search(str) {
-
-    const $tbls = $(this.refs['accordion']).find('.data-model-table');
-    const $grps = $(this.refs['accordion']).find('.data-model-group');
-    const $cols = $(this.refs['accordion']).find('.data-model-column');
+    const $tbls  = $(this.refs['accordion']).find('.data-model-table');
+    const $grps  = $(this.refs['accordion']).find('.data-model-group');
+    const $cols  = $(this.refs['accordion']).find('.data-model-column');
 
     // Enable columns that contain the string and disable others.
     if (str !== '') {
-      $tbls.filter(':not(:contains(' + str + '))').addClass('no-match');
-      $grps.filter(':not(:contains(' + str + '))').addClass('no-match');
-      $cols.filter(':not(:contains(' + str + '))').addClass('no-match');
-      $tbls.filter(':contains('      + str + ')').removeClass('no-match');
-      $grps.filter(':contains('      + str + ')').removeClass('no-match');
-      $cols.filter(':contains('      + str + ')').removeClass('no-match');
-      $tbls.not('.no-match').find('.data-model-table-count').each(function() {
-        const n_match = $(this).parents('.data-model-table')
-          .find('.data-model-column').not('.no-match').length;
+      $cols.addClass('no-match').filter(':icontains(' + str + ')').removeClass('no-match');
+      $tbls.find('.data-model-table-count').each(function() {
+        const $table = $(this).parents('.data-model-table');
+        const n_match = $table.find('.data-model-column').not('.no-match').length;
+        $(this).addClass(portals['MagIC'].color);
         $(this).children('span').remove();
         $(this).prepend(`<span>${n_match} of </span>`);
+        if (n_match === 0)
+          $table.addClass('no-match');
+        else
+          $table.removeClass('no-match');
       });
-      $grps.not('.no-match').find('.data-model-group-count').each(function() {
-        const n_match = $(this).parents('.data-model-group')
-          .find('.data-model-column').not('.no-match').length;
+      $grps.find('.data-model-group-count').each(function() {
+        const $group = $(this).parents('.data-model-group');
+        const n_match = $group.find('.data-model-column').not('.no-match').length;
+        $(this).addClass(portals['MagIC'].color);
         $(this).children('span').remove();
         $(this).prepend(`<span>${n_match} of </span>`);
+        if (n_match === 0)
+          $group.addClass('no-match');
+        else
+          $group.removeClass('no-match');
       });
+      $(this.refs['count']).html($cols.not('.no-match').length + ' of ' + $cols.length);
+      $(this.refs['count']).addClass(portals['MagIC'].color);
     }
 
     // Enable all columns since the search string is empty.
@@ -102,7 +132,11 @@ export default class extends React.Component {
       $tbls.removeClass('no-match');
       $grps.removeClass('no-match');
       $cols.removeClass('no-match');
-      $tbls.find('.data-model-table-count > span, .data-model-group-count > span').remove();
+      const $counts = $tbls.find('.data-model-table-count, .data-model-group-count');
+      $counts.removeClass(portals['MagIC'].color);
+      $counts.children().remove();
+      $(this.refs['count']).html($cols.length);
+      $(this.refs['count']).removeClass(portals['MagIC'].color);
     }
 
     // Show the first table/group/column.
@@ -118,29 +152,57 @@ export default class extends React.Component {
     });
 
     // Show the error message if no column match.
-    if ($tbls.not('.no-match').length === 0) {
+    if (this.state.loaded && $tbls.not('.no-match').length === 0) {
       $(this.refs['segment']).hide();
       $(this.refs['no-match-message']).show();
     } else {
       $(this.refs['segment']).show();
       $(this.refs['no-match-message']).hide();
     }
+  }
 
+  cachedDataModelColumn(table, column) {
+    const version = this.props.version;
+
+    // Define the cache key as the concatenation of the version, table, and column.
+    const cacheKey = [version, table, column].toString();
+
+    // Add the DataModelColumn component to the cache if necessary.
+    if (!this.dataModelColumnCache[cacheKey])
+      this.dataModelColumnCache[cacheKey] = (
+        <DataModelColumn
+          version={version}
+          table={table}
+          column={column}
+        />
+      );
+
+    // Retrieve the cached DataModelColumn component
+    return this.dataModelColumnCache[cacheKey];
   }
 
   render() {
     const version = this.props.version;
-    const model = magicDataModels[version];
-    if (_.indexOf(magicVersions, version) > 0)
-      previous_version = magicVersions[_.indexOf(magicVersions, version)-1];
+    const model = models[version];
+    const published = moment(model.published_day, 'YYYY:MM:DD').format('MMMM Do, YYYY');
+    let previous_version;
+    if (_.indexOf(versions, version) > 0)
+      previous_version = versions[_.indexOf(versions, version)-1];
     return (
       <div className="data-model">
         <div className="ui top attached tabular menu">
           <div className="disabled item"><b>Version:</b></div>
-          {magicVersions.slice().reverse().map((v,i) => {
+          {versions.slice().reverse().map((v,i) => {
             const classes = (v === version ? 'active ' : '') + 'item';
             return (
-              <a key={i} className={classes} href={`../${v}/`}>{v}</a>
+              <a key={i} className={classes} href={`../${v}/`}>
+                {v}
+                {(v === version ?
+                  <div
+                    ref="count"
+                    className="ui circular small basic floating label data-model-count"
+                  ></div> : undefined)}
+              </a>
             );
           })}
           <div className="right menu">
@@ -163,21 +225,24 @@ export default class extends React.Component {
           </div>
         </div>
         <div ref="segment" className="ui bottom attached segment">
-          <div ref="loading" className="ui inverted dimmer">
+          <div ref="loading" className="ui inverted active dimmer">
             <div className="ui text loader">Loading</div>
           </div>
           <div className="ui grid">
             <div className="ten wide column">
-              Published by the <a href="">MagIC Database Team</a> on March 20th, 2016.
+              {(published ?
+                <span>
+                  Published by the <a href="/user/@magic/">MagIC Database Team</a> on {published}.
+                </span> : undefined)}
             </div>
             <div className="right aligned six wide column">
               <i className="download icon"/>
-              Download as <a href="">.json</a> or <a href="">.xls</a>.
+              Download as <a href="">.json</a>.
             </div>
           </div>
           <div ref="accordion" className="ui styled fluid accordion">
             {this.tablesList(version).map((t,i) => {
-              return (
+              if (this.state.loaded) return (
                 <div className="data-model-table" key={i}>
                   <div className="title">
                     <i className="dropdown icon"/>
@@ -189,25 +254,38 @@ export default class extends React.Component {
                     <span className="description">{model.tables[t].description}</span>
                   </div>
                   <div className="content">
-                    {this.groupsList(version, t).map((group,j) => {
+                    {this.groupsList(version, t).map((g,j) => {
+                      const columns = this.columnsList(version, t, g);
+                      const validations = this.groupsValidationList(version, t, g);
+                      const required = _.some(validations, (x) => {
+                        return _.includes(x, 'required(');
+                      });
+                      const governed = _.some(validations, (x) => {
+                        return !_.includes(x, 'required(') && _.includes(x, 'required');
+                      });
                       return (
                         <div className="data-model-group" key={j}>
                           <div className={(j === 0 ? 'active ' : '') + 'title'}>
                             <i className="dropdown icon"/>
-                            {group} Group
+                            {g} Group
                             <div className="ui circular small basic label data-model-group-count">
-                              {this.columnsList(version, t, group).length}
+                              {columns.length}
                             </div>
+                            <span className="description"></span>
+                            {(governed && !required ?
+                              <div className="ui green horizontal small label">
+                                Governed
+                              </div>  : undefined)}
+                            {(required ?
+                              <div className="ui red horizontal small label">
+                                Required
+                              </div>  : undefined)}
                           </div>
                           <div className={(j === 0 ? 'active ' : '') + 'content'}>
-                            {this.columnsList(version, t, group).map((c,k) => {
+                            {columns.map((c,k) => {
                               return (
                                 <div className="data-model-column" key={k}>
-                                  <DataModelColumn
-                                    version={version}
-                                    table={t}
-                                    column={c}
-                                  />
+                                  {(this.cachedDataModelColumn(t,c))}
                                 </div>
                               );
                             })}

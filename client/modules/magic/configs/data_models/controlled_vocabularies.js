@@ -1,4 +1,34 @@
 export default {
+  "anisotropy_type": {
+    "label": "Anisotropy Type",
+    "items": [{
+      "item": "AMS",
+      "label": "Anisotropy of Magnetic Susceptibility"
+    }, {
+      "item": "AARM",
+      "label": "Anisotropy of Anhysteretic Remanent Magnetization"
+    }, {
+      "item": "ATRM",
+      "label": "Anisotropy of Thermoremanent Magnetization"
+    }, {
+      "item": "AIRM",
+      "label": "Anisotropy of Isothermal Remanent Magnetization"
+    }]
+  },
+  "anisotropy_tensor_unit": {
+    "label": "Anisotropy Type",
+    "items": [{
+      "item": "SI"
+    }, {
+      "item": "Am^2"
+    }, {
+      "item": "bulk in measurements table"
+    }, {
+      "item": "Normalized by trace"
+    }, {
+      "item": "m^3/kg"
+    }]
+  },
   "data_type": {
     "label": "Data Type",
     "items": [{
