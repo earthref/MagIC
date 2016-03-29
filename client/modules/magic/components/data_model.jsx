@@ -15,7 +15,6 @@ export default class extends React.Component {
       loaded: false,
       updating: false
     };
-    console.log('new cache');
     this.dataModelColumnCache = {};
   }
 
@@ -139,17 +138,21 @@ export default class extends React.Component {
       $(this.refs['count']).removeClass(portals['MagIC'].color);
     }
 
-    // Show the first table/group/column.
-    $tbls.not('.no-match').children().removeClass('active');
-    $grps.not('.no-match').children().removeClass('active');
-    $cols.not('.no-match').children().children().removeClass('active');
-    $tbls.not('.no-match').first().children().addClass('active');
-    $tbls.each(function() {
-      $(this).find('.data-model-group').not('.no-match').first().children().addClass('active');
-    });
-    $grps.each(function() {
-      $(this).find('.data-model-column').not('.no-match').first().children().children().addClass('active');
-    });
+    // If the search has up to 100 column matches or excludes an entire table,
+    // expand all tables and groups.
+    if ($cols.not('.no-match').length <= 100 || $tbls.filter('.no-match').length >= 1) {
+      $tbls.not('.no-match').children().addClass('active');
+      $grps.not('.no-match').children().addClass('active');
+      $cols.not('.no-match').children().children().removeClass('active');
+    }
+
+    // Otherwise, expand the first table and all of the groups.
+    else {
+      $tbls.not('.no-match').children().removeClass('active');
+      $grps.not('.no-match').children().addClass('active');
+      $cols.not('.no-match').children().children().removeClass('active');
+      $tbls.not('.no-match').first().children().addClass('active');
+    }
 
     // Show the error message if no column match.
     if (this.state.loaded && $tbls.not('.no-match').length === 0) {

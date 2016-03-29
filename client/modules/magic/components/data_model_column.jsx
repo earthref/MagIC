@@ -159,7 +159,7 @@ export default class extends React.Component {
   }
 
   formatTypeUnit(type, unit) {
-    if (!unit || unit == 'Custom')
+    if (!unit || unit == 'Custom' || unit == 'Dimensionless')
       return type;
     if (unit == 'Flag')
       return unit;
@@ -274,6 +274,16 @@ export default class extends React.Component {
                 <td className="top aligned collapsing"><b>Notes:</b></td>
                 <td>{model.notes}</td>
               </tr> : undefined)}
+            {(model.type ?
+              <tr>
+                <td className="top aligned collapsing"><b>Type:</b></td>
+                <td>{model.type}</td>
+              </tr> : undefined)}
+            {(model.unit ?
+              <tr>
+                <td className="top aligned collapsing"><b>Unit:</b></td>
+                <td>{model.unit}</td>
+              </tr> : undefined)}
             {(model.urls ?
               <tr>
                 <td className="top aligned collapsing">
@@ -286,7 +296,7 @@ export default class extends React.Component {
                     return (
                       <span key={l}>
                         {(l > 0 ? <br/> : undefined)}
-                        <a href={x}>{x}</a>
+                        <a href={x} target="_blank">{x}</a>
                       </span>
                     );
                   })}

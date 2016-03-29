@@ -28,7 +28,6 @@ export default function (injectDeps, {FlowRouter}) {
               {(portal === "MagIC" ?
                 <div>
                   <a className="ui button" href="/MagIC/data-model/">Data Model</a>
-                  <a className="ui button" href="/MagIC/upgrade/">Upgrade a Contribution</a>
                 </div>
               : '')}
             </Home>
