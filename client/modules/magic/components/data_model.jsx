@@ -143,7 +143,11 @@ export default class extends React.Component {
     if ($cols.not('.no-match').length <= 100 || $tbls.filter('.no-match').length >= 1) {
       $tbls.not('.no-match').children().addClass('active');
       $grps.not('.no-match').children().addClass('active');
-      $cols.not('.no-match').children().children().removeClass('active');
+
+      if ($cols.not('.no-match').length <= 10)
+        $cols.not('.no-match').children().children().addClass('active');
+      else
+        $cols.not('.no-match').children().children().removeClass('active');
     }
 
     // Otherwise, expand the first table and all of the groups.
@@ -209,18 +213,18 @@ export default class extends React.Component {
             );
           })}
           <div className="right menu">
-            <div className="item">
+            <div className="active item">
               <div className="ui search">
                 <div className="ui transparent icon input">
                   <input
                     ref="search"
                     className="prompt"
                     type="text"
-                    placeholder="Search the data model columns ..."
+                    placeholder="Search the columns ..."
                     value={this.state.search}
                     onChange={this.onSearchChange.bind(this)}
                   />
-                  <i className="search icon"/>
+                  <i className={portals['MagIC'].color + ' search icon'}/>
                 </div>
                 <div className="results"></div>
               </div>
@@ -233,10 +237,14 @@ export default class extends React.Component {
           </div>
           <div className="ui grid">
             <div className="ten wide column">
-              {(published ?
+              {(model.published_day ?
                 <span>
                   Published by the <a href="/user/@magic/">MagIC Database Team</a> on {published}.
-                </span> : undefined)}
+                </span> :
+                <span style={{color:'#912d2b !important'}}>
+                  This data model has not been published yet and may change.
+                </span>
+              )}
             </div>
             <div className="right aligned six wide column">
               <i className="download icon"/>
@@ -259,30 +267,15 @@ export default class extends React.Component {
                   <div className="content">
                     {this.groupsList(version, t).map((g,j) => {
                       const columns = this.columnsList(version, t, g);
-                      const validations = this.groupsValidationList(version, t, g);
-                      const required = _.some(validations, (x) => {
-                        return _.includes(x, 'required(');
-                      });
-                      const governed = _.some(validations, (x) => {
-                        return !_.includes(x, 'required(') && _.includes(x, 'required');
-                      });
                       return (
                         <div className="data-model-group" key={j}>
-                          <div className={(j === 0 ? 'active ' : '') + 'title'}>
+                          <div className={(j === 0 ? 'active ' : '') + 'title group-title'}>
                             <i className="dropdown icon"/>
                             {g} Group
                             <div className="ui circular small basic label data-model-group-count">
                               {columns.length}
                             </div>
                             <span className="description"></span>
-                            {(governed && !required ?
-                              <div className="ui green horizontal small label">
-                                Governed
-                              </div>  : undefined)}
-                            {(required ?
-                              <div className="ui red horizontal small label">
-                                Required
-                              </div>  : undefined)}
                           </div>
                           <div className={(j === 0 ? 'active ' : '') + 'content'}>
                             {columns.map((c,k) => {
