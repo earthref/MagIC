@@ -27,9 +27,11 @@ const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
 };
 
 
-function logErrors(errors) {
+function logErrors(errors, warnings) {
   for(let errorIdx in errors)
-  console.log(`ERROR: ${errors[errorIdx]['message']}`);
+    console.log(`ERROR: ${errors[errorIdx]['message']}`);
+  for(let warningIdx in warnings)
+    console.log(`Warning: ${warnings[warningIdx]['message']}`);
 }
 
 const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
@@ -57,6 +59,7 @@ const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
 const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
   const jsonNew = Upgrader.upgrade(jsonOld, maxVersion);
+  logErrors(Upgrader.errors(),Upgrader.warnings());
   expect(Upgrader.errors().length).to.equal(0);
   expect(jsonNew).to.deep.equal(jsonExpected);
 };
@@ -184,10 +187,10 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should keep numbers as strings', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.2'
+          magic_version: '2.5'
         }],
         er_locations: [{
-          begin_latitude: '10.0'
+          location_begin_lon: '10.0'
         }]
       };
       const jsonNew = {
@@ -195,10 +198,10 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         er_locations: [{
-          begin_latitude: '10.0'
+          location_begin_lon: '10.0'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, undefined, jsonNew);
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
     it('should stop upgrading at the given maximum version', () => {
@@ -218,7 +221,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should update column names', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.0'
+          magic_version: '2.5'
         }],
         rmag_susceptibility: [{
           susceptibility_xx: '1'
@@ -226,13 +229,13 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew = {
         contribution: [{
-          magic_version: '2.1'
+          magic_version: '3.0'
         }],
         rmag_susceptibility: [{
           susceptibility_loss_tangent: '1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '2.1', jsonNew);
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
     it('should warn about deleted columns', () => {
@@ -268,6 +271,7 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
+
       const upgradeMap = {
         er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}//the map from the old model to the new
       };
@@ -276,6 +280,37 @@ describe('magic.actions.upgrade_contribution', () => {
     });
 
 
+    it('should handle front matter', () => {
+      //This represents the model we are upgrading to
+      const newModel = {
+
+        'magic_version': '3.0',
+        'tables': {
+          'contribution': {
+            'label': 'Contribution',
+            'position': 1,
+            'description': 'Contribution metadata',
+            'columns': {
+              'id': {
+                'label': 'Contribution ID',
+                'group': 'Contribution',
+                'position': 1,
+                'type': 'Integer',
+                'description': 'Unique MagIC Contribution ID, Download Only, written during contribution activation',
+                'examples': ['5412'],
+                'validations': ['downloadOnly()'],
+                'previous_columns': [{
+                  'table': 'contribution',
+                  'column': 'id'
+                }]
+              }}
+      }}};
+      const upgradeMap = {
+        contribution: { id: [{ table: 'contribution', column: 'id'}]}
+      };
+
+      upgradeContributionMapTest(newModel, upgradeMap);
+    });
     it('should handle inserted columns', () => {
       const newModel = {
         tables: { er_locations: {
