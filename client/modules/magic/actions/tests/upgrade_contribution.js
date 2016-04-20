@@ -280,7 +280,7 @@ describe('magic.actions.upgrade_contribution', () => {
     });
 
 
-    it('should handle front matter', () => {
+    it('should handle multiple columns', () => {
       //This represents the model we are upgrading to
       const newModel = {
 
@@ -303,10 +303,28 @@ describe('magic.actions.upgrade_contribution', () => {
                   'table': 'contribution',
                   'column': 'id'
                 }]
-              }}
+              },
+              'version': {
+                'label': 'Version',
+                'group': 'Contribution',
+                'position': 2,
+                'type': 'Integer',
+                'description': 'Contribution version number, Download Only, written during contribution activation',
+                'notes': '1 for original contribution, 6 for latest contribution if there are 6 versions, empty if the contribution is not activated',
+                'validations': ['downloadOnly()'],
+                'previous_columns': [{
+                  'table': 'contribution',
+                  'column': 'version'
+                }]
+              }
+            }//end columns
       }}};
       const upgradeMap = {
-        contribution: { id: [{ table: 'contribution', column: 'id'}]}
+        contribution: {
+          id:     [{ table: 'contribution', column: 'id'}],
+          version:[{ table: 'contribution', column: 'version'}]
+        }
+
       };
 
       upgradeContributionMapTest(newModel, upgradeMap);
