@@ -11,127 +11,139 @@ export default class extends Runner {
 
   constructor({LocalState}) {
     super('UPGRADE_CONTRIBUTION', {LocalState});
+    this.jsonOld;
+    this.maxVersion;
+    this.jsonNew;
   }
 
-  upgrade(jsonOld, maxVersion) {
 
+
+  upgrade(jsonOld, maxVersion) {
     // Initialize the upgrading state.
+    this.jsonOld = jsonOld;
+    this.jsonNew = undefined;
+    this.maxVersion = maxVersion;
     this.table = undefined;
-    this.rowNumber = undefined;
     this.column = undefined;
 
+    //**********BASIC VALIDATION************
     // Check for a valid input.
-    if (_.isEmpty(jsonOld)) {
+    if (_.isEmpty(this.jsonOld)) {
       this._appendWarning('The first argument (MagIC contribution in JSON format) is empty.');
-      return jsonOld;
+      return this.jsonOld;
     }
 
     // Check that the maximum MagIC data model version to upgrade to is valid (maxVersion is in magicVersions).
-    if (maxVersion && _.indexOf(magicVersions, maxVersion) === -1) {
+    if (this.maxVersion && _.indexOf(magicVersions, this.maxVersion) === -1) {
       let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(', ');
-      this._appendError(`The second argument (maximum MagIC data model version), "${maxVersion}", is invalid. ` +
+      this._appendError(`The second argument (maximum MagIC data model version), "${this.maxVersion}", is invalid. ` +
                         `Expected one of: ${strVersions}.`);
-      return jsonOld;
+      return this.jsonOld;
     }
 
     // Look for the old MagIC data model version.
     let oldVersion;
-    if(!jsonOld || !jsonOld['contribution']) {
+    if(!this.jsonOld || !this.jsonOld['contribution']) {
       this._appendError('Failed to find the "contribution" table.');
-      return jsonOld;
+      return this.jsonOld;
     }
-    if (jsonOld['contribution']) {
-      if (jsonOld['contribution'].length !== 1) {
+    if (this.jsonOld['contribution']) {
+      if (this.jsonOld['contribution'].length !== 1) {
         this._appendError('The "contribution" table does not have exactly one row.');
-        return jsonOld;
+        return this.jsonOld;
       }
-      if (!jsonOld['contribution'][0]['magic_version']) {
+      if (!this.jsonOld['contribution'][0]['magic_version']) {
         this._appendError('The "contribution" table does not include the "magic_version" column.');
-        return jsonOld;
+        return this.jsonOld;
       }
       this.contributionTable = 'contribution';//GGG not sure what this is here for, seems to be unused
-      oldVersion = jsonOld['contribution'][0]['magic_version'];
+      oldVersion = this.jsonOld['contribution'][0]['magic_version'];
     }
 
     // Check that the old MagIC data model version is valid (oldVersion is in magicVersions).
     if (_.indexOf(magicVersions, oldVersion) === -1) {
       const strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(", ");
       this._appendError(`MagIC data model version ${oldVersion} is invalid. Expected one of: ${strVersions}.`);
-      return jsonOld;
+      return this.jsonOld;
     }
 
     // Check if the maxVersion has been reached.
-    if (oldVersion === maxVersion) return jsonOld;
+    if (oldVersion === this.maxVersion) return this.jsonOld;
 
     // Check that there is a newer MagIC data model to use.
-    if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return jsonOld;
+    if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return this.jsonOld;
     const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1];
     const oldModel = magicDataModels[oldVersion];
     const newModel = magicDataModels[newVersion];
 
-    // UPGRADE THE CONTRIBUTION
-    let upgradeMap = this.getUpgradeMap(newModel);
-    let jsonNew = {};
-    for (let oldTable in jsonOld) {
 
-      // Check that the old table is defined in the old data model.
-      if (!oldModel['tables'][oldTable]) {
-        this._appendError(`Table "${oldTable}" is not defined in magic data model version ${oldVersion}.`);
-        continue;
-      }
+    // ********** UPGRADE THE CONTRIBUTION ********
+    this.jsonNew = this.createNewJSON(newModel, oldModel, oldVersion, newVersion);
 
-      if (!jsonNew[oldTable]) jsonNew[oldTable] = [];
-
-      for (let oldRow of jsonOld[oldTable]) {
-
-        let newRow = {};
-        for (let oldColumn in oldRow) {
-
-          // Check that the old column is defined in the old data model.
-          if (!oldModel['tables'][oldTable]['columns'][oldColumn]) {
-            console.log(`VERSION? 1`);
-            this._appendError(`Column "${oldColumn}" in table "${oldTable}" is not defined in magic data model ${oldVersion}.`);
-            continue;
-          }
-
-          // Check that the old table and column are defined in the new data model.
-          if (!upgradeMap[oldTable] || !upgradeMap[oldTable][oldColumn]) {
-            console.log(`VERSION? 2`);
-            this._appendWarning(`Column "${oldColumn}" in table "${oldTable}" was deleted in MagIC data model version ${newVersion}.`);
-            continue;
-          }
-          console.log(`VERSION? ${oldTable}: ${oldColumn}: ${newVersion}`);
-
-          // Upgrade the version number
-          if (oldTable === 'contribution' && oldColumn === 'magic_version') {
-
-            newRow[oldColumn] = newVersion;
-            continue;
-          }
-
-          // TODO: this doesn't handle changes in table names properly yet
-          for (let newTableColumn in upgradeMap[oldTable][oldColumn]) {
-            //if (!jsonNew[newTableColumn.table]) jsonNew[newTableColumn.table] = [];
-            newRow[newTableColumn.column] = oldRow[oldColumn];
-          }
-        }
-
-        // TODO: this doesn't handle changes in table names properly yet
-        jsonNew[oldTable].push(newRow);
-
-      }
-    }
-
-    console.log("old: ", JSON.stringify(jsonOld, null, 1));
-//    console.log("old: ", jsonOld);
-    console.log("new: ", JSON.stringify(jsonNew, null, 1));
+    console.log("old: ", JSON.stringify(this.jsonOld, null, 1));
+//    console.log("old: ", this.jsonOld);
+    console.log("new: ", JSON.stringify(this.jsonNew, null, 1));
 
     /*GGG Reintroduce recursion when we are building reasonable upgraded versions.*/
-    return jsonNew;
+    return this.jsonNew;
     // Recursively upgrade the contribution.
-   //return this.upgrade(jsonNew, maxVersion);
-
+   //return this.upgrade(this.jsonNew, this.maxVersion);
   }
+
+  createNewJSON(newModel, oldModel, oldVersion, newVersion){
+      let upgradeMap = this.getUpgradeMap(newModel);
+      this.jsonNew = {};
+      for (let oldTable in this.jsonOld) {
+
+        // Check that the old table is defined in the old data model.
+        if (!oldModel['tables'][oldTable]) {
+          this._appendError(`Table "${oldTable}" is not defined in magic data model version ${oldVersion}.`);
+          continue;
+        }
+
+        if (!this.jsonNew[oldTable]) this.jsonNew[oldTable] = [];
+
+        for (let oldRow of this.jsonOld[oldTable]) {
+
+          let newRow = {};
+          for (let oldColumn in oldRow) {
+
+            // Check that the old column is defined in the old data model.
+            if (!oldModel['tables'][oldTable]['columns'][oldColumn]) {
+              //          console.log(`VERSION? 1`);
+              this._appendError(`Column "${oldColumn}" in table "${oldTable}" is not defined in magic data model ${oldVersion}.`);
+              continue;
+            }
+
+            // Check that the old table and column are defined in the new data model.
+            if (!upgradeMap[oldTable] || !upgradeMap[oldTable][oldColumn]) {
+  //            console.log(`VERSION? 2`);
+              this._appendWarning(`Column "${oldColumn}" in table "${oldTable}" was deleted in MagIC data model version ${newVersion}.`);
+              continue;
+            }
+            console.log(`VERSION? ${oldTable}: ${oldColumn}: ${newVersion}`);
+
+            // Upgrade the version number
+            if (oldTable === 'contribution' && oldColumn === 'magic_version') {
+
+              newRow[oldColumn] = newVersion;
+              continue;
+            }
+
+            // TODO: this doesn't handle changes in table names properly yet
+            for (let newTableColumn in upgradeMap[oldTable][oldColumn]) {
+              //if (!this.jsonNew[newTableColumn.table]) this.jsonNew[newTableColumn.table] = [];
+                          newRow[newTableColumn.column] = oldRow[oldColumn];
+                      }
+                  }
+
+                  // TODO: this doesn't handle changes in table names properly yet
+                  this.jsonNew[oldTable].push(newRow);
+
+              }
+          }
+          return this.jsonNew;
+      }
 
   //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
   //The upgradeMap is "forward looking" from perspecitve of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
@@ -144,7 +156,6 @@ export default class extends Runner {
 
       for (let newColumnName in newTableObject.columns)
       {
-        let tableColMapping = [];
         let currentColumnObj = newTableObject.columns[newColumnName];
         let prevColArray = currentColumnObj.previous_columns;
 
@@ -183,12 +194,15 @@ export default class extends Runner {
               let tmpPreviousColumnName = prevColArray[prevColIdx].column;
               let tmpPreviousColTableName  = prevColArray[prevColIdx].table;
 
-              //console.log(`${JSON.stringify(upgradeMap)}`);
-              console.log(`prevTab: ${tmpPreviousColTableName}:  prevCol: ${tmpPreviousColumnName}`  );
-              //console.log(`json: ${JSON.stringify(upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName])}`);
-              if(!upgradeMap[tmpPreviousColTableName] || upgradeMap[tmpPreviousColTableName]==undefined)
-                upgradeMap[tmpPreviousColumnName] = {};
+              /*if(!upgradeMap[tmpPreviousColTableName] || upgradeMap[tmpPreviousColTableName]==undefined)
+                upgradeMap[tmpPreviousColTableName] = {};
               if(!upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName] || upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName]==undefined)
+                upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName] = [];
+
+              upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName].push([{table:newTableName, column:newColumnName}]);*/
+              if(!upgradeMap[tmpPreviousColTableName])
+                upgradeMap[tmpPreviousColTableName] = {};
+              if(!upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName])
                 upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName] = [];
 
               upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName].push([{table:newTableName, column:newColumnName}]);
