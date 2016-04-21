@@ -141,11 +141,10 @@ export default class extends Runner {
 
     for (let newTableName in newModel.tables) {//this gets the STRING name of the property into 'table'
       let newTableObject = newModel.tables[newTableName];//this on the other hand, gets the whole table object
-//console.log(`TABLE: ${newTableName}`);
-      let mappingArray = [];
+
       for (let newColumnName in newTableObject.columns)
       {
-        //let currentColumnsObj = newTableObject.columns;
+        let tableColMapping = [];
         let currentColumnObj = newTableObject.columns[newColumnName];
         let prevColArray = currentColumnObj.previous_columns;
 
@@ -153,20 +152,16 @@ export default class extends Runner {
           continue;
         }
 
-
           if (prevColArray &&
               prevColArray.length === 1) {
             let previousColTableName = prevColArray[0].table;
             let previousColumnName = prevColArray[0].column;
-            let tableColMapping = {[previousColumnName]:mappingArray};
-
-            //console.log(JSON.stringify(tableColMapping));
+            if(!upgradeMap[previousColTableName])                     upgradeMap[previousColTableName] = {};
+            if(!upgradeMap[previousColTableName][previousColumnName]) upgradeMap[previousColTableName][previousColumnName] = [];
 
             //TEST FOR TABLE/COLUMNS WITH NO CHANGES
             if(newColumnName == previousColumnName && newTableName == previousColTableName){
-
-              tableColMapping[previousColumnName].push({table:newTableName,column:newColumnName});
-              _.set(upgradeMap,previousColTableName,tableColMapping);
+              upgradeMap[previousColTableName][previousColumnName].push({table:newTableName,column:newColumnName});
               //console.log(`NO CHANGE in table and column with no change detected. table:${newTableName}. Column name = ${newColumnName}` );
               continue;
             }
@@ -175,37 +170,34 @@ export default class extends Runner {
             if ((newTableName != previousColTableName) || (newColumnName != previousColumnName)) {
               //console.log(`RENAMED table or column detected. Previous table name : ${previousColTableName} New table: ${newTableName}.` );
               //console.log(`Previous column name = ${previousColumnName}. New column name = ${newColumnName}` );
-              tableColMapping[previousColumnName].push({table:newTableName,column:newColumnName});
-              _.set(upgradeMap,previousColTableName,tableColMapping);
+              upgradeMap[previousColTableName][previousColumnName].push({table:newTableName,column:newColumnName});
               continue;
             }
-
-            /*//TEST FOR RENAMED (POTENTIALLY SPLIT) COLUMNS
-            if(newColumnName != previousColumnName)
-            {
-              //console.log(`RENAMED (potentially a split) column  detected in table ${newTableName}. Previous column name = ${previousColumnName}. New column name = ${newColumnName}` );
-              tableColMapping[previousColumnName].push({table:newTableName,column:newColumnName});
-              _.set(upgradeMap,previousColTableName,tableColMapping);
-            }*/
           }
 
           //TEST FOR MERGED COLUMNS...If there is more than one previous column, that indicates a MERGE to this version
            if (prevColArray && (prevColArray.length > 1))
           {
-            upgradeMap[newTableName] = {};
-           //console.log("MERGED column detected in table " +newTableName);
-
             for(let prevColIdx in prevColArray)
             {
-              let tmpPreviousColTableName = prevColArray[prevColIdx].table;
-              let tmpPreviousColumnName = prevColArray[prevColIdx].column;//:${tmpPreviousColumnName}
-              upgradeMap[newTableName][tmpPreviousColumnName] = [{table:newTableName, column:newColumnName}];
+              let tmpPreviousColumnName = prevColArray[prevColIdx].column;
+              let tmpPreviousColTableName  = prevColArray[prevColIdx].table;
+
+              //console.log(`${JSON.stringify(upgradeMap)}`);
+              console.log(`prevTab: ${tmpPreviousColTableName}:  prevCol: ${tmpPreviousColumnName}`  );
+              //console.log(`json: ${JSON.stringify(upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName])}`);
+              if(!upgradeMap[tmpPreviousColTableName] || upgradeMap[tmpPreviousColTableName]==undefined)
+                upgradeMap[tmpPreviousColumnName] = {};
+              if(!upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName] || upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName]==undefined)
+                upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName] = [];
+
+              upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName].push([{table:newTableName, column:newColumnName}]);
             }
           }
       }
     }
 
-    console.log(`Upgrade Map ${JSON.stringify(upgradeMap)}`);
+   // console.log(`Upgrade Map ${JSON.stringify(upgradeMap)}`);
     return upgradeMap;
   }
 }
@@ -223,3 +215,10 @@ export default class extends Runner {
  }
  else {previousTableColumnMap.set(prevColKey, newColumnName);}//keep track that we have seen this previous table+column combination
  */
+/*//TEST FOR RENAMED (POTENTIALLY SPLIT) COLUMNS
+ if(newColumnName != previousColumnName)
+ {
+ //console.log(`RENAMED (potentially a split) column  detected in table ${newTableName}. Previous column name = ${previousColumnName}. New column name = ${newColumnName}` );
+ tableColMapping[previousColumnName].push({table:newTableName,column:newColumnName});
+ _.set(upgradeMap,previousColTableName,tableColMapping);
+ }*/
