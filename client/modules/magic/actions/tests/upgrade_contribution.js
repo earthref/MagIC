@@ -93,7 +93,8 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.2'
         }]
       };
-      upgradeContributionErrorTest(invalidMagicVersion, '1.0', /the second argument .* is invalid/i);
+      upgradeContributionErrorTest(invalidMagicVersion, '1.0', 
+        /the second argument .* is invalid/i);
     });
 
     it('should reject when no contribution table is found', () => {
@@ -105,7 +106,8 @@ describe('magic.actions.upgrade_contribution', () => {
           region: 'California'
         }]
       };
-       upgradeContributionErrorTest(jsonNoContribTable, undefined, /failed to find the "contribution" table/i);
+       upgradeContributionErrorTest(jsonNoContribTable, undefined, 
+         /failed to find the "contribution" table/i);
     });
 
     it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
@@ -126,7 +128,8 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.3'
         }]
       };
-      upgradeContributionErrorTest(jsonContribTwoRows, undefined, /table does not have exactly one row./i);
+      upgradeContributionErrorTest(jsonContribTwoRows, undefined, 
+        /table does not have exactly one row./i);
     });
 
    it('should reject if the data model version is invalid.', () => {
@@ -135,7 +138,8 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '0.1'
         }]
       };
-      upgradeContributionErrorTest(invalidMagicVersion, undefined, /data model version .* is invalid/i);
+      upgradeContributionErrorTest(invalidMagicVersion, undefined, 
+        /data model version .* is invalid/i);
     });
 
     it('should reject if the table name is invalid.', () => {
@@ -147,7 +151,8 @@ describe('magic.actions.upgrade_contribution', () => {
           region: 'California'
         }]
       };
-      upgradeContributionErrorTest(invalidTable, '3.0', /Table .* is not defined in magic data model version /i);
+      upgradeContributionErrorTest(invalidTable, '3.0', 
+        /table .* is not defined in magic data model version /i);
     });
 
     it('should reject if the column name is invalid.', () => {
@@ -251,13 +256,94 @@ describe('magic.actions.upgrade_contribution', () => {
         /column .* in table .* was deleted in magic data model/i);
     });
 
+    it('should update table names', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: '1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen_name: '1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+    it('should merge the same column value from different tables', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: '1'
+        }],
+        pmag_specimens: [{
+          er_specimen_names: '1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen_name: '1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+    it('should assign the same column into different tables based on the level', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_results: [{ // this is a sample level result (single sample name)
+          er_sample_names: '1',
+          er_specimen_names: '1:3',
+          average_age: '5'
+        },{ // this is a specimen level result (single specimen name)
+          er_sample_names: '1',
+          er_specimen_names: '3',
+          average_age: '6'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample_name: '1',
+          specimen_names: '1:3',
+          age: '5'
+        }],
+        specimens: [{
+          sample_name: '1',
+          specimen_name: '3',
+          age: '6'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+    // TODO: write more difficult tests for table names changing,
+    // merging from different tables, splitting into different tables,
+    // tables with columns renamed into different tables
+
+
   });
 
   // Test upgrading valid files.
 
   // Test calculating the upgrade map.
   //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
-  //The upgradeMap is "forward looking" from perspecitve of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
+  //The upgradeMap is "forward looking" from perspective of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
   describe('when calculating the upgrade map', () => {
     it('should handle renamed tables', () => {
       //This represents the model we are upgrading to
