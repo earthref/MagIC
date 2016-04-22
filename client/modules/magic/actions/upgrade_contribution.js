@@ -110,30 +110,27 @@ export default class extends Runner {
 
             // Check that the old column is defined in the old data model.
             if (!oldModel['tables'][oldTable]['columns'][oldColumn]) {
-              //          console.log(`VERSION? 1`);
               this._appendError(`Column "${oldColumn}" in table "${oldTable}" is not defined in magic data model ${oldVersion}.`);
               continue;
             }
 
             // Check that the old table and column are defined in the new data model.
             if (!upgradeMap[oldTable] || !upgradeMap[oldTable][oldColumn]) {
-  //            console.log(`VERSION? 2`);
               this._appendWarning(`Column "${oldColumn}" in table "${oldTable}" was deleted in MagIC data model version ${newVersion}.`);
               continue;
             }
-            console.log(`VERSION? ${oldTable}: ${oldColumn}: ${newVersion}`);
 
             // Upgrade the version number
             if (oldTable === 'contribution' && oldColumn === 'magic_version') {
-
               newRow[oldColumn] = newVersion;
               continue;
             }
 
-            // TODO: this doesn't handle changes in table names properly yet
-            for (let newTableColumn in upgradeMap[oldTable][oldColumn]) {
+            //Go through each table and column in the old version, grab appropritate data and create the new version
+            for (let newColumn in upgradeMap[oldTable][oldColumn]) {
               //if (!this.jsonNew[newTableColumn.table]) this.jsonNew[newTableColumn.table] = [];
-                          newRow[newTableColumn.column] = oldRow[oldColumn];
+                        console.log(`YO! ${newColumn[0]}`);
+                        newRow[newColumn.column] = oldRow[oldColumn];
                       }
                   }
 
@@ -205,7 +202,7 @@ export default class extends Runner {
               if(!upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName])
                 upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName] = [];
 
-              upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName].push([{table:newTableName, column:newColumnName}]);
+              upgradeMap[tmpPreviousColTableName][tmpPreviousColumnName].push({table:newTableName, column:newColumnName});
             }
           }
       }
