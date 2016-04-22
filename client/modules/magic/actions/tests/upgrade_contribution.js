@@ -59,6 +59,8 @@ const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
 const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
   const jsonNew = Upgrader.upgrade(jsonOld, maxVersion);
+  console.log("EXPECTED! " + JSON.stringify(jsonExpected));
+  console.log("ACTUAL  ! " + JSON.stringify(jsonNew));
   logErrors(Upgrader.errors(),Upgrader.warnings());
   expect(Upgrader.errors().length).to.equal(0);
   expect(jsonNew).to.deep.equal(jsonExpected);
@@ -189,23 +191,18 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test upgrading valid JSON.
   describe('when upgrading valid JSON', () => {
 
-    //GGG this test happens to choose a er_locations and locations_begin_lon that have
-    //each been changed in v3.0. TODO: make this test specific to strings
+    //doesn't test any true upgrade ability yet, just that numbers are upgraded as strings
     it('should keep numbers as strings', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
-        }],
-        er_locations: [{
-          location_begin_lon: '10.0'
+          magic_version: '2.5',
+          id: '66'
         }]
       };
       const jsonNew = {
         contribution: [{
-          magic_version: '3.0'
-        }],
-        er_locations: [{
-          location_begin_lon: '10.0'
+          magic_version: '3.0',
+          id:'66'
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
@@ -231,7 +228,7 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.5'
         }],
         rmag_susceptibility: [{
-          susceptibility_xx: '1'
+          susceptibility_loss_tangent: '1'
         }]
       };
       const jsonNew = {
@@ -239,7 +236,7 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         rmag_susceptibility: [{
-          susceptibility_loss_tangent: '1'
+          susc_loss_tangent: '1'
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);

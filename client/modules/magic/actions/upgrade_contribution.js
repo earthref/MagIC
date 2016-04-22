@@ -80,9 +80,8 @@ export default class extends Runner {
     // ********** UPGRADE THE CONTRIBUTION ********
     this.jsonNew = this.createNewJSON(newModel, oldModel, oldVersion, newVersion);
 
-    console.log("old: ", JSON.stringify(this.jsonOld, null, 1));
-//    console.log("old: ", this.jsonOld);
-    console.log("new: ", JSON.stringify(this.jsonNew, null, 1));
+/*    console.log("old: ", JSON.stringify(this.jsonOld, null, 1));
+    console.log("new: ", JSON.stringify(this.jsonNew, null, 1));*/
 
     /*GGG Reintroduce recursion when we are building reasonable upgraded versions.*/
     return this.jsonNew;
@@ -95,7 +94,7 @@ export default class extends Runner {
       let upgradeMap = this.getUpgradeMap(newModel);
       this.jsonNew = {};
       for (let oldTable in this.jsonOld) {
-console.log(`oldTab: ${oldTable}`);
+
         // Check that the old table is defined in the old data model.
         if (!oldModel['tables'][oldTable]) {
           this._appendError(`Table "${oldTable}" is not defined in magic data model version ${oldVersion}.`);
@@ -108,7 +107,7 @@ console.log(`oldTab: ${oldTable}`);
         for (let oldRow of this.jsonOld[oldTable]) {
           let newRow = {};
           for (let oldColumn in oldRow) {
-console.log(`oldCol ${oldColumn}`);
+//console.log(`oldCol ${oldColumn}`);
             // Check that the old column is defined in the old data model.
             if (!oldModel['tables'][oldTable]['columns'][oldColumn]) {
               this._appendError(`Column "${oldColumn}" in table "${oldTable}" is not defined in magic data model ${oldVersion}.`);
@@ -127,22 +126,18 @@ console.log(`oldCol ${oldColumn}`);
               continue;
             }
 
-            //let newColumnName = upgradeMap[oldTable][oldColumn];
-            //newRow[]
-
             //Cycle through the upgrade info for a given table/column to know where to place the the old model's data in the new model
-            for (let upgradeToTableAndColumn in upgradeMap[oldTable][oldColumn]) {
+            for (let upgradeToTableAndColumnIdx in upgradeMap[oldTable][oldColumn]) {
               //if (!this.jsonNew[upgradeToTableAndColumn.table]) this.jsonNew[upgradeToTableAndColumn.table] = [];
-              console.log(`json: ${JSON.stringify(upgradeMap[oldTable][oldColumn][upgradeToTableAndColumn])}`);
-                        console.log(`UpgradeTab! ${upgradeToTableAndColumn.table} ${upgradeToTableAndColumn.column}`);
+                        var upgradeTable = upgradeMap[oldTable][oldColumn][upgradeToTableAndColumnIdx].table;
+                        var upgradeColumn = upgradeMap[oldTable][oldColumn][upgradeToTableAndColumnIdx].column;
 
-                        newRow[upgradeToTableAndColumn.column] = oldRow[oldColumn];
+                        newRow[upgradeColumn] = oldRow[oldColumn];
                       }
                   }
 
                   // TODO: this doesn't handle changes in table names properly yet
                   this.jsonNew[oldTable].push(newRow);
-
               }
           }
           return this.jsonNew;
