@@ -5,3 +5,8 @@ node_modules
 # JetBrains
 .idea/
 .idea/libraries
+client/modules/magic/actions/tests/files/data_models/temp3.0.js
+client/modules/magic/actions/tests/files/data_models/tempForUpgradeMapOutput.js
+client/modules/magic/actions/tests/temp2.2.js
+client/modules/magic/actions/tests/temp2.3.js
+client/modules/magic/actions/tests/tmpUpgradeMap
