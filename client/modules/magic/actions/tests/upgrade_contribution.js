@@ -235,7 +235,7 @@ describe('magic.actions.upgrade_contribution', () => {
         contribution: [{
           magic_version: '3.0'
         }],
-        rmag_susceptibility: [{
+        specimens: [{
           susc_loss_tangent: '1'
         }]
       };

@@ -80,68 +80,67 @@ export default class extends Runner {
     // ********** UPGRADE THE CONTRIBUTION ********
     this.jsonNew = this.createNewJSON(newModel, oldModel, oldVersion, newVersion);
 
-/*    console.log("old: ", JSON.stringify(this.jsonOld, null, 1));
-    console.log("new: ", JSON.stringify(this.jsonNew, null, 1));*/
-
     /*GGG Reintroduce recursion when we are building reasonable upgraded versions.*/
     return this.jsonNew;
     // Recursively upgrade the contribution.
-   //return this.upgrade(this.jsonNew, this.maxVersion);
+    //return this.upgrade(this.jsonNew, this.maxVersion);
   }
 
   createNewJSON(newModel, oldModel, oldVersion, newVersion){
 
       let upgradeMap = this.getUpgradeMap(newModel);
       this.jsonNew = {};
-      for (let oldTable in this.jsonOld) {
+      for (let oldJSONTable in this.jsonOld) {
 
         // Check that the old table is defined in the old data model.
-        if (!oldModel['tables'][oldTable]) {
-          this._appendError(`Table "${oldTable}" is not defined in magic data model version ${oldVersion}.`);
+        if (!oldModel['tables'][oldJSONTable]) {
+          this._appendError(`Table "${oldJSONTable}" is not defined in magic data model version ${oldVersion}.`);
           continue;
         }
 
-        //This probably has to change when we do table name change upgrade
-        if (!this.jsonNew[oldTable]) this.jsonNew[oldTable] = [];
-
-        for (let oldRow of this.jsonOld[oldTable]) {
+        for (let oldJSONRow of this.jsonOld[oldJSONTable]) {//loop through all rows in table
           let newRow = {};
-          for (let oldColumn in oldRow) {
-//console.log(`oldCol ${oldColumn}`);
+
+          for (let oldJSONColumn in oldJSONRow) {//loop through all columns in row
             // Check that the old column is defined in the old data model.
-            if (!oldModel['tables'][oldTable]['columns'][oldColumn]) {
-              this._appendError(`Column "${oldColumn}" in table "${oldTable}" is not defined in magic data model ${oldVersion}.`);
+            if (!oldModel['tables'][oldJSONTable]['columns'][oldJSONColumn]) {
+              this._appendError(`Column "${oldJSONColumn}" in table "${oldJSONTable}" is not defined in magic data model ${oldVersion}.`);
               continue;
             }
 
             // Check that the old table and column are defined in the new data model.
-            if (!upgradeMap[oldTable] || !upgradeMap[oldTable][oldColumn]) {
-              this._appendWarning(`Column "${oldColumn}" in table "${oldTable}" was deleted in MagIC data model version ${newVersion}.`);
+            if (!upgradeMap[oldJSONTable] || !upgradeMap[oldJSONTable][oldJSONColumn]) {
+              this._appendWarning(`Column "${oldJSONColumn}" in table "${oldJSONTable}" was deleted in MagIC data model version ${newVersion}.`);
               continue;
             }
 
-            // Upgrade the version number
-            if (oldTable === 'contribution' && oldColumn === 'magic_version') {
-              newRow[oldColumn] = newVersion;
+            // Special case for upgrade the version number. I bet there is a smoother way of doing this
+            //For now, it is important to set the upgradeTable here in the special case, because we do so in the general case
+            var upgradeTable;
+            if (oldJSONTable === 'contribution' && oldJSONColumn === 'magic_version') {
+              newRow[oldJSONColumn] = newVersion;
+              upgradeTable = 'contribution';
+
               continue;
             }
 
             //Cycle through the upgrade info for a given table/column to know where to place the the old model's data in the new model
-            for (let upgradeToTableAndColumnIdx in upgradeMap[oldTable][oldColumn]) {
+            //This loop goes through the location(s) to move ONE field of data
+            for (let upgradeToTableAndColumnIdx in upgradeMap[oldJSONTable][oldJSONColumn]) {
               //if (!this.jsonNew[upgradeToTableAndColumn.table]) this.jsonNew[upgradeToTableAndColumn.table] = [];
-                        var upgradeTable = upgradeMap[oldTable][oldColumn][upgradeToTableAndColumnIdx].table;
-                        var upgradeColumn = upgradeMap[oldTable][oldColumn][upgradeToTableAndColumnIdx].column;
+              upgradeTable = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].table;
 
-                        newRow[upgradeColumn] = oldRow[oldColumn];
-                      }
-                  }
-
-                  // TODO: this doesn't handle changes in table names properly yet
-                  this.jsonNew[oldTable].push(newRow);
-              }
+              var upgradeColumn = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].column;
+              newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
+            }
           }
-          return this.jsonNew;
+          if (!this.jsonNew[upgradeTable]) this.jsonNew[upgradeTable] = [];
+          this.jsonNew[upgradeTable].push(newRow);
+        }
       }
+    return this.jsonNew;
+  }
+
 
   //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
   //The upgradeMap is "forward looking" from perspecitve of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
