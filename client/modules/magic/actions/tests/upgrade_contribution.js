@@ -189,6 +189,8 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test upgrading valid JSON.
   describe('when upgrading valid JSON', () => {
 
+    //GGG this test happens to choose a er_locations and locations_begin_lon that have
+    //each been changed in v3.0. TODO: make this test specific to strings
     it('should keep numbers as strings', () => {
       const jsonOld = {
         contribution: [{
