@@ -283,7 +283,8 @@ describe('magic.actions.upgrade_contribution', () => {
         er_specimens: [{
           er_specimen_name: '1'
         }],
-        pmag_specimens: [{
+        //pmag_specimens: [{
+        pmag_results: [{
           er_specimen_names: '1'
         }]
       };
