@@ -1,5 +1,6 @@
 const {describe, it} = global;
 import {expect} from 'chai';
+import {_} from 'lodash';
 import ParseContribution from '../parse_contribution.js';
 import UpgradeContribution from '../upgrade_contribution.js';
 //import {default as contribution289  } from './files/289.js';

@@ -1,8 +1,8 @@
 import {_} from 'lodash';
 import Runner from './runner.js';
 
-import {magicVersions} from '../configs/magic_versions.js';
-import {magicDataModels} from './tests/files/data_models/data_models.js';
+import {default as magicVersions} from '../configs/magic_versions';
+import {default as magicDataModels} from '../configs/data_models/data_models';
 
 
 /**This class upgrades the json data from its current model to the next model if a newer model is available
@@ -15,9 +15,7 @@ export default class extends Runner {
     this.maxVersion;
     this.jsonNew;
   }
-
-
-
+  
   upgrade(jsonOld, maxVersion) {
     // Initialize the upgrading state.
     this.jsonOld = jsonOld;

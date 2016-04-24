@@ -21,4 +21,4 @@ kadira:debug
 semantic:ui
 flemay:less-autoprefixer
 reactive-dict
-kadira:flow-router
+kadira:flow-router-ssr
