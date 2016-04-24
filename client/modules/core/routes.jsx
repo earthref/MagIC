@@ -5,7 +5,7 @@ import {mount} from 'react-mounter';
 import {portals} from './configs/portals.js';
 const rePortals = _.without(Object.keys(portals), 'EarthRef.org').join('|');
 
-import {magicVersions} from '../magic/configs/magic_versions.js';
+import {default as magicVersions} from '../magic/configs/magic_versions.js';
 
 import Layout from './components/layout.jsx';
 import Home from './components/home.jsx';
@@ -28,7 +28,6 @@ export default function (injectDeps, {FlowRouter}) {
               {(portal === "MagIC" ?
                 <div>
                   <a className="ui button" href="/MagIC/data-model/">Data Model</a>
-                  <a className="ui button" href="/MagIC/upgrade/">Upgrade a Contribution</a>
                 </div>
               : '')}
             </Home>
@@ -39,16 +38,19 @@ export default function (injectDeps, {FlowRouter}) {
   });
 
   FlowRouter.route(`/MagIC/data-model/`, {
-    action() { FlowRouter.redirect(`/MagIC/data-model/${magicVersions.slice(-1)[0]}/`); }
+    action() { FlowRouter.redirect(`/MagIC/data-models/${magicVersions.slice(-1)[0]}/`); }
   });
-  FlowRouter.route(`/MagIC/data-model/:magicVersion?`, {
+  FlowRouter.route(`/MagIC/data-models/:v`, {
     name: 'magicDataModel',
-    action({magicVersion}) {
+    action({v}, {q}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="MagIC">
             <Home portal="MagIC">
-              <MagICDataModel version={magicVersion}/>
+              <h3>
+                Browse the current and recent MagIC Data Models:
+              </h3>
+              <MagICDataModel version={v} search={q}/>
             </Home>
           </Layout>
         )
@@ -58,11 +60,15 @@ export default function (injectDeps, {FlowRouter}) {
 
   FlowRouter.route(`/MagIC/upgrade/`, {
     name: 'magicDataModel',
-    action({magicVersion}) {
+    action({}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="MagIC">
             <Home portal="MagIC">
+              <h3>
+                Upgrade an outdated MagIC contribution to the&nbsp;
+                <a className="purple" href="../data-model/">latest MagIC data model version</a>:
+              </h3>
               <MagICUpgradeContribution/>
             </Home>
           </Layout>
@@ -73,7 +79,7 @@ export default function (injectDeps, {FlowRouter}) {
 
   FlowRouter.notFound = {
     name: '404',
-    action({portal}) {
+    action({}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="404">

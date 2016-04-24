@@ -1,10 +1,21 @@
 @import '../../../lib/semantic-ui/themes/default/globals/site.variables.import.less';
+@import '../../../lib/semantic-ui/themes/default/modules/sidebar.variables.import.less';
 
 #react-root {
   height: 100% !important;
 }
 
-.top-menu {
+.layout.pushable {
+  transform: none !important;
+}
+
+.layout.pushable > .ui.sidebar,
+.layout.pushable > .fixed,
+.layout.pushable > .pusher:after {
+  position: fixed !important;
+}
+
+.top-menu, .footer {
   background: #F8F8F8 !important;
 }
 
@@ -28,6 +39,7 @@
 
 .layout-content {
   padding-top: 4em !important;
+  padding-bottom: 6em !important;
 }
 
 @media only screen and (max-width: @largestTabletScreen) {

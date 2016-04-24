@@ -1,0 +1,78 @@
+.data-model > .segment {
+  min-height: 200px !important;
+}
+
+.data-model > .segment > .dimmer.active {
+  max-height: 100vh !important;
+}
+
+.data-model .search input.prompt {
+  min-width: 200px !important;
+}
+
+.data-model .data-model-count {
+  white-space: nowrap !important;
+}
+
+.data-model .accordion {
+  margin-top: 1em !important;
+  box-shadow: none !important;
+}
+
+.data-model .accordion .title {
+  padding: 0.5em 0em !important;
+  display: flex;
+}
+
+.data-model .accordion .group-title {
+  background: #aaaaaa !important;
+  box-shadow: inset 0px -5px 35px 15px white !important;
+}
+
+.data-model .accordion .title > * {
+  white-space: nowrap !important;
+  min-width: inherit !important;
+  flex-shrink: 0 !important;
+  margin-right: 0.5em !important;
+}
+
+.data-model .accordion .title .description {
+  font-weight: normal !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  flex-shrink: 1 !important;
+  flex-grow: 1 !important;
+}
+
+.data-model .accordion .data-model-column .title.active .description {
+  visibility: hidden !important;
+}
+
+/*.data-model .accordion .data-model-table:first-of-type > .title {
+  border-top: none !important;
+}*/
+
+.data-model .accordion .title > span:not(.description) {
+  color: black;
+}
+
+.data-model .accordion .content {
+  padding: 0em 1.75em 0.5em !important;
+}
+
+.data-model .label {
+  font-weight: normal !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+  padding: 0.4em !important;
+}
+
+.data-model .accordion .data-model-table.no-match,
+.data-model .accordion .data-model-group.no-match,
+.data-model .accordion .data-model-column.no-match {
+  display: none !important;
+}
+
+.data-model .vocabulary-label {
+  color: rgba(0, 0, 0, 0.4) !important;
+}
