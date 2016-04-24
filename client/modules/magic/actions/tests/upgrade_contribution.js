@@ -284,6 +284,9 @@ describe('magic.actions.upgrade_contribution', () => {
         er_specimens: [{
           er_specimen_name: '1'
         }],
+        // RCJM: Yes pmag_specimens.er_specimen_names was wrong. 
+        // You can either use pmag_specimens.er_specimen_name or pmag_results.er_specimen_names - both merge into
+        // specimens.specimen_name in 3.0.
         //pmag_specimens: [{
         pmag_results: [{
           er_specimen_names: '1'
