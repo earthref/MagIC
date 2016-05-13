@@ -9,17 +9,33 @@ export default class extends React.Component {
   }
 
   restart() {
-    $(this.refs['select step']).addClass('active');
+    $(this.refs['select step']).show();
+    $(this.refs['select link step']).hide();
     $(this.refs['upgrade step']).removeClass('active').addClass('disabled');
     $(this.refs['save step']).removeClass('active').addClass('disabled');
     $(this.refs['accordion']).accordion('open',0);
   }
 
   onDrop(files) {
-    $(this.refs['select step']).removeClass('active');
+    $(this.refs['select step']).hide();
+    $(this.refs['select link step']).show();
     $(this.refs['upgrade step']).removeClass('disabled').addClass('active');
     $(this.refs['save step']).removeClass('active').addClass('disabled');
     $(this.refs['accordion']).accordion('open',1);
+
+    try {
+      for (let file of files) {
+        const fr = new FileReader();
+        fr.onload = (e) => {
+          console.log(e.target.result);
+        };
+        fr.readAsText(file);
+      }
+    }
+    catch(err) {
+      console.error(err.message, err);
+    }
+
   }
 
   saveContributionFile() {
@@ -30,27 +46,34 @@ export default class extends React.Component {
     return (
       <div className="upgrade-contribution">
         <div className="ui top attached stackable three steps">
-          <a ref="select step" className="active step" onClick={this.restart.bind(this)}>
+          <div ref="select step" className="active step">
             <i className="file text outline icon"></i>
             <div className="content">
-              <div className="title">Select the MagIC Text File(s)</div>
-              <div className="description">The text files must all belong to a single MagIC contribution.</div>
+              <div className="title">Step 1.<br/>Select the MagIC Text File(s)</div>
+              <div className="description">Click and select or drag and drop files below.</div>
+            </div>
+          </div>
+          <a ref="select link step" className="step" style={{display: "none"}} onClick={this.restart.bind(this)}>
+            <i className="file text outline icon"></i>
+            <div className="content">
+              <div className="title">Step 1.<br/>Restart by Selecting new File(s)</div>
+              <div className="description">All progress in upgrading will be lost.</div>
             </div>
           </a>
           <div ref="upgrade step" className="disabled step">
-            <i className="icons">
+            <i className="icons icon">
               <i className="file text outline icon"></i>
               <i className="corner up arrow icon"></i>
             </i>
             <div className="content">
-              <div className="title">Upgrade the MagIC Contribution</div>
+              <div className="title">Step 2.<br/>Upgrade the MagIC Contribution</div>
               <div className="description">The upgrade occurs locally on your computer without uploading to MagIC.</div>
             </div>
           </div>
           <div ref="save step" className="disabled step">
             <i className="download icon"></i>
             <div className="content">
-              <div className="title">Save the Upgraded Contribution</div>
+              <div className="title">Step 3.<br/>Save the Upgraded Contribution</div>
               <div className="description">Save the upgraded contribution text file to your downloads folder.</div>
             </div>
           </div>
@@ -59,6 +82,10 @@ export default class extends React.Component {
           <div ref="accordion" className="ui accordion">
             <div className="active title"></div>
             <div ref="select step message" className="active content select-step-content">
+              <div ref="loading" className="ui inverted dimmer">
+                <div className="ui text loader">Loading files</div>
+                <div className="ui button">Cancel</div>
+              </div>
               <Dropzone className="upgrade-dropzone" onDrop={this.onDrop.bind(this)}>
                 <div className="ui center aligned two column relaxed grid">
                   <div className="column">

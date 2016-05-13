@@ -1,6 +1,7 @@
 import {_} from 'lodash';
 import moment from 'moment';
 import React from 'react';
+import saveAs from 'save-as';
 import {portals} from '../../core/configs/portals.js';
 import {default as versions} from '../configs/magic_versions.js';
 import {default as models} from '../configs/data_models/data_models.js';
@@ -188,6 +189,16 @@ export default class extends React.Component {
     return this.dataModelColumnCache[cacheKey];
   }
 
+  downloadJSON() {
+    const version = this.props.version;
+    const model = models[version];
+    const published = (model.published_day ?
+      moment(model.published_day, 'YYYY:MM:DD').format('MMMM Do, YYYY') :
+      'unpublished');
+    const blob = new Blob([JSON.stringify(model, null, '\t')], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, 'MagIC Data Model v' + version + ' - ' + published + '.json');
+  }
+
   render() {
     const version = this.props.version;
     const model = models[version];
@@ -248,7 +259,7 @@ export default class extends React.Component {
             </div>
             <div className="right aligned six wide column">
               <i className="download icon"/>
-              Download as <a href="">.json</a>.
+              Download as <a href="" onClick={this.downloadJSON.bind(this)}>.json</a>.
             </div>
           </div>
           <div ref="accordion" className="ui styled fluid accordion">
