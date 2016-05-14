@@ -16,8 +16,8 @@
   ],
 
   "ssl": {
-    "certificate": "~/earthref.ssl.crt", // this is a bundle of certificates
-    "key": "~/earthref.ssl.key", // this is the private key of the certificate
+    "certificate": "earthref.ssl.crt", // this is a bundle of certificates
+    "key": "earthref.ssl.key", // this is the private key of the certificate
     "port": 443 // 443 is the default value and it's the standard HTTPS port
   },
 
