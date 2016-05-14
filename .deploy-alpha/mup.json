@@ -4,7 +4,7 @@
     {
       "host": "alpha.earthref.org",
       "username": "root",
-      "pem": "~/.ssh/digital_ocean.id_rsa",
+      "pem": "~/.ssh/id_rsa",
       // or pem file (ssh based authentication)
       // WARNING: Keys protected by a passphrase are not supported
       //"pem": "~/.ssh/id_rsa"
