@@ -7,7 +7,7 @@ import Home from '../core/components/home.jsx';
 
 import {default as magicVersions} from './configs/magic_versions.js';
 import MagICDataModel from './components/data_model.jsx';
-import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
+import MagICUploadContribution from './components/upload_contribution.jsx';
 
 export default function (injectDeps, {FlowRouter}) {
 
@@ -72,6 +72,24 @@ export default function (injectDeps, {FlowRouter}) {
                 <a className="purple" href="../data-model/">latest MagIC data model version</a>:
               </h3>
               <MagICUpgradeContribution/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/upload/`, {
+    name: 'magicDataModel',
+    action({}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Upload data to your private workspace:
+              </h3>
+              <MagICUploadContribution/>
             </Home>
           </Layout>
         )

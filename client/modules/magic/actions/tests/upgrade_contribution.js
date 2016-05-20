@@ -282,14 +282,12 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.5'
         }],
         er_specimens: [{
-          er_specimen_name: '1'
+          er_specimen_name: '1',
+          specimen_texture: 'Metamorphic'
         }],
-        // RCJM: Yes pmag_specimens.er_specimen_names was wrong. 
-        // You can either use pmag_specimens.er_specimen_name or pmag_results.er_specimen_names - both merge into
-        // specimens.specimen_name in 3.0.
-        //pmag_specimens: [{
         pmag_results: [{
-          er_specimen_names: '1'
+          er_specimen_names: '1',
+          data_type: 'a'
         }]
       };
       const jsonNew = {
@@ -297,7 +295,9 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         specimens: [{
-          specimen_name: '1'
+          specimen: '1',
+          texture: 'Metamorphic',
+          result_type: 'a'
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
@@ -323,13 +323,13 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         samples: [{
-          sample_name: '1',
-          specimen_names: '1:3',
+          sample: '1',
+          specimens: '1:3',
           age: '5'
         }],
         specimens: [{
-          sample_name: '1',
-          specimen_name: '3',
+          sample: '1',
+          specimen: '3',
           age: '6'
         }]
       };
