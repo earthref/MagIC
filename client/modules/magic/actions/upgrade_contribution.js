@@ -87,6 +87,8 @@ export default class extends Runner {
   createNewJSON(newModel, oldModel, oldVersion, newVersion){
 
       let upgradeMap = this.getUpgradeMap(newModel);
+      let upgradeColumnCollisions = {}; //= this.getColumnCollisions(newModel);
+
       this.jsonNew = {};
       for (let oldJSONTable in this.jsonOld) {
 
@@ -96,7 +98,7 @@ export default class extends Runner {
           continue;
         }
 
-        for (let oldJSONRow of this.jsonOld[oldJSONTable]) {//loop through all rows in table
+        for (let oldJSONRow of this.jsonOld[oldJSONTable]) {//loop through all rows in table old table
           let newRow = {};
 
           for (let oldJSONColumn in oldJSONRow) {//loop through all columns in row
@@ -118,26 +120,56 @@ export default class extends Runner {
             if (oldJSONTable === 'contribution' && oldJSONColumn === 'magic_version') {
               newRow[oldJSONColumn] = newVersion;
               upgradeTable = 'contribution';
+              this.jsonNew[upgradeTable] = [];
 
               continue;
             }
 
-            //Cycle through the upgrade info for a given table/column to know where to place the the old model's data in the new model
-            //This loop goes through the location(s) to move ONE field of data
+            //Cycle through the upgrade info outlining where to place the the old model's data in the new model
+            //This loop goes through the location(s) to move ONE field of data from the old model
             for (let upgradeToTableAndColumnIdx in upgradeMap[oldJSONTable][oldJSONColumn]) {
-              //if (!this.jsonNew[upgradeToTableAndColumn.table]) this.jsonNew[upgradeToTableAndColumn.table] = [];
+
               upgradeTable = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].table;
 
+              //Create table representation if it doesn't exist
+              if (!this.jsonNew[upgradeTable]) this.jsonNew[upgradeTable] = [];
+              //console.log(`json: ${upgradeTable}`);
+
               var upgradeColumn = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].column;
-              newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
+
+              //Here I'm beginging a solution to knowing whether or not we need to combine rows
+              //obviously it is not complete, and there is a lot more logic needed.
+              let rowKeyVal = '1';//This is obviously temporary
+              let upgradeCollisionKey = `${upgradeTable}${upgradeColumn}${rowKeyVal}`;
+              console.log(`Key ${upgradeCollisionKey}`);
+
+              console.log(`Key list: ${Object.getOwnPropertyNames(upgradeColumnCollisions)}`);
+              console.log(`Has key? ${upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey)}`);
+              if(!upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey))
+                newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
+              else
+                upgradeColumnCollisions[upgradeCollisionKey] = rowKeyVal;
             }
           }
-          if (!this.jsonNew[upgradeTable]) this.jsonNew[upgradeTable] = [];
-          this.jsonNew[upgradeTable].push(newRow);
+
+          //Create table representation if it doesn't exist
+          //if (!this.jsonNew[upgradeTable]) this.jsonNew[upgradeTable] = [];
+          /*if(this.jsonNew[upgradeTable]) */this.jsonNew[upgradeTable].push(newRow);
+          console.log(`json: ${JSON.stringify(this.jsonNew)}`);
         }
+        //collapseRows();
       }
     return this.jsonNew;
   }
+
+  upgradeColumnCollisions(newModel){
+
+  }
+
+
+   collapseRows(){
+
+   }
 
 
   //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
