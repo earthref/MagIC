@@ -192,7 +192,7 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test upgrading valid JSON.
   describe('when upgrading valid JSON', () => {
 
-    //doesn't test any true upgrade ability yet, just that numbers are upgraded as strings
+    // Numbers don't get converted from string until schema validation, so make sure they stay as strings for now.
     it('should keep numbers as strings', () => {
       const jsonOld = {
         contribution: [{
@@ -209,6 +209,9 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
+    // Upgrading should continue from the dataset version up until the current MagIC data model version.
+    // If a maximum version is passed to the upgrader, though, the upgrade should stop after the
+    // dataset reaches that version.
     it('should stop upgrading at the given maximum version', () => {
       const jsonOld = {
         contribution: [{
@@ -223,8 +226,26 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '2.4', jsonNew);
     });
 
+    // Tables and columns can change names from one version to the next.
     it('should update column names', () => {
-      const jsonOld = {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: '1'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: '1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+      const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -232,7 +253,7 @@ describe('magic.actions.upgrade_contribution', () => {
           susceptibility_loss_tangent: '1'
         }]
       };
-      const jsonNew = {
+      const jsonNew2 = {
         contribution: [{
           magic_version: '3.0'
         }],
@@ -240,9 +261,10 @@ describe('magic.actions.upgrade_contribution', () => {
           susc_loss_tangent: '1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
     });
 
+    // Columns could be removed during an upgrade. Make sure the user will be warned about any deletions.
     it('should warn about deleted columns', () => {
       const jsonOld = {
         contribution: [{
@@ -256,53 +278,17 @@ describe('magic.actions.upgrade_contribution', () => {
         /column .* in table .* was deleted in magic data model/i);
     });
 
-    it('should update table names', () => {
-      const jsonOld = {
-        contribution: [{
-          magic_version: '2.5'
-        }],
-        er_specimens: [{
-          er_specimen_name: '1'
-        }]
-      };
-      const jsonNew = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        specimens: [{
-          specimen_name: '1'
-        }]
-      };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
-    });
-
-    it('should merge the same column value from different tables', () => {
-      const jsonOld = {
-        contribution: [{
-          magic_version: '2.5'
-        }],
-        er_specimens: [{
-          er_specimen_name: '1'
-        }],
-        // RCJM: Yes pmag_specimens.er_specimen_names was wrong. 
-        // You can either use pmag_specimens.er_specimen_name or pmag_results.er_specimen_names - both merge into
-        // specimens.specimen_name in 3.0.
-        //pmag_specimens: [{
-        pmag_results: [{
-          er_specimen_names: '1'
-        }]
-      };
-      const jsonNew = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        specimens: [{
-          specimen_name: '1'
-        }]
-      };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
-    });
-
+    // Some of the 2.5 and older table (e.g. pmag_results, rmag_anisotropy) had a loose parent/child relationship.
+    // For example a pmag_results row like this:
+    //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
+    //   Location1           Site1            Sample1           Specimen1:Specimen2   0.0000052143
+    // had a parent record in the er_samples table with er_samples.er_sample_name = Sample1 because the specimens names
+    // in this pmag_results row are plural and describe which of Sample1's specimens were included in the result.
+    // Whereas a pmag_results row like this:
+    //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
+    //   Location1           Site1            Sample1           Specimen1             0.0000052143
+    // had a parent record in the er_specimens table with er_specimens.er_specimen_name = Specimen1.
+    // Make sure these rows wind up in the right 3.0 tables.
     it('should assign the same column into different tables based on the level', () => {
       const jsonOld = {
         contribution: [{
@@ -336,10 +322,149 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
-    // TODO: write more difficult tests for table names changing,
-    // merging from different tables, splitting into different tables,
-    // tables with columns renamed into different tables
+    // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
+    // these two rows wind up in a single row when possible
+    // (i.e. when all columns are either orthogonal or identical)
+    it('should merge the same column value from different tables', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: 'specimen_A',
+          specimen_texture: 'Metamorphic'
+        }],
+        pmag_results: [{
+          er_specimen_names: 'specimen_A',
+          data_type: 'a'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{ // texture from er_specimens and result_type from pmag_results are orthogonal
+          specimen: 'specimen_A',
+          texture: 'Metamorphic',
+          result_type: 'a'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_A',
+          site_lat: '1.1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_A',
+          average_lat: '1.1'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{ // lat from er_sites and pmag_results are identical
+          site: 'site_A',
+          lat: '1.1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+    });
 
+    // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
+    // these two rows are kept separate with repeated information.
+    it('should keep different column value separate from different tables', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          sample_class: 'Submarine:Sedimentary',
+          magic_method_codes: 'LP-DIR'
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          magic_method_codes: 'LP-PI'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{ // method_codes are different, so these rows can't be combined
+          sample: 'sample_A',
+          geologic_classes: 'Submarine:Sedimentary',
+          method_codes: 'LP-DIR'
+        },{
+          sample: 'sample_A',
+          int_abs: '0.0123',
+          method_codes: 'LP-PI'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          er_citation_names: 'This Study'
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          er_citation_names: '10.1029/92JB01202'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{ // citations are different, so these rows can't be combined
+          sample: 'sample_A',
+          citations: 'This Study'
+        },{
+          sample: 'sample_A',
+          average_int: '0.0123',
+          citations: '10.1029/92JB01202'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+      const jsonOld3 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_A',
+          site_lat: '1.1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_A',
+          average_lat: '1.2'
+        }]
+      };
+      const jsonNew3 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{ // lat values are different, so these rows can't be combined
+          site: 'site_A',
+          lat: '1.1'
+        },{
+          site: 'site_A',
+          lat: '1.2'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);
+    });
+
+    // TODO: Add special cases for 3.0 upgrades
 
   });
 
