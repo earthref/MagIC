@@ -149,7 +149,7 @@ export default class extends Runner {
                 newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
               else
                 upgradeColumnCollisions[upgradeCollisionKey] = rowKeyVal;
-            }
+            } 
           }
 
           //Create table representation if it doesn't exist
