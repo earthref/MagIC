@@ -125,41 +125,60 @@ export default class extends Runner {
               continue;
             }
 
-            //Cycle through the upgrade info outlining where to place the the old model's data in the new model
-            //This loop goes through the location(s) to move ONE field of data from the old model
+            //Cycle through the upgrade info outlining the potential locations in the new model for a single piece of data
+            //Go through the location(s) to move ONE field of data from the old model to the proper table in the new
             for (let upgradeToTableAndColumnIdx in upgradeMap[oldJSONTable][oldJSONColumn]) {
 
-              upgradeTable = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].table;
+              let defaultNewTable = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].table;
+              upgradeTable = this.disambiguateNewTable(oldJSONTable,oldJSONRow,defaultNewTable);
+              var upgradeColumn = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].column;
 
               //Create table representation if it doesn't exist
               if (!this.jsonNew[upgradeTable]) this.jsonNew[upgradeTable] = [];
-              //console.log(`json: ${upgradeTable}`);
-
-              var upgradeColumn = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].column;
-
-              //Here I'm beginging a solution to knowing whether or not we need to combine rows
-              //obviously it is not complete, and there is a lot more logic needed.
-              let rowKeyVal = '1';//This is obviously temporary
-              let upgradeCollisionKey = `${upgradeTable}${upgradeColumn}${rowKeyVal}`;
-              console.log(`Key ${upgradeCollisionKey}`);
-
-              console.log(`Key list: ${Object.getOwnPropertyNames(upgradeColumnCollisions)}`);
-              console.log(`Has key? ${upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey)}`);
-              if(!upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey))
-                newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
-              else
-                upgradeColumnCollisions[upgradeCollisionKey] = rowKeyVal;
+console.log(`new data: ${upgradeColumn}`);
+              newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
             } 
           }
 
           //Create table representation if it doesn't exist
           //if (!this.jsonNew[upgradeTable]) this.jsonNew[upgradeTable] = [];
-          /*if(this.jsonNew[upgradeTable]) */this.jsonNew[upgradeTable].push(newRow);
+          /*if(this.jsonNew[upgradeTable]) */
+          this.jsonNew[upgradeTable].push(newRow);
           console.log(`json: ${JSON.stringify(this.jsonNew)}`);
         }
         //collapseRows();
       }
     return this.jsonNew;
+  }
+
+
+  /*This informs the caller of the exceptions to the normal mapping from old to new tables which are based on rules applied to data
+  * in the tables as opposed to a direct mapping rule.*/
+  disambiguateNewTable(oldJSONTableName, oldRowData, defaultTable)
+  {
+      switch(oldJSONTableName) {
+        case 'pmag_results':
+
+            if( oldRowData['er_specimen_names']!= null &&
+                !oldRowData['er_specimen_names'].match(/[:]/i))//Rupert you may want to spice up this Regex
+            {return 'specimens';}
+            else
+            if( oldRowData['er_sample_names']!= null &&
+                oldRowData['er_specimen_names'].match(/[:]/i))//Rupert you may want to spice up this Regex
+            {return 'samples';}
+        break;
+
+        case 'another_table':
+        break;
+
+        default:
+        return defaultTable;
+      }
+  }
+
+  isPlural(dataCellString)
+  {
+
   }
 
   upgradeColumnCollisions(newModel){
@@ -243,6 +262,20 @@ export default class extends Runner {
   }
 }
 
+
+//CODE GRAVEYARD
+/*//Here I'm beginging a solution to knowing whether or not we need to combine rows
+//obviously it is not complete, and there is a lot more logic needed.
+let rowKeyVal = '1';//This is obviously temporary
+let upgradeCollisionKey = `${upgradeTable}${upgradeColumn}${rowKeyVal}`;
+console.log(`Key ${upgradeCollisionKey}`);
+
+console.log(`Key list: ${Object.getOwnPropertyNames(upgradeColumnCollisions)}`);
+console.log(`Has key? ${upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey)}`);
+if(!upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey))
+  newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
+else
+  upgradeColumnCollisions[upgradeCollisionKey] = rowKeyVal;*/
 
 
 //GGG THIS IS THE OLD SPLIT COL SOLUTION, holding onto it for a bit as i might want to copy some

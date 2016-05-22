@@ -279,16 +279,25 @@ describe('magic.actions.upgrade_contribution', () => {
     });
 
     // Some of the 2.5 and older table (e.g. pmag_results, rmag_anisotropy) had a loose parent/child relationship.
-    // For example a pmag_results row like this:
+
+    // For example a pmag_results row like this, which is a result based on a combination of specimens:
     //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
-    //   Location1           Site1            Sample1           Specimen1:Specimen2   0.0000052143
+    //   Location1           Site1            Sample1           Specimen1:Specimen2   0.0000068914
     // had a parent record in the er_samples table with er_samples.er_sample_name = Sample1 because the specimens names
     // in this pmag_results row are plural and describe which of Sample1's specimens were included in the result.
     // Whereas a pmag_results row like this:
     //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
     //   Location1           Site1            Sample1           Specimen1             0.0000052143
+    //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
+    //   Location1           Site1            Sample1           Specimen2             0.000005456
+
     // had a parent record in the er_specimens table with er_specimens.er_specimen_name = Specimen1.
     // Make sure these rows wind up in the right 3.0 tables.
+
+    //The situation above can be might represent a rock(sample) split into two pieces (specimens) Each specimen was then
+    //analyzed separately. The rows with a singular er _specimanes is considered a specimen.
+    // The row with the plural er_specimens_names might represent an average of the two specimens and is considered a sample.
+    //GGG Use this to debug the extra 'samples' and 'specimens' problem
     it('should assign the same column into different tables based on the level', () => {
       const jsonOld = {
         contribution: [{
@@ -322,9 +331,39 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
+    //GGG Using this test for debugging because it is simple
+    it('Simple Debug Test: should merge the same column value from different tables ', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        /*er_specimens: [{
+          er_specimen_name: '1'
+        }],*/
+        // RCJM: Yes pmag_specimens.er_specimen_names was wrong.
+        // You can either use pmag_specimens.er_specimen_name or pmag_results.er_specimen_names - both merge into
+        // specimens.specimen_name in 3.0.
+        //pmag_specimens: [{
+        pmag_specimens: [{
+          er_specimen_name: '1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: '1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
     // these two rows wind up in a single row when possible
     // (i.e. when all columns are either orthogonal or identical)
+    // if, in the set of colliding columns (based on the mapping) NOT have different values, then collpase to a single row
     it('should merge the same column value from different tables', () => {
       const jsonOld1 = {
         contribution: [{
@@ -372,11 +411,12 @@ describe('magic.actions.upgrade_contribution', () => {
           lat: '1.1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
     });
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
     // these two rows are kept separate with repeated information.
+    //So, if any field is different, make two rows
     it('should keep different column value separate from different tables', () => {
       const jsonOld1 = {
         contribution: [{
@@ -387,7 +427,7 @@ describe('magic.actions.upgrade_contribution', () => {
           sample_class: 'Submarine:Sedimentary',
           magic_method_codes: 'LP-DIR'
         }],
-        pmag_results: [{
+        pmag_results: [{///GGG Confirmed wiwth rupert that this should go to the specimen table due to no plurality
           er_sample_names: 'sample_A',
           average_int: '0.0123',
           magic_method_codes: 'LP-PI'
@@ -408,6 +448,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+      /*GGG  temp remove
       const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
@@ -461,7 +502,7 @@ describe('magic.actions.upgrade_contribution', () => {
           lat: '1.2'
         }]
       };
-      upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);
+      upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);*/
     });
 
     // TODO: Add special cases for 3.0 upgrades
