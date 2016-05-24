@@ -25,7 +25,7 @@ describe('magic.actions.export_contribution', () => {
     it('should reject if the column name is invalid.', () => {
       const invalidColumn = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '3.0'
         }],
         er_locations: [{
           not_region: 'California'
@@ -38,7 +38,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report one error if the same two columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '2.4'
+          magic_version: '3.0'
         }],
         er_locations: [{
           not_region: 'California'
@@ -54,7 +54,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report two errors if two different columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '2.4'
+          magic_version: '3.0'
         }],
         er_locations: [{
           not_region: 'California'
@@ -71,7 +71,7 @@ describe('magic.actions.export_contribution', () => {
   // Test exporting valid JSON to text.
   describe('when exporting valid JSON to text', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
-      const json1 = {
+      /*const json1 = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -115,7 +115,7 @@ describe('magic.actions.export_contribution', () => {
         'er_specimen_name\ter_location_name\ter_sample_name\tspecimen_dip\tspecimen_igsn\ter_citation_names\n' +
         'sp1\tlo1\tsa1\t1.2\tisgn1\t:"10.1023/A:1":This study:\n' +
         'sp2\tlo1\tsa1\t1.3\tisgn2\t\n';
-      exportContributionToTextJSONTest(json1, text1);
+      exportContributionToTextJSONTest(json1, text1);*/
       const json2 = {
         contribution: [{
           magic_version: '3.0',
@@ -142,7 +142,8 @@ describe('magic.actions.export_contribution', () => {
   });
 
   // Test parsing valid files.
-  describe('when exporting valid files to text', () => {
+  //GGG temporarily (perhaps permanently?) removing tests for export that are less than the 3.0 model.
+  /*describe('when exporting valid files to text', () => {
     it('should export contribution 3552 (MagIC version 2.2) with no errors', () => {
       exportContributionToTextNoErrorTest(contribution3552);
     });
@@ -152,7 +153,7 @@ describe('magic.actions.export_contribution', () => {
     it('should export contribution 10507 (MagIC version 2.5) with no errors', () => {
       exportContributionToTextNoErrorTest(contribution10507);
     });
-  });
+  });*/
 });
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
