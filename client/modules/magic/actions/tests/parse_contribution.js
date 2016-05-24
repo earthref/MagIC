@@ -5,39 +5,6 @@ import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
 
-// Expect the warnings to contain one warning that matches the reWarningMsg regex.
-const parseContributionWarningTest = (text, reWarningMsg) => {
-  const Parser = new ParseContribution({});
-  Parser.parse(text);
-  expect(Parser.warnings().length).to.be.at.least(1);
-  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reWarningMsg);
-};
-
-// Expect the errors to contain one error that matches the reErrorMsg regex.
-const parseContributionErrorTest = (text, reErrorMsg) => {
-  const Parser = new ParseContribution({});
-  Parser.parse(text);
-  expect(Parser.errors().length).to.be.at.least(1);
-  expect(Parser.errors()[Parser.errors().length - 1]['message']).to.match(reErrorMsg);
-};
-
-// Expect no errors.
-const parseContributionNoErrorTest = (text) => {
-  const Parser = new ParseContribution({});
-  Parser.parse(text);
-  expect(Parser.errors().length).to.equal(0);
-  return Parser;
-};
-
-// Expect no errors and check against expected JSON.
-const parseContributionJSONTest = (text, jsonExpected, Parser) => {
-  if(!Parser) Parser = new ParseContribution({});
-  const json = Parser.parse(text);
-  expect(Parser.errors().length).to.equal(0);
-  expect(json).to.deep.equal(jsonExpected);
-  return Parser;
-};
-
 describe('magic.actions.parse_contribution', () => {
 
   // Test parsing invalid strings.
@@ -97,9 +64,10 @@ describe('magic.actions.parse_contribution', () => {
     it('should eliminate blank lines and leading/trailing spaces', () => {
       const withBlanks = [
         '\ntab\ttable\ncol1\tcol2\nstr1\t1.2',
-        'tab\ttable\ncol1\tcol2\n\n\nstr1\t1.2',
+        'tab delimited \ttable\ncol1\tcol2\n\n\nstr1\t1.2',
         ' tab\ttable\ncol1\tcol2\nstr1\t1.2',
-        'tab  \ttable\ncol1\tcol2\nstr1\t1.2',
+        'tab any_non_tab_string\ttable\ncol1\tcol2\nstr1\t1.2',
+        'tab any_non_tab_string\ttable\ncol1\tcol2\nstr1\t1.2',
         'tab\t  table\ncol1\tcol2\nstr1\t1.2',
         'tab\ttable\ncol1  \tcol2\n  str1\t1.2  '
       ];
@@ -141,3 +109,36 @@ describe('magic.actions.parse_contribution', () => {
     });
   });
 });
+
+// Expect the warnings to contain one warning that matches the reWarningMsg regex.
+const parseContributionWarningTest = (text, reWarningMsg) => {
+  const Parser = new ParseContribution({});
+  Parser.parse(text);
+  expect(Parser.warnings().length).to.be.at.least(1);
+  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reWarningMsg);
+};
+
+// Expect the errors to contain one error that matches the reErrorMsg regex.
+const parseContributionErrorTest = (text, reErrorMsg) => {
+  const Parser = new ParseContribution({});
+  Parser.parse(text);
+  expect(Parser.errors().length).to.be.at.least(1);
+  expect(Parser.errors()[Parser.errors().length - 1]['message']).to.match(reErrorMsg);
+};
+
+// Expect no errors.
+const parseContributionNoErrorTest = (text) => {
+  const Parser = new ParseContribution({});
+  Parser.parse(text);
+  expect(Parser.errors().length).to.equal(0);
+  return Parser;
+};
+
+// Expect no errors and check against expected JSON.
+const parseContributionJSONTest = (text, jsonExpected, Parser) => {
+  if(!Parser) Parser = new ParseContribution({});
+  const json = Parser.parse(text);
+  expect(Parser.errors().length).to.equal(0);
+  expect(json).to.deep.equal(jsonExpected);
+  return Parser;
+};

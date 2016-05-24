@@ -24,7 +24,7 @@ export default class {
   _appendWarning(warningMessage) {
     const warnings = this.LocalState.get(`${this.name}_WARNINGS`);
     const warning = {lineNumber:this.lineNumber, message:warningMessage};
-    //console.log('WARNING: ', warningMessage);
+    console.log('WARNING: ', warningMessage);
     warnings.push(warning);
     this.LocalState.set(`${this.name}_WARNINGS`, warnings);
   }
@@ -32,7 +32,7 @@ export default class {
   _appendError(errorMessage) {
     const errors = this.LocalState.get(`${this.name}_ERRORS`);
     const error = {lineNumber:this.lineNumber, message:errorMessage};
-    //console.log('ERROR: ', errorMessage);
+    console.log('ERROR: ', errorMessage);
     errors.push(error);
     this.LocalState.set(`${this.name}_ERRORS`, errors);
   }
