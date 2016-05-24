@@ -1,56 +1,47 @@
 import {_} from 'lodash';
-import Runner from './runner.js';
+import Runner from '../../core/actions/runner.js';
+import GetContributionVersion from './get_contribution_version';
 
-import {magicVersions} from '../configs/magic_versions.js';
-import {magicDataModels} from '../configs/data_models/data_models.js';
+import {default as magicVersions} from '../configs/magic_versions';
+import {default as magicDataModels} from '../configs/data_models/data_models';
 
 export default class extends Runner {
 
   constructor({LocalState}) {
-    super('PARSE_CONTRIBUTION', {LocalState});
+    super('EXPORT_CONTRIBUTION', {LocalState});
+    this.VersionGetter = new GetContributionVersion({LocalState});
   }
 
-  toText(JSON) {
+  toText(json) {
 
     let text = '';
 
-    // Check for a valid input.
-    if (_.isEmpty(JSON)) {
-      this._appendWarning('The first argument (MagIC contribution in JSON format) is empty.');
-      return JSON;
-    }
-
-    // Look for the MagIC data model version.
-    let version;
-    if(!JSON || !JSON['contribution']) {
-      this._appendError('Failed to find the "contribution" table.');
-      return JSON;
-    }
-    if (JSON['contribution']) {
-      if (JSON['contribution'].length !== 1) {
-        this._appendError('The "contribution" table does not have exactly one row.');
-        return JSON;
-      }
-      if (!JSON['contribution'][0]['magic_version']) {
-        this._appendError('The "contribution" table does not include the "magic_version" column.');
-        return JSON;
-      }
-      version = JSON['contribution'][0]['magic_version'];
-    }
-
-    // Check that the MagIC data model version is valid (oldVersion is in magicVersions).
-    if (_.indexOf(magicVersions, version) === -1) {
-      const strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(", ");
-      this._appendError(`MagIC data model version ${version} is invalid. Expected one of: ${strVersions}.`);
-      return JSON;
-    }
+    // Retrieve the data model version used in the json
+    const version = this.VersionGetter.getVersion(json);
+    if (!version) return text;
 
     // Retrieve the data model
     const model = magicDataModels[version];
 
     // TODO: use the model to build up text string here
 
-    // text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
+    // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
+
+    // Start by making a list of tables in json, and sort them using the "position" property of the data model tables.
+
+    // For each table in json, make a list of all of the columns used in the rows in the json table,
+    // and sort them using the "position" property of the data model columns.
+
+    // Then loop through the used tables in data model order,
+    //   print the table header (note: "tab delimited\ttable_name" format)
+    //   loop through the used columns for that table in data model order,
+    //     print the column headers
+    //   loop through the rows in that table in the order in the json,
+    //     loop through the used columns for that table in data model order,
+    //       print the column value for that row
+    //         note: arrays turn into :val1:val2 string,
+    //               any string in an array that contains a ":" gets double quotes around it
+    //   and print the table separator if there is another table.
 
     return text;
 

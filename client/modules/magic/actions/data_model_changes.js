@@ -1,8 +1,8 @@
 import {_} from 'lodash';
-import Runner from './runner';
+import Runner from '../../core/actions/runner';
 
-import {magicVersions} from '../configs/magic_versions.js';
-import {magicDataModels} from '../configs/data_models/data_models.js';
+import {default as magicVersions} from '../configs/magic_versions';
+import {default as magicDataModels} from '../configs/data_models/data_models';
 
 /*This class makes a lists of changes from the "previous" model to the "current" model*/
 export default class extends Runner {

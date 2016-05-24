@@ -3,92 +3,12 @@ import {expect} from 'chai';
 import {_} from 'lodash';
 import ParseContribution from '../parse_contribution.js';
 import UpgradeContribution from '../upgrade_contribution.js';
-//import {default as contribution289  } from './files/289.js';
-//import {default as contribution3552 } from './files/3552.js';
-//import {default as contribution7527 } from './files/7527.js';
-//import {default as contribution7661 } from './files/7661.js';
-//import {default as contribution8054 } from './files/8054.js';
-//import {default as contribution10507} from './files/10507.js';
-
-// Expect the warnings to contain one warning that matches the reWarningMsg regex.
-const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
-  expect(Upgrader.warnings().length).to.be.at.least(1);
-  expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reWarningMsg);
-};
-
-// Expect the last error to match the reErrorMsg regex.
-const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
-  logErrors(Upgrader.errors());
-  expect(Upgrader.errors().length).to.be.at.least(1);
-  expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
-};
-
-
-function logErrors(errors, warnings) {
-  for(let errorIdx in errors)
-    console.log(`ERROR: ${errors[errorIdx]['message']}`);
-  for(let warningIdx in warnings)
-    console.log(`Warning: ${warnings[warningIdx]['message']}`);
-}
-
-const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
-  logErrors(Upgrader.errors());
-
-  //GGG CHANGING THIS because changes to the input test data are needed so that other errors are not detected
-  //In this case, it is related to the requirement  that the
-  //contribution table has a magic_version column, but apparently that has
-  //changed. So I'll have to go and change the input data so that error
-  //isn't detected by most every test
-  expect(Upgrader.errors().length).to.be.at.least(nErrors);
-  //expect(Upgrader.errors().length).to.equal(nErrors);
-};
-
-// Expect no errors.
-const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
-  expect(Upgrader.errors().length).to.equal(0);
-};
-
-// Expect no errors and check against expected JSON.
-const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
-  const Upgrader = new UpgradeContribution({});
-  const jsonNew = Upgrader.upgrade(jsonOld, maxVersion);
-  console.log("EXPECTED! " + JSON.stringify(jsonExpected));
-  console.log("ACTUAL  ! " + JSON.stringify(jsonNew));
-  logErrors(Upgrader.errors(),Upgrader.warnings());
-  expect(Upgrader.errors().length).to.equal(0);
-  expect(jsonNew).to.deep.equal(jsonExpected);
-};
-
-// Expect no errors and check the upgrade map against expected map.
-const upgradeContributionMapTest = (newModel, expectedMap) => {
-  const Upgrader = new UpgradeContribution({});
-  const upgradeMap = Upgrader.getUpgradeMap(newModel);
-
-  console.log("EXPECTED! " + JSON.stringify(expectedMap));
-  console.log("ACTUAL  ! " + JSON.stringify(upgradeMap));
-
-  expect(Upgrader.errors().length).to.equal(0);
-  expect(upgradeMap).to.deep.equal(expectedMap);
-};
+import {default as contribution10507} from './files/contributions/10507.js';
 
 describe('magic.actions.upgrade_contribution', () => {
 
   // Test upgrading invalid JSON.
   describe('when upgrading invalid JSON', () => {
-
-    it('should warn about upgrading an empty object', () => {
-      upgradeContributionWarningTest(null, undefined, /the first argument .* is empty/i);
-      upgradeContributionWarningTest(undefined, undefined, /the first argument .* is empty/i);
-      upgradeContributionWarningTest({}, undefined, /the first argument .* is empty/i);
-    });
 
     it('should reject when the maximum upgrade version is invalid.', () => {
       const invalidMagicVersion = {
@@ -99,52 +19,7 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionErrorTest(invalidMagicVersion, '1.0', 
         /the second argument .* is invalid/i);
     });
-
-    it('should reject when no contribution table is found', () => {
-      const jsonNoContribTable = {
-        not_contribution: [{
-          magic_version: '2.2'
-        }],
-        er_locations: [{
-          region: 'California'
-        }]
-      };
-       upgradeContributionErrorTest(jsonNoContribTable, undefined, 
-         /failed to find the "contribution" table/i);
-    });
-
-    it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
-      const jsonContribNoMagicVersion = {
-        contribution: [{
-          not_magic_version: '2.2'
-        }]
-      };
-      upgradeContributionErrorTest(jsonContribNoMagicVersion, undefined,
-        /table does not include the "magic_version" column./i);
-    });
-
-    it('should reject when the "contribution" table does not have exactly one row.', () => {
-      const jsonContribTwoRows = {
-        contribution: [{
-          magic_version: '2.2'
-        }, {
-          magic_version: '2.3'
-        }]
-      };
-      upgradeContributionErrorTest(jsonContribTwoRows, undefined, 
-        /table does not have exactly one row./i);
-    });
-
-   it('should reject if the data model version is invalid.', () => {
-      const invalidMagicVersion = {
-        contribution: [{
-          magic_version: '0.1'
-        }]
-      };
-      upgradeContributionErrorTest(invalidMagicVersion, undefined, 
-        /data model version .* is invalid/i);
-    });
-
+    
     it('should reject if the table name is invalid.', () => {
       const invalidTable = {
         contribution: [{
@@ -171,7 +46,7 @@ describe('magic.actions.upgrade_contribution', () => {
         /column .* in table .* is not defined in magic data model/i);
     });
 
-    it('should report two errors if two columns are invalid.', () => {
+    it('should report one error if the same two columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
           magic_version: '2.4'
@@ -182,11 +57,27 @@ describe('magic.actions.upgrade_contribution', () => {
           not_region: 'California'
         }]
       };
+      upgradeContributionNErrorsTest(invalidColumns, '2.5', 1);
+      upgradeContributionErrorTest(invalidColumns, '2.5',
+        /column .* in table .* is not defined in magic data model/i);
+    });
+    
+    it('should report two errors if two different columns are invalid.', () => {
+      const invalidColumns = {
+        contribution: [{
+          magic_version: '2.4'
+        }],
+        er_locations: [{
+          not_region: 'California'
+        },{
+          not_region2: 'California'
+        }]
+      };
       upgradeContributionNErrorsTest(invalidColumns, '2.5', 2);
       upgradeContributionErrorTest(invalidColumns, '2.5',
         /column .* in table .* is not defined in magic data model/i);
     });
-
+    
   });
 
   // Test upgrading valid JSON.
@@ -278,24 +169,62 @@ describe('magic.actions.upgrade_contribution', () => {
         /column .* in table .* was deleted in magic data model/i);
     });
 
-    // Some of the 2.5 and older table (e.g. pmag_results, rmag_anisotropy) had a loose parent/child relationship.
+    // TODO: don't warn about some columns not being used, like er_specimens.er_location_name
+    
+  });
+
+  // Tests specific to a 2.5 to 3.0 upgrade.
+  // Some of the logic needed to pass these tests needs to be hard coded for the 2.5 to 3.0 upgrade case.
+  // e.g. handling normalized relative intensities and geoids and creating new column types
+  describe('when upgrading 2.5 to 3.0', () => {
+
+    // Contribution level results are removed in 3.0. Make sure the user will be warned about any deletions.
+    // This can happen in pmag_results or rmag_results.
+    it('should warn about deleted results', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_results: [{
+          // These commented out columns would be empty for a contribution level result:
+          //er_location_names: '',
+          //er_site_names: '',
+          //er_sample_names: '',
+          //er_specimen_names: '',
+          average_int: '1'
+        }]
+      };
+      upgradeContributionWarningTest(jsonOld1, '3.0',
+        /row .* in table .* was deleted in magic data model/i);
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        rmag_results: [{
+          critical_temp: '1'
+        }]
+      };
+      upgradeContributionWarningTest(jsonOld2, '3.0',
+        /row .* in table .* was deleted in magic data model/i);
+    });
+
+    // pmag_results and rmag_results in 2.5 and older tables had a loose parent/child relationship.
 
     // For example a pmag_results row like this, which is a result based on a combination of specimens:
     //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
     //   Location1           Site1            Sample1           Specimen1:Specimen2   0.0000068914
     // had a parent record in the er_samples table with er_samples.er_sample_name = Sample1 because the specimens names
     // in this pmag_results row are plural and describe which of Sample1's specimens were included in the result.
+
     // Whereas a pmag_results row like this:
     //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
     //   Location1           Site1            Sample1           Specimen1             0.0000052143
-    //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
     //   Location1           Site1            Sample1           Specimen2             0.000005456
-
     // had a parent record in the er_specimens table with er_specimens.er_specimen_name = Specimen1.
     // Make sure these rows wind up in the right 3.0 tables.
 
-    //The situation above can be might represent a rock(sample) split into two pieces (specimens) Each specimen was then
-    //analyzed separately. The rows with a singular er _specimanes is considered a specimen.
+    //The situation above might represent a rock(sample) split into two pieces (specimens) Each specimen was then
+    //analyzed separately. The rows with a singular er_specimen_names is considered a specimen.
     // The row with the plural er_specimens_names might represent an average of the two specimens and is considered a sample.
     //GGG Use this to debug the extra 'samples' and 'specimens' problem
     it('should assign the same column into different tables based on the level', () => {
@@ -318,13 +247,13 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         samples: [{
-          sample_name: '1',
-          specimen_names: '1:3',
+          sample: '1',
+          specimens: '1:3',
           age: '5'
         }],
         specimens: [{
-          sample_name: '1',
-          specimen_name: '3',
+          sample: '1',
+          specimen: '3',
           age: '6'
         }]
       };
@@ -338,8 +267,8 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.5'
         }],
         /*er_specimens: [{
-          er_specimen_name: '1'
-        }],*/
+         er_specimen_name: '1'
+         }],*/
         // RCJM: Yes pmag_specimens.er_specimen_names was wrong.
         // You can either use pmag_specimens.er_specimen_name or pmag_results.er_specimen_names - both merge into
         // specimens.specimen_name in 3.0.
@@ -358,7 +287,6 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
-
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
     // these two rows wind up in a single row when possible
@@ -448,69 +376,87 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
-      /*GGG  temp remove
-      const jsonOld2 = {
-        contribution: [{
-          magic_version: '2.5'
-        }],
-        er_samples: [{
-          er_sample_name: 'sample_A',
-          er_citation_names: 'This Study'
-        }],
-        pmag_results: [{
-          er_sample_names: 'sample_A',
-          average_int: '0.0123',
-          er_citation_names: '10.1029/92JB01202'
-        }]
-      };
-      const jsonNew2 = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        samples: [{ // citations are different, so these rows can't be combined
-          sample: 'sample_A',
-          citations: 'This Study'
-        },{
-          sample: 'sample_A',
-          average_int: '0.0123',
-          citations: '10.1029/92JB01202'
-        }]
-      };
-      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
-      const jsonOld3 = {
-        contribution: [{
-          magic_version: '2.5'
-        }],
-        er_sites: [{
-          er_site_name: 'site_A',
-          site_lat: '1.1'
-        }],
-        pmag_results: [{
-          er_site_names: 'site_A',
-          average_lat: '1.2'
-        }]
-      };
-      const jsonNew3 = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        sites: [{ // lat values are different, so these rows can't be combined
-          site: 'site_A',
-          lat: '1.1'
-        },{
-          site: 'site_A',
-          lat: '1.2'
-        }]
-      };
-      upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);*/
+       const jsonOld2 = {
+         contribution: [{
+           magic_version: '2.5'
+         }],
+         er_samples: [{
+           er_sample_name: 'sample_A',
+           er_citation_names: 'This Study'
+         }],
+         pmag_results: [{
+           er_sample_names: 'sample_A',
+           average_int: '0.0123',
+           er_citation_names: '10.1029/92JB01202'
+         }]
+       };
+       const jsonNew2 = {
+         contribution: [{
+           magic_version: '3.0'
+         }],
+         samples: [{ // citations are different, so these rows can't be combined
+           sample: 'sample_A',
+           citations: 'This Study'
+         },{
+           sample: 'sample_A',
+           average_int: '0.0123',
+           citations: '10.1029/92JB01202'
+         }]
+       };
+       upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+       const jsonOld3 = {
+         contribution: [{
+           magic_version: '2.5'
+         }],
+           er_sites: [{
+           er_site_name: 'site_A',
+           site_lat: '1.1'
+         }],
+         pmag_results: [{
+           er_site_names: 'site_A',
+           average_lat: '1.2'
+         }]
+       };
+       const jsonNew3 = {
+         contribution: [{
+           magic_version: '3.0'
+         }],
+           sites: [{ // lat values are different, so these rows can't be combined
+           site: 'site_A',
+           lat: '1.1'
+         },{
+           site: 'site_A',
+           lat: '1.2'
+         }]
+       };
+       upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);
     });
 
-    // TODO: Add special cases for 3.0 upgrades
+    // TODO: pmag_rotations into rotation_sequence matrix test
+
+    // TODO: pmag/rmag_criteria into criteria table test
+
+    // TODO: external_database_names/ids into a matrix test
+
+    // TODO: normalized relative intensities test
+
+    // TODO: different synthetic and specimen name puts synthetic name in alternatives test
+
+    // TODO: geoid method code test
 
   });
 
+  // There are currently too many console.log statements in the upgrade for this to run.
+  /*
   // Test upgrading valid files.
-
+  describe('when upgrading valid files', () => {
+    it('should upgrading contribution 10507 (MagIC version 2.5) with no errors', () => {
+      const Parser = new ParseContribution({});
+      const json = Parser.parse(contribution10507);
+      upgradeContributionNoErrorTest(json);
+    });
+  });*/
+  
   // Test calculating the upgrade map.
   //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
   //The upgradeMap is "forward looking" from perspective of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
@@ -532,9 +478,8 @@ describe('magic.actions.upgrade_contribution', () => {
         er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}//the map from the old model to the new
       };
 
-      upgradeContributionMapTest(newModel, upgradeMap);
+      upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
-
 
     it('should handle multiple columns', () => {
       //This represents the model we are upgrading to
@@ -583,8 +528,9 @@ describe('magic.actions.upgrade_contribution', () => {
 
       };
 
-      upgradeContributionMapTest(newModel, upgradeMap);
+      upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
+
     it('should handle inserted columns', () => {
       const newModel = {
         tables: { er_locations: {
@@ -592,7 +538,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }}
       };
       const upgradeMap = {};
-      upgradeContributionMapTest(newModel, upgradeMap);
+      upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
 
     //If a the current column name is different than the previous column name on a one to one basis. By contrast, multiple columns with
@@ -612,7 +558,7 @@ describe('magic.actions.upgrade_contribution', () => {
       const upgradeMap  = {
         er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}//from the previous table and column to new table and column
       };
-      upgradeContributionMapTest(newModel, upgradeMap);
+      upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
 
     //If there are two columns with different names that have the same previous table and previous column name, we have a split
@@ -644,7 +590,7 @@ describe('magic.actions.upgrade_contribution', () => {
           ]
         }
       };
-      upgradeContributionMapTest(newModel, upgradeMap);
+      upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
 
     it('should handle merged columns', () => {
@@ -668,7 +614,7 @@ describe('magic.actions.upgrade_contribution', () => {
           col_name2: [{ table: 'er_locations', column: 'location_name'}] //from previous column (old JSON) TO new table and column
         }
       };
-      upgradeContributionMapTest(newModel, upgradeMap);
+      upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
 
 
@@ -678,3 +624,76 @@ describe('magic.actions.upgrade_contribution', () => {
 
   });
 });
+
+// Expect the warnings to contain one warning that matches the reWarningMsg regex.
+const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
+  const Upgrader = new UpgradeContribution({});
+  Upgrader.upgrade(jsonOld, maxVersion);
+  expect(Upgrader.warnings().length).to.be.at.least(1);
+  expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reWarningMsg);
+};
+
+// Expect the last error to match the reErrorMsg regex.
+const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
+  const Upgrader = new UpgradeContribution({});
+  Upgrader.upgrade(jsonOld, maxVersion);
+  expect(Upgrader.errors().length).to.be.at.least(1);
+  expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
+};
+
+const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
+  const Upgrader = new UpgradeContribution({});
+  Upgrader.upgrade(jsonOld, maxVersion);
+
+  //GGG CHANGING THIS because changes to the input test data are needed so that other errors are not detected
+  //In this case, it is related to the requirement  that the
+  //contribution table has a magic_version column, but apparently that has
+  //changed. So I'll have to go and change the input data so that error
+  //isn't detected by most every test
+  //expect(Upgrader.errors().length).to.be.at.least(nErrors);
+  expect(Upgrader.errors().length).to.equal(nErrors);
+};
+
+// Expect no errors.
+const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
+  const Upgrader = new UpgradeContribution({});
+  Upgrader.upgrade(jsonOld, maxVersion);
+  expect(Upgrader.warnings().length).to.equal(0);
+  expect(Upgrader.errors().length).to.equal(0);
+};
+
+// Expect no errors and check against expected JSON.
+const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
+  const Upgrader = new UpgradeContribution({});
+  const jsonNew = Upgrader.upgrade(jsonOld, maxVersion);
+  expect(Upgrader.warnings().length).to.equal(0);
+  expect(Upgrader.errors().length).to.equal(0);
+  expect(jsonNew).to.deep.equal(jsonExpected);
+};
+
+// Expect no errors and check the upgrade map against expected map.
+const upgradeContributionCreateMapTest = (newModel, expectedMap) => {
+  const Upgrader = new UpgradeContribution({});
+  const upgradeMap = Upgrader._getUpgradeMap(newModel);
+  expect(Upgrader.warnings().length).to.equal(0);
+  expect(Upgrader.errors().length).to.equal(0);
+  expect(upgradeMap).to.deep.equal(expectedMap);
+};
+
+// Expect no errors and check against expected JSON when mapping.
+const upgradeContributionMapTest = (jsonOld, maxVersion, jsonExpected) => {
+  const Upgrader = new UpgradeContribution({});
+  const jsonNew = Upgrader._map(jsonOld, maxVersion);
+  expect(Upgrader.warnings().length).to.equal(0);
+  expect(Upgrader.errors().length).to.equal(0);
+  expect(jsonNew).to.deep.equal(jsonExpected);
+};
+
+// Expect no errors and check against expected JSON when mapping.
+const upgradeContributionReduceTest = (jsonOld, jsonExpected) => {
+  const Upgrader = new UpgradeContribution({});
+  const jsonNew = Upgrader._reduce(jsonOld);
+  expect(Upgrader.warnings().length).to.equal(0);
+  expect(Upgrader.errors().length).to.equal(0);
+  expect(jsonNew).to.deep.equal(jsonExpected);
+};
