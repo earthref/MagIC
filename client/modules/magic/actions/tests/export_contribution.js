@@ -12,20 +12,20 @@ describe('magic.actions.export_contribution', () => {
     it('should reject if the table name is invalid.', () => {
       const invalidTable = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '3.0'
         }],
         not_er_locations: [{
           region: 'California'
         }]
       };
       exportContributionToTextErrorTest(invalidTable,
-        /table .* is not defined in magic data model version /i);
+        /table .* is not defined in magic data model version/i);
     });
 
     it('should reject if the column name is invalid.', () => {
       const invalidColumn = {
         contribution: [{
-          magic_version: '3.0'
+          magic_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -161,6 +161,7 @@ const exportContributionToTextErrorTest = (json, reErrorMsg) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json);
   expect(Exporter.errors().length).to.be.at.least(1);
+  //console.log(`test1: ${Exporter.errors()[Exporter.errors().length - 1]['message']}`);
   expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
