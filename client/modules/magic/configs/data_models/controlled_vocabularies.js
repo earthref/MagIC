@@ -3870,6 +3870,8 @@ export default {
     }, {
       "item": "PINT06"
     }, {
+      "item": "PINT08"
+    }, {
       "item": "PSVRL"
     }, {
       "item": "SAPIS"
