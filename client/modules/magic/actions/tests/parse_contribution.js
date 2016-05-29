@@ -81,7 +81,12 @@ describe('magic.actions.parse_contribution', () => {
         parseContributionJSONTest(withBlank, json);
     });
 
-    it('should combine strings', () => {
+    it('should handle empty columns', () => {
+      const withEmptyColumns = [
+        'tab\ttable\nempty\tcol1\tcol2\n\tstr1\t1.2\n\tstr2\t1.0',
+        'tab\ttable\ncol1\tempty\tcol2\nstr1\t\t1.2\nstr2\t\t1.0',
+        'tab\ttable\ncol1\tcol2\tempty\nstr1\t1.2\t\nstr2\t1.0\t'
+      ];
       const json = {
         table: [{
           col1: 'str1',
@@ -91,8 +96,24 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.0'
         }]
       };
-      const Parser = parseContributionNoErrorTest('tab\ttable\ncol1\tcol2\nstr1\t1.2');
-      parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr2\t1.0', json, Parser);
+      for (let withEmptyColumn of withEmptyColumns)
+        parseContributionJSONTest(withEmptyColumn, json);
+    });
+
+    it('should combine strings', () => {
+      const partial1 = 'tab\ttable\ncol1\tcol2\nstr1\t1.2';
+      const partial2 = 'tab\ttable\ncol1\tcol2\nstr2\t1.0';
+      const json = {
+        table: [{
+          col1: 'str1',
+          col2: '1.2'
+        }, {
+          col1: 'str2',
+          col2: '1.0'
+        }]
+      };
+      const Parser = parseContributionNoErrorTest(partial1);
+      parseContributionJSONTest(partial2, json, Parser);
     });
   });
 

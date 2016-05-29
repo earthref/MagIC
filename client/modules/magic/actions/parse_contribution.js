@@ -29,11 +29,8 @@ export default class extends Runner {
     let tableLineNumber = 0;
     for (let i = 0; i < lines.length; i++) {
 
-      // Trim leading and trailing whitespace from the line.
-      let line = lines[i].trim();
-
       // Skip empty lines.
-      if (line === undefined || line === '') continue;
+      if (lines[i] === undefined || lines[i] === '') continue;
 
       // Skip lines if skipping table.
       if (skipTable) continue;
@@ -43,7 +40,7 @@ export default class extends Runner {
       tableLineNumber++;
 
       // If this line ends a table, initialize a new table.
-      if (line.match(/^>+$/)) {
+      if (lines[i].match(/^>+$/)) {
         table = undefined;
         columns = [];
         tableLineNumber = 0;
@@ -54,7 +51,7 @@ export default class extends Runner {
       else if (tableLineNumber === 1) {
 
         // Split the table definition on the tab character.
-        let tableDefinition = line.split(/\s*\t\s*/);
+        let tableDefinition = lines[i].split(/\t/);
 
         // Check table definition has at least 2 elements in it.
         if (tableDefinition.length < 2) {
@@ -63,7 +60,7 @@ export default class extends Runner {
         }
 
         // Clean leading and trailing whitespace from each part of the table definition.
-        tableDefinition.map((str) => { return str.trim(); });
+        tableDefinition = tableDefinition.map((value) => { return value.trim(); });
 
         // Check the column delimiter is "tab".
         if (!tableDefinition[0].match(/^tab(\s|$)/i)) {
@@ -72,7 +69,7 @@ export default class extends Runner {
         }
 
         // Tab has been found, check for table name.
-        else if (tableDefinition[1] === undefined ) {
+        else if (tableDefinition[1] === undefined || tableDefinition[1] === '') {
           this._appendError(`No table name following tab delimiter`);
           skipTable = true;
         }
@@ -90,7 +87,7 @@ export default class extends Runner {
       else if (tableLineNumber === 2) {
 
         // Split the column definition on the tab character.
-        columns = line.split(/\s*\t\s*/);
+        columns = lines[i].split(/\t/);
 
         // Check for column names.
         if (columns.length === 0) {
@@ -99,7 +96,7 @@ export default class extends Runner {
         }
 
         // Clean leading and trailing whitespace from each column name.
-        columns = columns.map((str) => { return str.trim(); });
+        columns = columns.map((value) => { return value.trim(); });
 
         // Check for empty column names.
         if (_.findIndex(columns, '') !== -1) {
@@ -119,7 +116,7 @@ export default class extends Runner {
       else {
 
         // Split the row values on the tab character.
-        let values = line.split(/\s*\t\s*/);
+        let values = lines[i].split(/\t/);
 
         // Check there are enough column names.
         if (values.length > columns.length) {
@@ -128,8 +125,17 @@ export default class extends Runner {
 
         // Append the row of values onto the table in the JSON.
         else {
-          values = values.map((str) => { return str.trim(); });
-          this.json[table].push(_.zipObject(columns.slice(0, values.length), values));
+
+          // Remove leading and trailing whitespace.
+          values = values.map((value) => { return value.trim(); });
+
+          // Combine the coluns and values into an object.
+          let row = _.zipObject(columns.slice(0, values.length), values);
+
+          // Remove empty values
+          row = _.omitBy(row, (value, key) => { return value === ""; });
+
+          this.json[table].push(row);
         }
 
       }
