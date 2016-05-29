@@ -1,7 +1,7 @@
 import {_} from 'lodash';
 import Runner from '../../core/actions/runner.js';
 import GetContributionVersion from './get_contribution_version';
-import json2csv from 'json2csv';
+//import json2csv from 'json2csv';
 
 import {default as magicVersions} from '../configs/magic_versions';
 import {default as magicDataModels} from '../configs/data_models/data_models';
