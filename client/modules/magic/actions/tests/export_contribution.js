@@ -25,7 +25,8 @@ describe('magic.actions.export_contribution', () => {
     it('should reject if the column name is invalid.', () => {
       const invalidColumn = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '2.5', 
+          author: 'Geoff'
         }],
         er_locations: [{
           not_region: 'California'
@@ -38,7 +39,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report one error if the same two columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '3.0'
+          magic_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -54,7 +55,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report two errors if two different columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '3.0'
+          magic_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -69,9 +70,14 @@ describe('magic.actions.export_contribution', () => {
   });
 
   // Test exporting valid JSON to text.
+  //RUPERT, it seems like the purpose of this test is to maintain table and column order, but there are no position
+  //properties. I can add them if i'm not misinterpreting the purpose of the test.
+  // Also, this test is passing but it SHOULD NOT BE...this is somehow due to my failed attempt to use an async TSV
+  //generator. I'm afraid I was too persistent going down this path, and will back out of it. The structure i have in place
+  //now should make it easy to generate the TSV 'manually'
   describe('when exporting valid JSON to text', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
-      /*const json1 = {
+      const json1 = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -115,12 +121,13 @@ describe('magic.actions.export_contribution', () => {
         'er_specimen_name\ter_location_name\ter_sample_name\tspecimen_dip\tspecimen_igsn\ter_citation_names\n' +
         'sp1\tlo1\tsa1\t1.2\tisgn1\t:"10.1023/A:1":This study:\n' +
         'sp2\tlo1\tsa1\t1.3\tisgn2\t\n';
-      exportContributionToTextJSONTest(json1, text1);*/
+      exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
           magic_version: '3.0',
           id: '1234',
           contributor: '@magic'
+      
         }],
         specimens: [{
           specimen: 'sp1',
@@ -142,7 +149,7 @@ describe('magic.actions.export_contribution', () => {
   });
 
   // Test parsing valid files.
-  //GGG temporarily (perhaps permanently?) removing tests for export that are less than the 3.0 model.
+  //GGG temporarily removing tests for export, they might pass with a false positive now
   /*describe('when exporting valid files to text', () => {
     it('should export contribution 3552 (MagIC version 2.2) with no errors', () => {
       exportContributionToTextNoErrorTest(contribution3552);
@@ -160,9 +167,9 @@ describe('magic.actions.export_contribution', () => {
 const exportContributionToTextErrorTest = (json, reErrorMsg) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json);
-  expect(Exporter.errors().length).to.be.at.least(1);
-  //console.log(`test1: ${Exporter.errors()[Exporter.errors().length - 1]['message']}`);
-  expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
+    expect(Exporter.errors().length).to.be.at.least(1);
+    expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
+
 };
 
 // Expect no errors.
@@ -177,6 +184,7 @@ const exportContributionToTextNoErrorTest = (json) => {
 const exportContributionToTextNErrorsTest = (json, nErrors) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json);
+  console.log(`leng ${Exporter.errors().length}`);
   expect(Exporter.errors().length).to.equal(nErrors);
 };
 
@@ -184,6 +192,9 @@ const exportContributionToTextNErrorsTest = (json, nErrors) => {
 const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
   const text = Exporter.toText(json);
-  expect(Exporter.errors().length).to.equal(0);
-  expect(text).to.equal(textExpected);
+    expect(Exporter.errors().length).to.equal(0);
+    console.log(`text: ${text}`);
+    console.log(`text Expected: ${textExpected}`);
+    expect(text).to.equal(textExpected);
+
 };
