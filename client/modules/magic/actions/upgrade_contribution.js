@@ -62,10 +62,10 @@ export default class extends Runner {
 
       // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
       // doesn't include a foreign key.
-      modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
-      modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
-        {'table':'er_expeditions','column':'er_location_name'}
-      );
+      //modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
+      //modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
+      //  {'table':'er_expeditions','column':'er_location_name'}
+      //);
 
     }
 
@@ -86,7 +86,7 @@ export default class extends Runner {
       // Handle special cases when upgrading from 2.5 to 3.0 tables
       if (versionNew === '3.0') {
 
-        // Silently ignore tables that are deleted and not mapped from 2.5 to 3.0
+        // Don't warn about these tables being deleted when upgrading from 2.5 to 3.0
         if (jsonTableOld === 'magic_methods' ||
             jsonTableOld === 'er_citations' ||
             jsonTableOld === 'er_mailinglist' ||
@@ -137,7 +137,7 @@ export default class extends Runner {
         let tableRowsNew = {};
         let joinTable;
 
-        // Handle special cases when upgrading from 2.5 to 3.0 columns
+        // Handle special cases when upgrading from 2.5 to 3.0 rows
         if (versionNew === '3.0') {
 
           // Map data into the correct parent table
@@ -155,12 +155,36 @@ export default class extends Runner {
             else
               this._appendWarning(`Row ${jsonRowOldIdx} in table "${jsonTableOld}" was deleted in ` +
                                   `MagIC data model version ${versionNew} since it is a contribution-level result.`);
-//console.log(`Mapping ${jsonTableOld} to ${jsonTableNew}:`, jsonRowOld);
           }
           
         }
 
         for (let jsonColumnOld in jsonRowOld) {//loop through all columns in row
+
+          // Handle special cases when upgrading from 2.5 to 3.0 columns
+          if (versionNew === '3.0') {
+
+            // Don't warn about these columns being deleted when upgrading from 2.5 to 3.0
+            if (!modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld] && (
+                jsonColumnOld === 'er_location_name' ||
+                jsonColumnOld === 'er_site_name'     ||
+                jsonColumnOld === 'er_sample_name'   ||
+                jsonColumnOld === 'er_specimen_name'))
+              continue;
+
+            // Combine external_database_names/ids into a dictionary
+            if (jsonColumnOld === 'external_database_names') {
+              let dbNames = jsonRowOld['external_database_names'].replace(/(^:|:$)/g,'').split(/:/);
+              let dbIDs = jsonRowOld['external_database_ids'].replace(/(^:|:$)/g,'').split(/:/);
+              let dict = [];
+              for (let dbIdx in dbNames) {
+                dict.push(dbNames[dbIdx] + '[' + dbIDs[dbIdx] + ']');
+              }
+              jsonRowOld['external_database_names'] = dict.join(':');
+            }
+            if (jsonColumnOld === 'external_database_ids') continue;
+
+          }
 
           // Check that the old column is defined in the old data model.
           if (!modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld]) {
@@ -173,15 +197,6 @@ export default class extends Runner {
 
           // Check that the old table and column are defined in the new data model.
           if (!upgradeMap[jsonTableOld] || !upgradeMap[jsonTableOld][jsonColumnOld]) {
-
-            // Don't warn about these columns being deleted when upgrading from 2.5 to 3.0
-            if (versionNew === '3.0' && (
-                jsonColumnOld === 'er_location_name' ||
-                jsonColumnOld === 'er_site_name'     ||
-                jsonColumnOld === 'er_sample_name'   ||
-                jsonColumnOld === 'er_specimen_name'
-              ))
-              continue;
 
             if (!deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
               this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
@@ -201,14 +216,14 @@ export default class extends Runner {
             if (!joinTable || joinTable === jsonTableNew) {
 
               // Normalize lists for easier comparison in _reduce() by sorting them
-              if (modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'List') {
-                jsonValueNew = jsonValueNew.replace(/(^:|:$)/g,'');
-                jsonValueNew = _(jsonValueNew.split(/:/)).sortBy().sortedUniq().join(':');
+              if (modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'List' ||
+                  modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'Dictionary') {
+                jsonValueNew = jsonValueNew.replace(/(^:|:$)/g, '').split(/:/);
+                jsonValueNew = _(jsonValueNew).sortBy().sortedUniq().join(':');
               }
 
               // Create the table in the new JSON if it doesn't exist
               if (!tableRowsNew[jsonTableNew]) tableRowsNew[jsonTableNew] = {};
-//console.log(jsonTableOld, jsonColumnOld, '->', jsonTableNew, jsonColumnNew, '=', jsonValueNew);
 
               // Add the column value to the new JSON
               tableRowsNew[jsonTableNew][jsonColumnNew] = jsonValueNew;
@@ -222,7 +237,6 @@ export default class extends Runner {
         // Add the row(s) to the new JSON
         for (let table in tableRowsNew) {
           if (!json[table]) json[table] = [];
-//console.log(tableRowsNew[table]);
           json[table].push(tableRowsNew[table]);
         }
       }

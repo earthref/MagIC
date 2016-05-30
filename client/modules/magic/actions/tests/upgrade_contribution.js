@@ -161,8 +161,8 @@ describe('magic.actions.upgrade_contribution', () => {
         contribution: [{
           magic_version: '2.5'
         }],
-        er_expeditions: [{
-          expedition_start_loc: '1'
+        er_sites: [{
+          site_definition: '1'
         }]
       };
       upgradeContributionWarningTest(jsonOld, '3.0',
@@ -601,11 +601,66 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
     });
 
+    it('should convert a wide pmag_criteria table into a tall criteria table', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_criteria: [{
+          pmag_criteria_code: 'DE-SITE',
+          site_k: '180',
+          site_alpha95: '50',
+          criteria_definition: 'Criteria for selection of site direction'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        criteria: [{ // this row first because dir_alpha95 comes first in the 3.0 data model
+          description: 'Criteria for selection of site direction',
+          criterion_name: 'DE-SITE',
+          table_column_name: 'sites.dir_alpha95',
+          criterion_operation: '<=',
+          criterion_value: '180'
+        },{
+          description: 'Criteria for selection of site direction',
+          criterion_name: 'DE-SITE',
+          table_column_name: 'sites.dir_k',
+          criterion_operation: '>=',
+          criterion_value: '50'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+    it('should combine external_database_names/ids into a dictionary', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_locations: [{
+          er_location_name: 'loc_1'
+        }],
+        pmag_results: [{
+          er_location_names: 'loc_1',
+          external_database_names: ':GEOMAGIA50:CALS7K.2:ARCHEO00:',
+          external_database_ids: '1435::2329'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        locations: [{
+          location: 'loc_1',
+          external_database_ids: 'ARCHEO00[2329]:CALS7K.2[]:GEOMAGIA50[1435]'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
     // TODO: pmag_rotations into rotation_sequence matrix test
-
-    // TODO: pmag/rmag_criteria into criteria table test
-
-    // TODO: external_database_names/ids into a matrix test
 
     // TODO: normalized relative intensities test
 
@@ -613,7 +668,7 @@ describe('magic.actions.upgrade_contribution', () => {
 
     // TODO: geoid method code test
 
-    // TODO: reference to DOI
+    // TODO: reference to DOI, might need to export er_citation_ids to avoid losing DOIs in upgrades
 
     // TODO: user to handle
 
