@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {_} from 'lodash';
 import ParseContribution from '../parse_contribution.js';
 import UpgradeContribution from '../upgrade_contribution.js';
-import {default as contribution10507} from './files/contributions/10507.js';
+import {default as contribution10507} from './files/contributions/10507_partial';
 
 describe('magic.actions.upgrade_contribution', () => {
 
@@ -232,9 +232,16 @@ describe('magic.actions.upgrade_contribution', () => {
         contribution: [{
           magic_version: '2.5'
         }],
+        er_samples: [{
+          er_sample_name: '1'
+        }],
+        er_specimens: [{
+          er_sample_name: '1',
+          er_specimen_name: '3'
+        }],
         pmag_results: [{ // this is a sample level result (single sample name)
           er_sample_names: '1',
-          er_specimen_names: '1:3',
+          er_specimen_names: ':3:1:',
           average_age: '5'
         },{ // this is a specimen level result (single specimen name)
           er_sample_names: '1',
@@ -242,7 +249,27 @@ describe('magic.actions.upgrade_contribution', () => {
           average_age: '6'
         }]
       };
-      const jsonNew = {
+      const jsonNewMapped = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: '1'
+        },{
+          sample: '1',
+          specimens: '1:3',
+          age: '5'
+        }],
+        specimens: [{
+          sample: '1',
+          specimen: '3'
+        },{
+          sample: '1',
+          specimen: '3',
+          age: '6'
+        }]
+      };
+      const jsonNewReduced = {
         contribution: [{
           magic_version: '3.0'
         }],
@@ -257,35 +284,8 @@ describe('magic.actions.upgrade_contribution', () => {
           age: '6'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
-    });
-
-    //GGG Using this test for debugging because it is simple
-    it('Simple Debug Test: should merge the same column value from different tables ', () => {
-      const jsonOld = {
-        contribution: [{
-          magic_version: '2.5'
-        }],
-        /*er_specimens: [{
-         er_specimen_name: '1'
-         }],*/
-        // RCJM: Yes pmag_specimens.er_specimen_names was wrong.
-        // You can either use pmag_specimens.er_specimen_name or pmag_results.er_specimen_names - both merge into
-        // specimens.specimen_name in 3.0.
-        //pmag_specimens: [{
-        pmag_specimens: [{
-          er_specimen_name: '1'
-        }]
-      };
-      const jsonNew = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        specimens: [{
-          specimen: '1'
-        }]
-      };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      upgradeContributionMapJSONTest(jsonOld, '3.0', jsonNewMapped);
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNewReduced);
     });
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
@@ -344,20 +344,20 @@ describe('magic.actions.upgrade_contribution', () => {
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
     // these two rows are kept separate with repeated information.
-    //So, if any field is different, make two rows
-    it('should keep different column value separate from different tables', () => {
+    it('should keep different column values separate from different tables', () => {
       const jsonOld1 = {
         contribution: [{
           magic_version: '2.5'
         }],
-        er_samples: [{
-          er_sample_name: 'sample_A',
-          sample_class: 'Submarine:Sedimentary',
+        er_sites: [{
+          er_site_name: 'site_A',
+          site_class: 'Submarine:Sedimentary',
           magic_method_codes: 'LP-DIR'
         }],
-        pmag_results: [{///GGG Confirmed wiwth rupert that this should go to the specimen table due to no plurality
-          er_sample_names: 'sample_A',
-          average_int: '0.0123',
+        rmag_results: [{
+          er_site_names: 'site_A',
+          anisotropy_type: 'A',
+          anisotropy_p: '0.0123',
           magic_method_codes: 'LP-PI'
         }]
       };
@@ -365,13 +365,14 @@ describe('magic.actions.upgrade_contribution', () => {
         contribution: [{
           magic_version: '3.0'
         }],
-        samples: [{ // method_codes are different, so these rows can't be combined
-          sample: 'sample_A',
-          geologic_classes: 'Submarine:Sedimentary',
+        sites: [{ // method_codes are different, so these rows can't be combined
+          site: 'site_A',
+          geologic_classes: 'Sedimentary:Submarine', // lists should be normalized by being sorted
           method_codes: 'LP-DIR'
         },{
-          sample: 'sample_A',
-          int_abs: '0.0123',
+          site: 'site_A',
+          aniso_type: 'A',
+          aniso_p: '0.0123',
           method_codes: 'LP-PI'
         }]
       };
@@ -399,7 +400,7 @@ describe('magic.actions.upgrade_contribution', () => {
            citations: 'This Study'
          },{
            sample: 'sample_A',
-           average_int: '0.0123',
+           int_abs: '0.0123',
            citations: '10.1029/92JB01202'
          }]
        };
@@ -432,6 +433,136 @@ describe('magic.actions.upgrade_contribution', () => {
        upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);
     });
 
+    it('should merge rows even if lists are in a different order', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          sample_class: 'Submarine:Sedimentary',
+          magic_method_codes: 'LP-DIR:LP-PI'
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          magic_method_codes: 'LP-PI:LP-DIR'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: 'sample_A',
+          geologic_classes: 'Sedimentary:Submarine',
+          int_abs: '0.0123',
+          method_codes: 'LP-DIR:LP-PI'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+    it('should merge rows when changing tables', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'Site 1',
+          site_core_depth: '1'
+        }],
+        er_samples: [{
+          er_site_name: 'Site 1',
+          er_sample_name: 'Sample 2',
+          sample_core_depth: '1'
+        },{
+          er_site_name: 'Site 1',
+          er_sample_name: 'Sample 2',
+          sample_dip: '2'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'Site 1',
+          core_depth: '1'
+        }],
+        samples: [{
+          site: 'Site 1',
+          sample: 'Sample 2',
+          dip: '2'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'Site 1',
+          site_core_depth: '1'
+        }],
+        er_samples: [{
+          er_site_name: 'Site 1',
+          er_sample_name: 'Sample 2',
+          sample_core_depth: '2'
+        },{
+          er_site_name: 'Site 1',
+          er_sample_name: 'Sample 2',
+          sample_dip: '2'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'Site 1',
+          core_depth: '1'
+        },{
+          site: 'Site 1',
+          core_depth: '2'
+        }],
+        samples: [{
+          site: 'Site 1',
+          sample: 'Sample 2',
+          dip: '2'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+    });
+
+    /*it('should merge expeditions with locations', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_locations: [{
+          er_location_name: 'loc_1',
+          er_expedition_name: 'exp_A'
+        }],
+        er_expeditions: [{
+          er_expedition_name: 'exp_A',
+          expedition_ship: 'ship1',
+          expedition_mb_sonar: '123'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        locations: [{
+          location: 'loc_1',
+          expedition_name: 'exp_A',
+          expedition_ship: 'ship1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });*/
+
     // TODO: pmag_rotations into rotation_sequence matrix test
 
     // TODO: pmag/rmag_criteria into criteria table test
@@ -444,18 +575,22 @@ describe('magic.actions.upgrade_contribution', () => {
 
     // TODO: geoid method code test
 
+    // TODO: reference to DOI
+
+    // TODO: user to handle
+
+
   });
 
-  // There are currently too many console.log statements in the upgrade for this to run.
-  /*
   // Test upgrading valid files.
   describe('when upgrading valid files', () => {
     it('should upgrading contribution 10507 (MagIC version 2.5) with no errors', () => {
       const Parser = new ParseContribution({});
       const json = Parser.parse(contribution10507);
+      //upgradeContributionMapJSONTest(json, '3.0', {});
       upgradeContributionNoErrorTest(json);
     });
-  });*/
+  });
   
   // Test calculating the upgrade map.
   //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
@@ -658,7 +793,7 @@ const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
 const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
   const Upgrader = new UpgradeContribution({});
   Upgrader.upgrade(jsonOld, maxVersion);
-  expect(Upgrader.warnings().length).to.equal(0);
+  //expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
 };
 
@@ -666,34 +801,34 @@ const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
 const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
   const jsonNew = Upgrader.upgrade(jsonOld, maxVersion);
+  expect(jsonNew).to.deep.equal(jsonExpected);
   expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
-  expect(jsonNew).to.deep.equal(jsonExpected);
 };
 
 // Expect no errors and check the upgrade map against expected map.
 const upgradeContributionCreateMapTest = (newModel, expectedMap) => {
   const Upgrader = new UpgradeContribution({});
   const upgradeMap = Upgrader._getUpgradeMap(newModel);
+  expect(upgradeMap).to.deep.equal(expectedMap);
   expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
-  expect(upgradeMap).to.deep.equal(expectedMap);
 };
 
 // Expect no errors and check against expected JSON when mapping.
-const upgradeContributionMapTest = (jsonOld, maxVersion, jsonExpected) => {
+const upgradeContributionMapJSONTest = (jsonOld, maxVersion, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
   const jsonNew = Upgrader._map(jsonOld, maxVersion);
+  expect(jsonNew).to.deep.equal(jsonExpected);
   expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
-  expect(jsonNew).to.deep.equal(jsonExpected);
 };
 
 // Expect no errors and check against expected JSON when mapping.
-const upgradeContributionReduceTest = (jsonOld, jsonExpected) => {
+const upgradeContributionReduceJSONTest = (jsonOld, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
   const jsonNew = Upgrader._reduce(jsonOld);
+  expect(jsonNew).to.deep.equal(jsonExpected);
   expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
-  expect(jsonNew).to.deep.equal(jsonExpected);
 };

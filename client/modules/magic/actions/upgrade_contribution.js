@@ -6,7 +6,7 @@ import {default as magicVersions} from '../configs/magic_versions';
 import {default as magicDataModels} from '../configs/data_models/data_models';
 
 /**This class upgrades the json data from its current model to the next model if a newer model is available
- * It can optionally upgrade the model several times until it reaches a maxVersion*/
+ * It can optionally upgrade the model several times until it reaches a versionMax*/
 export default class extends Runner {
 
   constructor({LocalState}) {
@@ -18,45 +18,46 @@ export default class extends Runner {
   // The input JSON can be assumed to be the entire contribution.
   // The upgrade happens in two stages: map and then reduce.
   // This could probably be parallelized easily, but for now speed is less important that accuracy for this operation.
-  upgrade(oldJSON, maxVersion) {
+  upgrade(jsonOld, versionMax) {
 
     // Update table and column names all the way to the new data model version.
-    let newJSON = this._map(oldJSON, maxVersion);
+    let json = this._map(jsonOld, versionMax);
 
     // Merge rows that can be combined because they are orthogonal (null or identical in each column).
-    newJSON = this._reduce(newJSON);
+    if (this.errors().length === 0)
+      json = this._reduce(json);
 
-    return newJSON;
+    return json;
   }
 
   // Update table and column names to the new data model version.
-  _map(oldJSON, maxVersion){
-    let newJSON = {};
+  _map(jsonOld, versionMax){
+    let json = {};
 
     // Retrieve the data model version used in the json
-    const oldVersion = this.VersionGetter.getVersion(oldJSON);
-    if (!oldVersion) return newJSON;
+    const versionOld = this.VersionGetter.getVersion(jsonOld);
+    if (!versionOld) return;
 
-    // Check that the maximum MagIC data model version to upgrade to is valid (maxVersion is in magicVersions).
-    if (maxVersion && _.indexOf(magicVersions, maxVersion) === -1) {
+    // Check that the maximum MagIC data model version to upgrade to is valid (versionMax is in magicVersions).
+    if (versionMax && _.indexOf(magicVersions, versionMax) === -1) {
       let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(', ');
-      this._appendError(`The second argument (maximum MagIC data model version), "${maxVersion}", is invalid. ` +
+      this._appendError(`The second argument (maximum MagIC data model version), "${versionMax}", is invalid. ` +
         `Expected one of: ${strVersions}.`);
-      return newJSON;
+      return;
     }
 
-    // Check if the maxVersion has been reached.
-    if (oldVersion === maxVersion) return newJSON;
+    // Check if the versionMax has been reached.
+    if (versionOld === versionMax) return jsonOld;
 
     // Check that there is a newer MagIC data model to use.
-    if (_.indexOf(magicVersions, oldVersion) === magicVersions.length - 1) return newJSON;
-    const newVersion = magicVersions[_.indexOf(magicVersions, oldVersion) + 1];
+    if (_.indexOf(magicVersions, versionOld) === magicVersions.length - 1) return jsonOld;
+    const versionNew = magicVersions[_.indexOf(magicVersions, versionOld) + 1];
     
     // Retrieve the data models
-    const oldModel = magicDataModels[oldVersion];
-    const newModel = magicDataModels[newVersion];
+    const modelOld = magicDataModels[versionOld];
+    const modelNew = magicDataModels[versionNew];
 
-    let upgradeMap = this._getUpgradeMap(newModel);
+    let upgradeMap = this._getUpgradeMap(modelNew);
 
     // RCJM: using this for a quick sanity check of the upgrade map
     /*for (let t in upgradeMap)
@@ -64,77 +65,104 @@ export default class extends Runner {
         if (upgradeMap[t][c].length > 1 && t != 'pmag_results' && t != 'rmag_results')
           console.log(t, c, upgradeMap[t][c]);*/
 
-    for (let oldJSONTable in oldJSON) {
+    for (let jsonTableOld in jsonOld) {
 
       // Used to avoid duplicate errors or warnings for each row.
-      let undefinedColumnErrors = {};
-      let deletedColumnWarnings = {};
+      let undefinedTableColumnErrors = {};
+      let deletedTableColumnWarnings = {};
+
+      // Handle special cases when upgrading from 2.5 to 3.0 tables
+      if (versionNew === '3.0') {
+        if (jsonTableOld === 'magic_methods' || jsonTableOld === 'er_citations')
+          continue;
+      }
 
       // Check that the old table is defined in the old data model.
-      if (!oldModel['tables'][oldJSONTable]) {
-        this._appendError(`Table "${oldJSONTable}" is not defined in magic data model version ${oldVersion}.`);
+      if (!modelOld['tables'][jsonTableOld]) {
+        this._appendError(`Table "${jsonTableOld}" is not defined in magic data model version ${versionOld}.`);
         continue;
       }
 
-      for (let oldJSONRowIdx in oldJSON[oldJSONTable]) {//loop through all rows in table old table
-        let oldJSONRow = oldJSON[oldJSONTable][oldJSONRowIdx];
-        let newRow = {};
-        let newJSONTable;
+      for (let jsonRowOldIdx in jsonOld[jsonTableOld]) {//loop through all rows in table old table
+        let jsonRowOld = jsonOld[jsonTableOld][jsonRowOldIdx];
+        let tableRowsNew = {};
+        let joinTable;
 
-        // Handle special cases when upgrading from 2.5 to 3.0
-        if (newVersion == '3.0') {
+        // Handle special cases when upgrading from 2.5 to 3.0 columns
+        if (versionNew === '3.0') {
 
           // Map data into the correct parent table
-          if (oldJSONTable == 'pmag_results' || oldJSONTable == 'rmag_results') {
-            if (oldRowData['er_synthetic_names'] != null && !oldRowData['er_synthetic_names'].match(/.+:.+/))
-              newJSONTable = 'specimens';
-            else if (oldRowData['er_specimen_names'] != null && !oldRowData['er_specimen_names'].match(/.+:.+/))
-              newJSONTable = 'specimens';
-            else if (oldRowData['er_sample_names']!= null && !oldRowData['er_specimen_names'].match(/.+:.+/))
-              newJSONTable = 'samples';
-            else if (oldRowData['er_site_names']!= null && !oldRowData['er_site_names'].match(/.+:.+/))
-              newJSONTable = 'sites';
-            else if (oldRowData['er_location_names']!= null && !oldRowData['er_location_names'].match(/.+:.+/))
-              newJSONTable = 'locations';
+          if (jsonTableOld === 'pmag_results' || jsonTableOld === 'rmag_results') {
+            if (jsonRowOld['er_synthetic_names'] != null && !jsonRowOld['er_synthetic_names'].match(/.+:.+/))
+              joinTable = 'specimens';
+            else if (jsonRowOld['er_specimen_names'] != null && !jsonRowOld['er_specimen_names'].match(/.+:.+/))
+              joinTable = 'specimens';
+            else if (jsonRowOld['er_sample_names']!= null && !jsonRowOld['er_sample_names'].match(/.+:.+/))
+              joinTable = 'samples';
+            else if (jsonRowOld['er_site_names']!= null && !jsonRowOld['er_site_names'].match(/.+:.+/))
+              joinTable = 'sites';
+            else if (jsonRowOld['er_location_names']!= null && !jsonRowOld['er_location_names'].match(/.+:.+/))
+              joinTable = 'locations';
             else
-              this._appendWarning(`Row ${oldJSONRowIdx} in table "${oldJSONTable}" was deleted in MagIC data model version ${newVersion} since it is a contribution-level result.`);
-            continue;
+              this._appendWarning(`Row ${jsonRowOldIdx} in table "${jsonTableOld}" was deleted in ` +
+                                  `MagIC data model version ${versionNew} since it is a contribution-level result.`);
+//console.log(`Mapping ${jsonTableOld} to ${jsonTableNew}:`, jsonRowOld);
           }
           
         }
 
-        for (let oldJSONColumn in oldJSONRow) {//loop through all columns in row
+        for (let jsonColumnOld in jsonRowOld) {//loop through all columns in row
 
           // Check that the old column is defined in the old data model.
-          if (!oldModel['tables'][oldJSONTable]['columns'][oldJSONColumn]) {
-            if (!undefinedColumnErrors[oldJSONColumn])
-              this._appendError(`Column "${oldJSONColumn}" in table "${oldJSONTable}" is not defined in magic data model ${oldVersion}.`);
-            undefinedColumnErrors[oldJSONColumn] = true;
+          if (!modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld]) {
+            if (!undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
+              this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                                `is not defined in magic data model ${versionOld}.`);
+            undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
             continue;
           }
 
           // Check that the old table and column are defined in the new data model.
-          if (!upgradeMap[oldJSONTable] || !upgradeMap[oldJSONTable][oldJSONColumn]) {
-            if (!deletedColumnWarnings[oldJSONColumn])
-              this._appendWarning(`Column "${oldJSONColumn}" in table "${oldJSONTable}" was deleted in MagIC data model version ${newVersion}.`);
-            deletedColumnWarnings[oldJSONColumn] = true;
+          if (!upgradeMap[jsonTableOld] || !upgradeMap[jsonTableOld][jsonColumnOld]) {
+
+            // Don't warn about these columns being deleted when upgrading from 2.5 to 3.0
+            if (versionNew === '3.0' && (
+                jsonColumnOld === 'er_location_name' ||
+                jsonColumnOld === 'er_site_name'     ||
+                jsonColumnOld === 'er_sample_name'   ||
+                jsonColumnOld === 'er_specimen_name'
+              ))
+              continue;
+
+            if (!deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
+              this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                                  `was deleted in MagIC data model version ${versionNew}.`);
+            deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
             continue;
           }
 
           // Cycle through the upgrade info outlining the potential locations in the new model for a single piece of data
           // Go through the location(s) to move ONE field of data from the old model to the proper table in the new
-console.log(oldJSONTable, oldJSONColumn, upgradeMap[oldJSONTable][oldJSONColumn]);
-          for (let upgradeToTableAndColumnIdx in upgradeMap[oldJSONTable][oldJSONColumn]) {
+          for (let upgradeToTableAndColumnIdx in upgradeMap[jsonTableOld][jsonColumnOld]) {
 
-            let upgradeColumn = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].column;
-            let upgradeTable = upgradeMap[oldJSONTable][oldJSONColumn][upgradeToTableAndColumnIdx].table;
+            let jsonTableNew  = upgradeMap[jsonTableOld][jsonColumnOld][upgradeToTableAndColumnIdx].table;
+            let jsonColumnNew = upgradeMap[jsonTableOld][jsonColumnOld][upgradeToTableAndColumnIdx].column;
+            let jsonValueNew  = jsonRowOld[jsonColumnOld];
 
-            if (!newJSONTable || upgradeTable == newJSONTable) {
+            if (!joinTable || joinTable === jsonTableNew) {
+
+              // Normalize lists for easier comparison in _reduce() by sorting them
+              if (modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'List') {
+                jsonValueNew = jsonValueNew.replace(/(^:|:$)/g,'');
+                jsonValueNew = _(jsonValueNew.split(/:/)).sortBy().sortedUniq().join(':');
+              }
 
               // Create the table in the new JSON if it doesn't exist
-              if (!newJSON[upgradeTable]) newJSON[upgradeTable] = [];
-              console.log(`new data: ${upgradeColumn}`);
-              newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
+              if (!tableRowsNew[jsonTableNew]) tableRowsNew[jsonTableNew] = {};
+//console.log(jsonTableOld, jsonColumnOld, '->', jsonTableNew, jsonColumnNew, '=', jsonValueNew);
+
+              // Add the column value to the new JSON
+              tableRowsNew[jsonTableNew][jsonColumnNew] = jsonValueNew;
 
             }
 
@@ -142,39 +170,83 @@ console.log(oldJSONTable, oldJSONColumn, upgradeMap[oldJSONTable][oldJSONColumn]
 
         }
 
-        // Add the row to the new JSON
-        newJSON[upgradeTable].push(newRow);
-console.log(`json: ${JSON.stringify(newJSON)}`);
+        // Add the row(s) to the new JSON
+        for (let table in tableRowsNew) {
+          if (!json[table]) json[table] = [];
+//console.log(tableRowsNew[table]);
+          json[table].push(tableRowsNew[table]);
+        }
       }
     }
 
     // Update the data model version
-    newJSON['contribution'][0]['magic_version'] = newVersion;
+    json['contribution'][0]['magic_version'] = versionNew;
 
     // Recursively upgrade the contribution.
-    return this._map(newJSON, maxVersion);
+    return this._map(json, versionMax);
 
   }
 
   // Merge rows that can be combined because they are orthogonal (null or identical in each column).
-  _reduce(oldJSON) {
+  _reduce(json) {
 
-    let newJSON = {};
+    const keys = {
+      contribution: ['magic_version'],
+      locations: ['location'],
+      sites: ['site'],
+      samples: ['sample'],
+      specimens: ['specimen'],
+      measurements: ['number', 'experiment', 'specimen'],
+      criteria: ['criterion', 'table_column'],
+      ages: ['citations'],
+      images: ['file']
+    };
 
-    // RCJM: GGG, replace this to pass the tests.
-    newJSON = oldJSON;
+    // For each table in the contribution
+    for (let table in json) {
+//console.log("merging:", table);
 
-    return newJSON;
+      json[table] = _.sortBy(json[table], keys[table]);
+//console.log("table", json[table]);
+      if (table != 'measurements') {
+        for (let rowIdx = 0; rowIdx < json[table].length; rowIdx++) {
+          if (json[table][rowIdx] === undefined) continue;
+//console.log("merging", rowIdx, json[table][rowIdx]);
+          const rowKeys = _.pick(json[table][rowIdx], keys[table]);
+          for (let rowToMergeIdx = rowIdx + 1; rowToMergeIdx < json[table].length; rowToMergeIdx++) {
+//console.log("can merge?", rowToMergeIdx, json[table][rowToMergeIdx], 'has?', rowKeys);
+            if (json[table][rowToMergeIdx] === undefined) continue;
+            if (_.isMatch(json[table][rowToMergeIdx], rowKeys)) {
+              const rowCopy = _.cloneDeep(json[table][rowIdx]);
+//console.log("before", json[table][rowToMergeIdx], '->', rowCopy);
+              _.merge(rowCopy, json[table][rowToMergeIdx]);
+//console.log("after", rowCopy);
+              if (_.isMatch(rowCopy, json[table][rowIdx])) {
+                json[table][rowIdx] = rowCopy;
+                json[table][rowToMergeIdx] = undefined;
+//console.log("merged", rowIdx, "with", rowToMergeIdx);
+              }
+            } else {
+//console.log("done with", rowIdx, "of", json[table].length, ", stopped at",rowToMergeIdx);
+              break;
+            }
+          }
+        }
+        _.remove(json[table], _.isEmpty);
+      }
+    }
+
+    return json;
   }
 
-  //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
+  //modelNew is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
   //The upgradeMap is "forward looking" from the perspective of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
-  _getUpgradeMap(newModel) {
+  _getUpgradeMap(modelNew) {
 
     let upgradeMap = {};
 
-    for (let newTableName in newModel.tables) {//this gets the STRING name of the property into 'table'
-      let newTableObject = newModel.tables[newTableName];//this on the other hand, gets the whole table object
+    for (let newTableName in modelNew.tables) {//this gets the STRING name of the property into 'table'
+      let newTableObject = modelNew.tables[newTableName];//this on the other hand, gets the whole table object
 
       for (let newColumnName in newTableObject.columns)
       {
@@ -233,43 +305,8 @@ console.log(`json: ${JSON.stringify(newJSON)}`);
       }
     }
 
-    console.log(`Upgrade Map ${JSON.stringify(upgradeMap)}`);
+//console.log(`Upgrade Map ${JSON.stringify(upgradeMap)}`);
     return upgradeMap;
 
   }
 }
-
-
-//CODE GRAVEYARD
-/*//Here I'm beginging a solution to knowing whether or not we need to combine rows
-//obviously it is not complete, and there is a lot more logic needed.
-let rowKeyVal = '1';//This is obviously temporary
-let upgradeCollisionKey = `${upgradeTable}${upgradeColumn}${rowKeyVal}`;
-console.log(`Key ${upgradeCollisionKey}`);
-
-console.log(`Key list: ${Object.getOwnPropertyNames(upgradeColumnCollisions)}`);
-console.log(`Has key? ${upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey)}`);
-if(!upgradeColumnCollisions.hasOwnProperty(upgradeCollisionKey))
-  newRow[upgradeColumn] = oldJSONRow[oldJSONColumn];
-else
-  upgradeColumnCollisions[upgradeCollisionKey] = rowKeyVal;*/
-
-
-//GGG THIS IS THE OLD SPLIT COL SOLUTION, holding onto it for a bit as i might want to copy some
-/*let prevColKey = previousColTableName + previousColumnName;
- if (previousTableColumnMap.has(prevColKey)) // If we have seen this "previous column" before
- {
- console.log("SPLIT of previous column detcted: " + previousColTableName + "  " + previousColumnName);
- let newColName1 = previousTableColumnMap.get(prevColKey);
- _.set(upgradeMap[newTableName],previousColumnName,[{table:newTableName,column:newColName1},{table:newTableName,column:newColumnName}]);
- continue; //if it is a split column, it isn't any other kind of column
- }
- else {previousTableColumnMap.set(prevColKey, newColumnName);}//keep track that we have seen this previous table+column combination
- */
-/*//TEST FOR RENAMED (POTENTIALLY SPLIT) COLUMNS
- if(newColumnName != previousColumnName)
- {
- //console.log(`RENAMED (potentially a split) column  detected in table ${newTableName}. Previous column name = ${previousColumnName}. New column name = ${newColumnName}` );
- tableColMapping[previousColumnName].push({table:newTableName,column:newColumnName});
- _.set(upgradeMap,previousColTableName,tableColMapping);
- }*/
