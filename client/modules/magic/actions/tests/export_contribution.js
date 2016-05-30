@@ -70,11 +70,6 @@ describe('magic.actions.export_contribution', () => {
   });
 
   // Test exporting valid JSON to text.
-  //RUPERT, it seems like the purpose of this test is to maintain table and column order, but there are no position
-  //properties. I can add them if i'm not misinterpreting the purpose of the test.
-  // Also, this test is passing but it SHOULD NOT BE...this is somehow due to my failed attempt to use an async TSV
-  //generator. I'm afraid I was too persistent going down this path, and will back out of it. The structure i have in place
-  //now should make it easy to generate the TSV 'manually'
   describe('when exporting valid JSON to text', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
