@@ -15,7 +15,9 @@ export default class extends Runner {
 
   toText(json) {
 
-    let text = '';
+    // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
+    let text = 'tab';
+
     // Retrieve the data model version used in the json
     const version = this.VersionGetter.getVersion(json);
     if (!version) return text;
@@ -48,48 +50,57 @@ export default class extends Runner {
       }
         // TODO: use the model to build up text string here
 
-        // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
-
-
-        // For each table in json, make a list of all of the columns used in the rows in the json table,
-        // and sort them using the "position" property of the data model columns.
-        // Start by making a list of tables in json, and sort them using the "position" property of the data model tables.
-        //console.log(`JSON BEFORE: ${JSON.stringify(json)}`)
-        var jsonAscendingOrder = _.sortBy( json, 'position' );
-
-        //console.log(`JSON AFTER : ${JSON.stringify(jsonAscendingOrder)}`);
-        for(var tableName in jsonAscendingOrder)
-        {
-          //console.log(`Table: ${tableName}`);
-
-        }
-
-
-
-        /*for (var table in json) {
-          if (!table.hasOwnProperty(table)) {
-            //The current property is not a direct property of p
-            continue;
-          }*/
-
-
-
-          //Do your logic with the property here
-
-
-
-        // Then loop through the used tables in data model order,
-        //   print the table header (note: "tab delimited\ttable_name" format)
-        //   loop through the used columns for that table in data model order,
-        //     print the column headers
-        //   loop through the rows in that table in the order in the json,
-        //     loop through the used columns for that table in data model order,
-        //       print the column value for that row
-        //         note: arrays turn into :val1:val2 string,
-        //               any string in an array that contains a ":" gets double quotes around it
-        //   and print the table separator if there is another table.
       }
     }
+
+    //build table position map
+    var tableNames = Object.getOwnPropertyNames(model['tables']);
+    var tablePositionMap = [];
+    for(var tableIdx in tableNames)
+    {
+      console.log(`table: ${tableNames[tableIdx]}   position: ${model['tables'][tableNames[tableIdx]].position}`);
+      tablePositionMap[model['tables'][tableNames[tableIdx]].position - 1] = tableNames[tableIdx];
+      /*      console.log(`try: ${model['tables'][tableIdx]}`);
+       console.log(`table: ${Object.getOwnPropertyNames(model['tables'][tableIdx])} position: ${model['tables'][tableIdx].position}`);*/
+      //console.log(`Tables: ${tableIdx}  ${Object.getOwnPropertyNames(modelTablesAscendingOrder[tableIdx]).position}`);
+    }
+
+    console.log(`Sorted tablenames: ${tablePositionMap}`);
+
+    // For each table in json, make a list of all of the columns used in the rows in the json table,
+    // sort tables using the "position" property of the data model columns.
+    //console.log(`JSON BEFORE: ${JSON.stringify(json)}`)
+
+    // Start by making a list of tables in json, and sort them using the "position" property of the data model tables.
+
+
+    //console.log(`JSON AFTER : ${JSON.stringify(jsonAscendingOrder)}`);
+    /*for(var tableName in jsonAscendingOrder)
+     {
+     //console.log(`Table: ${tableName}`);
+
+     }*/
+
+    /*for (var table in json) {
+     if (!table.hasOwnProperty(table)) {
+     //The current property is not a direct property of p
+     continue;
+     }*/
+
+    //Do your logic with the property here
+
+    // Then loop through the used tables in data model order,
+    //   print the table header (note: "tab delimited\ttable_name" format)
+    //   loop through the used columns for that table in data model order,
+    //     print the column headers
+    //   loop through the rows in that table in the order in the json,
+    //     loop through the used columns for that table in data model order,
+    //       print the column value for that row
+    //         note: arrays turn into :val1:val2 string,
+    //               any string in an array that contains a ":" gets double quotes around it
+    //   and print the table separator if there is another table.
+
+
     return text;
 
 
