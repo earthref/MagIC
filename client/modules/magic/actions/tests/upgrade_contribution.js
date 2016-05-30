@@ -726,13 +726,33 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
-    // TODO: pmag_rotations into rotation_sequence matrix test
+    it('should add a geoid method code', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_1',
+          site_location_geoid: 'WGS84'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'site_1',
+          method_codes: 'GE-WGS84'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
 
-    // TODO: normalized relative intensities test
+    // TODO: pmag_rotations into rotation_sequence matrix test
 
     // TODO: different synthetic and specimen name puts synthetic name in alternatives test
 
-    // TODO: geoid method code test
+    // TODO: convert renamed method codes, e.g. ST-IC -> ST-C-I
 
     // TODO: reference to DOI, might need to export er_citation_ids to avoid losing DOIs in upgrades
 
