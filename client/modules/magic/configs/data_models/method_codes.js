@@ -240,10 +240,6 @@ export default {
   },
   "intensity_estimation": {
     "codes": [{
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-ARM",
-      "code": "IE-ARM",
-      "definition": "Relative paleointensity estimate from cleaned NRM normalized by ARM"
-    }, {
       "code": "IE-BB0",
       "definition": "Intensity normalized by GAD field at sampling location using 8x10^22 Am2 axial dipole moment"
     }, {
@@ -254,10 +250,6 @@ export default {
       "description": "Specimen level paleointensity and uncertainty determined by averaging all combinations of 4 or more adjacent points within unblocking temperature interval; Sample level paleointensity and standard error estimated by bootstrap resampling of specimen data.",
       "code": "IE-BOOT",
       "definition": "Thellier-type intensity and uncertainty estimated by bootstrap resampling of data"
-    }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-CHI",
-      "code": "IE-CHI",
-      "definition": "Relative paleointensity estimate from cleaned NRM normalized by susceptibility"
     }, {
       "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-DRATS",
       "code": "IE-DRAT",
@@ -274,10 +266,6 @@ export default {
       "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-FF",
       "code": "IE-FVDS",
       "definition": "Fraction of vector difference sum of NRM components"
-    }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-CHI",
-      "code": "IE-IRM",
-      "definition": "Relative paleointensity estimate from cleaned NRM normalized by IRM"
     }, {
       "code": "IE-MLAT",
       "definition": "Paleo-latitude"
@@ -1516,38 +1504,38 @@ export default {
       "IAGA7 code": "C",
       "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#FT-BC",
       "description": "The baked contact test compares the NRM direction of an igneous intrusion to that of the country rock surrounding it. One expects a changing NRM vector across the heat affected zone of the country rock. When an igneous rock intrudes an older rock formation, the intrusion heats a region of the surrounding country rock and the baked region of the country rock will then cool in the same magnetic field as the intrusion, and so will acquire a direction of magnetization the same as that of the intrusion. Agreement between the direction of magnetization of the intrusion and that of the country rock provides strong evidence for the stability of the magnetization of the intrusion",
-      "code": "ST-BC",
+      "code": "ST-C",
       "definition": "Baked contact test"
     }, {
       "References": ":78678:",
       "description": "Age uncertainties of < ± 15 Myr.",
-      "code": "ST-BC-Q1",
+      "code": "ST-BCQ-1",
       "definition": "Besse and Courtillot Quality Factor 1"
     }, {
       "References": ":78678:",
       "description": "There must be a sufficient number of individually oriented samples from enough sites. At least six sites and 36 samples, each site having a 95% confidence interval less than 10∘ in the Cenozoic and 15∘ in the Mesozoic.",
-      "code": "ST-BC-Q2",
+      "code": "ST-BCQ-2",
       "definition": "Besse and Courtillot Quality Factor 2"
     }, {
       "References": ":78678:",
       "description": "It must be demonstrated that a coherent characteristic remanence component has been isolated by the demagnetization procedure. McElhinny and McFadden (2000) attempted to standardize the description of the demagnetization status of a dataset using a demagnetization code (DC). Besse and Couttillot 2002 recommend using only poles with a DC of at least 2.",
-      "code": "ST-BC-Q3",
+      "code": "ST-BCQ-3",
       "definition": "Besse and Courtillot Quality Factor 3"
     }, {
       "References": ":78678:",
       "description": "The age of the magnetization relative to the age of the rock should be constrained using field tests (fold test, conglomerate test, baked contact test. Reject poles that fail a fold test or a reversals test.",
-      "code": "ST-BC-Q4",
+      "code": "ST-BCQ-4",
       "definition": "Besse and Courtillot Quality Factor 4"
     }, {
       "References": ":78678:",
       "description": "There should be agreement in the pole positions from units of similar age from a broad region and adequate knowledge of any structural corrections necessary. Reject poles from “mobile regions”, but incorporate data that are azimuthally unconstrained by using inclination only data as a constraint on paleolatitude.",
-      "code": "ST-BC-Q5",
+      "code": "ST-BCQ-5",
       "definition": "Besse and Courtillot Quality Factor 5"
     }, {
       "IAGA7 code": "G",
       "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#FT-CT",
       "description": "The conglomerate test compares the NRM direction of conglomerate clasts to the matrix (host particles) NRM direction. This results in directions that are random relative to the matrix, or directions clustering around the matrix particle's vector mean. If the directions of the magnetization of the conglomerate cobbles are random then this suggests that the magnetization of the parent formation has been stable since the deposition of the conglomerate",
-      "code": "ST-CT",
+      "code": "ST-G",
       "definition": "Conglomerate test"
     }, {
       "code": "ST-F",
@@ -1579,12 +1567,12 @@ export default {
     }, {
       "IAGA7 code": "C*",
       "description": "This is the inverse of the baked contact test. If stable magnetizations are observed in unbaked rocks that provide positive evidence for a baked contact test, then this also provides evidence that the unbaked sediments have retained their magnetization, at least since the time of baking",
-      "code": "ST-IC",
+      "code": "ST-C-I",
       "definition": "Inverse contact test"
     }, {
       "IAGA7 code": "G*",
       "description": "This is a variation on the conglomerate test, where the conglomerate lies within the formation and was deposited not long after the parent beds were deposited",
-      "code": "ST-IFC",
+      "code": "ST-G-IF",
       "definition": "Intraformational conglomerate test"
     }, {
       "code": "ST-R",
@@ -1616,37 +1604,37 @@ export default {
     }, {
       "References": ":62304:",
       "description": "The age of the formation must be known rather accurately. The age should be known to within a half of a geological period or within a numerical age of ± 4% for Phanerozoic data. For Precambrian rocks, the age should be known to within ± 4% or 40 Myr, whichever is smaller.",
-      "code": "ST-VV-Q1",
+      "code": "ST-VVQ-1",
       "definition": "Van der Voo Quality Factor 1"
     }, {
       "References": ":62304:",
       "description": "There must be a sufficient number of individually oriented samples from enough sites. A minimum of 24 discrete samples of the geomagnetic field each having a κ > 10.",
-      "code": "ST-VV-Q2",
+      "code": "ST-VVQ-2",
       "definition": "Van der Voo Quality Factor 2"
     }, {
       "References": ":62304:",
       "description": "It must be demonstrated that a coherent characteristic remanence component has been isolated by the demagnetization procedure.",
-      "code": "ST-VV-Q3",
+      "code": "ST-VVQ-3",
       "definition": "Van der Voo Quality Factor 3"
     }, {
       "References": ":62304:",
       "description": "The age of the magnetization relative to the age of the rock should be constrained using field tests (fold test, conglomerate test, baked contact test).",
-      "code": "ST-VV-Q4",
+      "code": "ST-VVQ-4",
       "definition": "Van der Voo Quality Factor 4"
     }, {
       "References": ":62304:",
       "description": "There should be agreement in the pole positions from units of similar age from a broad region and adequate knowledge of any structural corrections necessary.",
-      "code": "ST-VV-Q5",
+      "code": "ST-VVQ-5",
       "definition": "Van der Voo Quality Factor 5"
     }, {
       "References": ":62304:",
       "description": "Both polarities should be represented and the two data sets should be antipodal.",
-      "code": "ST-VV-Q6",
+      "code": "ST-VVQ-6",
       "definition": "Van der Voo Quality Factor 6"
     }, {
       "References": ":62304:",
       "description": "Pole positions should not fall on a younger part of the pole path or on the present field direction.",
-      "code": "ST-VV-Q7",
+      "code": "ST-VVQ-7",
       "definition": "Van der Voo Quality Factor 7"
     }],
     "label": "Stability Tests"
