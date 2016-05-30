@@ -77,7 +77,44 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionErrorTest(invalidColumns, '2.5',
         /column .* in table .* is not defined in magic data model/i);
     });
-    
+
+    it('should report one error if two or more different relative intensity normalizations are used', () => {
+      const tooManyCodes1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_1',
+          int_rel: '1',
+          int_rel_sigma: '2',
+          magic_method_codes: 'IE-IRM:IE-ARM'
+        }]
+      };
+      upgradeContributionNErrorsTest(tooManyCodes1, '2.5', 1);
+      upgradeContributionErrorTest(tooManyCodes1, '2.5',
+        /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i);
+      const tooManyCodes2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_1',
+          int_rel: '1',
+          int_rel_sigma: '2',
+          magic_method_codes: 'IE-IRM:IE-ARM:IE-CHI'
+        }]
+      };
+      upgradeContributionNErrorsTest(tooManyCodes2, '2.5', 1);
+      upgradeContributionErrorTest(tooManyCodes2, '2.5',
+        /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i);
+    });
+
   });
 
   // Test upgrading valid JSON.
@@ -655,6 +692,35 @@ describe('magic.actions.upgrade_contribution', () => {
         locations: [{
           location: 'loc_1',
           external_database_ids: 'ARCHEO00[2329]:CALS7K.2[]:GEOMAGIA50[1435]'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
+
+    it('should use method codes to map normalized relative intensities', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_1',
+          int_rel: '1',
+          int_rel_sigma: '2',
+          magic_method_codes: 'something else:IE-ARM'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'site_1',
+          int_rel_ARM: '1',
+          int_rel_ARM_sigma: '2',
+          method_codes: 'something else'
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
