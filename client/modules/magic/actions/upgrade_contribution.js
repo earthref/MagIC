@@ -57,6 +57,18 @@ export default class extends Runner {
     const modelOld = magicDataModels[versionOld];
     const modelNew = magicDataModels[versionNew];
 
+    // Handle special cases when upgrading from 2.5 to 3.0 tables
+    if (versionNew === '3.0') {
+
+      // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
+      // doesn't include a foreign key.
+      modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
+      modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
+        {'table':'er_expeditions','column':'er_location_name'}
+      );
+
+    }
+
     let upgradeMap = this._getUpgradeMap(modelNew);
 
     // RCJM: using this for a quick sanity check of the upgrade map
@@ -73,8 +85,45 @@ export default class extends Runner {
 
       // Handle special cases when upgrading from 2.5 to 3.0 tables
       if (versionNew === '3.0') {
-        if (jsonTableOld === 'magic_methods' || jsonTableOld === 'er_citations')
+
+        // Silently ignore tables that are deleted and not mapped from 2.5 to 3.0
+        if (jsonTableOld === 'magic_methods' ||
+            jsonTableOld === 'er_citations' ||
+            jsonTableOld === 'er_mailinglist' ||
+            jsonTableOld === 'magic_calibrations')
           continue;
+
+        if (jsonTableOld === 'er_expeditions') {
+          let expeditionsNew = [];
+          for (let expeditionRowIdx in jsonOld['er_expeditions']) {
+            let expeditionRow = jsonOld['er_expeditions'][expeditionRowIdx];
+
+            // If a list of locations for this expedition is provided, duplicate the
+            // expedition row for each location and add the er_location_name column
+            if (expeditionRow['expedition_location']) {
+              let expeditionLocations = expeditionRow['expedition_location']
+              expeditionLocations = expeditionLocations.replace(/(^:|:$)/g,'');
+              expeditionLocations = expeditionLocations.split(':');
+              for (let expeditionLocation of expeditionLocations) {
+                expeditionRow['er_location_name'] = expeditionLocation;
+                expeditionsNew.push(_.cloneDeep(expeditionRow));
+              }
+            }
+
+            // Otherwise, duplicate the expedition row for each location and add the
+            // er_location name column
+            else {
+              for (let locationRowIdx in jsonOld['er_locations']) {
+                let locationRow = jsonOld['er_locations'][locationRowIdx];
+                expeditionRow['er_location_name'] = locationRow['er_location_name'];
+                expeditionsNew.push(_.cloneDeep(expeditionRow));
+              }
+            }
+
+          }
+          jsonOld['er_expeditions'] = expeditionsNew;
+        }
+
       }
 
       // Check that the old table is defined in the old data model.
