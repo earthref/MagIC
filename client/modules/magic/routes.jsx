@@ -39,8 +39,8 @@ export default function (injectDeps, {FlowRouter}) {
     }
   });
   
-  magicRoutes.route(`/data-model/`, {
-    action() { FlowRouter.go(`/MagIC/data-models/${magicVersions.slice(-1)[0]}/`); }
+  magicRoutes.route(`/data-model`, {
+    action() { FlowRouter.go(`/MagIC/data-models/${magicVersions.slice(-1)[0]}`); }
   });
   magicRoutes.route(`/data-models/:v`, {
     name: 'magicDataModel',
@@ -60,7 +60,7 @@ export default function (injectDeps, {FlowRouter}) {
     }
   });
 
-  magicRoutes.route(`/upgrade/`, {
+  magicRoutes.route(`/upgrade`, {
     name: 'magicDataModel',
     action({}) {
       mount(mounterWithContext, {
@@ -79,7 +79,7 @@ export default function (injectDeps, {FlowRouter}) {
     }
   });
 
-  magicRoutes.route(`/upload/`, {
+  magicRoutes.route(`/upload`, {
     name: 'magicDataModel',
     action({}) {
       mount(mounterWithContext, {

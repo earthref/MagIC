@@ -231,8 +231,13 @@ export default class extends React.Component {
       <div>
         <div className="title">
           <i className="dropdown icon"/>
-          <span>{models[version].tables[table].position}.{model.position}</span>
-          <span>{model.label}</span>
+          <span>
+            {models[version].tables[table].position}.{model.position}
+          </span>
+          <span>
+            {model.label}
+            <span className="column">, {column}</span>
+          </span>
           <span className="ui basic horizontal small label">
             {this.formatTypeUnit(model.type, model.unit)}
           </span>

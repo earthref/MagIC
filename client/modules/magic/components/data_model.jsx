@@ -213,7 +213,7 @@ export default class extends React.Component {
           {versions.slice().reverse().map((v,i) => {
             const classes = (v === version ? 'active ' : '') + 'item';
             return (
-              <a key={i} className={classes} href={`../${v}/`}>
+              <a key={i} className={classes} href={`${v}`}>
                 {v}
                 {(v === version ?
                   <div
