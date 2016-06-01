@@ -3,7 +3,7 @@ import {expect} from 'chai';
 import {_} from 'lodash';
 import ParseContribution from '../parse_contribution.js';
 import UpgradeContribution from '../upgrade_contribution.js';
-import {default as contribution10507} from './files/contributions/10507_partial';
+import {default as contribution10507} from './files/contributions/10507';
 
 describe('magic.actions.upgrade_contribution', () => {
 
@@ -88,13 +88,13 @@ describe('magic.actions.upgrade_contribution', () => {
         }],
         pmag_results: [{
           er_site_names: 'site_1',
-          int_rel: '1',
-          int_rel_sigma: '2',
+          average_int_rel: '1',
+          average_int_rel_sigma: '2',
           magic_method_codes: 'IE-IRM:IE-ARM'
         }]
       };
-      upgradeContributionNErrorsTest(tooManyCodes1, '2.5', 1);
-      upgradeContributionErrorTest(tooManyCodes1, '2.5',
+      upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes1), '3.0', 1);
+      upgradeContributionErrorTest(_.cloneDeep(tooManyCodes1), '3.0',
         /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i);
       const tooManyCodes2 = {
         contribution: [{
@@ -105,13 +105,13 @@ describe('magic.actions.upgrade_contribution', () => {
         }],
         pmag_results: [{
           er_site_names: 'site_1',
-          int_rel: '1',
-          int_rel_sigma: '2',
+          average_int_rel: '1',
+          average_int_rel_sigma: '2',
           magic_method_codes: 'IE-IRM:IE-ARM:IE-CHI'
         }]
       };
-      upgradeContributionNErrorsTest(tooManyCodes2, '2.5', 1);
-      upgradeContributionErrorTest(tooManyCodes2, '2.5',
+      upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes2), '3.0', 1);
+      upgradeContributionErrorTest(_.cloneDeep(tooManyCodes2), '3.0',
         /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i);
     });
 
@@ -586,6 +586,18 @@ describe('magic.actions.upgrade_contribution', () => {
           expedition_mb_sonar: '123'
         }]
       };
+      const jsonMapped1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        locations: [{
+          location: 'loc_1'
+        },{
+          location: 'loc_1',
+          expedition_name: 'exp_A',
+          expedition_ship: 'ship1'
+        }]
+      };
       const jsonNew1 = {
         contribution: [{
           magic_version: '3.0'
@@ -596,6 +608,7 @@ describe('magic.actions.upgrade_contribution', () => {
           expedition_ship: 'ship1'
         }]
       };
+      upgradeContributionMapJSONTest(jsonOld1, '3.0', jsonMapped1);
       upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
       const jsonOld2 = {
         contribution: [{
@@ -656,14 +669,14 @@ describe('magic.actions.upgrade_contribution', () => {
         }],
         criteria: [{ // this row first because dir_alpha95 comes first in the 3.0 data model
           description: 'Criteria for selection of site direction',
-          criterion_name: 'DE-SITE',
-          table_column_name: 'sites.dir_alpha95',
+          criterion: 'DE-SITE',
+          table_column: 'sites.dir_alpha95',
           criterion_operation: '<=',
           criterion_value: '180'
         },{
           description: 'Criteria for selection of site direction',
-          criterion_name: 'DE-SITE',
-          table_column_name: 'sites.dir_k',
+          criterion: 'DE-SITE',
+          table_column: 'sites.dir_k',
           criterion_operation: '>=',
           criterion_value: '50'
         }]
@@ -707,9 +720,9 @@ describe('magic.actions.upgrade_contribution', () => {
         }],
         pmag_results: [{
           er_site_names: 'site_1',
-          int_rel: '1',
-          int_rel_sigma: '2',
-          magic_method_codes: 'something else:IE-ARM'
+          average_int_rel: '1',
+          average_int_rel_sigma: '2',
+          magic_method_codes: 'something else:ie-ARM'
         }]
       };
       const jsonNew = {
@@ -720,7 +733,7 @@ describe('magic.actions.upgrade_contribution', () => {
           site: 'site_1',
           int_rel_ARM: '1',
           int_rel_ARM_sigma: '2',
-          method_codes: 'something else'
+          method_codes: 'SOMETHING ELSE'
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
@@ -767,7 +780,7 @@ describe('magic.actions.upgrade_contribution', () => {
       const Parser = new ParseContribution({});
       const json = Parser.parse(contribution10507);
       //upgradeContributionMapJSONTest(json, '3.0', {});
-      upgradeContributionNoErrorTest(json);
+      upgradeContributionNoErrorTest(json, '3.0');
     });
   });
   

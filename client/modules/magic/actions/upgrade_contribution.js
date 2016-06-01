@@ -30,20 +30,22 @@ export default class extends Runner {
     return json;
   }
 
-  // Update table and column names to the new data model version.
+  // Map table and column names to the new data model version.
+  // The input JSON may be mutated during the mapping.
+  // Outputs a copy of the JSON in the new data model version.
   _map(jsonOld, versionMax){
-    let json = {};
+    let jsonNew = {};
 
     // Retrieve the data model version used in the json
     const versionOld = this.VersionGetter.getVersion(jsonOld);
-    if (!versionOld) return;
+    if (!versionOld) return jsonOld;
 
     // Check that the maximum MagIC data model version to upgrade to is valid (versionMax is in magicVersions).
     if (versionMax && _.indexOf(magicVersions, versionMax) === -1) {
       let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(', ');
       this._appendError(`The second argument (maximum MagIC data model version), "${versionMax}", is invalid. ` +
         `Expected one of: ${strVersions}.`);
-      return;
+      return jsonOld;
     }
 
     // Check if the versionMax has been reached.
@@ -52,7 +54,7 @@ export default class extends Runner {
     // Check that there is a newer MagIC data model to use.
     if (_.indexOf(magicVersions, versionOld) === magicVersions.length - 1) return jsonOld;
     const versionNew = magicVersions[_.indexOf(magicVersions, versionOld) + 1];
-    
+
     // Retrieve the data models
     const modelOld = magicDataModels[versionOld];
     const modelNew = magicDataModels[versionNew];
@@ -62,10 +64,10 @@ export default class extends Runner {
 
       // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
       // doesn't include a foreign key.
-      //modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
-      //modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
-      //  {'table':'er_expeditions','column':'er_location_name'}
-      //);
+      modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
+      modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
+        {'table':'er_expeditions','column':'er_location_name'}
+      );
 
     }
 
@@ -132,10 +134,14 @@ export default class extends Runner {
         continue;
       }
 
-      for (let jsonRowOldIdx in jsonOld[jsonTableOld]) {//loop through all rows in table old table
+      // Loop through all rows in table old table
+      let rowNumber = 0;
+      for (let jsonRowOldIdx in jsonOld[jsonTableOld]) {
         let jsonRowOld = jsonOld[jsonTableOld][jsonRowOldIdx];
         let tableRowsNew = {};
         let joinTable;
+        let relativeIntensityNormalization;
+        rowNumber++;
 
         // Handle special cases when upgrading from 2.5 to 3.0 rows
         if (versionNew === '3.0') {
@@ -153,10 +159,47 @@ export default class extends Runner {
             else if (jsonRowOld['er_location_names']!= null && !jsonRowOld['er_location_names'].match(/.+:.+/))
               joinTable = 'locations';
             else
-              this._appendWarning(`Row ${jsonRowOldIdx} in table "${jsonTableOld}" was deleted in ` +
+              this._appendWarning(`Row ${rowNumber} in table "${jsonTableOld}" was deleted in ` +
                                   `MagIC data model version ${versionNew} since it is a contribution-level result.`);
           }
-          
+
+          // Record the type of relative intensity normalization and remove the associated method code
+          if (jsonRowOld['magic_method_codes']) {
+
+            // Make a list of relative intensity normalizations in the method codes
+            let methodCodes = jsonRowOld['magic_method_codes'].replace(/(^:|:$)/g,'').split(/:/);
+            methodCodes = methodCodes.map((methodCode) => { return methodCode.toUpperCase(); });
+            let relativeIntensityNormalizations = _.intersection(methodCodes, ['IE-ARM', 'IE-IRM', 'IE-CHI']);
+
+            // Remove the relative intensity normalization method code
+            jsonRowOld['magic_method_codes'] = _.without(methodCodes, 'IE-ARM', 'IE-IRM', 'IE-CHI').join(':');
+
+            // Record the type of relative intensity normalization
+            if (relativeIntensityNormalizations.length > 1)
+              this._appendError(`Row ${rowNumber} in table "${jsonTableOld}" includes more than one ` +
+                `type of relative intensity normalization in the method codes.`);
+            else if (relativeIntensityNormalizations.length === 1)
+              relativeIntensityNormalization = relativeIntensityNormalizations[0].replace(/IE-/,'');
+            else
+              relativeIntensityNormalization = undefined;
+            // relativeIntensityNormalization = undefined or 'ARM' or 'IRM' or 'CHI'
+
+          }
+
+          // Add the geoid to the method codes
+          if (jsonRowOld['location_geoid']) {
+            if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
+            jsonRowOld['magic_method_codes'] += ':GE-' + jsonRowOld['location_geoid'];
+          }
+          if (jsonRowOld['site_location_geoid']) {
+            if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
+            jsonRowOld['magic_method_codes'] += ':GE-' + jsonRowOld['site_location_geoid'];
+          }
+          if (jsonRowOld['sample_location_geoid']) {
+            if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
+            jsonRowOld['magic_method_codes'] += ':GE-' + jsonRowOld['sample_location_geoid'];
+          }
+
         }
 
         for (let jsonColumnOld in jsonRowOld) {//loop through all columns in row
@@ -165,11 +208,15 @@ export default class extends Runner {
           if (versionNew === '3.0') {
 
             // Don't warn about these columns being deleted when upgrading from 2.5 to 3.0
-            if (!modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld] && (
-                jsonColumnOld === 'er_location_name' ||
-                jsonColumnOld === 'er_site_name'     ||
-                jsonColumnOld === 'er_sample_name'   ||
-                jsonColumnOld === 'er_specimen_name'))
+            if (!upgradeMap[jsonTableOld][jsonColumnOld] && (
+                jsonColumnOld === 'er_location_name'    ||
+                jsonColumnOld === 'er_site_name'        ||
+                jsonColumnOld === 'er_sample_name'      ||
+                jsonColumnOld === 'er_specimen_name'    ||
+                jsonColumnOld === 'expedition_location' ||
+                jsonColumnOld === 'location_geoid'      ||
+                jsonColumnOld === 'site_location_geoid' ||
+                jsonColumnOld === 'sample_location_geoid'))
               continue;
 
             // Combine external_database_names/ids into a dictionary
@@ -215,6 +262,16 @@ export default class extends Runner {
 
             if (!joinTable || joinTable === jsonTableNew) {
 
+              // Handle special cases when upgrading from 2.5 to 3.0 columns
+              if (versionNew === '3.0') {
+
+                if (jsonColumnNew.match(/^int_rel/) && relativeIntensityNormalization) {
+                  jsonColumnNew = jsonColumnNew.replace(/^int_rel/, 'int_rel_' + relativeIntensityNormalization);
+                  console.log(jsonColumnNew);
+                }
+
+              }
+
               // Normalize lists for easier comparison in _reduce() by sorting them
               if (modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'List' ||
                   modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'Dictionary') {
@@ -236,17 +293,17 @@ export default class extends Runner {
 
         // Add the row(s) to the new JSON
         for (let table in tableRowsNew) {
-          if (!json[table]) json[table] = [];
-          json[table].push(tableRowsNew[table]);
+          if (!jsonNew[table]) jsonNew[table] = [];
+          jsonNew[table].push(tableRowsNew[table]);
         }
       }
     }
 
     // Update the data model version
-    json['contribution'][0]['magic_version'] = versionNew;
+    jsonNew['contribution'][0]['magic_version'] = versionNew;
 
     // Recursively upgrade the contribution.
-    return this._map(json, versionMax);
+    return this._map(jsonNew, versionMax);
 
   }
 
@@ -261,22 +318,25 @@ export default class extends Runner {
       specimens: ['specimen'],
       measurements: ['number', 'experiment', 'specimen'],
       criteria: ['criterion', 'table_column'],
-      ages: ['citations'],
-      images: ['file']
+      ages: ['location', 'site', 'sample', 'specimen'],
+      images: ['location', 'site', 'sample', 'specimen']
     };
 
     // For each table in the contribution
     for (let table in json) {
+//if (table !== 'ages') continue;
 //console.log("merging:", table);
 
       json[table] = _.sortBy(json[table], keys[table]);
 //console.log("table", json[table]);
       if (table != 'measurements') {
         for (let rowIdx = 0; rowIdx < json[table].length; rowIdx++) {
+//if (rowIdx > 10) break;
           if (json[table][rowIdx] === undefined) continue;
 //console.log("merging", rowIdx, json[table][rowIdx]);
-          const rowKeys = _.pick(json[table][rowIdx], keys[table]);
+          const rowKeys = (keys[table] ? _.pick(json[table][rowIdx], keys[table]) : json[table][rowIdx]);
           for (let rowToMergeIdx = rowIdx + 1; rowToMergeIdx < json[table].length; rowToMergeIdx++) {
+//if (rowToMergeIdx > 10) break;
 //console.log("can merge?", rowToMergeIdx, json[table][rowToMergeIdx], 'has?', rowKeys);
             if (json[table][rowToMergeIdx] === undefined) continue;
             if (_.isMatch(json[table][rowToMergeIdx], rowKeys)) {
@@ -290,7 +350,7 @@ export default class extends Runner {
 //console.log("merged", rowIdx, "with", rowToMergeIdx);
               }
             } else {
-//console.log("done with", rowIdx, "of", json[table].length, ", stopped at",rowToMergeIdx);
+//if (table === 'ages') console.log("done with", rowIdx, "of", json[table].length, ", stopped at",rowToMergeIdx);
               break;
             }
           }
