@@ -12,20 +12,21 @@ describe('magic.actions.export_contribution', () => {
     it('should reject if the table name is invalid.', () => {
       const invalidTable = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '3.0'
         }],
         not_er_locations: [{
           region: 'California'
         }]
       };
       exportContributionToTextErrorTest(invalidTable,
-        /table .* is not defined in magic data model version /i);
+        /table .* is not defined in magic data model version/i);
     });
 
     it('should reject if the column name is invalid.', () => {
       const invalidColumn = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '2.5', 
+          author: 'Geoff'
         }],
         er_locations: [{
           not_region: 'California'
@@ -38,7 +39,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report one error if the same two columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '2.4'
+          magic_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -54,7 +55,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report two errors if two different columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '2.4'
+          magic_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -109,18 +110,19 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\ter_sites\n' +
         'er_site_name\ter_location_name\tsite_type\tsite_description\tmagic_method_codes\ter_citation_names\n' +
         'si2\tlo1\t\ta\t:code2:code1:\t\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\n' +
+        'si1\tlo1\tKiln\t\t\t:10.1023/A1:\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\ter_specimens\n' +
         'er_specimen_name\ter_location_name\ter_sample_name\tspecimen_dip\tspecimen_igsn\ter_citation_names\n' +
-        'sp1\tlo1\tsa1\t1.2\tisgn1\t:"10.1023/A:1":This study:\n' +
-        'sp2\tlo1\tsa1\t1.3\tisgn2\t\n';
+        'sp1\tlo1\tsa1\t1.2\tigsn1\t:"10.1023/A:1":This study:\n' +
+        'sp2\tlo1\tsa1\t1.3\tigsn2\t\n';
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
           magic_version: '3.0',
           id: '1234',
           contributor: '@magic'
+      
         }],
         specimens: [{
           specimen: 'sp1',
@@ -142,7 +144,8 @@ describe('magic.actions.export_contribution', () => {
   });
 
   // Test parsing valid files.
-  describe('when exporting valid files to text', () => {
+  //GGG temporarily removing tests for export, they might pass with a false positive now
+  /*describe('when exporting valid files to text', () => {
     it('should export contribution 3552 (MagIC version 2.2) with no errors', () => {
       exportContributionToTextNoErrorTest(contribution3552);
     });
@@ -152,15 +155,16 @@ describe('magic.actions.export_contribution', () => {
     it('should export contribution 10507 (MagIC version 2.5) with no errors', () => {
       exportContributionToTextNoErrorTest(contribution10507);
     });
-  });
+  });*/
 });
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 const exportContributionToTextErrorTest = (json, reErrorMsg) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json);
-  expect(Exporter.errors().length).to.be.at.least(1);
-  expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
+    expect(Exporter.errors().length).to.be.at.least(1);
+    expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
+
 };
 
 // Expect no errors.
@@ -175,6 +179,7 @@ const exportContributionToTextNoErrorTest = (json) => {
 const exportContributionToTextNErrorsTest = (json, nErrors) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json);
+  console.log(`length: ${Exporter.errors().length}`);
   expect(Exporter.errors().length).to.equal(nErrors);
 };
 
@@ -182,6 +187,9 @@ const exportContributionToTextNErrorsTest = (json, nErrors) => {
 const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
   const text = Exporter.toText(json);
-  expect(Exporter.errors().length).to.equal(0);
-  expect(text).to.equal(textExpected);
+    expect(Exporter.errors().length).to.equal(0);
+    console.log(`text:\n${text}`);
+    console.log(`text Expected:\n${textExpected}`);
+    expect(text).to.equal(textExpected);
+
 };
