@@ -142,16 +142,13 @@ export default class extends Runner {
     if(columnName == 'rotation_sequence')
     {
       for(let nestedArrayIdx in dataToManipulate)
-        /*for(let dataArrayIdx in dataToManipulate[nestedArrayIdx])
-        {
-          console.log(`rotation seq ${dataToManipulate[nestedArrayIdx][dataArrayIdx]}`);
-        }*/
         manipulatedData = dataToManipulate[nestedArrayIdx].join(':');
-      // dataToManipulate = dataToManipulate.replace(",",":");
     }
 
     if( columnName == 'er_citation_names' ||
-        columnName == 'magic_method_codes')
+        columnName == 'magic_method_codes'||
+        columnName == 'method_codes' ||
+        columnName == 'citations')
     {
       //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
       //multi segment piece of data
@@ -163,8 +160,7 @@ export default class extends Runner {
           dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
         }
 
-        manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';
-
+        manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
         //console.log(`manipulated data: ${manipulatedData}`);
       }
       return manipulatedData;
