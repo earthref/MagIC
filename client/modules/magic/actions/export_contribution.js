@@ -15,13 +15,30 @@ export default class extends Runner {
     this.model;
   }
 
+  toExtendedText(jsonToTranslate) {
+
+    // returns the same thing as toText but with extra headers (groups, columns names, and units)
+
+    // logic for column type/unit row:
+    // if type === 'Number'
+    //   if unit === 'Dimensionless' or 'Custom' or empty
+    //     print 'Number'
+    //   else
+    //     print 'Number in [unit]'
+    // else if unit === 'Flag'
+    //     print 'Flag'
+    // else
+    //     print '[type]'
+
+  }
+
   toText(jsonToTranslate) {
 
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
 
     // Retrieve the data model version used in the jsonToTranslate
     this.version = this.VersionGetter.getVersion(jsonToTranslate)
-    if (!this.version) return text;
+    if (!this.version) return jsonToTranslate;
 
     // Retrieve the data model
     this.model = magicDataModels[this.version];
@@ -35,6 +52,7 @@ export default class extends Runner {
 
     return text;
 
+    //RCJM: I think you put this in so feel free to delete it: https://github.com/earthref/earthref/commit/a0d5ecf15ab77904a7e4c71dc94bd1d4986e77d5
     //GGG Rupert i'm uncertain what this was supposed to do, If it is meant to validate tables and columns i've done that
     /*for (var table in jsonToTranslate) {
      if (!table.hasOwnProperty(table)) {

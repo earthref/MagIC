@@ -74,55 +74,52 @@ describe('magic.actions.export_contribution', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '3.0'
         }],
-        er_specimens: [{
-          er_location_name:  'lo1',
-          specimen_dip:      1.2,
-          specimen_igsn:     'igsn1',
-          er_specimen_name:  'sp1',
-          er_sample_name:    'sa1',
-          er_citation_names: ['10.1023/A:1', 'This study']
+        specimens: [{
+          dip:       1.2,
+          igsn:      'igsn1',
+          specimen:  'sp1',
+          sample:    'sa1',
+          citations: ['10.1023/A:1', 'This study']
         }, {
-          er_location_name: 'lo1',
-          specimen_dip:     1.3,
-          specimen_igsn:    'igsn2',
-          er_specimen_name: 'sp2',
-          er_sample_name:   'sa1'
+          dip:      1.3,
+          igsn:     'igsn2',
+          specimen: 'sp2',
+          sample:   'sa1'
         }],
-        er_sites: [{
-          er_location_name:   'lo1',
-          er_site_name:       'si2',
-          site_description:   'a',
-          magic_method_codes: ['code2', 'code1']
+        sites: [{
+          location:     'lo1',
+          site:         'si2',
+          description:  'a',
+          method_codes: ['code2', 'code1']
         }, {
-          er_site_name:      'si1',
-          er_location_name:  'lo1',
-          er_citation_names: ['10.1023/A1'],
-          site_type:         'Kiln'
+          site:              'si1',
+          location:          'lo1',
+          citations:         ['10.1023/A1'],
+          site_alternatives: 'Kiln'
         }]
       };
       const text1 =
         'tab delimited\tcontribution\n' +
         'magic_version\n' +
-        '2.5\n' +
+        '3.0\n' +
         '>>>>>>>>>>\n' +
-        'tab delimited\ter_sites\n' +
-        'er_site_name\ter_location_name\tsite_type\tsite_description\tmagic_method_codes\ter_citation_names\n' +
-        'si2\tlo1\t\ta\t:code2:code1:\t\n' +
-        'si1\tlo1\tKiln\t\t\t:10.1023/A1:\n' +
+        'tab delimited\sites\n' +
+        'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
+        'si2\tlo1\t\t:code2:code1:\t\ta\n' +
+        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
         '>>>>>>>>>>\n' +
-        'tab delimited\ter_specimens\n' +
-        'er_specimen_name\ter_location_name\ter_sample_name\tspecimen_dip\tspecimen_igsn\ter_citation_names\n' +
-        'sp1\tlo1\tsa1\t1.2\tigsn1\t:"10.1023/A:1":This study:\n' +
-        'sp2\tlo1\tsa1\t1.3\tigsn2\t\n';
+        'tab delimited\tspecimens\n' +
+        'specimen\tsample\tigsn\tcitations\tdip\n' +
+        'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
+        'sp2\tsa1\tigsn2\t\t1.3\n';
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
           magic_version: '3.0',
           id: '1234',
           contributor: '@magic'
-      
         }],
         specimens: [{
           specimen: 'sp1',
@@ -140,6 +137,94 @@ describe('magic.actions.export_contribution', () => {
         'specimen\tdescription\trotation_sequence\texternal_database_ids\n' +
         'sp1\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
       exportContributionToTextJSONTest(json2, text2);
+    });
+  });
+
+  // Test exporting valid JSON to extended text.
+  describe('when exporting valid JSON to extended text', () => {
+    it('should keep export tables and columns in the order defined in the data model', () => {
+      const json1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        specimens: [{
+          dip:       1.2,
+          igsn:      'igsn1',
+          specimen:  'sp1',
+          sample:    'sa1',
+          citations: ['10.1023/A:1', 'This study']
+        }, {
+          dip:      1.3,
+          igsn:     'igsn2',
+          specimen: 'sp2',
+          sample:   'sa1'
+        }],
+        sites: [{
+          location:     'lo1',
+          site:         'si2',
+          description:  'a',
+          method_codes: ['code2', 'code1']
+        }, {
+          site:              'si1',
+          location:          'lo1',
+          citations:         ['10.1023/A1'],
+          site_alternatives: 'Kiln'
+        }]
+      };
+      const text1 =
+        'tab delimited\tcontribution\t4 headers\n' +
+        'Contribution\n' +  // Group Name
+        'MagIC Version\n' + // Column Name
+        'String\n' +        // Column Type and/or Unit
+        'magic_version\n' +
+        '3.0\n' +
+        '>>>>>>>>>>\n' +
+        'tab delimited\sites\t4 headers\n' +
+        'Names\t\tSite\tResult\t\tMetadata\n' + // Group Name (blank if repeated from last column, will be a merged cell in Excel export)
+        'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // Column Name
+        'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit
+        'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
+        'si2\tlo1\t\t:code2:code1:\t\ta\n' +
+        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
+        '>>>>>>>>>>\n' +
+        'tab delimited\tspecimens\t4 headers\n' +
+        'Names\t\tSpecimen\tResult\tGeology\n' + // Group Name
+        'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name
+        'String\tString\tString\tList\tList\tNumber in Degrees\n' + // Column Type and/or Unit
+        'specimen\tsample\tigsn\tcitations\tdip\n' +
+        'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
+        'sp2\tsa1\tigsn2\t\t1.3\n';
+      exportContributionToExtendedTextJSONTest(json1, text1);
+      const json2 = {
+        contribution: [{
+          magic_version: '3.0',
+          id: '1234',
+          contributor: '@magic'
+        }],
+        specimens: [{
+          specimen: 'sp1',
+          meas_step_min: 1,
+          result_type: 'a',
+          rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]],
+          description: 'a, b',
+          external_database_ids: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
+        }]
+      };
+      const text2 =
+        'tab delimited\tcontribution\t4 headers\n' +
+        'Contribution\t\t\n' +                            // Group Name
+        'Contribution ID\tContributor\tMagIC Version\n' + // Column Name
+        'Integer\tInteger\tString\n' +                    // Column Type and/or Unit
+        'id\tcontributor\tmagic_version\n' +
+        '1234\t@magic\t3.0\n' +
+        '>>>>>>>>>>\n' +
+        'tab delimited\tspecimens\t4 headers\n' +
+        'Names\tMeasurement Parameters\tResult\tMetadata\t\t\n' + // Group Name
+        'Specimen Name\tMeasurement Step Minimum\tResult Type\tDescription\tSequence of Rotations\tExternal Database IDs\n' + // Column Name
+        'String\tNumber\tFlag\tString\tMatrix\tDictionary\n' + // Column Type and/or Unit
+        'specimen\tmeas_step_min\tresult_type\tdescription\trotation_sequence\texternal_database_ids\n' +
+        'sp1\t1\ta\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
+      exportContributionToExtendedTextJSONTest(json2, text2);
     });
   });
 
@@ -191,5 +276,16 @@ const exportContributionToTextJSONTest = (json, textExpected) => {
     console.log(`text:\n${text}`);
     console.log(`text Expected:\n${textExpected}`);
     expect(text).to.equal(textExpected);
+
+};
+
+// Expect no errors and check against expected text.
+const exportContributionToExtendedTextJSONTest = (json, textExpected) => {
+  const Exporter = new ExportContribution({});
+  const text = Exporter.toExtendedText(json);
+  expect(Exporter.errors().length).to.equal(0);
+  console.log(`text:\n${text}`);
+  console.log(`text Expected:\n${textExpected}`);
+  expect(text).to.equal(textExpected);
 
 };
