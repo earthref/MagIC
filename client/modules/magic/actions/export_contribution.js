@@ -139,10 +139,45 @@ export default class extends Runner {
 
     let manipulatedData = '';
 
+    if(columnName == 'external_database_ids')
+    {
+      //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
+      //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
+      let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
+      let numberOfElements = propertyNames.length;
+      let numberOfElementsProcessed = 0; //this counter is necessary because the loop index below is given some strange numbers from propertyNames i.e. they are not sequential
+      for(let propertyIdx in propertyNames)
+      {
+        let propertyName = propertyNames[propertyIdx];
+        let propertyValue = dataToManipulate[propertyName];
+        if(propertyValue == null) {propertyValue = '';}
+        manipulatedData = manipulatedData + `${propertyName}[${propertyValue}]`;
+        numberOfElementsProcessed++;
+
+        //we do not want a colon in front of the first
+        if (//propertyIdx < 1 ||
+        numberOfElementsProcessed < numberOfElements )
+              manipulatedData = manipulatedData + ':';
+
+        console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
+      }
+      return manipulatedData;
+    }
+
+
     if(columnName == 'rotation_sequence')
     {
+      //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
+      //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
+      let numberOfSubArrays = dataToManipulate.length;
       for(let nestedArrayIdx in dataToManipulate)
-        manipulatedData = dataToManipulate[nestedArrayIdx].join(':');
+      {
+        manipulatedData = manipulatedData + dataToManipulate[nestedArrayIdx].join(':');
+
+        //Each array worth of data is separated by a semi colon in the TSV
+        if (nestedArrayIdx + 1 < numberOfSubArrays) manipulatedData = manipulatedData + ';';
+      }
+      return manipulatedData;
     }
 
     if( columnName == 'er_citation_names' ||

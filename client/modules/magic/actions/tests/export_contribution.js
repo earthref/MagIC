@@ -115,7 +115,7 @@ describe('magic.actions.export_contribution', () => {
         'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
         'sp2\tsa1\tigsn2\t\t1.3\n';
       exportContributionToTextJSONTest(json1, text1);
-      /*const json2 = {
+      const json2 = {
        contribution: [{
        magic_version: '3.0',
        id: '1234',
@@ -136,7 +136,7 @@ describe('magic.actions.export_contribution', () => {
        'tab delimited\tspecimens\n' +
        'specimen\tdescription\trotation_sequence\texternal_database_ids\n' +
        'sp1\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
-       exportContributionToTextJSONTest(json2, text2);*/
+       exportContributionToTextJSONTest(json2, text2);
        });
   });
 
