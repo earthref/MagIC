@@ -110,12 +110,12 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\ter_sites\n' +
         'er_site_name\ter_location_name\tsite_type\tsite_description\tmagic_method_codes\ter_citation_names\n' +
         'si2\tlo1\t\ta\t:code2:code1:\t\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\n' +
+        'si1\tlo1\tKiln\t\t\t:10.1023/A1:\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\ter_specimens\n' +
         'er_specimen_name\ter_location_name\ter_sample_name\tspecimen_dip\tspecimen_igsn\ter_citation_names\n' +
-        'sp1\tlo1\tsa1\t1.2\tisgn1\t:"10.1023/A:1":This study:\n' +
-        'sp2\tlo1\tsa1\t1.3\tisgn2\t\n';
+        'sp1\tlo1\tsa1\t1.2\tigsn1\t:"10.1023/A:1":This study:\n' +
+        'sp2\tlo1\tsa1\t1.3\tigsn2\t\n';
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
@@ -179,7 +179,7 @@ const exportContributionToTextNoErrorTest = (json) => {
 const exportContributionToTextNErrorsTest = (json, nErrors) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json);
-  console.log(`leng ${Exporter.errors().length}`);
+  console.log(`length: ${Exporter.errors().length}`);
   expect(Exporter.errors().length).to.equal(nErrors);
 };
 
@@ -188,8 +188,8 @@ const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
   const text = Exporter.toText(json);
     expect(Exporter.errors().length).to.equal(0);
-    console.log(`text: ${text}`);
-    console.log(`text Expected: ${textExpected}`);
+    console.log(`text:\n${text}`);
+    console.log(`text Expected:\n${textExpected}`);
     expect(text).to.equal(textExpected);
 
 };
