@@ -145,7 +145,7 @@ describe('magic.actions.export_contribution', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '3.0'
         }],
         specimens: [{
           dip:       1.2,
@@ -179,7 +179,7 @@ describe('magic.actions.export_contribution', () => {
         'magic_version\n' +
         '3.0\n' +
         '>>>>>>>>>>\n' +
-        'tab delimited\sites\t4 headers\n' +
+        'tab delimited\tsites\t4 headers\n' +
         'Names\t\tSite\tResult\t\tMetadata\n' + // Group Name (blank if repeated from last column, will be a merged cell in Excel export)
         'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // Column Name
         'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit
