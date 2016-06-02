@@ -310,53 +310,66 @@ export default class extends Runner {
   // Merge rows that can be combined because they are orthogonal (null or identical in each column).
   _reduce(json) {
 
+    // Make a list of unique composite keys for each table.
     const keys = {
-      contribution: ['magic_version'],
       locations: ['location'],
-      sites: ['site'],
-      samples: ['sample'],
-      specimens: ['specimen'],
-      measurements: ['number', 'experiment', 'specimen'],
+      sites: ['site', 'location'],
+      samples: ['sample', 'site'],
+      specimens: ['specimen', 'sample'],
       criteria: ['criterion', 'table_column'],
       ages: ['location', 'site', 'sample', 'specimen'],
       images: ['location', 'site', 'sample', 'specimen']
     };
 
-    // For each table in the contribution
+    // For each table in the contribution:
     for (let table in json) {
-//if (table !== 'ages') continue;
-//console.log("merging:", table);
 
+      // Skip tables that don't have rows to merge.
+      if (table === 'measurements' || table === 'contribution') continue;
+
+      // Sort the table by the unique composite keys.
       json[table] = _.sortBy(json[table], keys[table]);
-//console.log("table", json[table]);
-      if (table != 'measurements') {
-        for (let rowIdx = 0; rowIdx < json[table].length; rowIdx++) {
-//if (rowIdx > 10) break;
-          if (json[table][rowIdx] === undefined) continue;
-//console.log("merging", rowIdx, json[table][rowIdx]);
-          const rowKeys = (keys[table] ? _.pick(json[table][rowIdx], keys[table]) : json[table][rowIdx]);
-          for (let rowToMergeIdx = rowIdx + 1; rowToMergeIdx < json[table].length; rowToMergeIdx++) {
-//if (rowToMergeIdx > 10) break;
-//console.log("can merge?", rowToMergeIdx, json[table][rowToMergeIdx], 'has?', rowKeys);
-            if (json[table][rowToMergeIdx] === undefined) continue;
-            if (_.isMatch(json[table][rowToMergeIdx], rowKeys)) {
-              const rowCopy = _.cloneDeep(json[table][rowIdx]);
-//console.log("before", json[table][rowToMergeIdx], '->', rowCopy);
-              _.merge(rowCopy, json[table][rowToMergeIdx]);
-//console.log("after", rowCopy);
-              if (_.isMatch(rowCopy, json[table][rowIdx])) {
-                json[table][rowIdx] = rowCopy;
-                json[table][rowToMergeIdx] = undefined;
-//console.log("merged", rowIdx, "with", rowToMergeIdx);
-              }
-            } else {
-//if (table === 'ages') console.log("done with", rowIdx, "of", json[table].length, ", stopped at",rowToMergeIdx);
-              break;
-            }
+      
+      // For each row in the sorted table:
+      for (let rowCurrentIdx = 0; rowCurrentIdx < json[table].length; rowCurrentIdx++) {
+        
+        // Skip rows that are empty (e.g. ones that have already been merged).
+        if (json[table][rowCurrentIdx] === undefined) continue;
+        
+        // Make a list of the columns of the composite keys that are defined in the current row.
+        const rowKeys = (keys[table] ? _.pick(json[table][rowCurrentIdx], keys[table]) : json[table][rowCurrentIdx]);
+        
+        // For each following row that is a candidate for merging:
+        for (let rowCandidateIdx = rowCurrentIdx + 1; rowCandidateIdx < json[table].length; rowCandidateIdx++) {
+
+          // Skip rows that are empty (e.g. ones that have already been merged).
+          if (json[table][rowCandidateIdx] === undefined) continue;
+          
+          // Stop merging if the candidate row has doesn't share composite key values with the current row.
+          // Since
+          if (!_.isMatch(json[table][rowCandidateIdx], rowKeys)) break;
+          
+          // Make a copy of the current row to test merging with the candidate row.
+          const rowMerged = _.cloneDeep(json[table][rowCurrentIdx]);
+          
+          // Merge the candidate row for merging with the current row.
+          _.merge(rowMerged, json[table][rowCandidateIdx]);
+          
+          // If the merge didn't mutate any of the existing values in the current row:
+          if (_.isMatch(rowMerged, json[table][rowCurrentIdx])) {
+            
+            // Replace the current row with the merged row.
+            json[table][rowCurrentIdx] = rowMerged;
+
+            // Empty the candidate row
+            json[table][rowCandidateIdx] = undefined;
+
           }
         }
-        _.remove(json[table], _.isEmpty);
       }
+    
+      _.remove(json[table], _.isEmpty);
+
     }
 
     return json;
