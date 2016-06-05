@@ -667,18 +667,18 @@ describe('magic.actions.upgrade_contribution', () => {
         contribution: [{
           magic_version: '3.0'
         }],
-        criteria: [{ // this row first because dir_alpha95 comes first in the 3.0 data model
+        criteria: [{ // this row first because of sorting on criterion, table_column
           description: 'Criteria for selection of site direction',
           criterion: 'DE-SITE',
           table_column: 'sites.dir_alpha95',
           criterion_operation: '<=',
-          criterion_value: '180'
+          criterion_value: '50'
         },{
           description: 'Criteria for selection of site direction',
           criterion: 'DE-SITE',
           table_column: 'sites.dir_k',
           criterion_operation: '>=',
-          criterion_value: '50'
+          criterion_value: '180'
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
@@ -785,11 +785,8 @@ describe('magic.actions.upgrade_contribution', () => {
   });
   
   // Test calculating the upgrade map.
-  //newModel is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
-  //The upgradeMap is "forward looking" from perspective of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
   describe('when calculating the upgrade map', () => {
     it('should handle renamed tables', () => {
-      //This represents the model we are upgrading to
       const newModel = {//indicates that table "er_locations" has been changed to "locations"
         tables: { locations: {
           columns: { location_name: {
@@ -800,18 +797,14 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-
       const upgradeMap = {
         er_locations: { location_name: [{ table: 'locations', column: 'location_name'}]}//the map from the old model to the new
       };
-
       upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
 
     it('should handle multiple columns', () => {
-      //This represents the model we are upgrading to
       const newModel = {
-
         'magic_version': '3.0',
         'tables': {
           'contribution': {
@@ -854,7 +847,6 @@ describe('magic.actions.upgrade_contribution', () => {
         }
 
       };
-
       upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
 
@@ -881,7 +873,6 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-
       const upgradeMap  = {
         er_locations: { name: [{ table: 'er_locations', column: 'location_name'}]}//from the previous table and column to new table and column
       };
@@ -908,7 +899,6 @@ describe('magic.actions.upgrade_contribution', () => {
           }
         }}
       };
-
       const upgradeMap = {
         er_locations: {
           splitColName: [
@@ -934,7 +924,6 @@ describe('magic.actions.upgrade_contribution', () => {
           }}
         }}
       };
-
       const upgradeMap = {
         er_locations: {//the table in the new model
           col_name1: [{ table: 'er_locations', column: 'location_name'}],//from previous column (old JSON) TO new table and column
@@ -943,11 +932,6 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       upgradeContributionCreateMapTest(newModel, upgradeMap);
     });
-
-
-    // TODO: write more difficult tests for table names changing,
-    // merging from different tables, splitting into different tables,
-    // tables with columns renamed into different tables
 
   });
 });
@@ -1019,7 +1003,7 @@ const upgradeContributionMapJSONTest = (jsonOld, maxVersion, jsonExpected) => {
 // Expect no errors and check against expected JSON when mapping.
 const upgradeContributionReduceJSONTest = (jsonOld, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
-  const jsonNew = Upgrader._reduce(jsonOld);
+  const jsonNew = Upgrader._merge(jsonOld);
   expect(jsonNew).to.deep.equal(jsonExpected);
   //expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);

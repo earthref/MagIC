@@ -5,8 +5,8 @@ import GetContributionVersion from './get_contribution_version';
 import {default as magicVersions} from '../configs/magic_versions';
 import {default as magicDataModels} from '../configs/data_models/data_models';
 
-/**This class upgrades the json data from its current model to the next model if a newer model is available
- * It can optionally upgrade the model several times until it reaches a versionMax*/
+// This class upgrades the json data from its current model to the next model if a newer model is available.
+// It can optionally upgrade the model several times until it reaches a versionMax.
 export default class extends Runner {
 
   constructor({LocalState}) {
@@ -16,7 +16,7 @@ export default class extends Runner {
 
   // Upgrade a contribution to its next MagIC data model version.
   // The input JSON can be assumed to be the entire contribution.
-  // The upgrade happens in two stages: map and then reduce.
+  // The upgrade happens in two stages: map column names and then merge rows.
   // This could probably be parallelized easily, but for now speed is less important that accuracy for this operation.
   upgrade(jsonOld, versionMax) {
 
@@ -25,7 +25,7 @@ export default class extends Runner {
 
     // Merge rows that can be combined because they are orthogonal (null or identical in each column).
     if (this.errors().length === 0)
-      json = this._reduce(json);
+      json = this._merge(json);
 
     return json;
   }
@@ -36,14 +36,15 @@ export default class extends Runner {
   _map(jsonOld, versionMax){
     let jsonNew = {};
 
-    // Retrieve the data model version used in the json
+    // Retrieve the data model version used in the json.
     const versionOld = this.VersionGetter.getVersion(jsonOld);
     if (!versionOld) return jsonOld;
 
     // Check that the maximum MagIC data model version to upgrade to is valid (versionMax is in magicVersions).
     if (versionMax && _.indexOf(magicVersions, versionMax) === -1) {
       let strVersions = magicVersions.map((str) => { return `"${str}"`; }).join(', ');
-      this._appendError(`The second argument (maximum MagIC data model version), "${versionMax}", is invalid. ` +
+      this._appendError(`The second argument (the maximum MagIC Data Model version for upgrading), ` +
+                        `"${versionMax}", is invalid. ` +
         `Expected one of: ${strVersions}.`);
       return jsonOld;
     }
@@ -55,11 +56,11 @@ export default class extends Runner {
     if (_.indexOf(magicVersions, versionOld) === magicVersions.length - 1) return jsonOld;
     const versionNew = magicVersions[_.indexOf(magicVersions, versionOld) + 1];
 
-    // Retrieve the data models
+    // Retrieve the data models.
     const modelOld = magicDataModels[versionOld];
     const modelNew = magicDataModels[versionNew];
 
-    // Handle special cases when upgrading from 2.5 to 3.0 tables
+    // Handle special cases when upgrading from 2.5 to 3.0 tables.
     if (versionNew === '3.0') {
 
       // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
@@ -85,10 +86,10 @@ export default class extends Runner {
       let undefinedTableColumnErrors = {};
       let deletedTableColumnWarnings = {};
 
-      // Handle special cases when upgrading from 2.5 to 3.0 tables
+      // Handle special cases when upgrading from 2.5 to 3.0 tables.
       if (versionNew === '3.0') {
 
-        // Don't warn about these tables being deleted when upgrading from 2.5 to 3.0
+        // Don't warn about these tables being deleted when upgrading from 2.5 to 3.0.
         if (jsonTableOld === 'magic_methods' ||
             jsonTableOld === 'er_citations' ||
             jsonTableOld === 'er_mailinglist' ||
@@ -101,7 +102,7 @@ export default class extends Runner {
             let expeditionRow = jsonOld['er_expeditions'][expeditionRowIdx];
 
             // If a list of locations for this expedition is provided, duplicate the
-            // expedition row for each location and add the er_location_name column
+            // expedition row for each location and add the er_location_name column.
             if (expeditionRow['expedition_location']) {
               let expeditionLocations = expeditionRow['expedition_location']
               expeditionLocations = expeditionLocations.replace(/(^:|:$)/g,'');
@@ -112,8 +113,7 @@ export default class extends Runner {
               }
             }
 
-            // Otherwise, duplicate the expedition row for each location and add the
-            // er_location name column
+            // Otherwise, duplicate the expedition row for each location and add the er_location name column.
             else {
               for (let locationRowIdx in jsonOld['er_locations']) {
                 let locationRow = jsonOld['er_locations'][locationRowIdx];
@@ -130,23 +130,25 @@ export default class extends Runner {
 
       // Check that the old table is defined in the old data model.
       if (!modelOld['tables'][jsonTableOld]) {
-        this._appendError(`Table "${jsonTableOld}" is not defined in magic data model version ${versionOld}.`);
+        this._appendError(`Table "${jsonTableOld}" is not defined in MagIC Data Model version ${versionOld}.`);
         continue;
       }
 
-      // Loop through all rows in table old table
+      // Loop through all rows in table old table.
       let rowNumber = 0;
       for (let jsonRowOldIdx in jsonOld[jsonTableOld]) {
-        let jsonRowOld = jsonOld[jsonTableOld][jsonRowOldIdx];
         let tableRowsNew = {};
         let joinTable;
         let relativeIntensityNormalization;
         rowNumber++;
 
-        // Handle special cases when upgrading from 2.5 to 3.0 rows
+        // Make a copy of the row since it might be mutated during the column mapping
+        let jsonRowOld = _.cloneDeep(jsonOld[jsonTableOld][jsonRowOldIdx]);
+
+        // Handle special cases when upgrading from 2.5 to 3.0 rows.
         if (versionNew === '3.0') {
 
-          // Map data into the correct parent table
+          // Map data into the correct parent table.
           if (jsonTableOld === 'pmag_results' || jsonTableOld === 'rmag_results') {
             if (jsonRowOld['er_synthetic_names'] != null && !jsonRowOld['er_synthetic_names'].match(/.+:.+/))
               joinTable = 'specimens';
@@ -163,18 +165,18 @@ export default class extends Runner {
                                   `MagIC data model version ${versionNew} since it is a contribution-level result.`);
           }
 
-          // Record the type of relative intensity normalization and remove the associated method code
+          // Record the type of relative intensity normalization and remove the associated method code.
           if (jsonRowOld['magic_method_codes']) {
 
-            // Make a list of relative intensity normalizations in the method codes
+            // Make a list of relative intensity normalizations in the method codes.
             let methodCodes = jsonRowOld['magic_method_codes'].replace(/(^:|:$)/g,'').split(/:/);
             methodCodes = methodCodes.map((methodCode) => { return methodCode.toUpperCase(); });
             let relativeIntensityNormalizations = _.intersection(methodCodes, ['IE-ARM', 'IE-IRM', 'IE-CHI']);
 
-            // Remove the relative intensity normalization method code
+            // Remove the relative intensity normalization method code.
             jsonRowOld['magic_method_codes'] = _.without(methodCodes, 'IE-ARM', 'IE-IRM', 'IE-CHI').join(':');
 
-            // Record the type of relative intensity normalization
+            // Record the type of relative intensity normalization.
             if (relativeIntensityNormalizations.length > 1)
               this._appendError(`Row ${rowNumber} in table "${jsonTableOld}" includes more than one ` +
                 `type of relative intensity normalization in the method codes.`);
@@ -182,11 +184,11 @@ export default class extends Runner {
               relativeIntensityNormalization = relativeIntensityNormalizations[0].replace(/IE-/,'');
             else
               relativeIntensityNormalization = undefined;
-            // relativeIntensityNormalization = undefined or 'ARM' or 'IRM' or 'CHI'
+            // Now relativeIntensityNormalization is undefined or 'ARM' or 'IRM' or 'CHI'.
 
           }
 
-          // Add the geoid to the method codes
+          // Add the geoid to the method codes.
           if (jsonRowOld['location_geoid']) {
             if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
             jsonRowOld['magic_method_codes'] += ':GE-' + jsonRowOld['location_geoid'];
@@ -202,24 +204,24 @@ export default class extends Runner {
 
         }
 
-        for (let jsonColumnOld in jsonRowOld) {//loop through all columns in row
+        for (let jsonColumnOld in jsonRowOld) {
 
-          // Handle special cases when upgrading from 2.5 to 3.0 columns
+          // Handle special cases when upgrading from 2.5 to 3.0 columns.
           if (versionNew === '3.0') {
 
-            // Don't warn about these columns being deleted when upgrading from 2.5 to 3.0
+            // Don't warn about these columns being deleted when upgrading from 2.5 to 3.0.
             if (!upgradeMap[jsonTableOld][jsonColumnOld] && (
-                jsonColumnOld === 'er_location_name'    ||
-                jsonColumnOld === 'er_site_name'        ||
-                jsonColumnOld === 'er_sample_name'      ||
-                jsonColumnOld === 'er_specimen_name'    ||
-                jsonColumnOld === 'expedition_location' ||
-                jsonColumnOld === 'location_geoid'      ||
-                jsonColumnOld === 'site_location_geoid' ||
+                jsonColumnOld === 'er_location_name'      ||
+                jsonColumnOld === 'er_site_name'          ||
+                jsonColumnOld === 'er_sample_name'        ||
+                jsonColumnOld === 'er_specimen_name'      ||
+                jsonColumnOld === 'expedition_location'   ||
+                jsonColumnOld === 'location_geoid'        ||
+                jsonColumnOld === 'site_location_geoid'   ||
                 jsonColumnOld === 'sample_location_geoid'))
               continue;
 
-            // Combine external_database_names/ids into a dictionary
+            // Combine external_database_names/ids into a dictionary.
             if (jsonColumnOld === 'external_database_names') {
               let dbNames = jsonRowOld['external_database_names'].replace(/(^:|:$)/g,'').split(/:/);
               let dbIDs = jsonRowOld['external_database_ids'].replace(/(^:|:$)/g,'').split(/:/);
@@ -231,23 +233,64 @@ export default class extends Runner {
             }
             if (jsonColumnOld === 'external_database_ids') continue;
 
+            // Convert the columns in pmag_criteria into rows in the criteria table.
+            if (jsonTableOld === 'pmag_criteria') {
+
+              // Create a criteria row if processing a criterion column and not metadata.
+              if (jsonColumnOld !== 'pmag_criteria_code' &&
+                  jsonColumnOld !== 'criteria_definition' &&
+                  jsonColumnOld !== 'criteria_description' &&
+                  jsonColumnOld !== 'er_citation_names') {
+
+                // Check that the pmag_criteria column is defined in the data model criteria map.
+                if (!modelNew['criteria_map'][jsonColumnOld]) {
+                  if (!undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
+                    this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                      `is not defined in criteria definition of the MagIC Data Model version ${versionNew}.`);
+                  undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
+                  continue;
+                }
+
+                // Create the criteria row.
+                let criteriaRow = {};
+                criteriaRow['table_column'] = modelNew['criteria_map'][jsonColumnOld]['table_column'];
+                criteriaRow['criterion_operation'] = modelNew['criteria_map'][jsonColumnOld]['criterion_operation'];
+                criteriaRow['criterion_value'] = jsonRowOld[jsonColumnOld];
+                if (jsonRowOld['pmag_criteria_code'])
+                  criteriaRow['criterion'] = jsonRowOld['pmag_criteria_code'];
+                if (jsonRowOld['criteria_definition'] || jsonRowOld['criteria_description'])
+                  criteriaRow['description'] =
+                    (jsonRowOld['criteria_definition'] ? jsonRowOld['criteria_definition'] : '') +
+                    (jsonRowOld['criteria_definition'] && jsonRowOld['criteria_description'] ? ', ' : '') +
+                    (jsonRowOld['criteria_description'] ? jsonRowOld['criteria_description'] : '');
+                if (jsonRowOld['er_citation_names'])
+                  criteriaRow['citations'] = jsonRowOld['er_citation_names'];
+
+                // Create the table in the new JSON if it doesn't exist.
+                if (!tableRowsNew['criteria']) tableRowsNew['criteria'] = [];
+
+                // Add the criterion row to the criteria table.
+                tableRowsNew['criteria'].push(criteriaRow);
+
+              }
+              continue;
+            }
           }
 
           // Check that the old column is defined in the old data model.
           if (!modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld]) {
             if (!undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
               this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-                                `is not defined in magic data model ${versionOld}.`);
+                                `is not defined in MagIC Data Model version ${versionOld}.`);
             undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
             continue;
           }
 
           // Check that the old table and column are defined in the new data model.
           if (!upgradeMap[jsonTableOld] || !upgradeMap[jsonTableOld][jsonColumnOld]) {
-
             if (!deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
               this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-                                  `was deleted in MagIC data model version ${versionNew}.`);
+                                  `was deleted in MagIC Data Model version ${versionNew}.`);
             deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
             continue;
           }
@@ -262,44 +305,44 @@ export default class extends Runner {
 
             if (!joinTable || joinTable === jsonTableNew) {
 
-              // Handle special cases when upgrading from 2.5 to 3.0 columns
+              // Handle special cases when upgrading from 2.5 to 3.0 columns.
               if (versionNew === '3.0') {
 
-                if (jsonColumnNew.match(/^int_rel/) && relativeIntensityNormalization) {
+                // Move the normalized relative intensities into separate columns.
+                if (jsonColumnNew.match(/^int_rel/) && relativeIntensityNormalization)
                   jsonColumnNew = jsonColumnNew.replace(/^int_rel/, 'int_rel_' + relativeIntensityNormalization);
-                  console.log(jsonColumnNew);
-                }
 
               }
 
-              // Normalize lists for easier comparison in _reduce() by sorting them
+              // Normalize lists for easier comparison in _reduce() by sorting them.
               if (modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'List' ||
                   modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'Dictionary') {
                 jsonValueNew = jsonValueNew.replace(/(^:|:$)/g, '').split(/:/);
                 jsonValueNew = _(jsonValueNew).sortBy().sortedUniq().join(':');
               }
 
-              // Create the table in the new JSON if it doesn't exist
-              if (!tableRowsNew[jsonTableNew]) tableRowsNew[jsonTableNew] = {};
+              // Create the table in the new JSON if it doesn't exist.
+              if (!tableRowsNew[jsonTableNew]) {
+                tableRowsNew[jsonTableNew] = [];
+                tableRowsNew[jsonTableNew][0] = {};
+              }
 
-              // Add the column value to the new JSON
-              tableRowsNew[jsonTableNew][jsonColumnNew] = jsonValueNew;
+              // Add the column value to the new JSON.
+              tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
 
             }
-
           }
-
         }
 
-        // Add the row(s) to the new JSON
+        // Add the row(s) to the new JSON.
         for (let table in tableRowsNew) {
           if (!jsonNew[table]) jsonNew[table] = [];
-          jsonNew[table].push(tableRowsNew[table]);
+          jsonNew[table] = jsonNew[table].concat(tableRowsNew[table]);
         }
       }
     }
 
-    // Update the data model version
+    // Update the data model version.
     jsonNew['contribution'][0]['magic_version'] = versionNew;
 
     // Recursively upgrade the contribution.
@@ -308,7 +351,7 @@ export default class extends Runner {
   }
 
   // Merge rows that can be combined because they are orthogonal (null or identical in each column).
-  _reduce(json) {
+  _merge(json) {
 
     // Make a list of unique composite keys for each table.
     const keys = {
@@ -346,7 +389,7 @@ export default class extends Runner {
           if (json[table][rowCandidateIdx] === undefined) continue;
           
           // Stop merging if the candidate row has doesn't share composite key values with the current row.
-          // Since
+          // Since the table is sorted, this guarantees that no following rows are candidates for merging.
           if (!_.isMatch(json[table][rowCandidateIdx], rowKeys)) break;
           
           // Make a copy of the current row to test merging with the candidate row.
@@ -361,13 +404,15 @@ export default class extends Runner {
             // Replace the current row with the merged row.
             json[table][rowCurrentIdx] = rowMerged;
 
-            // Empty the candidate row
+            // Empty the candidate row so that it is skipped when the current row reaches it without altering the
+            // number or rows in the table.
             json[table][rowCandidateIdx] = undefined;
 
           }
         }
       }
-    
+
+      // Remove all of the empty merged rows from the table.
       _.remove(json[table], _.isEmpty);
 
     }
