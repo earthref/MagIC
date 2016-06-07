@@ -205,9 +205,6 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionWarningTest(jsonOld, '3.0',
         /column .* in table .* was deleted in magic data model/i);
     });
-
-    // TODO: don't warn about some columns not being used, like er_specimens.er_location_name
-    
   });
 
   // Tests specific to a 2.5 to 3.0 upgrade.
@@ -761,11 +758,120 @@ describe('magic.actions.upgrade_contribution', () => {
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
-    // TODO: pmag_rotations into rotation_sequence matrix test
+    it('should rename method codes', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_1',
+          magic_method_codes: 'ST-BC:ST-BC-Q1:ST-CT:ST-IC:ST-IFC:ST-VV-Q1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'site_1',
+          method_codes: 'ST-BCQ-1:ST-C:ST-C-I:ST-G:ST-G-IF:ST-VVQ-1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
 
-    // TODO: different synthetic and specimen name puts synthetic name in alternatives test
+    it('should favor synthetic name over specimen name', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample1'
+        }],
+        er_specimens: [{
+          er_specimen_name: 'specimen1'
+        },{
+          er_specimen_name: 'specimen2'
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample1',
+          er_specimen_names: 'specimen1:specimen2',
+          average_age: '1'
+        }],
+        er_synthetics: [{
+          er_synthetic_name: 'synthetic1',
+          er_specimen_name: 'specimen1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: 'sample1',
+          specimens: 'specimen2:synthetic1',
+          age: '1'
+        }],
+        specimens: [{
+          specimen: 'specimen2'
+        },{
+          specimen: 'synthetic1',
+          specimen_alternatives: 'specimen1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });
 
-    // TODO: convert renamed method codes, e.g. ST-IC -> ST-C-I
+    // TODO: create a rotation matrix, even though they haven't been used properly
+    /*it('should create a rotation matrix', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: 'specimen1'
+        }],
+        pmag_specimens: [{
+          er_specimen_names: 'specimen1',
+          pmag_rotation_codes: 'code1:code2'
+        }],
+        pmag_rotations: [{
+          pmag_rotation_codes: 'code1',
+          er_specimen_name: 'specimen1'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: 'synthetic1',
+          specimen_alternatives: 'specimen1'
+        }]
+      };
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+    });*/
+    it('should warn about parsing an empty string', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: 'sp1'
+        }],
+        pmag_results: [{
+          er_location_names: 'lo1',
+          er_site_names: 'si1',
+          er_sample_names: 'sa1',
+          er_specimen_names: 'sp1',
+          pmag_rotation_codes: 'code1:code2'
+        }],
+        pmag_rotations: [{
+          pmag_rotation_code: 'code1'
+        }]
+      };
+      upgradeContributionWarningTest(jsonOld, '3.0', /pmag_rotations/i);
+    });
 
     // TODO: reference to DOI, might need to export er_citation_ids to avoid losing DOIs in upgrades
 

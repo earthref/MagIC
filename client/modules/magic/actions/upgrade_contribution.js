@@ -56,11 +56,14 @@ export default class extends Runner {
     if (_.indexOf(magicVersions, versionOld) === magicVersions.length - 1) return jsonOld;
     const versionNew = magicVersions[_.indexOf(magicVersions, versionOld) + 1];
 
-    // Retrieve the data models.
+    // Retrieve the data models and create the upgrade map.
     const modelOld = magicDataModels[versionOld];
     const modelNew = magicDataModels[versionNew];
+    let upgradeMap = this._getUpgradeMap(modelNew);
 
     // Handle special cases when upgrading from 2.5 to 3.0 tables.
+    let syntheticSpecimenNames = {};
+    let newMethodCodes = {};
     if (versionNew === '3.0') {
 
       // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
@@ -70,9 +73,34 @@ export default class extends Runner {
         {'table':'er_expeditions','column':'er_location_name'}
       );
 
-    }
+      // Favor synthetic names over specimen names for natural synthetics.
+      if (jsonOld['er_specimens'] && jsonOld['er_synthetics']) {
+        for (let jsonRowOldIdx in jsonOld['er_synthetics']) {
+          let syntheticRow = jsonOld['er_synthetics'][jsonRowOldIdx];
+          if (syntheticRow['er_specimen_name'] && syntheticRow['er_synthetic_name']) {
+            syntheticSpecimenNames[syntheticRow['er_specimen_name']] = syntheticRow['er_synthetic_name'];
+          }
+        }
+      }
 
-    let upgradeMap = this._getUpgradeMap(modelNew);
+      newMethodCodes['ST-BC'] = 'ST-C';
+      newMethodCodes['ST-BC-Q1'] = 'ST-BCQ-1';
+      newMethodCodes['ST-BC-Q2'] = 'ST-BCQ-2';
+      newMethodCodes['ST-BC-Q3'] = 'ST-BCQ-3';
+      newMethodCodes['ST-BC-Q4'] = 'ST-BCQ-4';
+      newMethodCodes['ST-BC-Q5'] = 'ST-BCQ-5';
+      newMethodCodes['ST-CT'] = 'ST-G';
+      newMethodCodes['ST-IC'] = 'ST-C-I';
+      newMethodCodes['ST-IFC'] = 'ST-G-IF';
+      newMethodCodes['ST-VV-Q1'] = 'ST-VVQ-1';
+      newMethodCodes['ST-VV-Q2'] = 'ST-VVQ-2';
+      newMethodCodes['ST-VV-Q3'] = 'ST-VVQ-3';
+      newMethodCodes['ST-VV-Q4'] = 'ST-VVQ-4';
+      newMethodCodes['ST-VV-Q5'] = 'ST-VVQ-5';
+      newMethodCodes['ST-VV-Q6'] = 'ST-VVQ-6';
+      newMethodCodes['ST-VV-Q7'] = 'ST-VVQ-7';
+
+    }
 
     // RCJM: using this for a quick sanity check of the upgrade map
     /*for (let t in upgradeMap)
@@ -168,9 +196,15 @@ export default class extends Runner {
           // Record the type of relative intensity normalization and remove the associated method code.
           if (jsonRowOld['magic_method_codes']) {
 
-            // Make a list of relative intensity normalizations in the method codes.
+            // Make a list of method codes and update their names if necessary.
             let methodCodes = jsonRowOld['magic_method_codes'].replace(/(^:|:$)/g,'').split(/:/);
-            methodCodes = methodCodes.map((methodCode) => { return methodCode.toUpperCase(); });
+            methodCodes = methodCodes.map((methodCode) => {
+              let mc = methodCode.toUpperCase();
+              if (newMethodCodes[mc]) mc = newMethodCodes[mc];
+              return mc;
+            });
+
+            // Make a list of relative intensity normalizations in the method codes.
             let relativeIntensityNormalizations = _.intersection(methodCodes, ['IE-ARM', 'IE-IRM', 'IE-CHI']);
 
             // Remove the relative intensity normalization method code.
@@ -200,6 +234,29 @@ export default class extends Runner {
           if (jsonRowOld['sample_location_geoid']) {
             if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
             jsonRowOld['magic_method_codes'] += ':GE-' + jsonRowOld['sample_location_geoid'];
+          }
+
+          // Favor synthetic names over specimen names for natural synthetics.
+          if (jsonTableOld === 'er_specimens' &&
+            syntheticSpecimenNames[jsonRowOld['er_specimen_name']]) {
+            if (jsonRowOld['er_specimen_alternatives']) {
+              let alternatives = jsonRowOld['er_specimen_alternatives'].replace(/(^:|:$)/g,'').split(/:/);
+              alternatives.append(jsonRowOld['er_specimen_name']);
+              jsonRowOld['er_specimen_alternatives'] = _.uniq(alternatives).join(':');
+            } else {
+              jsonRowOld['er_specimen_alternatives'] = jsonRowOld['er_specimen_name'];
+            }
+            jsonRowOld['er_specimen_name'] = syntheticSpecimenNames[jsonRowOld['er_specimen_name']];
+          } else if (syntheticSpecimenNames[jsonRowOld['er_specimen_name']]) {
+            jsonRowOld['er_specimen_name'] = syntheticSpecimenNames[jsonRowOld['er_specimen_name']];
+          } else if (jsonRowOld['er_specimen_names']) {
+            let specimens = jsonRowOld['er_specimen_names'].replace(/(^:|:$)/g, '').split(/:/);
+            for (let specimenIdx in specimens) {
+              if (syntheticSpecimenNames[specimens[specimenIdx]]) {
+                specimens[specimenIdx] = syntheticSpecimenNames[specimens[specimenIdx]];
+              }
+            }
+            jsonRowOld['er_specimen_names'] = _.uniq(specimens).join(':');
           }
 
         }
