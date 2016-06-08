@@ -172,25 +172,30 @@ describe('magic.actions.export_contribution', () => {
         }]
       };
       const text1 =
+          //GGG I think of the headers as metadata for a given column
+          //GGG Are the number of headers variable or fixed? --- Rupert confirms that 4 is fixed for now, the fourth is for the column names.
         'tab delimited\tcontribution\t4 headers\n' +
-        'Contribution\n' +  // Group Name
-        'MagIC Version\n' + // Column Name
-        'String\n' +        // Column Type and/or Unit
+        'Contribution\n' +  // Group Name (columns[column_name].group)
+        'MagIC Version\n' + // Column Name (columns[column_name].label)
+        'String\n' +        // Column Type and/or Unit ()  (columns[column_name].type and .unit depending upon logic
         'magic_version\n' +
         '3.0\n' +
         '>>>>>>>>>>\n' +
+         //Each table has different headers. The headers are based upon metadata for each column from the model.
         'tab delimited\tsites\t4 headers\n' +
-        'Names\t\tSite\tResult\t\tMetadata\n' + // Group Name (blank if repeated from last column, will be a merged cell in Excel export)
-        'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // Column Name
-        'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit
-        'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
-        'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
+        //So, here we begin three rows of meta data for the sites table
+        'Names\t\tSite\tResult\t\tMetadata\n' + // from group from each column in the model(columns[column_name].group), (blank if repeated from last column, will be a merged cell in Excel export)
+        'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // List column meta-names for the sites table
+        'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit -- special logic documented in production code
+        'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' + //"Normal" table definition
+        'si2\tlo1\t\t:code2:code1:\t\ta\n' + //"normal" table data
+        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' + //"normal" table data
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
+         //now three moreof metadata from the specimen data model
         'Names\t\tSpecimen\tResult\tGeology\n' + // Group Name
-        'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name
-        'String\tString\tString\tList\tList\tNumber in Degrees\n' + // Column Type and/or Unit
+        'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name (label)
+        'String\tString\tString\tList\tNumber in Degrees\n' + // Column Type and/or Unit
         'specimen\tsample\tigsn\tcitations\tdip\n' +
         'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
         'sp2\tsa1\tigsn2\t\t1.3\n';
@@ -214,7 +219,7 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\tcontribution\t4 headers\n' +
         'Contribution\t\t\n' +                            // Group Name
         'Contribution ID\tContributor\tMagIC Version\n' + // Column Name
-        'Integer\tInteger\tString\n' +                    // Column Type and/or Unit
+        'Integer\tString\tString\n' +                    // Column Type and/or Unit
         'id\tcontributor\tmagic_version\n' +
         '1234\t@magic\t3.0\n' +
         '>>>>>>>>>>\n' +
@@ -246,7 +251,7 @@ describe('magic.actions.export_contribution', () => {
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 const exportContributionToTextErrorTest = (json, reErrorMsg) => {
   const Exporter = new ExportContribution({});
-  Exporter.toText(json);
+  Exporter.toText(json,false);
     expect(Exporter.errors().length).to.be.at.least(1);
     expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
 
@@ -255,7 +260,7 @@ const exportContributionToTextErrorTest = (json, reErrorMsg) => {
 // Expect no errors.
 const exportContributionToTextNoErrorTest = (json) => {
   const Exporter = new ExportContribution({});
-  Exporter.toText(json);
+  Exporter.toText(json,false);
   expect(Exporter.errors().length).to.equal(0);
   return Exporter;
 };
@@ -263,7 +268,7 @@ const exportContributionToTextNoErrorTest = (json) => {
 // Expect N errors.
 const exportContributionToTextNErrorsTest = (json, nErrors) => {
   const Exporter = new ExportContribution({});
-  Exporter.toText(json);
+  Exporter.toText(json,false);
   console.log(`length: ${Exporter.errors().length}`);
   expect(Exporter.errors().length).to.equal(nErrors);
 };
@@ -271,7 +276,7 @@ const exportContributionToTextNErrorsTest = (json, nErrors) => {
 // Expect no errors and check against expected text.
 const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
-  const text = Exporter.toText(json);
+  const text = Exporter.toText(json,false);
     expect(Exporter.errors().length).to.equal(0);
     console.log(`text:\n${text}`);
     console.log(`text Expected:\n${textExpected}`);
@@ -282,7 +287,7 @@ const exportContributionToTextJSONTest = (json, textExpected) => {
 // Expect no errors and check against expected text.
 const exportContributionToExtendedTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
-  const text = Exporter.toExtendedText(json);
+  const text = Exporter.toText(json, true);
   expect(Exporter.errors().length).to.equal(0);
   console.log(`text:\n${text}`);
   console.log(`text Expected:\n${textExpected}`);

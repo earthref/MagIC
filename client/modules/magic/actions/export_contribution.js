@@ -15,10 +15,61 @@ export default class extends Runner {
     this.model;
   }
 
-  toExtendedText(jsonToTranslate) {
-
+  createExtendedHeaders(tableName, jsonToExport, orderedColumnArray)
+  {
+    let addHeader = '';
     // returns the same thing as toText but with extra headers (groups, columns names, and units)
 
+    let discoveredColumns = {};
+    let previousGroupFound = '';
+    let groupHeaderArray = [];
+    let labelHeaderArray = [];
+    let columnTypeOrUnitArray = [];
+    //loop through ordered model columns for this table, see if json has data from that column
+    for(let orderedColumnIdx in orderedColumnArray)
+    {
+      let potentialColumnToAdd = orderedColumnArray[orderedColumnIdx];
+      //Traverse the entire JSON table's rows looking for usages of the each column found in the ordered model. If the JSON file has the column in question
+      //extract the desired information and create the extended header
+      for(let jsonRowIdx in jsonToExport[tableName])
+      {
+        if (jsonToExport[tableName][jsonRowIdx][potentialColumnToAdd] && //if this ordered column is found in the json file
+            !discoveredColumns[potentialColumnToAdd]) //and we haven't seen this column before
+        {
+          //ggg gather data here from the model and add the header
+          discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;
+
+          let labelToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['label'];
+          labelHeaderArray.push(labelToAdd);
+
+          //we only want to add a 'group' header when the current group is different than the previous one. If the group is the same as the previous
+          //the we want to only add a tab
+          let currentGroupToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
+          if(previousGroupFound != currentGroupToAdd)
+            groupHeaderArray.push(currentGroupToAdd);
+            //addHeader = addHeader + currentGroupToAdd + '\t';
+          else
+            groupHeaderArray.push('');
+            //addHeader = addHeader + '\t';
+           previousGroupFound = currentGroupToAdd;//this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
+
+          columnTypeOrUnitArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+        }
+      }
+    }
+
+    addHeader = addHeader + groupHeaderArray.join('\t');
+    addHeader = addHeader + '\n';
+    addHeader = addHeader + labelHeaderArray.join('\t');
+    addHeader = addHeader + '\n';
+    addHeader = addHeader + columnTypeOrUnitArray.join('\t');
+    addHeader = addHeader + '\n';
+
+    return addHeader;
+  }
+
+  getColumnTypeOrUnitString(tableName, potentialColumnToAdd)
+  {
     // logic for column type/unit row:
     // if type === 'Number'
     //   if unit === 'Dimensionless' or 'Custom' or empty
@@ -30,38 +81,50 @@ export default class extends Runner {
     // else
     //     print '[type]'
 
+    let columnTypeOrUnitString = '';
+    let columnType = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['type'];
+    let columnUnit = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['unit'];
+
+    if(columnType === 'Number')
+    {
+      if( columnUnit === 'Dimensionless' ||
+          columnUnit === 'Custom' ||
+          columnUnit === '')
+        columnTypeOrUnitString = 'Number';
+      else
+        columnTypeOrUnitString = `Number in ${columnUnit}`;
+    }
+    else if (columnUnit === 'Flag')
+      columnTypeOrUnitString= 'Flag';
+    else
+      columnTypeOrUnitString = columnType;
+
+    return columnTypeOrUnitString;
   }
 
-  toText(jsonToTranslate) {
+  /*To extended text is a boolean indicating whether or not the text should be extended*/
+  toText(jsonToExport, toExtendedText) {
 
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
 
-    // Retrieve the data model version used in the jsonToTranslate
-    this.version = this.VersionGetter.getVersion(jsonToTranslate)
-    if (!this.version) return jsonToTranslate;
+    // Retrieve the data model version used in the jsonToExport
+    this.version = this.VersionGetter.getVersion(jsonToExport)
+    if (!this.version) return jsonToExport;
 
     // Retrieve the data model
     this.model = magicDataModels[this.version];
 
-    this.testValidityOfTablesAndColumns(jsonToTranslate);
+    this.testValidityOfTablesAndColumns(jsonToExport);
 
-    let orderedModel = this.createOrderedModel(jsonToTranslate);
+    let orderedModel = this.createOrderedModel(jsonToExport);
 
     // TODO: use the model to build up text string here
-    let text = this.createTSVfile(orderedModel, jsonToTranslate);
+    let text = this.createTSVfile(orderedModel, jsonToExport, toExtendedText);
 
     return text;
-
-    //RCJM: I think you put this in so feel free to delete it: https://github.com/earthref/earthref/commit/a0d5ecf15ab77904a7e4c71dc94bd1d4986e77d5
-    //GGG Rupert i'm uncertain what this was supposed to do, If it is meant to validate tables and columns i've done that
-    /*for (var table in jsonToTranslate) {
-     if (!table.hasOwnProperty(table)) {
-     //The current property is not a direct property of p
-     continue;
-     }*/
   }
 
-  createTSVfile(orderedModel, jsonToTranslate){
+  createTSVfile(orderedModel, jsonToExport, toExtendedText){
     //  loop through the used tables in data model order,
     //   print the table header (note: "tab delimited\ttable_name" format)
     //   loop through the used columns for that table in data model order,
@@ -73,14 +136,24 @@ export default class extends Runner {
     //               any string in an array that contains a ":" gets double quotes around it
     //   and print the table separator if there is another table.
     let text = ``;
-    let numberOfTablesInJson = Object.keys(jsonToTranslate).length;
+    let numberOfTablesInJson = Object.keys(jsonToExport).length;
     let numberOfTablesInAddedToTSV = 0;
     for(let orderedTableIdx in orderedModel)
     {
       let tableName = Object.getOwnPropertyNames(orderedModel[orderedTableIdx]);//loop through the tables in the model
-      if(jsonToTranslate[tableName])//if the current table exists in the json to translate, add it to the output file
+      if(jsonToExport[tableName])//if the current table exists in the json to translate, add it to the output file
       {
-        text = text.concat(`tab delimited\t${tableName}\n`);
+        text = text.concat(`tab delimited\t${tableName}`);
+        if (toExtendedText) {text = text.concat(`\t4 headers`);}
+        text = text.concat(`\n`);//in any case, we finish the header with a new line
+
+        //If we want extended headers, pass in the ordered column list
+        if (toExtendedText)
+        {
+          let orderedColumnArray = orderedModel[orderedTableIdx][tableName];
+          text = text + this.createExtendedHeaders(tableName, jsonToExport, orderedColumnArray)
+        }
+
 
         //*********now create the column headers for this table*************
         let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort
@@ -88,11 +161,11 @@ export default class extends Runner {
         for(let orderedColIdx in orderedModel[orderedTableIdx][tableName])//loop through the columns in the ordered model
         {
           let orderedColumnNameToPotentiallyAdd = orderedModel[orderedTableIdx][tableName][orderedColIdx];
-          for(let jsonRowsIdx in jsonToTranslate[tableName])
+          for(let jsonRowsIdx in jsonToExport[tableName])
           {
             //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
-            // column header in the TSV, then add itf
-            if(jsonToTranslate[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
+            // column header in the TSV, then add it
+            if(jsonToExport[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
                !columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] )
             {
               columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';
@@ -105,16 +178,15 @@ export default class extends Runner {
 
 
         /***************Now add all data from the table to the TSV*****************/
-        for(let jsonRowsIdx in jsonToTranslate[tableName])
+        for(let jsonRowsIdx in jsonToExport[tableName])
           for(let colNameIdx in orderedListOfColumnsAddedToHeader)
           {
             let colName = orderedListOfColumnsAddedToHeader[colNameIdx];
             let numberOfColumns = orderedListOfColumnsAddedToHeader.length;
-            let dataToAdd = jsonToTranslate[tableName][jsonRowsIdx][colName];
-           // console.log(`DATA: ${dataToAdd}`);
+            let dataToAdd = jsonToExport[tableName][jsonRowsIdx][colName];
+
             if (dataToAdd == undefined){dataToAdd = '';}//for rows with no data
 
-            //console.log(`YO! ${dataToAdd}`);
             if(colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
               {text = text.concat('\t');}
 
@@ -159,7 +231,7 @@ export default class extends Runner {
         numberOfElementsProcessed < numberOfElements )
               manipulatedData = manipulatedData + ':';
 
-        console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
+   //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
       }
       return manipulatedData;
     }
