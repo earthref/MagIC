@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "domready": "^1.0.8",
+    "exceljs": "^0.2.8",
     "lodash": "^4.6.1",
     "mantra-core": "^1.2.0",
     "moment": "^2.12.0",
