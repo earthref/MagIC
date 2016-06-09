@@ -10,6 +10,26 @@
   margin: 0em @iconDistance 0em 0em;
 }
 
+// Add pointer below step
+.ui.steps .active.step.pointing.below:before {
+  position: absolute;
+  z-index: 2;
+  content: '';
+  top: 100%;
+  left: 50%;
+  background-color: @activeBackground;
+  width: @arrowSize;
+  height: @arrowSize;
+  border-style: solid;
+  border-color: @borderColor;
+  border-width: @arrowBorderWidth;
+  transition: @transition;
+  transform: translateY(-50%) translateX(50%) rotate(45deg);
+}
+.ui.attached.steps .active.step.pointing.below:before {
+  top: calc(100% - 1px);
+}
+
 // Remove the shadow on a bottom attached message
 @import (multiple) '../../themes/default/collections/message.variables.import.less';
 .ui.bottom.attached.message {
@@ -48,4 +68,8 @@
   margin-left: 0;
   margin-right: 0;
   width: 100%;
+}
+
+.ui.inverted.dimmer .ui.loader:after {
+  border-color: rgba(0, 0, 0, 0.5) transparent transparent !important;
 }

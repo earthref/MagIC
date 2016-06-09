@@ -2,7 +2,7 @@ import {createApp} from 'mantra-core';
 import initContext from './configs/context';
 
 // modules
-import coreModule from './modules/core';
+import erModule from './modules/er';
 import germModule from './modules/germ';
 import magicModule from './modules/magic';
 import sbnModule from './modules/sbn';
@@ -15,7 +15,7 @@ const context = initContext();
 
 // create app
 const app = createApp(context);
-app.loadModule(coreModule);
+app.loadModule(erModule);
 app.loadModule(germModule);
 app.loadModule(magicModule);
 app.loadModule(sbnModule);

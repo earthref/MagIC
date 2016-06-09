@@ -1,5 +1,5 @@
 import {_} from 'lodash';
-import Runner from '../../core/actions/runner';
+import Runner from '../../er/actions/runner';
 
 import {default as magicVersions} from '../configs/magic_versions';
 import {default as magicDataModels} from '../configs/data_models/data_models';

@@ -2,11 +2,12 @@ import {_} from 'lodash';
 import React from 'react';
 import {mount} from 'react-mounter';
 
-import Layout from '../core/components/layout.jsx';
-import Home from '../core/components/home.jsx';
+import Layout from '../er/components/layout.jsx';
+import Home from '../er/components/home.jsx';
 
 import {default as magicVersions} from './configs/magic_versions.js';
 import MagICDataModel from './components/data_model.jsx';
+import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
 import MagICUploadContribution from './components/upload_contribution.jsx';
 
 export default function (injectDeps, {FlowRouter}) {

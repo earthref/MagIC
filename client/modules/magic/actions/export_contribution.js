@@ -1,5 +1,5 @@
 import {_} from 'lodash';
-import Runner from '../../core/actions/runner.js';
+import Runner from '../../er/actions/runner.js';
 import GetContributionVersion from './get_contribution_version';
 //import json2csv from 'json2csv';
 

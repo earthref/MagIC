@@ -2,7 +2,7 @@ import {_} from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '../../core/configs/portals.js';
+import {portals} from '../../er/configs/portals.js';
 import {default as versions} from '../configs/magic_versions.js';
 import {default as models} from '../configs/data_models/data_models.js';
 import DataModelColumn from './data_model_column.jsx';
@@ -219,7 +219,8 @@ export default class extends React.Component {
                   <div
                     ref="count"
                     className="ui circular small basic floating label data-model-count"
-                  ></div> : undefined)}
+                  ></div>
+                : undefined)}
               </a>
             );
           })}
