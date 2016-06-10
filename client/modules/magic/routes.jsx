@@ -8,6 +8,8 @@ import Home from '../core/components/home.jsx';
 import {default as magicVersions} from './configs/magic_versions.js';
 import MagICDataModel from './components/data_model.jsx';
 import MagICUploadContribution from './components/upload_contribution.jsx';
+import MagICExportExcelJS from './components/export_exceljs.jsx';
+import MagICExportXLSXStyle from './components/export_xlsx_style.jsx';
 
 export default function (injectDeps, {FlowRouter}) {
 
@@ -61,7 +63,7 @@ export default function (injectDeps, {FlowRouter}) {
   });
 
   magicRoutes.route(`/upgrade`, {
-    name: 'magicDataModel',
+    name: 'magicUpgrade',
     action({}) {
       mount(mounterWithContext, {
         content: () => (
@@ -80,7 +82,7 @@ export default function (injectDeps, {FlowRouter}) {
   });
 
   magicRoutes.route(`/upload`, {
-    name: 'magicDataModel',
+    name: 'magicUpload',
     action({}) {
       mount(mounterWithContext, {
         content: () => (
@@ -90,6 +92,42 @@ export default function (injectDeps, {FlowRouter}) {
                 Upload data to your private workspace:
               </h3>
               <MagICUploadContribution/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/export-xlsx-style`, {
+    name: 'magicExportXLSStyle',
+    action({}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Export JSON to Excel:
+              </h3>
+              <MagICExportXLSXStyle/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/export-exceljs`, {
+    name: 'magicExportExcelJS',
+    action({}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Export JSON to Excel:
+              </h3>
+              <MagICExportExcelJS/>
             </Home>
           </Layout>
         )

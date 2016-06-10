@@ -26,9 +26,10 @@
   },
   "dependencies": {
     "domready": "^1.0.8",
-    "exceljs": "^0.2.8",
+    "jszip": "^3.0.0",
     "lodash": "^4.6.1",
     "mantra-core": "^1.2.0",
+    "meteor-node-stubs": "^0.2.3",
     "moment": "^2.12.0",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
@@ -36,7 +37,8 @@
     "react-komposer": "^1.8.0",
     "react-mounter": "^1.0.0",
     "react-simple-di": "^1.0.1",
-    "save-as": "^0.1.4"
+    "save-as": "^0.1.4",
+    "xlsx-style": "^0.8.13"
   },
   "scripts": {
     "lint-only": "eslint ./lib ./client ./server --ext .js --ext .jsx",

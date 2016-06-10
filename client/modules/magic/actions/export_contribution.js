@@ -1,4 +1,5 @@
 import {_} from 'lodash';
+import XLSX from 'xlsx-style';
 import Runner from '../../core/actions/runner.js';
 import GetContributionVersion from './get_contribution_version';
 //import json2csv from 'json2csv';
@@ -13,6 +14,83 @@ export default class extends Runner {
     this.VersionGetter = new GetContributionVersion({LocalState});
     this.version;
     this.model;
+  }
+
+  /*To extended text is a boolean indicating whether or not the text should be extended*/
+  toText(jsonToExport, toExtendedText) {
+
+    // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
+
+    // Retrieve the data model version used in the jsonToExport
+    this.version = this.VersionGetter.getVersion(jsonToExport)
+    if (!this.version) return jsonToExport;
+
+    // Retrieve the data model
+    this.model = magicDataModels[this.version];
+
+    this.testValidityOfTablesAndColumns(jsonToExport);
+
+    let orderedModel = this.createOrderedModel(jsonToExport);
+
+    // TODO: use the model to build up text string here
+    let text = this.createTSVfile(orderedModel, jsonToExport, toExtendedText);
+
+    return text;
+  }
+
+  toExcel(jsonToExport) {
+
+    // Create an empty workbook.
+    let workbook = { SheetNames: [], Sheets: {} };
+
+    // Create a sheet in the workbook.
+    workbook.SheetNames.push('test');
+    workbook.Sheets['test'] = this._toSheet(
+      [
+        [1,2,3],
+        [true, false, null, "sheetjs"],
+        ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+        ["baz", null, "qux"]
+      ]
+    );
+
+    // TODO: use the model to build up and stylize the workbook here
+
+    return workbook;
+  }
+
+  _datenum(v, date1904) {
+    if(date1904) v+=1462;
+    var epoch = Date.parse(v);
+    return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
+  }
+
+  _toSheet(data, opts) {
+    var ws = {};
+    var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
+    for(var R = 0; R != data.length; ++R) {
+      for(var C = 0; C != data[R].length; ++C) {
+        if(range.s.r > R) range.s.r = R;
+        if(range.s.c > C) range.s.c = C;
+        if(range.e.r < R) range.e.r = R;
+        if(range.e.c < C) range.e.c = C;
+        var cell = {v: data[R][C] };
+        if(cell.v == null) continue;
+        var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
+
+        if(typeof cell.v === 'number') cell.t = 'n';
+        else if(typeof cell.v === 'boolean') cell.t = 'b';
+        else if(cell.v instanceof Date) {
+          cell.t = 'n'; cell.z = XLSX.SSF._table[14];
+          cell.v = this._datenum(cell.v);
+        }
+        else cell.t = 's';
+
+        ws[cell_ref] = cell;
+      }
+    }
+    if(range.s.c < 10000000) ws['!ref'] = XLSX.utils.encode_range(range);
+    return ws;
   }
 
   createExtendedHeaders(tableName, jsonToExport, orderedColumnArray)
@@ -100,28 +178,6 @@ export default class extends Runner {
       columnTypeOrUnitString = columnType;
 
     return columnTypeOrUnitString;
-  }
-
-  /*To extended text is a boolean indicating whether or not the text should be extended*/
-  toText(jsonToExport, toExtendedText) {
-
-    // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
-
-    // Retrieve the data model version used in the jsonToExport
-    this.version = this.VersionGetter.getVersion(jsonToExport)
-    if (!this.version) return jsonToExport;
-
-    // Retrieve the data model
-    this.model = magicDataModels[this.version];
-
-    this.testValidityOfTablesAndColumns(jsonToExport);
-
-    let orderedModel = this.createOrderedModel(jsonToExport);
-
-    // TODO: use the model to build up text string here
-    let text = this.createTSVfile(orderedModel, jsonToExport, toExtendedText);
-
-    return text;
   }
 
   createTSVfile(orderedModel, jsonToExport, toExtendedText){
