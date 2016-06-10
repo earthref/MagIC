@@ -11,6 +11,8 @@ export default class {
     this.LocalState.set(`${this.name}_ERRORS`, []);
     this.LocalState.set(`${this.name}_WARNINGS`, []);
 
+    // 
+
   }
 
   warnings() {
@@ -35,6 +37,10 @@ export default class {
     console.log('ERROR: ', errorMessage);
     errors.push(error);
     this.LocalState.set(`${this.name}_ERRORS`, errors);
+  }
+
+  _reportProgress() {
+
   }
 
 }
