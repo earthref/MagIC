@@ -13,7 +13,6 @@ export default class extends React.Component {
       step: 1,
       files: []
     };
-    this;
   }
 
   componentDidMount() {
@@ -38,26 +37,35 @@ export default class extends React.Component {
     _.defer((files) => {
       try {
         for (let file of files) {
-          const fileReader = new FileReader();
+          const fileReader = new FileReader(),
+                $fileIconDimmer = $(this.refs['files']).find('[data-file="' + file.name + '"] > .image > .dimmer'),
+                $readStep = $(this.refs['files']).find('[data-file="' + file.name + '"] [data-action=read]'),
+                $parseStep = $(this.refs['files']).find('[data-file="' + file.name + '"] [data-action=parse]'),
+                $readProgress = $readStep.find('.ui.progress').progress({percent: 0}),
+                $parseProgress = $parseStep.find('.ui.progress').progress({percent: 0});
+
+          $readStep.removeClass("disabled").addClass("active");
           fileReader.name = file.name;
           fileReader.onprogress = (e) => {
-            $(this.refs['files'])
-              .find('.ui.progress[data-action="read"][data-file="' + e.target.name + '"]')
-              .progress({percent:e.loaded/e.total});
+            $readProgress.progress('set').progress(e.loaded/e.total);
           };
           fileReader.onload = (e) => {
-            $(this.refs['files'])
-              .find('.ui.progress[data-action=read][data-file="' + e.target.name + '"]')
-              .progress({percent:100, text:{percent:'Done reading.'}});
-            $(this.refs['files'])
-              .find('.ui.progress[data-action=parse][data-file="' + e.target.name + '"]')
-              .removeClass('disabled')
-              .progress({percent:0, text:{success:'Done parsing.'}});
+            $readStep.removeClass("active").addClass("completed");
+            $readProgress.progress('set').progress(100);
+
+            $parseStep.removeClass("disabled").addClass("active");
             const Parser = new ParseContribution({});
-            /*const json = Parser.parse(e.target.result);
-            console.error(Parser.errors());
-            console.info(Parser.warnings());
-            console.log(json);*/
+            Parser.parsePromise(e.target.result, 1000,
+              (percent) => { $parseProgress.progress('set').progress(percent); }
+            ).then((parser) => {
+              $parseStep.removeClass("active").addClass("completed");
+              $fileIconDimmer.removeClass("active");
+              file.json = parser.json;
+              file.parseErrors = parser.errors();
+              file.parseWarnings = parser.warnings();
+              $parseProgress.progress('set').progress(100);
+            });
+
           };
           fileReader.readAsText(file);
         }
@@ -152,44 +160,60 @@ export default class extends React.Component {
               <div ref="files" className="ui divided items">
                 {this.state.files.map((file,i) => {
                   return (
-                    <div key={i} className="item">
+                    <div key={i} className="item" data-file={file.name}>
                       <div className="ui image">
                         <div className="ui active inverted dimmer">
                           <div className="ui loader"></div>
                         </div>
-                        <i className="massive fitted file text outline icon"></i>
+                        <i className="fitted file text outline icon"></i>
                       </div>
                       <div className="content">
-                        <div className="header">
-                          {file.name}
-                        </div>
+                        <div className="header">{file.name}</div>
                         <div className="meta">
-                          <span className="size">{filesize(file.size)}</span>
+                          <div className="ui horizontal label">{filesize(file.size)}</div>
+                          {(file.readErrors ?
+                            <div className="ui horizontal red label">
+                              {file.readErrors} Error{(file.readErrors > 0 ? 's' : '')}
+                            </div>
+                            : undefined )}
+                          {(file.parseErrors ?
+                            <div className="ui horizontal red label">
+                              {file.parseErrors} Error{(file.parseErrors > 0 ? 's' : '')}
+                            </div>
+                            : undefined )}
+                          {(file.parseWarnings ?
+                            <div className="ui horizontal yellow label">
+                              {file.parseWarnings} Warning{(file.parseWarnings > 0 ? 's' : '')}
+                            </div>
+                            : undefined )}
+                          {(file.nTables ?
+                            <div className="ui horizontal label">
+                              {file.nTables} Table{(file.nTables > 0 ? 's' : '')}
+                            </div>
+                            : undefined )}
+                          {(file.nRows ?
+                            <div className="ui horizontal label">
+                              {file.nRows} Row{(file.nRows > 0 ? 's' : '')}
+                            </div>
+                            : undefined )}
                         </div>
                         <div className="description">
-                          {(file.errors || file.warnings ?
-                            <div className="ui accordion">
-                              <div className="title"></div>
-                              <div className="content warning-content">
-                              </div>
-                              <div className="title"></div>
-                              <div className="content error-content">
-                              </div>
-                            </div>
-                          :
-                            <div>
-                              <div className="ui progress" data-action="read" data-file={file.name}>
-                                <div className="bar">
-                                  <div className="progress"></div>
+                          <div className="ui grid">
+                            <div className="two column row">
+                              <div className="column" data-action="read">
+                                <div className="ui tiny purple progress">
+                                  <div className="bar"></div>
+                                  <div className="label">Read</div>
                                 </div>
                               </div>
-                              <div className="ui progress" data-action="parse" data-file={file.name}>
-                                <div className="bar">
-                                  <div className="progress"></div>
+                              <div className="column" data-action="parse">
+                                <div className="ui tiny purple progress">
+                                  <div className="bar"></div>
+                                  <div className="label">Parse</div>
                                 </div>
                               </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </div>
                     </div>

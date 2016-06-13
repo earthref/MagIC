@@ -729,10 +729,10 @@ export default {
       "definition": "TRM acquisition"
     }, {
       "code": "LP-TRM-AFD",
-      "definition": "TRM acquisition: AF demagnitization"
+      "definition": "TRM acquisition: AF demagnetization"
     }, {
       "code": "LP-TRM-TD",
-      "definition": "TRM acquisition: Thermal demagnitization"
+      "definition": "TRM acquisition: Thermal demagnetization"
     }, {
       "code": "LP-U",
       "definition": "U-Channel"

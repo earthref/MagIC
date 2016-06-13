@@ -1,4 +1,5 @@
 import {_} from 'lodash';
+import Promise from 'bluebird';
 import Runner from '../../er/actions/runner.js';
 
 export default class extends Runner {
@@ -12,7 +13,59 @@ export default class extends Runner {
 
   }
 
-  parse(text, asyncCallback) {
+  parseNonBlocking(text, progressHandler) {
+
+    // Initialize this parsing operation.
+    this.table = undefined;
+    this.columns = [];
+    this.skipTable = false;
+    this.tableLineNumber = 0;
+
+
+  }
+
+  parsePromise(text, nLines, progressHandler) {
+
+    // Initialize this parsing operation.
+    this.table = undefined;
+    this.columns = [];
+    this.skipTable = false;
+    this.tableLineNumber = 0;
+
+    if (!nLines) nLines = 1;
+
+    //if (progressHandler) progressHandler = _.throttle(progressHandler, 100);
+
+    return new Promise.each(
+      _.chunk(text.match(/[^\r\n]+/g), nLines),
+      (lines, i, t) => {
+        //console.log(i, 'of', t, line);
+        //_.defer(() => {
+        return new Promise((resolve) => {
+          lines.forEach((line) => { this._parseLine(line); });
+          if (progressHandler) progressHandler(100 * (i + 1) / t);
+          resolve();
+        }).delay();
+        /*return new Promise(
+          (resolve) => {
+            this._parseLine(line);
+            resolve(this.json);
+          },
+          (reject) => {
+            console.log('reject');
+          }
+        ).tap(() => {
+          console.log('progress');
+          if (progressHandler) progressHandler(this.progress);
+        })*/
+        //return this.json;
+      }
+    ).then(() => {
+      return this;
+    });
+  }
+
+  parse(text) {
 
     // Check for a valid input.
     if (!text) {

@@ -15,6 +15,7 @@
     "babel-preset-stage-2": "6.x.x",
     "babel-preset-react": "6.x.x",
     "chai": "3.x.x",
+    "chai-as-promised": "^5.3.0",
     "mocha": "2.x.x",
     "jsdom": "^9.2.1"
   },

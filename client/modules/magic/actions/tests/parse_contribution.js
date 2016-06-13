@@ -1,9 +1,13 @@
 const {describe, it} = global;
-import {expect} from 'chai';
+import chai from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import ParseContribution from '../parse_contribution';
 import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
+
+const expect = chai.expect;
+chai.use(chaiAsPromised);
 
 describe('magic.actions.parse_contribution', () => {
 
@@ -59,6 +63,16 @@ describe('magic.actions.parse_contribution', () => {
         }]
       };
       parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
+    });
+
+    it('should keep numbers as strings asynchronously', () => {
+      const json = {
+        table: [{
+          col1: 'str1',
+          col2: '1.2'
+        }]
+      };
+      parseContributionJSONAsyncTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
     });
 
     it('should eliminate blank lines and leading/trailing spaces', () => {
@@ -162,4 +176,12 @@ const parseContributionJSONTest = (text, jsonExpected, Parser) => {
   expect(Parser.errors().length).to.equal(0);
   expect(json).to.deep.equal(jsonExpected);
   return Parser;
+};
+
+
+// Expect no errors and check against expected JSON asynchronously.
+const parseContributionJSONAsyncTest = (text, jsonExpected, Parser) => {
+  if(!Parser) Parser = new ParseContribution({});
+  console.log(text, jsonExpected);
+  return expect(Parser.parsePromise(text)).to.eventually.deep.equal(jsonExpected);
 };
