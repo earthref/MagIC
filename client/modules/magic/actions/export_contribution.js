@@ -38,13 +38,16 @@ export default class extends Runner {
     return text;
   }
 
+  //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
+
+    this.version = this.VersionGetter.getVersion(jsonToExport);//GGG not happy with the way i'm setting these class variables but right now i need to get this done
 
     // Create an empty workbook.
     let workbook = { SheetNames: [], Sheets: {} };
 
     // Create a sheet for each table in the 3.0 model in the workbook.
-    workbook.SheetNames.push('contribution');
+    /*workbook.SheetNames.push('contribution');
     workbook.SheetNames.push('locations');
     workbook.SheetNames.push('sites');
     workbook.SheetNames.push('samples');
@@ -52,12 +55,15 @@ export default class extends Runner {
     workbook.SheetNames.push('measurements');
     workbook.SheetNames.push('criteria');
     workbook.SheetNames.push('ages');
-    workbook.SheetNames.push('images');
+    workbook.SheetNames.push('images');*/
 
+//    console.log(`yo ${this.model}`);
 
-    for(var sheetName in this.model)
+    let modelProperties = Object.getOwnPropertySymbols(this.version);
+    for(let modelList in modelProperties)
     {
-      
+      workbook.SheetNames.push(this.model['tables'][sheetName]);
+      console.log(`Sheet: ${this.model['tables'][sheetName]}`);
     }
 
     workbook.Sheets['contribution'] = this._toSheet(
