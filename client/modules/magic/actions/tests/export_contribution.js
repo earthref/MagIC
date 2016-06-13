@@ -1,5 +1,7 @@
 const {describe, it} = global;
 import {expect} from 'chai';
+import JSZip from 'xlsx-style/node_modules/jszip';
+import XLSX from 'xlsx-style';
 import ExportContribution from '../export_contribution';
 import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
@@ -234,72 +236,6 @@ describe('magic.actions.export_contribution', () => {
   });
 
   // Test exporting valid JSON to extended text.
-  describe('when exporting valid JSON to EXCEL format', () => {
-    it('should export EXCEL tables and columns in the order defined in the data model', () => {
-      const json1 = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        specimens: [{
-          dip:       1.2,
-          igsn:      'igsn1',
-          specimen:  'sp1',
-          sample:    'sa1',
-          citations: ['10.1023/A:1', 'This study']
-        }, {
-          dip:      1.3,
-          igsn:     'igsn2',
-          specimen: 'sp2',
-          sample:   'sa1'
-        }],
-        sites: [{
-          location:     'lo1',
-          site:         'si2',
-          description:  'a',
-          method_codes: ['code2', 'code1']
-        }, {
-          site:              'si1',
-          location:          'lo1',
-          citations:         ['10.1023/A1'],
-          site_alternatives: 'Kiln'
-        }]
-      };
-
-      /*exportContributionToExtendedTextJSONTest(json1, text1);
-      const json2 = {
-        contribution: [{
-          magic_version: '3.0',
-          id: '1234',
-          contributor: '@magic'
-        }],
-        specimens: [{
-          specimen: 'sp1',
-          meas_step_min: 1,
-          result_type: 'a',
-          rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]],
-          description: 'a, b',
-          external_database_ids: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
-        }]
-      };
-      const text2 =
-          'tab delimited\tcontribution\t4 headers\n' +
-          'Contribution\t\t\n' +                            // Group Name
-          'Contribution ID\tContributor\tMagIC Version\n' + // Column Name
-          'Integer\tString\tString\n' +                    // Column Type and/or Unit
-          'id\tcontributor\tmagic_version\n' +
-          '1234\t@magic\t3.0\n' +
-          '>>>>>>>>>>\n' +
-          'tab delimited\tspecimens\t4 headers\n' +
-          'Names\tMeasurement Parameters\tResult\tMetadata\t\t\n' + // Group Name
-          'Specimen Name\tMeasurement Step Minimum\tResult Type\tDescription\tSequence of Rotations\tExternal Database IDs\n' + // Column Name
-          'String\tNumber\tFlag\tString\tMatrix\tDictionary\n' + // Column Type and/or Unit
-          'specimen\tmeas_step_min\tresult_type\tdescription\trotation_sequence\texternal_database_ids\n' +
-          'sp1\t1\ta\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
-      exportContributionToExtendedTextJSONTest(json2, text2);*/
-    });
-  });
-
-  // Test exporting valid JSON to extended text.
   describe('when exporting valid JSON to extended text', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
@@ -390,6 +326,42 @@ describe('magic.actions.export_contribution', () => {
           'sp1\t1\ta\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
       exportContributionToExtendedTextJSONTest(json2, text2);
     });
+
+  });
+
+  // Test exporting valid JSON to extended text.
+  describe('when exporting valid JSON to EXCEL format', () => {
+    it('should export EXCEL tables and columns in the order defined in the data model', () => {
+      const json1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          dip:       1.2,
+          igsn:      'igsn1',
+          specimen:  'sp1',
+          sample:    'sa1',
+          citations: ['10.1023/A:1', 'This study']
+        }, {
+          dip:      1.3,
+          igsn:     'igsn2',
+          specimen: 'sp2',
+          sample:   'sa1'
+        }],
+        sites: [{
+          location:     'lo1',
+          site:         'si2',
+          description:  'a',
+          method_codes: ['code2', 'code1']
+        }, {
+          site:              'si1',
+          location:          'lo1',
+          citations:         ['10.1023/A1'],
+          site_alternatives: 'Kiln'
+        }]
+      };
+      exportContributionToExcelTest(json1, 'client/modules/magic/actions/tests/output/test.xlsx');
+    });
   });
 
   // Test parsing valid files.
@@ -411,9 +383,8 @@ describe('magic.actions.export_contribution', () => {
 const exportContributionToTextErrorTest = (json, reErrorMsg) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json,false);
-    expect(Exporter.errors().length).to.be.at.least(1);
-    expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
-
+  expect(Exporter.errors().length).to.be.at.least(1);
+  expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
 // Expect no errors.
@@ -436,11 +407,10 @@ const exportContributionToTextNErrorsTest = (json, nErrors) => {
 const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
   const text = Exporter.toText(json,false);
-    expect(Exporter.errors().length).to.equal(0);
-    console.log(`text:\n${text}`);
-    console.log(`text Expected:\n${textExpected}`);
-    expect(text).to.equal(textExpected);
-
+  expect(Exporter.errors().length).to.equal(0);
+  console.log(`text:\n${text}`);
+  console.log(`text Expected:\n${textExpected}`);
+  expect(text).to.equal(textExpected);
 };
 
 // Expect no errors and check against expected text.
@@ -451,5 +421,12 @@ const exportContributionToExtendedTextJSONTest = (json, textExpected) => {
   console.log(`text:\n${text}`);
   console.log(`text Expected:\n${textExpected}`);
   expect(text).to.equal(textExpected);
+};
 
+// Expect no errors create an Excel file.
+const exportContributionToExcelTest = (json, outputFile) => {
+  const Exporter = new ExportContribution({});
+  const workbook = Exporter.toExcel(json);
+  expect(Exporter.errors().length).to.equal(0);
+  XLSX.writeFile(workbook, outputFile);
 };
