@@ -43,9 +43,24 @@ export default class extends Runner {
     // Create an empty workbook.
     let workbook = { SheetNames: [], Sheets: {} };
 
-    // Create a sheet in the workbook.
-    workbook.SheetNames.push('test');
-    workbook.Sheets['test'] = this._toSheet(
+    // Create a sheet for each table in the 3.0 model in the workbook.
+    workbook.SheetNames.push('contribution');
+    workbook.SheetNames.push('locations');
+    workbook.SheetNames.push('sites');
+    workbook.SheetNames.push('samples');
+    workbook.SheetNames.push('specimens');
+    workbook.SheetNames.push('measurements');
+    workbook.SheetNames.push('criteria');
+    workbook.SheetNames.push('ages');
+    workbook.SheetNames.push('images');
+
+
+    for(var sheetName in this.model)
+    {
+      
+    }
+
+    workbook.Sheets['contribution'] = this._toSheet(
       [
         [1,2,3],
         [true, false, null, "sheetjs"],
@@ -53,6 +68,81 @@ export default class extends Runner {
         ["baz", null, "qux"]
       ]
     );
+
+    workbook.Sheets['locations'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+
+    workbook.Sheets['sites'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+
+    workbook.Sheets['samples'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+    workbook.Sheets['specimens'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+    workbook.Sheets['measurements'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+    workbook.Sheets['criteria'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+    workbook.Sheets['ages'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+    workbook.Sheets['images'] = this._toSheet(
+        [
+          [1,2,3],
+          [true, false, null, "sheetjs"],
+          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+          ["baz", null, "qux"]
+        ]
+    );
+    /*
+
+    criteria
+    ages
+    images*/
+
+
+
 
     // TODO: use the model to build up and stylize the workbook here
 
