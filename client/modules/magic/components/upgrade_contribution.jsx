@@ -1,5 +1,6 @@
 import {_} from 'lodash';
 import filesize from 'filesize';
+import numeral from 'numeral';
 import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
@@ -20,12 +21,23 @@ export default class extends React.Component {
   }
 
   componentDidUpdate() {
-    $(this.refs['accordion']).accordion('open',this.state.step - 1);
+    $(this.refs['accordion']).accordion('open', this.state.step - 1);
+    $('.ui.progress').each(function() {
+      $(this).progress('set').progress($(this).attr('data-percent'));
+    });
   }
 
   restart() {
     $(this.refs['dropzone'])
     this.setState({step: 1, files:[]});
+  }
+
+  reviewParse() {
+    this.setState({step: 2});
+  }
+
+  reviewUpgrade() {
+    this.setState({step: 3});
   }
 
   onDrop(files) {
@@ -34,54 +46,43 @@ export default class extends React.Component {
       files: _.sortBy(files, (f) => { return f.name; })
     });
 
-    _.defer((files) => {
+    _.defer(() => {
       try {
-        for (let file of files) {
-          const fileReader = new FileReader(),
-                $fileIconDimmer = $(this.refs['files']).find('[data-file="' + file.name + '"] > .image > .dimmer'),
-                $readStep = $(this.refs['files']).find('[data-file="' + file.name + '"] [data-action=read]'),
-                $parseStep = $(this.refs['files']).find('[data-file="' + file.name + '"] [data-action=parse]'),
-                $readProgress = $readStep.find('.ui.progress').progress({percent: 0}),
-                $parseProgress = $parseStep.find('.ui.progress').progress({percent: 0});
+        for (let i in files) {
+          const fileReader = new FileReader();
 
-          $readStep.removeClass("disabled").addClass("active");
-          fileReader.name = file.name;
           fileReader.onprogress = (e) => {
-            $readProgress.progress('set').progress(e.loaded/e.total);
+            files[i].readProgress = (e.loaded/e.total);
+            this.setState({files: files});
           };
           fileReader.onload = (e) => {
-            $readStep.removeClass("active").addClass("completed");
-            $readProgress.progress('set').progress(100);
 
-            $parseStep.removeClass("disabled").addClass("active");
+            files[i].readProgress = 100;
+            this.setState({files: files});
+
             const Parser = new ParseContribution({});
             Parser.parsePromise(e.target.result, 1000,
-              (percent) => { $parseProgress.progress('set').progress(percent); }
+              (percent) => {
+                files[i].parseProgress = percent;
+                this.setState({files: files});
+              }
             ).then((parser) => {
-              $parseStep.removeClass("active").addClass("completed");
-              $fileIconDimmer.removeClass("active");
-              file.json = parser.json;
-              file.parseErrors = parser.errors();
-              file.parseWarnings = parser.warnings();
-              $parseProgress.progress('set').progress(100);
+              files[i].json = parser.json;
+              files[i].parseErrors = parser.errors();
+              files[i].parseWarnings = parser.warnings();
+              this.setState({files: files});
             });
 
           };
-          fileReader.readAsText(file);
+          fileReader.readAsText(files[i]);
         }
       }
       catch(err) {
         console.log(err); //.message, err);
         debugger;
       }
-    }, files);
-
-  }
-
-  parseFile() {
-    return new Promise((resolve, reject) => {
-
     });
+
   }
 
   saveContributionFile() {
@@ -93,43 +94,68 @@ export default class extends React.Component {
     return (
       <div className="upgrade-contribution">
         <div className="ui top attached stackable three steps">
-          <div ref="select step" className={(step === 1 ? 'active' : 'hidden') + ' pointing below step'}>
+          <div ref="select step" className={(['active', 'hidden', 'hidden'])[step-1] + ' pointing below step'}>
             <i className="icons">
               <i className="folder open outline icon"></i>
             </i>
             <div className="content">
-              <div className="title">Step 1.<br/>Select the MagIC Text File(s)</div>
+              <div className="title">Step 1. Select File(s)</div>
               <div className="description">Click and select or drag and drop files below.</div>
             </div>
           </div>
-          <a ref="select link step" className={(step !== 1 ? '' : 'hidden') + ' pointing below step'} onClick={this.restart.bind(this)}>
+          <a ref="select link step"
+             className={(['hidden', '', ''])[step-1] + ' pointing below step'}
+             onClick={this.restart.bind(this)}>
             <i className="icons">
               <i className="folder open outline icon"></i>
             </i>
             <div className="content">
-              <div className="title">Step 1.<br/>Restart by Selecting new File(s)</div>
+              <div className="title">Step 1. Restart</div>
               <div className="description">All progress in upgrading will be lost.</div>
             </div>
           </a>
-          <div ref="read step" className={(step === 2 ? 'active' : 'disabled') + ' pointing below step'}>
+          <div ref="read step" className={(['disabled', 'active', 'hidden'])[step-1] + ' pointing below step'}>
             <i className="icons">
               <i className="file text outline icon"></i>
             </i>
             <div className="content">
-              <div className="title">Step 2.<br/>Read the MagIC Contribution</div>
+              <div className="title">Step 2.<br/>Read and Parse</div>
               <div className="description">The upgrade occurs locally on your computer without uploading to MagIC.</div>
             </div>
           </div>
-          <div ref="upgrade step" className={(step === 3 ? 'active' : 'disabled') + ' pointing below step'}>
+          <a ref="read link step"
+             className={(['hidden', 'hidden', ''])[step-1] + ' pointing below step'}
+             onClick={this.reviewParse.bind(this)}>
+            <i className="icons">
+              <i className="file text outlinee icon"></i>
+            </i>
+            <div className="content">
+              <div className="title">Step 2.<br/>Read and Parse</div>
+              <div className="description">Review parsing results.</div>
+            </div>
+          </a>
+          <div ref="upgrade step" className={(['disabled', 'disabled', 'hidden'])[step-1] + ' pointing below step'}>
             <i className="icons">
               <i className="file text outline icon"></i>
               <i className="corner up arrow icon"></i>
             </i>
             <div className="content">
-              <div className="title">Step 3.<br/>Upgrade the MagIC Contribution</div>
+              <div className="title">Step 3.<br/>Upgrade</div>
               <div className="description">The upgrade occurs locally on your computer without uploading to MagIC.</div>
             </div>
           </div>
+          <a ref="upgrade link step"
+             className={(['hidden', 'hidden', 'active'])[step-1] + ' pointing below step'}
+             onClick={this.reviewUpgrade.bind(this)}>
+            <i className="icons">
+              <i className="file text outline icon"></i>
+              <i className="corner up arrow icon"></i>
+            </i>
+            <div className="content">
+              <div className="title">Step 3.<br/>Read and Parse</div>
+              <div className="description">Review upgrading results.</div>
+            </div>
+          </a>
         </div>
         <div className="ui active attached message upgrade-contribution-message">
           <div ref="accordion" className="ui accordion">
@@ -159,10 +185,12 @@ export default class extends React.Component {
             <div ref="upgrade step message" className="content upgrade-step-content">
               <div ref="files" className="ui divided items">
                 {this.state.files.map((file,i) => {
+                  const nTables = _.size(file.json);
+                  const nRows = _.reduce(file.json, (sum, value) => { return sum + value.length; }, 0);
                   return (
                     <div key={i} className="item" data-file={file.name}>
                       <div className="ui image">
-                        <div className="ui active inverted dimmer">
+                        <div className={(file.json ? '' : 'active ') + 'ui inverted dimmer'}>
                           <div className="ui loader"></div>
                         </div>
                         <i className="fitted file text outline icon"></i>
@@ -172,42 +200,50 @@ export default class extends React.Component {
                         <div className="meta">
                           <div className="ui horizontal label">{filesize(file.size)}</div>
                           {(file.readErrors ?
-                            <div className="ui horizontal red label">
-                              {file.readErrors} Error{(file.readErrors > 0 ? 's' : '')}
-                            </div>
+                            <a className="ui horizontal red label">
+                              {numeral(file.readErrors.length).format('0,0') + ' Error' + (file.readErrors.length > 0 ? 's' : '')}
+                            </a>
                             : undefined )}
-                          {(file.parseErrors ?
-                            <div className="ui horizontal red label">
-                              {file.parseErrors} Error{(file.parseErrors > 0 ? 's' : '')}
-                            </div>
+                          {(file.parseErrors && file.parseErrors.length > 0 ?
+                            <a className="ui horizontal red label">
+                              {numeral(file.parseErrors.length).format('0,0') + ' Error' + (file.parseErrors.length > 0 ? 's' : '')}
+                            </a>
                             : undefined )}
-                          {(file.parseWarnings ?
-                            <div className="ui horizontal yellow label">
-                              {file.parseWarnings} Warning{(file.parseWarnings > 0 ? 's' : '')}
-                            </div>
+                          {(file.parseWarnings && file.parseWarnings.length > 0 ?
+                            <a className="ui horizontal yellow label">
+                              {numeral(file.parseWarnings.length).format('0,0') + ' Warning' + (file.parseWarnings.length > 0 ? 's' : '')}
+                            </a>
                             : undefined )}
-                          {(file.nTables ?
-                            <div className="ui horizontal label">
-                              {file.nTables} Table{(file.nTables > 0 ? 's' : '')}
-                            </div>
+                          {(file.json && nTables > 0 ?
+                            <a className="ui horizontal label">
+                              {numeral(nTables).format('0,0') + ' Table' + (nTables > 0 ? 's' : '')}
+                            </a>
                             : undefined )}
-                          {(file.nRows ?
-                            <div className="ui horizontal label">
-                              {file.nRows} Row{(file.nRows > 0 ? 's' : '')}
-                            </div>
+                          {(file.json && nRows > 0 ?
+                            <a className="ui horizontal label">
+                              {numeral(nRows).format('0,0') + ' Row' + (nRows > 0 ? 's' : '')}
+                            </a>
                             : undefined )}
                         </div>
                         <div className="description">
                           <div className="ui grid">
                             <div className="two column row">
-                              <div className="column" data-action="read">
-                                <div className="ui tiny purple progress">
+                              <div className="column">
+                                <div className={(file.readErrors ? 'error ' : '') + 'ui tiny purple progress'}
+                                     data-action="read"
+                                     data-percent={file.readProgress}>
                                   <div className="bar"></div>
                                   <div className="label">Read</div>
                                 </div>
                               </div>
-                              <div className="column" data-action="parse">
-                                <div className="ui tiny purple progress">
+                              <div className="column">
+                                <div className={
+                                      (file.parseErrors && file.parseErrors.length ? 'error ' :
+                                      (file.parseWarnings && file.parseWarnings.length ? 'warning ' : '')) +
+                                      'ui tiny purple progress'
+                                     }
+                                     data-action="parse"
+                                     data-percent={file.parseProgress}>
                                   <div className="bar"></div>
                                   <div className="label">Parse</div>
                                 </div>
