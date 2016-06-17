@@ -119,16 +119,30 @@ export default class extends Runner {
     return workSheet;
   }
 
-  createExtendedHeaders(tableName, jsonToExport, orderedColumnArray)
+  //creates a single extended header TSV based on the table
+  generateExtendedHeaderTSV(tableName, jsonToExport, orderedColumnArray)
   {
-    let addHeader = '';
-    // returns the same thing as toText but with extra headers (groups, columns names, and units)
+    let extendedHeader = '';
+    let extraHeaderData = this.createExtendedHeadersData(tableName, jsonToExport, orderedColumnArray);
 
+    extendedHeader = extendedHeader + extraHeaderData.groupHeader.join('\t');
+    extendedHeader = extendedHeader + '\n';
+    extendedHeader = extendedHeader + extraHeaderData.labelHeader.join('\t');
+    extendedHeader = extendedHeader + '\n';
+    extendedHeader = extendedHeader + extraHeaderData.columnTypeOrUnitHeader.join('\t');
+    extendedHeader = extendedHeader + '\n';
+
+    return extendedHeader;
+  }
+
+  createExtendedHeadersData(tableName, jsonToExport, orderedColumnArray)
+  {
+    // returns data to be used for extra headers (groups, columns names, and units)
     let discoveredColumns = {};
     let previousGroupFound = '';
     let groupHeaderArray = [];
     let labelHeaderArray = [];
-    let columnTypeOrUnitArray = [];
+    let columnTypeOrUnitHeaderArray = [];
     //loop through ordered model columns for this table, see if json has data from that column
     for(let orderedColumnIdx in orderedColumnArray)
     {
@@ -151,25 +165,23 @@ export default class extends Runner {
           let currentGroupToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
           if(previousGroupFound != currentGroupToAdd)
             groupHeaderArray.push(currentGroupToAdd);
-            //addHeader = addHeader + currentGroupToAdd + '\t';
           else
             groupHeaderArray.push('');
-            //addHeader = addHeader + '\t';
+
            previousGroupFound = currentGroupToAdd;//this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
 
-          columnTypeOrUnitArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+          columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
         }
       }
     }
 
-    addHeader = addHeader + groupHeaderArray.join('\t');
-    addHeader = addHeader + '\n';
-    addHeader = addHeader + labelHeaderArray.join('\t');
-    addHeader = addHeader + '\n';
-    addHeader = addHeader + columnTypeOrUnitArray.join('\t');
-    addHeader = addHeader + '\n';
+    let orderedHeaderData = {};
+    orderedHeaderData.groupHeader = groupHeaderArray;
+    orderedHeaderData.labelHeader= labelHeaderArray;
+    orderedHeaderData.columnTypeOrUnitHeader = columnTypeOrUnitHeaderArray;
 
-    return addHeader;
+
+    return orderedHeaderData;
   }
 
   getColumnTypeOrUnitString(tableName, potentialColumnToAdd)
@@ -233,7 +245,7 @@ export default class extends Runner {
         if (toExtendedText)
         {
           let orderedColumnArray = orderedModel[orderedTableIdx][tableName];
-          text = text + this.createExtendedHeaders(tableName, jsonToExport, orderedColumnArray)
+          text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport, orderedColumnArray)
         }
 
 
