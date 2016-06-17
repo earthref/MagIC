@@ -41,119 +41,49 @@ export default class extends Runner {
   //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
 
-    this.version = this.VersionGetter.getVersion(jsonToExport);//GGG not happy with the way i'm setting these class variables but right now i need to get this done
+    this.version = this.VersionGetter.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
+    this.model = magicDataModels[this.version];
+    console.log(`Version: ${this.version}`);
+
 
     // Create an empty workbook.
     let workbook = { SheetNames: [], Sheets: {} };
 
-    // Create a sheet for each table in the 3.0 model in the workbook.
-    /*workbook.SheetNames.push('contribution');
-    workbook.SheetNames.push('locations');
-    workbook.SheetNames.push('sites');
-    workbook.SheetNames.push('samples');
-    workbook.SheetNames.push('specimens');
-    workbook.SheetNames.push('measurements');
-    workbook.SheetNames.push('criteria');
-    workbook.SheetNames.push('ages');
-    workbook.SheetNames.push('images');*/
+    let style = {fill:{patternType: 'solid'},  font:{}, numFmt:{}, alignment:{}, border:{}};
 
-//    console.log(`yo ${this.model}`);
-
-    let modelProperties = Object.getOwnPropertySymbols(this.version);
-    for(let modelList in modelProperties)
+    for(let modelTable in this.model.tables)
     {
-      workbook.SheetNames.push(this.model['tables'][sheetName]);
-      console.log(`Sheet: ${this.model['tables'][sheetName]}`);
+      workbook.SheetNames.push(modelTable);//Create a sheet for each table in the 3.0 model in the workbook.
+      workbook.Sheets[modelTable] = this._toSheet(
+          [
+              ['Group1'],['Name'],['Type'],['Column']
+      /*      [1,2,3],
+            [true, false, null, "sheetjs"],
+            ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+            ["baz", null, "qux"]*/
+          ]
+      );
+
+      let currentSheet = workbook.Sheets[modelTable];
+      currentSheet['A1'].s =  {
+        alignment: {horizontal: 'center', vertical: 'center'},
+        border: {
+          left: {style: 'thick', color: {auto: 1}},
+          right: {style: 'thick', color: {auto: 1}},
+          top: {style: 'thick', color: {auto: 1}},
+          bottom: {style: 'thick', color: {auto: 1}}
+        }};
+      //style; //{fill.patternType: 'solid'};
+      /*currentSheet['A2'].v = 'Name:';
+      currentSheet['A3'].v = 'Type:';
+      currentSheet['A4'].s = 'Column:';*/
+
     }
-
-    workbook.Sheets['contribution'] = this._toSheet(
-      [
-        [1,2,3],
-        [true, false, null, "sheetjs"],
-        ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-        ["baz", null, "qux"]
-      ]
-    );
-
-    workbook.Sheets['locations'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-
-    workbook.Sheets['sites'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-
-    workbook.Sheets['samples'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-    workbook.Sheets['specimens'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-    workbook.Sheets['measurements'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-    workbook.Sheets['criteria'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-    workbook.Sheets['ages'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-    workbook.Sheets['images'] = this._toSheet(
-        [
-          [1,2,3],
-          [true, false, null, "sheetjs"],
-          ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-          ["baz", null, "qux"]
-        ]
-    );
-    /*
-
-    criteria
-    ages
-    images*/
-
-
-
-
     // TODO: use the model to build up and stylize the workbook here
 
     return workbook;
   }
+
 
   _datenum(v, date1904) {
     if(date1904) v+=1462;
@@ -162,7 +92,7 @@ export default class extends Runner {
   }
 
   _toSheet(data, opts) {
-    var ws = {};
+    var workSheet = {};
     var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
     for(var R = 0; R != data.length; ++R) {
       for(var C = 0; C != data[R].length; ++C) {
@@ -182,11 +112,11 @@ export default class extends Runner {
         }
         else cell.t = 's';
 
-        ws[cell_ref] = cell;
+        workSheet[cell_ref] = cell;
       }
     }
-    if(range.s.c < 10000000) ws['!ref'] = XLSX.utils.encode_range(range);
-    return ws;
+    if(range.s.c < 10000000) workSheet['!ref'] = XLSX.utils.encode_range(range);
+    return workSheet;
   }
 
   createExtendedHeaders(tableName, jsonToExport, orderedColumnArray)
