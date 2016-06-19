@@ -269,8 +269,12 @@ export default class extends React.Component {
                 <div className="data-model-table" key={i}>
                   <div className="title">
                     <i className="dropdown icon"/>
-                    <span>{model.tables[t].position + '.'}</span>
-                    <span>{model.tables[t].label}</span>
+                    <span>
+                      {model.tables[t].position + '.'}</span>
+                    <span>
+                      {model.tables[t].label}
+                      <span className="table">, {t}</span>
+                    </span>
                     <div className="ui circular small basic label data-model-table-count">
                       {_.keys(model.tables[t].columns).length}
                     </div>
