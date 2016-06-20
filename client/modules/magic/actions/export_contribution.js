@@ -67,15 +67,10 @@ export default class extends Runner {
 
       //Now gather the data from the json object
       let tableData = jsonToExport[modelTable];
-     /* let tableDataWithExtraLeadingColumn = [];
-
-      for(let dataRowIdx in tableData)
-        tableDataWithExtraLeadingColumn.push(tableData[dataRowIdx]);*/
 
       /*Create array of sheet headers/data. This will be an array of arrays.
       The first dimension of the array is the row in the excel sheet
       The second dimension is the row data*/
-
       let completeSpreadSheetData =
           [
             groupHeader ,
@@ -98,8 +93,59 @@ export default class extends Runner {
 
       workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
 
+      //From the xlsx-style docs:
+      /*Cell range objects are stored as {s:S, e:E} where S is the first cell and E is the last cell in the range.
+      The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
       let currentSheet = workbook.Sheets[modelTable];
-      currentSheet['A1'].s =  {
+
+      //for each group found for this table
+      /*for(let groupIdx in groupHeader)
+      {
+        let currentCellToFormat = '';
+        //console.log(`group idxSr : ${groupIdx.toString()}`);
+        let excelIdx = Number(groupIdx);
+        excelIdx++;
+        //console.log(`prior ${(excelIdx).toString()}`);
+        currentCellToFormat = 'A'+ Number(excelIdx).toString();
+        console.log(`TRy ${currentCellToFormat}`);
+        currentSheet[currentCellToFormat/!*'A1'*!/].s =  {
+          alignment: {horizontal: 'center', vertical: 'center'},
+          border: {
+            left: {style: 'thick', color: {auto: 1}},
+            right: {style: 'thick', color: {auto: 1}},
+            top: {style: 'thick', color: {auto: 1}},
+            bottom: {style: 'thick', color: {auto: 1}}
+          },
+          font:{bold:'true'},
+          fill:{fgColor:{rgb:'D3D3D3'}}
+        };
+      }*/
+
+      for(let groupIdx in groupHeader)
+      {
+       // let currentCellToFormat = '';
+        //console.log(`group idxSr : ${groupIdx.toString()}`);
+       // let excelIdx = Number(groupIdx);
+        //excelIdx++;
+        //console.log(`prior ${(excelIdx).toString()}`);
+        //currentCellToFormat = 'A'+ Number(excelIdx).toString();
+        //console.log(`TRy ${currentCellToFormat}`);
+        let cellAddress = XLSX.utils.encode_cell({c: groupIdx,r: 0});
+        currentSheet[cellAddress].s =  {
+          alignment: {horizontal: 'center', vertical: 'center'},
+          border: {
+            left: {style: 'thick', color: {auto: 1}},
+            right: {style: 'thick', color: {auto: 1}},
+            top: {style: 'thick', color: {auto: 1}},
+            bottom: {style: 'thick', color: {auto: 1}}
+          },
+          font:{bold:'true'},
+          fill:{fgColor:{rgb:'D3D3D3'}}
+        };
+      }
+
+
+      currentSheet['A2'].s =  {
         alignment: {horizontal: 'center', vertical: 'center'},
         border: {
           left: {style: 'thick', color: {auto: 1}},
@@ -107,6 +153,24 @@ export default class extends Runner {
           top: {style: 'thick', color: {auto: 1}},
           bottom: {style: 'thick', color: {auto: 1}}
         }};
+      currentSheet['A3'].s =  {
+        alignment: {horizontal: 'center', vertical: 'center'},
+        border: {
+          left: {style: 'thick', color: {auto: 1}},
+          right: {style: 'thick', color: {auto: 1}},
+          top: {style: 'thick', color: {auto: 1}},
+          bottom: {style: 'thick', color: {auto: 1}}
+        }};
+      currentSheet['A4'].s =  {
+        alignment: {horizontal: 'center', vertical: 'center'},
+        border: {
+          left: {style: 'thick', color: {auto: 1}},
+          right: {style: 'thick', color: {auto: 1}},
+          top: {style: 'thick', color: {auto: 1}},
+          bottom: {style: 'thick', color: {auto: 1}}
+        }};
+
+
       //style; //{fill.patternType: 'solid'};
       /*currentSheet['A2'].v = 'Name:';
       currentSheet['A3'].v = 'Type:';
