@@ -18,6 +18,12 @@ table1  //Each object in the array is a row
     {col1: value3, col2:value4,...},  //row 2
     ...
 ]
+table2
+[
+    {col3: value5, col4:value6,...},
+    {col3: value7, col4:value8,...},
+    ...
+]
 
 ORDERED MODEL: The ordered model sorts tables and columns according to the "position" properties found in the unordered DATA MODEL described above
 [
