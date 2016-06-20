@@ -67,25 +67,36 @@ export default class extends Runner {
 
       //Now gather the data from the json object
       let tableData = jsonToExport[modelTable];
-      let tableDataWithExtraLeadingColumn = [];
+     /* let tableDataWithExtraLeadingColumn = [];
 
       for(let dataRowIdx in tableData)
-        tableDataWithExtraLeadingColumn.push(tableData[dataRowIdx]);
+        tableDataWithExtraLeadingColumn.push(tableData[dataRowIdx]);*/
 
-      workbook.Sheets[modelTable] = this._toSheet(
+      /*Create array of sheet headers/data. This will be an array of arrays.
+      The first dimension of the array is the row in the excel sheet
+      The second dimension is the row data*/
+
+      let completeSpreadSheetData =
           [
             groupHeader ,
             nameHeader,
             typeHeader,
-            columnHeader,
-            tableDataWithExtraLeadingColumn
-
-      /*      [1,2,3],
-            [true, false, null, "sheetjs"],
-            ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-            ["baz", null, "qux"]*/
+            columnHeader
+            /*      [1,2,3],
+             [true, false, null, "sheetjs"],
+             ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
+             ["baz", null, "qux"]*/
           ]
-      );
+
+      //Add data to the spreadsheet row by row, adding a blank column at the beginning
+      for(let dataRowIdx in tableData)
+      {
+        let newRowArray = _.values(tableData[dataRowIdx]);
+        newRowArray.unshift('');//Add a blank column at the beginning of each row
+        completeSpreadSheetData.push(newRowArray);
+      }
+
+      workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
 
       let currentSheet = workbook.Sheets[modelTable];
       currentSheet['A1'].s =  {
@@ -102,7 +113,6 @@ export default class extends Runner {
       currentSheet['A4'].s = 'Column:';*/
 
     }
-    // TODO: use the model to build up and stylize the workbook here
 
     return workbook;
   }
