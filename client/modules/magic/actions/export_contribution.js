@@ -18,7 +18,6 @@ export default class extends Runner {
 
   /*To extended text is a boolean indicating whether or not the text should be extended*/
   toText(jsonToExport, toExtendedText) {
-
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
 
     // Retrieve the data model version used in the jsonToExport
@@ -27,26 +26,24 @@ export default class extends Runner {
 
     // Retrieve the data model
     this.model = magicDataModels[this.version];
+    this.orderedModel = this.createOrderedModel(jsonToExport);
 
     this.testValidityOfTablesAndColumns(jsonToExport);
 
-    let orderedModel = this.createOrderedModel(jsonToExport);
 
     // TODO: use the model to build up text string here
-    let text = this.createTSVfile(orderedModel, jsonToExport, toExtendedText);
+    let text = this.createTSVfile(jsonToExport, toExtendedText);
 
     return text;
   }
 
   //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
-
     this.version = this.VersionGetter.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
     this.model = magicDataModels[this.version];
-    console.log(`Version: ${this.version}`);
+    this.orderedModel = this.createOrderedModel(jsonToExport);
 
-
-    // Create an empty workbook.
+    // Create an empty workbook
     let workbook = { SheetNames: [], Sheets: {} };
 
     let style = {fill:{patternType: 'solid'},  font:{}, numFmt:{}, alignment:{}, border:{}};
@@ -54,9 +51,35 @@ export default class extends Runner {
     for(let modelTable in this.model.tables)
     {
       workbook.SheetNames.push(modelTable);//Create a sheet for each table in the 3.0 model in the workbook.
+      
+      let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport/*, orderedColumnArray*/);
+
+      /*These the first four rows of the excel file*/
+      let groupHeader = tableHeaders.groupHeader;
+      groupHeader.unshift('Group:');//place 'Group' at the beginning of the array
+      //console.log(`groupHD${groupHeader}`);
+      let nameHeader = tableHeaders.labelHeader;
+      nameHeader.unshift('Name:');
+      let typeHeader = tableHeaders.columnTypeOrUnitHeader;
+      typeHeader.unshift('Type:');
+      let columnHeader = tableHeaders.columnNameHeader;
+      columnHeader.unshift('Column:');
+
+      //Now gather the data from the json object
+      let tableData = jsonToExport[modelTable];
+      let tableDataWithExtraLeadingColumn = [];
+
+      for(let dataRowIdx in tableData)
+        tableDataWithExtraLeadingColumn.push(tableData[dataRowIdx]);
+
       workbook.Sheets[modelTable] = this._toSheet(
           [
-              ['Group1'],['Name'],['Type'],['Column']
+            groupHeader ,
+            nameHeader,
+            typeHeader,
+            columnHeader,
+            tableDataWithExtraLeadingColumn
+
       /*      [1,2,3],
             [true, false, null, "sheetjs"],
             ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
@@ -120,10 +143,10 @@ export default class extends Runner {
   }
 
   //creates a single extended header TSV based on the table
-  generateExtendedHeaderTSV(tableName, jsonToExport, orderedColumnArray)
+  generateExtendedHeaderTSV(tableName, jsonToExport)
   {
     let extendedHeader = '';
-    let extraHeaderData = this.createExtendedHeadersData(tableName, jsonToExport, orderedColumnArray);
+    let extraHeaderData = this.createExtendedHeadersData(tableName, jsonToExport/*, orderedColumnArray*/);
 
     extendedHeader = extendedHeader + extraHeaderData.groupHeader.join('\t');
     extendedHeader = extendedHeader + '\n';
@@ -135,7 +158,25 @@ export default class extends Runner {
     return extendedHeader;
   }
 
-  createExtendedHeadersData(tableName, jsonToExport, orderedColumnArray)
+  _getOrderedColumnList(tableName)
+  {
+    /*GGG: this is hacky but i cant make indexOf work for an object in an array, and I'm on an airplane and cant look it up*/
+    //Find the index that holds the object which represents a given table
+    for(let orderedTableIdx in this.orderedModel)
+    {
+      if (this.orderedModel[orderedTableIdx][tableName])
+      {
+        return this.orderedModel[orderedTableIdx][tableName];
+      }
+    }
+
+    /*this.orderedModel.indexOf(this.orderedModel[tableName]);
+    console.log(`index of: ${orderedTableIdx}`);
+    let orderedColumnArray = this.orderedModel[orderedTableIdx][tableName];//this.orderedModel[orderedTableIdx][tableName];*/
+
+  };
+
+  createExtendedHeadersData(tableName, jsonToExport/*, orderedColumnArray*/)
   {
     // returns data to be used for extra headers (groups, columns names, and units)
     let discoveredColumns = {};
@@ -143,6 +184,10 @@ export default class extends Runner {
     let groupHeaderArray = [];
     let labelHeaderArray = [];
     let columnTypeOrUnitHeaderArray = [];
+    let columnHeaderArray = [];
+    //let orderedTableIdx = _getOrderedColumnList
+    let orderedColumnArray = this._getOrderedColumnList(tableName);
+    
     //loop through ordered model columns for this table, see if json has data from that column
     for(let orderedColumnIdx in orderedColumnArray)
     {
@@ -155,7 +200,8 @@ export default class extends Runner {
             !discoveredColumns[potentialColumnToAdd]) //and we haven't seen this column before
         {
           //ggg gather data here from the model and add the header
-          discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;
+          discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
+          columnHeaderArray.push(potentialColumnToAdd);
 
           let labelToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['label'];
           labelHeaderArray.push(labelToAdd);
@@ -179,7 +225,7 @@ export default class extends Runner {
     orderedHeaderData.groupHeader = groupHeaderArray;
     orderedHeaderData.labelHeader= labelHeaderArray;
     orderedHeaderData.columnTypeOrUnitHeader = columnTypeOrUnitHeaderArray;
-
+    orderedHeaderData.columnNameHeader = columnHeaderArray;
 
     return orderedHeaderData;
   }
@@ -218,7 +264,7 @@ export default class extends Runner {
     return columnTypeOrUnitString;
   }
 
-  createTSVfile(orderedModel, jsonToExport, toExtendedText){
+  createTSVfile( jsonToExport, toExtendedText){
     //  loop through the used tables in data model order,
     //   print the table header (note: "tab delimited\ttable_name" format)
     //   loop through the used columns for that table in data model order,
@@ -232,9 +278,9 @@ export default class extends Runner {
     let text = ``;
     let numberOfTablesInJson = Object.keys(jsonToExport).length;
     let numberOfTablesInAddedToTSV = 0;
-    for(let orderedTableIdx in orderedModel)
+    for(let orderedTableIdx in this.orderedModel)
     {
-      let tableName = Object.getOwnPropertyNames(orderedModel[orderedTableIdx]);//loop through the tables in the model
+      let tableName = Object.getOwnPropertyNames(this.orderedModel[orderedTableIdx]);//loop through the tables in the model
       if(jsonToExport[tableName])//if the current table exists in the json to translate, add it to the output file
       {
         text = text.concat(`tab delimited\t${tableName}`);
@@ -244,17 +290,17 @@ export default class extends Runner {
         //If we want extended headers, pass in the ordered column list
         if (toExtendedText)
         {
-          let orderedColumnArray = orderedModel[orderedTableIdx][tableName];
-          text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport, orderedColumnArray)
+          /*let orderedColumnArray = orderedModel[orderedTableIdx][tableName];*/
+          text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport/*, orderedColumnArray*/)
         }
 
 
         //*********now create the column headers for this table*************
         let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort
         let orderedListOfColumnsAddedToHeader = [];//TODO:the object and the array are a bit of a duplicate effort
-        for(let orderedColIdx in orderedModel[orderedTableIdx][tableName])//loop through the columns in the ordered model
+        for(let orderedColIdx in this.orderedModel[orderedTableIdx][tableName])//loop through the columns in the ordered model
         {
-          let orderedColumnNameToPotentiallyAdd = orderedModel[orderedTableIdx][tableName][orderedColIdx];
+          let orderedColumnNameToPotentiallyAdd = this.orderedModel[orderedTableIdx][tableName][orderedColIdx];
           for(let jsonRowsIdx in jsonToExport[tableName])
           {
             //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
@@ -427,7 +473,6 @@ export default class extends Runner {
         //assign the properly ordered array of columns to the object keyed via the current table
         orderedModel[properTablePositionIdx][tableNames[tableIdx]] = columnPositionMap;
       }
-
-      return orderedModel;
+    return orderedModel;
   }
 }
