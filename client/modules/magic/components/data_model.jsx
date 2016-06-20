@@ -2,10 +2,11 @@ import {_} from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '../../er/configs/portals.js';
-import {default as versions} from '../configs/magic_versions.js';
-import {default as models} from '../configs/data_models/data_models.js';
-import DataModelColumn from './data_model_column.jsx';
+import {portals} from '../../er/configs/portals';
+import {default as versions} from '../configs/magic_versions';
+import {default as models} from '../configs/data_models/data_models';
+import Upgrader from '../actions/upgrade_contribution';
+import DataModelColumn from './data_model_column';
 
 export default class extends React.Component {
 
@@ -17,6 +18,8 @@ export default class extends React.Component {
       updating: false
     };
     this.dataModelColumnCache = {};
+    this.changeLogCache = {};
+    this.upgrader = new Upgrader({});
   }
 
   componentDidMount() {
@@ -188,6 +191,20 @@ export default class extends React.Component {
     // Retrieve the cached DataModelColumn component
     return this.dataModelColumnCache[cacheKey];
   }
+  
+  cachedChangeLog() {
+    const version = this.props.version;
+
+    // Add the DataModelColumn component to the cache if necessary.
+    if (!this.changeLogCache[version]) {
+      let changeLog = {};
+      let upgradeMap = this.upgrader.getUpgradeMap(models[version]);
+      changeLog['new'];
+      this.changeLogCache[version] = changeLog;
+    }
+    
+    return this.changeLogCache[version];
+  }
 
   downloadJSON() {
     const version = this.props.version;
@@ -203,9 +220,13 @@ export default class extends React.Component {
     const version = this.props.version;
     const model = models[version];
     const published = moment(model.published_day, 'YYYY:MM:DD').format('MMMM Do, YYYY');
-    let previous_version;
+    let previousVersion;
     if (_.indexOf(versions, version) > 0)
-      previous_version = versions[_.indexOf(versions, version)-1];
+      previousVersion = versions[_.indexOf(versions, version)-1];
+    let upgradeMap;
+    if (previousVersion)
+      upgradeMap = this.cachedChangeLog();
+    console.log(upgradeMap);
     return (
       <div className="data-model">
         <div className="ui top attached tabular menu">
@@ -310,6 +331,66 @@ export default class extends React.Component {
               );
             })}
           </div>
+          {(upgradeMap ?
+            <div>
+              <h4 className="ui horizontal divider header">
+                <i className="random icon"></i>
+                <span className="content">
+                  Change Log
+                </span>
+              </h4>
+              <div className="ui styled fluid accordion">
+                <div className="title">
+                  <i className="dropdown icon"/>
+                  <span>
+                    New Columns
+                  </span>
+                  <div className="ui circular small basic label data-model-table-count">
+                    {0}
+                  </div>
+                  <span className="description">in MagIC Data Model version {version}</span>
+                </div>
+                <div className="content">
+                </div>
+                <div className="title">
+                  <i className="dropdown icon"/>
+                  <span>
+                    Removed Columns
+                  </span>
+                  <div className="ui circular small basic label data-model-table-count">
+                    {0}
+                  </div>
+                  <span className="description">from MagIC Data Model version {previousVersion}</span>
+                </div>
+                <div className="content">
+                </div>
+                <div className="title">
+                  <i className="dropdown icon"/>
+                  <span>
+                    Renamed Columns
+                  </span>
+                  <div className="ui circular small basic label data-model-table-count">
+                    {0}
+                  </div>
+                  <span className="description">from MagIC Data Model version {previousVersion} to {version}</span>
+                </div>
+                <div className="content">
+                </div>
+                <div className="title">
+                  <i className="dropdown icon"/>
+                  <span>
+                    Merged Columns
+                  </span>
+                  <div className="ui circular small basic label data-model-table-count">
+                    {0}
+                  </div>
+                  <span className="description">from MagIC Data Model version {previousVersion} to {version}</span>
+                </div>
+                <div className="content">
+                </div>
+              </div>
+            </div>
+          : undefined)}
         </div>
         <div ref="no-match-message" className="ui hidden error bottom attached message">
           No columns match your search. Please edit the search string.

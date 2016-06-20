@@ -70,7 +70,7 @@ export default function (injectDeps, {FlowRouter}) {
             <Home portal="MagIC">
               <h3>
                 Upgrade an outdated MagIC contribution to the&nbsp;
-                <a className="purple" href="data-model">latest MagIC data model version</a>:
+                <a className="purple" href="data-model" target="_blank">latest MagIC data model version</a>:
               </h3>
               <MagICUpgradeContribution/>
             </Home>
