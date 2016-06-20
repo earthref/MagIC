@@ -1,6 +1,7 @@
 import {_} from 'lodash';
 import Promise from 'bluebird';
 import Runner from '../../er/actions/runner.js';
+import {default as versions} from '../configs/magic_versions';
 
 export default class extends Runner {
 
@@ -10,18 +11,14 @@ export default class extends Runner {
     // Initialize the contribution.
     this.json = {};
     this.lineNumber = 0;
+    this.isVersionGuessed = false;
 
   }
-
-  parseNonBlocking(text, progressHandler) {
-
-    // Initialize this parsing operation.
-    this.table = undefined;
-    this.columns = [];
-    this.skipTable = false;
-    this.tableLineNumber = 0;
-
-
+  
+  reset() {
+    this.json = {};
+    this.lineNumber = 0;
+    this.isVersionGuessed = false;
   }
 
   parsePromise(text, nLines, progressHandler) {
@@ -33,36 +30,20 @@ export default class extends Runner {
     this.tableLineNumber = 0;
 
     if (!nLines) nLines = 1;
-
-    //if (progressHandler) progressHandler = _.throttle(progressHandler, 100);
-
+    
     return new Promise.each(
       _.chunk(text.match(/[^\r\n]+/g), nLines),
       (lines, i, t) => {
-        //console.log(i, 'of', t, line);
-        //_.defer(() => {
         return new Promise((resolve) => {
           lines.forEach((line) => { this._parseLine(line); });
           if (progressHandler) progressHandler(100 * (i + 1) / t);
           resolve();
         }).delay();
-        /*return new Promise(
-          (resolve) => {
-            this._parseLine(line);
-            resolve(this.json);
-          },
-          (reject) => {
-            console.log('reject');
-          }
-        ).tap(() => {
-          console.log('progress');
-          if (progressHandler) progressHandler(this.progress);
-        })*/
-        //return this.json;
       }
     ).then(() => {
       return this;
     });
+    
   }
 
   parse(text) {
@@ -81,37 +62,16 @@ export default class extends Runner {
     // Split the text on line breaks.
     const lines = text.match(/[^\r\n]+/g);
 
-    if (!asyncCallback) {
+    // Process the text line by line.
+    lines.forEach(this._parseLine.bind(this));
 
-      // Process the text line by line.
-      lines.forEach(this._parseLine.bind(this));
-
-      // Look for empty tables to issue a warning.
-      for (let jsonTable in this.json) {
-        if (this.json[jsonTable].length === 0)
-          this._appendWarning(`No data values were found in the ${jsonTable} table.`);
-      }
-
-      return this.json;
-
-    } else {
-
-      // Process the text line by line.
-      lines.forEach(_.defer(this._parseLine.bind(this)));
-
-      _.defer((asyncCallback) => {
-
-
-      });
-      // Look for empty tables to issue a warning.
-      for (let jsonTable in this.json) {
-        if (this.json[jsonTable].length === 0)
-          this._appendWarning(`No data values were found in the ${jsonTable} table.`);
-      }
-
-      return this.json;
-
+    // Look for empty tables to issue a warning.
+    for (let jsonTable in this.json) {
+      if (this.json[jsonTable].length === 0)
+        this._appendWarning(`No data values were found in the ${jsonTable} table.`);
     }
+
+    return this.json;
 
   }
 
@@ -231,4 +191,54 @@ export default class extends Runner {
 
   }
 
+  getVersion(json) {
+
+    let text = '';
+    this.isVersionGuessed = false;
+    
+    // Check for a valid input after defaulting to the class json property.
+    if (_.isEmpty(json)) json = this.json;
+    if (_.isEmpty(json)) {
+      this._appendWarning('The first argument (MagIC contribution in JSON format) is empty.');
+      return undefined;
+    }
+
+    // Look for the MagIC data model version.
+    let version;
+    if(!json || !json['contribution']) {
+      this._appendWarning('Failed to find the "contribution" table.');
+      return this._guessVersion(json);
+    }
+    if (json['contribution']) {
+      if (json['contribution'].length !== 1) {
+        this._appendError('The "contribution" table does not have exactly one row.');
+        return this._guessVersion(json);
+      }
+      if (!json['contribution'][0]['magic_version']) {
+        this._appendWarning('The "contribution" table does not include the "magic_version" column.');
+        return this._guessVersion(json);
+      }
+      version = json['contribution'][0]['magic_version'];
+    }
+
+    // Check that the MagIC data model version is valid (oldVersion is in versions).
+    if (_.indexOf(versions, version) === -1) {
+      const strVersions = versions.map((str) => { return `"${str}"`; }).join(", ");
+      this._appendError(`MagIC data model version ${version} is invalid. Expected one of: ${strVersions}.`);
+      return undefined;
+    }
+
+    return version;
+
+  }
+
+  _guessVersion(json) {
+
+    let version;
+    this.isVersionGuessed = true;
+    
+    return version;
+
+  }
+  
 }

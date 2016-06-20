@@ -1,6 +1,6 @@
 import {_} from 'lodash';
-import Runner from '../../er/actions/runner.js';
-import GetContributionVersion from './get_contribution_version';
+import Runner from '../../er/actions/runner';
+import ParseContribution from './parse_contribution';
 //import json2csv from 'json2csv';
 
 import {default as magicVersions} from '../configs/magic_versions';
@@ -10,7 +10,7 @@ export default class extends Runner {
 
   constructor({LocalState}) {
     super('EXPORT_CONTRIBUTION', {LocalState});
-    this.VersionGetter = new GetContributionVersion({LocalState});
+    this.parser = new ParseContribution({LocalState});
     this.version;
     this.model;
   }
@@ -37,7 +37,7 @@ export default class extends Runner {
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
 
     // Retrieve the data model version used in the jsonToTranslate
-    this.version = this.VersionGetter.getVersion(jsonToTranslate)
+    this.version = this.parser.getVersion(jsonToTranslate)
     if (!this.version) return jsonToTranslate;
 
     // Retrieve the data model

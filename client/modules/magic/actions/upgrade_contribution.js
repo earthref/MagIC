@@ -1,6 +1,6 @@
 import {_} from 'lodash';
-import Runner from '../../er/actions/runner.js';
-import GetContributionVersion from './get_contribution_version';
+import Runner from '../../er/actions/runner';
+import ParseContribution from './parse_contribution';
 
 import {default as magicVersions} from '../configs/magic_versions';
 import {default as magicDataModels} from '../configs/data_models/data_models';
@@ -11,18 +11,18 @@ export default class extends Runner {
 
   constructor({LocalState}) {
     super('UPGRADE_CONTRIBUTION', {LocalState});
-    this.VersionGetter = new GetContributionVersion({LocalState});
+    this.parser = new ParseContribution({LocalState});
   }
 
   // Upgrade a contribution to its next MagIC data model version.
   // The input JSON can be assumed to be the entire contribution.
   // The upgrade happens in two stages: map column names and then merge rows.
-  // This could probably be parallelized easily, but for now speed is less important that accuracy for this operation.
+  // This could probably be parallelized easily, but for now speed is less important than accuracy for this operation.
   upgrade(jsonOld, versionMax) {
 
     // Update table and column names all the way to the new data model version.
     let json = this._map(jsonOld, versionMax);
-
+    
     // Merge rows that can be combined because they are orthogonal (null or identical in each column).
     if (this.errors().length === 0)
       json = this._merge(json);
@@ -37,7 +37,7 @@ export default class extends Runner {
     let jsonNew = {};
 
     // Retrieve the data model version used in the json.
-    const versionOld = this.VersionGetter.getVersion(jsonOld);
+    const versionOld = this.parser.getVersion(jsonOld);
     if (!versionOld) return jsonOld;
 
     // Check that the maximum MagIC data model version to upgrade to is valid (versionMax is in magicVersions).
@@ -59,7 +59,7 @@ export default class extends Runner {
     // Retrieve the data models and create the upgrade map.
     const modelOld = magicDataModels[versionOld];
     const modelNew = magicDataModels[versionNew];
-    let upgradeMap = this._getUpgradeMap(modelNew);
+    let upgradeMap = this.getUpgradeMap(modelNew);
 
     // Handle special cases when upgrading from 2.5 to 3.0 tables.
     let syntheticSpecimenNames = {};
@@ -83,6 +83,7 @@ export default class extends Runner {
         }
       }
 
+      // Define new method code names
       newMethodCodes['ST-BC'] = 'ST-C';
       newMethodCodes['ST-BC-Q1'] = 'ST-BCQ-1';
       newMethodCodes['ST-BC-Q2'] = 'ST-BCQ-2';
@@ -275,7 +276,11 @@ export default class extends Runner {
                 jsonColumnOld === 'expedition_location'   ||
                 jsonColumnOld === 'location_geoid'        ||
                 jsonColumnOld === 'site_location_geoid'   ||
-                jsonColumnOld === 'sample_location_geoid'))
+                jsonColumnOld === 'sample_location_geoid' ||
+                jsonTableOld === 'er_citations' ||
+                jsonTableOld === 'er_mailinglist' ||
+                (jsonTableOld === 'rmag_results' && jsonColumnOld === 'er_location_name') ||
+                jsonTableOld === 'magic_methods'))
               continue;
 
             // Combine external_database_names/ids into a dictionary.
@@ -479,7 +484,7 @@ export default class extends Runner {
 
   //modelNew is the "more recent" of the two models involved in the upgrade process. It is the model we are upgrading the JSON object to.
   //The upgradeMap is "forward looking" from the perspective of the "less recent" (or "current") model in that it shows the path from the less recent model to the "more recent".
-  _getUpgradeMap(modelNew) {
+  getUpgradeMap(modelNew) {
 
     let upgradeMap = {};
 

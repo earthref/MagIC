@@ -53,6 +53,61 @@ describe('magic.actions.parse_contribution', () => {
     });
   });
 
+  // Test getting version from invalid strings.
+  describe('when getting version from invalid JSON', () => {
+    it('should warn about getting version from an empty object', () => {
+      getContributionVersionWarningTest(null, /the first argument .* is empty/i);
+      getContributionVersionWarningTest(undefined, /the first argument .* is empty/i);
+      getContributionVersionWarningTest({}, /the first argument .* is empty/i);
+    });
+
+    it('should reject when no contribution table is found', () => {
+      const jsonNoContribTable = {
+        not_contribution: [{
+          magic_version: '2.2'
+        }],
+        er_locations: [{
+          region: 'California'
+        }]
+      };
+      getContributionVersionWarningTest(jsonNoContribTable,
+        /failed to find the "contribution" table/i);
+    });
+
+    it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
+      const jsonContribNoMagicVersion = {
+        contribution: [{
+          not_magic_version: '2.2'
+        }]
+      };
+      getContributionVersionWarningTest(jsonContribNoMagicVersion,
+        /table does not include the "magic_version" column./i);
+    });
+
+    it('should reject when the "contribution" table does not have exactly one row.', () => {
+      const jsonContribTwoRows = {
+        contribution: [{
+          magic_version: '2.2'
+        }, {
+          magic_version: '2.3'
+        }]
+      };
+      getContributionVersionErrorTest(jsonContribTwoRows,
+        /table does not have exactly one row./i);
+    });
+
+    it('should reject if the data model version is invalid.', () => {
+      const invalidMagicVersion = {
+        contribution: [{
+          magic_version: '0.1'
+        }]
+      };
+      getContributionVersionErrorTest(invalidMagicVersion,
+        /data model version .* is invalid/i);
+    });
+
+  });
+
   // Test parsing valid strings.
   describe('when parsing valid strings', () => {
     it('should keep numbers as strings', () => {
@@ -63,16 +118,6 @@ describe('magic.actions.parse_contribution', () => {
         }]
       };
       parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
-    });
-
-    it('should keep numbers as strings asynchronously', () => {
-      const json = {
-        table: [{
-          col1: 'str1',
-          col2: '1.2'
-        }]
-      };
-      parseContributionJSONAsyncTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
     });
 
     it('should eliminate blank lines and leading/trailing spaces', () => {
@@ -114,7 +159,7 @@ describe('magic.actions.parse_contribution', () => {
         parseContributionJSONTest(withEmptyColumn, json);
     });
 
-    it('should combine strings', () => {
+    it('should combine rows', () => {
       const partial1 = 'tab\ttable\ncol1\tcol2\nstr1\t1.2';
       const partial2 = 'tab\ttable\ncol1\tcol2\nstr2\t1.0';
       const json = {
@@ -122,6 +167,23 @@ describe('magic.actions.parse_contribution', () => {
           col1: 'str1',
           col2: '1.2'
         }, {
+          col1: 'str2',
+          col2: '1.0'
+        }]
+      };
+      const Parser = parseContributionNoErrorTest(partial1);
+      parseContributionJSONTest(partial2, json, Parser);
+    });
+
+    it('should combine tables', () => {
+      const partial1 = 'tab\ttable1\ncol1\tcol2\nstr1\t1.2';
+      const partial2 = 'tab\ttable2\ncol1\tcol2\nstr2\t1.0';
+      const json = {
+        table1: [{
+          col1: 'str1',
+          col2: '1.2'
+        }],
+        table2: [{
           col1: 'str2',
           col2: '1.0'
         }]
@@ -165,6 +227,7 @@ const parseContributionErrorTest = (text, reErrorMsg) => {
 const parseContributionNoErrorTest = (text) => {
   const Parser = new ParseContribution({});
   Parser.parse(text);
+  expect(Parser.isVersionGuessed).to.be.false;
   expect(Parser.errors().length).to.equal(0);
   return Parser;
 };
@@ -173,15 +236,32 @@ const parseContributionNoErrorTest = (text) => {
 const parseContributionJSONTest = (text, jsonExpected, Parser) => {
   if(!Parser) Parser = new ParseContribution({});
   const json = Parser.parse(text);
+  expect(Parser.isVersionGuessed).to.be.false;
   expect(Parser.errors().length).to.equal(0);
   expect(json).to.deep.equal(jsonExpected);
   return Parser;
 };
 
+// Expect the warnings to contain one warning that matches the reWarningMsg regex.
+const getContributionVersionWarningTest = (json, reWarningMsg) => {
+  const Parser = new ParseContribution({});
+  Parser.getVersion(json);
+  expect(Parser.warnings().length).to.be.at.least(1);
+  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reWarningMsg);
+};
 
-// Expect no errors and check against expected JSON asynchronously.
-const parseContributionJSONAsyncTest = (text, jsonExpected, Parser) => {
-  if(!Parser) Parser = new ParseContribution({});
-  console.log(text, jsonExpected);
-  return expect(Parser.parsePromise(text)).to.eventually.deep.equal(jsonExpected);
+// Expect the errors to contain one error that matches the reErrorMsg regex.
+const getContributionVersionErrorTest = (json, reErrorMsg) => {
+  const Parser = new ParseContribution({});
+  Parser.getVersion(json);
+  expect(Parser.errors().length).to.be.at.least(1);
+  expect(Parser.errors()[Parser.errors().length - 1]['message']).to.match(reErrorMsg);
+};
+
+// Expect the version to be guessed correctly.
+const guessContributionVersionTest = (json, versionExpected) => {
+  const Parser = new ParseContribution({});
+  let version = Parser.getVersion(json);
+  expect(Parser.isVersionGuessed).to.be.true;
+  expect(version).to.equal(versionExpected);
 };

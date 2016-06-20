@@ -1091,7 +1091,7 @@ const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
 // Expect no errors and check the upgrade map against expected map.
 const upgradeContributionCreateMapTest = (newModel, expectedMap) => {
   const Upgrader = new UpgradeContribution({});
-  const upgradeMap = Upgrader._getUpgradeMap(newModel);
+  const upgradeMap = Upgrader.getUpgradeMap(newModel);
   expect(upgradeMap).to.deep.equal(expectedMap);
   expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
