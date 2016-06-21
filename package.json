@@ -10,31 +10,38 @@
   "devDependencies": {
     "babel-core": "6.x.x",
     "babel-plugin-react-require": "2.x.x",
-    "babel-root-slash-import": "1.x.x",
+    "babel-polyfill": "6.x.x",
     "babel-preset-es2015": "6.x.x",
-    "babel-preset-stage-2": "6.x.x",
     "babel-preset-react": "6.x.x",
+    "babel-preset-stage-2": "6.x.x",
+    "babel-root-slash-import": "1.x.x",
     "chai": "3.x.x",
-    "chai-as-promised": "^5.3.0",
+    "enzyme": "^2.0.0",
+    "eslint": "1.10.x",
+    "eslint-plugin-react": "3.15.x",
     "mocha": "2.x.x",
-    "jsdom": "^9.2.1"
+    "react-addons-test-utils": "^0.14.6",
+    "sinon": "1.17.x",
+    "jsdom": "^8.0.4"
   },
   "dependencies": {
-    "bluebird": "^3.4.0",
-    "filesize": "^3.3.0",
+    "domready": "^1.0.8",
+    "jszip": "^3.0.0",
     "lodash": "^4.6.1",
     "mantra-core": "^1.2.0",
+    "meteor-node-stubs": "^0.2.3",
     "moment": "^2.12.0",
-    "numeral": "^1.5.3",
     "react": "^0.14.7",
     "react-dom": "^0.14.7",
     "react-dropzone": "^3.3.2",
     "react-komposer": "^1.8.0",
     "react-mounter": "^1.0.0",
-    "save-as": "^0.1.4"
+    "react-simple-di": "^1.0.1",
+    "save-as": "^0.1.4",
+    "xlsx-style": "^0.8.13"
   },
   "scripts": {
-    "lint-only": ".dev/eslint ./lib ./client ./server --ext .js --ext .jsx",
+    "lint-only": "eslint ./lib ./client ./server --ext .js --ext .jsx",
     "lint-fix": "npm run lint-only -- --fix"
   }
 }

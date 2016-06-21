@@ -1,5 +1,7 @@
 const {describe, it} = global;
 import {expect} from 'chai';
+import JSZip from 'xlsx-style/node_modules/jszip';
+import XLSX from 'xlsx-style';
 import ExportContribution from '../export_contribution';
 import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
@@ -145,7 +147,7 @@ describe('magic.actions.export_contribution', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
         contribution: [{
-          magic_version: '2.5'
+          magic_version: '3.0'
         }],
         specimens: [{
           dip:       1.2,
@@ -172,25 +174,30 @@ describe('magic.actions.export_contribution', () => {
         }]
       };
       const text1 =
+          //GGG I think of the headers as metadata for a given column
+          //GGG Are the number of headers variable or fixed? --- Rupert confirms that 4 is fixed for now, the fourth is for the column names.
         'tab delimited\tcontribution\t4 headers\n' +
-        'Contribution\n' +  // Group Name
-        'MagIC Version\n' + // Column Name
-        'String\n' +        // Column Type and/or Unit
+        'Contribution\n' +  // Group Name (columns[column_name].group)
+        'MagIC Version\n' + // Column Name (columns[column_name].label)
+        'String\n' +        // Column Type and/or Unit ()  (columns[column_name].type and .unit depending upon logic
         'magic_version\n' +
         '3.0\n' +
         '>>>>>>>>>>\n' +
-        'tab delimited\sites\t4 headers\n' +
-        'Names\t\tSite\tResult\t\tMetadata\n' + // Group Name (blank if repeated from last column, will be a merged cell in Excel export)
-        'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // Column Name
-        'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit
-        'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
-        'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
+         //Each table has different headers. The headers are based upon metadata for each column from the model.
+        'tab delimited\tsites\t4 headers\n' +
+        //So, here we begin three rows of meta data for the sites table
+        'Names\t\tSite\tResult\t\tMetadata\n' + // from group from each column in the model(columns[column_name].group), (blank if repeated from last column, will be a merged cell in Excel export)
+        'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // List column meta-names for the sites table
+        'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit -- special logic documented in production code
+        'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' + //"Normal" table definition
+        'si2\tlo1\t\t:code2:code1:\t\ta\n' + //"normal" table data
+        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' + //"normal" table data
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
+         //now three moreof metadata from the specimen data model
         'Names\t\tSpecimen\tResult\tGeology\n' + // Group Name
-        'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name
-        'String\tString\tString\tList\tList\tNumber in Degrees\n' + // Column Type and/or Unit
+        'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name (label)
+        'String\tString\tString\tList\tNumber in Degrees\n' + // Column Type and/or Unit
         'specimen\tsample\tigsn\tcitations\tdip\n' +
         'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
         'sp2\tsa1\tigsn2\t\t1.3\n';
@@ -214,7 +221,7 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\tcontribution\t4 headers\n' +
         'Contribution\t\t\n' +                            // Group Name
         'Contribution ID\tContributor\tMagIC Version\n' + // Column Name
-        'Integer\tInteger\tString\n' +                    // Column Type and/or Unit
+        'Integer\tString\tString\n' +                    // Column Type and/or Unit
         'id\tcontributor\tmagic_version\n' +
         '1234\t@magic\t3.0\n' +
         '>>>>>>>>>>\n' +
@@ -225,6 +232,135 @@ describe('magic.actions.export_contribution', () => {
         'specimen\tmeas_step_min\tresult_type\tdescription\trotation_sequence\texternal_database_ids\n' +
         'sp1\t1\ta\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
       exportContributionToExtendedTextJSONTest(json2, text2);
+    });
+  });
+
+  // Test exporting valid JSON to extended text.
+  describe('when exporting valid JSON to extended text', () => {
+    it('should keep export tables and columns in the order defined in the data model', () => {
+      const json1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          dip:       1.2,
+          igsn:      'igsn1',
+          specimen:  'sp1',
+          sample:    'sa1',
+          citations: ['10.1023/A:1', 'This study']
+        }, {
+          dip:      1.3,
+          igsn:     'igsn2',
+          specimen: 'sp2',
+          sample:   'sa1'
+        }],
+        sites: [{
+          location:     'lo1',
+          site:         'si2',
+          description:  'a',
+          method_codes: ['code2', 'code1']
+        }, {
+          site:              'si1',
+          location:          'lo1',
+          citations:         ['10.1023/A1'],
+          site_alternatives: 'Kiln'
+        }]
+      };
+      const text1 =
+          //GGG I think of the headers as metadata for a given column
+          //GGG Are the number of headers variable or fixed? --- Rupert confirms that 4 is fixed for now, the fourth is for the column names.
+          'tab delimited\tcontribution\t4 headers\n' +
+          'Contribution\n' +  // Group Name (columns[column_name].group)
+          'MagIC Version\n' + // Column Name (columns[column_name].label)
+          'String\n' +        // Column Type and/or Unit ()  (columns[column_name].type and .unit depending upon logic
+          'magic_version\n' +
+          '3.0\n' +
+          '>>>>>>>>>>\n' +
+          //Each table has different headers. The headers are based upon metadata for each column from the model.
+          'tab delimited\tsites\t4 headers\n' +
+          //So, here we begin three rows of meta data for the sites table
+          'Names\t\tSite\tResult\t\tMetadata\n' + // from group from each column in the model(columns[column_name].group), (blank if repeated from last column, will be a merged cell in Excel export)
+          'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' + // List column meta-names for the sites table
+          'String\tString\tList\tList\tList\tString\n' + // Column Type and/or Unit -- special logic documented in production code
+          'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' + //"Normal" table definition
+          'si2\tlo1\t\t:code2:code1:\t\ta\n' + //"normal" table data
+          'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' + //"normal" table data
+          '>>>>>>>>>>\n' +
+          'tab delimited\tspecimens\t4 headers\n' +
+          //now three moreof metadata from the specimen data model
+          'Names\t\tSpecimen\tResult\tGeology\n' + // Group Name
+          'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name (label)
+          'String\tString\tString\tList\tNumber in Degrees\n' + // Column Type and/or Unit
+          'specimen\tsample\tigsn\tcitations\tdip\n' +
+          'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
+          'sp2\tsa1\tigsn2\t\t1.3\n';
+      exportContributionToExtendedTextJSONTest(json1, text1);
+      const json2 = {
+        contribution: [{
+          magic_version: '3.0',
+          id: '1234',
+          contributor: '@magic'
+        }],
+        specimens: [{
+          specimen: 'sp1',
+          meas_step_min: 1,
+          result_type: 'a',
+          rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]],
+          description: 'a, b',
+          external_database_ids: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
+        }]
+      };
+      const text2 =
+          'tab delimited\tcontribution\t4 headers\n' +
+          'Contribution\t\t\n' +                            // Group Name
+          'Contribution ID\tContributor\tMagIC Version\n' + // Column Name
+          'Integer\tString\tString\n' +                    // Column Type and/or Unit
+          'id\tcontributor\tmagic_version\n' +
+          '1234\t@magic\t3.0\n' +
+          '>>>>>>>>>>\n' +
+          'tab delimited\tspecimens\t4 headers\n' +
+          'Names\tMeasurement Parameters\tResult\tMetadata\t\t\n' + // Group Name
+          'Specimen Name\tMeasurement Step Minimum\tResult Type\tDescription\tSequence of Rotations\tExternal Database IDs\n' + // Column Name
+          'String\tNumber\tFlag\tString\tMatrix\tDictionary\n' + // Column Type and/or Unit
+          'specimen\tmeas_step_min\tresult_type\tdescription\trotation_sequence\texternal_database_ids\n' +
+          'sp1\t1\ta\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
+      exportContributionToExtendedTextJSONTest(json2, text2);
+    });
+
+  });
+
+  // Test exporting valid JSON to extended text.
+  describe('when exporting valid JSON to EXCEL format', () => {
+    it('should export EXCEL tables and columns in the order defined in the data model', () => {
+      const json1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          dip:       1.2,
+          igsn:      'igsn1',
+          specimen:  'sp1',
+          sample:    'sa1',
+          citations: ['10.1023/A:1', 'This study']
+        }, {
+          dip:      1.3,
+          igsn:     'igsn2',
+          specimen: 'sp2',
+          sample:   'sa1'
+        }],
+        sites: [{
+          location:     'lo1',
+          site:         'si2',
+          description:  'a',
+          method_codes: ['code2', 'code1']
+        }, {
+          site:              'si1',
+          location:          'lo1',
+          citations:         ['10.1023/A1'],
+          site_alternatives: 'Kiln'
+        }]
+      };
+      exportContributionToExcelTest(json1, 'client/modules/magic/actions/tests/output/test.xlsx');
     });
   });
 
@@ -246,16 +382,15 @@ describe('magic.actions.export_contribution', () => {
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 const exportContributionToTextErrorTest = (json, reErrorMsg) => {
   const Exporter = new ExportContribution({});
-  Exporter.toText(json);
-    expect(Exporter.errors().length).to.be.at.least(1);
-    expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
-
+  Exporter.toText(json,false);
+  expect(Exporter.errors().length).to.be.at.least(1);
+  expect(Exporter.errors()[Exporter.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
 // Expect no errors.
 const exportContributionToTextNoErrorTest = (json) => {
   const Exporter = new ExportContribution({});
-  Exporter.toText(json);
+  Exporter.toText(json,false);
   expect(Exporter.errors().length).to.equal(0);
   return Exporter;
 };
@@ -263,7 +398,7 @@ const exportContributionToTextNoErrorTest = (json) => {
 // Expect N errors.
 const exportContributionToTextNErrorsTest = (json, nErrors) => {
   const Exporter = new ExportContribution({});
-  Exporter.toText(json);
+  Exporter.toText(json,false);
   console.log(`length: ${Exporter.errors().length}`);
   expect(Exporter.errors().length).to.equal(nErrors);
 };
@@ -271,21 +406,28 @@ const exportContributionToTextNErrorsTest = (json, nErrors) => {
 // Expect no errors and check against expected text.
 const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
-  const text = Exporter.toText(json);
-    expect(Exporter.errors().length).to.equal(0);
-    console.log(`text:\n${text}`);
-    console.log(`text Expected:\n${textExpected}`);
-    expect(text).to.equal(textExpected);
-
+  const text = Exporter.toText(json,false);
+  expect(Exporter.errors().length).to.equal(0);
+  console.log(`text:\n${text}`);
+  console.log(`text Expected:\n${textExpected}`);
+  expect(text).to.equal(textExpected);
 };
 
 // Expect no errors and check against expected text.
 const exportContributionToExtendedTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
-  const text = Exporter.toExtendedText(json);
+  const text = Exporter.toText(json, true);
   expect(Exporter.errors().length).to.equal(0);
   console.log(`text:\n${text}`);
   console.log(`text Expected:\n${textExpected}`);
   expect(text).to.equal(textExpected);
+};
 
+// Expect no errors create an Excel file.
+const exportContributionToExcelTest = (json, outputFile) => {
+  const Exporter = new ExportContribution({});
+  const workbook = Exporter.toExcel(json);
+  expect(Exporter.errors().length).to.equal(0);
+  var writeOpts = { tabSelected:'sites' }; // <--- GGG might be using this incorrectly, doesn't appear to work, i also tried a simple index number
+  XLSX.writeFile(workbook, outputFile, writeOpts);
 };
