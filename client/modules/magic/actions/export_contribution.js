@@ -148,28 +148,51 @@ export default class extends Runner {
       currentSheet['A2'].s =  {
         alignment: {horizontal: 'center', vertical: 'center'},
         border: {
-          left: {style: 'thick', color: {auto: 1}},
-          right: {style: 'thick', color: {auto: 1}},
-          top: {style: 'thick', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
-        }};
-      currentSheet['A3'].s =  {
-        alignment: {horizontal: 'center', vertical: 'center'},
-        border: {
-          left: {style: 'thick', color: {auto: 1}},
-          right: {style: 'thick', color: {auto: 1}},
-          top: {style: 'thick', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
-        }};
-      currentSheet['A4'].s =  {
-        alignment: {horizontal: 'center', vertical: 'center'},
-        border: {
-          left: {style: 'thick', color: {auto: 1}},
-          right: {style: 'thick', color: {auto: 1}},
-          top: {style: 'thick', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
+          left: {style: 'hair', color: {auto: 1}},
+          right: {style: 'hair', color: {auto: 1}},
+          top: {style: 'hair', color: {auto: 1}},
+          bottom: {style: 'hair', color: {auto: 1}}
         }};
 
+
+      /*currentSheet['A3'].s =  {
+        alignment: {horizontal: 'center', vertical: 'center'},
+        border: {
+          left: {style: 'thick', color: {auto: 1}},
+          right: {style: 'thick', color: {auto: 1}},
+          top: {style: 'thick', color: {auto: 1}},
+          bottom: {style: 'thick', color: {auto: 1}}
+        }};*/
+      for(let typeIdx in typeHeader)
+      {
+        let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
+        currentSheet[cellAddress].s = {
+          alignment: {horizontal: 'center', vertical: 'center'},
+          border: {
+            left: {style: 'hair', color: {auto: 1}},
+            right: {style: 'hair', color: {auto: 1}},
+            top: {style: 'hair', color: {auto: 1}},
+            bottom: {style: 'hair', color: {auto: 1}}
+          },
+          //font: {bold: 'true'},
+          //fill: {fgColor: {rgb: 'D3D3D3'}}
+        };
+      }
+
+      for(let columnIdx in columnHeader)
+      {
+        //todo: reverse col/row
+        let cellAddress = XLSX.utils.encode_cell({c: columnIdx, r: 3});
+        currentSheet[cellAddress].s = {
+          alignment: {horizontal: 'center', vertical: 'center'},
+          border: {
+            left: {style: 'hair', color: {auto: 1}},
+            right: {style: 'hair', color: {auto: 1}},
+            top: {style: 'hair', color: {auto: 1}},
+            bottom: {style: 'thick', color: {auto: 1}}
+          }
+        };
+      }
 
       //style; //{fill.patternType: 'solid'};
       /*currentSheet['A2'].v = 'Name:';
