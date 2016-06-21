@@ -56,14 +56,14 @@ export default class extends Runner {
 
       /*These the first four rows of the excel file*/
       let groupHeader = tableHeaders.groupHeader;
-      groupHeader.unshift('Group:');//place 'Group' at the beginning of the array
+      groupHeader.unshift('Group:  ');//place 'Group' at the beginning of the array
       //console.log(`groupHD${groupHeader}`);
-      let nameHeader = tableHeaders.labelHeader;
-      nameHeader.unshift('Name:');
-      let typeHeader = tableHeaders.columnTypeOrUnitHeader;
-      typeHeader.unshift('Type:');
+      let typeHeader = tableHeaders.labelHeader;
+      typeHeader.unshift('Name:  ');
+      typeHeader = tableHeaders.columnTypeOrUnitHeader;
+      typeHeader.unshift('Type:  ');
       let columnHeader = tableHeaders.columnNameHeader;
-      columnHeader.unshift('Column:');
+      columnHeader.unshift('Column:  ');
 
       //Now gather the data from the json object
       let tableData = jsonToExport[modelTable];
@@ -74,7 +74,7 @@ export default class extends Runner {
       let completeSpreadSheetData =
           [
             groupHeader ,
-            nameHeader,
+            typeHeader,
             typeHeader,
             columnHeader
             /*      [1,2,3],
@@ -98,7 +98,6 @@ export default class extends Runner {
       The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
       let currentSheet = workbook.Sheets[modelTable];
 
-
       //TODO: formatting concerns need to be refactored into a separate method
       /*FORMAT SHEETS*/
       //****************FORMAT GROUP HEADER**************
@@ -109,14 +108,14 @@ export default class extends Runner {
 
         /*later, we need to compare the next and previous columns for formatting purposes*/
         let nextCellColIdx = Number(groupIdx);
-        let  previousColIdx = Number(groupIdx);
+        let previousColIdx = Number(groupIdx);
             nextCellColIdx++;//
         previousColIdx--;
 
         let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
         let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
-        //ggg crappy hack to get the first row to be right alligned
+        //ggg crappy hack to get the first col to be right alligned
         let textOrientation = 'center';
         if(groupIdx == 0)
           textOrientation = 'right';
@@ -170,29 +169,31 @@ export default class extends Runner {
         //console.log(`old ${currentSheet[cellAddress].v}`);
       }
 
-
       /*FORMAT NAME HEADER*/
-      currentSheet['A2'].s =  {
-        alignment: {horizontal: 'right', vertical: 'center'},
-        border: {
-          left: {style: 'hair', color: {auto: 1}},
-          right: {style: 'hair', color: {auto: 1}},
-          top: {style: 'hair', color: {auto: 1}},
-          bottom: {style: 'hair', color: {auto: 1}}
-        }};
+      for(let nameIdx in typeHeader)
+      {
+        let cellAddress = XLSX.utils.encode_cell({c: nameIdx, r: 1});//row 1 of excel output
+        if(currentSheet[cellAddress])//if there is data to format
+        {
+          currentSheet[cellAddress].s = {
+            alignment: {horizontal: 'right', vertical: 'center'},
+            border: {
+              left: {style: 'hair', color: {auto: 1}},
+              right: {style: 'hair', color: {auto: 1}},
+              top: {style: 'hair', color: {auto: 1}},
+              bottom: {style: 'hair', color: {auto: 1}}
+            },
+            fill: {fgColor: {rgb: 'DCDCDC'}}
+          };
+        }
+      }
 
-
-      /*currentSheet['A3'].s =  {
-        alignment: {horizontal: 'center', vertical: 'center'},
-        border: {
-          left: {style: 'thick', color: {auto: 1}},
-          right: {style: 'thick', color: {auto: 1}},
-          top: {style: 'thick', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
-        }};*/
+      /*FORMAT TYPE HEADER*/
       for(let typeIdx in typeHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
+        if(currentSheet[cellAddress])//if there is data to format
+        {
         currentSheet[cellAddress].s = {
           alignment: {horizontal: 'right', vertical: 'center'},
           border: {
@@ -201,8 +202,24 @@ export default class extends Runner {
             top: {style: 'hair', color: {auto: 1}},
             bottom: {style: 'hair', color: {auto: 1}}
           },
+          fill: {fgColor: {rgb: 'DCDCDC'}}
+        };
+        }
+      }
+
+      for(let typeIdx in typeHeader)
+      {
+        let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
+        currentSheet[cellAddress].s = {
+          alignment: {horizontal: 'center', vertical: 'center'},
+          border: {
+            left: {style: 'hair', color: {auto: 1}},
+            right: {style: 'hair', color: {auto: 1}},
+            top: {style: 'hair', color: {auto: 1}},
+            bottom: {style: 'hair', color: {auto: 1}}
+          },
           //font: {bold: 'true'},
-          //fill: {fgColor: {rgb: 'D3D3D3'}}
+          fill: {fgColor: {rgb: 'DCDCDC'}}
         };
       }
 
@@ -217,7 +234,8 @@ export default class extends Runner {
             right: {style: 'hair', color: {auto: 1}},
             top: {style: 'hair', color: {auto: 1}},
             bottom: {style: 'thick', color: {auto: 1}}
-          }
+          },
+          fill: {fgColor: {rgb: 'DCDCDC'}}
         };
       }
 
