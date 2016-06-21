@@ -7,12 +7,13 @@ export default class {
     this.name = name.toUpperCase();
     this.LocalState = LocalState;
 
-    // Clear errors and warnings
+    this.reset();
+
+  }
+
+  reset() {
     this.LocalState.set(`${this.name}_ERRORS`, []);
     this.LocalState.set(`${this.name}_WARNINGS`, []);
-
-    // 
-
   }
 
   warnings() {

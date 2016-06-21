@@ -61,29 +61,6 @@ describe('magic.actions.parse_contribution', () => {
       getContributionVersionWarningTest({}, /the first argument .* is empty/i);
     });
 
-    it('should reject when no contribution table is found', () => {
-      const jsonNoContribTable = {
-        not_contribution: [{
-          magic_version: '2.2'
-        }],
-        er_locations: [{
-          region: 'California'
-        }]
-      };
-      getContributionVersionWarningTest(jsonNoContribTable,
-        /failed to find the "contribution" table/i);
-    });
-
-    it('should reject when the "contribution" table does not include the "magic_version" column.', () => {
-      const jsonContribNoMagicVersion = {
-        contribution: [{
-          not_magic_version: '2.2'
-        }]
-      };
-      getContributionVersionWarningTest(jsonContribNoMagicVersion,
-        /table does not include the "magic_version" column./i);
-    });
-
     it('should reject when the "contribution" table does not have exactly one row.', () => {
       const jsonContribTwoRows = {
         contribution: [{
@@ -227,7 +204,6 @@ const parseContributionErrorTest = (text, reErrorMsg) => {
 const parseContributionNoErrorTest = (text) => {
   const Parser = new ParseContribution({});
   Parser.parse(text);
-  expect(Parser.isVersionGuessed).to.be.false;
   expect(Parser.errors().length).to.equal(0);
   return Parser;
 };
@@ -236,7 +212,6 @@ const parseContributionNoErrorTest = (text) => {
 const parseContributionJSONTest = (text, jsonExpected, Parser) => {
   if(!Parser) Parser = new ParseContribution({});
   const json = Parser.parse(text);
-  expect(Parser.isVersionGuessed).to.be.false;
   expect(Parser.errors().length).to.equal(0);
   expect(json).to.deep.equal(jsonExpected);
   return Parser;

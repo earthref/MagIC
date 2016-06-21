@@ -7,22 +7,29 @@ export default class extends Runner {
 
   constructor({LocalState}) {
     super('PARSE_CONTRIBUTION', {LocalState});
-
-    // Initialize the contribution.
-    this.json = {};
-    this.lineNumber = 0;
-    this.isVersionGuessed = false;
-
+    this.reset();
   }
-  
+
   reset() {
     this.json = {};
-    this.lineNumber = 0;
+    this.version = undefined;
     this.isVersionGuessed = false;
+    this.resetProgress();
   }
-
+  
+  resetProgress() {
+    super.reset();
+    this.lineNumber = 0;
+    this.progress = 0;
+  }
+  
   parsePromise(text, nLines, progressHandler) {
 
+    // Check for a valid input.
+    if (!text) {
+      return this._appendWarning('Contribution text is empty.');
+    }
+    
     // Initialize this parsing operation.
     this.table = undefined;
     this.columns = [];
@@ -36,11 +43,13 @@ export default class extends Runner {
       (lines, i, t) => {
         return new Promise((resolve) => {
           lines.forEach((line) => { this._parseLine(line); });
-          if (progressHandler) progressHandler(100 * (i + 1) / t);
+          this.progress = 100 * (i + 1) / t;
+          if (progressHandler) progressHandler(this.progress);
           resolve();
         }).delay();
       }
     ).then(() => {
+      this.version = this.getVersion();
       return this;
     });
     
@@ -71,6 +80,7 @@ export default class extends Runner {
         this._appendWarning(`No data values were found in the ${jsonTable} table.`);
     }
 
+    this.version = this.getVersion();
     return this.json;
 
   }
@@ -206,16 +216,16 @@ export default class extends Runner {
     // Look for the MagIC data model version.
     let version;
     if(!json || !json['contribution']) {
-      this._appendWarning('Failed to find the "contribution" table.');
+      //this._appendWarning('Failed to find the "contribution" table.');
       return this._guessVersion(json);
     }
     if (json['contribution']) {
       if (json['contribution'].length !== 1) {
         this._appendError('The "contribution" table does not have exactly one row.');
-        return this._guessVersion(json);
+        return undefined;
       }
       if (!json['contribution'][0]['magic_version']) {
-        this._appendWarning('The "contribution" table does not include the "magic_version" column.');
+        //this._appendWarning('The "contribution" table does not include the "magic_version" column.');
         return this._guessVersion(json);
       }
       version = json['contribution'][0]['magic_version'];
