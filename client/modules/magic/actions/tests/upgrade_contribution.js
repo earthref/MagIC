@@ -9,16 +9,6 @@ describe('magic.actions.upgrade_contribution', () => {
 
   // Test upgrading invalid JSON.
   describe('when upgrading invalid JSON', () => {
-
-    it('should reject when the maximum upgrade version is invalid.', () => {
-      const invalidMagicVersion = {
-        contribution: [{
-          magic_version: '2.2'
-        }]
-      };
-      upgradeContributionErrorTest(invalidMagicVersion, '1.0', 
-        /the second argument .* is invalid/i);
-    });
     
     it('should reject if the table name is invalid.', () => {
       const invalidTable = {
@@ -135,23 +125,6 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
-    });
-
-    // Upgrading should continue from the dataset version up until the current MagIC data model version.
-    // If a maximum version is passed to the upgrader, though, the upgrade should stop after the
-    // dataset reaches that version.
-    it('should stop upgrading at the given maximum version', () => {
-      const jsonOld = {
-        contribution: [{
-          magic_version: '2.2'
-        }]
-      };
-      const jsonNew = {
-        contribution: [{
-          magic_version: '2.4'
-        }]
-      };
-      upgradeContributionJSONTest(jsonOld, '2.4', jsonNew);
     });
 
     // Tables and columns can change names from one version to the next.
@@ -283,27 +256,7 @@ describe('magic.actions.upgrade_contribution', () => {
           average_age: '6'
         }]
       };
-      const jsonNewMapped = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        samples: [{
-          sample: '1'
-        },{
-          sample: '1',
-          specimens: '1:3',
-          age: '5'
-        }],
-        specimens: [{
-          sample: '1',
-          specimen: '3'
-        },{
-          sample: '1',
-          specimen: '3',
-          age: '6'
-        }]
-      };
-      const jsonNewReduced = {
+      const jsonNew = {
         contribution: [{
           magic_version: '3.0'
         }],
@@ -318,8 +271,7 @@ describe('magic.actions.upgrade_contribution', () => {
           age: '6'
         }]
       };
-      upgradeContributionMapJSONTest(jsonOld, '3.0', jsonNewMapped);
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNewReduced);
+      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
     });
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
@@ -583,18 +535,6 @@ describe('magic.actions.upgrade_contribution', () => {
           expedition_mb_sonar: '123'
         }]
       };
-      const jsonMapped1 = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        locations: [{
-          location: 'loc_1'
-        },{
-          location: 'loc_1',
-          expedition_name: 'exp_A',
-          expedition_ship: 'ship1'
-        }]
-      };
       const jsonNew1 = {
         contribution: [{
           magic_version: '3.0'
@@ -605,7 +545,6 @@ describe('magic.actions.upgrade_contribution', () => {
           expedition_ship: 'ship1'
         }]
       };
-      upgradeContributionMapJSONTest(jsonOld1, '3.0', jsonMapped1);
       upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
       const jsonOld2 = {
         contribution: [{
@@ -1045,7 +984,7 @@ describe('magic.actions.upgrade_contribution', () => {
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
   const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
+  Upgrader.upgrade(jsonOld);
   expect(Upgrader.warnings().length).to.be.at.least(1);
   expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reWarningMsg);
 };
@@ -1053,14 +992,14 @@ const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
 // Expect the last error to match the reErrorMsg regex.
 const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
   const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
+  Upgrader.upgrade(jsonOld);
   expect(Upgrader.errors().length).to.be.at.least(1);
   expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
 };
 
 const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
   const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
+  Upgrader.upgrade(jsonOld);
 
   //GGG CHANGING THIS because changes to the input test data are needed so that other errors are not detected
   //In this case, it is related to the requirement  that the
@@ -1074,7 +1013,7 @@ const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
 // Expect no errors.
 const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
   const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld, maxVersion);
+  Upgrader.upgrade(jsonOld);
   //expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
 };
@@ -1082,7 +1021,7 @@ const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
 // Expect no errors and check against expected JSON.
 const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
   const Upgrader = new UpgradeContribution({});
-  const jsonNew = Upgrader.upgrade(jsonOld, maxVersion);
+  const jsonNew = Upgrader.upgrade(jsonOld);
   expect(jsonNew).to.deep.equal(jsonExpected);
   //expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
@@ -1094,23 +1033,5 @@ const upgradeContributionCreateMapTest = (newModel, expectedMap) => {
   const upgradeMap = Upgrader.getUpgradeMap(newModel);
   expect(upgradeMap).to.deep.equal(expectedMap);
   expect(Upgrader.warnings().length).to.equal(0);
-  expect(Upgrader.errors().length).to.equal(0);
-};
-
-// Expect no errors and check against expected JSON when mapping.
-const upgradeContributionMapJSONTest = (jsonOld, maxVersion, jsonExpected) => {
-  const Upgrader = new UpgradeContribution({});
-  const jsonNew = Upgrader._map(jsonOld, maxVersion);
-  expect(jsonNew).to.deep.equal(jsonExpected);
-  //expect(Upgrader.warnings().length).to.equal(0);
-  expect(Upgrader.errors().length).to.equal(0);
-};
-
-// Expect no errors and check against expected JSON when mapping.
-const upgradeContributionReduceJSONTest = (jsonOld, jsonExpected) => {
-  const Upgrader = new UpgradeContribution({});
-  const jsonNew = Upgrader._merge(jsonOld);
-  expect(jsonNew).to.deep.equal(jsonExpected);
-  //expect(Upgrader.warnings().length).to.equal(0);
   expect(Upgrader.errors().length).to.equal(0);
 };
