@@ -428,5 +428,6 @@ const exportContributionToExcelTest = (json, outputFile) => {
   const Exporter = new ExportContribution({});
   const workbook = Exporter.toExcel(json);
   expect(Exporter.errors().length).to.equal(0);
-  XLSX.writeFile(workbook, outputFile);
+  var writeOpts = { tabSelected:'sites' }; // <--- GGG might be using this incorrectly, doesn't appear to work, i also tried a simple index number
+  XLSX.writeFile(workbook, outputFile, writeOpts);
 };

@@ -98,40 +98,51 @@ export default class extends Runner {
       The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
       let currentSheet = workbook.Sheets[modelTable];
 
-      //for each group found for this table
-      /*for(let groupIdx in groupHeader)
-      {
-        let currentCellToFormat = '';
-        //console.log(`group idxSr : ${groupIdx.toString()}`);
-        let excelIdx = Number(groupIdx);
-        excelIdx++;
-        //console.log(`prior ${(excelIdx).toString()}`);
-        currentCellToFormat = 'A'+ Number(excelIdx).toString();
-        console.log(`TRy ${currentCellToFormat}`);
-        currentSheet[currentCellToFormat/!*'A1'*!/].s =  {
-          alignment: {horizontal: 'center', vertical: 'center'},
-          border: {
-            left: {style: 'thick', color: {auto: 1}},
-            right: {style: 'thick', color: {auto: 1}},
-            top: {style: 'thick', color: {auto: 1}},
-            bottom: {style: 'thick', color: {auto: 1}}
-          },
-          font:{bold:'true'},
-          fill:{fgColor:{rgb:'D3D3D3'}}
-        };
-      }*/
 
+
+
+      //TODO: formatting concerns need to be moved to another method
+      /*FORMAT SHEETS*/
+
+      ///FORMAT GROUP HEADER
       for(let groupIdx in groupHeader)
       {
-       // let currentCellToFormat = '';
-        //console.log(`group idxSr : ${groupIdx.toString()}`);
-       // let excelIdx = Number(groupIdx);
-        //excelIdx++;
-        //console.log(`prior ${(excelIdx).toString()}`);
-        //currentCellToFormat = 'A'+ Number(excelIdx).toString();
-        //console.log(`TRy ${currentCellToFormat}`);
-        let cellAddress = XLSX.utils.encode_cell({c: groupIdx,r: 0});
-        currentSheet[cellAddress].s =  {
+        let cellAddress = XLSX.utils.encode_cell({r: 0,c: groupIdx});
+        console.log(`here: ${cellAddress}`);
+
+        /*later, we need to compare the next and previous columns for formatting purposes*/
+        let nextCellColIdx = Number(groupIdx);
+        let  previousColIdx = Number(groupIdx);
+        nextCellColIdx++;//
+        previousColIdx--;
+
+        let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
+        let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
+       // console.log(`Cell ${cellAddress}  celltoright: ${nextCellAddressToTheRight}`);
+
+        console.log(`cell address value? ${currentSheet[cellAddress].v}`);
+
+
+       /* if(cellAddress.v == previousCellToTheLeft.v)
+        {
+          currentSheet[cellAddress].s =
+          {
+            alignment: {horizontal: 'center', vertical: 'center'},
+            border: {
+              left: {style: 'hair', color: {auto: 1}},
+              right: {style: 'thick', color: {auto: 1}},
+              top: {style: 'thick', color: {auto: 1}},
+              bottom: {style: 'thick', color: {auto: 1}}
+            },
+            font: {bold: 'true'},
+            fill: {fgColor: {rgb: 'D3D3D3'}}
+          }
+        }*/
+        //console.log(`cell to the right: ${nextCellAddressToTheRight}`);
+
+        //this is the default formatting for the group row.
+        currentSheet[cellAddress].s =
+        {
           alignment: {horizontal: 'center', vertical: 'center'},
           border: {
             left: {style: 'thick', color: {auto: 1}},
@@ -139,9 +150,44 @@ export default class extends Runner {
             top: {style: 'thick', color: {auto: 1}},
             bottom: {style: 'thick', color: {auto: 1}}
           },
-          font:{bold:'true'},
-          fill:{fgColor:{rgb:'D3D3D3'}}
-        };
+          font: {bold: 'true'},
+          fill: {fgColor: {rgb: 'D3D3D3'}}
+        }
+
+        if( currentSheet[nextCellAddressToTheRight] &&
+            currentSheet[nextCellAddressToTheRight].v == '')
+        {
+console.log(`double detected  ${cellAddress}`);
+          currentSheet[cellAddress].s =
+          {
+            alignment: {horizontal: 'center', vertical: 'center'},
+            border: {
+              left: {style: 'thick', color: {auto: 1}},
+              right: {style: 'hair', color: {auto: 1}},
+              top: {style: 'thick', color: {auto: 1}},
+              bottom: {style: 'thick', color: {auto: 1}}
+            },
+            font: {bold: 'true'},
+            fill: {fgColor: {rgb: 'D3D3D3'}}
+          }
+        }
+        if (currentSheet[cellAddress].v == '')// Do not bold the border if this cell is empty
+        {
+          console.log(`trying for hair..`);
+          currentSheet[cellAddress].s =
+          {
+            alignment: {horizontal: 'center', vertical: 'center'},
+            border: {
+              left: {style: 'hair', color: {auto: 1}},
+              right: {style: 'thick', color: {auto: 1}},
+              top: {style: 'thick', color: {auto: 1}},
+              bottom: {style: 'thick', color: {auto: 1}}
+            },
+            font: {bold: 'true'},
+            fill: {fgColor: {rgb: 'D3D3D3'}}
+          }
+        }
+        //console.log(`old ${currentSheet[cellAddress].v}`);
       }
 
 
