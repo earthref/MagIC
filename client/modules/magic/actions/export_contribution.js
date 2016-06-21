@@ -58,9 +58,9 @@ export default class extends Runner {
       let groupHeader = tableHeaders.groupHeader;
       groupHeader.unshift('Group:  ');//place 'Group' at the beginning of the array
       //console.log(`groupHD${groupHeader}`);
-      let typeHeader = tableHeaders.labelHeader;
-      typeHeader.unshift('Name:  ');
-      typeHeader = tableHeaders.columnTypeOrUnitHeader;
+      let nameHeader = tableHeaders.labelHeader;
+      nameHeader.unshift('Name:  ');
+      let typeHeader = tableHeaders.columnTypeOrUnitHeader;
       typeHeader.unshift('Type:  ');
       let columnHeader = tableHeaders.columnNameHeader;
       columnHeader.unshift('Column:  ');
@@ -74,7 +74,7 @@ export default class extends Runner {
       let completeSpreadSheetData =
           [
             groupHeader ,
-            typeHeader,
+            nameHeader,
             typeHeader,
             columnHeader
             /*      [1,2,3],
@@ -101,6 +101,7 @@ export default class extends Runner {
       //TODO: formatting concerns need to be refactored into a separate method
       /*FORMAT SHEETS*/
       //****************FORMAT GROUP HEADER**************
+      let headerTextOrientation = 'center';
       for(let groupIdx in groupHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({r: 0,c: groupIdx});
@@ -116,14 +117,14 @@ export default class extends Runner {
         let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
         //ggg crappy hack to get the first col to be right alligned
-        let textOrientation = 'center';
+        //let headerTextOrientation = 'center';
         if(groupIdx == 0)
-          textOrientation = 'right';
+          headerTextOrientation = 'right';
 
-        //this is the default formatting for the group row.
+        //DEFAULT FORMATTING FOR GROUP.
         currentSheet[cellAddress].s =
         {
-          alignment: {horizontal: textOrientation, vertical: 'center'},
+          alignment: {horizontal: headerTextOrientation, vertical: 'center'},
           border: {
             left: {style: 'thick', color: {auto: 1}},
             right: {style: 'thick', color: {auto: 1}},
@@ -134,6 +135,7 @@ export default class extends Runner {
           fill: {fgColor: {rgb: 'D3D3D3'}}
         }
 
+        //OVERRIDE GROUP FORMATTING
         if( currentSheet[nextCellAddressToTheRight] &&
             currentSheet[nextCellAddressToTheRight].v == '')
         {
@@ -175,8 +177,9 @@ export default class extends Runner {
         let cellAddress = XLSX.utils.encode_cell({c: nameIdx, r: 1});//row 1 of excel output
         if(currentSheet[cellAddress])//if there is data to format
         {
+          console.log(`heder ${headerTextOrientation}`);
           currentSheet[cellAddress].s = {
-            alignment: {horizontal: 'right', vertical: 'center'},
+            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
             border: {
               left: {style: 'hair', color: {auto: 1}},
               right: {style: 'hair', color: {auto: 1}},
@@ -195,7 +198,7 @@ export default class extends Runner {
         if(currentSheet[cellAddress])//if there is data to format
         {
         currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'right', vertical: 'center'},
+          alignment: {horizontal: headerTextOrientation, vertical: 'center'},
           border: {
             left: {style: 'hair', color: {auto: 1}},
             right: {style: 'hair', color: {auto: 1}},
