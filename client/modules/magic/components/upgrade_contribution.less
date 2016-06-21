@@ -1,6 +1,10 @@
 .upgrade-contribution {
-  margin: 4em auto;
+  //margin: 2em auto;
   //max-width: 800px;
+}
+
+.upgrade-contribution .ui.steps .step {
+  min-height: 8em;
 }
 
 .upgrade-contribution .ui.steps .step.hidden {
@@ -28,8 +32,25 @@
   margin: 0.5em;
 }
 
-.upgrade-step-content .file.text.icon {
+.upgrade-contribution-message .file.icons {
   line-height: 1;
   vertical-align: middle;
-  font-size: 5em;
+  font-size: 4em;
+}
+
+.upgrade-contribution-message .file.icons > .icon {
+  margin-right: 0;
+}
+
+.upgrade-contribution-message .ui.horizontal.label {
+  margin-left: 0;
+}
+
+.upgrade-step-content .ui.inline.dropdown .dropdown.icon {
+  margin: 0 0 0 0.25em;
+}
+
+.upgrade-step-content .vertical.divider > .icon {
+  line-height: 0;
+  font-size: 1.5em;
 }
