@@ -99,12 +99,9 @@ export default class extends Runner {
       let currentSheet = workbook.Sheets[modelTable];
 
 
-
-
-      //TODO: formatting concerns need to be moved to another method
+      //TODO: formatting concerns need to be refactored into a separate method
       /*FORMAT SHEETS*/
-
-      ///FORMAT GROUP HEADER
+      //****************FORMAT GROUP HEADER**************
       for(let groupIdx in groupHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({r: 0,c: groupIdx});
@@ -113,37 +110,21 @@ export default class extends Runner {
         /*later, we need to compare the next and previous columns for formatting purposes*/
         let nextCellColIdx = Number(groupIdx);
         let  previousColIdx = Number(groupIdx);
-        nextCellColIdx++;//
+            nextCellColIdx++;//
         previousColIdx--;
 
         let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
         let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
-       // console.log(`Cell ${cellAddress}  celltoright: ${nextCellAddressToTheRight}`);
 
-        console.log(`cell address value? ${currentSheet[cellAddress].v}`);
-
-
-       /* if(cellAddress.v == previousCellToTheLeft.v)
-        {
-          currentSheet[cellAddress].s =
-          {
-            alignment: {horizontal: 'center', vertical: 'center'},
-            border: {
-              left: {style: 'hair', color: {auto: 1}},
-              right: {style: 'thick', color: {auto: 1}},
-              top: {style: 'thick', color: {auto: 1}},
-              bottom: {style: 'thick', color: {auto: 1}}
-            },
-            font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'D3D3D3'}}
-          }
-        }*/
-        //console.log(`cell to the right: ${nextCellAddressToTheRight}`);
+        //ggg crappy hack to get the first row to be right alligned
+        let textOrientation = 'center';
+        if(groupIdx == 0)
+          textOrientation = 'right';
 
         //this is the default formatting for the group row.
         currentSheet[cellAddress].s =
         {
-          alignment: {horizontal: 'center', vertical: 'center'},
+          alignment: {horizontal: textOrientation, vertical: 'center'},
           border: {
             left: {style: 'thick', color: {auto: 1}},
             right: {style: 'thick', color: {auto: 1}},
@@ -157,7 +138,6 @@ export default class extends Runner {
         if( currentSheet[nextCellAddressToTheRight] &&
             currentSheet[nextCellAddressToTheRight].v == '')
         {
-console.log(`double detected  ${cellAddress}`);
           currentSheet[cellAddress].s =
           {
             alignment: {horizontal: 'center', vertical: 'center'},
@@ -173,7 +153,7 @@ console.log(`double detected  ${cellAddress}`);
         }
         if (currentSheet[cellAddress].v == '')// Do not bold the border if this cell is empty
         {
-          console.log(`trying for hair..`);
+         // console.log(`trying for hair..`);
           currentSheet[cellAddress].s =
           {
             alignment: {horizontal: 'center', vertical: 'center'},
@@ -191,8 +171,9 @@ console.log(`double detected  ${cellAddress}`);
       }
 
 
+      /*FORMAT NAME HEADER*/
       currentSheet['A2'].s =  {
-        alignment: {horizontal: 'center', vertical: 'center'},
+        alignment: {horizontal: 'right', vertical: 'center'},
         border: {
           left: {style: 'hair', color: {auto: 1}},
           right: {style: 'hair', color: {auto: 1}},
@@ -213,7 +194,7 @@ console.log(`double detected  ${cellAddress}`);
       {
         let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
         currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'center', vertical: 'center'},
+          alignment: {horizontal: 'right', vertical: 'center'},
           border: {
             left: {style: 'hair', color: {auto: 1}},
             right: {style: 'hair', color: {auto: 1}},
@@ -230,7 +211,7 @@ console.log(`double detected  ${cellAddress}`);
         //todo: reverse col/row
         let cellAddress = XLSX.utils.encode_cell({c: columnIdx, r: 3});
         currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'center', vertical: 'center'},
+          alignment: {horizontal: 'right', vertical: 'center'},
           border: {
             left: {style: 'hair', color: {auto: 1}},
             right: {style: 'hair', color: {auto: 1}},
