@@ -110,7 +110,7 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\tsites\n' +
         'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
         'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
+        'si1\tlo1\t:Kiln:\t\t:10.1023/A1:\t\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\n' +
         'specimen\tsample\tigsn\tcitations\tdip\n' +

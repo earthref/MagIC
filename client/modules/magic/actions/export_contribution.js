@@ -482,7 +482,8 @@ export default class extends Runner {
           }
         }
         //add the collected column headers to the TSV here
-        text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
+        if (orderedListOfColumnsAddedToHeader.length > 0)
+          text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
 
 
         /***************Now add all data from the table to the TSV*****************/
@@ -498,7 +499,7 @@ export default class extends Runner {
             if(colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
               {text = text.concat('\t');}
 
-            dataToAdd =  this.handleSpecialCases(dataToAdd,colName);
+            //dataToAdd =  this.handleSpecialCases(dataToAdd,tableName,colName);
 
             text = text.concat(dataToAdd);
 
@@ -513,14 +514,16 @@ export default class extends Runner {
     return text;
   }
 
-  handleSpecialCases(dataToManipulate, columnName)
+  /*handleSpecialCases(dataToManipulate, tableName, columnName)
   {
     if (dataToManipulate == '') return dataToManipulate;
 
     let manipulatedData = '';
 
-    if(columnName == 'external_database_ids')
+    if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary')
+    //if(columnName == 'external_database_ids')
     {
+
       //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
       //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
       let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
@@ -544,8 +547,8 @@ export default class extends Runner {
       return manipulatedData;
     }
 
-
-    if(columnName == 'rotation_sequence')
+    if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Matrix')
+    //if(columnName == 'rotation_sequence')
     {
       //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
       //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
@@ -560,29 +563,36 @@ export default class extends Runner {
       return manipulatedData;
     }
 
-    if( columnName == 'er_citation_names' ||
-        columnName == 'magic_method_codes'||
-        columnName == 'method_codes' ||
-        columnName == 'citations')
+    if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'List')
+    //if( columnName == 'er_citation_names' ||
+    //  columnName == 'magic_method_codes'||
+    //  columnName == 'method_codes' ||
+    //  columnName == 'citations')
     {
+      //console.log(dataToManipulate, typeof(dataToManipulate));
+      if (typeof(dataToManipulate) === 'string') dataToManipulate = [dataToManipulate];
+      manipulatedData = ':' + dataToManipulate.map(v => (v.match(/:/) ? '"' + v + '"' : v)).join(':') + ':';
+
+
       //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
       //multi segment piece of data
-      manipulatedData = ':';
-      for(let dataIdx in dataToManipulate)
-      {
-        if(dataToManipulate[dataIdx].match(/:/))
-        {
-          dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
-        }
+      //manipulatedData = ':';
+      //for(let dataIdx in dataToManipulate)
+      //{
+      //  if(dataToManipulate[dataIdx].match(/:/))
+      //  {
+      //    dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
+      //  }
+      //
+      //  manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
+      //  //console.log(`manipulated data: ${manipulatedData}`);
+      //}
 
-        manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
-        //console.log(`manipulated data: ${manipulatedData}`);
-      }
       return manipulatedData;
     }
 
     return dataToManipulate;//if not a special case, return the same string that was passed in
-  }
+  }*/
 
   testValidityOfTablesAndColumns(jsonToTranslate){
       for (let newTableName in jsonToTranslate) {//this gets the string name of the property 'table'
