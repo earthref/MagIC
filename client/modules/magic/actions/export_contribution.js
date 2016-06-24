@@ -1,7 +1,7 @@
 import {_} from 'lodash';
 import XLSX from 'xlsx-style';
-import Runner from '../../core/actions/runner.js';
-import GetContributionVersion from './get_contribution_version';
+import Runner from '../../er/actions/runner.js';
+import Parser from './parse_contribution';
 //import json2csv from 'json2csv';
 
 import {default as magicVersions} from '../configs/magic_versions';
@@ -11,7 +11,7 @@ export default class extends Runner {
 
   constructor({LocalState}) {
     super('EXPORT_CONTRIBUTION', {LocalState});
-    this.VersionGetter = new GetContributionVersion({LocalState});
+    this.parser = new Parser({LocalState});
     this.version;
     this.model;
   }
@@ -21,7 +21,7 @@ export default class extends Runner {
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
 
     // Retrieve the data model version used in the jsonToExport
-    this.version = this.VersionGetter.getVersion(jsonToExport)
+    this.version = this.parser.getVersion(jsonToExport)
     if (!this.version) return jsonToExport;
 
     // Retrieve the data model
