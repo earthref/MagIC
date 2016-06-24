@@ -5109,9 +5109,10 @@ export default {
     }]
   },
   "criterion_operation": {
-    "label": "Rock Magnetic Test Codes",
+    "label": "Criterion Operations",
     "items": [{
-      "item": "<, <=, =, >, >=, begins with, ends with, contains, equals"
+      "item": "<",
+      "label": "Numeric less than"
     }, {
       "item": "<=",
       "label": "Numeric less than or equal to"
@@ -5131,11 +5132,28 @@ export default {
       "item": "ends with",
       "label": "String ends with"
     }, {
+      "item": "does not contain",
+      "label": "String or list does not contain"
+    }, {
       "item": "contains",
-      "label": "String contains"
+      "label": "String or list contains"
     }, {
       "item": "equals",
       "label": "String equals"
+    }]
+  },
+  "magic_versions": {
+    "label": "MagIC Data Model Versions",
+    "items": [{
+      "item": "2.2"
+    }, {
+      "item": "2.3"
+    }, {
+      "item": "2.4"
+    }, {
+      "item": "2.5"
+    }, {
+      "item": "3.0"
     }]
   }
 };
