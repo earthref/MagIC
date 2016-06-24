@@ -1,33 +1,51 @@
-import {_} from 'lodash';
+import _ from 'lodash';
 import filesize from 'filesize';
 import numeral from 'numeral';
 import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
+import saveAs from 'save-as';
 import {default as versions} from '../configs/magic_versions';
 import {default as models} from '../configs/data_models/data_models';
 import ParseContribution from '../actions/parse_contribution';
 import UpgradeContribution from '../actions/upgrade_contribution';
+import ExportContribution from '../actions/export_contribution';
 
 export default class extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      processingStep: 1,
-      visibleStep: 1,
-      files: [],
-      fromVersion: undefined,
-      nReadErrors: 0,
-      nParseWarnings: 0,
-      nParseErrors: 0
-    };
+    this.files = [];
     this.parser = new ParseContribution({});
     this.upgrader = new UpgradeContribution({});
-    this.jsonToUpgrade = {};
-    this.isUpgraded = false;
+    this.initialState = {
+      processingStep: 1,
+      visibleStep: 1,
+      fromVersion: undefined,
+      readProgressTaps: 0,
+      totalReadErrors: 0,
+      isRead: false,
+      parseProgressTaps: 0,
+      totalParseWarnings: 0,
+      totalParseErrors: 0,
+      isParsed: false,
+      upgradeProgress: 0,
+      isUpgraded: false
+    };
+    this.state = this.initialState;
   }
 
+  restart() {
+    for (let i in this.files)
+      if (this.files[i].fileReader)
+        this.files[i].fileReader.abort();
+    this.files = [];
+    this.parser.reset();
+    this.upgrader.reset();
+    this.setState(this.initialState);
+    // TODO: cancel active reading or parsing
+  }
+  
   componentDidMount() {
     $(this.refs['accordion']).accordion({on: null, collapsible: false});
     $(this.refs['from version']).dropdown({
@@ -48,23 +66,6 @@ export default class extends React.Component {
     });
   }
 
-  restart() {
-    this.parser.reset();
-    this.upgrader.reset();
-    this.jsonToUpgrade = {};
-    this.isUpgraded = false;
-    this.setState({
-      processingStep: 1,
-      visibleStep: 1,
-      files: [],
-      fromVersion: undefined,
-      nReadErrors: 0,
-      nParseWarnings: 0,
-      nParseErrors: 0
-    });
-    // TODO: cancel active reading or parsing
-  }
-
   reviewParse() {
     this.setState({visibleStep: 2});
   }
@@ -73,105 +74,95 @@ export default class extends React.Component {
     this.setState({visibleStep: 3});
   }
 
-  onDrop(files) {
+  readFiles(files) {
 
-    for (let i in files) {
-      files[i].readProgress = 0;
-      files[i].readErrors = [];
-      files[i].parseProgress = 0;
-      files[i].parseWarnings = [];
-      files[i].parseErrors = [];
+    // Sort the files by name.
+    this.files = _.sortBy(files, file => file.name);
+
+    // Initialize the read progress state.
+    for (let i in this.files) {
+      this.files[i].readProgress = 0;
+      this.files[i].readErrors = [];
     }
-
     this.setState({
       processingStep: 2,
       visibleStep: 2,
-      files: _.sortBy(files, (f) => { return f.name; }),
-      fromVersion: undefined,
-      nReadErrors: 0,
-      nParseWarnings: 0,
-      nParseErrors: 0
+      readProgressTaps: 0
     });
 
-    _.defer(() => {
-      for (let i in files)
-        this.read(i);
-    });
-  }
-
-  read(i) {
-    const files = this.state.files;
-    const fileReader = new FileReader();
-    fileReader.onprogress = (e) => {
-      files[i].readProgress = (e.loaded/e.total);
-      this.setState({files: files});
-    };
-    fileReader.onload = (e) => {
-      files[i].readProgress = 100;
-      files[i].txt = e.target.result;
-      this.setState({files: files});
+    // Read the files in parallel.
+    Promise.all(files.map((file, i) => {
+      return new Promise((resolve, reject) => {
+        this.files[i].fileReader = new FileReader();
+        this.files[i].fileReader.onprogress = e => {
+          this.files[i].readProgress = (e.loaded/e.total);
+          this.setState({readProgressTaps: this.state.readProgressTaps + 1});
+        };
+        this.files[i].fileReader.onload = e => {
+          this.files[i].readProgress = 100;
+          this.files[i].text = e.target.result;
+          this.setState({readProgressTaps: this.state.readProgressTaps + 1});
+          resolve();
+        };
+        this.files[i].fileReader.onerror = e => {
+          this.files[i].readErrors.push(e.toString());
+          this.setState({readProgressTaps: this.state.readProgressTaps + 1});
+          reject();
+        };
+        this.files[i].fileReader.readAsText(file);
+      }).delay();
+    })).then(() => {
+      this.setState({
+        isRead: true,
+        totalReadErrors: _.reduce(this.files, (n, file) => n + file.readErrors.length, 0)
+      });
       this.parse();
-    };
-    fileReader.onerror = (e) => {
-      files[i].readErrors.push(e.toString());
-      this.setState({nReadErrors: files[i].readErrors.length});
-    };
-    fileReader.readAsText(files[i]);
+    });
   }
 
   parse() {
-    const files = this.state.files;
 
-    // Check that reading is complete.
-    const allFilesRead = _.reduce(files, (allFilesRead, file) => {
-      return (file.txt ? allFilesRead : false);
-    }, true);
-    if (!allFilesRead || this.state.processingStep == 1) return;
-
-    // Reading is complete, begin parsing sequentially through the files.
-    for (let i in files) {
-      if (!files[i].isParsing) {
-        files[i].isParsing = true;
-        this.isParsed = false;
-        this.parser.resetProgress();
-        this.parser.parsePromise(files[i].txt, 1000,
-          (percent) => {
-            files[i].parseProgress = percent;
-            this.setState({files: files});
-          }
-        ).then((parser) => {
-          files[i].parseWarnings = parser.warnings();
-          files[i].parseErrors = parser.errors();
-          files[i].isParsed = true;
-          const nParseWarnings = _.reduce(files, (nParseWarnings, file) => {
-            return nParseWarnings + file.parseWarnings.length;
-          }, 0);
-          const nParseErrors = _.reduce(files, (nParseErrors, file) => {
-            return nParseErrors + file.parseErrors.length;
-          }, 0);
-          this.setState({files: files, nParseErrors: nParseErrors, nParseWarnings: nParseWarnings});
-          this.parse();
-          this.upgrade();
-        });
-        return;
-      }
+    // Initialize the parse progress state.
+    for (let i in this.files) {
+      this.files[i].parseProgress = 0;
+      this.files[i].parseWarnings = [];
+      this.files[i].parseErrors = [];
     }
+    this.setState({
+      parseProgressTaps: 0
+    });
+
+    // Parse sequentially through the files.
+    Promise.each(this.files, (file, i) => {
+      return new Promise((resolve) => {
+        this.parser.resetProgress();
+        this.parser.parsePromise({
+          text: file.text,
+          onProgress: (percent) => {
+            this.files[i].parseProgress = percent;
+            this.setState({parseProgressTaps: this.state.parseProgressTaps + 1});
+          }
+        }).then(() => {
+          this.files[i].parseProgress = 100;
+          this.files[i].parseWarnings = this.parser.warnings();
+          this.files[i].parseErrors = this.parser.errors();
+          resolve();
+        });
+      }).delay();
+    }).then(() => {
+      const totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
+      const totalParseWarnings = _.reduce(this.files, (n, file) => n + file.parseWarnings.length, 0);
+      this.setState({
+        isParsed: true,
+        totalParseErrors: totalParseErrors,
+        totalParseWarnings: totalParseWarnings
+      });
+      if (totalParseErrors === 0)
+        this.upgrade();
+    });
   }
 
   upgrade(fromVersion) {
-    const files = this.state.files;
-
-    // Check that parsing is complete.
-    if (!this.isParsed) {
-      const allFilesParsed = _.reduce(files, (allFilesParsed, file) => {
-        return (file.isParsed ? allFilesParsed : false);
-      }, true);
-      if (!allFilesParsed || this.state.nParseErrors > 0 || this.state.processingStep == 1) return;
-      this.isParsed = true;
-    }
-
-    // Parsing is complete, begin upgrading.
-    let jsonParsed = this.parser.json;
 
     // Check if the user has overridden the contribution version
     if (fromVersion === undefined) {
@@ -185,23 +176,35 @@ export default class extends React.Component {
     if (fromVersion === undefined) return;
 
     // Override the contribution version.
+    let jsonParsed = this.parser.json;
     if (!jsonParsed.contribution || jsonParsed.contribution.length === 0)
       jsonParsed.contribution = [{}];
     jsonParsed.contribution[0]['magic_version'] = fromVersion;
 
     // Upgrade the contribution.
-    this.isUpgraded = false;
-    this.upgrader.upgrade(jsonParsed);
-    this.isUpgraded = true;
-
-    this.setState({
-      nUpgraderErrrors: this.upgrader.errors().length
+    this.upgrader.upgradePromise({
+      json: jsonParsed,
+      onProgress: (percent) => {
+        this.setState({upgradeProgress: percent});
+      }
+    }).then(() => {
+      this.setState({isUpgraded: true});
+      console.log('upgrade warnings', this.upgrader.warnings());
+      console.log('upgrade errors', this.upgrader.errors());
     });
 
   }
 
-  saveContributionFile() {
-    console.log('Saving files to ...');
+  saveText() {
+    const exporter = new ExportContribution({});
+    let blob = new Blob([exporter.toText(this.upgrader.json)], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.txt');
+  }
+
+  saveJSON() {
+    const exporter = new ExportContribution({});
+    const blob = new Blob([JSON.stringify(this.upgrader.json, null, '\t')], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.json');
   }
 
   render() {
@@ -301,7 +304,7 @@ export default class extends React.Component {
             <div className="active title"></div>
             <div ref="select step message" className="active content select-step-content">
               {(step === 1 ?
-                <Dropzone ref="dropzone" className="upgrade-dropzone" onDrop={this.onDrop.bind(this)}>
+                <Dropzone ref="dropzone" className="upgrade-dropzone" onDrop={this.readFiles.bind(this)}>
                   <div className="ui center aligned two column relaxed grid">
                     <div className="column">
                       <i className="huge purple folder open outline icon"></i>
@@ -324,19 +327,23 @@ export default class extends React.Component {
             <div ref="read step message" className="content read-step-content">
               <h3>Reading and parsing each of the files in the contribution:</h3>
               <div ref="files" className="ui divided items">
-                {this.state.files.map((file, i) => {
+                {this.files.map((file, i) => {
+                  const fileIsDone = (file.parseProgress === 100 ||
+                                      (file.readErrors && file.readErrors.length > 0) ||
+                                      (file.parseErrors && file.parseErrors.length > 0));
+                  const fileHasErrors = ((file.readErrors && file.readErrors.length > 0) ||
+                                         (file.parseErrors && file.parseErrors.length > 0));
+                  const fileHasWarnings = (file.parseWarnings && file.parseWarnings.length > 0);
                   return (
                     <div key={i} className="item" data-file={file.name}>
                       <div className="ui image">
-                        <div className={(file.isParsed ? '' : 'active ') + 'ui inverted dimmer'}>
+                        <div className={(fileIsDone ? '' : 'active ') + 'ui inverted dimmer'}>
                           <div className="ui loader"></div>
                         </div>
                         <i className="file icons">
                           <i className="fitted file text outline icon"></i>
-                          {(file.readErrors.length > 0 || file.parseErrors.length > 0 ?
-                            <i className="corner red warning circle icon"></i>
-                          : (file.parseWarnings.length > 0 ?
-                            <i className="corner yellow warning circle icon"></i>
+                          {(fileHasErrors ? <i className="corner red warning circle icon"></i>
+                          : (fileHasWarnings ? <i className="corner yellow warning circle icon"></i>
                           : undefined ))}
                         </i>
                       </div>
@@ -344,17 +351,17 @@ export default class extends React.Component {
                         <div className="ui header">
                           {file.name + ' '}
                           <div className="ui horizontal label">{filesize(file.size)}</div>
-                          {(file.readErrors.length > 0 ?
+                          {(file.readErrors && file.readErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.readErrors.length).format('0,0') + ' Read Error' + (file.readErrors.length === 1 ? '' : 's')}
                             </div>
                           : undefined)}
-                          {(file.parseErrors.length > 0 ?
+                          {(file.parseErrors && file.parseErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.parseErrors.length).format('0,0') + ' Parse Error' + (file.parseErrors.length === 1 ? '' : 's')}
                             </div>
                           : undefined)}
-                          {(file.parseWarnings.length > 0 ?
+                          {(file.parseWarnings && file.parseWarnings.length > 0 ?
                             <div className="ui horizontal yellow label">
                               {numeral(file.parseWarnings.length).format('0,0') + ' Parse Warning' + (file.parseWarnings.length === 1 ? '' : 's')}
                             </div>
@@ -364,8 +371,10 @@ export default class extends React.Component {
                           <div className="ui grid">
                             <div className="two column row">
                               <div className="column">
-                                <div className={(file.readErrors ? 'error ' : '') + 'ui tiny purple progress'}
-                                     data-action="read"
+                                <div className={
+                                       (file.readErrors ? 'error ' : '') +
+                                       'ui tiny purple progress'
+                                     }
                                      data-percent={file.readProgress}>
                                   <div className="bar"></div>
                                   <div className="label">Read</div>
@@ -377,7 +386,6 @@ export default class extends React.Component {
                                       (file.parseWarnings && file.parseWarnings.length ? 'warning ' : '')) +
                                       'ui tiny purple progress'
                                      }
-                                     data-action="parse"
                                      data-percent={file.parseProgress}>
                                   <div className="bar"></div>
                                   <div className="label">Parse</div>
@@ -386,7 +394,7 @@ export default class extends React.Component {
                             </div>
                           </div>
                         </div>
-                        {(file.readErrors.length > 0 || file.parseErrors.length > 0 || file.parseWarnings.length > 0 ?
+                        {(fileHasErrors || fileHasWarnings ?
                           <div className="extra">
                             <table className="ui compact table">
                               <tbody>
@@ -429,7 +437,7 @@ export default class extends React.Component {
               <div className="ui items">
                 <div className="item">
                   <div className="ui image">
-                    <div className={(this.isUpgraded ? '' : 'active ') + 'ui inverted dimmer'}>
+                    <div className={(this.state.isUpgraded ? '' : 'active ') + 'ui inverted dimmer'}>
                       <div className="ui loader"></div>
                     </div>
                     <i className="file icons">
@@ -452,112 +460,157 @@ export default class extends React.Component {
                         <i className="dropdown icon"></i>
                         <div className="menu">
                           {versions.sort().map((v,i) => {
-                            return (
-                              <div className="item" value={v} key={i} selected={v === fromVersion}>{v}</div>
-                            );
+                            return (v !== toVersion ?
+                              <div className={(v === fromVersion ? 'active selected ' : '') + 'item'}
+                                   value={v} key={i}>
+                                {v}
+                              </div>
+                            : undefined);
                           })}
                         </div>
                       </div>
                       <span> to {toVersion} </span>
-                      {(this.isUpgraded || nTables > 0 || nRows > 0 ?
+                      {(this.state.isUpgraded || nTables > 0 || nRows > 0 ?
                         <a className="ui horizontal label">
                           {numeral(nRows).format('0,0') + ' Row' + (nRows === 1 ? '' : 's')}
                           <span> in </span>
                           {numeral(nTables).format('0,0') + ' Table' + (nTables === 1 ? '' : 's')}
                         </a>
                       : undefined)}
+                      {(this.state.isUpgraded && this.upgrader.errors().length > 0 ?
+                        <div className="ui horizontal red label">
+                          {numeral(this.upgrader.errors().length).format('0,0') + ' Upgrade Error' + (this.upgrader.errors().length === 1 ? '' : 's')}
+                        </div>
+                        : undefined)}
+                      {(this.state.isUpgraded && this.upgrader.warnings().length > 0 ?
+                        <div className="ui horizontal yellow label">
+                          {numeral(this.upgrader.warnings().length).format('0,0') + ' Upgrade Warning' + (this.upgrader.warnings().length === 1 ? '' : 's')}
+                        </div>
+                        : undefined)}
                     </div>
                     <div className="description">
                       <div className={(this.upgrader.errors().length ? 'error ' : '') + 'ui tiny purple progress'}
-                           data-percent={this.upgrader.progress}>
+                           data-percent={this.state.upgradeProgress}>
                         <div className="bar"></div>
                         <div className="label">Upgrade</div>
                       </div>
                     </div>
+                    {(this.upgrader.warnings().length || this.upgrader.errors().length ?
+                      <div className="extra" style={{marginTop: '2em'}}>
+                        <table className="ui compact table">
+                          <tbody>
+                          {this.upgrader.errors().map((error, j) => {
+                            return (
+                              <tr key={j} className="error">
+                                <td>{error.message}</td>
+                              </tr>
+                            );
+                          })}
+                          {this.upgrader.warnings().map((warning, j) => {
+                            return (
+                              <tr key={j} className="warning">
+                                <td>{warning.message}</td>
+                              </tr>
+                            );
+                          })}
+                          </tbody>
+                        </table>
+                      </div>
+                      : undefined)}
                   </div>
                 </div>
               </div>
-              {(this.isUpgraded && this.upgrader.errors().length === 0 ?
+              {(this.state.isUpgraded && this.upgrader.errors().length === 0 ?
+                <div>
+                <h4 className="ui horizontal divider header">
+                  <i className="download icon"></i>
+                      <span className="content">
+                        Download the Upgraded Contribution
+                      </span>
+                </h4>
                 <div className="ui basic segment">
-                  <h4 className="ui horizontal divider header">
-                    <i className="download icon"></i>
-                    <span className="content">
-                      Download Upgraded Contribution
-                    </span>
-                  </h4>
-                  <br/>
-                  <div className="ui three column middle aligned very relaxed stackable grid">
-                    <div className="column">
-                      <button className="ui fluid purple icon large button">
-                        MagIC Text File
-                      </button>
-                    </div>
-                    <div className="column">
-                      <button className="ui fluid icon large button">
-                        Excel Spreadsheet
-                      </button>
-                    </div>
-                    <div className="column">
-                      <button className="ui fluid icon large button">
-                        JSON String
-                      </button>
+                    <div className="ui three column middle aligned very relaxed stackable grid">
+                      <div className="column">
+                        <button className="ui fluid icon large disabled button">
+                          Excel Spreadsheet
+                        </button>
+                      </div>
+                      <div className="column">
+                        <button className="ui fluid purple icon large button" onClick={this.saveText.bind(this)}>
+                          MagIC Text File
+                        </button>
+                      </div>
+                      <div className="column">
+                        <button className="ui fluid icon large button" onClick={this.saveJSON.bind(this)}>
+                          JSON String
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
               :undefined)}
               {(this.state.fromVersion ?
-                <div className="ui basic segment">
-                  <div className="ui two column middle aligned very relaxed stackable grid">
-                    <div className="column">
-                      <table className="ui very basic collapsing compact celled right floated table">
-                        <thead>
-                        <tr>
-                          <th>Table</th>
-                          <th>Rows</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {_.sortBy(_.keys(models[this.state.fromVersion].tables),
-                          (t) => { return models[this.state.fromVersion].tables[t].position; }
-                        ).map((t,i) => {
-                          const tableName = models[this.state.fromVersion].tables[t].label;
-                          const nRows = (this.parser.json && this.parser.json[t] ? this.parser.json[t].length : 0);
-                          return (nRows > 0 ?
-                            <tr key={i}>
-                              <td><h4>{tableName}</h4></td>
-                              <td>{nRows}</td>
-                            </tr>
+                <div>
+                  <h4 className="ui horizontal divider header">
+                    <i className="download icon"></i>
+                        <span className="content">
+                          Upgrade Details
+                        </span>
+                  </h4>
+                  <div className="ui basic segment">
+                    <div className="ui two column very relaxed stackable grid">
+                      <div className="column">
+                        <table className="ui very basic collapsing compact celled right floated table">
+                          <thead>
+                          <tr>
+                            <th>{this.state.fromVersion} Table</th>
+                            <th>Rows</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          {_.sortBy(_.keys(models[this.state.fromVersion].tables),
+                            (t) => { return models[this.state.fromVersion].tables[t].position; }
+                          ).map((t,i) => {
+                            const tableName = models[this.state.fromVersion].tables[t].label;
+                            const nRows = (this.parser.json && this.parser.json[t] ? this.parser.json[t].length : 0);
+                            return (nRows > 0 ?
+                              <tr key={i}>
+                                <td><h4>{tableName}</h4></td>
+                                <td>{numeral(nRows).format('0,0')}</td>
+                              </tr>
+                              : undefined);
+                          })}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="ui vertical divider">
+                        <i className="circle arrow right icon"></i>
+                      </div>
+                      <div className="column">
+                        <table className="ui very basic collapsing compact celled table">
+                          <thead>
+                          <tr>
+                            <th>{toVersion} Table</th>
+                            <th>Rows</th>
+                          </tr>
+                          </thead>
+                          <tbody>
+                          {_.sortBy(_.keys(models[toVersion].tables),
+                            (t) => { return models[toVersion].tables[t].position; }
+                          ).map((t,i) => {
+                            //console.log(models[toVersion].tables[t], (this.upgrader.json && this.upgrader.json[t] ? this.upgrader.json[t] : ''))
+                            const tableName = models[toVersion].tables[t].label;
+                            const nRows = (this.upgrader.json && this.upgrader.json[t] ? this.upgrader.json[t].length : 0);
+                            return (nRows > 0 ?
+                              <tr key={i}>
+                                <td><h4>{tableName}</h4></td>
+                                <td>{numeral(nRows).format('0,0')}</td>
+                              </tr>
                             : undefined);
-                        })}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="ui vertical divider">
-                      <i className="circle arrow right icon"></i>
-                    </div>
-                    <div className="column">
-                      <table className="ui very basic collapsing compact celled table">
-                        <thead>
-                        <tr>
-                          <th>Table</th>
-                          <th>Rows</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {_.sortBy(_.keys(models[toVersion].tables),
-                          (t) => { return models[toVersion].tables[t].position; }
-                        ).map((t,i) => {
-                          const tableName = models[toVersion].tables[t].label;
-                          const nRows = (this.upgrader.json && this.upgrader.json[t] ? this.upgrader.json[t].length : 0);
-                          return (nRows > 0 ?
-                            <tr key={i}>
-                              <td><h4>{tableName}</h4></td>
-                              <td>{nRows}</td>
-                            </tr>
-                            : undefined);
-                        })}
-                        </tbody>
-                      </table>
+                          })}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -575,62 +628,62 @@ export default class extends React.Component {
             </div>
           </div>
         : undefined)}
-        {(step === 2 && this.state.nReadErrors + this.state.nParseErrors > 0 ?
+        {(step === 2 && this.state.totalReadErrors + this.state.totalParseErrors > 0 ?
         <div className="ui bottom attached icon error message">
           <i className="warning circle icon"></i>
           <div className="content">
             Reading and parsing
-            {this.state.files.length === 1 ? ' this file ' : ' these files '}
+            {this.files.length === 1 ? ' this file ' : ' these files '}
             resulted in
-            {' ' + (this.state.nReadErrors + this.state.nParseErrors)}
-            {this.state.nReadErrors + this.state.nParseErrors === 1 ? ' error' : ' errors'}
+            {' ' + (this.state.totalReadErrors + this.state.totalParseErrors)}
+            {this.state.totalReadErrors + this.state.totalParseErrors === 1 ? ' error' : ' errors'}
             . Please address
-            {this.state.nReadErrors + this.state.nParseErrors === 1 ? ' the error ' : ' these errors '}
+            {this.state.totalReadErrors + this.state.totalParseErrors === 1 ? ' the error ' : ' these errors '}
             and return to Step 1.
           </div>
         </div>
         : undefined)}
-        {(step === 2 && this.state.nReadErrors + this.state.nParseErrors === 0 && this.state.nParseWarnings > 0 ?
+        {(step === 2 && this.state.totalReadErrors + this.state.totalParseErrors === 0 && this.state.totalParseWarnings > 0 ?
           <div className="ui bottom attached icon warning message">
             <i className="warning circle icon"></i>
             <div className="content">
               Reading and parsing
-              {this.state.files.length === 1 ? ' this file ' : ' these files '}
+              {this.files.length === 1 ? ' this file ' : ' these files '}
               was successful despite the
-              {' ' + this.state.nParseWarnings}
-              {this.state.nParseWarnings === 1 ? ' warning ' : ' warnings '}
+              {' ' + this.state.totalParseWarnings}
+              {this.state.totalParseWarnings === 1 ? ' warning ' : ' warnings '}
               . Upgrading this contribution can proceed in Step 3, but please review and consider addressing
-              {this.state.nParseWarnings === 1 ? ' the warning' : ' these warnings'}
+              {this.state.totalParseWarnings === 1 ? ' the warning' : ' these warnings'}
               .
             </div>
           </div>
           : undefined)}
-        {(step === 2 && !this.isParsed && this.state.nReadErrors + this.state.nParseErrors + this.state.nParseWarnings === 0 ?
+        {(step === 2 && !this.state.isParsed && this.state.totalReadErrors + this.state.totalParseErrors + this.state.totalParseWarnings === 0 ?
           <div className="ui bottom attached icon message">
             <i className="purple info circle icon"></i>
             <div className="content">
               Reading and parsing
-              {this.state.files.length === 1 ? ' this file ' : ' these files '}
+              {this.files.length === 1 ? ' this file ' : ' these files '}
               in preparation for upgrading.
             </div>
           </div>
           : undefined)}
-        {(step === 2 && this.isParsed && this.state.nReadErrors + this.state.nParseErrors + this.state.nParseWarnings === 0 ?
+        {(step === 2 && this.state.isParsed && this.state.totalReadErrors + this.state.totalParseErrors + this.state.totalParseWarnings === 0 ?
           <div className="ui bottom attached icon success message">
             <i className="check circle icon"></i>
             <div className="content">
               Reading and parsing
-              {this.state.files.length === 1 ? ' this file ' : ' these files '}
+              {this.files.length === 1 ? ' this file ' : ' these files '}
               was successful. Upgrading this contribution can proceed in Step 3.
             </div>
           </div>
           : undefined)}
-        {(step === 3 && !fromVersion > 0 ?
+        {(step === 3 && this.state.fromVersion === undefined ?
           <div className="ui bottom attached icon error message">
             <i className="warning circle icon"></i>
             <div className="content">
               The <em>MagIC Data Model version</em> could not be determined from the parsed
-              {this.state.files.length === 1 ? ' file' : ' files'}.
+              {this.files.length === 1 ? ' file' : ' files'}.
               Please select the version from which to upgrade.
             </div>
           </div>

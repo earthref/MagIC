@@ -1,6 +1,7 @@
 const {describe, it} = global;
+import _ from 'lodash';
 import {expect} from 'chai';
-import {_} from 'lodash';
+import Promise from 'bluebird';
 import ParseContribution from '../parse_contribution.js';
 import UpgradeContribution from '../upgrade_contribution.js';
 import {default as contribution10507} from './files/contributions/10507';
@@ -19,7 +20,7 @@ describe('magic.actions.upgrade_contribution', () => {
           region: 'California'
         }]
       };
-      upgradeContributionErrorTest(invalidTable, '3.0', 
+      return upgradeContributionErrorTest(invalidTable, 
         /table .* is not defined in magic data model version /i);
     });
 
@@ -32,7 +33,7 @@ describe('magic.actions.upgrade_contribution', () => {
           not_region: 'California'
         }]
       };
-      upgradeContributionErrorTest(invalidColumn, '3.0',
+      return upgradeContributionErrorTest(invalidColumn,
         /column .* in table .* is not defined in magic data model/i);
     });
 
@@ -47,9 +48,11 @@ describe('magic.actions.upgrade_contribution', () => {
           not_region: 'California'
         }]
       };
-      upgradeContributionNErrorsTest(invalidColumns, '2.5', 1);
-      upgradeContributionErrorTest(invalidColumns, '2.5',
-        /column .* in table .* is not defined in magic data model/i);
+      return Promise.all([
+        upgradeContributionNErrorsTest(invalidColumns, 1),
+        upgradeContributionErrorTest(invalidColumns,
+          /column .* in table .* is not defined in magic data model/i)
+      ]);
     });
     
     it('should report two errors if two different columns are invalid.', () => {
@@ -63,9 +66,11 @@ describe('magic.actions.upgrade_contribution', () => {
           not_region2: 'California'
         }]
       };
-      upgradeContributionNErrorsTest(invalidColumns, '2.5', 2);
-      upgradeContributionErrorTest(invalidColumns, '2.5',
-        /column .* in table .* is not defined in magic data model/i);
+      return Promise.all([
+        upgradeContributionNErrorsTest(invalidColumns, 2),
+        upgradeContributionErrorTest(invalidColumns,
+         /column .* in table .* is not defined in magic data model/i)
+      ]);
     });
 
     it('should report one error if two or more different relative intensity normalizations are used', () => {
@@ -83,9 +88,6 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_method_codes: 'IE-IRM:IE-ARM'
         }]
       };
-      upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes1), '3.0', 1);
-      upgradeContributionErrorTest(_.cloneDeep(tooManyCodes1), '3.0',
-        /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i);
       const tooManyCodes2 = {
         contribution: [{
           magic_version: '2.5'
@@ -100,9 +102,14 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_method_codes: 'IE-IRM:IE-ARM:IE-CHI'
         }]
       };
-      upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes2), '3.0', 1);
-      upgradeContributionErrorTest(_.cloneDeep(tooManyCodes2), '3.0',
-        /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i);
+      return Promise.all([
+        upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes1), 1),
+        upgradeContributionErrorTest(_.cloneDeep(tooManyCodes1),
+          /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i),
+        upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes2), 1),
+        upgradeContributionErrorTest(_.cloneDeep(tooManyCodes2),
+          /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i)
+      ]);
     });
 
   });
@@ -124,7 +131,7 @@ describe('magic.actions.upgrade_contribution', () => {
           id:'66'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     // Tables and columns can change names from one version to the next.
@@ -145,7 +152,6 @@ describe('magic.actions.upgrade_contribution', () => {
           specimen: '1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
       const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
@@ -162,7 +168,10 @@ describe('magic.actions.upgrade_contribution', () => {
           susc_loss_tangent: '1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
     });
 
     // Columns could be removed during an upgrade. Make sure the user will be warned about any deletions.
@@ -175,7 +184,7 @@ describe('magic.actions.upgrade_contribution', () => {
           site_definition: '1'
         }]
       };
-      upgradeContributionWarningTest(jsonOld, '3.0',
+      return upgradeContributionWarningTest(jsonOld,
         /column .* in table .* was deleted in magic data model/i);
     });
   });
@@ -201,8 +210,6 @@ describe('magic.actions.upgrade_contribution', () => {
           average_int: '1'
         }]
       };
-      upgradeContributionWarningTest(jsonOld1, '3.0',
-        /row .* in table .* was deleted in magic data model/i);
       const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
@@ -211,8 +218,12 @@ describe('magic.actions.upgrade_contribution', () => {
           critical_temp: '1'
         }]
       };
-      upgradeContributionWarningTest(jsonOld2, '3.0',
-        /row .* in table .* was deleted in magic data model/i);
+      return Promise.all([
+        upgradeContributionWarningTest(jsonOld2,
+          /row .* in table .* was deleted in magic data model/i),
+        upgradeContributionWarningTest(jsonOld1,
+          /row .* in table .* was deleted in magic data model/i)
+      ]);
     });
 
     // pmag_results and rmag_results in 2.5 and older tables had a loose parent/child relationship.
@@ -271,7 +282,7 @@ describe('magic.actions.upgrade_contribution', () => {
           age: '6'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
@@ -302,7 +313,6 @@ describe('magic.actions.upgrade_contribution', () => {
           result_type: 'a'
         }]
       };
-      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
       const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
@@ -325,7 +335,10 @@ describe('magic.actions.upgrade_contribution', () => {
           lat: '1.1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
     });
 
     // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
@@ -362,61 +375,63 @@ describe('magic.actions.upgrade_contribution', () => {
           method_codes: 'LP-PI'
         }]
       };
-      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
-       const jsonOld2 = {
-         contribution: [{
-           magic_version: '2.5'
-         }],
-         er_samples: [{
-           er_sample_name: 'sample_A',
-           er_citation_names: 'This Study'
-         }],
-         pmag_results: [{
-           er_sample_names: 'sample_A',
-           average_int: '0.0123',
-           er_citation_names: '10.1029/92JB01202'
-         }]
-       };
-       const jsonNew2 = {
-         contribution: [{
-           magic_version: '3.0'
-         }],
-         samples: [{ // citations are different, so these rows can't be combined
-           sample: 'sample_A',
-           citations: 'This Study'
-         },{
-           sample: 'sample_A',
-           int_abs: '0.0123',
-           citations: '10.1029/92JB01202'
-         }]
-       };
-       upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
-       const jsonOld3 = {
-         contribution: [{
-           magic_version: '2.5'
-         }],
-           er_sites: [{
-           er_site_name: 'site_A',
-           site_lat: '1.1'
-         }],
-         pmag_results: [{
-           er_site_names: 'site_A',
-           average_lat: '1.2'
-         }]
-       };
-       const jsonNew3 = {
-         contribution: [{
-           magic_version: '3.0'
-         }],
-           sites: [{ // lat values are different, so these rows can't be combined
-           site: 'site_A',
-           lat: '1.1'
-         },{
-           site: 'site_A',
-           lat: '1.2'
-         }]
-       };
-       upgradeContributionJSONTest(jsonOld3, '3.0', jsonNew3);
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          er_citation_names: 'This Study'
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          er_citation_names: '10.1029/92JB01202'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{ // citations are different, so these rows can't be combined
+          sample: 'sample_A',
+          citations: 'This Study'
+        },{
+          sample: 'sample_A',
+          int_abs: '0.0123',
+          citations: '10.1029/92JB01202'
+        }]
+      };
+      const jsonOld3 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+          er_sites: [{
+          er_site_name: 'site_A',
+          site_lat: '1.1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_A',
+          average_lat: '1.2'
+        }]
+      };
+      const jsonNew3 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+          sites: [{ // lat values are different, so these rows can't be combined
+          site: 'site_A',
+          lat: '1.1'
+        },{
+          site: 'site_A',
+          lat: '1.2'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),   
+        upgradeContributionJSONTest(jsonOld2, jsonNew2),
+        upgradeContributionJSONTest(jsonOld3, jsonNew3)
+      ]);
     });
 
     it('should merge rows even if lists are in a different order', () => {
@@ -446,7 +461,7 @@ describe('magic.actions.upgrade_contribution', () => {
           method_codes: 'LP-DIR:LP-PI'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     it('should merge rows when changing tables', () => {
@@ -482,7 +497,6 @@ describe('magic.actions.upgrade_contribution', () => {
           dip: '2'
         }]
       };
-      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
       const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
@@ -518,7 +532,10 @@ describe('magic.actions.upgrade_contribution', () => {
           dip: '2'
         }]
       };
-      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
     });
 
     it('should merge expeditions with locations', () => {
@@ -545,7 +562,6 @@ describe('magic.actions.upgrade_contribution', () => {
           expedition_ship: 'ship1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld1, '3.0', jsonNew1);
       const jsonOld2 = {
         contribution: [{
           magic_version: '2.5'
@@ -584,7 +600,10 @@ describe('magic.actions.upgrade_contribution', () => {
           expedition_name: 'exp_B'
         }]
       };
-      upgradeContributionJSONTest(jsonOld2, '3.0', jsonNew2);
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
     });
 
     it('should convert a wide pmag_criteria table into a tall criteria table', () => {
@@ -617,7 +636,7 @@ describe('magic.actions.upgrade_contribution', () => {
           criterion_value: '180'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     it('should combine external_database_names/ids into a dictionary', () => {
@@ -643,7 +662,7 @@ describe('magic.actions.upgrade_contribution', () => {
           external_database_ids: 'ARCHEO00[2329]:CALS7K.2[]:GEOMAGIA50[1435]'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     it('should use method codes to map normalized relative intensities', () => {
@@ -672,7 +691,7 @@ describe('magic.actions.upgrade_contribution', () => {
           method_codes: 'SOMETHING ELSE'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     it('should add a geoid method code', () => {
@@ -694,7 +713,7 @@ describe('magic.actions.upgrade_contribution', () => {
           method_codes: 'GE-WGS84'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     it('should rename method codes', () => {
@@ -716,7 +735,7 @@ describe('magic.actions.upgrade_contribution', () => {
           method_codes: 'ST-BCQ-1:ST-C:ST-C-I:ST-G:ST-G-IF:ST-VVQ-1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     it('should favor synthetic name over specimen name', () => {
@@ -758,7 +777,7 @@ describe('magic.actions.upgrade_contribution', () => {
           specimen_alternatives: 'specimen1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
     // TODO: create a rotation matrix, even though they haven't been used properly
@@ -788,7 +807,7 @@ describe('magic.actions.upgrade_contribution', () => {
           specimen_alternatives: 'specimen1'
         }]
       };
-      upgradeContributionJSONTest(jsonOld, '3.0', jsonNew);
+      upgradeContributionJSONTest(jsonOld, jsonNew);
     });*/
     it('should warn about parsing an empty string', () => {
       const jsonOld = {
@@ -809,7 +828,7 @@ describe('magic.actions.upgrade_contribution', () => {
           pmag_rotation_code: 'code1'
         }]
       };
-      upgradeContributionWarningTest(jsonOld, '3.0', /pmag_rotations/i);
+      return upgradeContributionWarningTest(jsonOld, /pmag_rotations/i);
     });
 
     // TODO: reference to DOI, might need to export er_citation_ids to avoid losing DOIs in upgrades
@@ -822,10 +841,8 @@ describe('magic.actions.upgrade_contribution', () => {
   // Test upgrading valid files.
   describe('when upgrading valid files', () => {
     it('should upgrading contribution 10507 (MagIC version 2.5) with no errors', () => {
-      const Parser = new ParseContribution({});
-      const json = Parser.parse(contribution10507);
-      //upgradeContributionMapJSONTest(json, '3.0', {});
-      upgradeContributionNoErrorTest(json, '3.0');
+      const parser = new ParseContribution({});
+      return parser.parsePromise({text: contribution10507}).then(() => upgradeContributionNoErrorTest(parser.json));
     });
   });
   
@@ -982,56 +999,52 @@ describe('magic.actions.upgrade_contribution', () => {
 });
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
-const upgradeContributionWarningTest = (jsonOld, maxVersion, reWarningMsg) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld);
-  expect(Upgrader.warnings().length).to.be.at.least(1);
-  expect(Upgrader.warnings()[Upgrader.warnings().length - 1]['message']).to.match(reWarningMsg);
+const upgradeContributionWarningTest = (jsonOld, reWarningMsg) => {
+  const upgrader = new UpgradeContribution({});
+  return upgrader.upgradePromise({json: jsonOld}).then(() => {
+    expect(upgrader.warnings().length).to.be.at.least(1);
+    expect(_.find(upgrader.warnings(), warning => warning.message.match(reWarningMsg))).to.not.be.undefined;
+  });
 };
 
 // Expect the last error to match the reErrorMsg regex.
-const upgradeContributionErrorTest = (jsonOld, maxVersion, reErrorMsg) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld);
-  expect(Upgrader.errors().length).to.be.at.least(1);
-  expect(Upgrader.errors()[Upgrader.errors().length - 1]['message']).to.match(reErrorMsg);
+const upgradeContributionErrorTest = (jsonOld, reErrorMsg) => {
+  const upgrader = new UpgradeContribution({});
+  return upgrader.upgradePromise({json: jsonOld}).then(() => {
+    expect(upgrader.errors().length).to.be.at.least(1);
+    expect(_.find(upgrader.errors(), error => error.message.match(reErrorMsg))).to.not.be.undefined;
+  });
 };
 
-const upgradeContributionNErrorsTest = (jsonOld, maxVersion, nErrors) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld);
-
-  //GGG CHANGING THIS because changes to the input test data are needed so that other errors are not detected
-  //In this case, it is related to the requirement  that the
-  //contribution table has a magic_version column, but apparently that has
-  //changed. So I'll have to go and change the input data so that error
-  //isn't detected by most every test
-  //expect(Upgrader.errors().length).to.be.at.least(nErrors);
-  expect(Upgrader.errors().length).to.equal(nErrors);
+const upgradeContributionNErrorsTest = (jsonOld, nErrors) => {
+  const upgrader = new UpgradeContribution({});
+  return upgrader.upgradePromise({json: jsonOld}).then(() => {
+    expect(upgrader.errors().length).to.equal(nErrors);
+  });
 };
 
 // Expect no errors.
-const upgradeContributionNoErrorTest = (jsonOld, maxVersion) => {
-  const Upgrader = new UpgradeContribution({});
-  Upgrader.upgrade(jsonOld);
-  //expect(Upgrader.warnings().length).to.equal(0);
-  expect(Upgrader.errors().length).to.equal(0);
+const upgradeContributionNoErrorTest = (jsonOld) => {
+  const upgrader = new UpgradeContribution({});
+  return upgrader.upgradePromise({json: jsonOld}).then(() => {
+    expect(upgrader.errors().length).to.equal(0);
+  });
 };
 
 // Expect no errors and check against expected JSON.
-const upgradeContributionJSONTest = (jsonOld, maxVersion, jsonExpected) => {
-  const Upgrader = new UpgradeContribution({});
-  const jsonNew = Upgrader.upgrade(jsonOld);
-  expect(jsonNew).to.deep.equal(jsonExpected);
-  //expect(Upgrader.warnings().length).to.equal(0);
-  expect(Upgrader.errors().length).to.equal(0);
+const upgradeContributionJSONTest = (jsonOld, jsonExpected) => {
+  const upgrader = new UpgradeContribution({});
+  return upgrader.upgradePromise({json: jsonOld}).then(() => {
+    expect(upgrader.errors().length).to.equal(0);
+    expect(upgrader.json).to.deep.equal(jsonExpected);
+  });
 };
 
 // Expect no errors and check the upgrade map against expected map.
 const upgradeContributionCreateMapTest = (newModel, expectedMap) => {
-  const Upgrader = new UpgradeContribution({});
-  const upgradeMap = Upgrader.getUpgradeMap(newModel);
+  const upgrader = new UpgradeContribution({});
+  const upgradeMap = upgrader.getUpgradeMap(newModel);
   expect(upgradeMap).to.deep.equal(expectedMap);
-  expect(Upgrader.warnings().length).to.equal(0);
-  expect(Upgrader.errors().length).to.equal(0);
+  expect(upgrader.warnings().length).to.equal(0);
+  expect(upgrader.errors().length).to.equal(0);
 };

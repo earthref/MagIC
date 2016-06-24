@@ -1,4 +1,5 @@
 import {_} from 'lodash';
+import Promise from 'bluebird';
 import Runner from '../../er/actions/runner';
 import ParseContribution from './parse_contribution';
 
@@ -28,186 +29,227 @@ export default class extends Runner {
 
   reset() {
     super.reset();
+
     this.jsonOld = undefined;
     this.versionOld = undefined;
     this.modelOld = undefined;
+
     this.jsonNew = {};
     this.versionNew = undefined;
     this.modelNew = undefined;
-    this.json = undefined;
-    this.tableRowNumber = 0;
+
+    this.json = {};
+    this.upgradeMap = {};
+
     this.progress = 0;
-    this.syntheticSpecimenNames = {};
+    this.nRowsBetweenProgressEvents = 1000;
+    this.onProgress = undefined;
+
     this.newMethodCodes = {};
+    this.syntheticSpecimenNames = {};
     this.undefinedTableColumnErrors = {};
     this.deletedTableColumnWarnings = {};
-    this.upgradeMap = {};
   }
   
   // Upgrade a contribution to its next MagIC data model version.
   // The input JSON can be assumed to be the entire contribution.
   // The upgrade happens in two stages: map column names and then merge rows.
-  upgrade(jsonOld, nRows, progressHandler) {
+  upgradePromise({json = undefined, nRowsBetweenProgressEvents = 1000, onProgress = undefined} = {}) {
 
     this.reset();
-    this.jsonOld = jsonOld;
+    this.jsonOld = json;
+    this.nRowsBetweenProgressEvents = nRowsBetweenProgressEvents;
+    this.onProgress = onProgress;
 
-    // Update table and column names all the way to the new data model version.
-    this._map();
-    this.progress = 50;
+    return this._mapPromise().then(this._mergePromise.bind(this));
 
-    // Merge rows that can be combined because they are orthogonal (null or identical in each column).
-    if (this.errors().length === 0)
-      this._merge();
-
-    this.progress = 100;
-    return this.json;
   }
 
-  // Map table and column names to the new data model version.
-  // The input JSON may be mutated during the mapping.
-  // Outputs a copy of the JSON in the new data model version.
-  _map(){
+  _mapPromise() {
 
     // Retrieve the data model version used in the json.
     this.versionOld = this.parser.getVersion(this.jsonOld);
-    if (!this.versionOld) return;
 
-    // Check if the newest model has been reached.
-    if (this.versionOld === _.last(versions)) {
-      this.json = this.jsonNew;
-      return this.json;
-    }
+    // If the data model version could not be found or guessed, stop here.
+    if (!this.versionOld)
+      return Promise.resolve();
 
-    // Check that there is a newer MagIC data model to use.
-    if (_.indexOf(versions, this.versionOld) === versions.length - 1) {
-      this.json = this.jsonNew;
-      return this.json;
-    }
-    this.versionNew = versions[_.indexOf(versions, this.versionOld) + 1];
+    // Make a list of versions after the current version up to the newest version.
+    const versionsToNewest = _.takeRightWhile(versions, v => {return (v !== this.versionOld)});
+    if (versionsToNewest.length === 0)
+      return Promise.resolve();
 
-    // Retrieve the data models and create the upgrade map.
-    this.modelOld = models[this.versionOld];
-    this.modelNew = models[this.versionNew];
-    this.upgradeMap = this.getUpgradeMap(this.modelNew);
+    const versionPercentProgress = 50 / versionsToNewest.length;
+    return Promise.each(versionsToNewest, (versionNew, versionIdx) => {
 
-    // Handle special cases when upgrading from 2.5 to 3.0 tables.
-    if (this.versionNew === '3.0') {
+      this.versionNew = versionNew;
+      //console.log('upgrading', this.versionOld, 'to', this.versionNew);
 
-      // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
-      // doesn't include a foreign key.
-      this.modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
-      this.modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
-        {'table':'er_expeditions','column':'er_location_name'}
-      );
+      // Retrieve the data models and create the upgrade map.
+      this.modelOld = models[this.versionOld];
+      this.modelNew = models[this.versionNew];
+      this.upgradeMap = this.getUpgradeMap(this.modelNew);
 
-      // Favor synthetic names over specimen names for natural synthetics.
-      if (this.jsonOld['er_specimens'] && this.jsonOld['er_synthetics']) {
-        for (let jsonRowOldIdx in this.jsonOld['er_synthetics']) {
-          let syntheticRow = this.jsonOld['er_synthetics'][jsonRowOldIdx];
-          if (syntheticRow['er_specimen_name'] && syntheticRow['er_synthetic_name']) {
-            this.syntheticSpecimenNames[syntheticRow['er_specimen_name']] = syntheticRow['er_synthetic_name'];
-          }
-        }
-      }
-
-      // Define new method code names
-      this.newMethodCodes['ST-BC'] = 'ST-C';
-      this.newMethodCodes['ST-BC-Q1'] = 'ST-BCQ-1';
-      this.newMethodCodes['ST-BC-Q2'] = 'ST-BCQ-2';
-      this.newMethodCodes['ST-BC-Q3'] = 'ST-BCQ-3';
-      this.newMethodCodes['ST-BC-Q4'] = 'ST-BCQ-4';
-      this.newMethodCodes['ST-BC-Q5'] = 'ST-BCQ-5';
-      this.newMethodCodes['ST-CT'] = 'ST-G';
-      this.newMethodCodes['ST-IC'] = 'ST-C-I';
-      this.newMethodCodes['ST-IFC'] = 'ST-G-IF';
-      this.newMethodCodes['ST-VV-Q1'] = 'ST-VVQ-1';
-      this.newMethodCodes['ST-VV-Q2'] = 'ST-VVQ-2';
-      this.newMethodCodes['ST-VV-Q3'] = 'ST-VVQ-3';
-      this.newMethodCodes['ST-VV-Q4'] = 'ST-VVQ-4';
-      this.newMethodCodes['ST-VV-Q5'] = 'ST-VVQ-5';
-      this.newMethodCodes['ST-VV-Q6'] = 'ST-VVQ-6';
-      this.newMethodCodes['ST-VV-Q7'] = 'ST-VVQ-7';
-
-    }
-
-    // RCJM: using this for a quick sanity check of the upgrade map
-    /*for (let t in this.upgradeMap)
-     for (let c in this.upgradeMap[t])
-     if (this.upgradeMap[t][c].length > 1 && t != 'pmag_results' && t != 'rmag_results')
-     console.log(t, c, this.upgradeMap[t][c]);*/
-
-    for (let jsonTableOld in this.jsonOld) {
+      // RCJM: using this for a quick sanity check of the upgrade map
+      /*for (let t in this.upgradeMap)
+       for (let c in this.upgradeMap[t])
+       if (this.upgradeMap[t][c].length > 1 && t != 'pmag_results' && t != 'rmag_results')
+       console.log(t, c, this.upgradeMap[t][c]);*/
 
       // Handle special cases when upgrading from 2.5 to 3.0 tables.
       if (this.versionNew === '3.0') {
 
-        // Don't warn about these tables being deleted when upgrading from 2.5 to 3.0.
-        if (jsonTableOld === 'magic_methods' ||
-          jsonTableOld === 'er_citations' ||
-          jsonTableOld === 'er_mailinglist' ||
-          jsonTableOld === 'magic_calibrations')
-          continue;
+        // Unofficially add a mapping from er_expeditions to locations because the 2.5 model
+        // doesn't include a foreign key.
+        this.modelOld['tables']['er_expeditions']['columns']['er_location_name'] = {};
+        this.modelNew['tables']['locations']['columns']['location']['previous_columns'].push(
+          {'table': 'er_expeditions', 'column': 'er_location_name'}
+        );
 
-        if (jsonTableOld === 'er_expeditions') {
-          let expeditionsNew = [];
-          for (let expeditionRowIdx in this.jsonOld['er_expeditions']) {
-            let expeditionRow = this.jsonOld['er_expeditions'][expeditionRowIdx];
-
-            // If a list of locations for this expedition is provided, duplicate the
-            // expedition row for each location and add the er_location_name column.
-            if (expeditionRow['expedition_location']) {
-              let expeditionLocations = expeditionRow['expedition_location']
-              expeditionLocations = expeditionLocations.replace(/(^:|:$)/g, '');
-              expeditionLocations = expeditionLocations.split(':');
-              for (let expeditionLocation of expeditionLocations) {
-                expeditionRow['er_location_name'] = expeditionLocation;
-                expeditionsNew.push(_.cloneDeep(expeditionRow));
-              }
+        // Favor synthetic names over specimen names for natural synthetics.
+        if (this.jsonOld['er_specimens'] && this.jsonOld['er_synthetics']) {
+          for (let jsonRowOldIdx in this.jsonOld['er_synthetics']) {
+            let syntheticRow = this.jsonOld['er_synthetics'][jsonRowOldIdx];
+            if (syntheticRow['er_specimen_name'] && syntheticRow['er_synthetic_name']) {
+              this.syntheticSpecimenNames[syntheticRow['er_specimen_name']] = syntheticRow['er_synthetic_name'];
             }
-
-            // Otherwise, duplicate the expedition row for each location and add the er_location name column.
-            else {
-              for (let locationRowIdx in this.jsonOld['er_locations']) {
-                let locationRow = this.jsonOld['er_locations'][locationRowIdx];
-                expeditionRow['er_location_name'] = locationRow['er_location_name'];
-                expeditionsNew.push(_.cloneDeep(expeditionRow));
-              }
-            }
-
           }
-          this.jsonOld['er_expeditions'] = expeditionsNew;
         }
 
+        // Define new method code names
+        this.newMethodCodes['ST-BC'] = 'ST-C';
+        this.newMethodCodes['ST-BC-Q1'] = 'ST-BCQ-1';
+        this.newMethodCodes['ST-BC-Q2'] = 'ST-BCQ-2';
+        this.newMethodCodes['ST-BC-Q3'] = 'ST-BCQ-3';
+        this.newMethodCodes['ST-BC-Q4'] = 'ST-BCQ-4';
+        this.newMethodCodes['ST-BC-Q5'] = 'ST-BCQ-5';
+        this.newMethodCodes['ST-CT'] = 'ST-G';
+        this.newMethodCodes['ST-IC'] = 'ST-C-I';
+        this.newMethodCodes['ST-IFC'] = 'ST-G-IF';
+        this.newMethodCodes['ST-VV-Q1'] = 'ST-VVQ-1';
+        this.newMethodCodes['ST-VV-Q2'] = 'ST-VVQ-2';
+        this.newMethodCodes['ST-VV-Q3'] = 'ST-VVQ-3';
+        this.newMethodCodes['ST-VV-Q4'] = 'ST-VVQ-4';
+        this.newMethodCodes['ST-VV-Q5'] = 'ST-VVQ-5';
+        this.newMethodCodes['ST-VV-Q6'] = 'ST-VVQ-6';
+        this.newMethodCodes['ST-VV-Q7'] = 'ST-VVQ-7';
+
       }
 
-      // Check that the old table is defined in the old data model.
-      if (!this.modelOld['tables'][jsonTableOld]) {
-        this._appendError(`Table "${jsonTableOld}" is not defined in MagIC Data Model version ${this.versionOld}.`);
-        continue;
-      }
+      const rowsTotal = _.reduce(this.jsonOld, (rowsTotal, jsonTableOld) => {
+        return rowsTotal + jsonTableOld.length;
+      }, 0);
 
-    //}
 
-    //for (let jsonTableOld in this.jsonOld) {
+      const tables = _.keys(this.jsonOld);
+      if (tables.length === 0)
+        return Promise.resolve();
 
-      // Loop through all rows in table old table.
-      this.tableRowNumber = 0;
-      for (let jsonRowOldIdx in this.jsonOld[jsonTableOld]) {
-        this._mapTableRow(jsonTableOld, jsonRowOldIdx);
-      }
-    }
+      let rowProgressCounter = 0;
+      return Promise.each(tables, jsonTableOld => {
 
-    // Update the data model version.
-    this.jsonNew['contribution'][0]['magic_version'] = this.versionNew;
+        //console.log('mapping_table', jsonTableOld, rowProgressCounter, this.versionOld, '\n', this.jsonOld);
 
-    // Recursively upgrade the contribution.
-    this.jsonOld = this.jsonNew;
-    return this._map();
+        // Handle special cases when upgrading from 2.5 to 3.0 tables.
+        if (this.versionNew === '3.0') {
+
+          // Don't warn about these tables being deleted when upgrading from 2.5 to 3.0.
+          if (jsonTableOld === 'magic_methods' ||
+            jsonTableOld === 'er_citations' ||
+            jsonTableOld === 'er_mailinglist' ||
+            jsonTableOld === 'magic_calibrations' ||
+            jsonTableOld === 'magic_instruments') {
+            rowProgressCounter += this.jsonOld[jsonTableOld].length;
+            return Promise.resolve();
+          }
+
+          if (jsonTableOld === 'er_expeditions') {
+            let expeditionsNew = [];
+            for (let expeditionRowIdx in this.jsonOld['er_expeditions']) {
+              let expeditionRow = this.jsonOld['er_expeditions'][expeditionRowIdx];
+
+              // If a list of locations for this expedition is provided, duplicate the
+              // expedition row for each location and add the er_location_name column.
+              if (expeditionRow['expedition_location']) {
+                let expeditionLocations = expeditionRow['expedition_location']
+                expeditionLocations = expeditionLocations.replace(/(^:|:$)/g, '');
+                expeditionLocations = expeditionLocations.split(':');
+                for (let expeditionLocation of expeditionLocations) {
+                  expeditionRow['er_location_name'] = expeditionLocation;
+                  expeditionsNew.push(_.cloneDeep(expeditionRow));
+                }
+              }
+
+              // Otherwise, duplicate the expedition row for each location and add the er_location name column.
+              else {
+                for (let locationRowIdx in this.jsonOld['er_locations']) {
+                  let locationRow = this.jsonOld['er_locations'][locationRowIdx];
+                  expeditionRow['er_location_name'] = locationRow['er_location_name'];
+                  expeditionsNew.push(_.cloneDeep(expeditionRow));
+                }
+              }
+
+            }
+            this.jsonOld['er_expeditions'] = expeditionsNew;
+          }
+
+        }
+
+        // Check that the old table is defined in the old data model.
+        if (!this.modelOld['tables'][jsonTableOld]) {
+          this._appendError(`Table "${jsonTableOld}" is not defined in MagIC Data Model version ${this.versionOld}.`);
+          //console.log('rowProgressCounter', jsonTableOld, rowProgressCounter, this.versionOld, this.jsonOld[jsonTableOld]);
+          rowProgressCounter += this.jsonOld[jsonTableOld].length;
+          this.progress = versionIdx * versionPercentProgress + (versionPercentProgress * rowProgressCounter / rowsTotal);
+          if (this.onProgress) this.onProgress(this.progress);
+          //console.log('map progress', this.progress);
+          return Promise.resolve();
+        }
+
+        // Loop through all rows in table old table.
+        const rowIdxChunks = _.chunk(_.range(this.jsonOld[jsonTableOld].length), this.nRowsBetweenProgressEvents);
+        if (rowIdxChunks.length === 0)
+          return Promise.resolve();
+
+        return Promise.each(rowIdxChunks, rowIdxChunk => {
+          return new Promise((resolve) => {
+            //_.defer(() => {
+            //console.log('before mapping_table_row', jsonTableOld, _.first(rowIdxChunks), 'to', _.last(rowIdxChunks), this.versionOld);
+            rowIdxChunk.forEach(rowIdx => {
+              this._mapTableRow(jsonTableOld, rowIdx);
+              rowProgressCounter++;
+              //console.log('after mapping_table_row', jsonTableOld, rowIdx, this.versionOld, '\n', this.jsonOld);
+            });
+            this.progress = versionIdx * versionPercentProgress + (versionPercentProgress * rowProgressCounter / rowsTotal);
+            if (this.onProgress) this.onProgress(this.progress);
+            //console.log('map progress', this.progress);
+            //_.delay(() => { resolve(); }, 1000);
+            //});
+            resolve();
+          }).delay();
+        });
+
+      }).then(() => {
+        // Update the data model version.
+        if (!this.jsonNew['contribution'])
+          this.jsonNew['contribution'] = [{}];
+        this.jsonNew['contribution'][0]['magic_version'] = this.versionNew;
+
+        //console.log('done with mapping', this.versionOld, 'to', this.versionNew);
+        this.json = this.jsonNew;
+        this.jsonOld = this.jsonNew;
+        this.versionOld = this.versionNew;
+        this.jsonNew = {};
+
+      });
+
+    });
 
   }
 
   _mapTableRow(jsonTableOld, jsonRowOldIdx) {
+
+    //console.log('mapping_table_row', jsonTableOld, jsonRowOldIdx, this.versionOld, '\n', this.jsonOld);
 
     let tableRowsNew = {};
     let joinTable;
@@ -319,10 +361,7 @@ export default class extends Runner {
           jsonColumnOld === 'location_geoid'        ||
           jsonColumnOld === 'site_location_geoid'   ||
           jsonColumnOld === 'sample_location_geoid' ||
-          jsonTableOld === 'er_citations' ||
-          jsonTableOld === 'er_mailinglist' ||
-          (jsonTableOld === 'rmag_results' && jsonColumnOld === 'er_location_name') ||
-          jsonTableOld === 'magic_methods'))
+          (jsonTableOld === 'rmag_results' && jsonColumnOld === 'er_location_name')))
           continue;
 
         // Combine external_database_names/ids into a dictionary.
@@ -425,13 +464,9 @@ export default class extends Runner {
             jsonValueNew = _(jsonValueNew).sortBy().sortedUniq().join(':');
           }
 
-          // Create the table in the new JSON if it doesn't exist.
-          if (!tableRowsNew[jsonTableNew]) {
-            tableRowsNew[jsonTableNew] = [];
-            tableRowsNew[jsonTableNew][0] = {};
-          }
-
           // Add the column value to the new JSON.
+          if (!tableRowsNew[jsonTableNew])
+            tableRowsNew[jsonTableNew] = [{}];
           tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
 
         }
@@ -447,36 +482,62 @@ export default class extends Runner {
   }
 
   // Merge rows that can be combined because they are orthogonal (null or identical in each column).
-  _merge() {
+  _mergePromise() {
+
+    //console.log('merging', this.json);
 
     // For each table in the contribution:
-    for (let table in this.json) {
+    const rowsTotal = _.reduce(this.json, (rowsTotal, table) => rowsTotal + table.length, 0);
+    let rowProgressCounter = 0;
+
+    const tables = _.keys(this.json);
+    if (tables.length === 0)
+      return Promise.resolve();
+
+    return Promise.each(tables, table => {
+
+      //console.log('merging', table);
 
       // Skip tables that don't have rows to merge.
-      if (table === 'measurements' || table === 'contribution') continue;
+      if (table === 'measurements' || table === 'contribution') {
+        rowProgressCounter += this.json[table].length;
+        this.progress = 50 + (50 * rowProgressCounter / rowsTotal);
+        if (this.onProgress) this.onProgress(this.progress);
+        //console.log('merge progress', this.progress);
+        return Promise.resolve();
+      }
 
       // Sort the table by the unique composite keys.
       this.json[table] = _.sortBy(this.json[table], this.mergeKeys[table]);
-      
-      // For each row in the sorted table:
-      for (let rowIdx = 0; rowIdx < this.json[table].length; rowIdx++) {
 
-        // Skip rows that are empty (e.g. ones that have already been merged).
-        if (this.json[table][rowIdx] === undefined) continue;
+      // Loop through all rows in the sorted table.
+      const rowIdxChunks = _.chunk(_.range(this.json[table].length), this.nRowsBetweenProgressEvents);
+      if (rowIdxChunks.length === 0)
+        return Promise.resolve();
 
-        this._mergeTableRow(table, rowIdx);
+      return Promise.each(rowIdxChunks, rowIdxs => {
+        return new Promise((resolve) => {
+          rowIdxs.forEach(rowIdx => {
+            this._mergeTableRow(table, rowIdx);
+            rowProgressCounter++;
+          });
+          this.progress = 50 + (50 * rowProgressCounter / rowsTotal);
+          if (this.onProgress) this.onProgress(this.progress);
+          //console.log('merge progress', this.progress);
+          resolve();
+        }).delay();
+      }).then(() => {
+        _.remove(this.json[table], _.isEmpty);
+      });
 
-      }
+    });
 
-      // Remove all of the empty merged rows from the table.
-      _.remove(this.json[table], _.isEmpty);
-
-    }
-
-    return;
   }
 
   _mergeTableRow(table, rowIdx) {
+
+    // Skip rows that are empty (e.g. ones that have already been merged).
+    if (this.json[table][rowIdx] === undefined) return;
 
     // Make a list of the columns of the composite keys that are defined in the current row.
     const rowKeys = (this.mergeKeys[table] ? _.pick(this.json[table][rowIdx], this.mergeKeys[table]) : this.json[table][rowIdx]);

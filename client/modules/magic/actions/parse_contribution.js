@@ -13,7 +13,7 @@ export default class extends Runner {
   reset() {
     this.json = {};
     this.version = undefined;
-    this.isVersionGuessed = false;
+    this.isVersionGuessed = undefined;
     this.resetProgress();
   }
   
@@ -22,67 +22,43 @@ export default class extends Runner {
     this.lineNumber = 0;
     this.progress = 0;
   }
-  
-  parsePromise(text, nLines, progressHandler) {
+
+  parsePromise({text = undefined, nLinesBetweenProgressEvents = 1000, onProgress = undefined} = {}) {
 
     // Check for a valid input.
-    if (!text) {
-      return this._appendWarning('Contribution text is empty.');
+    if (typeof(text) !== 'string') {
+      text = '';
+      this._appendWarning('Contribution text is not a string.');
     }
-    
+    if (_.isEmpty(text)) {
+      text = '';
+      this._appendWarning('Contribution text is empty.');
+    }
+
     // Initialize this parsing operation.
     this.table = undefined;
     this.columns = [];
     this.skipTable = false;
     this.tableLineNumber = 0;
 
-    if (!nLines) nLines = 1;
-    
     return new Promise.each(
-      _.chunk(text.match(/[^\r\n]+/g), nLines),
+      _.chunk(text.match(/[^\r\n]+/g), nLinesBetweenProgressEvents),
       (lines, i, t) => {
         return new Promise((resolve) => {
-          lines.forEach((line) => { this._parseLine(line); });
+          lines.forEach(line => this._parseLine(line));
           this.progress = 100 * (i + 1) / t;
-          if (progressHandler) progressHandler(this.progress);
+          if (onProgress) onProgress(this.progress);
           resolve();
         }).delay();
       }
     ).then(() => {
       this.version = this.getVersion();
-      return this;
+      for (let jsonTable in this.json) {
+        if (this.json[jsonTable].length === 0)
+          this._appendWarning(`No data values were found in the ${jsonTable} table.`);
+      }
     });
     
-  }
-
-  parse(text) {
-
-    // Check for a valid input.
-    if (!text) {
-      return this._appendWarning('Contribution text is empty.');
-    }
-
-    // Initialize this parsing operation.
-    this.table = undefined;
-    this.columns = [];
-    this.skipTable = false;
-    this.tableLineNumber = 0;
-
-    // Split the text on line breaks.
-    const lines = text.match(/[^\r\n]+/g);
-
-    // Process the text line by line.
-    lines.forEach(this._parseLine.bind(this));
-
-    // Look for empty tables to issue a warning.
-    for (let jsonTable in this.json) {
-      if (this.json[jsonTable].length === 0)
-        this._appendWarning(`No data values were found in the ${jsonTable} table.`);
-    }
-
-    this.version = this.getVersion();
-    return this.json;
-
   }
 
   _parseLine(line) {
@@ -204,8 +180,7 @@ export default class extends Runner {
   getVersion(json) {
 
     let text = '';
-    this.isVersionGuessed = false;
-    
+
     // Check for a valid input after defaulting to the class json property.
     if (_.isEmpty(json)) json = this.json;
     if (_.isEmpty(json)) {
@@ -228,17 +203,18 @@ export default class extends Runner {
         //this._appendWarning('The "contribution" table does not include the "magic_version" column.');
         return this._guessVersion(json);
       }
-      version = json['contribution'][0]['magic_version'];
+      this.isVersionGuessed = false;
+      this.version = json['contribution'][0]['magic_version'];
     }
 
     // Check that the MagIC data model version is valid (oldVersion is in versions).
-    if (_.indexOf(versions, version) === -1) {
+    if (_.indexOf(versions, this.version) === -1) {
       const strVersions = versions.map((str) => { return `"${str}"`; }).join(", ");
-      this._appendError(`MagIC data model version ${version} is invalid. Expected one of: ${strVersions}.`);
+      this._appendError(`MagIC data model version ${this.version} is invalid. Expected one of: ${strVersions}.`);
       return undefined;
     }
 
-    return version;
+    return this.version;
 
   }
 

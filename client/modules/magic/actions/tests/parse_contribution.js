@@ -1,34 +1,42 @@
 const {describe, it} = global;
-import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import _ from 'lodash';
+import {expect} from 'chai';
+import Promise from 'bluebird';
 import ParseContribution from '../parse_contribution';
 import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
-
-const expect = chai.expect;
-chai.use(chaiAsPromised);
 
 describe('magic.actions.parse_contribution', () => {
 
   // Test parsing invalid strings.
   describe('when parsing invalid strings', () => {
     it('should warn about parsing an empty string', () => {
-      parseContributionWarningTest(null, /empty/i);
-      parseContributionWarningTest(undefined, /empty/i);
-      parseContributionWarningTest('', /empty/i);
+      return Promise.all([
+        parseContributionWarningTest(undefined, /empty/i),
+        parseContributionWarningTest('', /empty/i)
+      ]);
+    });
+
+    it('should warn about parsing a non-string', () => {
+      return Promise.all([
+        parseContributionWarningTest(null, /not a string/i),
+        parseContributionWarningTest({}, /not a string/i),
+        parseContributionWarningTest(0, /not a string/i),
+        parseContributionWarningTest(false, /not a string/i)
+      ]);
     });
 
     it('should reject nonsense', () => {
-      parseContributionErrorTest('nonsense', /unrecognized column delimiter/i);
+      return parseContributionErrorTest('nonsense', /unrecognized column delimiter/i);
     });
 
     it('should reject nonsense with tab header', () => {
-      parseContributionErrorTest('nonsense\ttable', /unrecognized column delimiter/i);
+      return parseContributionErrorTest('nonsense\ttable', /unrecognized column delimiter/i);
     });
 
     it('should reject leading space nonsense', () => {
-      parseContributionErrorTest('  nonsense  \ttable\ncol1\tcol2\nstr1\t1.2', /. Expected "tab"./i);
+      return parseContributionErrorTest('  nonsense  \ttable\ncol1\tcol2\nstr1\t1.2', /. Expected "tab"./i);
     });
 
     it('should reject if table name is missing', () => {
@@ -39,17 +47,20 @@ describe('magic.actions.parse_contribution', () => {
         'tab\t\n',
         'tab\t \n'
       ];
-      for (let noTableName of noTableNames)
-        parseContributionErrorTest(noTableName, /no table name following tab delimiter/i);
+      return Promise.all(noTableNames.map(noTableName =>
+        parseContributionErrorTest(noTableName, /no table name following tab delimiter/i)
+      ));
     });
 
     it('should reject repeated column names', () => {
-      parseContributionErrorTest('tab\ttable\ncol1\tcol1\n', /found duplicate column names/i);
+      return parseContributionErrorTest('tab\ttable\ncol1\tcol1\n', /found duplicate column names/i);
     });
 
     it('should warn about empty tables', () => {
-      parseContributionWarningTest('tab\ttable\ncol1\tcol2\n', /no data values were found/i);
-      parseContributionWarningTest('tab \t123\ncol1\tcol2\n', /no data values were found/i);
+      return Promise.all([
+        parseContributionWarningTest('tab\ttable\ncol1\tcol2\n', /no data values were found/i),
+        parseContributionWarningTest('tab \t123\ncol1\tcol2\n', /no data values were found/i)
+      ]);
     });
   });
 
@@ -94,7 +105,7 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.2'
         }]
       };
-      parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
+      return parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
     });
 
     it('should eliminate blank lines and leading/trailing spaces', () => {
@@ -113,8 +124,9 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.2'
         }]
       };
-      for (let withBlank of withBlanks)
-        parseContributionJSONTest(withBlank, json);
+      return Promise.all(withBlanks.map(withBlank =>
+        parseContributionJSONTest(withBlank, json)
+      ));
     });
 
     it('should handle empty columns', () => {
@@ -132,8 +144,9 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.0'
         }]
       };
-      for (let withEmptyColumn of withEmptyColumns)
-        parseContributionJSONTest(withEmptyColumn, json);
+      return Promise.all(withEmptyColumns.map(withEmptyColumn =>
+        parseContributionJSONTest(withEmptyColumn, json)
+      ));
     });
 
     it('should combine rows', () => {
@@ -148,8 +161,7 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.0'
         }]
       };
-      const Parser = parseContributionNoErrorTest(partial1);
-      parseContributionJSONTest(partial2, json, Parser);
+      return parseContributionsJSONTest([partial1, partial2], json);
     });
 
     it('should combine tables', () => {
@@ -165,78 +177,89 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.0'
         }]
       };
-      const Parser = parseContributionNoErrorTest(partial1);
-      parseContributionJSONTest(partial2, json, Parser);
+      return parseContributionsJSONTest([partial1, partial2], json);
     });
   });
 
   // Test parsing valid files.
   describe('when parsing valid files', () => {
     it('should parse contribution 3552 (MagIC version 2.2) with no errors', () => {
-      parseContributionNoErrorTest(contribution3552);
+      return parseContributionNoErrorTest(contribution3552);
     });
     it('should parse contribution 8054 (MagIC version 2.4) with no errors', () => {
-      parseContributionNoErrorTest(contribution8054);
+      return parseContributionNoErrorTest(contribution8054);
     });
     it('should parse contribution 10507 (MagIC version 2.5) with no errors', () => {
-      parseContributionNoErrorTest(contribution10507);
+      return parseContributionNoErrorTest(contribution10507);
     });
   });
 });
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
-const parseContributionWarningTest = (text, reWarningMsg) => {
-  const Parser = new ParseContribution({});
-  Parser.parse(text);
-  expect(Parser.warnings().length).to.be.at.least(1);
-  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reWarningMsg);
+const parseContributionWarningTest = (text, reWarningMsg, done) => {
+  const parser = new ParseContribution({});
+  return parser.parsePromise({text: text}).then(function() {
+    expect(parser.warnings().length).to.be.at.least(1);
+    expect(_.find(parser.warnings(), warning => warning.message.match(reWarningMsg))).to.not.be.undefined;
+  });
 };
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 const parseContributionErrorTest = (text, reErrorMsg) => {
-  const Parser = new ParseContribution({});
-  Parser.parse(text);
-  expect(Parser.errors().length).to.be.at.least(1);
-  expect(Parser.errors()[Parser.errors().length - 1]['message']).to.match(reErrorMsg);
+  const parser = new ParseContribution({});
+  return parser.parsePromise({text: text}).then(() => {
+    expect(parser.errors().length).to.be.at.least(1);
+    expect(_.find(parser.errors(), error => error.message.match(reErrorMsg))).to.not.be.undefined;
+  });
 };
 
 // Expect no errors.
 const parseContributionNoErrorTest = (text) => {
-  const Parser = new ParseContribution({});
-  Parser.parse(text);
-  expect(Parser.errors().length).to.equal(0);
-  return Parser;
+  const parser = new ParseContribution({});
+  return parser.parsePromise({text: text}).then(() => {
+    expect(parser.errors().length).to.equal(0);
+  });
 };
 
 // Expect no errors and check against expected JSON.
-const parseContributionJSONTest = (text, jsonExpected, Parser) => {
-  if(!Parser) Parser = new ParseContribution({});
-  const json = Parser.parse(text);
-  expect(Parser.errors().length).to.equal(0);
-  expect(json).to.deep.equal(jsonExpected);
-  return Parser;
+const parseContributionJSONTest = (text, jsonExpected) => {
+  const parser = new ParseContribution({});
+  return parser.parsePromise({text: text}).then(() => {
+    expect(parser.errors().length).to.equal(0);
+    expect(parser.json).to.deep.equal(jsonExpected);
+  });
+};
+
+const parseContributionsJSONTest = (texts, jsonExpected) => {
+  const parser = new ParseContribution({});
+  return Promise.mapSeries(texts, text => parser.parsePromise({text: text})).then(() => {
+    expect(parser.errors().length).to.equal(0);
+    expect(parser.json).to.deep.equal(jsonExpected);
+  });
 };
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const getContributionVersionWarningTest = (json, reWarningMsg) => {
-  const Parser = new ParseContribution({});
-  Parser.getVersion(json);
-  expect(Parser.warnings().length).to.be.at.least(1);
-  expect(Parser.warnings()[Parser.warnings().length - 1]['message']).to.match(reWarningMsg);
+  const parser = new ParseContribution({});
+  parser.getVersion(json);
+  expect(parser.warnings().length).to.be.at.least(1);
+  expect(_.find(parser.warnings(), warning => warning.message.match(reWarningMsg))).to.not.be.undefined;
 };
 
 // Expect the errors to contain one error that matches the reErrorMsg regex.
 const getContributionVersionErrorTest = (json, reErrorMsg) => {
-  const Parser = new ParseContribution({});
-  Parser.getVersion(json);
-  expect(Parser.errors().length).to.be.at.least(1);
-  expect(Parser.errors()[Parser.errors().length - 1]['message']).to.match(reErrorMsg);
+  const parser = new ParseContribution({});
+  console.log(json);
+  parser.getVersion(json);
+  console.log(parser.errors());
+  expect(parser.errors().length).to.be.at.least(1);
+  expect(_.find(parser.errors(), error => error.message.match(reErrorMsg))).to.not.be.undefined;
 };
 
 // Expect the version to be guessed correctly.
 const guessContributionVersionTest = (json, versionExpected) => {
-  const Parser = new ParseContribution({});
-  let version = Parser.getVersion(json);
-  expect(Parser.isVersionGuessed).to.be.true;
+  const parser = new ParseContribution({});
+  let version = parser.getVersion(json);
+  expect(parser.isVersionGuessed).to.be.true;
   expect(version).to.equal(versionExpected);
 };
