@@ -212,6 +212,8 @@ export default class extends React.Component {
     const fromVersion = this.state.fromVersion;
     const toVersion = _.last(versions)
     const nTables = _.size(this.upgrader.json);
+    const nUpgradeWarnings = this.upgrader.warnings().length;
+    const nUpgradeErrors = this.upgrader.errors().length;
     const nRows = _.reduce(this.upgrader.json, (sum, value) => { return sum + value.length; }, 0);
     return (
       <div className="upgrade-contribution">
@@ -337,15 +339,18 @@ export default class extends React.Component {
                   return (
                     <div key={i} className="item" data-file={file.name}>
                       <div className="ui image">
-                        <div className={(fileIsDone ? '' : 'active ') + 'ui inverted dimmer'}>
-                          <div className="ui loader"></div>
+                        <div className="icon loader wrapper">
+                          <div className={(fileIsDone ? '' : 'active ') + 'ui inverted dimmer'}>
+                            <div className="ui loader"></div>
+                          </div>
+                          <i className="file icons">
+                            <i className="fitted file text outline icon"></i>
+                            {(fileHasErrors ? <i className="corner red warning circle icon"></i>
+                              : (fileHasWarnings ? <i className="corner yellow warning circle icon"></i>
+                              : undefined )
+                            )}
+                          </i>
                         </div>
-                        <i className="file icons">
-                          <i className="fitted file text outline icon"></i>
-                          {(fileHasErrors ? <i className="corner red warning circle icon"></i>
-                          : (fileHasWarnings ? <i className="corner yellow warning circle icon"></i>
-                          : undefined ))}
-                        </i>
                       </div>
                       <div className="content">
                         <div className="ui header">
@@ -437,17 +442,18 @@ export default class extends React.Component {
               <div className="ui items">
                 <div className="item">
                   <div className="ui image">
-                    <div className={(this.state.isUpgraded ? '' : 'active ') + 'ui inverted dimmer'}>
-                      <div className="ui loader"></div>
+                    <div className="icon loader wrapper">
+                      <div className={(this.state.isUpgraded ? '' : 'active ') + 'ui inverted dimmer'}>
+                        <div className="ui loader"></div>
+                      </div>
+                      <i className="file icons">
+                        <i className="fitted file text outline icon"></i>
+                        {(this.upgrader.errors().length > 0 ? <i className="corner red warning circle icon"></i>
+                          : (this.upgrader.warnings().length > 0 ? <i className="corner yellow warning circle icon"></i>
+                          : undefined )
+                        )}
+                      </i>
                     </div>
-                    <i className="file icons">
-                      <i className="fitted file text outline icon"></i>
-                      {(this.upgrader.errors().length > 0 ?
-                        <i className="corner red warning circle icon"></i>
-                        : (this.upgrader.warnings().length > 0 ?
-                        <i className="corner yellow warning circle icon"></i>
-                        : undefined ))}
-                    </i>
                   </div>
                   <div className="content">
                     <div className="ui header">
@@ -522,13 +528,13 @@ export default class extends React.Component {
               </div>
               {(this.state.isUpgraded && this.upgrader.errors().length === 0 ?
                 <div>
-                <h4 className="ui horizontal divider header">
-                  <i className="download icon"></i>
-                      <span className="content">
-                        Download the Upgraded Contribution
-                      </span>
-                </h4>
-                <div className="ui basic segment">
+                  <h4 className="ui horizontal divider header">
+                    <i className="download icon"></i>
+                        <span className="content">
+                          Download the Upgraded Contribution
+                        </span>
+                  </h4>
+                  <div className="ui basic segment">
                     <div className="ui three column middle aligned very relaxed stackable grid">
                       <div className="column">
                         <button className="ui fluid icon large disabled button">
@@ -547,6 +553,8 @@ export default class extends React.Component {
                       </div>
                     </div>
                   </div>
+                  {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
+                  <div></div>
                 </div>
               :undefined)}
               {(this.state.fromVersion ?
@@ -613,6 +621,8 @@ export default class extends React.Component {
                       </div>
                     </div>
                   </div>
+                  {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
+                  <div></div>
                 </div>
               : undefined)}
             </div>
@@ -664,7 +674,7 @@ export default class extends React.Component {
             <div className="content">
               Reading and parsing
               {this.files.length === 1 ? ' this file ' : ' these files '}
-              in preparation for upgrading.
+              in preparation for upgrading ...
             </div>
           </div>
           : undefined)}
@@ -678,13 +688,50 @@ export default class extends React.Component {
             </div>
           </div>
           : undefined)}
-        {(step === 3 && this.state.fromVersion === undefined ?
+        {(step === 3 && fromVersion === undefined ?
           <div className="ui bottom attached icon error message">
             <i className="warning circle icon"></i>
             <div className="content">
               The <em>MagIC Data Model version</em> could not be determined from the parsed
               {this.files.length === 1 ? ' file' : ' files'}.
               Please select the version from which to upgrade.
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && fromVersion && !this.state.isUpgraded ?
+          <div className="ui bottom attached icon message">
+            <i className="purple info circle icon"></i>
+            <div className="content">
+              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} ...
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && fromVersion && this.state.isUpgraded && nUpgradeErrors > 0 ?
+          <div className="ui bottom attached icon error message">
+            <i className="warning circle icon"></i>
+            <div className="content">
+              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} failed
+              to complete because of {numeral(nUpgradeErrors).format('0,0')}
+              {' error' + (nUpgradeErrors === 1 ? '' : 's') + '.'}
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && fromVersion && this.state.isUpgraded && nUpgradeErrors === 0 && nUpgradeWarnings > 0 ?
+          <div className="ui bottom attached icon success message">
+            <i className="check circle icon"></i>
+            <div className="content">
+              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} completed
+              successfully with {numeral(nUpgradeWarnings).format('0,0')}
+              {' warning' + (nUpgradeWarnings === 1 ? '' : 's') + '.'}
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && fromVersion && this.state.isUpgraded && (nUpgradeErrors + nUpgradeWarnings) === 0 ?
+          <div className="ui bottom attached icon success message">
+            <i className="check circle icon"></i>
+            <div className="content">
+              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} completed
+              successfully.
             </div>
           </div>
           : undefined)}
