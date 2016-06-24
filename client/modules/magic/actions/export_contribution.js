@@ -93,6 +93,9 @@ export default class extends Runner {
 
       workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
 
+
+
+      //NOW FORMAT THE SHEET
       //From the xlsx-style docs:
       /*Cell range objects are stored as {s:S, e:E} where S is the first cell and E is the last cell in the range.
       The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
@@ -116,12 +119,8 @@ export default class extends Runner {
         let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
         let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
-        //ggg crappy hack to get the first col to be right alligned
-        //let headerTextOrientation = 'center';
-        if(groupIdx == 0)
-          headerTextOrientation = 'right';
-
         //DEFAULT FORMATTING FOR GROUP.
+       // headerTextOrientation = 'right';
         currentSheet[cellAddress].s =
         {
           alignment: {horizontal: headerTextOrientation, vertical: 'center'},
@@ -132,7 +131,7 @@ export default class extends Runner {
             bottom: {style: 'thick', color: {auto: 1}}
           },
           font: {bold: 'true'},
-          fill: {fgColor: {rgb: 'D3D3D3'}}
+          fill: {fgColor: {rgb: 'cccccc'}}
         }
 
         //OVERRIDE GROUP FORMATTING
@@ -141,7 +140,7 @@ export default class extends Runner {
         {
           currentSheet[cellAddress].s =
           {
-            alignment: {horizontal: 'center', vertical: 'center'},
+            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
             border: {
               left: {style: 'thick', color: {auto: 1}},
               right: {style: 'hair', color: {auto: 1}},
@@ -149,15 +148,14 @@ export default class extends Runner {
               bottom: {style: 'thick', color: {auto: 1}}
             },
             font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'D3D3D3'}}
+            fill: {fgColor: {rgb: 'cccccc'}}
           }
         }
         if (currentSheet[cellAddress].v == '')// Do not bold the border if this cell is empty
         {
-         // console.log(`trying for hair..`);
           currentSheet[cellAddress].s =
           {
-            alignment: {horizontal: 'center', vertical: 'center'},
+            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
             border: {
               left: {style: 'hair', color: {auto: 1}},
               right: {style: 'thick', color: {auto: 1}},
@@ -165,7 +163,7 @@ export default class extends Runner {
               bottom: {style: 'thick', color: {auto: 1}}
             },
             font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'D3D3D3'}}
+            fill: {fgColor: {rgb: 'cccccc'}}
           }
         }
         //console.log(`old ${currentSheet[cellAddress].v}`);
@@ -175,9 +173,9 @@ export default class extends Runner {
       for(let nameIdx in typeHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({c: nameIdx, r: 1});//row 1 of excel output
+
         if(currentSheet[cellAddress])//if there is data to format
         {
-          console.log(`heder ${headerTextOrientation}`);
           currentSheet[cellAddress].s = {
             alignment: {horizontal: headerTextOrientation, vertical: 'center'},
             border: {
@@ -186,7 +184,7 @@ export default class extends Runner {
               top: {style: 'hair', color: {auto: 1}},
               bottom: {style: 'hair', color: {auto: 1}}
             },
-            fill: {fgColor: {rgb: 'DCDCDC'}}
+            fill: {fgColor: {rgb: 'f2f2f2'}}
           };
         }
       }
@@ -205,11 +203,12 @@ export default class extends Runner {
             top: {style: 'hair', color: {auto: 1}},
             bottom: {style: 'hair', color: {auto: 1}}
           },
-          fill: {fgColor: {rgb: 'DCDCDC'}}
+          fill: {fgColor: {rgb: 'f2f2f2'}}
         };
         }
       }
 
+      //probably delete this? Duplicate code.
       for(let typeIdx in typeHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
@@ -222,13 +221,12 @@ export default class extends Runner {
             bottom: {style: 'hair', color: {auto: 1}}
           },
           //font: {bold: 'true'},
-          fill: {fgColor: {rgb: 'DCDCDC'}}
+          fill: {fgColor: {rgb: 'f2f2f2'}}
         };
       }
 
       for(let columnIdx in columnHeader)
       {
-        //todo: reverse col/row
         let cellAddress = XLSX.utils.encode_cell({c: columnIdx, r: 3});
         currentSheet[cellAddress].s = {
           alignment: {horizontal: 'right', vertical: 'center'},
@@ -238,16 +236,41 @@ export default class extends Runner {
             top: {style: 'hair', color: {auto: 1}},
             bottom: {style: 'thick', color: {auto: 1}}
           },
-          fill: {fgColor: {rgb: 'DCDCDC'}}
+          fill: {fgColor: {rgb: 'f2f2f2'}}
         };
       }
 
-      //style; //{fill.patternType: 'solid'};
-      /*currentSheet['A2'].v = 'Name:';
-      currentSheet['A3'].v = 'Type:';
-      currentSheet['A4'].s = 'Column:';*/
+      //Rows don't seem to be zero indexed. This is the hard code for justification of the header
+      let cellAddress = XLSX.utils.encode_cell({c: 0, r: 2});
+      currentSheet[cellAddress].s = {
+        alignment: {horizontal: 'right', vertical: 'center'},
+        border: {
+          left: {style: 'hair', color: {auto: 1}},
+          right: {style: 'hair', color: {auto: 1}},
+          top: {style: 'hair', color: {auto: 1}},
+          bottom: {style: 'thick', color: {auto: 1}}
+        },
+        fill: {fgColor: {rgb: 'f2f2f2'}}
+      };
+
+      //Rows don't seem to be zero indexed. This is the hard code for justification of the header
+       cellAddress = XLSX.utils.encode_cell({c: 0, r: 3});
+      currentSheet[cellAddress].s = {
+        alignment: {horizontal: 'right', vertical: 'center'},
+        border: {
+          left: {style: 'hair', color: {auto: 1}},
+          right: {style: 'hair', color: {auto: 1}},
+          top: {style: 'hair', color: {auto: 1}},
+          bottom: {style: 'thick', color: {auto: 1}}
+        },
+        fill: {fgColor: {rgb: 'f2f2f2'}}
+      };
 
     }
+
+
+    /*HARD CODED FORMATTING*/
+
 
     return workbook;
   }
