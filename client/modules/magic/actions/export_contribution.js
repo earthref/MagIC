@@ -48,13 +48,15 @@ export default class extends Runner {
 
     let style = {fill:{patternType: 'solid'},  font:{}, numFmt:{}, alignment:{}, border:{}};
 
+    //Create a sheet for each table in the model, and add headers and data to it
     for(let modelTable in this.model.tables)
     {
       workbook.SheetNames.push(modelTable);//Create a sheet for each table in the 3.0 model in the workbook.
-      
+
+      //gather the data for the table headers
       let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport/*, orderedColumnArray*/);
 
-      /*These the first four rows of the excel file*/
+      /*These the first four rows of the excel file, and they will always be the same*/
       let groupHeader = tableHeaders.groupHeader;
       groupHeader.unshift('Group:  ');//place 'Group' at the beginning of the array
       //console.log(`groupHD${groupHeader}`);
@@ -68,7 +70,7 @@ export default class extends Runner {
       //Now gather the data from the json object
       let tableData = jsonToExport[modelTable];
 
-      /*Create array of sheet headers/data. This will be an array of arrays.
+      /*Create array of sheet headers. This will be an array of arrays.
       The first dimension of the array is the row in the excel sheet
       The second dimension is the row data*/
       let completeSpreadSheetData =
@@ -83,7 +85,7 @@ export default class extends Runner {
              ["baz", null, "qux"]*/
           ]
 
-      //Add data to the spreadsheet row by row, adding a blank column at the beginning
+      //Add data to the spreadsheet row by row, adding a blank column at the beginning of each row
       for(let dataRowIdx in tableData)
       {
         let newRowArray = _.values(tableData[dataRowIdx]);
@@ -94,14 +96,14 @@ export default class extends Runner {
       workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
 
 
-
-      //NOW FORMAT THE SHEET
+      //TODO: formatting concerns need to be refactored into a separate method
+      //NOW FORMAT THE SHEETS
       //From the xlsx-style docs:
       /*Cell range objects are stored as {s:S, e:E} where S is the first cell and E is the last cell in the range.
       The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
       let currentSheet = workbook.Sheets[modelTable];
 
-      //TODO: formatting concerns need to be refactored into a separate method
+
       /*FORMAT SHEETS*/
       //****************FORMAT GROUP HEADER**************
       let headerTextOrientation = 'center';
@@ -120,10 +122,10 @@ export default class extends Runner {
         let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
         //DEFAULT FORMATTING FOR GROUP.
-       // headerTextOrientation = 'right';
+        let groupRowColor = { rgb: 'cccccc' };
         currentSheet[cellAddress].s =
         {
-          alignment: {horizontal: headerTextOrientation, vertical: 'center'},
+          alignment: {horizontal: 'center', vertical: 'center'},
           border: {
             left: {style: 'thick', color: {auto: 1}},
             right: {style: 'thick', color: {auto: 1}},
@@ -131,60 +133,42 @@ export default class extends Runner {
             bottom: {style: 'thick', color: {auto: 1}}
           },
           font: {bold: 'true'},
-          fill: {fgColor: {rgb: 'cccccc'}}
+          fill: {fgColor: groupRowColor}
         }
 
         //OVERRIDE GROUP FORMATTING
         if( currentSheet[nextCellAddressToTheRight] &&
             currentSheet[nextCellAddressToTheRight].v == '')
         {
-          currentSheet[cellAddress].s =
-          {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-            border: {
-              left: {style: 'thick', color: {auto: 1}},
-              right: {style: 'hair', color: {auto: 1}},
-              top: {style: 'thick', color: {auto: 1}},
-              bottom: {style: 'thick', color: {auto: 1}}
-            },
-            font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'cccccc'}}
-          }
+          //this is a hack to try and move the text closer to the "center" when a group takes up two columns
+          currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
+          currentSheet[cellAddress].s.border.right = {style:'hair', color: groupRowColor};
         }
         if (currentSheet[cellAddress].v == '')// Do not bold the border if this cell is empty
         {
-          currentSheet[cellAddress].s =
-          {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-            border: {
-              left: {style: 'hair', color: {auto: 1}},
-              right: {style: 'thick', color: {auto: 1}},
-              top: {style: 'thick', color: {auto: 1}},
-              bottom: {style: 'thick', color: {auto: 1}}
-            },
-            font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'cccccc'}}
-          }
+          currentSheet[cellAddress].s.border.left = {style: 'hair', color: groupRowColor};
         }
         //console.log(`old ${currentSheet[cellAddress].v}`);
       }
 
       /*FORMAT NAME HEADER*/
-      for(let nameIdx in typeHeader)
+      let nameTypeColumnBorderStyle = 'thin';
+      let nameTypeColumnFillColor =  {rgb: 'f2f2f2'};
+      for(let nameHeaderIdx in typeHeader)
       {
-        let cellAddress = XLSX.utils.encode_cell({c: nameIdx, r: 1});//row 1 of excel output
-
+        let cellAddress = XLSX.utils.encode_cell({r: 1, c: nameHeaderIdx});//row 1 of excel output
+        
         if(currentSheet[cellAddress])//if there is data to format
         {
           currentSheet[cellAddress].s = {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
+            alignment: {horizontal: 'left', vertical: 'center'},
             border: {
-              left: {style: 'hair', color: {auto: 1}},
-              right: {style: 'hair', color: {auto: 1}},
+              left: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
+              right: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
               top: {style: 'hair', color: {auto: 1}},
-              bottom: {style: 'hair', color: {auto: 1}}
+              bottom: {style: 'hair', color: nameTypeColumnFillColor}
             },
-            fill: {fgColor: {rgb: 'f2f2f2'}}
+            fill: {fgColor: nameTypeColumnFillColor}
           };
         }
       }
@@ -192,56 +176,40 @@ export default class extends Runner {
       /*FORMAT TYPE HEADER*/
       for(let typeIdx in typeHeader)
       {
-        let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
-        if(currentSheet[cellAddress])//if there is data to format
-        {
+        let cellAddress = XLSX.utils.encode_cell({r: 2,c: typeIdx});
         currentSheet[cellAddress].s = {
-          alignment: {horizontal: headerTextOrientation, vertical: 'center'},
+          font:{color: {rgb: '808080'}},//this changes the color of the data/text to grey-ish
+          alignment: {horizontal: 'left', vertical: 'center'},
           border: {
-            left: {style: 'hair', color: {auto: 1}},
-            right: {style: 'hair', color: {auto: 1}},
-            top: {style: 'hair', color: {auto: 1}},
-            bottom: {style: 'hair', color: {auto: 1}}
+            left: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
+            right: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
+            top: {style: 'hair', color: nameTypeColumnFillColor},//making the border the same color as the 'fill' effectively hides them from sight
+            bottom: {style: 'hair', color: nameTypeColumnFillColor}
           },
-          fill: {fgColor: {rgb: 'f2f2f2'}}
-        };
-        }
-      }
-
-      //probably delete this? Duplicate code.
-      for(let typeIdx in typeHeader)
-      {
-        let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
-        currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'center', vertical: 'center'},
-          border: {
-            left: {style: 'hair', color: {auto: 1}},
-            right: {style: 'hair', color: {auto: 1}},
-            top: {style: 'hair', color: {auto: 1}},
-            bottom: {style: 'hair', color: {auto: 1}}
-          },
-          //font: {bold: 'true'},
-          fill: {fgColor: {rgb: 'f2f2f2'}}
+          fill: {fgColor: nameTypeColumnFillColor}
         };
       }
 
+      //Format column header
       for(let columnIdx in columnHeader)
       {
-        let cellAddress = XLSX.utils.encode_cell({c: columnIdx, r: 3});
+        let cellAddress = XLSX.utils.encode_cell({r: 3,c: columnIdx});
         currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'right', vertical: 'center'},
+          alignment: {horizontal: 'left', vertical: 'center'},
           border: {
-            left: {style: 'hair', color: {auto: 1}},
-            right: {style: 'hair', color: {auto: 1}},
-            top: {style: 'hair', color: {auto: 1}},
+            left: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
+            right: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
+            top: {style: 'hair', color: nameTypeColumnFillColor},
             bottom: {style: 'thick', color: {auto: 1}}
           },
-          fill: {fgColor: {rgb: 'f2f2f2'}}
+          fill: {fgColor: nameTypeColumnFillColor}
         };
       }
 
-      //Rows don't seem to be zero indexed. This is the hard code for justification of the header
-      let cellAddress = XLSX.utils.encode_cell({c: 0, r: 2});
+      let cellAddress = undefined;
+      //This is the hard code for justification of the header for rows 1, 2 and 3
+      //TODO: only override properties that have changed from the baseline style
+      cellAddress = XLSX.utils.encode_cell({r: 3, c: 0});
       currentSheet[cellAddress].s = {
         alignment: {horizontal: 'right', vertical: 'center'},
         border: {
@@ -253,23 +221,33 @@ export default class extends Runner {
         fill: {fgColor: {rgb: 'f2f2f2'}}
       };
 
-      //Rows don't seem to be zero indexed. This is the hard code for justification of the header
-       cellAddress = XLSX.utils.encode_cell({c: 0, r: 3});
+      cellAddress = XLSX.utils.encode_cell({r: 2, c: 0});
       currentSheet[cellAddress].s = {
         alignment: {horizontal: 'right', vertical: 'center'},
         border: {
           left: {style: 'hair', color: {auto: 1}},
           right: {style: 'hair', color: {auto: 1}},
           top: {style: 'hair', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
+          bottom: {style: 'hair', color: {auto: 1}}
         },
         fill: {fgColor: {rgb: 'f2f2f2'}}
       };
+
+      //Override Name, Type, and Column headers style (the first column of the headers
+      cellAddress = XLSX.utils.encode_cell({ r: 1, c: 0});
+      currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
+      currentSheet[cellAddress].s.border.right = {style: 'thick', color: {auto: 1}};
+
+      cellAddress = XLSX.utils.encode_cell({ r: 2, c: 0});
+      currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
+      currentSheet[cellAddress].s.border.right = {style: 'thick', color: {auto: 1}};
+
+      cellAddress = XLSX.utils.encode_cell({ r: 3, c: 0});
+      currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
+      currentSheet[cellAddress].s.border.right = {style: 'thick', color: {auto: 1}};
+
 
     }
-
-
-    /*HARD CODED FORMATTING*/
 
 
     return workbook;
