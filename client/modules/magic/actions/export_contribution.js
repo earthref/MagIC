@@ -14,7 +14,7 @@ export default class extends Runner {
     this.VersionGetter = new GetContributionVersion({LocalState});
     this.version;
     this.model;
-  }
+    }
 
   /*To extended text is a boolean indicating whether or not the text should be extended*/
   toText(jsonToExport, toExtendedText) {
@@ -30,11 +30,51 @@ export default class extends Runner {
 
     this.testValidityOfTablesAndColumns(jsonToExport);
 
-
     // TODO: use the model to build up text string here
     let text = this.createTSVfile(jsonToExport, toExtendedText);
 
     return text;
+  }
+
+  _findColumnWidthsBasedOnHeaders(completeSpreadSheetData)
+  {
+    let numberOfColumns = completeSpreadSheetData[0].length;//using the first row to infer the number of columns for the entire spreadsheet
+    let workSheetColWidths = new Array(numberOfColumns).fill({wch:0});
+    for(let rowIdx in completeSpreadSheetData)
+    {
+      console.log(`NEW ROW IDX **** ${rowIdx}`);
+      for(let colIdx in completeSpreadSheetData[rowIdx])
+      {
+        console.log(`Investigating row: ${rowIdx} and column : ${colIdx}`);
+        console.log(`Column Data: ${completeSpreadSheetData[rowIdx][colIdx]}   Data length: ${completeSpreadSheetData[rowIdx][colIdx].length}`);
+        console.log(`Old Data Length: ${workSheetColWidths[colIdx]}   New Data length: ${completeSpreadSheetData[rowIdx][colIdx].length}`);
+        if(completeSpreadSheetData[rowIdx][colIdx].length > workSheetColWidths[colIdx].wch)
+        {///GGGG NEVER GETTING INTO THIS LOOOP
+          console.log(`Replacing colIDX ${colIdx} value: ${workSheetColWidths[colIdx]} with ${completeSpreadSheetData[rowIdx][colIdx].length}`);
+          workSheetColWidths[colIdx] = {wch:completeSpreadSheetData[rowIdx][colIdx].length};
+          console.log(`replacement json: ${JSON.stringify(workSheetColWidths[colIdx])}`);
+        }
+      }
+    }
+
+    //now create the xlxs-style friendly object containing column lenghts
+    /*let
+    for(let colLengthIdx in workSheetColWidths)
+    {
+
+    }*/
+/*groupHeader ,
+ nameHeader,
+ typeHeader,
+ columnHeader
+ */
+    /*var wscols = [
+      {wch:6},
+      {wch:7},
+      {wch:10}
+    ];*/
+    return workSheetColWidths;
+
   }
 
   //Per requirements, this will only work for model 3.0
@@ -42,11 +82,18 @@ export default class extends Runner {
     this.version = this.VersionGetter.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
     this.model = magicDataModels[this.version];
     this.orderedModel = this.createOrderedModel(jsonToExport);
+    //Now set properties related to the header for this sheet.
+    //I'm making these class variables as they apply globally to all generated sheets, although obviously they only apply to excel exports
+    this.HEADER_ROW_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
+    this.HEADER_COL_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
+    this.HEADER_ROW_END_IDX = 3;//hard coded as there are always four header columns
+    this.LAST_COL_IDX = {};//this is the only dimension that is variable for the header and will be populated with integers on a sheet by sheet basis
+    this.COL_WIDTHS = {};//this will contain an array for each sheet containing width formatting info for each column
 
     // Create an empty workbook
     let workbook = { SheetNames: [], Sheets: {} };
 
-    let style = {fill:{patternType: 'solid'},  font:{}, numFmt:{}, alignment:{}, border:{}};
+//    let style = {fill:{patternType: 'solid'},  font:{}, numFmt:{}, alignment:{}, border:{}};
 
     //Create a sheet for each table in the model, and add headers and data to it
     for(let modelTable in this.model.tables)
@@ -54,7 +101,7 @@ export default class extends Runner {
       workbook.SheetNames.push(modelTable);//Create a sheet for each table in the 3.0 model in the workbook.
 
       //gather the data for the table headers
-      let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport/*, orderedColumnArray*/);
+      let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport);
 
       /*These the first four rows of the excel file, and they will always be the same*/
       let groupHeader = tableHeaders.groupHeader;
@@ -67,8 +114,8 @@ export default class extends Runner {
       let columnHeader = tableHeaders.columnNameHeader;
       columnHeader.unshift('Column:  ');
 
-      //Now gather the data from the json object
-      let tableData = jsonToExport[modelTable];
+      this.LAST_COL_IDX[modelTable] = groupHeader.length - 1;
+    // console.log(`${this.LAST_COL_IDX[modelTable]}`);
 
       /*Create array of sheet headers. This will be an array of arrays.
       The first dimension of the array is the row in the excel sheet
@@ -85,6 +132,8 @@ export default class extends Runner {
              ["baz", null, "qux"]*/
           ]
 
+      //Now gather the data from the json object
+      let tableData = jsonToExport[modelTable];
       //Add data to the spreadsheet row by row, adding a blank column at the beginning of each row
       for(let dataRowIdx in tableData)
       {
@@ -94,7 +143,9 @@ export default class extends Runner {
       }
 
       workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
+      //workbook.Sheets[modelTable].columnWidths = this._findColumnWidthsBasedOnHeaders();
 
+//      console.log(`json: ${JSON.stringify(workbook.Sheets[modelTable])}`);
 
       //TODO: formatting concerns need to be refactored into a separate method
       //NOW FORMAT THE SHEETS
@@ -103,14 +154,13 @@ export default class extends Runner {
       The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
       let currentSheet = workbook.Sheets[modelTable];
 
-
       /*FORMAT SHEETS*/
+      currentSheet['!cols'] = this._findColumnWidthsBasedOnHeaders(completeSpreadSheetData);// !cols is a special property of a worksheet that has a list of properties for each column
+      console.log(`json: ${JSON.stringify(currentSheet['!cols'])}`);
       //****************FORMAT GROUP HEADER**************
-      let headerTextOrientation = 'center';
       for(let groupIdx in groupHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({r: 0,c: groupIdx});
-        console.log(`here: ${cellAddress}`);
 
         /*later, we need to compare the next and previous columns for formatting purposes*/
         let nextCellColIdx = Number(groupIdx);
@@ -119,7 +169,7 @@ export default class extends Runner {
         previousColIdx--;
 
         let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
-        let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
+        //let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
         //DEFAULT FORMATTING FOR GROUP.
         let groupRowColor = { rgb: 'cccccc' };
@@ -178,7 +228,7 @@ export default class extends Runner {
       {
         let cellAddress = XLSX.utils.encode_cell({r: 2,c: typeIdx});
         currentSheet[cellAddress].s = {
-          font:{color: {rgb: '808080'}},//this changes the color of the data/text to grey-ish
+          font:{color: {rgb: '808080'}},//this changes the color of the TYPE header text to grey-ish
           alignment: {horizontal: 'left', vertical: 'center'},
           border: {
             left: {style: nameTypeColumnBorderStyle, color: {auto: 1}},
