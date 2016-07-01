@@ -553,27 +553,11 @@ export default class extends Runner {
           text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport/*, orderedColumnArray*/)
         }
 
-        //*********now create the column headers for this table*************
-      let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort
-      let orderedListOfColumnsAddedToHeader = [];//TODO:the object and the array are a bit of a duplicate effort
-      for(let orderedColIdx in this.orderedModel[orderedTableIdx][tableName])//loop through the columns in the ordered model
-      {
-        let orderedColumnNameToPotentiallyAdd = this.orderedModel[orderedTableIdx][tableName][orderedColIdx];
-        for(let jsonRowsIdx in jsonToExport[tableName])
-        {
-          //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
-          // column header in the TSV, then add it
-          if(jsonToExport[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
-              !columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] )
-          {
-            columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';
-            orderedListOfColumnsAddedToHeader.push(orderedColumnNameToPotentiallyAdd);
-          }
-        }
-      }
+        //*********now create the column headers for this table************
+        let orderedColumnNames = this.orderedModel[orderedTableIdx][tableName];
+        let orderedListOfColumnsAddedToHeader = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport,orderedColumnNames);
         //add the collected column headers to the TSV here
         text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
-
 
         /***************Now add all data from the table to the TSV*****************/
         for(let jsonRowsIdx in jsonToExport[tableName])
@@ -601,6 +585,28 @@ export default class extends Runner {
       }
     }
     return text;
+  }
+
+  filterRelevantOrderedListOfColumns(tableName, jsonToExport, orderedColumnNames)
+  {
+    let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort, this simply keeps track of columns we have already seen by adding a property
+    let orderedListOfColumnsAddedToHeader = [];//TODO:the object and the array are a bit of a duplicate effort
+    for(let orderedColIdx in orderedColumnNames)//loop through the columns in the ordered model
+    {
+      let orderedColumnNameToPotentiallyAdd = orderedColumnNames[orderedColIdx];
+      for(let jsonRowsIdx in jsonToExport[tableName])
+      {
+        //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
+        // column header in the TSV, then add it
+        if(jsonToExport[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
+            !columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] )
+        {
+          columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';//keep track of columns we've seen
+          orderedListOfColumnsAddedToHeader.push(orderedColumnNameToPotentiallyAdd);
+        }
+      }
+    }
+    return orderedListOfColumnsAddedToHeader;
   }
 
   handleSpecialCases(dataToManipulate, columnName)
