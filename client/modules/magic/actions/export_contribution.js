@@ -2,9 +2,6 @@ import {_} from 'lodash';
 import XLSX from 'xlsx-style';
 import Runner from '../../core/actions/runner.js';
 import GetContributionVersion from './get_contribution_version';
-//import json2csv from 'json2csv';
-
-import {default as magicVersions} from '../configs/magic_versions';
 import {default as magicDataModels} from '../configs/data_models/data_models';
 
 export default class extends Runner {
@@ -19,7 +16,6 @@ export default class extends Runner {
   /*To extended text is a boolean indicating whether or not the text should be extended*/
   toText(jsonToExport, toExtendedText) {
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
-
     // Retrieve the data model version used in the jsonToExport
     this.version = this.VersionGetter.getVersion(jsonToExport)
     if (!this.version) return jsonToExport;
@@ -43,28 +39,35 @@ export default class extends Runner {
     this.orderedModel = this.createOrderedModel(jsonToExport);
     //Now set properties related to the header for this sheet.
     //I'm making these class variables as they apply globally to all generated sheets, although obviously they only apply to excel exports
-    this.HEADER_ROW_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
-    this.HEADER_COL_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
+    //this.HEADER_ROW_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
+    //this.HEADER_COL_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
     this.HEADER_ROW_END_IDX = 3;//hard coded as there are always four header columns
     this.LAST_COL_IDX = {};//for each table/sheet, will be populated with an integer, indicating the last column for that sheet
     this.LAST_ROW_IDX = {};//for each table/sheet, will be populated with an integer, indicating the last row for that sheet
-    this.COL_WIDTHS = {};//this will contain an array for each sheet containing width formatting info for each column
+    //this.COL_WIDTHS = {};//this will contain an array for each sheet containing width formatting info for each column
 
     // Create an empty workbook
     let workbook = { SheetNames: [], Sheets: {} };
 
     //Create a sheet for each table in the model, and add headers and data to it
-    for(let modelTable in this.model.tables)
+    //for(let orderedTableIdx in this.orderedModel)
+    for(let tableName in this.model.tables)
     {
-      workbook.SheetNames.push(modelTable);//Create a sheet for each table in the 3.0 model in the workbook.
+      //let tableName = Object.getOwnPropertyNames(this.orderedModel[orderedTableIdx]);//loop through the tables in the model
+
+      if(!jsonToExport[tableName])//only process this table if it exists in the json to export file
+        continue;
+
+      workbook.SheetNames.push(tableName);//Create a sheet for each table in the 3.0 model in the workbook.
+
+//      console.log(`Before SHEET: ${tableName}  Index:  ${orderedTableIdx}` );
 
       //gather the data for the table headers
-      let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport);
+      let tableHeaders = this.createExtendedHeadersData(tableName, jsonToExport);
 
       /*These the first four rows of the excel file, and they will always be the same*/
       let groupHeader = tableHeaders.groupHeader;
-      groupHeader.unshift('Group:  ');//place 'Group' at the beginning of the array
-      //console.log(`groupHD${groupHeader}`);
+      groupHeader.unshift('Group:  ');//place 'Group' at the beginning of the array;
       let nameHeader = tableHeaders.labelHeader;
       nameHeader.unshift('Name:  ');
       let typeHeader = tableHeaders.columnTypeOrUnitHeader;
@@ -75,7 +78,6 @@ export default class extends Runner {
       /*Create array of sheet headers. This will be an array of arrays.
       The first dimension of the array is the row in the excel sheet
       The second dimension is the row data*/
-
       let completeSpreadSheetData =
           [
             groupHeader ,
@@ -89,31 +91,49 @@ export default class extends Runner {
           ]
 
       //Now gather the data from the json object
-      let tableData = jsonToExport[modelTable];
+      let jsonTableData = jsonToExport[tableName];
+
       //Add data to the spreadsheet row by row, adding a blank column at the beginning of each row
-      for(let dataRowIdx in tableData)
+      for(let jsonRowDataIdx in jsonTableData)
       {
-        let newRowArray = _.values(tableData[dataRowIdx]);
-        //newRowArray.map(this.convertUndefinedToEmptyString);//attempt to replace undefined with blank spaces
-        console.log(`new row ${newRowArray}`);
-        newRowArray.unshift('');//Add a blank column at the beginning of each row
-        console.log(`row added: ${newRowArray}`);
-        //GGG MUST USE ORDERED MODEL HERE TO MAKE SURE COLUMN DATA IS IN ORDER!
+        //console.log(` ${jsonTableData[jsonRowDataIdx]}`);
+        ///Insert data into each column of a row in the proper row order
+        //let orderedColumnNames = this.orderedModel[orderedTableIdx][tableName];
+        let orderedColListForThisJsonTable = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport, -1/*orderedColumnNames*/);
+        let numberOfColumns = orderedColListForThisJsonTable.length;
+        let newRowArray = [];
+        for(let colNameIdx in orderedColListForThisJsonTable)
+        {
+          //grab the column names in order, extract from unordered JSON and add to ordered array
+          let colName = orderedColListForThisJsonTable[colNameIdx];
+
+          //console.log(`Trying to get data from JSON.  table: ${tableName}  jsonRowIdx: ${jsonRowDataIdx} ColName: ${colName} `);
+          let dataToAdd = jsonToExport[tableName][jsonRowDataIdx][colName];
+          if (dataToAdd == undefined){dataToAdd = '';}//for rows with no data
+
+          newRowArray.push(dataToAdd);//add one data column to the row
+        }
+
+//        console.log(`Adding new row data: ${newRowArray}`);
+        newRowArray.unshift('');//this makes the first column blank
+        //console.log(`First Data Column${newRowArray[0]}`);
+        //console.log(`Second Data Column${newRowArray[1]}`);
         completeSpreadSheetData.push(newRowArray);
+
+
       }
 
       //book keeping for later regarding spreadsheet dimensions
-      this.LAST_COL_IDX[modelTable] = groupHeader.length - 1;
-      this.LAST_ROW_IDX[modelTable] = completeSpreadSheetData.length- 1;
+      this.LAST_COL_IDX[tableName] = groupHeader.length - 1;
+      this.LAST_ROW_IDX[tableName] = completeSpreadSheetData.length- 1;
 
       //Create sheet for workbook
-      workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
+      workbook.Sheets[tableName] = this._toSheet(completeSpreadSheetData);
 
       //TODO: formatting concerns need to be refactored into a separate method
-      //NOW FORMAT THE SHEETS
-      let currentSheet = workbook.Sheets[modelTable];
-
       /************FORMAT SHEETS**************/
+      let currentSheet = workbook.Sheets[tableName];
+
       //find proper column widths
       currentSheet['!cols'] = this._findColumnWidthsBasedOnHeaders(completeSpreadSheetData);// !cols is a special property of a worksheet that has a list of properties for each column
 
@@ -158,7 +178,6 @@ export default class extends Runner {
         {
           currentSheet[cellAddress].s.border.left = {style: 'hair', color: groupRowColor};
         }
-        //console.log(`old ${currentSheet[cellAddress].v}`);
       }
 
       /**********FORMAT NAME HEADER**********/
@@ -228,11 +247,11 @@ export default class extends Runner {
 
          Below are some attempts to make it work, similar to attempts made by others. These fields are apparently ignored as they have no effect on the output
          */
-        currentSheet[cellAddress].w = undefined;
+        /*currentSheet[cellAddress].w = undefined;
         currentSheet[cellAddress].t = 's';
         currentSheet[cellAddress].h = 'true';
 
-        currentSheet[cellAddress].l= {Target: 'pleaseWork'}; //{ Target: 'testItBaby', tooltip: 'No Chance'};//`<a href="url">${currentSheet[cellAddress].v}</a>`;
+        currentSheet[cellAddress].l= {Target: 'pleaseWork'}; //{ Target: 'testItBaby', tooltip: 'No Chance'};//`<a href="url">${currentSheet[cellAddress].v}</a>`;*/
         //currentSheet[cellAddress].v = currentSheet[cellAddress].v.display;
         //currentSheet[cellAddress].w = `<a href="url">${currentSheet[cellAddress].v}</a>`;
         //'https://earthref.org/MagIC/data-models/3.0/#[table].[column]'
@@ -274,16 +293,19 @@ export default class extends Runner {
       fill: {fgColor: {rgb: 'f2f2f2'}}
     };
 
-     /*****FORMAT DATA CELLS*****/
-      this.formatDataCells(currentSheet);
+      //console.log(`json:\n ${JSON.stringify(currentSheet)}`);
 
+     /*****FORMAT DATA CELLS*****/
+     //currentSheet = this.formatDataCells(currentSheet);
 
       /****FORMAT FINAL CONCERNS****/
-      currentSheet = this.finalFormattingConcerns(currentSheet, modelTable);
+      //currentSheet = this.finalFormattingConcerns(currentSheet, modelTable);
     }
+
     return workbook;
   }
 
+  /*This is a placeholder for one of the final formatting concerns, right justifying floats/doubles*/ //GGG i gigure this is low priority
   formatDataCells(currentSheet)
   {
    /* if(currentSheet[cellAddress])
@@ -292,7 +314,8 @@ export default class extends Runner {
     }*/
   }
 
-
+  /*This is where we hope to clean up formatting odds and ends that didn't fit into any previous slot*/
+  //GGG Currently buggy
   finalFormattingConcerns(currentSheet, modelTable)
   {
     console.log(`Table ${modelTable}`);
@@ -315,7 +338,6 @@ export default class extends Runner {
         }
       };
 
-      //console.log(`start ${this.HEADER_ROW_END_IDX +1}   Last: ${this.LAST_ROW_IDX[modelTable]}`);
       console.log(`json: ${JSON.stringify(cellAddressLastColumn)}  Value: ${currentSheet[cellAddressLastColumn]}`);
       //console.log(`data sheet: ${JSON.stringify(currentSheet[cellAddressLastColumn])}`);
       //The beginning and end of the table rows have thick left and right cell borders
@@ -350,6 +372,7 @@ export default class extends Runner {
       {
         if(completeSpreadSheetData[rowIdx][colIdx].length > workSheetColWidths[colIdx].wch)
         {
+//          console.log(`LAST COL IDX COLS ROW 0: ${numberOfColumns - 1} accessing col: ${colIdx}`);
           workSheetColWidths[colIdx] = {wch:completeSpreadSheetData[rowIdx][colIdx].length};
         }
       }
@@ -358,54 +381,11 @@ export default class extends Runner {
     return workSheetColWidths;
   }
 
-  convertUndefinedToEmptyString(currentValue, currentIdx, arrayToChange)
-  {
-    if(currentValue == undefined)
-    {
-      console.log(`I"M IN BABY ${currentValue}`);
-      arrayToChange[currentIdx] = '';
-    }
-  }
-
-  _datenum(v, date1904) {
-    if(date1904) v+=1462;
-    var epoch = Date.parse(v);
-    return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
-  }
-
-  _toSheet(data, opts) {
-    var workSheet = {};
-    var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
-    for(var R = 0; R != data.length; ++R) {
-      for(var C = 0; C != data[R].length; ++C) {
-        if(range.s.r > R) range.s.r = R;
-        if(range.s.c > C) range.s.c = C;
-        if(range.e.r < R) range.e.r = R;
-        if(range.e.c < C) range.e.c = C;
-        var cell = {v: data[R][C] };
-        if(cell.v == null) continue;
-        var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
-
-        if(typeof cell.v === 'number') cell.t = 'n';
-        else if(typeof cell.v === 'boolean') cell.t = 'b';
-        else if(cell.v instanceof Date) {
-          cell.t = 'n'; cell.z = XLSX.SSF._table[14];
-          cell.v = this._datenum(cell.v);
-        }
-        else cell.t = 's';
-
-        workSheet[cell_ref] = cell;
-      }
-    }
-    if(range.s.c < 10000000) workSheet['!ref'] = XLSX.utils.encode_range(range);
-    return workSheet;
-  }
-
   //creates a single extended header TSV based on the table
   generateExtendedHeaderTSV(tableName, jsonToExport)
   {
     let extendedHeader = '';
-    let extraHeaderData = this.createExtendedHeadersData(tableName, jsonToExport/*, orderedColumnArray*/);
+    let extraHeaderData = this.createExtendedHeadersData(tableName, jsonToExport);
 
     extendedHeader = extendedHeader + extraHeaderData.groupHeader.join('\t');
     extendedHeader = extendedHeader + '\n';
@@ -428,14 +408,9 @@ export default class extends Runner {
         return this.orderedModel[orderedTableIdx][tableName];
       }
     }
-
-    /*this.orderedModel.indexOf(this.orderedModel[tableName]);
-    console.log(`index of: ${orderedTableIdx}`);
-    let orderedColumnArray = this.orderedModel[orderedTableIdx][tableName];//this.orderedModel[orderedTableIdx][tableName];*/
-
   };
 
-  createExtendedHeadersData(tableName, jsonToExport/*, orderedColumnArray*/)
+  createExtendedHeadersData(tableName, jsonToExport)
   {
     // returns data to be used for extra headers (groups, columns names, and units)
     let discoveredColumns = {};
@@ -444,7 +419,6 @@ export default class extends Runner {
     let labelHeaderArray = [];
     let columnTypeOrUnitHeaderArray = [];
     let columnHeaderArray = [];
-    //let orderedTableIdx = _getOrderedColumnList
     let orderedColumnArray = this._getOrderedColumnList(tableName);
     
     //loop through ordered model columns for this table, see if json has data from that column
@@ -489,19 +463,21 @@ export default class extends Runner {
     return orderedHeaderData;
   }
 
+  /**
+   Logic for column type/unit row:
+
+  if type === 'Number'
+    if unit === 'Dimensionless' or 'Custom' or empty
+      print 'Number'
+    else
+      print 'Number in [unit]'
+  else if unit === 'Flag'
+      print 'Flag'
+  else
+      print '[type]'
+   **/
   getColumnTypeOrUnitString(tableName, potentialColumnToAdd)
   {
-    // logic for column type/unit row:
-    // if type === 'Number'
-    //   if unit === 'Dimensionless' or 'Custom' or empty
-    //     print 'Number'
-    //   else
-    //     print 'Number in [unit]'
-    // else if unit === 'Flag'
-    //     print 'Flag'
-    // else
-    //     print '[type]'
-
     let columnTypeOrUnitString = '';
     let columnType = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['type'];
     let columnUnit = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['unit'];
@@ -549,13 +525,12 @@ export default class extends Runner {
         //If we want extended headers, pass in the ordered column list
         if (toExtendedText)
         {
-          /*let orderedColumnArray = orderedModel[orderedTableIdx][tableName];*/
-          text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport/*, orderedColumnArray*/)
+          text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport)
         }
 
         //*********now create the column headers for this table************
         let orderedColumnNames = this.orderedModel[orderedTableIdx][tableName];
-        let orderedListOfColumnsAddedToHeader = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport,orderedColumnNames);
+        let orderedListOfColumnsAddedToHeader = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport, orderedColumnNames);//<---try to put -1 for orderedColumnNames
         //add the collected column headers to the TSV here
         text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
 
@@ -572,7 +547,7 @@ export default class extends Runner {
             if(colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
               {text = text.concat('\t');}
 
-            dataToAdd =  this.handleSpecialCases(dataToAdd,colName);
+            dataToAdd =  this._handleSpecialCases(dataToAdd,colName);
 
             text = text.concat(dataToAdd);
 
@@ -587,10 +562,34 @@ export default class extends Runner {
     return text;
   }
 
+    /*This returns the ordered list of columns associated with the table name that is passed in
+    * The indices correspond DIRECTLY to the position number in the model, that means that the
+    * zeroith index is empty.*/
+    _findOrderedColumns(tableName)
+    {
+      for(let orderedModelTableIdx in this.orderedModel)
+      {
+        let orderedModelTableName = Object.getOwnPropertyNames(this.orderedModel[orderedModelTableIdx])[0];
+
+        //console.log(`Trying ${tableName}: ${tableName.length}   ModelTableNa ${orderedModelTableName}: ${orderedModelTableName.length}`);
+        if(orderedModelTableName === tableName)
+        {
+            return this.orderedModel[orderedModelTableIdx][tableName];
+        }
+      }
+    }
+
+  //This will extract only the columns that are being used in a given jsonToExport and return an array of those columns
   filterRelevantOrderedListOfColumns(tableName, jsonToExport, orderedColumnNames)
   {
-    let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort, this simply keeps track of columns we have already seen by adding a property
+    let columnsToAddToHeader = {};//TODO:the object and the array are a bit of a duplicate effort, this simply keeps track of columns we have already seen by adding a property
     let orderedListOfColumnsAddedToHeader = [];//TODO:the object and the array are a bit of a duplicate effort
+    if(orderedColumnNames == -1)//find
+    {
+      orderedColumnNames = this._findOrderedColumns(tableName);
+    }
+    console.log(`OrderedColumnNames: ${JSON.stringify(orderedColumnNames)}`);
+
     for(let orderedColIdx in orderedColumnNames)//loop through the columns in the ordered model
     {
       let orderedColumnNameToPotentiallyAdd = orderedColumnNames[orderedColIdx];
@@ -599,17 +598,50 @@ export default class extends Runner {
         //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
         // column header in the TSV, then add it
         if(jsonToExport[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
-            !columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] )
+            !columnsToAddToHeader[orderedColumnNameToPotentiallyAdd] )
         {
-          columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';//keep track of columns we've seen
+          columnsToAddToHeader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';//keep track of columns we've seen
           orderedListOfColumnsAddedToHeader.push(orderedColumnNameToPotentiallyAdd);
         }
       }
     }
+    console.log(`FINAL COL LIST : ${JSON.stringify(orderedListOfColumnsAddedToHeader)}`);
     return orderedListOfColumnsAddedToHeader;
   }
 
-  handleSpecialCases(dataToManipulate, columnName)
+  /*
+    Builds an array of table objects ordered by the "position" property of the data model tables.
+   sort tables using the "position" property of the data model .
+   The array has the following structure:
+   [
+      {tableName1: [column1, column2,...]},
+      {tableName2: [column3, column4,...]},...
+   ]
+   */
+  createOrderedModel(jsonToTranslate)
+  {
+      let tableNames = Object.getOwnPropertyNames(this.model['tables']);
+      let orderedModel = [];
+      for(let tableIdx in tableNames)
+      {
+        let properTablePositionIdx = this.model['tables'][tableNames[tableIdx]].position - 1;
+        orderedModel[properTablePositionIdx] = {[tableNames[tableIdx]]:[]};
+
+        let columnPositionMap = [];
+        let columnNames = Object.getOwnPropertyNames(this.model['tables'][tableNames[tableIdx]].columns);
+        for(let columnIdx in columnNames)
+        {
+          let columnName = columnNames[columnIdx];
+          let columnPosition = this.model['tables'][tableNames[tableIdx]]['columns'][columnName].position;
+          columnPositionMap[columnPosition] = columnName;
+        }
+        //assign the properly ordered array of columns to the object keyed via the current table
+        orderedModel[properTablePositionIdx][tableNames[tableIdx]] = columnPositionMap;
+      }
+    return orderedModel;
+  }
+
+  _handleSpecialCases(dataToManipulate, columnName)
   {
     if (dataToManipulate == '') return dataToManipulate;
 
@@ -633,13 +665,12 @@ export default class extends Runner {
         //we do not want a colon in front of the first
         if (//propertyIdx < 1 ||
         numberOfElementsProcessed < numberOfElements )
-              manipulatedData = manipulatedData + ':';
+          manipulatedData = manipulatedData + ':';
 
-   //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
+        //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
       }
       return manipulatedData;
     }
-
 
     if(columnName == 'rotation_sequence')
     {
@@ -681,62 +712,69 @@ export default class extends Runner {
   }
 
   testValidityOfTablesAndColumns(jsonToTranslate){
-      for (let newTableName in jsonToTranslate) {//this gets the string name of the property 'table'
-        let newTableObject = this.model.tables[newTableName];
-        if(!newTableObject)
-        {
-          this._appendError(`table ${newTableName} is not defined in magic data model version ${this.version}`);
-          continue;
-        }
-
-        //Test to make sure the column names are valid for a given model
-        let columnErrorTracker = {};//keep track of invalid columns we have seen
-        for (let jsonRowIdx in jsonToTranslate[newTableName]) {
-          let jsonColumnNames = Object.getOwnPropertyNames(jsonToTranslate[newTableName][jsonRowIdx]);
-          for (let jsonColumnNameIdx in jsonColumnNames) {
-            let modelColumn = this.model.tables[newTableName].columns[jsonColumnNames[jsonColumnNameIdx]];
-            if (!modelColumn || modelColumn == undefined) {
-              if (!columnErrorTracker[jsonColumnNames[jsonColumnNameIdx]] ) {//only add an error if we don't already have an error on the same column
-                this._appendError(`column ${jsonColumnNames[jsonColumnNameIdx]} in table ${newTableName} is not defined in magic data model version ${this.version}`);
-                //Keeping track of column we have seen for this table. I really only care about the property here, not the value.
-                columnErrorTracker[jsonColumnNames[jsonColumnNameIdx]] = 'placeholder';
-                          }
-                          continue;
-                      }
-                  }
-              }
-          }
+    for (let newTableName in jsonToTranslate) {//this gets the string name of the property 'table'
+      let newTableObject = this.model.tables[newTableName];
+      if(!newTableObject)
+      {
+        this._appendError(`table ${newTableName} is not defined in magic data model version ${this.version}`);
+        continue;
       }
+
+      //Test to make sure the column names are valid for a given model
+      let columnErrorTracker = {};//keep track of invalid columns we have seen
+      for (let jsonRowIdx in jsonToTranslate[newTableName]) {
+        let jsonColumnNames = Object.getOwnPropertyNames(jsonToTranslate[newTableName][jsonRowIdx]);
+        for (let jsonColumnNameIdx in jsonColumnNames) {
+          let modelColumn = this.model.tables[newTableName].columns[jsonColumnNames[jsonColumnNameIdx]];
+          if (!modelColumn || modelColumn == undefined) {
+            if (!columnErrorTracker[jsonColumnNames[jsonColumnNameIdx]] ) {//only add an error if we don't already have an error on the same column
+              this._appendError(`column ${jsonColumnNames[jsonColumnNameIdx]} in table ${newTableName} is not defined in magic data model version ${this.version}`);
+              //Keeping track of column we have seen for this table. I really only care about the property here, not the value.
+              columnErrorTracker[jsonColumnNames[jsonColumnNameIdx]] = 'placeholder';
+            }
+            continue;
+          }
+        }
+      }
+    }
+  }
 
   /*
-    Builds an array of table objects ordered by the "position" property of the data model tables.
-   sort tables using the "position" property of the data model .
-   The array has the following structure:
-   [
-      {tableName1: [column1, column2,...]},
-      {tableName2: [column3, column4,...]},...
-   ]
-   */
-  createOrderedModel(jsonToTranslate)
-  {
-      let tableNames = Object.getOwnPropertyNames(this.model['tables']);
-      let orderedModel = [];
-      for(let tableIdx in tableNames)
-      {
-        let properTablePositionIdx = this.model['tables'][tableNames[tableIdx]].position - 1;
-        orderedModel[properTablePositionIdx] = {[tableNames[tableIdx]]:[]};
+   * This a shitty, terribly documented, albiet necessary function from the xslx-style package.
+   * I am relegating this method to the bowles of this overblown class.
+   * */
+  _toSheet(data, opts) {
+    var workSheet = {};
+    var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
+    for(var R = 0; R != data.length; ++R) {
+      for(var C = 0; C != data[R].length; ++C) {
+        if(range.s.r > R) range.s.r = R;
+        if(range.s.c > C) range.s.c = C;
+        if(range.e.r < R) range.e.r = R;
+        if(range.e.c < C) range.e.c = C;
+        var cell = {v: data[R][C] };
+        if(cell.v == null) continue;
+        var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
 
-        let columnPositionMap = [];
-        let columnNames = Object.getOwnPropertyNames(this.model['tables'][tableNames[tableIdx]].columns);
-        for(let columnIdx in columnNames)
-        {
-          let columnName = columnNames[columnIdx];
-          let columnPosition = this.model['tables'][tableNames[tableIdx]]['columns'][columnName].position;
-          columnPositionMap[columnPosition] = columnName;
+        if(typeof cell.v === 'number') cell.t = 'n';
+        else if(typeof cell.v === 'boolean') cell.t = 'b';
+        else if(cell.v instanceof Date) {
+          cell.t = 'n'; cell.z = XLSX.SSF._table[14];
+          cell.v = this._datenum(cell.v);
         }
-        //assign the properly ordered array of columns to the object keyed via the current table
-        orderedModel[properTablePositionIdx][tableNames[tableIdx]] = columnPositionMap;
+        else cell.t = 's';
+
+        workSheet[cell_ref] = cell;
       }
-    return orderedModel;
+    }
+    if(range.s.c < 10000000) workSheet['!ref'] = XLSX.utils.encode_range(range);
+    return workSheet;
+  }
+
+  /*This menthod is also from the xlsx package example*/
+  _datenum(v, date1904) {
+    if(date1904) v+=1462;
+    var epoch = Date.parse(v);
+    return (epoch - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000);
   }
 }
