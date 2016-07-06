@@ -47,6 +47,7 @@ export default class extends Runner {
 
     this.newMethodCodes = {};
     this.syntheticSpecimenNames = {};
+    this.collisionErrors = {};
     this.undefinedTableColumnErrors = {};
     this.deletedTableColumnWarnings = {};
   }
@@ -344,6 +345,98 @@ export default class extends Runner {
         jsonRowOld['er_specimen_names'] = _.uniq(specimens).join(':');
       }
 
+      // Combine the anisotropy tensor elements into a list
+      if (jsonTableOld === 'pmag_results' && joinTable === 'locations' && (
+        jsonRowOld['eta_dec'        ] ||
+        jsonRowOld['eta_inc'        ] ||
+        jsonRowOld['eta_semi_angle' ] ||
+        jsonRowOld['zeta_dec'       ] ||
+        jsonRowOld['zeta_inc'       ] ||
+        jsonRowOld['zeta_semi_angle'])) {
+        let poleConf = ['','','','','',''];
+        if (jsonRowOld['eta_dec'        ]) poleConf[0] = jsonRowOld['eta_dec'        ];
+        if (jsonRowOld['eta_inc'        ]) poleConf[1] = jsonRowOld['eta_inc'        ];
+        if (jsonRowOld['eta_semi_angle' ]) poleConf[2] = jsonRowOld['eta_semi_angle' ];
+        if (jsonRowOld['zeta_dec'       ]) poleConf[3] = jsonRowOld['zeta_dec'       ];
+        if (jsonRowOld['zeta_inc'       ]) poleConf[4] = jsonRowOld['zeta_inc'       ];
+        if (jsonRowOld['zeta_semi_angle']) poleConf[5] = jsonRowOld['zeta_semi_angle'];
+        jsonRowOld['eta_dec'        ] = poleConf.join(':');
+        delete jsonRowOld['eta_inc'        ];
+        delete jsonRowOld['eta_semi_angle' ];
+        delete jsonRowOld['zeta_dec'       ];
+        delete jsonRowOld['zeta_inc'       ];
+        delete jsonRowOld['zeta_semi_angle'];
+      }
+
+      // Combine the anisotropy tensor elements into a matrix
+      if (jsonTableOld === 'rmag_anisotropy' && (
+          jsonRowOld['anisotropy_s1'] ||
+          jsonRowOld['anisotropy_s2'] ||
+          jsonRowOld['anisotropy_s3'] ||
+          jsonRowOld['anisotropy_s4'] ||
+          jsonRowOld['anisotropy_s5'] ||
+          jsonRowOld['anisotropy_s6'])) {
+        let anisoS = ['','','','','',''];
+        if (jsonRowOld['anisotropy_s1']) anisoS[0] = jsonRowOld['anisotropy_s1'];
+        if (jsonRowOld['anisotropy_s2']) anisoS[1] = jsonRowOld['anisotropy_s2'];
+        if (jsonRowOld['anisotropy_s3']) anisoS[2] = jsonRowOld['anisotropy_s3'];
+        if (jsonRowOld['anisotropy_s4']) anisoS[3] = jsonRowOld['anisotropy_s4'];
+        if (jsonRowOld['anisotropy_s5']) anisoS[4] = jsonRowOld['anisotropy_s5'];
+        if (jsonRowOld['anisotropy_s6']) anisoS[5] = jsonRowOld['anisotropy_s6'];
+        jsonRowOld['anisotropy_s1'] = anisoS.join(':');
+        delete jsonRowOld['anisotropy_s2'];
+        delete jsonRowOld['anisotropy_s3'];
+        delete jsonRowOld['anisotropy_s4'];
+        delete jsonRowOld['anisotropy_s5'];
+        delete jsonRowOld['anisotropy_s6'];
+      }
+
+      // Combine the anisotropy eigenparameters into a matrix
+      for (let i = 1; i <= 3; i++) {
+        if (jsonTableOld === 'rmag_results' && (
+            jsonRowOld['anisotropy_t' + i                     ] ||
+            jsonRowOld['anisotropy_v' + i + '_dec'            ] ||
+            jsonRowOld['anisotropy_v' + i + '_inc'            ]) && (
+            jsonRowOld['anisotropy_v' + i + '_eta_dec'        ] ||
+            jsonRowOld['anisotropy_v' + i + '_eta_inc'        ] ||
+            jsonRowOld['anisotropy_v' + i + '_eta_semi_angle' ] ||
+            jsonRowOld['anisotropy_v' + i + '_zeta_dec'       ] ||
+            jsonRowOld['anisotropy_v' + i + '_zeta_inc'       ] ||
+            jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle'])) {
+          let anisoV = ['', '', '', 'eta/zeta', '', '', '', '', '', ''];
+          if (jsonRowOld['anisotropy_t' + i                     ]) anisoV[0] = jsonRowOld['anisotropy_t' + i                     ];
+          if (jsonRowOld['anisotropy_v' + i + '_dec'            ]) anisoV[1] = jsonRowOld['anisotropy_v' + i + '_dec'            ];
+          if (jsonRowOld['anisotropy_v' + i + '_inc'            ]) anisoV[2] = jsonRowOld['anisotropy_v' + i + '_inc'            ];
+          if (jsonRowOld['anisotropy_v' + i + '_eta_dec'        ]) anisoV[4] = jsonRowOld['anisotropy_v' + i + '_eta_dec'        ];
+          if (jsonRowOld['anisotropy_v' + i + '_eta_inc'        ]) anisoV[5] = jsonRowOld['anisotropy_v' + i + '_eta_inc'        ];
+          if (jsonRowOld['anisotropy_v' + i + '_eta_semi_angle' ]) anisoV[6] = jsonRowOld['anisotropy_v' + i + '_eta_semi_angle' ];
+          if (jsonRowOld['anisotropy_v' + i + '_zeta_dec'       ]) anisoV[7] = jsonRowOld['anisotropy_v' + i + '_zeta_dec'       ];
+          if (jsonRowOld['anisotropy_v' + i + '_zeta_inc'       ]) anisoV[8] = jsonRowOld['anisotropy_v' + i + '_zeta_inc'       ];
+          if (jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle']) anisoV[9] = jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle'];
+          jsonRowOld['anisotropy_t' + i] = anisoV.join(':');
+          delete jsonRowOld['anisotropy_v' + i + '_dec'            ];
+          delete jsonRowOld['anisotropy_v' + i + '_inc'            ];
+          delete jsonRowOld['anisotropy_v' + i + '_eta_dec'        ];
+          delete jsonRowOld['anisotropy_v' + i + '_eta_inc'        ];
+          delete jsonRowOld['anisotropy_v' + i + '_eta_semi_angle' ];
+          delete jsonRowOld['anisotropy_v' + i + '_zeta_dec'       ];
+          delete jsonRowOld['anisotropy_v' + i + '_zeta_inc'       ];
+          delete jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle'];
+        }
+        else if (jsonTableOld === 'rmag_results' && (
+            jsonRowOld['anisotropy_t' + i         ] ||
+            jsonRowOld['anisotropy_v' + i + '_dec'] ||
+            jsonRowOld['anisotropy_v' + i + '_inc'])) {
+          let anisoV = ['', '', ''];
+          if (jsonRowOld['anisotropy_t' + i         ]) anisoV[0] = jsonRowOld['anisotropy_t' + i         ];
+          if (jsonRowOld['anisotropy_v' + i + '_dec']) anisoV[1] = jsonRowOld['anisotropy_v' + i + '_dec'];
+          if (jsonRowOld['anisotropy_v' + i + '_inc']) anisoV[2] = jsonRowOld['anisotropy_v' + i + '_inc'];
+          jsonRowOld['anisotropy_t' + i] = anisoV.join(':');
+          delete jsonRowOld['anisotropy_v' + i + '_dec'];
+          delete jsonRowOld['anisotropy_v' + i + '_inc'];
+        }
+      }
+
     }
 
     for (let jsonColumnOld in jsonRowOld) {
@@ -389,7 +482,8 @@ export default class extends Runner {
             if (!this.modelNew['criteria_map'][jsonColumnOld]) {
               if (!this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
                 this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-                  `is not defined in criteria definition of the MagIC Data Model version ${this.versionNew}.`);
+                  `is an unrecognized criteria column in the mapping from MagIC Data Model version ` +
+                  `${this.versionOld} to ${this.versionNew}.`);
               this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
               continue;
             }
@@ -455,9 +549,21 @@ export default class extends Runner {
             if (jsonColumnNew.match(/^int_rel/) && relativeIntensityNormalization)
               jsonColumnNew = jsonColumnNew.replace(/^int_rel/, 'int_rel_' + relativeIntensityNormalization);
 
+            // Combine descriptions without repetition
+            if (jsonColumnNew === 'description' && tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
+              if (tableRowsNew[jsonTableNew][0][jsonColumnNew].indexOf(jsonValueNew) != -1)
+                jsonValueNew = tableRowsNew[jsonTableNew][0][jsonColumnNew];
+              else if (jsonValueNew.indexOf(tableRowsNew[jsonTableNew][0][jsonColumnNew]) != -1)
+                tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
+              else {
+                tableRowsNew[jsonTableNew][0][jsonColumnNew] += ', ' + jsonValueNew;
+                jsonValueNew = tableRowsNew[jsonTableNew][0][jsonColumnNew];
+              }
+            }
+
           }
 
-          // Normalize lists for easier comparison in _reduce() by sorting them.
+          // Normalize lists for easier comparison in merging by sorting them.
           if (this.modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'List' ||
             this.modelNew['tables'][jsonTableNew]['columns'][jsonColumnNew].type === 'Dictionary') {
             jsonValueNew = jsonValueNew.replace(/(^:|:$)/g, '').split(/:/);
@@ -467,7 +573,17 @@ export default class extends Runner {
           // Add the column value to the new JSON.
           if (!tableRowsNew[jsonTableNew])
             tableRowsNew[jsonTableNew] = [{}];
-          tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
+          /*if (tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined &&
+              tableRowsNew[jsonTableNew][0][jsonColumnNew] !== jsonValueNew &&
+              this.collisionErrors[`${jsonTableOld}.${jsonColumnOld}`] != `${jsonTableNew}.${jsonColumnNew}`) {
+            this._appendError(`MagIC Data Model version ${this.versionOld} column "${jsonColumnOld}" in table ` +
+              `"${jsonTableOld}" is about to map value "${jsonValueNew}" into version ${this.versionNew} ` +
+              `table "${jsonTableNew}", but column "${jsonColumnNew}" already contains the value ` +
+              `"${tableRowsNew[jsonTableNew][0][jsonColumnNew]}".`);
+            this.collisionErrors[`${jsonTableOld}.${jsonColumnOld}`] = `${jsonTableNew}.${jsonColumnNew}`;
+          } else {*/
+            tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
+          //}
 
         }
       }

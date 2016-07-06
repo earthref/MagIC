@@ -5142,7 +5142,7 @@ export default {
       "label": "String equals"
     }]
   },
-  "magic_versions": {
+  "magic_version": {
     "label": "MagIC Data Model Versions",
     "items": [{
       "item": "2.2"
@@ -5154,6 +5154,14 @@ export default {
       "item": "2.5"
     }, {
       "item": "3.0"
+    }]
+  },
+  "boolean": {
+    "label": "Boolean Flags",
+    "items": [{
+      "item": "True"
+    }, {
+      "item": "False"
     }]
   }
 };

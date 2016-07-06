@@ -227,24 +227,23 @@ describe('magic.actions.upgrade_contribution', () => {
     });
 
     // pmag_results and rmag_results in 2.5 and older tables had a loose parent/child relationship.
-
+    //
     // For example a pmag_results row like this, which is a result based on a combination of specimens:
     //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
     //   Location1           Site1            Sample1           Specimen1:Specimen2   0.0000068914
     // had a parent record in the er_samples table with er_samples.er_sample_name = Sample1 because the specimens names
     // in this pmag_results row are plural and describe which of Sample1's specimens were included in the result.
-
+    //
     // Whereas a pmag_results row like this:
     //   er_location_names   er_sites_names   er_sample_names   er_specimens_names    average_intensity
     //   Location1           Site1            Sample1           Specimen1             0.0000052143
     //   Location1           Site1            Sample1           Specimen2             0.000005456
     // had a parent record in the er_specimens table with er_specimens.er_specimen_name = Specimen1.
     // Make sure these rows wind up in the right 3.0 tables.
-
-    //The situation above might represent a rock(sample) split into two pieces (specimens) Each specimen was then
-    //analyzed separately. The rows with a singular er_specimen_names is considered a specimen.
+    //
+    // The situation above might represent a rock(sample) split into two pieces (specimens) Each specimen was then
+    // analyzed separately. The rows with a singular er_specimen_names is considered a specimen.
     // The row with the plural er_specimens_names might represent an average of the two specimens and is considered a sample.
-    //GGG Use this to debug the extra 'samples' and 'specimens' problem
     it('should assign the same column into different tables based on the level', () => {
       const jsonOld = {
         contribution: [{
@@ -260,11 +259,11 @@ describe('magic.actions.upgrade_contribution', () => {
         pmag_results: [{ // this is a sample level result (single sample name)
           er_sample_names: '1',
           er_specimen_names: ':3:1:',
-          average_age: '5'
+          average_int: '5'
         },{ // this is a specimen level result (single specimen name)
           er_sample_names: '1',
           er_specimen_names: '3',
-          average_age: '6'
+          average_int: '6'
         }]
       };
       const jsonNew = {
@@ -274,12 +273,12 @@ describe('magic.actions.upgrade_contribution', () => {
         samples: [{
           sample: '1',
           specimens: '1:3',
-          age: '5'
+          int_abs: '5'
         }],
         specimens: [{
           sample: '1',
           specimen: '3',
-          age: '6'
+          int_abs: '6'
         }]
       };
       return upgradeContributionJSONTest(jsonOld, jsonNew);
@@ -754,7 +753,7 @@ describe('magic.actions.upgrade_contribution', () => {
         pmag_results: [{
           er_sample_names: 'sample1',
           er_specimen_names: 'specimen1:specimen2',
-          average_age: '1'
+          average_int: '1'
         }],
         er_synthetics: [{
           er_synthetic_name: 'synthetic1',
@@ -768,7 +767,7 @@ describe('magic.actions.upgrade_contribution', () => {
         samples: [{
           sample: 'sample1',
           specimens: 'specimen2:synthetic1',
-          age: '1'
+          int_abs: '1'
         }],
         specimens: [{
           specimen: 'specimen2'
@@ -778,6 +777,241 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
+    it('should combine pole confidence ellipse parameters', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_results: [{
+          er_location_names: 'location1',
+          eta_dec: '1',
+          eta_inc: '2',
+          eta_semi_angle: '3',
+          zeta_dec: '4',
+          zeta_inc: '5',
+          zeta_semi_angle: '6'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        locations: [{
+          location: 'location1',
+          pole_conf: '1:2:3:4:5:6'
+        }]
+      };
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
+    it('should combine the anisotropy tensor elements', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        rmag_anisotropy: [{
+          er_specimen_name: 'specimen1',
+          anisotropy_s1: '1',
+          anisotropy_s2: '2',
+          anisotropy_s3: '3',
+          anisotropy_s4: '4',
+          anisotropy_s5: '5',
+          anisotropy_s6: '6'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: 'specimen1',
+          aniso_s: '1:2:3:4:5:6'
+        }]
+      };
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
+    it('should combine the anisotropy eigenparameters', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        rmag_results: [{
+          er_specimen_names: 'specimen1',
+          anisotropy_t1: '1',
+          anisotropy_v1_dec: '2',
+          anisotropy_v1_inc: '3',
+          anisotropy_v1_eta_dec: '4',
+          anisotropy_v1_eta_inc: '5',
+          anisotropy_v1_eta_semi_angle: '6',
+          anisotropy_v1_zeta_dec: '7',
+          anisotropy_v1_zeta_inc: '8',
+          anisotropy_v1_zeta_semi_angle: '9'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: 'specimen1',
+          aniso_v1: '1:2:3:eta/zeta:4:5:6:7:8:9'
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        rmag_results: [{
+          er_specimen_names: 'specimen1',
+          anisotropy_t2: '1',
+          anisotropy_v2_dec: '2',
+          anisotropy_v2_inc: '3'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: 'specimen1',
+          aniso_v2: '1:2:3'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
+    });
+
+    it('should adopt inferred ages up to the sites table', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_site_name: 'site1',
+          er_sample_name: 'sample1',
+          er_specimen_name: 'specimen1'
+        }],
+        pmag_results: [{
+          er_specimen_names: 'specimen1',
+          average_age: '1', // -> pmag_specimens.specimen_inferred_age -> pmag_samples.sample_inferred_age  -> pmag_sites.site_inferred_age
+          average_age_low: '0',
+          average_age_high: '2'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'site1',
+          age: '1'
+        }]
+      };
+      return upgradeContributionJSONTest(jsonOld1, jsonNew1);
+    });
+
+    it('should combine descriptions without repetition', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_results: [{
+          er_site_names: 'site1',
+          pmag_result_name: 'name',
+          result_description: 'a name'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'site1',
+          description: 'a name'
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_results: [{
+          er_site_names: 'site1',
+          pmag_result_name: 'name1',
+          result_description: 'a name'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+          site: 'site1',
+          description: 'name1, a name'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
+    });
+
+    it('should convert dates into ISO 8601 timestamps', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        magic_measurements: [{
+          measurement_date: '2008:07:01:08:46:00.00',
+          measurement_time_zone: 'SAN'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        measurements: [{
+          timestamp: '2008-07-01T15:46Z'
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        magic_measurements: [{
+          measurement_date: '2008:07:01:08:46:00.00'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        measurements: [{
+          timestamp: '2008-07-01T08:46Z'
+        }]
+      };
+      const jsonOld3 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        magic_measurements: [{
+          measurement_time_zone: 'SAN'
+        }]
+      };
+      const jsonNew3 = {
+        contribution: [{
+          magic_version: '3.0'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2),
+        upgradeContributionJSONTest(jsonOld3, jsonNew3)
+      ]);
     });
 
     // TODO: create a rotation matrix, even though they haven't been used properly
@@ -808,7 +1042,8 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       upgradeContributionJSONTest(jsonOld, jsonNew);
-    });*/
+    });
+
     it('should warn about parsing an empty string', () => {
       const jsonOld = {
         contribution: [{
@@ -829,7 +1064,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return upgradeContributionWarningTest(jsonOld, /pmag_rotations/i);
-    });
+    });*/
 
     // TODO: reference to DOI, might need to export er_citation_ids to avoid losing DOIs in upgrades
 
