@@ -550,7 +550,8 @@ export default class extends Runner {
               jsonColumnNew = jsonColumnNew.replace(/^int_rel/, 'int_rel_' + relativeIntensityNormalization);
 
             // Combine descriptions without repetition
-            if (jsonColumnNew === 'description' && tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
+            if (jsonColumnNew === 'description' && tableRowsNew[jsonTableNew] &&
+                tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
               if (tableRowsNew[jsonTableNew][0][jsonColumnNew].indexOf(jsonValueNew) != -1)
                 jsonValueNew = tableRowsNew[jsonTableNew][0][jsonColumnNew];
               else if (jsonValueNew.indexOf(tableRowsNew[jsonTableNew][0][jsonColumnNew]) != -1)
