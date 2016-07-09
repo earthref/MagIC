@@ -44,7 +44,8 @@ export default class extends Runner {
     this.HEADER_ROW_END_IDX = 3;//hard coded as there are always four header columns
     this.LAST_COL_IDX = {};//for each table/sheet, will be populated with an integer, indicating the last column for that sheet
     this.LAST_ROW_IDX = {};//for each table/sheet, will be populated with an integer, indicating the last row for that sheet
-    this.EXTRA_ROW_FORMATTING_PADDING = 20;
+    this.FIRST_DATA_COL_IDX = 1;
+    //this.EXTRA_ROW_FORMATTING_PADDING = 20;
     //this.COL_WIDTHS = {};//this will contain an array for each sheet containing width formatting info for each column
 
     // Create an empty workbook
@@ -60,8 +61,6 @@ export default class extends Runner {
         continue;
 
       workbook.SheetNames.push(tableName);//Create a sheet for each table in the 3.0 model in the workbook.
-
-//      console.log(`Before SHEET: ${tableName}  Index:  ${orderedTableIdx}` );
 
       //gather the data for the table headers
       let tableHeaders = this.createExtendedHeadersData(tableName, jsonToExport);
@@ -97,7 +96,6 @@ export default class extends Runner {
       //Add data to the spreadsheet row by row, adding a blank column at the beginning of each row
       for(let jsonRowDataIdx in jsonTableData)
       {
-        //console.log(` ${jsonTableData[jsonRowDataIdx]}`);
         ///Insert data into each column of a row in the proper row order
         //let orderedColumnNames = this.orderedModel[orderedTableIdx][tableName];
         let orderedColListForThisJsonTable = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport, -1/*orderedColumnNames*/);
@@ -107,21 +105,13 @@ export default class extends Runner {
         {
           //grab the column names in order, extract from unordered JSON and add to ordered array
           let colName = orderedColListForThisJsonTable[colNameIdx];
-
-          //console.log(`Trying to get data from JSON.  table: ${tableName}  jsonRowIdx: ${jsonRowDataIdx} ColName: ${colName} `);
           let dataToAdd = jsonToExport[tableName][jsonRowDataIdx][colName];
           if (dataToAdd == undefined){dataToAdd = '';}//for rows with no data
 
           newRowArray.push(dataToAdd);//add one data column to the row
         }
-
-//        console.log(`Adding new row data: ${newRowArray}`);
         newRowArray.unshift('');//this makes the first column blank
-        //console.log(`First Data Column${newRowArray[0]}`);
-        //console.log(`Second Data Column${newRowArray[1]}`);
         completeSpreadSheetData.push(newRowArray);
-
-
       }
 
       //book keeping for later regarding spreadsheet dimensions
@@ -148,9 +138,6 @@ export default class extends Runner {
         let previousColIdx = Number(groupIdx);
             nextCellColIdx++;//
         previousColIdx--;
-
-
-        //let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
         //DEFAULT FORMATTING FOR GROUP.
         let groupRowColor = { rgb: 'cccccc' };
@@ -298,11 +285,6 @@ export default class extends Runner {
       fill: {fgColor: {rgb: 'f2f2f2'}}
     };
 
-      //console.log(`json:\n ${JSON.stringify(currentSheet)}`);
-
-     /*****FORMAT DATA CELLS*****/
-     //currentSheet = this.formatDataCells(currentSheet);
-
       /****FORMAT FINAL CONCERNS****/
       currentSheet = this.finalFormattingConcerns(currentSheet, tableName);
     }
@@ -310,14 +292,6 @@ export default class extends Runner {
     return workbook;
   }
 
-  /*This is a placeholder for one of the final formatting concerns, right justifying floats/doubles*/ //GGG i gigure this is low priority
-  formatDataCells(currentSheet)
-  {
-   /* if(currentSheet[cellAddress])
-    {
-
-    }*/
-  }
 
   /*This is where we hope to clean up formatting odds and ends that didn't fit into any previous slot*/
   //GGG Currently buggy
@@ -332,7 +306,8 @@ export default class extends Runner {
         cellAddressLastColumn.s.border = {left: {style: 'thick', color: {auto: 1}}};
       }*/
 
-      //this.HEADER_ROW_END_IDX +1   this.LAST_ROW_IDX[currentSheet]`
+      currentSheet = this._initializeCellDataStyle(currentSheet, tableName);
+
       //Traverse every DATA row of the sheet (not headers) and alter the first and last columns' formatting
       for(let rowIdx = this.HEADER_ROW_END_IDX +1; rowIdx <= this.LAST_ROW_IDX[tableName] /*+ this.EXTRA_ROW_FORMATTING_PADDING*/; rowIdx++)
       {
@@ -353,8 +328,6 @@ export default class extends Runner {
           }
         };
 
-        console.log(`json: ${JSON.stringify(cellAddressLastColumn)}  Value: ${currentSheet[cellAddressLastColumn]}`);
-        //console.log(`data sheet: ${JSON.stringify(currentSheet[cellAddressLastColumn])}`);
         //The beginning and end of the table rows have thick left and right cell borders
       currentSheet[cellAddressLastColumn].s = {
         alignment: {horizontal: 'left', vertical: 'center'},
@@ -372,10 +345,14 @@ export default class extends Runner {
       {
         for(let colIdx = 0; colIdx <= this.LAST_COL_IDX[tableName]; colIdx++)
         {
+          let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
+
+
           if(!this._isNextCellSameGroupHeader(colIdx, currentSheet))
           {
             //add a style object to every data row for potential formatting
-            let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
+            //GGG I'm guessing this might not require replacing the entire style object, but i tride to adjust just the "left" property and had trouble
+            //let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
             currentSheet[cellAddress].s = {
               alignment: {horizontal: 'left', vertical: 'center'},
               border: {
@@ -386,9 +363,36 @@ export default class extends Runner {
               }
             };
           }
+
+          if(!isNaN(parseFloat(currentSheet[cellAddress].v)))//GGG BUG: This clause returns true if there exists any float in the value of the cell.
+          {
+            //console.log(`YOOOOOOO!!! ${currentSheet[cellAddress].v}`);
+            currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
+          }
         }
       }
 
+    return currentSheet;
+  }
+
+   _initializeCellDataStyle(currentSheet, tableName)
+  {
+      for(let rowIdx = this.HEADER_ROW_END_IDX +1; rowIdx <= this.LAST_ROW_IDX[tableName] /*+ this.EXTRA_ROW_FORMATTING_PADDING*/; rowIdx++) {
+        for (let colIdx = this.FIRST_DATA_COL_IDX; colIdx < this.LAST_COL_IDX[tableName]; colIdx++) {
+          let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
+          console.log(`cellAddress value: ${cellAddress}  addy row: ${rowIdx}  addy col:${colIdx}`);
+
+          currentSheet[cellAddress].s = {};
+
+          currentSheet[cellAddress].s.alignment = {};
+
+          currentSheet[cellAddress].s.border = {};
+          currentSheet[cellAddress].s.border.right = {horizontal: 'center', vertical: 'center'};
+          currentSheet[cellAddress].s.border.left = {horizontal: 'center', vertical: 'center'};
+          currentSheet[cellAddress].s.border.top = {horizontal: 'center', vertical: 'center'};
+          currentSheet[cellAddress].s.border.bottom = {horizontal: 'center', vertical: 'center'};
+        }
+      }
     return currentSheet;
   }
 
@@ -633,7 +637,6 @@ export default class extends Runner {
     {
       orderedColumnNames = this._findOrderedColumns(tableName);
     }
-    console.log(`OrderedColumnNames: ${JSON.stringify(orderedColumnNames)}`);
 
     for(let orderedColIdx in orderedColumnNames)//loop through the columns in the ordered model
     {
@@ -650,7 +653,6 @@ export default class extends Runner {
         }
       }
     }
-//    console.log(`FINAL COL LIST : ${JSON.stringify(orderedListOfColumnsAddedToHeader)}`);
     return orderedListOfColumnsAddedToHeader;
   }
 
@@ -711,8 +713,6 @@ export default class extends Runner {
         if (//propertyIdx < 1 ||
         numberOfElementsProcessed < numberOfElements )
           manipulatedData = manipulatedData + ':';
-
-        //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
       }
       return manipulatedData;
     }
@@ -748,7 +748,6 @@ export default class extends Runner {
         }
 
         manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
-        //console.log(`manipulated data: ${manipulatedData}`);
       }
       return manipulatedData;
     }
