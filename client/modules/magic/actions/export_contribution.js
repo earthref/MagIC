@@ -237,16 +237,7 @@ export default class extends Runner {
 
          http://stackoverflow.com/questions/32485449/xlxs-js-how-does-the-l-cell-hyperlink-object-option-work
 
-         Below are some attempts to make it work, similar to attempts made by others. These fields are apparently ignored as they have no effect on the output
          */
-        /*currentSheet[cellAddress].w = undefined;
-        currentSheet[cellAddress].t = 's';
-        currentSheet[cellAddress].h = 'true';
-
-        currentSheet[cellAddress].l= {Target: 'pleaseWork'}; //{ Target: 'testItBaby', tooltip: 'No Chance'};//`<a href="url">${currentSheet[cellAddress].v}</a>`;*/
-        //currentSheet[cellAddress].v = currentSheet[cellAddress].v.display;
-        //currentSheet[cellAddress].w = `<a href="url">${currentSheet[cellAddress].v}</a>`;
-        //'https://earthref.org/MagIC/data-models/3.0/#[table].[column]'
       }
 
       let cellAddress = undefined;
@@ -294,18 +285,8 @@ export default class extends Runner {
 
 
   /*This is where we hope to clean up formatting odds and ends that didn't fit into any previous slot*/
-  //GGG Currently buggy
   finalFormattingConcerns(currentSheet, tableName)
     {
-      //console.log(`Table ${modelTable}`);
-      //Traverse all of the header rows to override special formatting where needed
-      /*for(let rowIdx = this.HEADER_ROW_START_IDX; rowIdx <= this.HEADER_ROW_END_IDX; rowIdx++)
-      {
-        console.log(`Row: ${rowIdx}  Col: ${this.LAST_COL_IDX[modelTable]}`);
-        let cellAddressLastColumn = XLSX.utils.encode_cell({r: rowIdx, c: this.LAST_COL_IDX[modelTable]});
-        cellAddressLastColumn.s.border = {left: {style: 'thick', color: {auto: 1}}};
-      }*/
-
       currentSheet = this._initializeCellDataStyle(currentSheet, tableName);
 
       //Traverse every DATA row of the sheet (not headers) and alter the first and last columns' formatting
@@ -426,7 +407,6 @@ export default class extends Runner {
         }
       }
     }
-
     return workSheetColWidths;
   }
 
