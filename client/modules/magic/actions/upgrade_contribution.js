@@ -1,4 +1,5 @@
-import {_} from 'lodash';
+import _ from 'lodash';
+import moment from 'moment-timezone';
 import Promise from 'bluebird';
 import Runner from '../../er/actions/runner';
 import ParseContribution from './parse_contribution';
@@ -17,9 +18,9 @@ export default class extends Runner {
     // Make a list of unique composite keys for each table.
     this.mergeKeys = {
       locations: ['location'],
-      sites: ['site', 'location'],
-      samples: ['sample', 'site'],
-      specimens: ['specimen', 'sample'],
+      sites: ['site'], //, 'location'],
+      samples: ['sample'], //, 'site'],
+      specimens: ['specimen'], //, 'sample'],
       criteria: ['criterion', 'table_column'],
       ages: ['location', 'site', 'sample', 'specimen'],
       images: ['location', 'site', 'sample', 'specimen']
@@ -117,7 +118,7 @@ export default class extends Runner {
           }
         }
 
-        // Define new method code names
+        // Define new method code names in 3.0.
         this.newMethodCodes['ST-BC'] = 'ST-C';
         this.newMethodCodes['ST-BC-Q1'] = 'ST-BCQ-1';
         this.newMethodCodes['ST-BC-Q2'] = 'ST-BCQ-2';
@@ -141,8 +142,10 @@ export default class extends Runner {
         return rowsTotal + jsonTableOld.length;
       }, 0);
 
-
-      const tables = _.keys(this.jsonOld);
+      const modelTables = _.orderBy(_.keys(this.modelOld['tables']), (t) => {
+        return this.modelOld['tables'][t].position;
+      }, 'asc');
+      const tables = _.union(_.intersection(modelTables, _.keys(this.jsonOld)), _.keys(this.jsonOld));
       if (tables.length === 0)
         return Promise.resolve();
 
@@ -345,14 +348,15 @@ export default class extends Runner {
         jsonRowOld['er_specimen_names'] = _.uniq(specimens).join(':');
       }
 
-      // Combine the anisotropy tensor elements into a list
+      // Combine the anisotropy tensor elements into a list.
       if (jsonTableOld === 'pmag_results' && joinTable === 'locations' && (
-        jsonRowOld['eta_dec'        ] ||
-        jsonRowOld['eta_inc'        ] ||
-        jsonRowOld['eta_semi_angle' ] ||
-        jsonRowOld['zeta_dec'       ] ||
-        jsonRowOld['zeta_inc'       ] ||
-        jsonRowOld['zeta_semi_angle'])) {
+            jsonRowOld['eta_dec'        ] ||
+            jsonRowOld['eta_inc'        ] ||
+            jsonRowOld['eta_semi_angle' ] ||
+            jsonRowOld['zeta_dec'       ] ||
+            jsonRowOld['zeta_inc'       ] ||
+            jsonRowOld['zeta_semi_angle']
+          )) {
         let poleConf = ['','','','','',''];
         if (jsonRowOld['eta_dec'        ]) poleConf[0] = jsonRowOld['eta_dec'        ];
         if (jsonRowOld['eta_inc'        ]) poleConf[1] = jsonRowOld['eta_inc'        ];
@@ -368,14 +372,15 @@ export default class extends Runner {
         delete jsonRowOld['zeta_semi_angle'];
       }
 
-      // Combine the anisotropy tensor elements into a matrix
+      // Combine the anisotropy tensor elements into a matrix.
       if (jsonTableOld === 'rmag_anisotropy' && (
-          jsonRowOld['anisotropy_s1'] ||
-          jsonRowOld['anisotropy_s2'] ||
-          jsonRowOld['anisotropy_s3'] ||
-          jsonRowOld['anisotropy_s4'] ||
-          jsonRowOld['anisotropy_s5'] ||
-          jsonRowOld['anisotropy_s6'])) {
+            jsonRowOld['anisotropy_s1'] ||
+            jsonRowOld['anisotropy_s2'] ||
+            jsonRowOld['anisotropy_s3'] ||
+            jsonRowOld['anisotropy_s4'] ||
+            jsonRowOld['anisotropy_s5'] ||
+            jsonRowOld['anisotropy_s6']
+          )) {
         let anisoS = ['','','','','',''];
         if (jsonRowOld['anisotropy_s1']) anisoS[0] = jsonRowOld['anisotropy_s1'];
         if (jsonRowOld['anisotropy_s2']) anisoS[1] = jsonRowOld['anisotropy_s2'];
@@ -391,18 +396,20 @@ export default class extends Runner {
         delete jsonRowOld['anisotropy_s6'];
       }
 
-      // Combine the anisotropy eigenparameters into a matrix
+      // Combine the anisotropy eigenparameters into a matrix.
       for (let i = 1; i <= 3; i++) {
         if (jsonTableOld === 'rmag_results' && (
-            jsonRowOld['anisotropy_t' + i                     ] ||
-            jsonRowOld['anisotropy_v' + i + '_dec'            ] ||
-            jsonRowOld['anisotropy_v' + i + '_inc'            ]) && (
-            jsonRowOld['anisotropy_v' + i + '_eta_dec'        ] ||
-            jsonRowOld['anisotropy_v' + i + '_eta_inc'        ] ||
-            jsonRowOld['anisotropy_v' + i + '_eta_semi_angle' ] ||
-            jsonRowOld['anisotropy_v' + i + '_zeta_dec'       ] ||
-            jsonRowOld['anisotropy_v' + i + '_zeta_inc'       ] ||
-            jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle'])) {
+              jsonRowOld['anisotropy_t' + i                     ] ||
+              jsonRowOld['anisotropy_v' + i + '_dec'            ] ||
+              jsonRowOld['anisotropy_v' + i + '_inc'            ]
+            ) && (
+              jsonRowOld['anisotropy_v' + i + '_eta_dec'        ] ||
+              jsonRowOld['anisotropy_v' + i + '_eta_inc'        ] ||
+              jsonRowOld['anisotropy_v' + i + '_eta_semi_angle' ] ||
+              jsonRowOld['anisotropy_v' + i + '_zeta_dec'       ] ||
+              jsonRowOld['anisotropy_v' + i + '_zeta_inc'       ] ||
+              jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle']
+            )) {
           let anisoV = ['', '', '', 'eta/zeta', '', '', '', '', '', ''];
           if (jsonRowOld['anisotropy_t' + i                     ]) anisoV[0] = jsonRowOld['anisotropy_t' + i                     ];
           if (jsonRowOld['anisotropy_v' + i + '_dec'            ]) anisoV[1] = jsonRowOld['anisotropy_v' + i + '_dec'            ];
@@ -424,9 +431,10 @@ export default class extends Runner {
           delete jsonRowOld['anisotropy_v' + i + '_zeta_semi_angle'];
         }
         else if (jsonTableOld === 'rmag_results' && (
-            jsonRowOld['anisotropy_t' + i         ] ||
-            jsonRowOld['anisotropy_v' + i + '_dec'] ||
-            jsonRowOld['anisotropy_v' + i + '_inc'])) {
+              jsonRowOld['anisotropy_t' + i         ] ||
+              jsonRowOld['anisotropy_v' + i + '_dec'] ||
+              jsonRowOld['anisotropy_v' + i + '_inc'])
+            ) {
           let anisoV = ['', '', ''];
           if (jsonRowOld['anisotropy_t' + i         ]) anisoV[0] = jsonRowOld['anisotropy_t' + i         ];
           if (jsonRowOld['anisotropy_v' + i + '_dec']) anisoV[1] = jsonRowOld['anisotropy_v' + i + '_dec'];
@@ -435,6 +443,106 @@ export default class extends Runner {
           delete jsonRowOld['anisotropy_v' + i + '_dec'];
           delete jsonRowOld['anisotropy_v' + i + '_inc'];
         }
+      }
+
+      // Convert dates into ISO 8601 timestamps.
+      if (jsonRowOld['sample'      + '_date'] || jsonRowOld['sample'      + '_time_zone'] ||
+          jsonRowOld['measurement' + '_date'] || jsonRowOld['measurement' + '_time_zone'] ||
+          jsonRowOld['image'       + '_date'] || jsonRowOld['image'       + '_time_zone'] ||
+          jsonRowOld['plot'        + '_date'] || jsonRowOld['plot'        + '_time_zone']) {
+        let f = "YYYY:MM:DD:hh:mm:ss.SSS";
+        let tz = 'UTC';
+        if (jsonRowOld['sample'      + '_time_zone']) tz = jsonRowOld['sample'      + '_time_zone'];
+        if (jsonRowOld['measurement' + '_time_zone']) tz = jsonRowOld['measurement' + '_time_zone'];
+        if (jsonRowOld['image'       + '_time_zone']) tz = jsonRowOld['image'       + '_time_zone'];
+        if (jsonRowOld['plot'        + '_time_zone']) tz = jsonRowOld['plot'        + '_time_zone'];
+        if (tz === 'CDT'   ) tz = 'CST6CDT';
+        if (tz === 'PDT'   ) tz = 'PST8PDT';
+        if (tz === '+8 GMT') tz = 'PRC';
+        if (tz === '0'     ) tz = 'UTC';
+        if (tz === 'SAN'   ) tz = 'US/Pacific';
+        if (jsonRowOld['sample_date'])
+          jsonRowOld['sample_date'] = moment.tz(jsonRowOld['sample_date'], f, tz).tz('UTC').format();
+        if (jsonRowOld['measurement_date'])
+          jsonRowOld['measurement_date'] = moment.tz(jsonRowOld['measurement_date'], f, tz).tz('UTC').format();
+        if (jsonRowOld['image_date'])
+          jsonRowOld['image_date'] = moment.tz(jsonRowOld['image_date'], f, tz).tz('UTC').format();
+        if (jsonRowOld['plot_date'])
+          jsonRowOld['plot_date'] = moment.tz(jsonRowOld['plot_date'], f, tz).tz('UTC').format();
+        delete jsonRowOld['sample'      + '_time_zone'];
+        delete jsonRowOld['measurement' + '_time_zone'];
+        delete jsonRowOld['image'       + '_time_zone'];
+        delete jsonRowOld['plot'        + '_time_zone'];
+      }
+
+      // Adopt sample inferred ages up to site ages.
+      if (jsonRowOld['er_site_name'] && jsonTableOld === 'pmag_samples' && (
+            jsonRowOld['sample_inferred_age'      ] ||
+            jsonRowOld['sample_inferred_age_sigma'] ||
+            jsonRowOld['sample_inferred_age_low'  ] ||
+            jsonRowOld['sample_inferred_age_high' ] ||
+            jsonRowOld['sample_inferred_age_unit' ]
+          )) {
+        let siteRow = {"site": jsonRowOld['er_site_name']};
+        if (jsonRowOld['sample_inferred_age'      ]) siteRow['age'      ] = jsonRowOld['sample_inferred_age'      ];
+        if (jsonRowOld['sample_inferred_age_sigma']) siteRow['age_sigma'] = jsonRowOld['sample_inferred_age_sigma'];
+        if (jsonRowOld['sample_inferred_age_low'  ]) siteRow['age_low'  ] = jsonRowOld['sample_inferred_age_low'  ];
+        if (jsonRowOld['sample_inferred_age_high' ]) siteRow['age_high' ] = jsonRowOld['sample_inferred_age_high' ];
+        if (jsonRowOld['sample_inferred_age_unit' ]) siteRow['age_unit' ] = jsonRowOld['sample_inferred_age_unit' ];
+        if (!this.jsonNew['sites']) this.jsonNew['sites'] = [];
+        this.jsonNew['sites'].push(siteRow);
+        delete jsonRowOld['sample_inferred_age'      ];
+        delete jsonRowOld['sample_inferred_age_sigma'];
+        delete jsonRowOld['sample_inferred_age_low'  ];
+        delete jsonRowOld['sample_inferred_age_high' ];
+        delete jsonRowOld['sample_inferred_age_unit' ];
+      }
+
+      // Adopt specimen inferred ages up to site ages.
+      if (jsonRowOld['er_site_name'] && jsonTableOld === 'pmag_specimens' && (
+            jsonRowOld['specimen_inferred_age'      ] ||
+            jsonRowOld['specimen_inferred_age_sigma'] ||
+            jsonRowOld['specimen_inferred_age_low'  ] ||
+            jsonRowOld['specimen_inferred_age_high' ] ||
+            jsonRowOld['specimen_inferred_age_unit' ]
+          )) {
+        let siteRow = {"site": jsonRowOld['er_site_name']};
+        if (jsonRowOld['specimen_inferred_age'      ]) siteRow['age'      ] = jsonRowOld['specimen_inferred_age'      ];
+        if (jsonRowOld['specimen_inferred_age_sigma']) siteRow['age_sigma'] = jsonRowOld['specimen_inferred_age_sigma'];
+        if (jsonRowOld['specimen_inferred_age_low'  ]) siteRow['age_low'  ] = jsonRowOld['specimen_inferred_age_low'  ];
+        if (jsonRowOld['specimen_inferred_age_high' ]) siteRow['age_high' ] = jsonRowOld['specimen_inferred_age_high' ];
+        if (jsonRowOld['specimen_inferred_age_unit' ]) siteRow['age_unit' ] = jsonRowOld['specimen_inferred_age_unit' ];
+        if (!this.jsonNew['sites']) this.jsonNew['sites'] = [];
+        this.jsonNew['sites'].push(siteRow);
+        delete jsonRowOld['specimen_inferred_age'      ];
+        delete jsonRowOld['specimen_inferred_age_sigma'];
+        delete jsonRowOld['specimen_inferred_age_low'  ];
+        delete jsonRowOld['specimen_inferred_age_high' ];
+        delete jsonRowOld['specimen_inferred_age_unit' ];
+      }
+
+      // Adopt sample and specimen average ages up to site ages.
+      if (jsonRowOld['er_site_names'] && jsonTableOld === 'pmag_results' &&
+          (joinTable === 'samples' || joinTable === 'specimens') && (
+            jsonRowOld['average_age'      ] ||
+            jsonRowOld['average_age_sigma'] ||
+            jsonRowOld['average_age_low'  ] ||
+            jsonRowOld['average_age_high' ] ||
+            jsonRowOld['average_age_unit' ]
+          )) {
+        let siteRow = {"site": jsonRowOld['er_site_names']};
+        if (jsonRowOld['average_age'      ]) siteRow['age'      ] = jsonRowOld['average_age'      ];
+        if (jsonRowOld['average_age_sigma']) siteRow['age_sigma'] = jsonRowOld['average_age_sigma'];
+        if (jsonRowOld['average_age_low'  ]) siteRow['age_low'  ] = jsonRowOld['average_age_low'  ];
+        if (jsonRowOld['average_age_high' ]) siteRow['age_high' ] = jsonRowOld['average_age_high' ];
+        if (jsonRowOld['average_age_unit' ]) siteRow['age_unit' ] = jsonRowOld['average_age_unit' ];
+        if (!this.jsonNew['sites']) this.jsonNew['sites'] = [];
+        this.jsonNew['sites'].push(siteRow);
+        delete jsonRowOld['average_age'      ];
+        delete jsonRowOld['average_age_sigma'];
+        delete jsonRowOld['average_age_low'  ];
+        delete jsonRowOld['average_age_high' ];
+        delete jsonRowOld['average_age_unit' ];
       }
 
     }
@@ -512,6 +620,7 @@ export default class extends Runner {
           }
           continue;
         }
+
       }
 
       // Check that the old column is defined in the old data model.
@@ -574,7 +683,7 @@ export default class extends Runner {
           // Add the column value to the new JSON.
           if (!tableRowsNew[jsonTableNew])
             tableRowsNew[jsonTableNew] = [{}];
-          /*if (tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined &&
+          if (tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined &&
               tableRowsNew[jsonTableNew][0][jsonColumnNew] !== jsonValueNew &&
               this.collisionErrors[`${jsonTableOld}.${jsonColumnOld}`] != `${jsonTableNew}.${jsonColumnNew}`) {
             this._appendError(`MagIC Data Model version ${this.versionOld} column "${jsonColumnOld}" in table ` +
@@ -582,11 +691,12 @@ export default class extends Runner {
               `table "${jsonTableNew}", but column "${jsonColumnNew}" already contains the value ` +
               `"${tableRowsNew[jsonTableNew][0][jsonColumnNew]}".`);
             this.collisionErrors[`${jsonTableOld}.${jsonColumnOld}`] = `${jsonTableNew}.${jsonColumnNew}`;
-          } else {*/
+          } else {
             tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
-          //}
+          }
 
         }
+
       }
     }
 
@@ -659,34 +769,42 @@ export default class extends Runner {
     // Make a list of the columns of the composite keys that are defined in the current row.
     const rowKeys = (this.mergeKeys[table] ? _.pick(this.json[table][rowIdx], this.mergeKeys[table]) : this.json[table][rowIdx]);
 
+    // Make a copy of the row to merge
+    const rowToMerge = _.cloneDeep(this.json[table][rowIdx]);
+    let didMerge = false;
+
     // For each following row that is a candidate for merging:
     for (let rowCandidateIdx = rowIdx + 1; rowCandidateIdx < this.json[table].length; rowCandidateIdx++) {
 
       // Skip rows that are empty (e.g. ones that have already been merged).
       if (this.json[table][rowCandidateIdx] === undefined) continue;
 
-      // Stop merging if the candidate row has doesn't share composite key values with the current row.
+      // Stop merging if the candidate row doesn't share composite key values with the current row.
       // Since the table is sorted, this guarantees that no following rows are candidates for merging.
       if (!_.isMatch(this.json[table][rowCandidateIdx], rowKeys)) break;
 
       // Make a copy of the current row to test merging with the candidate row.
-      const rowMerged = _.cloneDeep(this.json[table][rowIdx]);
+      //console.log(table, rowIdx, rowKeys, 'should merge?', this.json[table][rowCandidateIdx], 'with', rowToMerge);
+      const rowMerged = _.cloneDeep(rowToMerge);
 
-      // Merge the candidate row for merging with the current row.
+      // Merge the candidate row to test merging with the current row.
       _.merge(rowMerged, this.json[table][rowCandidateIdx]);
 
       // If the merge didn't mutate any of the existing values in the current row:
-      if (_.isMatch(rowMerged, this.json[table][rowIdx])) {
+      //console.log('data preserved?', rowMerged, 'from', rowToMerge);
+      if (_.isMatch(rowMerged, rowToMerge)) {
 
         // Replace the current row with the merged row.
-        this.json[table][rowIdx] = rowMerged;
-
-        // Empty the candidate row so that it is skipped when the current row reaches it without altering the
-        // number or rows in the table.
-        this.json[table][rowCandidateIdx] = undefined;
+        //console.log('yes, merged row', rowCandidateIdx, ':', rowToMerge, 'into', rowMerged);
+        this.json[table][rowCandidateIdx] = rowMerged;
+        didMerge = true;
 
       }
     }
+
+    // Empty the candidate row so that it is skipped when the current row reaches it without altering the
+    // number or rows in the table.
+    if (didMerge) this.json[table][rowIdx] = undefined;
 
   }
 

@@ -469,8 +469,7 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.5'
         }],
         er_sites: [{
-          er_site_name: 'Site 1',
-          site_core_depth: '1'
+          er_site_name: 'Site 1'
         }],
         er_samples: [{
           er_site_name: 'Site 1',
@@ -520,10 +519,10 @@ describe('magic.actions.upgrade_contribution', () => {
         }],
         sites: [{
           site: 'Site 1',
-          core_depth: '1'
+          core_depth: '2'
         },{
           site: 'Site 1',
-          core_depth: '2'
+          core_depth: '1'
         }],
         samples: [{
           site: 'Site 1',
@@ -891,12 +890,21 @@ describe('magic.actions.upgrade_contribution', () => {
         contribution: [{
           magic_version: '2.5'
         }],
+        er_sites: [{
+          er_site_name: 'site1'
+        }],
+        er_samples: [{
+          er_site_name: 'site1',
+          er_sample_name: 'sample1'
+        }],
         er_specimens: [{
           er_site_name: 'site1',
           er_sample_name: 'sample1',
           er_specimen_name: 'specimen1'
         }],
         pmag_results: [{
+          er_site_names: 'site1',
+          er_sample_names: 'sample1',
           er_specimen_names: 'specimen1',
           average_age: '1', // -> pmag_specimens.specimen_inferred_age -> pmag_samples.sample_inferred_age  -> pmag_sites.site_inferred_age
           average_age_low: '0',
@@ -909,7 +917,51 @@ describe('magic.actions.upgrade_contribution', () => {
         }],
         sites: [{
           site: 'site1',
-          age: '1'
+          age: '1',
+          age_low: '0',
+          age_high: '2'
+        }],
+        samples: [{
+          site: 'site1',
+          sample: 'sample1'
+        }],
+        specimens: [{
+          sample: 'sample1',
+          specimen: 'specimen1'
+        }]
+      };
+      return upgradeContributionJSONTest(jsonOld1, jsonNew1);
+    });
+
+    it('should repeat metadata', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_specimens: [{
+          er_specimen_name: 'specimen1',
+          specimen_lithology: 'Basalt'
+        }],
+        pmag_specimens: [{
+          er_specimen_name: 'specimen1',
+          specimen_inc: '1'
+        }, {
+          er_specimen_name: 'specimen1',
+          specimen_inc: '2'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: 'specimen1',
+          lithologies: 'Basalt',
+          dir_inc: '1'
+        },{
+          specimen: 'specimen1',
+          lithologies: 'Basalt',
+          dir_inc: '2'
         }]
       };
       return upgradeContributionJSONTest(jsonOld1, jsonNew1);
@@ -975,7 +1027,7 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         measurements: [{
-          timestamp: '2008-07-01T15:46Z'
+          timestamp: '2008-07-01T15:46:00Z'
         }]
       };
       const jsonOld2 = {
@@ -991,7 +1043,7 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         measurements: [{
-          timestamp: '2008-07-01T08:46Z'
+          timestamp: '2008-07-01T08:46:00Z'
         }]
       };
       const jsonOld3 = {
