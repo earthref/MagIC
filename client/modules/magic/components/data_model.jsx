@@ -55,6 +55,9 @@ export default class extends React.Component {
     const names = _.keys(tables);
     let list = [];
     for (let i in names) {
+      if (list[tables[names[i]].position-1])
+        console.error("Tables", list[tables[names[i]].position-1], "and", names[i],
+                      "are both in position", tables[names[i]].position);
       list[tables[names[i]].position-1] = names[i];
     }
     return list;
@@ -86,8 +89,12 @@ export default class extends React.Component {
     const names = _.keys(columns);
     let list = [];
     for (let i in names) {
-      if (!group || columns[names[i]].group === group)
-        list[columns[names[i]].position-1] = names[i];
+      if (!group || columns[names[i]].group === group) {
+        if (list[columns[names[i]].position-1])
+          console.error("Columns", list[columns[names[i]].position-1], "and", names[i], "in table", table,
+                        "and group", group, "are both in position", columns[names[i]].position);
+        list[columns[names[i]].position - 1] = names[i];
+      }
     }
     return _.pull(list, undefined);
   }

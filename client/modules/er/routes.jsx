@@ -7,6 +7,7 @@ const rePortals = _.without(Object.keys(portals), 'EarthRef.org').join('|');
 
 import Layout from './components/layout.jsx';
 import Home from './components/home.jsx';
+import Vocabularies from './components/vocabularies.jsx';
 
 export default function (injectDeps, {FlowRouter}) {
 
@@ -23,6 +24,24 @@ export default function (injectDeps, {FlowRouter}) {
               <div>
                 EarthRef Home.
               </div>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  FlowRouter.route(`/vocabularies`, {
+    name: 'erVocabularies',
+    action({q}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="EarthRef.org">
+            <Home portal="EarthRef.org">
+              <h3>
+                Browse the EarthRef Vocabularies:
+              </h3>
+              <Vocabularies search={q}/>
             </Home>
           </Layout>
         )

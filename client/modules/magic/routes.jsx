@@ -7,6 +7,7 @@ import Home from '../er/components/home.jsx';
 
 import {default as magicVersions} from './configs/magic_versions.js';
 import MagICDataModel from './components/data_model.jsx';
+import MagICMethodCodes from './components/method_codes.jsx';
 import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
 import MagICUploadContribution from './components/upload_contribution.jsx';
 import MagICExportExcelJS from './components/export_exceljs.jsx';
@@ -56,6 +57,24 @@ export default function (injectDeps, {FlowRouter}) {
                 Browse the current and recent MagIC Data Models:
               </h3>
               <MagICDataModel version={v} search={q}/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/method-codes`, {
+    name: 'magicMethodCodes',
+    action({q}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Browse the MagIC Method Codes:
+              </h3>
+              <MagICMethodCodes search={q}/>
             </Home>
           </Layout>
         )

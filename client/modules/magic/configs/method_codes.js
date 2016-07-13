@@ -1,7 +1,7 @@
 export default {
   "direction_estimation": {
     "codes": [{
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#DE-BFL",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#DE-BFL"],
       "code": "DE-BFL",
       "definition": "Best fit line"
     }, {
@@ -11,7 +11,7 @@ export default {
       "code": "DE-BFL-O",
       "definition": "Best fit line: Linear regression with origin included but not anchored in calculations"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#DE-BFL",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#DE-BFL"],
       "code": "DE-BFP",
       "definition": "Best fit plane"
     }, {
@@ -24,7 +24,7 @@ export default {
       "code": "DE-BS",
       "definition": "Bingham statistics"
     }, {
-      "IAGA7 code": "Ptype D",
+      "IAGA": "Ptype D",
       "code": "DE-DI",
       "definition": "Pole latitude and longitude calculation from mean declination-inclination"
     }, {
@@ -52,15 +52,15 @@ export default {
       "code": "DE-K-U",
       "definition": "Kappa estimation: Unbiased estimate of Fisherian Kappa, given by Ku=(N-2)/(N-R)"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#PE-MAD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#PE-MAD"],
       "code": "DE-MAD",
       "definition": "Maximum angle of deviation"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#PE-MAD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#PE-MAD"],
       "code": "DE-MAD-L",
       "definition": "Maximum angle of deviation: Estimated about best-fit line"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#PE-MAD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#PE-MAD"],
       "code": "DE-MAD-P",
       "definition": "Maximum angle of deviation: Estimated about best-fit plane"
     }, {
@@ -73,7 +73,7 @@ export default {
       "code": "DE-V",
       "definition": "Definition of parameter V for different sets of N & R directions"
     }, {
-      "IAGA7 code": "Ptype V",
+      "IAGA": "Ptype V",
       "code": "DE-VGP",
       "definition": "Pole latitude and longitude calculation from mean VGP"
     }, {
@@ -84,45 +84,45 @@ export default {
   },
   "sample_orientation": {
     "codes": [{
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-CMD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-CMD"],
       "code": "SO-ASO",
       "definition": "Determining orientation by acoustic scanning in drill holes"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-CMD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-CMD"],
       "code": "SO-CMD-NORTH",
       "definition": "Correction applied for magnetic declination: True north"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-CMD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-CMD"],
       "code": "SO-CMD-ZERO",
       "definition": "Correction applied for magnetic declination: Zero"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-CO",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-CO"],
       "code": "SO-CO",
       "definition": "Plaster (or similar substance) cap-oriented samples"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-CMD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-CMD"],
       "code": "SO-DML",
       "definition": "Determining orientation by deep matter logging in drill holes"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-GPD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-GPD"],
       "code": "SO-GPS-DIFF",
       "definition": "Differential GPS"
     }, {
       "code": "SO-GT5",
       "definition": "Sample orientation uncertainty greater than five degrees"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-INCL",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-INCL"],
       "code": "SO-INCL",
       "definition": "Inclinometer"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-MAG",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-MAG"],
       "code": "SO-MAG",
       "definition": "Magnetic compass"
     }, {
       "code": "SO-NO",
       "definition": "Unknown sample orientation method"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-POM",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-POM"],
       "code": "SO-POM",
       "definition": "Pomeroy orientation device"
     }, {
@@ -147,11 +147,11 @@ export default {
       "code": "SO-SM",
       "definition": "Magnetic and/or sun compass"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-SUN",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-SUN"],
       "code": "SO-SUN",
       "definition": "Sun compass"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SO-CMD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SO-CMD"],
       "code": "SO-TENSOR",
       "definition": "Determining orientation by tensor tool"
     }, {
@@ -198,11 +198,11 @@ export default {
       "code": "SP-SHTBOX",
       "definition": "Powdering of sample by shatterbox"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SP-SSA",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SP-SSA"],
       "code": "SP-SS-A",
       "definition": "Sub sampling: Archeological artifact"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#SP-SSC",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#SP-SSC"],
       "code": "SP-SS-C",
       "definition": "Sub sampling: Core"
     }, {
@@ -243,7 +243,7 @@ export default {
       "code": "IE-BB0",
       "definition": "Intensity normalized by GAD field at sampling location using 8x10^22 Am2 axial dipole moment"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-BETA",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-BETA"],
       "code": "IE-BETA",
       "definition": "Standard error of the paleointensity estimated by total least squares (York, 1969) as the slope of the Arai Plot"
     }, {
@@ -251,19 +251,19 @@ export default {
       "code": "IE-BOOT",
       "definition": "Thellier-type intensity and uncertainty estimated by bootstrap resampling of data"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-DRATS",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-DRATS"],
       "code": "IE-DRAT",
       "definition": "pTRM difference ratio (DRAT)"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-DRATS",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-DRATS"],
       "code": "IE-DRATS",
       "definition": "pTRM difference ratio sum (DRATS)"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-F",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-F"],
       "code": "IE-F",
       "definition": "Fraction of NRM component (Coe's F number)"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-FF",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-FF"],
       "code": "IE-FVDS",
       "definition": "Fraction of vector difference sum of NRM components"
     }, {
@@ -279,15 +279,15 @@ export default {
       "code": "IE-MR",
       "definition": "Mean of the ratio (TRM/NRM) obtained for different temperature steps"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-R",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-R"],
       "code": "IE-R",
       "definition": "Ratio of total TRM to NRM"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-SH",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-SH"],
       "code": "IE-SH",
       "definition": "Best-fit slope through Shaw data"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-TT",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-TT"],
       "code": "IE-TT",
       "definition": "Best-fit slope through TT data"
     }, {
@@ -358,11 +358,11 @@ export default {
       "code": "FS-D",
       "definition": "Dredging"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#FS-FD",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#FS-FD"],
       "code": "FS-FD",
       "definition": "Field drilling using a hand-held portable drill"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#FS-H",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#FS-H"],
       "code": "FS-H",
       "definition": "Hand sampling"
     }, {
@@ -391,14 +391,14 @@ export default {
       "code": "LP-AN",
       "definition": "Anisotropy measurement"
     }, {
-      "description": "Measure of anisotropy of anhysteretic susceptibility (AAS) via ARM acquisition (AARM). A fully demagnetized specimen is subject to ARM in three to fifteen (tensor) directions while being demagnetized after each of the ARM steps in the direction of the next ARM",
+      "description": "Measure of anisotropy of anhysteretic susceptibility (AAS) via ARM acquisition (AARM). A fully demagnetized specimen is subject to ARM in three to fifteen (tensor) directions while being demagnetized after each of the ARM steps in the direction of the next ARM.",
       "code": "LP-AN-ARM",
       "definition": "Anisotropy measurement: ARM acquisition"
     }, {
       "code": "LP-AN-IRM",
       "definition": "Anisotropy measurement: IRM acquisition"
     }, {
-      "description": "Susceptibility measured in multiple positions to determine susceptibility tensor",
+      "description": "Susceptibility measured in multiple positions to determine susceptibility tensor.",
       "code": "LP-AN-MS",
       "definition": "Anisotropy measurement: Magnetic susceptibility"
     }, {
@@ -426,41 +426,41 @@ export default {
       "code": "LP-BCR-HDM",
       "definition": "Coercivity of remanence: Half delta M"
     }, {
-      "description": "Variable temperature measurement sequence (e.g. in QD-MPMS) with magnetization measurements while cooling and rewarming",
+      "description": "Variable temperature measurement sequence (e.g. in QD-MPMS) with magnetization measurements while cooling and rewarming.",
       "code": "LP-CW-NRM",
       "definition": "Cycling between cooling and warming: Room temperature NRM"
     }, {
-      "description": "Variable temperature measurement sequence (e.g. in QD-MPMS) with magnetization measurements while cooling and rewarming",
+      "description": "Variable temperature measurement sequence (e.g. in QD-MPMS) with magnetization measurements while cooling and rewarming.",
       "code": "LP-CW-SIRM",
       "definition": "Cycling between cooling and warming: Room temperature SIRM"
     }, {
-      "IAGA7 code": "DC0",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.16.htm#IAGA7",
+      "IAGA": "DC0",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch16.html#IAGA7"],
       "code": "LP-DC0",
       "definition": "No demagnetization carried out but only NRM values reported"
     }, {
-      "IAGA7 code": "DC1",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.16.htm#IAGA7",
+      "IAGA": "DC1",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch16.html#IAGA7"],
       "code": "LP-DC1",
       "definition": "Pilot demagnetizations on some samples suggest stability but only NRM values reported"
     }, {
-      "IAGA7 code": "DC2",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.16.htm#IAGA7",
+      "IAGA": "DC2",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch16.html#IAGA7"],
       "code": "LP-DC2",
       "definition": "Bulk demagnetization carried out on all samples but no vector diagrams shown"
     }, {
-      "IAGA7 code": "DC3",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.16.htm#IAGA7",
+      "IAGA": "DC3",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch16.html#IAGA7"],
       "code": "LP-DC3",
       "definition": "Vector diagrams or stereoplots with M/Mo justify demagnetization procedures used"
     }, {
-      "IAGA7 code": "DC4",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.16.htm#IAGA7",
+      "IAGA": "DC4",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch16.html#IAGA7"],
       "code": "LP-DC4",
       "definition": "Principal component analysis carried out from analysis of Zijderveld diagrams"
     }, {
-      "IAGA7 code": "DC5",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.16.htm#IAGA7",
+      "IAGA": "DC5",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch16.html#IAGA7"],
       "code": "LP-DC5",
       "definition": "Magnetic vectors isolated using two or more demagnetization methods with principle component analysis"
     }, {
@@ -482,11 +482,11 @@ export default {
       "code": "LP-DIR-T",
       "definition": "Directional data: Step-wise thermal demagnetization"
     }, {
-      "description": "Measurement of sample NRM on squid or spinner magnetometer, cooling in liquid nitrogen bath, rewarming in zero field and then re-measuring at room temperature",
+      "description": "Measurement of sample NRM on squid or spinner magnetometer, cooling in liquid nitrogen bath, rewarming in zero field and then re-measuring at room temperature.",
       "code": "LP-DM-NRM",
       "definition": "Demagnetization: Room temperature NRM"
     }, {
-      "description": "Measurement of sample NRM on squid or spinner magnetometer, cooling in liquid nitrogen bath, rewarming in zero field and then re-measuring at room temperature",
+      "description": "Measurement of sample NRM on squid or spinner magnetometer, cooling in liquid nitrogen bath, rewarming in zero field and then re-measuring at room temperature.",
       "code": "LP-DM-SIRM",
       "definition": "Demagnetization: Room temperature SIRM"
     }, {
@@ -496,7 +496,7 @@ export default {
       "code": "LP-FC-IM",
       "definition": "Field cooled: Induced magnetization measured on warming"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.07.htm#LP-FORC",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch7.html#LP-FORC"],
       "code": "LP-FORC",
       "definition": "First order reversal curves or FORC analysis"
     }, {
@@ -506,7 +506,7 @@ export default {
       "code": "LP-HYS",
       "definition": "Hysteresis loops"
     }, {
-      "References": ":98056:",
+      "urls": ["98056"],
       "code": "LP-HYS-M",
       "definition": "Hysteresis loops: Minor loops"
     }, {
@@ -522,21 +522,21 @@ export default {
       "code": "LP-IMT",
       "definition": "Induced magnetization as a function of temperature"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.05.htm#LP-IRMAC",
-      "description": "After demagnetization a specimen is subject to successively increasing fields, acquiring partial IRMs until saturation is reached (SIRM). Remanence is measured at each step to provide the IRM acquisition curve",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch5.html#LP-IRMAC"],
+      "description": "After demagnetization a specimen is subject to successively increasing fields, acquiring partial IRMs until saturation is reached (SIRM). Remanence is measured at each step to provide the IRM acquisition curve.",
       "code": "LP-IRM",
       "definition": "IRM acquisition"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.08.htm#LP-IRM3D",
-      "description": "IRM is applied to the specimen along three orthogonal axes at different field strengths (e.g. 5T, 0.4T, 0.12T). Then the specimen is thermally demagnetized and the magnitude along the orthogonal axis (X1,X2,X3) versus temperature is plotted",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch8.html#LP-IRM3D"],
+      "description": "IRM is applied to the specimen along three orthogonal axes at different field strengths (e.g. 5T, 0.4T, 0.12T). Then the specimen is thermally demagnetized and the magnitude along the orthogonal axis (X1,X2,X3) versus temperature is plotted.",
       "code": "LP-IRM-3D",
       "definition": "IRM acquisition: Thermal demagnetization of 3-axis IRM"
     }, {
       "code": "LP-IRM-AFD",
       "definition": "IRM acquisition: AF demagnetization"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.05.htm#LP-DCDMAG",
-      "description": "DC field is applied to remove IRM. The specimen is then exposed to increasing strengths of the reverse field until the remanence reduces to zero at Bcr. The IRMs are then plotted versus applied field producing the acquisition/removal curves",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch5.html#LP-DCDMAG"],
+      "description": "DC field is applied to remove IRM. The specimen is then exposed to increasing strengths of the reverse field until the remanence reduces to zero at Bcr. The IRMs are then plotted versus applied field producing the acquisition/removal curves.",
       "code": "LP-IRM-DCD",
       "definition": "IRM acquisition: DC demagnetization"
     }, {
@@ -576,20 +576,20 @@ export default {
       "code": "LP-PFC-IM",
       "definition": "Partial field cooled: Induced magnetization measured on warming"
     }, {
-      "description": "Minimal paleointensity method code, further information, about the basic method, alteration checks, and reciprocity checks can be specified using additional LP-PI codes described below",
+      "description": "Minimal paleointensity method code, further information, about the basic method, alteration checks, and reciprocity checks can be specified using additional LP-PI codes described below.",
       "code": "LP-PI",
       "definition": "Paleointensity experiment"
     }, {
-      "description": "This code is used to indicate that some kind of check was used to detect alteration of the sample during the course of the paleointensity experiments. More details can be specified using the supplemental codes described below",
+      "description": "This code is used to indicate that some kind of check was used to detect alteration of the sample during the course of the paleointensity experiments. More details can be specified using the supplemental codes described below.",
       "code": "LP-PI-ALT",
       "definition": "Paleointensity experiment: Alteration check"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#IE-S",
-      "description": "A method to detect alteration that uses AF demagnetization of an ARM, before and after heating to impart TRM. Changes in the ARM coercivity spectrum indicate alteration",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#IE-S"],
+      "description": "A method to detect alteration that uses AF demagnetization of an ARM, before and after heating to impart TRM. Changes in the ARM coercivity spectrum indicate alteration.",
       "code": "LP-PI-ALT-AFARM",
       "definition": "Paleointensity experiment: Alteration check using AF demagnetization of ARM"
     }, {
-      "description": "Check that AF coercivity spectrum does not change during paleointensity experiment",
+      "description": "Check that AF coercivity spectrum does not change during paleointensity experiment.",
       "code": "LP-PI-ALT-AFTRM",
       "definition": "Paleointensity experiment: Alteration check using AF coercivity spectrum before and after TRM acquisition"
     }, {
@@ -599,34 +599,34 @@ export default {
       "code": "LP-PI-ALT-HYST",
       "definition": "Paleointensity experiment: Alteration check using hysteresis after acquisitions of TRM"
     }, {
-      "description": "This is a check for reproducibility of pTRM acquisition at a specific temperature. During a Thellier-type paleointensity experiment, the specimen is reheated to a lower temperature and cooled in the laboratory field, thus reapplying a pTRM",
+      "description": "This is a check for reproducibility of pTRM acquisition at a specific temperature. During a Thellier-type paleointensity experiment, the specimen is reheated to a lower temperature and cooled in the laboratory field, thus reapplying a pTRM.",
       "code": "LP-PI-ALT-PMRM",
       "definition": "Paleointensity experiment: Alteration check using a partial microwave induced TRM check"
     }, {
-      "description": "This is a check for reproducibility of pTRM acquisition at a specific temperature. During a Thellier-type paleointensity experiment, the specimen is reheated to a lower temperature and cooled in the laboratory field, thus reapplying a pTRM",
+      "description": "This is a check for reproducibility of pTRM acquisition at a specific temperature. During a Thellier-type paleointensity experiment, the specimen is reheated to a lower temperature and cooled in the laboratory field, thus reapplying a pTRM.",
       "code": "LP-PI-ALT-PTRM",
       "definition": "Paleointensity experiment: Alteration check using a pTRM check"
     }, {
       "code": "LP-PI-ALT-SUSC",
       "definition": "Paleointensity experiment: Alteration check using specimen susceptibility that does not change after successive heatings"
     }, {
-      "description": "Any paleointensity experiment in which a laboratory ARM is used to normalize NRM for paleofield estimation, as suggested by Levi and Banerjee (1976) or the more detailed pseudo-Thellier experiments of Tauxe et al . (1995)",
+      "description": "Any paleointensity experiment in which a laboratory ARM is used to normalize NRM for paleofield estimation, as suggested by Levi and Banerjee (1976) or the more detailed pseudo-Thellier experiments of Tauxe et al . (1995).",
       "code": "LP-PI-ARM",
       "definition": "Paleointensity experiment: Using a laboratory ARM to normalize NRM for paleofield estimation"
     }, {
-      "description": "Reciprocity checks are used to determine whether the blocking and unblocking process is the same at a given temperature during a Thellier-type experiment. This is considered an indicator of the types of grains (single or multidomain) present in the specimen",
+      "description": "Reciprocity checks are used to determine whether the blocking and unblocking process is the same at a given temperature during a Thellier-type experiment. This is considered an indicator of the types of grains (single or multidomain) present in the specimen.",
       "code": "LP-PI-BT",
       "definition": "Paleointensity experiment: Reciprocity check"
     }, {
-      "description": "Heating to a specific temperature to remove NRM and then cooling in a known magnetic field to induce TRM. Followed by heating to the same or lower temperature step and then cooling in zero, ambient magnetic field",
+      "description": "Heating to a specific temperature to remove NRM and then cooling in a known magnetic field to induce TRM. Followed by heating to the same or lower temperature step and then cooling in zero, ambient magnetic field.",
       "code": "LP-PI-BT-IZZI",
       "definition": "Paleointensity experiment: Reciprocity check using in-field step, followed by zero-field step"
     }, {
-      "description": "In zero field the specimen is cooled to low temperature and warmed prior to measurement. Low temperature cycling of specimens can detect presence of particles whose magnetic properties depend on magnetocrystalline anisotropy, including multidomain grains",
+      "description": "In zero field the specimen is cooled to low temperature and warmed prior to measurement. Low temperature cycling of specimens can detect presence of particles whose magnetic properties depend on magnetocrystalline anisotropy, including multidomain grains.",
       "code": "LP-PI-BT-LT",
       "definition": "Paleointensity experiment: Reciprocity check using low temperature cycling of the specimen"
     }, {
-      "description": "A check carried out during Thellier-type procedures to detect multidomain grains. Additional zero field heating steps are used to remove a previously placed pTRM. The ability to remove a prior pTRM step at the same temperature imparted is used as an indicator of reversal",
+      "description": "A check carried out during Thellier-type procedures to detect multidomain grains. Additional zero field heating steps are used to remove a previously placed pTRM. The ability to remove a prior pTRM step at the same temperature imparted is used as an indicator of reversal.",
       "code": "LP-PI-BT-MD",
       "definition": "Paleointensity experiment: Reciprocity check using an attempted removal of a previously placed pTRM"
     }, {
@@ -645,18 +645,18 @@ export default {
       "code": "LP-PI-II",
       "definition": "Paleointensity experiment: Original Thellier-Thellier method with in-field and in-field steps analogous to LP-PI-IZ and LP-PI-ZI"
     }, {
-      "description": "Use of a laboratory IRM to normalize NRM for paleofield estimation",
+      "description": "Use of a laboratory IRM to normalize NRM for paleofield estimation.",
       "code": "LP-PI-IRM",
       "definition": "Paleointensity experiment: Using a laboratory IRM to normalize NRM for paleofield estimation"
     }, {
       "code": "LP-PI-IZ",
       "definition": "Paleointensity experiment: In-field and zero-field pair of steps"
     }, {
-      "description": "Use of microwave radiation as the energy source to unblock NRM and/or for in-field remanence acquisition",
+      "description": "Use of microwave radiation as the energy source to unblock NRM and/or for in-field remanence acquisition.",
       "code": "LP-PI-M",
       "definition": "Paleointensity experiment: Microwave demagnetization"
     }, {
-      "description": "Use of microwave radiation as the energy source to unblock NRM and/or for in-field remanence acquisition",
+      "description": "Use of microwave radiation as the energy source to unblock NRM and/or for in-field remanence acquisition.",
       "code": "LP-PI-M-D",
       "definition": "Paleointensity experiment: Microwave demagnetization with both zero-field and in-field steps"
     }, {
@@ -664,7 +664,7 @@ export default {
       "code": "LP-PI-M-II",
       "definition": "Paleointensity experiment: Microwave demagnetization with an in-field step followed by another in-field step (classical Thellier experiment)"
     }, {
-      "description": "Heating the specimen to the desired temperature step and then cooling in known ambient magnetic field. Then heating to the same or lower temperature and then cooling in zero magnetic field to induce pTRM",
+      "description": "Heating the specimen to the desired temperature step and then cooling in known ambient magnetic field. Then heating to the same or lower temperature and then cooling in zero magnetic field to induce pTRM.",
       "code": "LP-PI-M-IZ",
       "definition": "Paleointensity experiment: Using a microwave TRM with an in-field step followed by a zero-field step"
     }, {
@@ -672,18 +672,18 @@ export default {
       "code": "LP-PI-M-PERP",
       "definition": "Paleointensity experiment: Microwave heating with perpendicular protocol"
     }, {
-      "description": "Use of microwave radiation as the energy source to unblock NRM and/or for in-field remanence acquisition",
+      "description": "Use of microwave radiation as the energy source to unblock NRM and/or for in-field remanence acquisition.",
       "code": "LP-PI-M-S",
       "definition": "Paleointensity experiment: Microwave demagnetization with only in-field steps"
     }, {
-      "description": "Heating the specimen to the desired temperature step and then cooling in zero ambient magnetic field. Then heating to the same or lower temperature and then cooling in a known magnetic field to induce pTRM",
+      "description": "Heating the specimen to the desired temperature step and then cooling in zero ambient magnetic field. Then heating to the same or lower temperature and then cooling in a known magnetic field to induce pTRM.",
       "code": "LP-PI-M-ZI",
       "definition": "Paleointensity experiment: Using a microwave TRM with a zero-field step followed by an in-field step"
     }, {
       "code": "LP-PI-MULT",
       "definition": "Paleointensity experiment: Using a multi-specimen procedure"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#PE-PT",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#PE-PT"],
       "code": "LP-PI-PARM",
       "definition": "Paleointensity experiment: Best-fit slope through NRM remaining versus pARM gained data"
     }, {
@@ -696,7 +696,7 @@ export default {
       "code": "LP-PI-TDS",
       "definition": "Paleointensity experiment: Normalized by thermal demagnetization spectrum"
     }, {
-      "description": "Any paleointensity experiment that uses a TRM produced in a lab controlled field. Includes all variants of the Thellier method, including the Shaw method. More details on alteration and reciprocity checks can be added using the special LP-PI-ALT and LP-PI-BT method codes",
+      "description": "Any paleointensity experiment that uses a TRM produced in a lab controlled field. Includes all variants of the Thellier method, including the Shaw method. More details on alteration and reciprocity checks can be added using the special LP-PI-ALT and LP-PI-BT method codes.",
       "code": "LP-PI-TRM",
       "definition": "Paleointensity experiment: Using a laboratory TRM"
     }, {
@@ -704,7 +704,7 @@ export default {
       "code": "LP-PI-TRM-II",
       "definition": "Paleointensity experiment: Using a laboratory TRM with an in-field step followed by another in-field step (classical Thellier experiment)"
     }, {
-      "description": "Heating the specimen to the desired temperature step and then cooling in known ambient magnetic field. Then heating to the same or lower temperature and then cooling in zero magnetic field to induce pTRM",
+      "description": "Heating the specimen to the desired temperature step and then cooling in known ambient magnetic field. Then heating to the same or lower temperature and then cooling in zero magnetic field to induce pTRM.",
       "code": "LP-PI-TRM-IZ",
       "definition": "Paleointensity experiment: Using a laboratory TRM with an in-field step followed by a zero-field step"
     }, {
@@ -715,7 +715,7 @@ export default {
       "code": "LP-PI-TRM-PERP",
       "definition": "Paleointensity experiment: Using a laboratory TRM with perpendicular protocol"
     }, {
-      "description": "Heating the specimen to the desired temperature step and then cooling in zero ambient magnetic field. Then heating to the same or lower temperature and then cooling in a known magnetic field to induce pTRM",
+      "description": "Heating the specimen to the desired temperature step and then cooling in zero ambient magnetic field. Then heating to the same or lower temperature and then cooling in a known magnetic field to induce pTRM.",
       "code": "LP-PI-TRM-ZI",
       "definition": "Paleointensity experiment: Using a laboratory TRM with a zero-field step followed by an in-field step"
     }, {
@@ -752,7 +752,7 @@ export default {
       "code": "LP-X-F",
       "definition": "Susceptibility measurement: As a function of frequency"
     }, {
-      "description": "Ferromagnetic susceptibility is the low-field minus the high-field susceptibility to correct for paramagnetic contribution",
+      "description": "Ferromagnetic susceptibility is the low-field minus the high-field susceptibility to correct for paramagnetic contribution.",
       "code": "LP-X-FERRO",
       "definition": "Susceptibility measurement: Independent measurements of low field and highfield susceptibility for getting ferromagnetic susceptibility"
     }, {
@@ -778,19 +778,19 @@ export default {
       "code": "LT-AF-G",
       "definition": "Alternating field: Triple demagnetization with AF along Y,Z,X measurement followed by AF along Y and AF along Z measurement"
     }, {
-      "IAGA7 code": "A",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.05.htm#LT-AFI",
-      "description": "AF demagnetization in a small DC field offset to produce an ARM",
+      "IAGA": "A",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch5.html#LT-AFI"],
+      "description": "AF demagnetization in a small DC field offset to produce an ARM.",
       "code": "LT-AF-I",
       "definition": "Alternating field: In laboratory field"
     }, {
-      "IAGA7 code": "A",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#LT-AFZ",
-      "description": "A specimen is subject to a decaying and alternating magnetic field such that the magnetic moments with coercivities below the peak field are aligned in opposed directions, and thus cancel. Specimens are typically reoriented in three or more orthogonal axes",
+      "IAGA": "A",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#LT-AFZ"],
+      "description": "A specimen is subject to a decaying and alternating magnetic field such that the magnetic moments with coercivities below the peak field are aligned in opposed directions, and thus cancel. Specimens are typically reoriented in three or more orthogonal axes.",
       "code": "LT-AF-Z",
       "definition": "Alternating field: In zero field"
     }, {
-      "IAGA7 code": "H",
+      "IAGA": "H",
       "code": "LT-CHEM",
       "definition": "Cleaning of porous rocks by chemical leaching with HCl"
     }, {
@@ -809,7 +809,7 @@ export default {
       "code": "LT-LT-I",
       "definition": "Low temperature treatment: In laboratory field"
     }, {
-      "description": "In zero field the specimen is cooled to low temperature and warmed prior to measurement. Low temperature cycling of specimens can detect presence of particles whose magnetic properties depend on magnetocrystalline anisotropy, including multidomain grains",
+      "description": "In zero field the specimen is cooled to low temperature and warmed prior to measurement. Low temperature cycling of specimens can detect presence of particles whose magnetic properties depend on magnetocrystalline anisotropy, including multidomain grains.",
       "code": "LT-LT-Z",
       "definition": "Low temperature treatment: In zero field"
     }, {
@@ -825,7 +825,7 @@ export default {
       "code": "LT-MV-Z",
       "definition": "Using microwave radiation: In zero field"
     }, {
-      "IAGA7 code": "N",
+      "IAGA": "N",
       "code": "LT-NO",
       "definition": "No treatments applied before measurement"
     }, {
@@ -838,45 +838,45 @@ export default {
       "code": "LT-NRM-PERP",
       "definition": "Specimen heating and cooling: Laboratory field perpendicular to the NRM vector"
     }, {
-      "description": "After treatment at a particular temperature step, the specimen is then reheated to a lower temperature and cooled with the laboratory field on thus reapplying a pTRM",
+      "description": "After treatment at a particular temperature step, the specimen is then reheated to a lower temperature and cooled with the laboratory field on thus reapplying a pTRM.",
       "code": "LT-PMRM-I",
       "definition": "pMRM check: After zero field step, perform an in field cooling after heating to lower T with  microwave radiation"
     }, {
-      "description": "A check carried out during Thellier procedures to detect multidomain grains. Additional zero field heating steps are used to remove a previously placed pTRM. The ability to remove a prior pTRM step at the same temperature imparted is used as an indicator of reversal",
+      "description": "A check carried out during Thellier procedures to detect multidomain grains. Additional zero field heating steps are used to remove a previously placed pTRM. The ability to remove a prior pTRM step at the same temperature imparted is used as an indicator of reversal.",
       "code": "LT-PMRM-MD",
       "definition": "pMRM tail check: After in laboratory field step, perform a zero field cooling after heating with same microwave power and time "
     }, {
-      "description": "After heating to a particular temperature step and cooling in field. The specimen is heated to a lower temperature step and cooled in zero field. This checks for low temperature pTRM tails",
+      "description": "After heating to a particular temperature step and cooling in field. The specimen is heated to a lower temperature step and cooled in zero field. This checks for low temperature pTRM tails.",
       "code": "LT-PMRM-Z",
       "definition": "pMRM tail check: After in laboratory field step, perform a zero field cooling after microwave heating at a lower power/time"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#LT-pTRMI",
-      "description": "After treatment at a particular temperature step, the specimen is then reheated to a lower temperature and cooled with the laboratory field on thus reapplying a pTRM",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#LT-pTRMI"],
+      "description": "After treatment at a particular temperature step, the specimen is then reheated to a lower temperature and cooled with the laboratory field on thus reapplying a pTRM.",
       "code": "LT-PTRM-I",
       "definition": "pTRM check: After zero field step, perform an in field cooling"
     }, {
-      "description": "A check carried out during Thellier procedures to detect multidomain grains. Additional zero field heating steps are used to remove a previously placed pTRM. The ability to remove a prior pTRM step at the same temperature imparted is used as an indicator of reversal",
+      "description": "A check carried out during Thellier procedures to detect multidomain grains. Additional zero field heating steps are used to remove a previously placed pTRM. The ability to remove a prior pTRM step at the same temperature imparted is used as an indicator of reversal.",
       "code": "LT-PTRM-MD",
       "definition": "pTRM tail check: After in laboratory field step, perform a zero field cooling at same temperature"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#LT-pTRMZ",
-      "description": "After heating to a particular temperature step and cooling in field. The specimen is heated to a lower temperature step and cooled in zero field. This checks for low temperature pTRM tails",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#LT-pTRMZ"],
+      "description": "After heating to a particular temperature step and cooling in field. The specimen is heated to a lower temperature step and cooled in zero field. This checks for low temperature pTRM tails.",
       "code": "LT-PTRM-Z",
       "definition": "pTRM tail check After in laboratory field step, perform a zero field cooling at a lower temperature"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#LT-TI",
-      "description": "Heating to a specific temperature to remove NRM and then cooling in a known magnetic field to induce TRM",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#LT-TI"],
+      "description": "Heating to a specific temperature to remove NRM and then cooling in a known magnetic field to induce TRM.",
       "code": "LT-T-I",
       "definition": "Specimen cooling: In laboratory field"
     }, {
-      "IAGA7 code": "T",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#LT-TZ",
-      "description": "Heating the specimen to the desired temperature step and then cooling in zero ambient magnetic field",
+      "IAGA": "T",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#LT-TZ"],
+      "description": "Heating the specimen to the desired temperature step and then cooling in zero ambient magnetic field.",
       "code": "LT-T-Z",
       "definition": "Specimen cooling: In zero field"
     }, {
-      "IAGA7 code": "V",
-      "description": "Placing a specimen in a zero field environment (often a MU-metal shield) allows for the relaxation of the softest components of magnetization. This randomizing effect can then be measured over time. MU-metal is Ni-Fe alloy of high permeability",
+      "IAGA": "V",
+      "description": "Placing a specimen in a zero field environment (often a MU-metal shield) allows for the relaxation of the softest components of magnetization. This randomizing effect can then be measured over time. MU-metal is Ni-Fe alloy of high permeability.",
       "code": "LT-VD",
       "definition": "Viscous demagnetization by applying MU-metal screening"
     }],
@@ -1272,7 +1272,7 @@ export default {
       "code": "GM-USD-TH228-TH232",
       "definition": "Uranium series disequilibrium age determination: 228Th-232Th"
     }, {
-      "description": "Ionium dating in deep sea sediments",
+      "description": "Ionium dating in deep sea sediments.",
       "code": "GM-USD-TH230",
       "definition": "Uranium series disequilibrium age determination: 230Th"
     }, {
@@ -1416,7 +1416,7 @@ export default {
       "definition": "Manometry"
     }, {
       "code": "SC-MB",
-      "definition": "M¿ssbauer"
+      "definition": "Mössbauer"
     }, {
       "code": "SC-MS",
       "definition": "Mass spectrometry"
@@ -1501,138 +1501,138 @@ export default {
   },
   "stability_tests": {
     "codes": [{
-      "IAGA7 code": "C",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#FT-BC",
-      "description": "The baked contact test compares the NRM direction of an igneous intrusion to that of the country rock surrounding it. One expects a changing NRM vector across the heat affected zone of the country rock. When an igneous rock intrudes an older rock formation, the intrusion heats a region of the surrounding country rock and the baked region of the country rock will then cool in the same magnetic field as the intrusion, and so will acquire a direction of magnetization the same as that of the intrusion. Agreement between the direction of magnetization of the intrusion and that of the country rock provides strong evidence for the stability of the magnetization of the intrusion",
+      "IAGA": "C",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#FT-BC"],
+      "description": "The baked contact test compares the NRM direction of an igneous intrusion to that of the country rock surrounding it. One expects a changing NRM vector across the heat affected zone of the country rock. When an igneous rock intrudes an older rock formation, the intrusion heats a region of the surrounding country rock and the baked region of the country rock will then cool in the same magnetic field as the intrusion, and so will acquire a direction of magnetization the same as that of the intrusion. Agreement between the direction of magnetization of the intrusion and that of the country rock provides strong evidence for the stability of the magnetization of the intrusion.",
       "code": "ST-C",
       "definition": "Baked contact test"
     }, {
-      "References": ":78678:",
+      "urls": ["10.1029/2000JB000050"],
       "description": "Age uncertainties of < ± 15 Myr.",
       "code": "ST-BCQ-1",
       "definition": "Besse and Courtillot Quality Factor 1"
     }, {
-      "References": ":78678:",
+      "urls": ["10.1029/2000JB000050"],
       "description": "There must be a sufficient number of individually oriented samples from enough sites. At least six sites and 36 samples, each site having a 95% confidence interval less than 10∘ in the Cenozoic and 15∘ in the Mesozoic.",
       "code": "ST-BCQ-2",
       "definition": "Besse and Courtillot Quality Factor 2"
     }, {
-      "References": ":78678:",
+      "urls": ["10.1029/2000JB000050"],
       "description": "It must be demonstrated that a coherent characteristic remanence component has been isolated by the demagnetization procedure. McElhinny and McFadden (2000) attempted to standardize the description of the demagnetization status of a dataset using a demagnetization code (DC). Besse and Couttillot 2002 recommend using only poles with a DC of at least 2.",
       "code": "ST-BCQ-3",
       "definition": "Besse and Courtillot Quality Factor 3"
     }, {
-      "References": ":78678:",
+      "urls": ["10.1029/2000JB000050"],
       "description": "The age of the magnetization relative to the age of the rock should be constrained using field tests (fold test, conglomerate test, baked contact test. Reject poles that fail a fold test or a reversals test.",
       "code": "ST-BCQ-4",
       "definition": "Besse and Courtillot Quality Factor 4"
     }, {
-      "References": ":78678:",
+      "urls": ["10.1029/2000JB000050"],
       "description": "There should be agreement in the pole positions from units of similar age from a broad region and adequate knowledge of any structural corrections necessary. Reject poles from “mobile regions”, but incorporate data that are azimuthally unconstrained by using inclination only data as a constraint on paleolatitude.",
       "code": "ST-BCQ-5",
       "definition": "Besse and Courtillot Quality Factor 5"
     }, {
-      "IAGA7 code": "G",
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.09.htm#FT-CT",
-      "description": "The conglomerate test compares the NRM direction of conglomerate clasts to the matrix (host particles) NRM direction. This results in directions that are random relative to the matrix, or directions clustering around the matrix particle's vector mean. If the directions of the magnetization of the conglomerate cobbles are random then this suggests that the magnetization of the parent formation has been stable since the deposition of the conglomerate",
+      "IAGA": "G",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch9.html#FT-CT"],
+      "description": "The conglomerate test compares the NRM direction of conglomerate clasts to the matrix (host particles) NRM direction. This results in directions that are random relative to the matrix, or directions clustering around the matrix particle's vector mean. If the directions of the magnetization of the conglomerate cobbles are random then this suggests that the magnetization of the parent formation has been stable since the deposition of the conglomerate.",
       "code": "ST-G",
       "definition": "Conglomerate test"
     }, {
       "code": "ST-F",
       "definition": "Fold test"
     }, {
-      "IAGA7 code": "F",
-      "description": "This fold test compares the precision parameter (kappa) of the NRM directions across a fold before and after fold correction (unfolding). The positive result signifies an improved precision (kappa) about the vector mean, resulting in less dispersion. Samples are taken from different limbs of a fold. If the in situ directions of magnetization on the separate limbs differ, but agree after unfolding the limbs towards the horizontal, then the magnetization must predate the folding and must have been stable since that time",
+      "IAGA": "F",
+      "description": "This fold test compares the precision parameter (kappa) of the NRM directions across a fold before and after fold correction (unfolding). The positive result signifies an improved precision (kappa) about the vector mean, resulting in less dispersion. Samples are taken from different limbs of a fold. If the in situ directions of magnetization on the separate limbs differ, but agree after unfolding the limbs towards the horizontal, then the magnetization must predate the folding and must have been stable since that time.",
       "code": "ST-F-1",
       "definition": "Fold test 1: Compares Kappa before and after tilt correction"
     }, {
-      "IAGA7 code": "F*",
-      "description": "This fold test is a comparison of precisions (kappa) between different fold limbs (groups) to determine if they could have been drawn from a common group. An estimated ratio of k1/k2 far from unity is interpreted to imply significantly different distributions, where the critical value is being determined by F-test distributions. If the observed value of <f> exceeds the critical value of the F distribution at the required level of significance, then the hypothesis of a common true mean may be rejected. In other words, the sites on each limb may be considered as a separate group with each group having it's own common tilt correction",
+      "IAGA": "F*",
+      "description": "This fold test is a comparison of precisions (kappa) between different fold limbs (groups) to determine if they could have been drawn from a common group. An estimated ratio of k1/k2 far from unity is interpreted to imply significantly different distributions, where the critical value is being determined by F-test distributions. If the observed value of <f> exceeds the critical value of the F distribution at the required level of significance, then the hypothesis of a common true mean may be rejected. In other words, the sites on each limb may be considered as a separate group with each group having it's own common tilt correction.",
       "code": "ST-F-2",
       "definition": "Fold test 2: Compares distributions of directions from various limbs of folds before and after tilt correction"
     }, {
-      "IAGA7 code": "F*",
-      "description": "This fold test is used to determine if there is no common precision (kappa) between groups by using Watson's V statistic compared to a simulated random distribution. If there is not a common kappa and there are multiple sites on each limb, then it is still possible to make use of this V-test. If the null hypothesis of a common mean direction can be rejected in the in situ position, but not in the unfolded position, then this is evidence that the magnetization was acquired before the folding occurred",
+      "IAGA": "F*",
+      "description": "This fold test is used to determine if there is no common precision (kappa) between groups by using Watson's V statistic compared to a simulated random distribution. If there is not a common kappa and there are multiple sites on each limb, then it is still possible to make use of this V-test. If the null hypothesis of a common mean direction can be rejected in the in situ position, but not in the unfolded position, then this is evidence that the magnetization was acquired before the folding occurred.",
       "code": "ST-F-3",
       "definition": "Fold test 3: Uses Watson's V to test for common mean after tilt correction"
     }, {
-      "IAGA7 code": "F*",
+      "IAGA": "F*",
       "code": "ST-F-4",
       "definition": "Fold test 4: Estimates confidence on Kappa as a function of tilt correction"
     }, {
-      "IAGA7 code": "F*",
-      "description": "In this fold test the behavior of the eigenvalue t1 is examined during unfolding to find the point at which the tightest grouping is achieved. Because in the orientation matrix the polarity does not play a role and because the tightness of groupings is reflected in the relative magnitudes of the eigenvalues(t), we can predict that the variance along the principal axis grows and those along the other axis shrinks, as the data become more tightly grouped",
+      "IAGA": "F*",
+      "description": "In this fold test the behavior of the eigenvalue t1 is examined during unfolding to find the point at which the tightest grouping is achieved. Because in the orientation matrix the polarity does not play a role and because the tightness of groupings is reflected in the relative magnitudes of the eigenvalues(t), we can predict that the variance along the principal axis grows and those along the other axis shrinks, as the data become more tightly grouped.",
       "code": "ST-F-5",
       "definition": "Fold test 5: Estimates confidence on maximum eigenvalue as a function of tilt correction"
     }, {
-      "IAGA7 code": "C*",
-      "description": "This is the inverse of the baked contact test. If stable magnetizations are observed in unbaked rocks that provide positive evidence for a baked contact test, then this also provides evidence that the unbaked sediments have retained their magnetization, at least since the time of baking",
+      "IAGA": "C*",
+      "description": "This is the inverse of the baked contact test. If stable magnetizations are observed in unbaked rocks that provide positive evidence for a baked contact test, then this also provides evidence that the unbaked sediments have retained their magnetization, at least since the time of baking.",
       "code": "ST-C-I",
       "definition": "Inverse contact test"
     }, {
-      "IAGA7 code": "G*",
-      "description": "This is a variation on the conglomerate test, where the conglomerate lies within the formation and was deposited not long after the parent beds were deposited",
+      "IAGA": "G*",
+      "description": "This is a variation on the conglomerate test, where the conglomerate lies within the formation and was deposited not long after the parent beds were deposited.",
       "code": "ST-G-IF",
       "definition": "Intraformational conglomerate test"
     }, {
       "code": "ST-R",
       "definition": "Reversals test"
     }, {
-      "IAGA7 code": "R",
-      "description": "This reversal test compares the normal and reverse directions, that are flipped 180 degrees, for a common mean. Originally the simple procedure was to invert one of the directions by 180 degrees and then test if the resulting two directions of magnetization were discernibly different, by testing for common kappa. However, this method is taken to be flawed, because the larger the circles of confidence the harder it would be to show the two directions were discernibly different from one another",
+      "IAGA": "R",
+      "description": "This reversal test compares the normal and reverse directions, that are flipped 180 degrees, for a common mean. Originally the simple procedure was to invert one of the directions by 180 degrees and then test if the resulting two directions of magnetization were discernibly different, by testing for common kappa. However, this method is taken to be flawed, because the larger the circles of confidence the harder it would be to show the two directions were discernibly different from one another.",
       "code": "ST-R-1",
       "definition": "Reversals test 1: Compares N and antipodes of R directions by testing for common mean"
     }, {
-      "IAGA7 code": "R",
-      "description": "This reversal test compares the means of the normal and reversed data, and assesses the quality using Watson's V-statistic to test whether the two samples could have been drawn from distributions sharing a common mean direction, depend on the number of observations in each sample and whether the two distributions share a common precision. Results can be classified as 'A' if ?c <= 5¿, 'B' if 5¿ <= ?c <= 10¿, or ¿C' if 10¿ <= ?c <= 20¿, and indeterminate if ?c > 20¿",
+      "IAGA": "R",
+      "description": "This reversal test compares the means of the normal and reversed data, and assesses the quality using Watson's V-statistic to test whether the two samples could have been drawn from distributions sharing a common mean direction, depend on the number of observations in each sample and whether the two distributions share a common precision. Results can be classified as 'A' if γc <= 5°, 'B' if 5° <= γc <= 10°, or 'C' if 10° <= γc <= 20°, and indeterminate if γc > 20°.",
       "code": "ST-R-2",
       "definition": "Reversals test 2: Compares Watson's V statistic for normal and reverse modes with monte carlo simulation"
     }, {
-      "IAGA7 code": "R",
-      "description": "This reversal test compares the overlap of confidence intervals for bootstrapped means of reversed antipodal data. If the confidence intervals for the normal and reversed data overlap, then this suggests that the two means cannot be distinguished at the 95% level of confidence",
+      "IAGA": "R",
+      "description": "This reversal test compares the overlap of confidence intervals for bootstrapped means of reversed antipodal data. If the confidence intervals for the normal and reversed data overlap, then this suggests that the two means cannot be distinguished at the 95% level of confidence.",
       "code": "ST-R-3",
       "definition": "Reversals test 3: Compares bootstrapped means for N and R antipodes by testing for common mean"
     }, {
-      "IAGA7 code": "R",
+      "IAGA": "R",
       "code": "ST-R-4",
       "definition": "Reversals test 4: Defines degree of Alpha95 overlap for N and R antipodes"
     }, {
-      "IAGA7 code": "U",
-      "description": "This unconformity test is applied in special cases when successive zones of normal and reverse magnetization are truncated by an unconformity in the sequence. If the polarity zones of the upper/younger sequence do not match those of the lower/older sequence, then the magnetization of the lower beds is older than the episode of erosion that created the unconformity",
+      "IAGA": "U",
+      "description": "This unconformity test is applied in special cases when successive zones of normal and reverse magnetization are truncated by an unconformity in the sequence. If the polarity zones of the upper/younger sequence do not match those of the lower/older sequence, then the magnetization of the lower beds is older than the episode of erosion that created the unconformity.",
       "code": "ST-U",
       "definition": "Unconformity test"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "The age of the formation must be known rather accurately. The age should be known to within a half of a geological period or within a numerical age of ± 4% for Phanerozoic data. For Precambrian rocks, the age should be known to within ± 4% or 40 Myr, whichever is smaller.",
       "code": "ST-VVQ-1",
       "definition": "Van der Voo Quality Factor 1"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "There must be a sufficient number of individually oriented samples from enough sites. A minimum of 24 discrete samples of the geomagnetic field each having a κ > 10.",
       "code": "ST-VVQ-2",
       "definition": "Van der Voo Quality Factor 2"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "It must be demonstrated that a coherent characteristic remanence component has been isolated by the demagnetization procedure.",
       "code": "ST-VVQ-3",
       "definition": "Van der Voo Quality Factor 3"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "The age of the magnetization relative to the age of the rock should be constrained using field tests (fold test, conglomerate test, baked contact test).",
       "code": "ST-VVQ-4",
       "definition": "Van der Voo Quality Factor 4"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "There should be agreement in the pole positions from units of similar age from a broad region and adequate knowledge of any structural corrections necessary.",
       "code": "ST-VVQ-5",
       "definition": "Van der Voo Quality Factor 5"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "Both polarities should be represented and the two data sets should be antipodal.",
       "code": "ST-VVQ-6",
       "definition": "Van der Voo Quality Factor 6"
     }, {
-      "References": ":62304:",
+      "urls": ["http://dx.doi.org/10.1029/rg028i002p00167"],
       "description": "Pole positions should not fall on a younger part of the pole path or on the present field direction.",
       "code": "ST-VVQ-7",
       "definition": "Van der Voo Quality Factor 7"
@@ -1704,15 +1704,15 @@ export default {
       "code": "SM-EXT",
       "definition": "Extrapolation"
     }, {
-      "description": "Linear temperature dependence of inverse susceptibility above ordering temperature of ferromagnets",
+      "description": "Linear temperature dependence of inverse susceptibility above ordering temperature of ferromagnets.",
       "code": "SM-EXT-LIN",
       "definition": "Linear extrapolation from above critical temperature"
     }, {
-      "description": "Hyperbolic temperature dependence of inverse susceptibility above ordering temperature of ferromagnets",
+      "description": "Hyperbolic temperature dependence of inverse susceptibility above ordering temperature of ferromagnets.",
       "code": "SM-EXT-NL1",
       "definition": "Non-linear extrapolation from above critical temperature"
     }, {
-      "description": "Theoretical decay of Ms versus T to estimate Curie temperature",
+      "description": "Theoretical decay of Ms versus T to estimate Curie temperature.",
       "code": "SM-EXT-NL2",
       "definition": "Non-linear extrapolation from below critical temperature"
     }, {
@@ -1837,15 +1837,15 @@ export default {
       "code": "DA-CR",
       "definition": "Cooling rate correction"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#IC-CR1",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#IC-CR1"],
       "code": "DA-CR-EG",
       "definition": "Cooling rate correction: Educated guess"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#IC-CR2",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#IC-CR2"],
       "code": "DA-CR-PS",
       "definition": "Cooling rate correction: Percent estimated from pilot samples"
     }, {
-      "Essentials of Paleomagnetism URL": "http://earthref.org/MAGIC/books/Tauxe/2005/lecture.10.htm#IC-CR3",
+      "urls": ["https://earthref.org/MagIC/books/Tauxe/Essentials/WebBook3ch10.html#IC-CR3"],
       "code": "DA-CR-TRM",
       "definition": "Cooling rate correction: Comparison between 2 TRMs acquired with a slow and rapid cooling rate"
     }, {
