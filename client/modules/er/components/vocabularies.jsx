@@ -33,7 +33,7 @@ export default class extends React.Component {
         nextState.loaded != this.state.loaded) {
       return true;
     }
-    if (nextProps.version !== this.props.version) {
+    if (nextProps.vocabularies !== this.props.vocabularies) {
       $(this.refs['loading']).addClass('active');
       setTimeout(() => { this.setState({updating: true}); }, 1);
     }
@@ -49,6 +49,7 @@ export default class extends React.Component {
   }
 
   search(str) {
+    return;
     const $tbls  = $(this.refs['accordion']).find('.data-model-table');
     const $grps  = $(this.refs['accordion']).find('.data-model-group');
     const $cols  = $(this.refs['accordion']).find('.data-model-column');
@@ -125,15 +126,28 @@ export default class extends React.Component {
   }
 
   downloadJSON() {
-    const blob = new Blob([JSON.stringify(methodCodes, null, '\t')], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, 'MagIC Method Codes.json');
+    if (this.props.vocabularies === 'controlled') {
+      const blob = new Blob([JSON.stringify(cvs, null, '\t')], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, 'EarthRef Controlled Vocabularies.json');
+    }
+    if (this.props.vocabularies === 'suggested') {
+      const blob = new Blob([JSON.stringify(svs, null, '\t')], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, 'EarthRef Suggested Vocabularies.json');
+    }
   }
 
   render() {
+    const vocabularies = (this.props.vocabularies === 'controlled' ? cvs : svs);
     return (
-      <div className="data-model" style={{marginTop: '-3em'}}>
+      <div className="data-model">
         <div className="ui top attached tabular menu">
-          <div className="right menu">
+          <a className={(this.props.vocabularies === 'controlled' ? 'active ' : '') + 'item'} href={'controlled'}>
+            Controlled Vocabularies
+          </a>
+          <a className={(this.props.vocabularies === 'suggested' ? 'active ' : '') + 'item'} href={'suggested'}>
+            Suggested Vocabularies
+          </a>
+          <div className="right menu" style={{display:'none'}}>
             <div className="active item">
               <div className="ui search">
                 <div className="ui transparent icon input">
@@ -156,39 +170,42 @@ export default class extends React.Component {
           <div ref="loading" className="ui inverted active dimmer">
             <div className="ui text loader">Loading</div>
           </div>
-          <div className="ui grid">
-            <div className="ten wide column"></div>
-            <div className="right aligned six wide column">
+          <div className="ui equal width grid">
+            <div className="right aligned column">
               <i className="download icon"/>
               Download as <a href="" onClick={this.downloadJSON.bind(this)}>.json</a>.
             </div>
           </div>
           <div ref="accordion" className="ui styled fluid accordion">
-            {_.keys(cvs).sort().map((group,i) => {
+            {_.keys(vocabularies).sort().map((group,i) => {
               if (this.state.loaded) return (
                 <div className="data-model-table" key={i}>
-                  <div className="title">
+                  <div className={(i === 0 ? 'active ' : '') + 'title'}>
                     <i className="dropdown icon"/>
                     <span>
-                      {cvs[group].label}
+                      {vocabularies[group].label}
                     </span>
                     <div className="ui circular small basic label data-model-table-count">
-                      {cvs[group].items.length}
+                      {vocabularies[group].items.length}
                     </div>
                   </div>
                   <div className={(i === 0 ? 'active ' : '') + 'content'}>
-                    {cvs[group].items.map((item,j) => {
-                      return (
-                        <div className="data-model-column" key={j}>
-                          <div className={(j === 0 ? 'active ' : '') + 'title'}>
-                            {item.item}
-                            <span className="description">
-                              {item.label}
-                            </span>
+                    <div className="ui six column doubling padded grid">
+                      {vocabularies[group].items.map((item,j) => {
+                        return (
+                          <div className="column" key={j}>
+                            <div className="ui bulleted list">
+                              <div className="item">
+                                <div className="content">
+                                  <div className="header">{item.item}</div>
+                                  <div className="description">{item.label}</div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
                 </div>
               );

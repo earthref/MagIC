@@ -32,8 +32,11 @@ export default function (injectDeps, {FlowRouter}) {
   });
 
   FlowRouter.route(`/vocabularies`, {
+    action() { FlowRouter.go('/vocabularies/controlled'); }
+  });
+  FlowRouter.route(`/vocabularies/:v(controlled|suggested)`, {
     name: 'erVocabularies',
-    action({q}) {
+    action({v}, {q}) {
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="EarthRef.org">
@@ -41,7 +44,7 @@ export default function (injectDeps, {FlowRouter}) {
               <h3>
                 Browse the EarthRef Vocabularies:
               </h3>
-              <Vocabularies search={q}/>
+              <Vocabularies vocabularies={v} search={q}/>
             </Home>
           </Layout>
         )
