@@ -1,14 +1,15 @@
 import {_} from 'lodash';
 import XLSX from 'xlsx-style';
-import Runner from '../../core/actions/runner.js';
-import GetContributionVersion from './get_contribution_version';
+import Runner from '../../er/actions/runner.js';
+import Parser from './parse_contribution';
 import {default as magicDataModels} from '../configs/data_models/data_models';
+import {default as magicVersions} from '../configs/magic_versions';
 
 export default class extends Runner {
 
   constructor({LocalState}) {
     super('EXPORT_CONTRIBUTION', {LocalState});
-    this.VersionGetter = new GetContributionVersion({LocalState});
+    this.parser = new Parser({LocalState});
     this.version;
     this.model;
     }
@@ -17,7 +18,7 @@ export default class extends Runner {
   toText(jsonToExport, toExtendedText) {
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
     // Retrieve the data model version used in the jsonToExport
-    this.version = this.VersionGetter.getVersion(jsonToExport)
+    this.version = this.parser.getVersion(jsonToExport)
     if (!this.version) return jsonToExport;
 
     // Retrieve the data model
@@ -34,7 +35,7 @@ export default class extends Runner {
 
   //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
-    this.version = this.VersionGetter.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
+    this.version = this.parser.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
     this.model = magicDataModels[this.version];
     this.orderedModel = this.createOrderedModel(jsonToExport);
     //Now set properties related to the header for this sheet.
@@ -561,7 +562,8 @@ export default class extends Runner {
         let orderedColumnNames = this.orderedModel[orderedTableIdx][tableName];
         let orderedListOfColumnsAddedToHeader = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport, orderedColumnNames);//<---try to put -1 for orderedColumnNames
         //add the collected column headers to the TSV here
-        text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
+        if (orderedListOfColumnsAddedToHeader.length > 0)
+          text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
 
         /***************Now add all data from the table to the TSV*****************/
         for(let jsonRowsIdx in jsonToExport[tableName])
@@ -576,7 +578,7 @@ export default class extends Runner {
             if(colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
               {text = text.concat('\t');}
 
-            dataToAdd =  this._handleSpecialCases(dataToAdd,colName);
+            dataToAdd =  this._handleSpecialCases(dataToAdd,tableName,colName);
 
             text = text.concat(dataToAdd);
 
@@ -668,71 +670,85 @@ export default class extends Runner {
     return orderedModel;
   }
 
-  _handleSpecialCases(dataToManipulate, columnName)
+
+  _handleSpecialCases(dataToManipulate, tableName, columnName)
   {
-    if (dataToManipulate == '') return dataToManipulate;
+   if (dataToManipulate == '') return dataToManipulate;
 
-    let manipulatedData = '';
+   let manipulatedData = '';
 
-    if(columnName == 'external_database_ids')
-    {
-      //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
-      //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
-      let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
-      let numberOfElements = propertyNames.length;
-      let numberOfElementsProcessed = 0; //this counter is necessary because the loop index below is given some strange numbers from propertyNames i.e. they are not sequential
-      for(let propertyIdx in propertyNames)
-      {
-        let propertyName = propertyNames[propertyIdx];
-        let propertyValue = dataToManipulate[propertyName];
-        if(propertyValue == null) {propertyValue = '';}
-        manipulatedData = manipulatedData + `${propertyName}[${propertyValue}]`;
-        numberOfElementsProcessed++;
+   if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary')
+   //if(columnName == 'external_database_ids')
+   {
 
-        //we do not want a colon in front of the first
-        if (//propertyIdx < 1 ||
-        numberOfElementsProcessed < numberOfElements )
-          manipulatedData = manipulatedData + ':';
-      }
-      return manipulatedData;
-    }
+   //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
+   //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
+   let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
+   let numberOfElements = propertyNames.length;
+   let numberOfElementsProcessed = 0; //this counter is necessary because the loop index below is given some strange numbers from propertyNames i.e. they are not sequential
+   for(let propertyIdx in propertyNames)
+   {
+   let propertyName = propertyNames[propertyIdx];
+   let propertyValue = dataToManipulate[propertyName];
+   if(propertyValue == null) {propertyValue = '';}
+   manipulatedData = manipulatedData + `${propertyName}[${propertyValue}]`;
+   numberOfElementsProcessed++;
 
-    if(columnName == 'rotation_sequence')
-    {
-      //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
-      //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
-      let numberOfSubArrays = dataToManipulate.length;
-      for(let nestedArrayIdx in dataToManipulate)
-      {
-        manipulatedData = manipulatedData + dataToManipulate[nestedArrayIdx].join(':');
+   //we do not want a colon in front of the first
+   if (//propertyIdx < 1 ||
+   numberOfElementsProcessed < numberOfElements )
+   manipulatedData = manipulatedData + ':';
 
-        //Each array worth of data is separated by a semi colon in the TSV
-        if (nestedArrayIdx + 1 < numberOfSubArrays) manipulatedData = manipulatedData + ';';
-      }
-      return manipulatedData;
-    }
+   //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
+   }
+   return manipulatedData;
+   }
 
-    if( columnName == 'er_citation_names' ||
-        columnName == 'magic_method_codes'||
-        columnName == 'method_codes' ||
-        columnName == 'citations')
-    {
-      //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
-      //multi segment piece of data
-      manipulatedData = ':';
-      for(let dataIdx in dataToManipulate)
-      {
-        if(dataToManipulate[dataIdx].match(/:/))
-        {
-          dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
-        }
+   if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Matrix')
+   //if(columnName == 'rotation_sequence')
+   {
+   //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
+   //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
+   let numberOfSubArrays = dataToManipulate.length;
+   for(let nestedArrayIdx in dataToManipulate)
+   {
+   manipulatedData = manipulatedData + dataToManipulate[nestedArrayIdx].join(':');
 
-        manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
-      }
-      return manipulatedData;
-    }
+   //Each array worth of data is separated by a semi colon in the TSV
+   if (nestedArrayIdx + 1 < numberOfSubArrays) manipulatedData = manipulatedData + ';';
+   }
+   return manipulatedData;
+   }
 
-    return dataToManipulate;//if not a special case, return the same string that was passed in
+   if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'List')
+   //if( columnName == 'er_citation_names' ||
+   //  columnName == 'magic_method_codes'||
+   //  columnName == 'method_codes' ||
+   //  columnName == 'citations')
+   {
+   //console.log(dataToManipulate, typeof(dataToManipulate));
+   if (typeof(dataToManipulate) === 'string') dataToManipulate = [dataToManipulate];
+   manipulatedData = ':' + dataToManipulate.map(v => (v.match(/:/) ? '"' + v + '"' : v)).join(':') + ':';
+
+
+   //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
+   //multi segment piece of data
+   //manipulatedData = ':';
+   //for(let dataIdx in dataToManipulate)
+   //{
+   //  if(dataToManipulate[dataIdx].match(/:/))
+   //  {
+   //    dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
+   //  }
+   //
+   //  manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
+   //  //console.log(`manipulated data: ${manipulatedData}`);
+   //}
+
+   return manipulatedData;
+   }
+
+   return dataToManipulate;//if not a special case, return the same string that was passed in
   }
 
   testValidityOfTablesAndColumns(jsonToTranslate){
