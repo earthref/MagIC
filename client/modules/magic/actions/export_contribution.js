@@ -39,11 +39,13 @@ export default class extends Runner {
     this.orderedModel = this.createOrderedModel(jsonToExport);
     //Now set properties related to the header for this sheet.
     //I'm making these class variables as they apply globally to all generated sheets, although obviously they only apply to excel exports
-    //this.HEADER_ROW_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
-    //this.HEADER_COL_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
+    this.HEADER_ROW_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
+    this.HEADER_COL_START_IDX = 0;//hard coded as the [0,0] index is where the header range starts
     this.HEADER_ROW_END_IDX = 3;//hard coded as there are always four header columns
     this.LAST_COL_IDX = {};//for each table/sheet, will be populated with an integer, indicating the last column for that sheet
     this.LAST_ROW_IDX = {};//for each table/sheet, will be populated with an integer, indicating the last row for that sheet
+    this.FIRST_DATA_COL_IDX = 1;
+    //this.EXTRA_ROW_FORMATTING_PADDING = 20;
     //this.COL_WIDTHS = {};//this will contain an array for each sheet containing width formatting info for each column
 
     // Create an empty workbook
@@ -59,8 +61,6 @@ export default class extends Runner {
         continue;
 
       workbook.SheetNames.push(tableName);//Create a sheet for each table in the 3.0 model in the workbook.
-
-//      console.log(`Before SHEET: ${tableName}  Index:  ${orderedTableIdx}` );
 
       //gather the data for the table headers
       let tableHeaders = this.createExtendedHeadersData(tableName, jsonToExport);
@@ -96,7 +96,6 @@ export default class extends Runner {
       //Add data to the spreadsheet row by row, adding a blank column at the beginning of each row
       for(let jsonRowDataIdx in jsonTableData)
       {
-        //console.log(` ${jsonTableData[jsonRowDataIdx]}`);
         ///Insert data into each column of a row in the proper row order
         //let orderedColumnNames = this.orderedModel[orderedTableIdx][tableName];
         let orderedColListForThisJsonTable = this.filterRelevantOrderedListOfColumns(tableName, jsonToExport, -1/*orderedColumnNames*/);
@@ -106,21 +105,13 @@ export default class extends Runner {
         {
           //grab the column names in order, extract from unordered JSON and add to ordered array
           let colName = orderedColListForThisJsonTable[colNameIdx];
-
-          //console.log(`Trying to get data from JSON.  table: ${tableName}  jsonRowIdx: ${jsonRowDataIdx} ColName: ${colName} `);
           let dataToAdd = jsonToExport[tableName][jsonRowDataIdx][colName];
           if (dataToAdd == undefined){dataToAdd = '';}//for rows with no data
 
           newRowArray.push(dataToAdd);//add one data column to the row
         }
-
-//        console.log(`Adding new row data: ${newRowArray}`);
         newRowArray.unshift('');//this makes the first column blank
-        //console.log(`First Data Column${newRowArray[0]}`);
-        //console.log(`Second Data Column${newRowArray[1]}`);
         completeSpreadSheetData.push(newRowArray);
-
-
       }
 
       //book keeping for later regarding spreadsheet dimensions
@@ -134,7 +125,7 @@ export default class extends Runner {
       /************FORMAT SHEETS**************/
       let currentSheet = workbook.Sheets[tableName];
 
-      //find proper column widths
+      //find proper column widths, "!cols" is a special property of the sheet that we can set
       currentSheet['!cols'] = this._findColumnWidthsBasedOnHeaders(completeSpreadSheetData);// !cols is a special property of a worksheet that has a list of properties for each column
 
       //****************FORMAT GROUP HEADER**************
@@ -147,9 +138,6 @@ export default class extends Runner {
         let previousColIdx = Number(groupIdx);
             nextCellColIdx++;//
         previousColIdx--;
-
-        let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
-        //let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
 
         //DEFAULT FORMATTING FOR GROUP.
         let groupRowColor = { rgb: 'cccccc' };
@@ -166,14 +154,19 @@ export default class extends Runner {
           fill: {fgColor: groupRowColor}
         }
 
+
         //OVERRIDE GROUP FORMATTING
-        if( currentSheet[nextCellAddressToTheRight] &&
-            currentSheet[nextCellAddressToTheRight].v == '')
+       // let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
+        if(this._isNextCellSameGroupHeader(nextCellColIdx, currentSheet))
         {
-          //this is a hack to try and move the text closer to the "center" when a group takes up two columns
+          //this is a hack to move the text closer to the "center" when a group takes up two columns
           currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
           currentSheet[cellAddress].s.border.right = {style:'hair', color: groupRowColor};
         }
+        /*else
+        {
+          currentSheet[cellAddress].s.border.right = {style:'medium', color: groupRowColor};
+        }*/
         if (currentSheet[cellAddress].v == '')// Do not bold the border if this cell is empty
         {
           currentSheet[cellAddress].s.border.left = {style: 'hair', color: groupRowColor};
@@ -235,8 +228,7 @@ export default class extends Runner {
         };
 
 
-        /* GGG
-         -HYPERLINK CAPABILITY DOESN'T SEEM TO BE SUPPORTED IN XLSX-SYLE
+        /* GGG -HYPERLINK CAPABILITY DOESN'T SEEM TO BE SUPPORTED IN XLSX-SYLE
          Despite what appears in the docs to be hyperlink support...after first attempting many different approaches which seemed like they should be no-brainers, and the researching, I'm nearly sure there is no support for creating hyperlinks when writing docs.
          These discussions corroborate this flaw in the xlsx-style package (along with its parent package):
 
@@ -245,16 +237,7 @@ export default class extends Runner {
 
          http://stackoverflow.com/questions/32485449/xlxs-js-how-does-the-l-cell-hyperlink-object-option-work
 
-         Below are some attempts to make it work, similar to attempts made by others. These fields are apparently ignored as they have no effect on the output
          */
-        /*currentSheet[cellAddress].w = undefined;
-        currentSheet[cellAddress].t = 's';
-        currentSheet[cellAddress].h = 'true';
-
-        currentSheet[cellAddress].l= {Target: 'pleaseWork'}; //{ Target: 'testItBaby', tooltip: 'No Chance'};//`<a href="url">${currentSheet[cellAddress].v}</a>`;*/
-        //currentSheet[cellAddress].v = currentSheet[cellAddress].v.display;
-        //currentSheet[cellAddress].w = `<a href="url">${currentSheet[cellAddress].v}</a>`;
-        //'https://earthref.org/MagIC/data-models/3.0/#[table].[column]'
       }
 
       let cellAddress = undefined;
@@ -293,42 +276,41 @@ export default class extends Runner {
       fill: {fgColor: {rgb: 'f2f2f2'}}
     };
 
-      //console.log(`json:\n ${JSON.stringify(currentSheet)}`);
-
-     /*****FORMAT DATA CELLS*****/
-     //currentSheet = this.formatDataCells(currentSheet);
-
       /****FORMAT FINAL CONCERNS****/
-      //currentSheet = this.finalFormattingConcerns(currentSheet, modelTable);
+      currentSheet = this.finalFormattingConcerns(currentSheet, tableName);
     }
 
     return workbook;
   }
 
-  /*This is a placeholder for one of the final formatting concerns, right justifying floats/doubles*/ //GGG i gigure this is low priority
-  formatDataCells(currentSheet)
-  {
-   /* if(currentSheet[cellAddress])
-    {
-
-    }*/
-  }
 
   /*This is where we hope to clean up formatting odds and ends that didn't fit into any previous slot*/
-  //GGG Currently buggy
-  finalFormattingConcerns(currentSheet, modelTable)
-  {
-    console.log(`Table ${modelTable}`);
-    //`this.HEADER_ROW_END_IDX +1   this.LAST_ROW_IDX[currentSheet]`
-    //Traverse every DATA row of the sheet (not headers) and alter the first and last columns' formatting
-    for(let rowIdx = this.HEADER_ROW_END_IDX+1; rowIdx <= this.LAST_ROW_IDX[modelTable]; rowIdx++)
+  finalFormattingConcerns(currentSheet, tableName)
     {
-      console.log(`ROW IDX: ${rowIdx}`);
-      let cellAddressFirstColumn = XLSX.utils.encode_cell({r: rowIdx, c: 1});
-      let cellAddressLastColumn = XLSX.utils.encode_cell({r: rowIdx, c: this.LAST_COL_IDX[modelTable]});
+      currentSheet = this._initializeCellDataStyle(currentSheet, tableName);
 
-      //The beginning and end of the table rows have thick left and right cell borders
-      currentSheet[cellAddressFirstColumn].s = {
+      //Traverse every DATA row of the sheet (not headers) and alter the first and last columns' formatting
+      for(let rowIdx = this.HEADER_ROW_END_IDX +1; rowIdx <= this.LAST_ROW_IDX[tableName] /*+ this.EXTRA_ROW_FORMATTING_PADDING*/; rowIdx++)
+      {
+        console.log(`ROW IDX: ${rowIdx}`);
+        let cellAddressFirstColumn = XLSX.utils.encode_cell({r: rowIdx, c: 0});
+        let cellAddressLastColumn = XLSX.utils.encode_cell({r: rowIdx, c: this.LAST_COL_IDX[tableName]});
+
+        //The beginning and end of the table rows have thick left and right cell borders
+        /*currentSheet[cellAddressFirstColumn].s.border = {left: {style: 'thick', color: {auto: 1}}};*/
+        currentSheet[cellAddressFirstColumn].s =
+        {
+          alignment: {horizontal: 'left', vertical: 'center'},
+          border: {
+            left: {style: 'hair', color: {auto: 1}},
+            right: {style: 'thick', color: {auto: 1}},
+            top: {style: 'hair', color: {auto: 1}},
+            bottom: {style: 'hair', color: {auto: 1}}
+          }
+        };
+
+        //The beginning and end of the table rows have thick left and right cell borders
+      currentSheet[cellAddressLastColumn].s = {
         alignment: {horizontal: 'left', vertical: 'center'},
         border: {
           left: {style: 'hair', color: {auto: 1}},
@@ -337,23 +319,71 @@ export default class extends Runner {
           bottom: {style: 'hair', color: {auto: 1}}
         }
       };
-
-      console.log(`json: ${JSON.stringify(cellAddressLastColumn)}  Value: ${currentSheet[cellAddressLastColumn]}`);
-      //console.log(`data sheet: ${JSON.stringify(currentSheet[cellAddressLastColumn])}`);
-      //The beginning and end of the table rows have thick left and right cell borders
-      /*currentSheet[cellAddressLastColumn].s = {
-        alignment: {horizontal: 'left', vertical: 'center'},
-        border: {
-          left: {style: 'hair', color: {auto: 1}},
-          right: {style: 'thick', color: {auto: 1}},
-          top: {style: 'hair', color: {auto: 1}},
-          bottom: {style: 'hair', color: {auto: 1}}
-        }
-      };*/
-
     }
+
+    //Traverse every data row and column. Add formatting where for numbers (right justify) and group columns (slightly darker dividing lines)
+      for(let rowIdx = this.HEADER_ROW_END_IDX +1; rowIdx <= this.LAST_ROW_IDX[tableName] /*+ this.EXTRA_ROW_FORMATTING_PADDING*/; rowIdx++)
+      {
+        for(let colIdx = 0; colIdx <= this.LAST_COL_IDX[tableName]; colIdx++)
+        {
+          let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
+
+
+          if(!this._isNextCellSameGroupHeader(colIdx, currentSheet))
+          {
+            //add a style object to every data row for potential formatting
+            //GGG I'm guessing this might not require replacing the entire style object, but i tride to adjust just the "left" property and had trouble
+            //let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
+            currentSheet[cellAddress].s = {
+              alignment: {horizontal: 'left', vertical: 'center'},
+              border: {
+                left: {style: 'medium', color: {auto: 1}},
+                right: {style: 'hair', color: {auto: 1}},
+                top: {style: 'hair', color: {auto: 1}},
+                bottom: {style: 'hair', color: {auto: 1}}
+              }
+            };
+          }
+
+          if(!isNaN(parseFloat(currentSheet[cellAddress].v)))//GGG BUG: This clause returns true if there exists any float in the value of the cell.
+          {
+            //console.log(`YOOOOOOO!!! ${currentSheet[cellAddress].v}`);
+            currentSheet[cellAddress].s.alignment = {horizontal: 'right', vertical: 'center'};
+          }
+        }
+      }
+
     return currentSheet;
   }
+
+   _initializeCellDataStyle(currentSheet, tableName)
+  {
+      for(let rowIdx = this.HEADER_ROW_END_IDX +1; rowIdx <= this.LAST_ROW_IDX[tableName] /*+ this.EXTRA_ROW_FORMATTING_PADDING*/; rowIdx++) {
+        for (let colIdx = this.FIRST_DATA_COL_IDX; colIdx < this.LAST_COL_IDX[tableName]; colIdx++) {
+          let cellAddress = XLSX.utils.encode_cell({r: rowIdx, c: colIdx});
+          console.log(`cellAddress value: ${cellAddress}  addy row: ${rowIdx}  addy col:${colIdx}`);
+
+          currentSheet[cellAddress].s = {};
+
+          currentSheet[cellAddress].s.alignment = {};
+
+          currentSheet[cellAddress].s.border = {};
+          currentSheet[cellAddress].s.border.right = {horizontal: 'center', vertical: 'center'};
+          currentSheet[cellAddress].s.border.left = {horizontal: 'center', vertical: 'center'};
+          currentSheet[cellAddress].s.border.top = {horizontal: 'center', vertical: 'center'};
+          currentSheet[cellAddress].s.border.bottom = {horizontal: 'center', vertical: 'center'};
+        }
+      }
+    return currentSheet;
+  }
+
+  _isNextCellSameGroupHeader(nextGroupHeaderColIdx, currentSheet)
+  {
+    let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextGroupHeaderColIdx,r: 0});
+    return ( currentSheet[nextCellAddressToTheRight] &&
+        currentSheet[nextCellAddressToTheRight].v == '')
+  }
+
 
   /*This method produces an object that is friendly to xlxs-style outlining the size of each column. The format looks like this:
    * var wscols = [
@@ -377,7 +407,6 @@ export default class extends Runner {
         }
       }
     }
-
     return workSheetColWidths;
   }
 
@@ -588,7 +617,6 @@ export default class extends Runner {
     {
       orderedColumnNames = this._findOrderedColumns(tableName);
     }
-    console.log(`OrderedColumnNames: ${JSON.stringify(orderedColumnNames)}`);
 
     for(let orderedColIdx in orderedColumnNames)//loop through the columns in the ordered model
     {
@@ -605,7 +633,6 @@ export default class extends Runner {
         }
       }
     }
-    console.log(`FINAL COL LIST : ${JSON.stringify(orderedListOfColumnsAddedToHeader)}`);
     return orderedListOfColumnsAddedToHeader;
   }
 
@@ -666,8 +693,6 @@ export default class extends Runner {
         if (//propertyIdx < 1 ||
         numberOfElementsProcessed < numberOfElements )
           manipulatedData = manipulatedData + ':';
-
-        //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
       }
       return manipulatedData;
     }
@@ -703,7 +728,6 @@ export default class extends Runner {
         }
 
         manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
-        //console.log(`manipulated data: ${manipulatedData}`);
       }
       return manipulatedData;
     }
