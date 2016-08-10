@@ -637,6 +637,32 @@ describe('magic.actions.upgrade_contribution', () => {
       return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
+    it('should assign the minimum location lat and lon to the correct columns', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_locations: [{
+          location_begin_lat: 10,
+          location_end_lat: -10,
+          location_begin_lon: 10,
+          location_end_lon: 5
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        locations: [{
+          lat_s: -10,
+          lat_n: 10,
+          lon_w: 5,
+          lon_e: 10
+        }]
+      };
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
     it('should combine external_database_names/ids into a dictionary', () => {
       const jsonOld = {
         contribution: [{

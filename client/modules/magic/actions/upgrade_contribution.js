@@ -660,7 +660,7 @@ export default class extends Runner {
 
             // Combine descriptions without repetition
             if (jsonColumnNew === 'description' && tableRowsNew[jsonTableNew] &&
-                tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
+              tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
               if (tableRowsNew[jsonTableNew][0][jsonColumnNew].indexOf(jsonValueNew) != -1)
                 jsonValueNew = tableRowsNew[jsonTableNew][0][jsonColumnNew];
               else if (jsonValueNew.indexOf(tableRowsNew[jsonTableNew][0][jsonColumnNew]) != -1)
@@ -669,6 +669,22 @@ export default class extends Runner {
                 tableRowsNew[jsonTableNew][0][jsonColumnNew] += ', ' + jsonValueNew;
                 jsonValueNew = tableRowsNew[jsonTableNew][0][jsonColumnNew];
               }
+            }
+
+            // Use the lesser location latitude for lat_s and longitude for lon_w
+            if ((jsonColumnNew === 'lat_s' || jsonColumnNew === 'lon_w') &&
+                tableRowsNew[jsonTableNew] &&
+                tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
+              jsonValueNew = Math.min(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
+              tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
+            }
+
+            // Use the greater location latitude for lat_n and longitude for lon_e
+            if ((jsonColumnNew === 'lat_n' || jsonColumnNew === 'lon_e') &&
+                tableRowsNew[jsonTableNew] &&
+                tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
+              jsonValueNew = Math.max(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
+              tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
             }
 
           }
