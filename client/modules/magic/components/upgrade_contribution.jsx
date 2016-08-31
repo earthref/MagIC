@@ -301,7 +301,7 @@ export default class extends React.Component {
             </div>
           ))}
         </div>
-        <div className="ui active attached message upgrade-contribution-message">
+        <div className="ui attached message upgrade-contribution-message">
           <div ref="accordion" className="ui accordion">
             <div className="active title"></div>
             <div ref="select step message" className="active content select-step-content">

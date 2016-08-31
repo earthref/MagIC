@@ -433,6 +433,132 @@ describe('magic.actions.upgrade_contribution', () => {
       ]);
     });
 
+    it('should assign a tilt correction for tilt corrected/uncorrected directions', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          sample_class: 'Submarine:Sedimentary',
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          tilt_dec_corr: '1',
+          magic_method_codes: 'LP-PI:LP-DIR'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: 'sample_A',
+          geologic_classes: 'Sedimentary:Submarine',
+          int_abs: '0.0123',
+          dir_dec: '1',
+          dir_tilt_correction: '100',
+          method_codes: 'LP-DIR:LP-PI'
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          sample_class: 'Submarine:Sedimentary',
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          tilt_inc_uncorr: '1',
+          magic_method_codes: 'LP-PI:LP-DIR'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: 'sample_A',
+          geologic_classes: 'Sedimentary:Submarine',
+          int_abs: '0.0123',
+          dir_inc: '1',
+          dir_tilt_correction: '0',
+          method_codes: 'LP-DIR:LP-PI'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
+    });
+
+    it('should separate results with mixtures of corrected/uncorrected directions', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          sample_class: 'Submarine:Sedimentary',
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          tilt_dec_corr: '1',
+          magic_method_codes: 'LP-PI:LP-DIR'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: 'sample_A',
+          geologic_classes: 'Sedimentary:Submarine',
+          int_abs: '0.0123',
+          dir_dec: '1',
+          dir_tilt_correction: '100',
+          method_codes: 'LP-DIR:LP-PI'
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: 'sample_A',
+          sample_class: 'Submarine:Sedimentary',
+        }],
+        pmag_results: [{
+          er_sample_names: 'sample_A',
+          average_int: '0.0123',
+          tilt_inc_uncorr: '1',
+          magic_method_codes: 'LP-PI:LP-DIR'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: 'sample_A',
+          geologic_classes: 'Sedimentary:Submarine',
+          int_abs: '0.0123',
+          dir_inc: '1',
+          dir_tilt_correction: '0',
+          method_codes: 'LP-DIR:LP-PI'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2)
+      ]);
+    });
+
     it('should merge rows even if lists are in a different order', () => {
       const jsonOld = {
         contribution: [{
@@ -637,6 +763,90 @@ describe('magic.actions.upgrade_contribution', () => {
       return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
 
+    it('should convert the specimen direction type into a method code', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_specimens: [{
+          specimen_inc: 1,
+          magic_method_codes: 'DE-SITE'
+        }]
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          dir_inc: 1,
+          method_codes: 'DE-SITE:DE-BFL' // default to "determined from a line"
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_specimens: [{
+          specimen_inc: 1,
+          specimen_direction_type: 'p',
+          magic_method_codes: 'DE-SITE'
+        }]
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          dir_inc: 1,
+          method_codes: 'DE-SITE:DE-BFP' // apply "determined from a plane"
+        }]
+      };
+      const jsonOld3 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_results: [{
+          er_specimen_name: 's1',
+          average_inc: 1,
+          magic_method_codes: 'DE-SITE'
+        }]
+      };
+      const jsonNew3 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          specimen: 's1',
+          dir_inc: 1,
+          method_codes: 'DE-SITE' // not for pmag_results directions
+        }]
+      };
+      const jsonOld4 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_specimens: [{
+          specimen_int: 1,
+          magic_method_codes: 'LP-DIR'
+        }]
+      };
+      const jsonNew4 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        specimens: [{
+          int_abs: 1,
+          method_codes: 'LP-DIR' // not without a pmag_specimens direction
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2),
+        upgradeContributionJSONTest(jsonOld4, jsonNew4),
+        upgradeContributionJSONTest(jsonOld3, jsonNew3)
+      ]);
+    });
+
     it('should assign the minimum location lat and lon to the correct columns', () => {
       const jsonOld = {
         contribution: [{
@@ -659,6 +869,130 @@ describe('magic.actions.upgrade_contribution', () => {
           lon_w: 5,
           lon_e: 10
         }]
+      };
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
+    it('should insert the default sample orientation flag of "g" only if there is an orientation', () => {
+      const jsonOld1 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          sample_azimuth: 1
+        }],
+      };
+      const jsonNew1 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          orientation_flag: 'g',
+          azimuth: 1
+        }]
+      };
+      const jsonOld2 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          sample_cooling_rate: 1
+        }],
+      };
+      const jsonNew2 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          cooling_rate: 1
+        }]
+      };
+      const jsonOld3 = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          sample_orientation_flag: 'b',
+          sample_azimuth: 1
+        }],
+      };
+      const jsonNew3 = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          orientation_flag: 'b',
+          azimuth: 1
+        }]
+      };
+      return Promise.all([
+        upgradeContributionJSONTest(jsonOld1, jsonNew1),
+        upgradeContributionJSONTest(jsonOld2, jsonNew2),
+        upgradeContributionJSONTest(jsonOld3, jsonNew3)
+      ]);
+    });
+
+    it('should insert required default values', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        pmag_sites: [{
+          site_int: 1 // causes default sites.result_quality
+        }],
+        magic_measurements: [{
+          treatment_temp: 1 // causes default measurements.standard and measurements.quality
+        }],
+        pmag_samples: [{
+          sample_polarity,
+          sample_nrm
+        }],
+        //pmag_sites: [{
+        //  site_nrm,
+        //  site_polarity
+        //}],
+        pmag_specimens: [{
+          specimen_scat,
+          specimen_polarity,
+          specimen_nrm,
+          specimen_correction
+        }],
+        rmag_anisotropy: [{
+          anisotropy_flag
+        }],
+        rmag_hysteresis: [{
+          hysteresis_flag
+        }],
+        rmag_remanence: [{
+          remanence_flag
+        }],
+        rmag_susceptibility: [{
+          susceptibility_flag
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        sites: [{
+
+          result_type: 'i',
+          result_quality: 'g'
+        }],
+        samples: [{
+          result_type: 'i',
+          result_quality: 'g'
+        }],
+        specimens: [{
+          result_type: 'i',
+          result_quality: 'g'
+        }],
+        measurements: [{
+          treat_temp: 1,
+          standard: 'u',
+          quality: 'g'
+        }]
+
       };
       return upgradeContributionJSONTest(jsonOld, jsonNew);
     });
