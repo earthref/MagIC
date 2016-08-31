@@ -23,7 +23,7 @@ export default class extends Runner {
     this.progress = 0;
   }
 
-  parsePromise({text = undefined, nLinesBetweenProgressEvents = 1000, onProgress = undefined} = {}) {
+  parsePromise({text = undefined, nLinesBetweenProgressEvents = 1000, onProgress = undefined, format = 'magic'} = {}) {
 
     // Check for a valid input.
     if (typeof(text) !== 'string') {
@@ -45,23 +45,24 @@ export default class extends Runner {
       _.chunk(text.match(/[^\r\n]+/g), nLinesBetweenProgressEvents),
       (lines, i, t) => {
         return new Promise((resolve) => {
-          lines.forEach(line => this._parseLine(line));
+          lines.forEach(line => this._parseLine(line, format));
           this.progress = 100 * (i + 1) / t;
           if (onProgress) onProgress(this.progress);
           resolve();
         }).delay();
       }
     ).then(() => {
-      this.version = this.getVersion();
       for (let jsonTable in this.json) {
         if (this.json[jsonTable].length === 0)
           this._appendWarning(`No data values were found in the ${jsonTable} table.`);
       }
+      if (this.errors().length === 0)
+        this.version = this.getVersion();
     });
     
   }
 
-  _parseLine(line) {
+  _parseLine(line, format) {
 
     // Skip empty lines.
     if (line === undefined || line === '') return;
@@ -82,7 +83,7 @@ export default class extends Runner {
     }
 
     // If this is the first line of a table, look for the table name.
-    else if (this.tableLineNumber === 1) {
+    else if (format === 'magic' && this.tableLineNumber === 1) {
 
       // Split the table definition on the tab character.
       let tableDefinition = line.split(/\t/);
@@ -104,7 +105,7 @@ export default class extends Runner {
 
       // Tab has been found, check for table name.
       else if (tableDefinition[1] === undefined || tableDefinition[1] === '') {
-        this._appendError(`No table name following tab delimiter`);
+        this._appendError(`No table name following tab delimiter.`);
         this.skipTable = true;
       }
 
@@ -118,7 +119,10 @@ export default class extends Runner {
     }
 
     // If this is the second line of a table, look for the column names.
-    else if (this.tableLineNumber === 2) {
+    else if (
+        (format === 'magic' && this.tableLineNumber === 2) ||
+        (format === 'tsv' && this.tableLineNumber === 1)
+      ) {
 
       // Split the column definition on the tab character.
       this.columns = line.split(/\t/);
@@ -155,6 +159,7 @@ export default class extends Runner {
       // Check there are enough column names.
       if (values.length > this.columns.length) {
         this._appendError('More values found than columns.');
+        this.skipTable = true;
       }
 
       // Append the row of values onto the table in the JSON.
@@ -169,6 +174,14 @@ export default class extends Runner {
         // Remove empty values
         row = _.omitBy(row, (value, key) => { return value === ""; });
 
+        // Use a default table of 'unknown' for non MagIC text files.
+        if (this.table === undefined) {
+          this._appendError(`No table name defined.`);
+          this.table = 'unknown';
+          this.json[this.table] = [];
+        }
+
+        // Append the values to the table in JSON.
         this.json[this.table].push(row);
 
       }
