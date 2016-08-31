@@ -26,7 +26,7 @@ export default class extends Runner {
 
     // Retrieve the data model
     this.model = magicDataModels[this.version];
-    this.orderedModel = this.createOrderedModel(jsonToExport);
+    this.orderedModel = this.createOrderedModel();
 
     this.testValidityOfTablesAndColumns(jsonToExport);
 
@@ -39,9 +39,11 @@ export default class extends Runner {
 
   //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
-    this.version = this.VersionGetter.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
+    this.version = this.parser.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
+    console.log(this.version);
     this.model = magicDataModels[this.version];
-    this.orderedModel = this.createOrderedModel(jsonToExport);
+    console.log(this.model);
+    this.orderedModel = this.createOrderedModel();
 
     // Create an empty workbook
     let workbook = { SheetNames: [], Sheets: {} };
@@ -631,7 +633,7 @@ export default class extends Runner {
    {tableName2: [column3, column4,...]},...
    ]
    */
-  createOrderedModel(jsonToTranslate)
+  createOrderedModel()
   {
     let tableNames = Object.getOwnPropertyNames(this.model['tables']);
     let orderedModel = [];

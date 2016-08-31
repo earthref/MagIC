@@ -9,7 +9,7 @@ export default class extends React.Component {
   exportToExcel() {
 
     let Exporter = new ExportContribution({});
-    let workbook = Exporter.toExcel($(this.refs['json']).val());
+    let workbook = Exporter.toExcel(JSON.parse($(this.refs['json']).val()));
 
     // Prepare the workbook for output.
     let workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});

@@ -118,28 +118,28 @@ describe('magic.actions.export_contribution', () => {
         'sp2\tsa1\tigsn2\t\t1.3\n';
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
-       contribution: [{
-       magic_version: '3.0',
-       id: '1234',
-       contributor: '@magic'
-       }],
-       specimens: [{
-       specimen: 'sp1',
-       rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]],
-       description: 'a, b',
-       external_database_ids: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
-       }]
-       };
-       const text2 =
-       'tab delimited\tcontribution\n' +
-       'id\tcontributor\tmagic_version\n' +
-       '1234\t@magic\t3.0\n' +
-       '>>>>>>>>>>\n' +
-       'tab delimited\tspecimens\n' +
-       'specimen\tdescription\trotation_sequence\texternal_database_ids\n' +
-       'sp1\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
-       exportContributionToTextJSONTest(json2, text2);
-       });
+        contribution: [{
+          magic_version: '3.0',
+          id: '1234',
+          contributor: '@magic'
+        }],
+        specimens: [{
+          specimen: 'sp1',
+          rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]],
+          description: 'a, b',
+          external_database_ids: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
+        }]
+      };
+      const text2 =
+        'tab delimited\tcontribution\n' +
+        'id\tcontributor\tmagic_version\n' +
+        '1234\t@magic\t3.0\n' +
+        '>>>>>>>>>>\n' +
+        'tab delimited\tspecimens\n' +
+        'specimen\tdescription\trotation_sequence\texternal_database_ids\n' +
+        'sp1\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
+      exportContributionToTextJSONTest(json2, text2);
+    });
   });
 
   // Test exporting valid JSON to extended text.
