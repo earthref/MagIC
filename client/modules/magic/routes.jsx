@@ -6,10 +6,12 @@ import Layout from '../er/components/layout.jsx';
 import Home from '../er/components/home.jsx';
 
 import {default as magicVersions} from './configs/magic_versions.js';
+import MagICHome from './components/home.jsx';
 import MagICDataModel from './components/data_model.jsx';
 import MagICMethodCodes from './components/method_codes.jsx';
 import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
 import MagICUploadContribution from './components/upload_contribution.jsx';
+import MagICValidateContribution from './components/validate_contribution.jsx';
 import MagICExportExcelJS from './components/export_exceljs.jsx';
 import MagICExportXLSXStyle from './components/export_xlsx_style.jsx';
 
@@ -33,9 +35,7 @@ export default function (injectDeps, {FlowRouter}) {
         content: () => (
           <Layout portal="MagIC">
             <Home portal="MagIC">
-              <div>
-                <a className="ui button" href="/MagIC/data-model/">Data Model</a>
-              </div>
+              <MagICHome></MagICHome>
             </Home>
           </Layout>
         )
@@ -109,9 +109,27 @@ export default function (injectDeps, {FlowRouter}) {
           <Layout portal="MagIC">
             <Home portal="MagIC">
               <h3>
-                Upload data to your private workspace:
+                Upload data into a private workspace:
               </h3>
               <MagICUploadContribution/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/validate`, {
+    name: 'magicValidate',
+    action({}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Validate a MagIC contribution:
+              </h3>
+              <MagICValidateContribution/>
             </Home>
           </Layout>
         )

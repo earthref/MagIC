@@ -24,10 +24,23 @@
   border-color: @borderColor;
   border-width: @arrowBorderWidth;
   transition: @transition;
-  transform: translateY(-50%) translateX(50%) rotate(45deg);
+  transform: translateY(-50%) translateX(-42%) rotate(45deg);
 }
+
 .ui.attached.steps .active.step.pointing.below:before {
   top: calc(100% - 1px);
+}
+
+@media only screen and (max-width: (@largestMobileScreen)) {
+  .ui.steps .active.step.pointing.below:before {
+    display: none !important;
+  }
+  .ui.steps .step {
+    border-right: none !important;
+  }
+  .ui.steps .step > .icons {
+    margin-bottom: @iconDistance;
+  }
 }
 
 // Remove the shadow on a bottom attached message
@@ -70,10 +83,18 @@
   width: 100%;
 }
 
+.ui.header {
+  overflow: visible !important;
+}
+
 .ui.inverted.dimmer .ui.loader:after {
   border-color: rgba(0, 0, 0, 0.5) transparent transparent !important;
 }
 
 .ui.right.floated.table {
   float: right;
+}
+
+.ui.grid > .column + .divider, .ui.grid > .row > .column + .divider {
+  left: 50% !important;
 }
