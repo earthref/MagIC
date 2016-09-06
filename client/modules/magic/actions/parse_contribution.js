@@ -65,7 +65,7 @@ export default class extends Runner {
   _parseLine(line, format) {
 
     // Skip empty lines.
-    if (line === undefined || line === '') return;
+    if (line === undefined || line.trim() === '') return;
 
     // Skip lines if skipping table.
     if (this.skipTable) return;
@@ -75,7 +75,7 @@ export default class extends Runner {
     this.tableLineNumber++;
 
     // If this line ends a table, initialize a new table.
-    if (line.match(/^>+$/)) {
+    if (line.trim().match(/^>+$/)) {
       this.table = undefined;
       this.columns = [];
       this.tableLineNumber = 0;
@@ -111,7 +111,7 @@ export default class extends Runner {
 
       // Save the table name and add it to the JSON if necessary.
       else {
-        this.table = tableDefinition[1];
+        this.table = tableDefinition[1].toLowerCase();
         if (!this.json.hasOwnProperty(this.table))
           this.json[this.table] = [];
       }
@@ -134,7 +134,7 @@ export default class extends Runner {
       }
 
       // Clean leading and trailing whitespace from each column name.
-      this.columns = this.columns.map((value) => { return value.trim(); });
+      this.columns = this.columns.map((value) => { return value.trim().toLowerCase(); });
 
       // Check for empty column names.
       if (_.findIndex(this.columns, '') !== -1) {
@@ -147,6 +147,11 @@ export default class extends Runner {
         this._appendError('Found duplicate column names.');
         this.skipTable = true;
       }
+
+      if (format === 'magic' && (
+          this.table === 'measurements' ||
+          this.table === 'magic_measurements'))
+        this.json[this.table] = { columns: this.columns, rows: [] };
 
     }
 
@@ -168,11 +173,16 @@ export default class extends Runner {
         // Remove leading and trailing whitespace.
         values = values.map((value) => { return value.trim(); });
 
-        // Combine the coluns and values into an object.
+        // Combine the columns and values into an object.
         let row = _.zipObject(this.columns.slice(0, values.length), values);
 
         // Remove empty values
-        row = _.omitBy(row, (value, key) => { return value === ""; });
+        if (format === 'magic' && (
+            this.table === 'measurements' ||
+            this.table === 'magic_measurements'))
+          row = values;
+        else
+          row = _.omitBy(row, (value, key) => { return value === ""; });
 
         // Use a default table of 'unknown' for non MagIC text files.
         if (this.table === undefined) {
@@ -182,7 +192,12 @@ export default class extends Runner {
         }
 
         // Append the values to the table in JSON.
-        this.json[this.table].push(row);
+        if (format === 'magic' && (
+            this.table.toLowerCase() === 'measurements' ||
+            this.table.toLowerCase() === 'magic_measurements'))
+          this.json[this.table].rows.push(row);
+        else
+          this.json[this.table].push(row);
 
       }
 

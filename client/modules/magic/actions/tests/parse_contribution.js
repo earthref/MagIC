@@ -98,6 +98,7 @@ describe('magic.actions.parse_contribution', () => {
 
   // Test parsing valid strings.
   describe('when parsing valid strings', () => {
+
     it('should keep numbers as strings', () => {
       const json = {
         table: [{
@@ -106,6 +107,33 @@ describe('magic.actions.parse_contribution', () => {
         }]
       };
       return parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
+    });
+
+    it('should keep measurements as a table', () => {
+      const text = `tab\tMAGIC_measurements
+                    col1\tcol2
+                    str1\t1.1
+                    str2\t1.2
+                    >>>>>>>>>>>
+                    tab\tMeasurements
+                    col1\tcol2
+                    str1\t1.2`;
+      const json = {
+        magic_measurements: {
+          columns: ['col1', 'col2'],
+          rows: [
+            ['str1','1.1'],
+            ['str2','1.2']
+          ]
+        },
+        measurements: {
+          columns: ['col1', 'col2'],
+          rows: [
+            ['str1','1.2']
+          ]
+        },
+      };
+      return parseContributionJSONTest(text, json);
     });
 
     it('should eliminate blank lines and leading/trailing spaces', () => {
@@ -179,6 +207,7 @@ describe('magic.actions.parse_contribution', () => {
       };
       return parseContributionsJSONTest([partial1, partial2], json);
     });
+
   });
 
   // Test parsing valid files.
