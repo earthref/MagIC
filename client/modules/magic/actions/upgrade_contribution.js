@@ -197,6 +197,187 @@ export default class extends Runner {
             this.jsonOld['er_expeditions'] = expeditionsNew;
           }
 
+
+          // Split tilt stratigraphic/corrected/uncorrected directions.
+          if (jsonTableOld === 'pmag_results') {
+            let resultsNew = [];
+            for (let resultRowIdx in this.jsonOld['pmag_results']) {
+              let resultsRow = this.jsonOld['pmag_results'][resultRowIdx];
+              let hasStratigraphic = (
+                resultsRow['average_inc'    ] ||
+                resultsRow['average_dec'    ] ||
+                resultsRow['average_sigma'  ] ||
+                resultsRow['average_alpha95'] ||
+                resultsRow['average_n'      ] ||
+                resultsRow['average_nn'     ] ||
+                resultsRow['average_k'      ] ||
+                resultsRow['average_r'      ]
+              );
+              let hasTiltCorrected = (
+                resultsRow['tilt_inc_corr'    ] ||
+                resultsRow['tilt_dec_corr'    ] ||
+                resultsRow['tilt_k_corr'      ] ||
+                resultsRow['tilt_alpha95_corr'] ||
+                resultsRow['tilt_k_ratio'     ] ||
+                resultsRow['tilt_n'           ] ||
+                resultsRow['tilt_correction'  ]
+              );
+              let hasTiltUncorrected = (
+                resultsRow['tilt_inc_uncorr'    ] ||
+                resultsRow['tilt_dec_uncorr'    ] ||
+                resultsRow['tilt_k_uncorr'      ] ||
+                resultsRow['tilt_alpha95_uncorr']
+              );
+
+              // If the pmag_results row contains directional data, make sure it's not mixed with other directions.
+              if (hasStratigraphic || hasTiltCorrected || hasTiltUncorrected) {
+
+                // Create the stratigraphic row.
+                if (hasStratigraphic) {
+                  let stratigraphicRow = _.cloneDeep(resultsRow);
+                  delete stratigraphicRow['tilt_inc_corr'];
+                  delete stratigraphicRow['tilt_dec_corr'];
+                  delete stratigraphicRow['tilt_k_corr'];
+                  delete stratigraphicRow['tilt_alpha95_corr'];
+                  delete stratigraphicRow['tilt_k_ratio'];
+                  delete stratigraphicRow['tilt_n'];
+                  delete stratigraphicRow['tilt_inc_uncorr'];
+                  delete stratigraphicRow['tilt_dec_uncorr'];
+                  delete stratigraphicRow['tilt_k_uncorr'];
+                  delete stratigraphicRow['tilt_alpha95_uncorr'];
+                  stratigraphicRow['tilt_correction'] = '100';
+                  resultsNew.push(stratigraphicRow);
+                }
+
+                // Create the tilt corrected row.
+                if (hasTiltCorrected) {
+                  let tiltCorrectedRow = _.cloneDeep(resultsRow);
+                  delete tiltCorrectedRow['average_inc'];
+                  delete tiltCorrectedRow['average_dec'];
+                  delete tiltCorrectedRow['average_sigma'];
+                  delete tiltCorrectedRow['average_alpha95'];
+                  delete tiltCorrectedRow['average_n'];
+                  delete tiltCorrectedRow['average_nn'];
+                  delete tiltCorrectedRow['average_k'];
+                  delete tiltCorrectedRow['average_r'];
+                  delete tiltCorrectedRow['tilt_inc_uncorr'];
+                  delete tiltCorrectedRow['tilt_dec_uncorr'];
+                  delete tiltCorrectedRow['tilt_k_uncorr'];
+                  delete tiltCorrectedRow['tilt_alpha95_uncorr'];
+                  if (tiltCorrectedRow['tilt_correction'] === undefined)
+                    tiltCorrectedRow['tilt_correction'] = '-3'; // tilt correction is unknown
+                  resultsNew.push(tiltCorrectedRow);
+                }
+
+                // Create the tilt uncorrected row.
+                if (hasTiltUncorrected) {
+                  let tiltUncorrectedRow = _.cloneDeep(resultsRow);
+                  delete tiltUncorrectedRow['average_inc'];
+                  delete tiltUncorrectedRow['average_dec'];
+                  delete tiltUncorrectedRow['average_sigma'];
+                  delete tiltUncorrectedRow['average_alpha95'];
+                  delete tiltUncorrectedRow['average_n'];
+                  delete tiltUncorrectedRow['average_nn'];
+                  delete tiltUncorrectedRow['average_k'];
+                  delete tiltUncorrectedRow['average_r'];
+                  delete tiltUncorrectedRow['tilt_inc_corr'];
+                  delete tiltUncorrectedRow['tilt_dec_corr'];
+                  delete tiltUncorrectedRow['tilt_k_corr'];
+                  delete tiltUncorrectedRow['tilt_alpha95_corr'];
+                  delete tiltUncorrectedRow['tilt_k_ratio'];
+                  delete tiltUncorrectedRow['tilt_n'];
+                  tiltUncorrectedRow['tilt_correction'] = '0';
+                  resultsNew.push(tiltUncorrectedRow);
+                }
+
+              } else {
+                resultsNew.push(_.cloneDeep(resultsRow));
+              }
+            }
+            this.jsonOld['pmag_results'] = resultsNew;
+          }
+
+          if (jsonTableOld === 'magic_measurements') {
+
+            // Check that the magic_measurements table has a list of columns and a list or rows.
+            if (!Array.isArray(this.jsonOld['magic_measurements'].columns) ||
+                !Array.isArray(this.jsonOld['magic_measurements'].rows)) {
+              this._appendError(`Table "${jsonTableOld}" ` +
+                `has not been parsed properly.`);
+            }
+
+            else {
+
+              // Create a measurements table.
+              this.jsonNew['measurements'] = { columns: [], rows: [] };
+
+              // Map the magic_measurements columns into measurements columns.
+              let pullIdxs = [];
+              for (let columnIdx in this.jsonOld['magic_measurements'].columns) {
+
+                let jsonColumnOld = this.jsonOld['magic_measurements'].columns[columnIdx];
+
+                // Check that the old column is defined in the old data model.
+                if (!this.modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld]) {
+                  if (!this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
+                    this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                      `is not defined in MagIC Data Model version ${this.versionOld}.`);
+                  this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
+                  pullIdxs.push(columnIdx);
+                  continue;
+                }
+
+                // Check that the old table and column are defined in the new data model.
+                if (!this.upgradeMap[jsonTableOld] || !this.upgradeMap[jsonTableOld][jsonColumnOld]) {
+                  if (!this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
+                    this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                      `was deleted in MagIC Data Model version ${this.versionNew}.`);
+                  this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
+                  pullIdxs.push(columnIdx);
+                  continue;
+                }
+
+                if (jsonColumnOld === 'measurement_time_zone')
+                  pullIdxs.push(columnIdx);
+                else
+                  this.jsonNew['measurements'].columns.push(
+                    this.upgradeMap[jsonTableOld][jsonColumnOld][0].column
+                  );
+                
+              }
+
+              // Map the magic_measurements rows into measurements rows.
+              let dateIdx = this.jsonOld['magic_measurements'].columns.indexOf('measurement_date');
+              let tzIdx   = this.jsonOld['magic_measurements'].columns.indexOf('measurement_time_zone');
+              this.jsonNew['measurements'].rows = this.jsonOld['magic_measurements'].rows.map((row) => {
+
+                // Convert dates into ISO 8601 timestamps.
+                if (dateIdx >= 0) {
+                  let f = "YYYY:MM:DD:hh:mm:ss.SSS";
+                  let tz = 'UTC';
+                  if (tzIdx >= 0) tz = row[tzIdx];
+                  if (tz === 'CDT') tz = 'CST6CDT';
+                  if (tz === 'PDT') tz = 'PST8PDT';
+                  if (tz === '+8 GMT') tz = 'PRC';
+                  if (tz === '0') tz = 'UTC';
+                  if (tz === 'SAN') tz = 'US/Pacific';
+                  row[dateIdx] = moment.tz(row[dateIdx], f, tz).tz('UTC').format();
+                }
+
+                // Remove indexes that should not be part of the measurements table.
+                _.pullAt(row, pullIdxs);
+                return row;
+
+              });
+
+            }
+
+            rowProgressCounter += this.jsonOld[jsonTableOld].length;
+            this.progress = versionIdx * versionPercentProgress + (versionPercentProgress * rowProgressCounter / rowsTotal);
+            if (this.onProgress) this.onProgress(this.progress);
+            return Promise.resolve();
+          }
+
         }
 
         // Check that the old table is defined in the old data model.
@@ -311,6 +492,16 @@ export default class extends Runner {
 
       }
 
+      // Convert a specimen direction type into a method code.
+      if (jsonRowOld['specimen_direction_type']) {
+        if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
+        if (jsonRowOld['specimen_direction_type'].toLowerCase() === 'p')
+          jsonRowOld['magic_method_codes'] += ':DE-BFP';
+        else
+          jsonRowOld['magic_method_codes'] += ':DE-BFL';
+        delete jsonRowOld['specimen_direction_type'];
+      }
+
       // Add the geoid to the method codes.
       if (jsonRowOld['location_geoid']) {
         if (!jsonRowOld['magic_method_codes']) jsonRowOld['magic_method_codes'] = '';
@@ -364,7 +555,7 @@ export default class extends Runner {
         if (jsonRowOld['zeta_dec'       ]) poleConf[3] = jsonRowOld['zeta_dec'       ];
         if (jsonRowOld['zeta_inc'       ]) poleConf[4] = jsonRowOld['zeta_inc'       ];
         if (jsonRowOld['zeta_semi_angle']) poleConf[5] = jsonRowOld['zeta_semi_angle'];
-        jsonRowOld['eta_dec'        ] = poleConf.join(':');
+        jsonRowOld['eta_dec'] = poleConf.join(':');
         delete jsonRowOld['eta_inc'        ];
         delete jsonRowOld['eta_semi_angle' ];
         delete jsonRowOld['zeta_dec'       ];
@@ -447,13 +638,11 @@ export default class extends Runner {
 
       // Convert dates into ISO 8601 timestamps.
       if (jsonRowOld['sample'      + '_date'] || jsonRowOld['sample'      + '_time_zone'] ||
-          jsonRowOld['measurement' + '_date'] || jsonRowOld['measurement' + '_time_zone'] ||
           jsonRowOld['image'       + '_date'] || jsonRowOld['image'       + '_time_zone'] ||
           jsonRowOld['plot'        + '_date'] || jsonRowOld['plot'        + '_time_zone']) {
         let f = "YYYY:MM:DD:hh:mm:ss.SSS";
         let tz = 'UTC';
         if (jsonRowOld['sample'      + '_time_zone']) tz = jsonRowOld['sample'      + '_time_zone'];
-        if (jsonRowOld['measurement' + '_time_zone']) tz = jsonRowOld['measurement' + '_time_zone'];
         if (jsonRowOld['image'       + '_time_zone']) tz = jsonRowOld['image'       + '_time_zone'];
         if (jsonRowOld['plot'        + '_time_zone']) tz = jsonRowOld['plot'        + '_time_zone'];
         if (tz === 'CDT'   ) tz = 'CST6CDT';
@@ -463,17 +652,18 @@ export default class extends Runner {
         if (tz === 'SAN'   ) tz = 'US/Pacific';
         if (jsonRowOld['sample_date'])
           jsonRowOld['sample_date'] = moment.tz(jsonRowOld['sample_date'], f, tz).tz('UTC').format();
-        if (jsonRowOld['measurement_date'])
-          jsonRowOld['measurement_date'] = moment.tz(jsonRowOld['measurement_date'], f, tz).tz('UTC').format();
         if (jsonRowOld['image_date'])
           jsonRowOld['image_date'] = moment.tz(jsonRowOld['image_date'], f, tz).tz('UTC').format();
         if (jsonRowOld['plot_date'])
           jsonRowOld['plot_date'] = moment.tz(jsonRowOld['plot_date'], f, tz).tz('UTC').format();
         delete jsonRowOld['sample'      + '_time_zone'];
-        delete jsonRowOld['measurement' + '_time_zone'];
         delete jsonRowOld['image'       + '_time_zone'];
         delete jsonRowOld['plot'        + '_time_zone'];
       }
+
+      // Convert a good/bad intensity scatter into a true/false boolean.
+      if (jsonRowOld['specimen_scat'] === 'g') jsonRowOld['specimen_scat'] = 't';
+      if (jsonRowOld['specimen_scat'] === 'b') jsonRowOld['specimen_scat'] = 'f';
 
       // Adopt sample inferred ages up to site ages.
       if (jsonRowOld['er_site_name'] && jsonTableOld === 'pmag_samples' && (
@@ -544,6 +734,18 @@ export default class extends Runner {
         delete jsonRowOld['average_age_high' ];
         delete jsonRowOld['average_age_unit' ];
       }
+
+      // Insert the default result quality
+      if (jsonTableOld === 'pmag_sites'          && jsonRowOld['site_flag'          ] === undefined) jsonRowOld['site_flag'          ] = 'g';
+      if (jsonTableOld === 'pmag_samples'        && jsonRowOld['sample_flag'        ] === undefined) jsonRowOld['sample_flag'        ] = 'g';
+      if (jsonTableOld === 'pmag_specimens'      && jsonRowOld['specimen_flag'      ] === undefined) jsonRowOld['specimen_flag'      ] = 'g';
+      if (jsonTableOld === 'rmag_anisotropy'     && jsonRowOld['anisotropy_flag'    ] === undefined) jsonRowOld['anisotropy_flag'    ] = 'g';
+      if (jsonTableOld === 'rmag_hysteresis'     && jsonRowOld['hysteresis_flag'    ] === undefined) jsonRowOld['hysteresis_flag'    ] = 'g';
+      if (jsonTableOld === 'rmag_remanence'      && jsonRowOld['remanence_flag'     ] === undefined) jsonRowOld['remanence_flag'     ] = 'g';
+      if (jsonTableOld === 'rmag_susceptibility' && jsonRowOld['susceptibility_flag'] === undefined) jsonRowOld['susceptibility_flag'] = 'g';
+
+      // Insert the default result type
+      if (jsonTableOld === 'pmag_results' && jsonRowOld['data_type'] === undefined) jsonRowOld['data_type'] = 'i';
 
     }
 
@@ -651,14 +853,14 @@ export default class extends Runner {
 
         if (!joinTable || joinTable === jsonTableNew) {
 
-          // Handle special cases when upgrading from 2.5 to 3.0 columns.
+          // Handle special cases when upgrading from 2.5 to 3.0 columns using the presence or absence of data in groups.
           if (this.versionNew === '3.0') {
 
             // Move the normalized relative intensities into separate columns.
             if (jsonColumnNew.match(/^int_rel/) && relativeIntensityNormalization)
               jsonColumnNew = jsonColumnNew.replace(/^int_rel/, 'int_rel_' + relativeIntensityNormalization);
 
-            // Combine descriptions without repetition
+            // Combine descriptions without repetition.
             if (jsonColumnNew === 'description' && tableRowsNew[jsonTableNew] &&
               tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
               if (tableRowsNew[jsonTableNew][0][jsonColumnNew].indexOf(jsonValueNew) != -1)
@@ -671,7 +873,7 @@ export default class extends Runner {
               }
             }
 
-            // Use the lesser location latitude for lat_s and longitude for lon_w
+            // Use the lesser location latitude for lat_s and longitude for lon_w.
             if ((jsonColumnNew === 'lat_s' || jsonColumnNew === 'lon_w') &&
                 tableRowsNew[jsonTableNew] &&
                 tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
@@ -679,7 +881,7 @@ export default class extends Runner {
               tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
             }
 
-            // Use the greater location latitude for lat_n and longitude for lon_e
+            // Use the greater location latitude for lat_n and longitude for lon_e.
             if ((jsonColumnNew === 'lat_n' || jsonColumnNew === 'lon_e') &&
                 tableRowsNew[jsonTableNew] &&
                 tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
@@ -718,8 +920,88 @@ export default class extends Runner {
 
     // Add the row(s) to the new JSON.
     for (let table in tableRowsNew) {
+
+      // Handle special cases when upgrading from 2.5 to 3.0 columns.
+      if (this.versionNew === '3.0') {
+        for (let rowIdx in tableRowsNew[table]) {
+
+          // Insert the 2.5 default orientation quality
+          if (table === 'samples' && tableRowsNew[table][rowIdx]['orientation_quality'] === undefined) {
+            for (let column in tableRowsNew[table][rowIdx]) {
+              if (this.modelNew['tables'][table]['columns'][column].group === 'Orientation') {
+                tableRowsNew[table][rowIdx]['orientation_quality'] = 'g';
+                break;
+              }
+            }
+          }
+
+          // Insert the 2.5 default direction polarity
+          if ((table === 'sites' || table === 'samples' || table === 'specimens') &&
+              tableRowsNew[table][rowIdx]['dir_polarity'] === undefined) {
+            for (let column in tableRowsNew[table][rowIdx]) {
+              if (this.modelNew['tables'][table]['columns'][column].group === 'Direction') {
+                tableRowsNew[table][rowIdx]['dir_polarity'] = 'n';
+                break;
+              }
+            }
+          }
+
+          // Insert the 2.5 default direction NRM origin
+          if ((table === 'sites' || table === 'samples' || table === 'specimens') &&
+              tableRowsNew[table][rowIdx]['dir_nrm_origin'] === undefined) {
+            for (let column in tableRowsNew[table][rowIdx]) {
+              if (this.modelNew['tables'][table]['columns'][column].group === 'Direction') {
+                tableRowsNew[table][rowIdx]['dir_nrm_origin'] = 'p';
+                break;
+              }
+            }
+          }
+
+          // Insert the 2.5 default direction type
+          if (table === 'sites' || table === 'samples' || table === 'specimens') {
+            for (let column in tableRowsNew[table][rowIdx]) {
+              if (this.modelNew['tables'][table]['columns'][column].group === 'Direction') {
+                if (tableRowsNew[table][rowIdx]['method_codes']) {
+                  if (!tableRowsNew[table][rowIdx]['method_codes'].match(/(^|(\s*)?:)(\s*)?DE-BF(L|P)/i)) {
+                    let methodCodes = tableRowsNew[table][rowIdx]['method_codes'].replace(/(^:|:$)/g, '').split(/:/);
+                    methodCodes.push('DE-BFL');
+                    tableRowsNew[table][rowIdx]['method_codes'] = _(methodCodes).sortBy().sortedUniq().join(':');
+                  }
+                } else {
+                  tableRowsNew[table][rowIdx]['method_codes'] = 'DE-BFL';
+                }
+                break;
+              }
+            }
+          }
+
+          // Insert the 2.5 default intensity correction
+          if (table === 'specimens' && tableRowsNew[table][rowIdx]['int_corr'] === undefined) {
+            for (let column in tableRowsNew[table][rowIdx]) {
+              if (this.modelNew['tables'][table]['columns'][column].group === 'Paleointensity') {
+                tableRowsNew[table][rowIdx]['int_corr'] = 'u';
+                break;
+              }
+            }
+          }
+
+          // Insert the 2.5 default intensity scatter
+          if (table === 'specimens' && tableRowsNew[table][rowIdx]['int_scat'] === undefined) {
+            for (let column in tableRowsNew[table][rowIdx]) {
+              if (this.modelNew['tables'][table]['columns'][column].group === 'Paleointensity Arai Statistics') {
+                tableRowsNew[table][rowIdx]['int_scat'] = 't';
+                break;
+              }
+            }
+          }
+
+        }
+      }
+
+      // Add the row to the new JSON.
       if (!this.jsonNew[table]) this.jsonNew[table] = [];
       this.jsonNew[table] = this.jsonNew[table].concat(tableRowsNew[table]);
+
     }
 
   }

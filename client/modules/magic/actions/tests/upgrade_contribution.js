@@ -12,7 +12,7 @@ describe('magic.actions.upgrade_contribution', () => {
   describe('when upgrading invalid JSON', () => {
     
     it('should reject if the table name is invalid.', () => {
-      const invalidTable = {
+      const jsonOld = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -20,12 +20,12 @@ describe('magic.actions.upgrade_contribution', () => {
           region: 'California'
         }]
       };
-      return upgradeContributionErrorTest(invalidTable, 
+      return upgradeContributionErrorTest(jsonOld,
         /table .* is not defined in magic data model version /i);
     });
 
     it('should reject if the column name is invalid.', () => {
-      const invalidColumn = {
+      const jsonOld = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -33,12 +33,12 @@ describe('magic.actions.upgrade_contribution', () => {
           not_region: 'California'
         }]
       };
-      return upgradeContributionErrorTest(invalidColumn,
+      return upgradeContributionErrorTest(jsonOld,
         /column .* in table .* is not defined in magic data model/i);
     });
 
     it('should report one error if the same two columns are invalid.', () => {
-      const invalidColumns = {
+      const jsonOld = {
         contribution: [{
           magic_version: '2.4'
         }],
@@ -49,14 +49,14 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return Promise.all([
-        upgradeContributionNErrorsTest(invalidColumns, 1),
-        upgradeContributionErrorTest(invalidColumns,
+        upgradeContributionNErrorsTest(jsonOld, 1),
+        upgradeContributionErrorTest(jsonOld,
           /column .* in table .* is not defined in magic data model/i)
       ]);
     });
     
     it('should report two errors if two different columns are invalid.', () => {
-      const invalidColumns = {
+      const jsonOld = {
         contribution: [{
           magic_version: '2.4'
         }],
@@ -67,14 +67,14 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return Promise.all([
-        upgradeContributionNErrorsTest(invalidColumns, 2),
-        upgradeContributionErrorTest(invalidColumns,
+        upgradeContributionNErrorsTest(jsonOld, 2),
+        upgradeContributionErrorTest(jsonOld,
          /column .* in table .* is not defined in magic data model/i)
       ]);
     });
 
-    it('should report one error if two or more different relative intensity normalizations are used', () => {
-      const tooManyCodes1 = {
+    it('should report one error if two different relative intensity normalizations are used', () => {
+      const jsonOld = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -88,7 +88,7 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_method_codes: 'IE-IRM:IE-ARM'
         }]
       };
-      const tooManyCodes2 = {
+      const jsonNew = {
         contribution: [{
           magic_version: '2.5'
         }],
@@ -103,11 +103,30 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return Promise.all([
-        upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes1), 1),
-        upgradeContributionErrorTest(_.cloneDeep(tooManyCodes1),
-          /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i),
-        upgradeContributionNErrorsTest(_.cloneDeep(tooManyCodes2), 1),
-        upgradeContributionErrorTest(_.cloneDeep(tooManyCodes2),
+        upgradeContributionNErrorsTest(_.cloneDeep(jsonOld), 1),
+        upgradeContributionErrorTest(_.cloneDeep(jsonOld),
+          /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i)
+      ]);
+    });
+
+    it('should report one error if several different relative intensity normalizations are used', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_sites: [{
+          er_site_name: 'site_1'
+        }],
+        pmag_results: [{
+          er_site_names: 'site_1',
+          average_int_rel: '1',
+          average_int_rel_sigma: '2',
+          magic_method_codes: 'IE-IRM:IE-ARM:IE-CHI'
+        }]
+      };
+      return Promise.all([
+        upgradeContributionNErrorsTest(_.cloneDeep(jsonOld), 1),
+        upgradeContributionErrorTest(_.cloneDeep(jsonOld),
           /row .* in table .* includes more than one type of relative intensity normalization in the method codes/i)
       ]);
     });
@@ -135,7 +154,7 @@ describe('magic.actions.upgrade_contribution', () => {
     });
 
     // Tables and columns can change names from one version to the next.
-    it('should update column names', () => {
+    it('should update table and column names', () => {
       const jsonOld1 = {
         contribution: [{
           magic_version: '2.5'
@@ -157,7 +176,8 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '2.5'
         }],
         rmag_susceptibility: [{
-          susceptibility_loss_tangent: '1'
+          susceptibility_loss_tangent: '1',
+          susceptibility_flag: 'g'
         }]
       };
       const jsonNew2 = {
@@ -165,7 +185,8 @@ describe('magic.actions.upgrade_contribution', () => {
           magic_version: '3.0'
         }],
         specimens: [{
-          susc_loss_tangent: '1'
+          susc_loss_tangent: '1',
+          result_quality: 'g'
         }]
       };
       return Promise.all([
@@ -221,9 +242,9 @@ describe('magic.actions.upgrade_contribution', () => {
           }]
         };
         return Promise.all([
-          upgradeContributionWarningTest(jsonOld2,
-            /row .* in table .* was deleted in magic data model/i),
           upgradeContributionWarningTest(jsonOld1,
+            /row .* in table .* was deleted in magic data model/i),
+          upgradeContributionWarningTest(jsonOld2,
             /row .* in table .* was deleted in magic data model/i)
         ]);
       });
@@ -265,11 +286,13 @@ describe('magic.actions.upgrade_contribution', () => {
           pmag_results: [{ // this is a sample level result (single sample name)
             er_sample_names: '1',
             er_specimen_names: ':3:1:',
-            average_int: '5'
+            data_type: 'i',
+            magic_method_codes: 'LP-DIR'
           }, { // this is a specimen level result (single specimen name)
             er_sample_names: '1',
             er_specimen_names: '3',
-            average_int: '6'
+            data_type: 'i',
+            magic_method_codes: 'LT-AF-Z'
           }]
         };
         const jsonNew = {
@@ -279,12 +302,14 @@ describe('magic.actions.upgrade_contribution', () => {
           samples: [{
             sample: '1',
             specimens: '1:3',
-            int_abs: '5'
+            result_type: 'i',
+            method_codes: 'LP-DIR'
           }],
           specimens: [{
             sample: '1',
             specimen: '3',
-            int_abs: '6'
+            result_type: 'i',
+            method_codes: 'LT-AF-Z'
           }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
@@ -294,8 +319,8 @@ describe('magic.actions.upgrade_contribution', () => {
       // these two rows wind up in a single row when possible
       // (i.e. when all columns are either orthogonal or identical)
       // if, in the set of colliding columns (based on the mapping) NOT have different values, then collpase to a single row
-      it('should merge the same column value from different tables', () => {
-        const jsonOld1 = {
+      it('should merge orthogonal data from different tables', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
@@ -308,7 +333,7 @@ describe('magic.actions.upgrade_contribution', () => {
             data_type: 'a'
           }]
         };
-        const jsonNew1 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
@@ -318,7 +343,10 @@ describe('magic.actions.upgrade_contribution', () => {
             result_type: 'a'
           }]
         };
-        const jsonOld2 = {
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+      it('should merge the same column value from different tables', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
@@ -328,22 +356,21 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           pmag_results: [{
             er_site_names: 'site_A',
+            data_type: 'i',
             average_lat: '1.1'
           }]
         };
-        const jsonNew2 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           sites: [{ // lat from er_sites and pmag_results are identical
             site: 'site_A',
+            result_type: 'i',
             lat: '1.1'
           }]
         };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1),
-          upgradeContributionJSONTest(jsonOld2, jsonNew2)
-        ]);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
       // Since many of the parent/child tables in 2.5 and earlier are joined into a single table in 3.0, make sure that
@@ -391,6 +418,7 @@ describe('magic.actions.upgrade_contribution', () => {
           pmag_results: [{
             er_sample_names: 'sample_A',
             average_int: '0.0123',
+            data_type: 'i',
             er_citation_names: '10.1029/92JB01202'
           }]
         };
@@ -404,6 +432,7 @@ describe('magic.actions.upgrade_contribution', () => {
           }, {
             sample: 'sample_A',
             int_abs: '0.0123',
+            result_type: 'i',
             citations: '10.1029/92JB01202'
           }]
         };
@@ -417,6 +446,7 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           pmag_results: [{
             er_site_names: 'site_A',
+            data_type: 'i',
             average_lat: '1.2'
           }]
         };
@@ -429,6 +459,7 @@ describe('magic.actions.upgrade_contribution', () => {
             lat: '1.1'
           }, {
             site: 'site_A',
+            result_type: 'i',
             lat: '1.2'
           }]
         };
@@ -452,6 +483,7 @@ describe('magic.actions.upgrade_contribution', () => {
           pmag_results: [{
             er_sample_names: 'sample_A',
             average_int: '0.0123',
+            data_type: 'i',
             magic_method_codes: 'LP-PI:LP-DIR'
           }]
         };
@@ -463,6 +495,7 @@ describe('magic.actions.upgrade_contribution', () => {
             sample: 'sample_A',
             geologic_classes: 'Sedimentary:Submarine',
             int_abs: '0.0123',
+            result_type: 'i',
             method_codes: 'LP-DIR:LP-PI'
           }]
         };
@@ -483,8 +516,7 @@ describe('magic.actions.upgrade_contribution', () => {
             sample_core_depth: '1'
           },{
             er_site_name: 'Site 1',
-            er_sample_name: 'Sample 2',
-            sample_dip: '2'
+            er_sample_name: 'Sample 2'
           }]
         };
         const jsonNew1 = {
@@ -493,12 +525,11 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           sites: [{
             site: 'Site 1',
-            core_depth: '1'
+            core_depth: '1' // moved from er_samples table
           }],
           samples: [{
             site: 'Site 1',
-            sample: 'Sample 2',
-            dip: '2'
+            sample: 'Sample 2'
           }]
         };
         const jsonOld2 = {
@@ -515,8 +546,7 @@ describe('magic.actions.upgrade_contribution', () => {
             sample_core_depth: '2'
           },{
             er_site_name: 'Site 1',
-            er_sample_name: 'Sample 2',
-            sample_dip: '2'
+            er_sample_name: 'Sample 2'
           }]
         };
         const jsonNew2 = {
@@ -525,15 +555,14 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           sites: [{
             site: 'Site 1',
-            core_depth: '2'
+            core_depth: '2' // moved from er_samples table, but makes a seperate row because of er_sites.site_core_depth
           },{
             site: 'Site 1',
             core_depth: '1'
           }],
           samples: [{
             site: 'Site 1',
-            sample: 'Sample 2',
-            dip: '2'
+            sample: 'Sample 2'
           }]
         };
         return Promise.all([
@@ -615,121 +644,119 @@ describe('magic.actions.upgrade_contribution', () => {
     describe('when adding defaults', () => {
 
       it('should assign a tilt correction for tilt corrected/uncorrected directions', () => {
-        const jsonOld1 = {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
           er_samples: [{
-            er_sample_name: 'sample_A',
-            sample_class: 'Submarine:Sedimentary',
+            er_sample_name: 'sample_A'
           }],
           pmag_results: [{
             er_sample_names: 'sample_A',
-            average_int: '0.0123',
-            tilt_dec_corr: '1',
-            magic_method_codes: 'LP-PI:LP-DIR'
+            average_dec: '1',
+            magic_method_codes: 'DE-BFL'
+          },{
+            er_sample_names: 'sample_A',
+            tilt_dec_corr: '2',
+            magic_method_codes: 'DE-BFL'
+          },{
+            er_sample_names: 'sample_A',
+            tilt_dec_uncorr: '3',
+            magic_method_codes: 'DE-BFL'
           }]
         };
-        const jsonNew1 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           samples: [{
             sample: 'sample_A',
-            geologic_classes: 'Sedimentary:Submarine',
-            int_abs: '0.0123',
             dir_dec: '1',
-            dir_tilt_correction: '100', // insert a 100% tilt correction
-            method_codes: 'LP-DIR:LP-PI'
-          }]
-        };
-        const jsonOld2 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          er_samples: [{
-            er_sample_name: 'sample_A',
-            sample_class: 'Submarine:Sedimentary',
-          }],
-          pmag_results: [{
-            er_sample_names: 'sample_A',
-            average_int: '0.0123',
-            tilt_inc_uncorr: '1',
-            magic_method_codes: 'LP-PI:LP-DIR'
-          }]
-        };
-        const jsonNew2 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          samples: [{
+            dir_tilt_correction: '100', // insert a 100% tilt correction for stratigraphic coordinates
+            dir_nrm_origin: 'p',
+            dir_polarity: 'n',
+            result_type: 'i',
+            method_codes: 'DE-BFL'
+          },{
             sample: 'sample_A',
-            geologic_classes: 'Sedimentary:Submarine',
-            int_abs: '0.0123',
-            dir_inc: '1',
-            dir_tilt_correction: '0', // insert a 0% tilt correction
-            method_codes: 'LP-DIR:LP-PI'
+            dir_dec: '2',
+            dir_tilt_correction: '-3', // insert a -3% tilt correction for unknonwn tilt correction
+            dir_nrm_origin: 'p',
+            dir_polarity: 'n',
+            result_type: 'i',
+            method_codes: 'DE-BFL'
+          },{
+            sample: 'sample_A',
+            dir_dec: '3',
+            dir_tilt_correction: '0', // insert a 0% tilt correction for uncorrected
+            dir_nrm_origin: 'p',
+            dir_polarity: 'n',
+            result_type: 'i',
+            method_codes: 'DE-BFL'
           }]
         };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1),
-          upgradeContributionJSONTest(jsonOld2, jsonNew2)
-        ]);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
-      it('should insert the default sample orientation flag of "g" only if there is an orientation', () => {
-        const jsonOld1 = {
+      it('should insert the default sample orientation quality of "g" only if there is an orientation', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
           er_samples: [{
-            sample_azimuth: 1
+            sample_azimuth: 1,
+            sample_lat: 1
+          },{
+            sample_dip: 1,
+            sample_lat: 2
+          }, {
+            sample_bed_dip: 1,
+            sample_lat: 3
           }],
         };
-        const jsonNew1 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           samples: [{
-            orientation_flag: 'g',
-            azimuth: 1
+            orientation_quality: 'g', // insert default "good" flag because of er_samples.sample_azimuth
+            azimuth: 1,
+            lat: 1
+          },{
+            orientation_quality: 'g', // insert default "good" flag because of er_samples.sample_dip
+            dip: 1,
+            lat: 2
+          },{
+            orientation_quality: 'g', // insert default "good" flag because of er_samples.sample_bed_dip
+            bed_dip: 1,
+            lat: 3
           }]
         };
-        const jsonOld2 = {
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should preserve sample orientation quality regardless of whether there were orientation data', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
           er_samples: [{
-            sample_dip: 1
+            sample_orientation_flag: 'b'
           }],
         };
-        const jsonNew2 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           samples: [{
-            orientation_flag: 'g',
-            dip: 1
+            orientation_quality: 'b' // preserve the orientation flag regardless of whether there were orientation data
           }]
         };
-        const jsonOld3 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          er_samples: [{
-            sample_bed_dip: 1
-          }],
-        };
-        const jsonNew3 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          samples: [{
-            orientation_flag: 'g',
-            bed_dip: 1
-          }]
-        };
-        const jsonOld4 = {
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should not insert a default orientation flag without orientation data', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
@@ -737,99 +764,27 @@ describe('magic.actions.upgrade_contribution', () => {
             sample_cooling_rate: 1
           }],
         };
-        const jsonNew4 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           samples: [{
-            cooling_rate: 1 // no orientation data, so no orientation flag
+            cooling_rate: 1 // no orientation flag because there are no orientation data
           }]
         };
-        const jsonOld5 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          er_samples: [{
-            sample_orientation_flag: 'b',
-            sample_azimuth: 1
-          }],
-        };
-        const jsonNew5 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          samples: [{
-            orientation_flag: 'b',
-            azimuth: 1
-          }]
-        };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1),
-          upgradeContributionJSONTest(jsonOld2, jsonNew2),
-          upgradeContributionJSONTest(jsonOld3, jsonNew3),
-          upgradeContributionJSONTest(jsonOld4, jsonNew4),
-          upgradeContributionJSONTest(jsonOld5, jsonNew5)
-        ]);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
-      it('should insert site default values', () => {
-        const jsonOld1 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          pmag_sites: [{
-            site_int: 1
-          }]
-        };
-        const jsonNew1 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          sites: [{
-            result_type: 'i',
-            result_type: 'i',
-            result_type: 'i',
-            result_quality: 'g'
-          }]
-        };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1)
-        ]);
-      });
-
-      it('should insert other default values', () => {
+      it('should insert a default result quality', () => {
         const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
-          magic_measurements: [{
-            treatment_temp: 1 // causes default measurements.standard and measurements.quality
-          }],
-          pmag_samples: [{
-            sample_polarity,
-            sample_nrm
-          }],
-          //pmag_sites: [{
-          //  site_nrm,
-          //  site_polarity
-          //}],
-          pmag_specimens: [{
-            specimen_scat,
-            specimen_polarity,
-            specimen_nrm,
-            specimen_correction
-          }],
-          rmag_anisotropy: [{
-            anisotropy_flag
-          }],
-          rmag_hysteresis: [{
-            hysteresis_flag
+          pmag_sites: [{
+            er_site_name: 'A'
           }],
           rmag_remanence: [{
-            remanence_flag
-          }],
-          rmag_susceptibility: [{
-            susceptibility_flag
+            er_specimen_name: 'B'
           }]
         };
         const jsonNew = {
@@ -837,24 +792,95 @@ describe('magic.actions.upgrade_contribution', () => {
             magic_version: '3.0'
           }],
           sites: [{
-
-            result_type: 'i',
-            result_quality: 'g'
-          }],
-          samples: [{
-            result_type: 'i',
-            result_quality: 'g'
+            site: 'A',
+            result_quality: 'g' // default because of data in pmag_sites
           }],
           specimens: [{
-            result_type: 'i',
-            result_quality: 'g'
-          }],
-          measurements: [{
-            treat_temp: 1,
-            standard: 'u',
-            quality: 'g'
+            specimen: 'B',
+            result_quality: 'g' // default because of data in rmag_remanence
           }]
+        };
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
 
+      it('should insert a default result type', () => {
+        const jsonOld = {
+          contribution: [{
+            magic_version: '2.5'
+          }],
+          pmag_results: [{
+            er_sample_names: 'A'
+          }]
+        };
+        const jsonNew = {
+          contribution: [{
+            magic_version: '3.0'
+          }],
+          samples: [{
+            sample: 'A',
+            result_type: 'i' // default because of data in pmag_results
+          }]
+        };
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should insert specimen direction default values', () => {
+        const jsonOld = {
+          contribution: [{
+            magic_version: '2.5'
+          }],
+          pmag_specimens: [{
+            specimen_inc: 1,
+            specimen_flag: 'g'
+          },{
+            specimen_inc: 2,
+            specimen_flag: 'g',
+            magic_method_codes: 'LP-DIR'
+          }]
+        };
+        const jsonNew = {
+          contribution: [{
+            magic_version: '3.0'
+          }],
+          specimens: [{
+            dir_inc: 1,
+            dir_polarity: 'n', // default "normal" polarity
+            dir_nrm_origin: 'p', // default "primary" NRM origin,
+            result_quality: 'g',
+            method_codes: 'DE-BFL' // default to "determined from a line"
+          },{
+            dir_inc: 2,
+            dir_polarity: 'n', // default "normal" polarity
+            dir_nrm_origin: 'p', // default "primary" NRM origin,
+            result_quality: 'g',
+            method_codes: 'DE-BFL:LP-DIR' // default to "determined from a line"
+          }]
+        };
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should insert specimen intensity default values', () => {
+        const jsonOld = {
+          contribution: [{
+            magic_version: '2.5'
+          }],
+          pmag_specimens: [{
+            specimen_int: 1,
+            specimen_b: 2,
+            specimen_flag: 'g'
+          }]
+        };
+        const jsonNew = {
+          contribution: [{
+            magic_version: '3.0'
+          }],
+          specimens: [{
+            int_abs: 1,
+            int_corr: 'u', // default "uncorrected" estimate
+            int_b: 2,
+            int_scat: 't', // default "true" that all scatter checks are in the box
+            result_quality: 'g'
+          }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
@@ -863,7 +889,7 @@ describe('magic.actions.upgrade_contribution', () => {
 
     describe('when reorganizing data', () => {
 
-      it('should separate results with mixtures of corrected/uncorrected directions', () => {
+      it('should separate results with mixtures of tilt corrected/uncorrected directions', () => {
         const jsonOld = {
           contribution: [{
             magic_version: '2.5'
@@ -874,10 +900,11 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           pmag_results: [{
             er_sample_names: 'sample_A',
-            average_int: '0.0123',
-            tilt_dec_corr: '1',
-            tilt_inc_uncorr: '2',
-            magic_method_codes: 'LP-PI:LP-DIR'
+            average_inc: '1',
+            tilt_dec_corr: '2',
+            tilt_correction: '50',
+            tilt_inc_uncorr: '3',
+            magic_method_codes: 'DE-BFL:LP-PI:LP-DIR'
           }]
         };
         const jsonNew = {
@@ -887,17 +914,30 @@ describe('magic.actions.upgrade_contribution', () => {
           samples: [{
             sample: 'sample_A',
             geologic_classes: 'Sedimentary:Submarine',
-            int_abs: '0.0123',
-            dir_dec: '1',
+            dir_inc: '1',
             dir_tilt_correction: '100',
-            method_codes: 'LP-DIR:LP-PI'
+            dir_nrm_origin: 'p',
+            dir_polarity: 'n',
+            result_type: 'i',
+            method_codes: 'DE-BFL:LP-DIR:LP-PI'
           }, {
             sample: 'sample_A',
             geologic_classes: 'Sedimentary:Submarine',
-            int_abs: '0.0123',
             dir_dec: '2',
+            dir_tilt_correction: '50',
+            dir_nrm_origin: 'p',
+            dir_polarity: 'n',
+            result_type: 'i',
+            method_codes: 'DE-BFL:LP-DIR:LP-PI'
+          }, {
+            sample: 'sample_A',
+            geologic_classes: 'Sedimentary:Submarine',
+            dir_inc: '3',
             dir_tilt_correction: '0',
-            method_codes: 'LP-DIR:LP-PI'
+            dir_nrm_origin: 'p',
+            dir_polarity: 'n',
+            result_type: 'i',
+            method_codes: 'DE-BFL:LP-DIR:LP-PI'
           }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
@@ -936,108 +976,87 @@ describe('magic.actions.upgrade_contribution', () => {
         return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
-      it('should convert the specimen direction type into a method code', () => {
-        const jsonOld1 = {
+      it('should convert a good/bad intensity scatter into a true/false', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
           pmag_specimens: [{
-            specimen_inc: 1,
-            magic_method_codes: 'DE-SITE'
+            specimen_scat: 'g',
+            specimen_flag: 'g'
+          }, {
+            specimen_scat: 'b',
+            specimen_flag: 'b'
           }]
         };
-        const jsonNew1 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           specimens: [{
-            dir_inc: 1,
-            method_codes: 'DE-SITE:DE-BFL' // default to "determined from a line"
+            int_scat: 't',
+            result_quality: 'g'
+          }, {
+            int_scat: 'f',
+            result_quality: 'b'
           }]
         };
-        const jsonOld2 = {
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should convert the specimen direction type into a method code', () => {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
           pmag_specimens: [{
             specimen_inc: 1,
             specimen_direction_type: 'l',
-            magic_method_codes: 'DE-SITE'
-          }]
-        };
-        const jsonNew2 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          specimens: [{
-            dir_inc: 1,
-            method_codes: 'DE-SITE:DE-BFP' // apply "determined from a line"
-          }]
-        };
-        const jsonOld3 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          pmag_specimens: [{
-            specimen_inc: 1,
+            magic_method_codes: 'DE-SITE',
+            specimen_flag: 'g'
+          },{
+            specimen_inc: 2,
             specimen_direction_type: 'p',
-            magic_method_codes: 'DE-SITE'
+            magic_method_codes: 'DE-SITE',
+            specimen_flag: 'g'
+          },{
+            specimen_inc: 3,
+            specimen_direction_type: 'p',
+            magic_method_codes: 'DE-BFP',
+            specimen_flag: 'g'
+          },{
+            magic_method_codes: 'LP-DIR',
+            specimen_flag: 'g'
           }]
         };
-        const jsonNew3 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           specimens: [{
             dir_inc: 1,
-            method_codes: 'DE-SITE:DE-BFP' // apply "determined from a plane"
-          }]
-        };
-        const jsonOld4 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          pmag_results: [{
-            er_specimen_name: 's1',
-            average_inc: 1,
-            magic_method_codes: 'DE-SITE'
-          }]
-        };
-        const jsonNew4 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          specimens: [{
-            specimen: 's1',
-            dir_inc: 1,
-            method_codes: 'DE-SITE' // not for pmag_results directions
-          }]
-        };
-        const jsonOld5 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          pmag_specimens: [{
-            specimen_int: 1,
-            magic_method_codes: 'LP-DIR'
-          }]
-        };
-        const jsonNew5 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          specimens: [{
-            int_abs: 1,
+            result_quality: 'g',
+            dir_polarity: 'n', // default "normal" polarity
+            dir_nrm_origin: 'p', // default "primary" NRM origin
+            method_codes: 'DE-BFL:DE-SITE' // apply "determined from a line"
+          },{
+            dir_inc: 2,
+            result_quality: 'g',
+            dir_polarity: 'n', // default "normal" polarity
+            dir_nrm_origin: 'p', // default "primary" NRM origin
+            method_codes: 'DE-BFP:DE-SITE' // apply "determined from a plane"
+          },{
+            dir_inc: 3,
+            result_quality: 'g',
+            dir_polarity: 'n', // default "normal" polarity
+            dir_nrm_origin: 'p', // default "primary" NRM origin
+            method_codes: 'DE-BFP' // method code is already included
+          },{
+            result_quality: 'g',
             method_codes: 'LP-DIR' // not without a pmag_specimens direction
           }]
         };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1),
-          upgradeContributionJSONTest(jsonOld2, jsonNew2),
-          upgradeContributionJSONTest(jsonOld3, jsonNew3),
-          upgradeContributionJSONTest(jsonOld4, jsonNew4),
-          upgradeContributionJSONTest(jsonOld5, jsonNew5)
-        ]);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
       it('should assign the minimum location lat and lon to the correct columns', () => {
@@ -1066,7 +1085,29 @@ describe('magic.actions.upgrade_contribution', () => {
         return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
-      it('should summarize measurements as experiments', () => {
+      it('should handle measurements as an array', () => {
+        const jsonOld = {
+          contribution: [{
+            magic_version: '2.5'
+          }],
+          magic_measurements: {
+            columns: ['measurement_date', 'measurement_time_zone'],
+            rows: [
+              ['2008:07:01:08:46:00.00', 'SAN']
+            ]
+          }
+        };
+        const jsonNew = {
+          contribution: [{
+            magic_version: '3.0'
+          }],
+          measurements: {
+            columns: ['timestamp'],
+            rows: [
+              ['2008-07-01T15:46:00Z']
+            ]
+          }
+        };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
@@ -1075,11 +1116,9 @@ describe('magic.actions.upgrade_contribution', () => {
           contribution: [{
             magic_version: '2.5'
           }],
-          er_locations: [{
-            er_location_name: 'loc_1'
-          }],
-          pmag_results: [{
-            er_location_names: 'loc_1',
+          pmag_sites: [{
+            er_site_name: 'A',
+            site_flag: 'g',
             external_database_names: ':GEOMAGIA50:CALS7K.2:ARCHEO00:',
             external_database_ids: '1435::2329'
           }]
@@ -1088,8 +1127,9 @@ describe('magic.actions.upgrade_contribution', () => {
           contribution: [{
             magic_version: '3.0'
           }],
-          locations: [{
-            location: 'loc_1',
+          sites: [{
+            site: 'A',
+            result_quality: 'g',
             external_database_ids: 'ARCHEO00[2329]:CALS7K.2[]:GEOMAGIA50[1435]'
           }]
         };
@@ -1101,13 +1141,11 @@ describe('magic.actions.upgrade_contribution', () => {
           contribution: [{
             magic_version: '2.5'
           }],
-          er_sites: [{
-            er_site_name: 'site_1'
-          }],
           pmag_results: [{
             er_site_names: 'site_1',
             average_int_rel: '1',
             average_int_rel_sigma: '2',
+            data_type: 'i',
             magic_method_codes: 'something else:ie-ARM'
           }]
         };
@@ -1119,6 +1157,7 @@ describe('magic.actions.upgrade_contribution', () => {
             site: 'site_1',
             int_rel_ARM: '1',
             int_rel_ARM_sigma: '2',
+            result_type: 'i',
             method_codes: 'SOMETHING ELSE'
           }]
         };
@@ -1199,7 +1238,8 @@ describe('magic.actions.upgrade_contribution', () => {
           samples: [{
             sample: 'sample1',
             specimens: 'specimen2:synthetic1',
-            int_abs: '1'
+            int_abs: '1',
+            result_type: 'i'
           }],
           specimens: [{
             specimen: 'specimen2'
@@ -1232,7 +1272,8 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           locations: [{
             location: 'location1',
-            pole_conf: '1:2:3:4:5:6'
+            pole_conf: '1:2:3:4:5:6',
+            result_type: 'i'
           }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
@@ -1259,7 +1300,8 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           specimens: [{
             specimen: 'specimen1',
-            aniso_s: '1:2:3:4:5:6'
+            aniso_s: '1:2:3:4:5:6',
+            result_quality: 'g'
           }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
@@ -1360,14 +1402,15 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           specimens: [{
             sample: 'sample1',
-            specimen: 'specimen1'
+            specimen: 'specimen1',
+            result_type: 'i'
           }]
         };
         return upgradeContributionJSONTest(jsonOld1, jsonNew1);
       });
 
       it('should repeat metadata', () => {
-        const jsonOld1 = {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
@@ -1377,31 +1420,33 @@ describe('magic.actions.upgrade_contribution', () => {
           }],
           pmag_specimens: [{
             er_specimen_name: 'specimen1',
-            specimen_inc: '1'
+            specimen_mad: '1'
           }, {
             er_specimen_name: 'specimen1',
-            specimen_inc: '2'
+            specimen_mad: '2'
           }]
         };
-        const jsonNew1 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           specimens: [{
             specimen: 'specimen1',
             lithologies: 'Basalt',
-            dir_inc: '1'
+            result_quality: 'g',
+            dir_mad_free: '1'
           }, {
             specimen: 'specimen1',
             lithologies: 'Basalt',
-            dir_inc: '2'
+            result_quality: 'g',
+            dir_mad_free: '2'
           }]
         };
-        return upgradeContributionJSONTest(jsonOld1, jsonNew1);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
       it('should combine descriptions without repetition', () => {
-        const jsonOld1 = {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
@@ -1409,97 +1454,57 @@ describe('magic.actions.upgrade_contribution', () => {
             er_site_names: 'site1',
             pmag_result_name: 'name',
             result_description: 'a name'
-          }]
-        };
-        const jsonNew1 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          sites: [{
-            site: 'site1',
-            description: 'a name'
-          }]
-        };
-        const jsonOld2 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          pmag_results: [{
-            er_site_names: 'site1',
+          },{
+            er_site_names: 'site2',
             pmag_result_name: 'name1',
             result_description: 'a name'
           }]
         };
-        const jsonNew2 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
           sites: [{
             site: 'site1',
-            description: 'name1, a name'
+            description: 'a name',
+            result_type: 'i'
+          },{
+            site: 'site2',
+            description: 'name1, a name',
+            result_type: 'i'
           }]
         };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1),
-          upgradeContributionJSONTest(jsonOld2, jsonNew2)
-        ]);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
       it('should convert dates into ISO 8601 timestamps', () => {
-        const jsonOld1 = {
+        const jsonOld = {
           contribution: [{
             magic_version: '2.5'
           }],
-          magic_measurements: [{
-            measurement_date: '2008:07:01:08:46:00.00',
-            measurement_time_zone: 'SAN'
+          er_samples: [{
+            sample_date: '2008:07:01:08:46:00.00',
+            sample_time_zone: 'SAN'
+          },{
+            sample_date: '2008:07:01:08:46:00.00'
+          },{
+            sample_time_zone: 'SAN'
           }]
         };
-        const jsonNew1 = {
+        const jsonNew = {
           contribution: [{
             magic_version: '3.0'
           }],
-          measurements: [{
+          samples: [{
             timestamp: '2008-07-01T15:46:00Z'
-          }]
-        };
-        const jsonOld2 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          magic_measurements: [{
-            measurement_date: '2008:07:01:08:46:00.00'
-          }]
-        };
-        const jsonNew2 = {
-          contribution: [{
-            magic_version: '3.0'
-          }],
-          measurements: [{
+          },{
             timestamp: '2008-07-01T08:46:00Z'
           }]
         };
-        const jsonOld3 = {
-          contribution: [{
-            magic_version: '2.5'
-          }],
-          magic_measurements: [{
-            measurement_time_zone: 'SAN'
-          }]
-        };
-        const jsonNew3 = {
-          contribution: [{
-            magic_version: '3.0'
-          }]
-        };
-        return Promise.all([
-          upgradeContributionJSONTest(jsonOld1, jsonNew1),
-          upgradeContributionJSONTest(jsonOld2, jsonNew2),
-          upgradeContributionJSONTest(jsonOld3, jsonNew3)
-        ]);
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
       });
 
-      // TODO: create a rotation matrix, even though they haven't been used properly
+      // TODO: create a rotation matrix, even though they haven't been used properly yet
       /*it('should create a rotation matrix', () => {
        const jsonOld = {
        contribution: [{
