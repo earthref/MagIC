@@ -89,7 +89,7 @@ export default class extends React.Component {
             </a>
           </div>
           <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/actiave/">
+            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/activate/">
               <i className="icons">
                 <i className="file text outline icon"></i>
                 <i className="purple corner checkmark icon" style={{fontSize:'1.5em'}}></i>

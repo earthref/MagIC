@@ -5159,9 +5159,11 @@ export default {
   "boolean": {
     "label": "Boolean Flags",
     "items": [{
-      "item": "True"
+      "item": "t",
+      "label": "True"
     }, {
-      "item": "False"
+      "item": "f",
+      "label": "False"
     }]
   }
 };
