@@ -195,7 +195,7 @@ describe('magic.actions.export_contribution', () => {
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
          //now three moreof metadata from the specimen data model
-        'Names\t\tSpecimen\tResult\tGeology\n' + // Group Name
+        'Names\t\tSpecimen\tResult\tOrientation\n' + // Group Name
         'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' + // Column Name (label)
         'String\tString\tString\tList\tNumber in Degrees\n' + // Column Type and/or Unit
         'specimen\tsample\tigsn\tcitations\tdip\n' +
@@ -226,11 +226,11 @@ describe('magic.actions.export_contribution', () => {
         '1234\t@magic\t3.0\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
-        'Names\tMeasurement Parameters\tResult\tMetadata\t\t\n' + // Group Name
-        'Specimen Name\tMeasurement Step Minimum\tResult Type\tDescription\tSequence of Rotations\tExternal Database IDs\n' + // Column Name
-        'String\tNumber\tFlag\tString\tMatrix\tDictionary\n' + // Column Type and/or Unit
-        'specimen\tmeas_step_min\tresult_type\tdescription\trotation_sequence\texternal_database_ids\n' +
-        'sp1\t1\ta\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
+        'Names\tResult\tMeasurement Parameters\tMetadata\t\t\n' + // Group Name
+        'Specimen Name\tResult Type\tMeasurement Step Minimum\tDescription\tSequence of Rotations\tExternal Database IDs\n' + // Column Name
+        'String\tFlag\tNumber\tString\tMatrix\tDictionary\n' + // Column Type and/or Unit
+        'specimen\tresult_type\tmeas_step_min\tdescription\trotation_sequence\texternal_database_ids\n' +
+        'sp1\ta\t1\ta, b\t1.4:5.2:-0.3;0:-2.1:0.12345\tGEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]\n';
       exportContributionToExtendedTextJSONTest(json2, text2);
     });
   });
@@ -305,7 +305,7 @@ const exportContributionToTextNoErrorTest = (json) => {
 const exportContributionToTextNErrorsTest = (json, nErrors) => {
   const Exporter = new ExportContribution({});
   Exporter.toText(json,false);
-  console.log(`length: ${Exporter.errors().length}`);
+  //console.log(`length: ${Exporter.errors().length}`);
   expect(Exporter.errors().length).to.equal(nErrors);
 };
 
@@ -314,8 +314,8 @@ const exportContributionToTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
   const text = Exporter.toText(json,false);
   expect(Exporter.errors().length).to.equal(0);
-  console.log(`text:\n${text}`);
-  console.log(`text Expected:\n${textExpected}`);
+  //console.log(`text:\n${text}`);
+  //console.log(`text Expected:\n${textExpected}`);
   expect(text).to.equal(textExpected);
 };
 
@@ -324,8 +324,8 @@ const exportContributionToExtendedTextJSONTest = (json, textExpected) => {
   const Exporter = new ExportContribution({});
   const text = Exporter.toText(json, true);
   expect(Exporter.errors().length).to.equal(0);
-  console.log(`text:\n${text}`);
-  console.log(`text Expected:\n${textExpected}`);
+  //console.log(`text:\n${text}`);
+  //console.log(`text Expected:\n${textExpected}`);
   expect(text).to.equal(textExpected);
 };
 

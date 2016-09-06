@@ -40,9 +40,9 @@ export default class extends Runner {
   //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
     this.version = this.parser.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
-    console.log(this.version);
+    //console.log(this.version);
     this.model = magicDataModels[this.version];
-    console.log(this.model);
+    //console.log(this.model);
     this.orderedModel = this.createOrderedModel();
 
     // Create an empty workbook
@@ -110,7 +110,7 @@ export default class extends Runner {
       for(let groupIdx in groupHeader)
       {
         let cellAddress = XLSX.utils.encode_cell({r: 0,c: groupIdx});
-        console.log(`here: ${cellAddress}`);
+        //console.log(`here: ${cellAddress}`);
 
         /*later, we need to compare the next and previous columns for formatting purposes*/
         let nextCellColIdx = Number(groupIdx);
@@ -501,7 +501,7 @@ export default class extends Runner {
             if(colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
             {text = text.concat('\t');}
 
-            //dataToAdd =  this.handleSpecialCases(dataToAdd,tableName,colName);
+            dataToAdd =  this.handleSpecialCases(dataToAdd,tableName,colName);
 
             text = text.concat(dataToAdd);
 
@@ -516,8 +516,8 @@ export default class extends Runner {
     return text;
   }
 
-  /*handleSpecialCases(dataToManipulate, tableName, columnName)
-   {
+  handleSpecialCases(dataToManipulate, tableName, columnName)
+  {
    if (dataToManipulate == '') return dataToManipulate;
 
    let manipulatedData = '';
@@ -594,7 +594,7 @@ export default class extends Runner {
    }
 
    return dataToManipulate;//if not a special case, return the same string that was passed in
-   }*/
+  }
 
   testValidityOfTablesAndColumns(jsonToTranslate){
     for (let newTableName in jsonToTranslate) {//this gets the string name of the property 'table'
