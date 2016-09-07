@@ -338,7 +338,7 @@ export default class extends React.Component {
               );
             })}
           </div>
-          {(upgradeMap ?
+          {(false && upgradeMap ?
             <div>
               <h4 className="ui horizontal divider header">
                 <i className="random icon"></i>
