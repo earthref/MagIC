@@ -59,7 +59,7 @@ modules-runtime@0.7.6
 mongo@1.1.12
 mongo-id@1.0.5
 mongo-livedata@1.0.12
-npm-mongo@1.5.48
+npm-mongo@1.5.49
 observe-sequence@1.0.12
 ordered-dict@1.0.8
 promise@0.8.4
@@ -71,7 +71,7 @@ reload@1.1.10
 retry@1.0.8
 routepolicy@1.0.11
 semantic:ui@2.2.1
-semantic:ui-data@2.2.1
+semantic:ui-data@2.2.4
 service-configuration@1.0.10
 session@1.1.6
 shell-server@0.2.1
