@@ -208,6 +208,31 @@ describe('magic.actions.upgrade_contribution', () => {
       return upgradeContributionWarningTest(jsonOld,
         /column .* in table .* was deleted in magic data model/i);
     });
+
+    it('should sort numeric merge keys', () => {
+      const jsonOld = {
+        contribution: [{
+          magic_version: '2.5'
+        }],
+        er_samples: [{
+          er_sample_name: '9'
+        },{
+          er_sample_name: '10'
+        }]
+      };
+      const jsonNew = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
+        samples: [{
+          sample: '9'
+        },{
+          sample: '10'
+        }]
+      };
+      return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
   });
 
   // Tests specific to a 2.5 to 3.0 upgrade.

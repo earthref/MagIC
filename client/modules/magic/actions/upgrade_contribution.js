@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import jQuery from 'jquery';
 import moment from 'moment-timezone';
 import Promise from 'bluebird';
 import Runner from '../../er/actions/runner';
@@ -1033,7 +1034,9 @@ export default class extends Runner {
       }
 
       // Sort the table by the unique composite keys.
-      this.json[table] = _.sortBy(this.json[table], this.mergeKeys[table]);
+      this.json[table] = _.sortBy(this.json[table], this.mergeKeys[table].map((k) => {
+        return (o) => (jQuery.isNumeric(o[k]) ? parseFloat(o[k]) : o[k]);
+      }));
 
       // Loop through all rows in the sorted table.
       const rowIdxChunks = _.chunk(_.range(this.json[table].length), this.nRowsBetweenProgressEvents);
