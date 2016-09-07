@@ -3,9 +3,10 @@ import {expect} from 'chai';
 import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx-style';
 import ExportContribution from '../export_contribution';
-import {default as contribution3552 } from './files/contributions/3552.js';
-import {default as contribution8054 } from './files/contributions/8054.js';
-import {default as contribution10507} from './files/contributions/10507.js';
+import {default as contribution_3 } from './files/contributions/3.0.js';
+//import {default as contribution3552 } from './files/contributions/3552.js';
+//import {default as contribution8054 } from './files/contributions/8054.js';
+//import {default as contribution10507} from './files/contributions/10507.js';
 
 describe('magic.actions.export_contribution', () => {
 
@@ -252,7 +253,11 @@ describe('magic.actions.export_contribution', () => {
           dip:      1.3,
           igsn:     'igsn2',
           specimen: 'sp2',
-          sample:   'sa1'
+          sample:   'sa1',
+          dir_tilt_correction: '100',
+          dir_dec: '1.5',
+          dir_inc: '2',
+          dir_alpha95: '0.123'
         }],
         sites: [{
           location:     'lo1',
@@ -262,11 +267,19 @@ describe('magic.actions.export_contribution', () => {
         }, {
           site:              'si1',
           location:          'lo1',
-          citations:         ['10.1023/A1'],
-          site_alternatives: 'Kiln'
+          citations:         '10.1023/A1',
+          site_alternatives: 'Kiln',
+          method_codes: 'code1:code2'
         }]
       };
       exportContributionToExcelTest(json1, 'client/modules/magic/actions/tests/output/test.xlsx');
+    });
+  });
+
+  // Test exporting valid files to Excel.
+  describe('when exporting valid files to EXCEL', () => {
+    it('should export contribution 3.0 (MagIC version 3.0) with no errors', () => {
+      exportContributionToExcelTest(contribution_3, 'client/modules/magic/actions/tests/output/3.0.xlsx');
     });
   });
 
@@ -334,6 +347,6 @@ const exportContributionToExcelTest = (json, outputFile) => {
   const Exporter = new ExportContribution({});
   const workbook = Exporter.toExcel(json);
   expect(Exporter.errors().length).to.equal(0);
-  var writeOpts = { tabSelected:'sites' }; // <--- GGG doesn't appear to work, i also tried a simple index number
+  var writeOpts = { tabSelected:2 }; // <--- GGG doesn't appear to work, i also tried a simple index number
   XLSX.writeFile(workbook, outputFile, writeOpts);
 }

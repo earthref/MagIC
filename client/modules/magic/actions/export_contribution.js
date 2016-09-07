@@ -1,4 +1,5 @@
 import {_} from 'lodash';
+import jQuery from 'jquery';
 import XLSX from 'xlsx-style';
 import Runner from '../../er/actions/runner.js';
 import Parser from './parse_contribution';
@@ -30,7 +31,6 @@ export default class extends Runner {
 
     this.testValidityOfTablesAndColumns(jsonToExport);
 
-
     // TODO: use the model to build up text string here
     let text = this.createTSVfile(jsonToExport, toExtendedText);
 
@@ -45,238 +45,183 @@ export default class extends Runner {
     //console.log(this.model);
     this.orderedModel = this.createOrderedModel();
 
-    // Create an empty workbook
+    // Create an empty workbook.
     let workbook = { SheetNames: [], Sheets: {} };
 
     let style = {fill:{patternType: 'solid'},  font:{}, numFmt:{}, alignment:{}, border:{}};
 
-    for(let modelTable in this.model.tables)
-    {
-      workbook.SheetNames.push(modelTable);//Create a sheet for each table in the 3.0 model in the workbook.
+    // Iterate through all of the tables in the model.
+    for (let modelTable in this.model.tables) {
 
-      let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport/*, orderedColumnArray*/);
+      // Skip model tables that are not included in the contribution.
+      if (jsonToExport[modelTable] === undefined) continue;
 
-      /*These the first four rows of the excel file*/
-      let groupHeader = tableHeaders.groupHeader;
-      groupHeader.unshift('Group:  ');//place 'Group' at the beginning of the array
-      //console.log(`groupHD${groupHeader}`);
-      let nameHeader = tableHeaders.labelHeader;
-      nameHeader.unshift('Name:  ');
-      let typeHeader = tableHeaders.columnTypeOrUnitHeader;
-      typeHeader.unshift('Type:  ');
-      let columnHeader = tableHeaders.columnNameHeader;
-      columnHeader.unshift('Column:  ');
+      // Create a worksheet data matrix.
+      let tableHeaders = this.createExtendedHeadersData(modelTable, jsonToExport);
+      let wsData = [
+        ['Group: ' , ... tableHeaders.groupHeader           ],
+        ['Name: '  , ... tableHeaders.labelHeader           ],
+        ['Type: '  , ... tableHeaders.columnTypeOrUnitHeader],
+        ['Column: ', ... tableHeaders.columnNameHeader      ]
+      ];
 
-      //Now gather the data from the json object
-      let tableData = jsonToExport[modelTable];
+      // Iterate through all of the data rows in the table.
+      for (let rowIdx in jsonToExport[modelTable]) {
 
-      /*Create array of sheet headers/data. This will be an array of arrays.
-       The first dimension of the array is the row in the excel sheet
-       The second dimension is the row data*/
-      let completeSpreadSheetData =
-        [
-          groupHeader ,
-          nameHeader,
-          typeHeader,
-          columnHeader
-          /*      [1,2,3],
-           [true, false, null, "sheetjs"],
-           ["foo","bar",new Date("2014-02-19T14:30Z"), "0.3"],
-           ["baz", null, "qux"]*/
-        ]
+        // Add a blank column at the beginning of each data row for the row headers.
+        let wsRow = [''];
 
-      //Add data to the spreadsheet row by row, adding a blank column at the beginning
-      for(let dataRowIdx in tableData)
-      {
-        let newRowArray = _.values(tableData[dataRowIdx]);
-        newRowArray.unshift('');//Add a blank column at the beginning of each row
-        completeSpreadSheetData.push(newRowArray);
+        // Iterate through each column name in the header.
+        for (let columnName of tableHeaders.columnNameHeader) {
+          let value = jsonToExport[modelTable][rowIdx][columnName];
+
+          if (Array.isArray(value) && value.length > 0 && !Array.isArray(value[0])) value = value.join(':');
+
+          wsRow.push(value);
+        }
+        wsData.push(wsRow);
+
       }
 
-      workbook.Sheets[modelTable] = this._toSheet(completeSpreadSheetData);
+      // Convert the data matrix into a worksheet object.
+      let worksheet = this._toSheet(wsData);
+      let rowIdx;
 
+      // Format the group header row.
+      rowIdx = 0;
+      for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
 
+        let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
+        let cellStyle = {
+          font:   {bold: 'true'},
+          fill:   {fgColor: {rgb: 'CCCCCC'}},
+          border: {top:    {style: 'thick' , color: {rgb: '555555'}},
+                   bottom: {style: 'medium', color: {rgb: '555555'}}}
+        };
 
-      //NOW FORMAT THE SHEET
-      //From the xlsx-style docs:
-      /*Cell range objects are stored as {s:S, e:E} where S is the first cell and E is the last cell in the range.
-       The ranges are inclusive. For example, the range A3:B7 is represented by the object {s:{c:0, r:2}, e:{c:1, r:6}}*/
-      let currentSheet = workbook.Sheets[modelTable];
+        // Set horizontal alignment.
+        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
 
-      //TODO: formatting concerns need to be refactored into a separate method
-      /*FORMAT SHEETS*/
-      //****************FORMAT GROUP HEADER**************
-      let headerTextOrientation = 'center';
-      for(let groupIdx in groupHeader)
-      {
-        let cellAddress = XLSX.utils.encode_cell({r: 0,c: groupIdx});
-        //console.log(`here: ${cellAddress}`);
+        // Add borders.
+        if (columnIdx == 0)
+          cellStyle.border.left = {style: 'thick', color: {rgb: '555555'}};
+        if (columnIdx == 0 || columnIdx == wsData[rowIdx].length - 1)
+          cellStyle.border.right = {style: 'thick', color: {rgb: '555555'}};
+        if (columnIdx > 0 && columnIdx < wsData[rowIdx].length - 1 && wsData[0][columnIdx+1] != '')
+          cellStyle.border.right = {style: 'medium', color: {rgb: '555555'}};
 
-        /*later, we need to compare the next and previous columns for formatting purposes*/
-        let nextCellColIdx = Number(groupIdx);
-        let previousColIdx = Number(groupIdx);
-        nextCellColIdx++;//
-        previousColIdx--;
+        worksheet[cellAddress].s = cellStyle;
 
-        let nextCellAddressToTheRight = XLSX.utils.encode_cell({c: nextCellColIdx,r: 0});
-        let previousCellToTheLeft = XLSX.utils.encode_cell({c: previousColIdx,r: 0});
+      }
 
-        //DEFAULT FORMATTING FOR GROUP.
-        // headerTextOrientation = 'right';
-        currentSheet[cellAddress].s =
-        {
-          alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-          border: {
-            left: {style: 'thick', color: {auto: 1}},
-            right: {style: 'thick', color: {auto: 1}},
-            top: {style: 'thick', color: {auto: 1}},
-            bottom: {style: 'thick', color: {auto: 1}}
-          },
-          font: {bold: 'true'},
-          fill: {fgColor: {rgb: 'cccccc'}}
-        }
+      // Format the name header row.
+      rowIdx = 1;
+      for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
 
-        //OVERRIDE GROUP FORMATTING
-        if( currentSheet[nextCellAddressToTheRight] &&
-          currentSheet[nextCellAddressToTheRight].v == '')
-        {
-          currentSheet[cellAddress].s =
-          {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-            border: {
-              left: {style: 'thick', color: {auto: 1}},
-              right: {style: 'hair', color: {auto: 1}},
-              top: {style: 'thick', color: {auto: 1}},
-              bottom: {style: 'thick', color: {auto: 1}}
-            },
-            font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'cccccc'}}
+        let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
+        let cellStyle = {
+          fill:   {fgColor: {rgb: 'FFFFFF'}},
+          border: {}
+        };
+
+        // Set horizontal alignment.
+        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
+
+        // Add borders.
+        if (columnIdx == 0)
+          cellStyle.border.left = {style: 'thick', color: {rgb: '555555'}};
+        if (columnIdx == 0 || columnIdx == wsData[rowIdx].length - 1)
+          cellStyle.border.right = {style: 'thick', color: {rgb: '555555'}};
+        else if (columnIdx > 0 && columnIdx < wsData[rowIdx].length - 1 && wsData[0][columnIdx+1] != '')
+          cellStyle.border.right = {style: 'medium', color: {rgb: '555555'}};
+        else
+          cellStyle.border.right = {style: 'thin', color: {rgb: '888888'}};
+
+        worksheet[cellAddress].s = cellStyle;
+
+      }
+
+      // Format the type header row.
+      rowIdx = 2;
+      for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
+
+        let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
+        let cellStyle = {
+          fill:   {fgColor: {rgb: 'FFFFFF'}},
+          border: {}
+        };
+
+        // Set horizontal alignment.
+        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
+
+        // Add borders.
+        if (columnIdx == 0)
+          cellStyle.border.left = {style: 'thick', color: {rgb: '555555'}};
+        if (columnIdx == 0 || columnIdx == wsData[rowIdx].length - 1)
+          cellStyle.border.right = {style: 'thick', color: {rgb: '555555'}};
+        else if (columnIdx > 0 && columnIdx < wsData[rowIdx].length - 1 && wsData[0][columnIdx+1] != '')
+          cellStyle.border.right = {style: 'medium', color: {rgb: '555555'}};
+        else
+          cellStyle.border.right = {style: 'thin', color: {rgb: '888888'}};
+
+        worksheet[cellAddress].s = cellStyle;
+
+      }
+
+      // Format the column name header row.
+      rowIdx = 3;
+      for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
+
+        let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
+        let cellStyle = {
+          font:   {bold: 'true'},
+          fill:   {fgColor: {rgb: 'F2F2F2'}},
+          border: {top:    {style: 'thin' , color: {rgb: '555555'}},
+                   bottom: {style: 'thick', color: {rgb: '555555'}}}
+        };
+
+        // Set horizontal alignment.
+        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
+
+        // Add borders.
+        if (columnIdx == 0)
+          cellStyle.border.left = {style: 'thick', color: {rgb: '555555'}};
+        if (columnIdx == 0 || columnIdx == wsData[rowIdx].length - 1)
+          cellStyle.border.right = {style: 'thick', color: {rgb: '555555'}};
+        else if (columnIdx > 0 && columnIdx < wsData[rowIdx].length - 1 && wsData[0][columnIdx+1] != '')
+          cellStyle.border.right = {style: 'medium', color: {rgb: '555555'}};
+        else
+          cellStyle.border.right = {style: 'thin', color: {rgb: '888888'}};
+
+        worksheet[cellAddress].s = cellStyle;
+
+      }
+
+      // Format the entire worksheet.
+      let columnWidths = new Array(wsData[0].length).fill(0);
+      for (let rowIdx = 0; rowIdx < wsData.length; rowIdx++) {
+        for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
+          let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
+          if (worksheet[cellAddress] !== undefined) {
+            if (worksheet[cellAddress].v !== undefined)
+              columnWidths[columnIdx] = Math.max(columnWidths[columnIdx], worksheet[cellAddress].v.toString().length);
+            if (worksheet[cellAddress].s === undefined) worksheet[cellAddress].s = {};
+            if (worksheet[cellAddress].s.font === undefined) worksheet[cellAddress].s.font = {};
+            worksheet[cellAddress].s.font.name = 'Consolas';
+            worksheet[cellAddress].s.font.sz = '11';
           }
         }
-        if (currentSheet[cellAddress].v == '')// Do not bold the border if this cell is empty
-        {
-          currentSheet[cellAddress].s =
-          {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-            border: {
-              left: {style: 'hair', color: {auto: 1}},
-              right: {style: 'thick', color: {auto: 1}},
-              top: {style: 'thick', color: {auto: 1}},
-              bottom: {style: 'thick', color: {auto: 1}}
-            },
-            font: {bold: 'true'},
-            fill: {fgColor: {rgb: 'cccccc'}}
-          }
-        }
-        //console.log(`old ${currentSheet[cellAddress].v}`);
       }
+      worksheet['!cols'] = columnWidths.map((w) => { return {wpx: (w+1)*7.5}});
 
-      /*FORMAT NAME HEADER*/
-      for(let nameIdx in typeHeader)
-      {
-        let cellAddress = XLSX.utils.encode_cell({c: nameIdx, r: 1});//row 1 of excel output
-
-        if(currentSheet[cellAddress])//if there is data to format
-        {
-          currentSheet[cellAddress].s = {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-            border: {
-              left: {style: 'hair', color: {auto: 1}},
-              right: {style: 'hair', color: {auto: 1}},
-              top: {style: 'hair', color: {auto: 1}},
-              bottom: {style: 'hair', color: {auto: 1}}
-            },
-            fill: {fgColor: {rgb: 'f2f2f2'}}
-          };
-        }
-      }
-
-      /*FORMAT TYPE HEADER*/
-      for(let typeIdx in typeHeader)
-      {
-        let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
-        if(currentSheet[cellAddress])//if there is data to format
-        {
-          currentSheet[cellAddress].s = {
-            alignment: {horizontal: headerTextOrientation, vertical: 'center'},
-            border: {
-              left: {style: 'hair', color: {auto: 1}},
-              right: {style: 'hair', color: {auto: 1}},
-              top: {style: 'hair', color: {auto: 1}},
-              bottom: {style: 'hair', color: {auto: 1}}
-            },
-            fill: {fgColor: {rgb: 'f2f2f2'}}
-          };
-        }
-      }
-
-      //probably delete this? Duplicate code.
-      for(let typeIdx in typeHeader)
-      {
-        let cellAddress = XLSX.utils.encode_cell({c: typeIdx, r: 2});
-        currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'center', vertical: 'center'},
-          border: {
-            left: {style: 'hair', color: {auto: 1}},
-            right: {style: 'hair', color: {auto: 1}},
-            top: {style: 'hair', color: {auto: 1}},
-            bottom: {style: 'hair', color: {auto: 1}}
-          },
-          //font: {bold: 'true'},
-          fill: {fgColor: {rgb: 'f2f2f2'}}
-        };
-      }
-
-      for(let columnIdx in columnHeader)
-      {
-        let cellAddress = XLSX.utils.encode_cell({c: columnIdx, r: 3});
-        currentSheet[cellAddress].s = {
-          alignment: {horizontal: 'right', vertical: 'center'},
-          border: {
-            left: {style: 'hair', color: {auto: 1}},
-            right: {style: 'hair', color: {auto: 1}},
-            top: {style: 'hair', color: {auto: 1}},
-            bottom: {style: 'thick', color: {auto: 1}}
-          },
-          fill: {fgColor: {rgb: 'f2f2f2'}}
-        };
-      }
-
-      //Rows don't seem to be zero indexed. This is the hard code for justification of the header
-      let cellAddress = XLSX.utils.encode_cell({c: 0, r: 2});
-      currentSheet[cellAddress].s = {
-        alignment: {horizontal: 'right', vertical: 'center'},
-        border: {
-          left: {style: 'hair', color: {auto: 1}},
-          right: {style: 'hair', color: {auto: 1}},
-          top: {style: 'hair', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
-        },
-        fill: {fgColor: {rgb: 'f2f2f2'}}
-      };
-
-      //Rows don't seem to be zero indexed. This is the hard code for justification of the header
-      cellAddress = XLSX.utils.encode_cell({c: 0, r: 3});
-      currentSheet[cellAddress].s = {
-        alignment: {horizontal: 'right', vertical: 'center'},
-        border: {
-          left: {style: 'hair', color: {auto: 1}},
-          right: {style: 'hair', color: {auto: 1}},
-          top: {style: 'hair', color: {auto: 1}},
-          bottom: {style: 'thick', color: {auto: 1}}
-        },
-        fill: {fgColor: {rgb: 'f2f2f2'}}
-      };
+      // Add the worksheet to the workbook.
+      workbook.SheetNames.push(modelTable);
+      workbook.Sheets[modelTable] = worksheet;
 
     }
 
-
-    /*HARD CODED FORMATTING*/
-
-
     return workbook;
   }
-
 
   _datenum(v, date1904) {
     if(date1904) v+=1462;
@@ -285,7 +230,7 @@ export default class extends Runner {
   }
 
   _toSheet(data, opts) {
-    var workSheet = {};
+    var worksheet = {};
     var range = {s: {c:10000000, r:10000000}, e: {c:0, r:0 }};
     for(var R = 0; R != data.length; ++R) {
       for(var C = 0; C != data[R].length; ++C) {
@@ -297,19 +242,18 @@ export default class extends Runner {
         if(cell.v == null) continue;
         var cell_ref = XLSX.utils.encode_cell({c:C,r:R});
 
-        if(typeof cell.v === 'number') cell.t = 'n';
+        if(jQuery.isNumeric(cell.v)) cell.t = 'n';
         else if(typeof cell.v === 'boolean') cell.t = 'b';
         else if(cell.v instanceof Date) {
           cell.t = 'n'; cell.z = XLSX.SSF._table[14];
           cell.v = this._datenum(cell.v);
         }
         else cell.t = 's';
-
-        workSheet[cell_ref] = cell;
+        worksheet[cell_ref] = cell;
       }
     }
-    if(range.s.c < 10000000) workSheet['!ref'] = XLSX.utils.encode_range(range);
-    return workSheet;
+    if(range.s.c < 10000000) worksheet['!ref'] = XLSX.utils.encode_range(range);
+    return worksheet;
   }
 
   //creates a single extended header TSV based on the table

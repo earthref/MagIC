@@ -5,6 +5,7 @@ import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
 import saveAs from 'save-as';
+import XLSX from 'xlsx-style';
 import {default as versions} from '../configs/magic_versions';
 import {default as models} from '../configs/data_models/data_models';
 import ParseContribution from '../actions/parse_contribution';
@@ -205,6 +206,21 @@ export default class extends React.Component {
     const exporter = new ExportContribution({});
     const blob = new Blob([JSON.stringify(this.upgrader.json, null, '\t')], {type: "text/plain;charset=utf-8"});
     saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.json');
+  }
+
+  saveExcel() {
+    const Exporter = new ExportContribution({});
+    const workbook = Exporter.toExcel(this.upgrader.json);
+
+    // Prepare the workbook for output.
+    const workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});
+    const workbookBuffer = new ArrayBuffer(workbookBinary.length);
+    const workbookEncoded = new Uint8Array(workbookBuffer);
+    for (var i=0; i!=workbookBinary.length; ++i)
+      workbookEncoded[i] = workbookBinary.charCodeAt(i) & 0xFF;
+    const workbookBlob = new Blob([workbookBuffer], {type: 'application/octet-stream'});
+
+    saveAs(workbookBlob, 'Upgraded Contribution v' + _.last(versions) + '.xlsx');
   }
 
   render() {
@@ -537,7 +553,7 @@ export default class extends React.Component {
                   <div className="ui basic segment">
                     <div className="ui three column middle aligned very relaxed stackable grid">
                       <div className="column">
-                        <button className="ui fluid icon large disabled button">
+                        <button className="ui fluid icon large button" onClick={this.saveExcel.bind(this)}>
                           Excel Spreadsheet
                         </button>
                       </div>
