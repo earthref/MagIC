@@ -64,53 +64,33 @@ describe('magic.actions.parse_contribution', () => {
     });
   });
 
-  // Test getting version from invalid strings.
-  describe('when getting version from invalid JSON', () => {
-    it('should warn about getting version from an empty object', () => {
-      getContributionVersionWarningTest(null, /the first argument .* is empty/i);
-      getContributionVersionWarningTest(undefined, /the first argument .* is empty/i);
-      getContributionVersionWarningTest({}, /the first argument .* is empty/i);
-    });
-
-    it('should reject when the "contribution" table does not have exactly one row.', () => {
-      const jsonContribTwoRows = {
-        contribution: [{
-          magic_version: '2.2'
-        }, {
-          magic_version: '2.3'
-        }]
-      };
-      getContributionVersionErrorTest(jsonContribTwoRows,
-        /table does not have exactly one row./i);
-    });
-
-    it('should reject if the data model version is invalid.', () => {
-      const invalidMagicVersion = {
-        contribution: [{
-          magic_version: '0.1'
-        }]
-      };
-      getContributionVersionErrorTest(invalidMagicVersion,
-        /data model version .* is invalid/i);
-    });
-
-  });
-
   // Test parsing valid strings.
   describe('when parsing valid strings', () => {
 
     it('should keep numbers as strings', () => {
+      const text = `tab\tcontribution
+                    magic_version
+                    3.0
+                    >>>>>>>>>>>
+                    tab\ttable
+                    col1\tcol2
+                    str1\t1.2`;
       const json = {
+        contribution: [{ magic_version: '3.0' }],
         table: [{
           col1: 'str1',
           col2: '1.2'
         }]
       };
-      return parseContributionJSONTest('tab\ttable\ncol1\tcol2\nstr1\t1.2', json);
+      return parseContributionJSONTest(text, json);
     });
 
     it('should keep measurements as a table', () => {
-      const text = `tab\tMAGIC_measurements
+      const text = `tab\tcontribution
+                    magic_version
+                    3.0
+                    >>>>>>>>>>>
+                    tab\tMAGIC_measurements
                     col1\tcol2
                     str1\t1.1
                     str2\t1.2
@@ -119,6 +99,7 @@ describe('magic.actions.parse_contribution', () => {
                     col1\tcol2
                     str1\t1.2`;
       const json = {
+        contribution: [{ magic_version: '3.0' }],
         magic_measurements: {
           columns: ['col1', 'col2'],
           rows: [
@@ -137,50 +118,57 @@ describe('magic.actions.parse_contribution', () => {
     });
 
     it('should eliminate blank lines and leading/trailing spaces', () => {
-      const withBlanks = [
-        '\ntab\ttable\ncol1\tcol2\nstr1\t1.2',
-        'tab delimited \ttable\ncol1\tcol2\n\n\nstr1\t1.2',
-        ' tab\ttable\ncol1\tcol2\nstr1\t1.2',
-        'tab any_non_tab_string\ttable\ncol1\tcol2\nstr1\t1.2',
-        'tab any_non_tab_string\ttable\ncol1\tcol2\nstr1\t1.2',
-        'tab\t  table\ncol1\tcol2\nstr1\t1.2',
-        'tab\ttable\ncol1  \tcol2\n  str1\t1.2  '
+      const texts = [
+        '\ntab\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
+        'tab delimited \tcontribution\nmagic_version\tdoi\n\n\n3.0\t1.2',
+        ' tab\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
+        'tab any_non_tab_string\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
+        'tab any_non_tab_string\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
+        'tab\t  contribution\nmagic_version\tdoi\n3.0\t1.2',
+        'tab\tcontribution\nmagic_version  \tdoi\n  3.0\t1.2  '
       ];
       const json = {
-        table: [{
-          col1: 'str1',
-          col2: '1.2'
+        contribution: [{
+          magic_version: '3.0',
+          doi: '1.2'
         }]
       };
-      return Promise.all(withBlanks.map(withBlank =>
-        parseContributionJSONTest(withBlank, json)
+      return Promise.all(texts.map(text =>
+        parseContributionJSONTest(text, json)
       ));
     });
 
     it('should handle empty columns', () => {
-      const withEmptyColumns = [
-        'tab\ttable\nempty\tcol1\tcol2\n\tstr1\t1.2\n\tstr2\t1.0',
-        'tab\ttable\ncol1\tempty\tcol2\nstr1\t\t1.2\nstr2\t\t1.0',
-        'tab\ttable\ncol1\tcol2\tempty\nstr1\t1.2\t\nstr2\t1.0\t'
+      const texts = [
+        `tab\tcontribution
+         \tmagic_version\tdoi
+         \t3.0\t1.2`,
+        `tab\tcontribution
+         magic_version\t\tdoi
+         3.0\t\t1.2`,
+        `tab\tcontribution
+         magic_version\tdoi\tempty_column
+         3.0\t1.2\t`
       ];
       const json = {
-        table: [{
-          col1: 'str1',
-          col2: '1.2'
-        }, {
-          col1: 'str2',
-          col2: '1.0'
+        contribution: [{
+          magic_version: '3.0',
+          doi: '1.2'
         }]
       };
-      return Promise.all(withEmptyColumns.map(withEmptyColumn =>
-        parseContributionJSONTest(withEmptyColumn, json)
+      return Promise.all(texts.map(text =>
+        parseContributionJSONTest(text, json)
       ));
     });
 
     it('should combine rows', () => {
-      const partial1 = 'tab\ttable\ncol1\tcol2\nstr1\t1.2';
-      const partial2 = 'tab\ttable\ncol1\tcol2\nstr2\t1.0';
+      const partial1 = 'tab\tcontribution\nmagic_version\n3.0';
+      const partial2 = 'tab\ttable\ncol1\tcol2\nstr1\t1.2';
+      const partial3 = 'tab\ttable\ncol1\tcol2\nstr2\t1.0';
       const json = {
+        contribution: [{
+          magic_version: '3.0'
+        }],
         table: [{
           col1: 'str1',
           col2: '1.2'
@@ -189,16 +177,15 @@ describe('magic.actions.parse_contribution', () => {
           col2: '1.0'
         }]
       };
-      return parseContributionsJSONTest([partial1, partial2], json);
+      return parseContributionsJSONTest([partial1, partial2, partial3], json);
     });
 
     it('should combine tables', () => {
-      const partial1 = 'tab\ttable1\ncol1\tcol2\nstr1\t1.2';
+      const partial1 = 'tab\tcontribution\nmagic_version\n3.0';
       const partial2 = 'tab\ttable2\ncol1\tcol2\nstr2\t1.0';
       const json = {
-        table1: [{
-          col1: 'str1',
-          col2: '1.2'
+        contribution: [{
+          magic_version: '3.0'
         }],
         table2: [{
           col1: 'str2',
@@ -222,6 +209,83 @@ describe('magic.actions.parse_contribution', () => {
       return parseContributionNoErrorTest(contribution10507);
     });
   });
+
+  // Test getting version from invalid strings.
+  describe('when getting data model version from invalid JSON', () => {
+    it('should warn about getting version from an empty object', () => {
+      getContributionVersionWarningTest(null, /the first argument .* is empty/i);
+      getContributionVersionWarningTest(undefined, /the first argument .* is empty/i);
+      getContributionVersionWarningTest({}, /the first argument .* is empty/i);
+    });
+
+    it('should reject when the "contribution" table does not have exactly one row.', () => {
+      const json = {
+        contribution: [{
+          magic_version: '2.2'
+        }, {
+          magic_version: '2.3'
+        }]
+      };
+      getContributionVersionErrorTest(json,
+        /table does not have exactly one row./i);
+    });
+
+    it('should reject if the data model version is invalid.', () => {
+      const json = {
+        contribution: [{
+          magic_version: '0.1'
+        }]
+      };
+      getContributionVersionErrorTest(json,
+        /data model version .* is invalid/i);
+    });
+
+  });
+
+  // Test getting the contribution MagIC Data Model version.
+  describe('when getting data model version from valid JSON', () => {
+
+    it('should get the data model version', () => {
+      const json = {
+        contribution: [{
+          magic_version: '3.0'
+        }]
+      };
+      return getContributionVersionTest(json, '3.0');
+    });
+
+    it('should guess the data model version is 3.0', () => {
+      const json = {
+        locations: [{
+          location: 'A'
+        }],
+        measurements: {
+          columns: ['number', 'experiment'],
+          rows: [
+            ['1','A']
+          ]
+        }
+      };
+      return guessContributionVersionTest(json, '3.0');
+    });
+
+    it('should guess the data model version is 2.5', () => {
+      const json = {
+        er_locations: [{
+          er_location_name: 'A'
+        }],
+        magic_measurements: {
+          columns: ['measurement_number', 'magic_experiment_name'],
+          rows: [
+            ['1','A']
+          ]
+        }
+      };
+      return guessContributionVersionTest(json, '2.5');
+    });
+
+  });
+
 });
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
@@ -283,6 +347,14 @@ const getContributionVersionErrorTest = (json, reErrorMsg) => {
   console.log(parser.errors());
   expect(parser.errors().length).to.be.at.least(1);
   expect(_.find(parser.errors(), error => error.message.match(reErrorMsg))).to.not.be.undefined;
+};
+
+// Expect the version to be retrieved correctly.
+const getContributionVersionTest = (json, versionExpected) => {
+  const parser = new ParseContribution({});
+  let version = parser.getVersion(json);
+  expect(parser.isVersionGuessed).to.be.false;
+  expect(version).to.equal(versionExpected);
 };
 
 // Expect the version to be guessed correctly.
