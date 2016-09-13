@@ -44,7 +44,6 @@ export default class extends React.Component {
     this.files = [];
     this.parser.reset();
     this.upgrader.reset();
-    this.validator.reset();
     this.setState(this.initialState);
     // TODO: cancel active reading or parsing
   }
@@ -564,29 +563,64 @@ export default class extends React.Component {
               </div>
               {(this.state.isUpgraded && nUpgradeErrors === 0 ?
                 <div>
-                  <h4 className="ui horizontal divider header">
-                    <i className="download icon"></i>
-                        <span className="content">
-                          Download the Upgraded Contribution
-                        </span>
-                  </h4>
-                  <div className="ui basic segment">
-                    <div className="ui three column middle aligned very relaxed stackable grid">
-                      <div className="column">
-                        <button className="ui fluid icon large button" onClick={this.saveExcel.bind(this)}>
-                          Excel Spreadsheet
-                        </button>
-                      </div>
-                      <div className="column">
-                        <button className="ui fluid purple icon large button" onClick={this.saveText.bind(this)}>
-                          MagIC Text File
-                        </button>
-                      </div>
-                      <div className="column">
-                        <button className="ui fluid icon large button" onClick={this.saveJSON.bind(this)}>
-                          JSON String
-                        </button>
-                      </div>
+                  <div className="ui horizontal divider">
+                    <span className="content">
+                      Next Steps
+                    </span>
+                  </div>
+                  <div className="ui five column grid">
+                    <div className="center aligned column">
+                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} onClick={this.saveExcel.bind(this)}>
+                        <i className="icons">
+                          <i className="file excel outline icon"></i>
+                        </i>
+                        <div className="content">
+                          <div className="ui purple header">Save as Excel</div>
+                        </div>
+                      </a>
+                    </div>
+                    <div className="center aligned column">
+                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}}  onClick={this.saveText.bind(this)}>
+                        <i className="icons">
+                          <i className="file text outline icon"></i>
+                        </i>
+                        <div className="content">
+                          <div className="ui purple header">Save as Text</div>
+                        </div>
+                      </a>
+                    </div>
+                    <div className="center aligned column">
+                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/validate/">
+                        <i className="icons">
+                          <i className="file text outline icon"></i>
+                          <i className="purple corner help icon" style={{fontSize:'1.5em'}}></i>
+                        </i>
+                        <div className="content">
+                          <div className="ui purple header">Validate</div>
+                        </div>
+                      </a>
+                    </div>
+                    <div className="center aligned column">
+                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upload/">
+                        <i className="icons">
+                          <i className="database icon"></i>
+                          <i className="purple corner search icon" style={{fontSize:'1.5em'}}></i>
+                        </i>
+                        <div className="content">
+                          <div className="ui purple header">Upload</div>
+                        </div>
+                      </a>
+                    </div>
+                    <div className="center aligned column">
+                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upgrade/">
+                        <i className="icons">
+                          <i className="file text outline icon"></i>
+                          <i className="purple corner arrow up icon" style={{fontSize:'1.5em'}}></i>
+                        </i>
+                        <div className="content">
+                          <div className="ui purple header">New Upgrade</div>
+                        </div>
+                      </a>
                     </div>
                   </div>
                   {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
@@ -595,12 +629,11 @@ export default class extends React.Component {
               :undefined)}
               {(this.state.fromVersion ?
                 <div>
-                  <h4 className="ui horizontal divider header">
-                    <i className="download icon"></i>
-                        <span className="content">
-                          Upgrade Details
-                        </span>
-                  </h4>
+                  <div className="ui horizontal divider">
+                    <span className="content">
+                      Upgrade Details
+                    </span>
+                  </div>
                   <div className="ui basic segment">
                     <div className="ui two column very relaxed stackable grid">
                       <div className="column">

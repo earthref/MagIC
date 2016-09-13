@@ -51,7 +51,7 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui hidden divider"></div>
-        <div className="ui five column grid">
+          <div className="ui five column grid">
           <div className="center aligned column">
             <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/search/">
               <i className="icons">

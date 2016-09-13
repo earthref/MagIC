@@ -26,7 +26,7 @@ export default class extends Runner {
     if (_.isEmpty(json)) json = this.json;
     if (_.isEmpty(json)) {
       this._appendWarning('The first argument (MagIC contribution in JSON format) is empty.');
-      return undefined;
+      return { version: undefined, isGuessed: true };
     }
     this.json = json;
 
