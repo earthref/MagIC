@@ -210,88 +210,12 @@ describe('magic.actions.parse_contribution', () => {
     });
   });
 
-  // Test getting version from invalid strings.
-  describe('when getting data model version from invalid JSON', () => {
-    it('should warn about getting version from an empty object', () => {
-      getContributionVersionWarningTest(null, /the first argument .* is empty/i);
-      getContributionVersionWarningTest(undefined, /the first argument .* is empty/i);
-      getContributionVersionWarningTest({}, /the first argument .* is empty/i);
-    });
-
-    it('should reject when the "contribution" table does not have exactly one row.', () => {
-      const json = {
-        contribution: [{
-          magic_version: '2.2'
-        }, {
-          magic_version: '2.3'
-        }]
-      };
-      getContributionVersionErrorTest(json,
-        /table does not have exactly one row./i);
-    });
-
-    it('should reject if the data model version is invalid.', () => {
-      const json = {
-        contribution: [{
-          magic_version: '0.1'
-        }]
-      };
-      getContributionVersionErrorTest(json,
-        /data model version .* is invalid/i);
-    });
-
-  });
-
-  // Test getting the contribution MagIC Data Model version.
-  describe('when getting data model version from valid JSON', () => {
-
-    it('should get the data model version', () => {
-      const json = {
-        contribution: [{
-          magic_version: '3.0'
-        }]
-      };
-      return getContributionVersionTest(json, '3.0');
-    });
-
-    it('should guess the data model version is 3.0', () => {
-      const json = {
-        locations: [{
-          location: 'A'
-        }],
-        measurements: {
-          columns: ['number', 'experiment'],
-          rows: [
-            ['1','A']
-          ]
-        }
-      };
-      return guessContributionVersionTest(json, '3.0');
-    });
-
-    it('should guess the data model version is 2.5', () => {
-      const json = {
-        er_locations: [{
-          er_location_name: 'A'
-        }],
-        magic_measurements: {
-          columns: ['measurement_number', 'magic_experiment_name'],
-          rows: [
-            ['1','A']
-          ]
-        }
-      };
-      return guessContributionVersionTest(json, '2.5');
-    });
-
-  });
-
 });
 
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const parseContributionWarningTest = (text, reWarningMsg, done) => {
   const parser = new ParseContribution({});
-  return parser.parsePromise({text: text}).then(function() {
+  return parser.parsePromise({text: text}).then(() => {
     expect(parser.warnings().length).to.be.at.least(1);
     expect(_.find(parser.warnings(), warning => warning.message.match(reWarningMsg))).to.not.be.undefined;
   });
@@ -329,38 +253,4 @@ const parseContributionsJSONTest = (texts, jsonExpected) => {
     expect(parser.errors().length).to.equal(0);
     expect(parser.json).to.deep.equal(jsonExpected);
   });
-};
-
-// Expect the warnings to contain one warning that matches the reWarningMsg regex.
-const getContributionVersionWarningTest = (json, reWarningMsg) => {
-  const parser = new ParseContribution({});
-  parser.getVersion(json);
-  expect(parser.warnings().length).to.be.at.least(1);
-  expect(_.find(parser.warnings(), warning => warning.message.match(reWarningMsg))).to.not.be.undefined;
-};
-
-// Expect the errors to contain one error that matches the reErrorMsg regex.
-const getContributionVersionErrorTest = (json, reErrorMsg) => {
-  const parser = new ParseContribution({});
-  console.log(json);
-  parser.getVersion(json);
-  console.log(parser.errors());
-  expect(parser.errors().length).to.be.at.least(1);
-  expect(_.find(parser.errors(), error => error.message.match(reErrorMsg))).to.not.be.undefined;
-};
-
-// Expect the version to be retrieved correctly.
-const getContributionVersionTest = (json, versionExpected) => {
-  const parser = new ParseContribution({});
-  let version = parser.getVersion(json);
-  expect(parser.isVersionGuessed).to.be.false;
-  expect(version).to.equal(versionExpected);
-};
-
-// Expect the version to be guessed correctly.
-const guessContributionVersionTest = (json, versionExpected) => {
-  const parser = new ParseContribution({});
-  let version = parser.getVersion(json);
-  expect(parser.isVersionGuessed).to.be.true;
-  expect(version).to.equal(versionExpected);
 };

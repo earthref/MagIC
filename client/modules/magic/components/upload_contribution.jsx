@@ -3,9 +3,7 @@ import filesize from 'filesize';
 import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
-import {default as versions} from '../configs/magic_versions';
-import {default as models} from '../configs/data_models/data_models';
-import ParseContribution from '../actions/parse_contribution.js';
+import ParseContribution from '../actions/parse_contribution';
 
 export default class extends React.Component {
 

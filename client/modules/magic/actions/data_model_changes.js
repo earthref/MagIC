@@ -8,7 +8,7 @@ import {default as magicDataModels} from '../configs/data_models/data_models';
 export default class extends Runner {
 
   constructor({LocalState}) {
-    super('DATA_MODEL_CHANGE_LOG', {LocalState});
+    super({LocalState});
 
     //model changes that must be reflected:
     //deleted, inserted, renamed, merged

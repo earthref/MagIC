@@ -3,7 +3,7 @@ import jQuery from 'jquery';
 import moment from 'moment-timezone';
 import Promise from 'bluebird';
 import Runner from '../../er/actions/runner';
-import ParseContribution from './parse_contribution';
+import ValidateContribution from './validate_contribution';
 
 import {default as versions} from '../configs/magic_versions';
 import {default as models} from '../configs/data_models/data_models';
@@ -11,10 +11,11 @@ import {default as models} from '../configs/data_models/data_models';
 // This class upgrades the json data from its current model to the newest model if a newer model is available.
 export default class extends Runner {
 
-  constructor({LocalState}) {
-    super('UPGRADE_CONTRIBUTION', {LocalState});
-    this.parser = new ParseContribution({LocalState});
-    this.reset();
+  constructor({runnerState}) {
+    super({runnerState});
+    runnerState = this.runnerState;
+    this.validator = new ValidateContribution({runnerState});
+    this.initialize();
 
     // Make a list of unique composite keys for each table.
     this.mergeKeys = {
@@ -31,7 +32,12 @@ export default class extends Runner {
 
   reset() {
     super.reset();
+    this.validator.reset();
+    this.initialize();
+    console.log('upgrade reset');
+  }
 
+  initialize() {
     this.jsonOld = undefined;
     this.versionOld = undefined;
     this.modelOld = undefined;
@@ -41,6 +47,7 @@ export default class extends Runner {
     this.modelNew = undefined;
 
     this.json = {};
+    this.version = undefined;
     this.upgradeMap = {};
 
     this.progress = 0;
@@ -53,29 +60,32 @@ export default class extends Runner {
     this.undefinedTableColumnErrors = {};
     this.deletedTableColumnWarnings = {};
   }
-  
+
   // Upgrade a contribution to its next MagIC data model version.
   // The input JSON can be assumed to be the entire contribution.
   // The upgrade happens in two stages: map column names and then merge rows.
   upgradePromise({json = undefined, nRowsBetweenProgressEvents = 1000, onProgress = undefined} = {}) {
 
     this.reset();
-    this.jsonOld = json;
     this.nRowsBetweenProgressEvents = nRowsBetweenProgressEvents;
     this.onProgress = onProgress;
 
+    // Retrieve the data model version used in the json.
+    let { version, isGuessed } = this.validator.getVersion(json);
+    this.json = json;
+    this.version = version;
+
+    // If the data model version could not be found or guessed, stop here.
+    if (!this.version)
+      return Promise.resolve();
+
+    this.jsonOld = json;
+    this.versionOld = version;
     return this._mapPromise().then(this._mergePromise.bind(this));
 
   }
 
   _mapPromise() {
-
-    // Retrieve the data model version used in the json.
-    this.versionOld = this.parser.getVersion(this.jsonOld);
-
-    // If the data model version could not be found or guessed, stop here.
-    if (!this.versionOld)
-      return Promise.resolve();
 
     // Make a list of versions after the current version up to the newest version.
     const versionsToNewest = _.takeRightWhile(versions, v => {return (v !== this.versionOld)});
@@ -85,10 +95,8 @@ export default class extends Runner {
     const versionPercentProgress = 50 / versionsToNewest.length;
     return Promise.each(versionsToNewest, (versionNew, versionIdx) => {
 
-      this.versionNew = versionNew;
-      //console.log('upgrading', this.versionOld, 'to', this.versionNew);
-
       // Retrieve the data models and create the upgrade map.
+      this.versionNew = versionNew;
       this.modelOld = models[this.versionOld];
       this.modelNew = models[this.versionNew];
       this.upgradeMap = this.getUpgradeMap(this.modelNew);
@@ -98,6 +106,17 @@ export default class extends Runner {
        for (let c in this.upgradeMap[t])
        if (this.upgradeMap[t][c].length > 1 && t != 'pmag_results' && t != 'rmag_results')
        console.log(t, c, this.upgradeMap[t][c]);*/
+
+      const rowsTotal = _.reduce(this.jsonOld, (rowsTotal, table) => {
+        return rowsTotal + (table.rows ? table.rows.length : table.length);
+      }, 0);
+
+      const modelTables = _.orderBy(_.keys(this.modelOld['tables']), (t) => {
+        return this.modelOld['tables'][t].position;
+      }, 'asc');
+      const tables = _.union(_.intersection(modelTables, _.keys(this.jsonOld)), _.keys(this.jsonOld));
+      if (tables.length === 0)
+        return Promise.resolve();
 
       // Handle special cases when upgrading from 2.5 to 3.0 tables.
       if (this.versionNew === '3.0') {
@@ -138,17 +157,6 @@ export default class extends Runner {
         this.newMethodCodes['ST-VV-Q7'] = 'ST-VVQ-7';
 
       }
-
-      const rowsTotal = _.reduce(this.jsonOld, (rowsTotal, jsonTableOld) => {
-        return rowsTotal + jsonTableOld.length;
-      }, 0);
-
-      const modelTables = _.orderBy(_.keys(this.modelOld['tables']), (t) => {
-        return this.modelOld['tables'][t].position;
-      }, 'asc');
-      const tables = _.union(_.intersection(modelTables, _.keys(this.jsonOld)), _.keys(this.jsonOld));
-      if (tables.length === 0)
-        return Promise.resolve();
 
       let rowProgressCounter = 0;
       return Promise.each(tables, jsonTableOld => {
@@ -197,7 +205,6 @@ export default class extends Runner {
             }
             this.jsonOld['er_expeditions'] = expeditionsNew;
           }
-
 
           // Split tilt stratigraphic/corrected/uncorrected directions.
           if (jsonTableOld === 'pmag_results') {
@@ -1013,7 +1020,9 @@ export default class extends Runner {
     //console.log('merging', this.json);
 
     // For each table in the contribution:
-    const rowsTotal = _.reduce(this.json, (rowsTotal, table) => rowsTotal + table.length, 0);
+    const rowsTotal = _.reduce(this.json, (rowsTotal, table) => {
+      return rowsTotal + (table.rows ? table.rows.length : table.length);
+    }, 0);
     let rowProgressCounter = 0;
 
     const tables = _.keys(this.json);
@@ -1026,7 +1035,7 @@ export default class extends Runner {
 
       // Skip tables that don't have rows to merge.
       if (table === 'measurements' || table === 'contribution') {
-        rowProgressCounter += this.json[table].length;
+        rowProgressCounter += (this.json[table].rows ? this.json[table].rows.length : this.json[table].length);
         this.progress = 50 + (50 * rowProgressCounter / rowsTotal);
         if (this.onProgress) this.onProgress(this.progress);
         //console.log('merge progress', this.progress);

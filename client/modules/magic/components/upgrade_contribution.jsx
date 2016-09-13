@@ -10,6 +10,7 @@ import {default as versions} from '../configs/magic_versions';
 import {default as models} from '../configs/data_models/data_models';
 import ParseContribution from '../actions/parse_contribution';
 import UpgradeContribution from '../actions/upgrade_contribution';
+import ValidateContribution from '../actions/validate_contribution';
 import ExportContribution from '../actions/export_contribution';
 
 export default class extends React.Component {
@@ -43,6 +44,7 @@ export default class extends React.Component {
     this.files = [];
     this.parser.reset();
     this.upgrader.reset();
+    this.validator.reset();
     this.setState(this.initialState);
     // TODO: cancel active reading or parsing
   }
@@ -165,33 +167,36 @@ export default class extends React.Component {
 
   upgrade(fromVersion) {
 
-    // Check if the user has overridden the contribution version
-    if (fromVersion === undefined) {
-      fromVersion = this.parser.getVersion();
+    // Override the contribution version.
+    if (fromVersion !== undefined) {
+      if (!this.parser.json.contribution || this.parser.json.contribution.length === 0)
+        this.parser.json.contribution = [{}];
+      this.parser.json.contribution[0]['magic_version'] = fromVersion;
+
     }
+
+    // Otherwise retrieve or guess the contribution version.
+    else {
+      let validator = new ValidateContribution({});
+      let {version} = validator.getVersion(this.parser.json);
+      fromVersion = version;
+    }
+
+    // Upgrade the contribution.
     this.setState({
-      processingStep: 3, 
+      processingStep: 3,
       visibleStep: 3,
       fromVersion: fromVersion
     });
-    if (fromVersion === undefined) return;
-
-    // Override the contribution version.
-    let jsonParsed = this.parser.json;
-    if (!jsonParsed.contribution || jsonParsed.contribution.length === 0)
-      jsonParsed.contribution = [{}];
-    jsonParsed.contribution[0]['magic_version'] = fromVersion;
-
-    // Upgrade the contribution.
     this.upgrader.upgradePromise({
-      json: jsonParsed,
+      json: this.parser.json,
       onProgress: (percent) => {
         this.setState({upgradeProgress: percent});
       }
     }).then(() => {
-      this.setState({isUpgraded: true});
-      console.log('upgrade warnings', this.upgrader.warnings());
-      console.log('upgrade errors', this.upgrader.errors());
+      this.setState({
+        isUpgraded: true
+      });
     });
 
   }
@@ -227,10 +232,21 @@ export default class extends React.Component {
     const step = this.state.visibleStep;
     const fromVersion = this.state.fromVersion;
     const toVersion = _.last(versions)
+
     const nTables = _.size(this.upgrader.json);
+    const strTables = numeral(nTables).format('0,0') + ' Table' + (nTables === 1 ? '' : 's');
+
+    const nRows = _.reduce(this.upgrader.json, (rowsTotal, table) => {
+      return rowsTotal + (table.rows ? table.rows.length : table.length);
+    }, 0);
+    const strRows = numeral(nRows).format('0,0') + ' Row' + (nRows === 1 ? '' : 's');
+
     const nUpgradeWarnings = this.upgrader.warnings().length;
+    const strUpgradeWarnings = numeral(nUpgradeWarnings).format('0,0') + ' Upgrade Warning' + (nUpgradeWarnings === 1 ? '' : 's');
+
     const nUpgradeErrors = this.upgrader.errors().length;
-    const nRows = _.reduce(this.upgrader.json, (sum, value) => { return sum + value.length; }, 0);
+    const strUpgradeErrors = numeral(nUpgradeErrors).format('0,0') + ' Upgrade Error' + (nUpgradeErrors === 1 ? '' : 's');
+
     return (
       <div className="upgrade-contribution">
         <div className="ui top attached stackable three steps">
@@ -362,14 +378,14 @@ export default class extends React.Component {
                           <i className="file icons">
                             <i className="fitted file text outline icon"></i>
                             {(fileHasErrors ? <i className="corner red warning circle icon"></i>
-                              : (fileHasWarnings ? <i className="corner yellow warning circle icon"></i>
+                              : (fileHasWarnings ? <i className="corner yellow warning sign icon"></i>
                               : undefined )
                             )}
                           </i>
                         </div>
                       </div>
                       <div className="content">
-                        <div className="ui header">
+                        <h3 className="ui header">
                           {file.name + ' '}
                           <div className="ui horizontal label">{filesize(file.size)}</div>
                           {(file.readErrors && file.readErrors.length > 0 ?
@@ -387,7 +403,7 @@ export default class extends React.Component {
                               {numeral(file.parseWarnings.length).format('0,0') + ' Parse Warning' + (file.parseWarnings.length === 1 ? '' : 's')}
                             </div>
                           : undefined)}
-                        </div>
+                        </h3>
                         <div className="description">
                           <div className="ui grid">
                             <div className="two column row">
@@ -464,18 +480,18 @@ export default class extends React.Component {
                       </div>
                       <i className="file icons">
                         <i className="fitted file text outline icon"></i>
-                        {(this.upgrader.errors().length > 0 ? <i className="corner red warning circle icon"></i>
-                          : (this.upgrader.warnings().length > 0 ? <i className="corner yellow warning circle icon"></i>
+                        {(nUpgradeErrors > 0 ? <i className="corner red warning circle icon"></i>
+                          : (nUpgradeWarnings > 0 ? <i className="corner yellow warning sign icon"></i>
                           : undefined )
                         )}
                       </i>
                     </div>
                   </div>
                   <div className="content">
-                    <div className="ui header">
+                    <h3 className="ui header">
                       <span>Upgrading from </span>
                       <div ref="from version"
-                           className={(fromVersion ? '' : 'error ') + 'ui inline dropdown'}>
+                           className={(fromVersion ? 'black ' : 'red ') + 'ui inline dropdown compact basic icon button'}>
                         <div className="text">
                           {fromVersion || 'Unknown'}
                         </div>
@@ -494,47 +510,51 @@ export default class extends React.Component {
                       <span> to {toVersion} </span>
                       {(this.state.isUpgraded || nTables > 0 || nRows > 0 ?
                         <a className="ui horizontal label">
-                          {numeral(nRows).format('0,0') + ' Row' + (nRows === 1 ? '' : 's')}
+                          {strRows}
                           <span> in </span>
-                          {numeral(nTables).format('0,0') + ' Table' + (nTables === 1 ? '' : 's')}
+                          {strTables}
                         </a>
                       : undefined)}
-                      {(this.state.isUpgraded && this.upgrader.errors().length > 0 ?
-                        <div className="ui horizontal red label">
-                          {numeral(this.upgrader.errors().length).format('0,0') + ' Upgrade Error' + (this.upgrader.errors().length === 1 ? '' : 's')}
-                        </div>
-                        : undefined)}
-                      {(this.state.isUpgraded && this.upgrader.warnings().length > 0 ?
-                        <div className="ui horizontal yellow label">
-                          {numeral(this.upgrader.warnings().length).format('0,0') + ' Upgrade Warning' + (this.upgrader.warnings().length === 1 ? '' : 's')}
-                        </div>
-                        : undefined)}
-                    </div>
+                    </h3>
                     <div className="description">
-                      <div className={(this.upgrader.errors().length ? 'error ' : '') + 'ui tiny purple progress'}
+                      <div className={(nUpgradeErrors ? 'error ' : '') + 'ui tiny purple progress'}
                            data-percent={this.state.upgradeProgress}>
                         <div className="bar"></div>
                         <div className="label">Upgrade</div>
                       </div>
                     </div>
-                    {(this.upgrader.warnings().length || this.upgrader.errors().length ?
+                    {(nUpgradeErrors ?
                       <div className="extra" style={{marginTop: '2em'}}>
-                        <table className="ui compact table">
+                        <table className="ui compact small inverted red table">
                           <tbody>
-                          {this.upgrader.errors().map((error, j) => {
-                            return (
-                              <tr key={j} className="error">
-                                <td>{error.message}</td>
-                              </tr>
-                            );
-                          })}
-                          {this.upgrader.warnings().map((warning, j) => {
-                            return (
-                              <tr key={j} className="warning">
-                                <td>{warning.message}</td>
-                              </tr>
-                            );
-                          })}
+                            <tr>
+                              <td><i className="warning circle icon"></i><b>{strUpgradeErrors}</b></td>
+                            </tr>
+                            {this.upgrader.errors().map((error, j) => {
+                              return (
+                                <tr key={j} className="error">
+                                  <td>{error.message}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                      : undefined)}
+                    {(nUpgradeWarnings ?
+                      <div className="extra" style={{marginTop: '2em'}}>
+                        <table className="ui compact small inverted yellow table">
+                          <tbody>
+                            <tr>
+                              <td><i className="warning sign icon"></i><b>{strUpgradeWarnings}</b></td>
+                            </tr>
+                            {this.upgrader.warnings().map((warning, j) => {
+                              return (
+                                <tr key={j} className="warning">
+                                  <td>{warning.message}</td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -542,7 +562,7 @@ export default class extends React.Component {
                   </div>
                 </div>
               </div>
-              {(this.state.isUpgraded && this.upgrader.errors().length === 0 ?
+              {(this.state.isUpgraded && nUpgradeErrors === 0 ?
                 <div>
                   <h4 className="ui horizontal divider header">
                     <i className="download icon"></i>
@@ -595,8 +615,9 @@ export default class extends React.Component {
                           {_.sortBy(_.keys(models[this.state.fromVersion].tables),
                             (t) => { return models[this.state.fromVersion].tables[t].position; }
                           ).map((t,i) => {
+                            let json = this.parser.json;
                             const tableName = models[this.state.fromVersion].tables[t].label;
-                            const nRows = (this.parser.json && this.parser.json[t] ? this.parser.json[t].length : 0);
+                            const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
                             return (nRows > 0 ?
                               <tr key={i}>
                                 <td><h4>{tableName}</h4></td>
@@ -622,9 +643,9 @@ export default class extends React.Component {
                           {_.sortBy(_.keys(models[toVersion].tables),
                             (t) => { return models[toVersion].tables[t].position; }
                           ).map((t,i) => {
-                            //console.log(models[toVersion].tables[t], (this.upgrader.json && this.upgrader.json[t] ? this.upgrader.json[t] : ''))
+                            let json = this.upgrader.json;
                             const tableName = models[toVersion].tables[t].label;
-                            const nRows = (this.upgrader.json && this.upgrader.json[t] ? this.upgrader.json[t].length : 0);
+                            const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
                             return (nRows > 0 ?
                               <tr key={i}>
                                 <td><h4>{tableName}</h4></td>
@@ -671,7 +692,7 @@ export default class extends React.Component {
         : undefined)}
         {(step === 2 && this.state.totalReadErrors + this.state.totalParseErrors === 0 && this.state.totalParseWarnings > 0 ?
           <div className="ui bottom attached icon warning message">
-            <i className="warning circle icon"></i>
+            <i className="warning sign icon"></i>
             <div className="content">
               Reading and parsing
               {this.files.length === 1 ? ' this file ' : ' these files '}
@@ -706,7 +727,7 @@ export default class extends React.Component {
           : undefined)}
         {(step === 3 && fromVersion === undefined ?
           <div className="ui bottom attached icon error message">
-            <i className="warning circle icon"></i>
+            <i className="warning sign icon"></i>
             <div className="content">
               The <em>MagIC Data Model version</em> could not be determined from the parsed
               {this.files.length === 1 ? ' file' : ' files'}.
@@ -718,7 +739,7 @@ export default class extends React.Component {
           <div className="ui bottom attached icon message">
             <i className="purple info circle icon"></i>
             <div className="content">
-              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} ...
+              Upgrading the contribution from MagIC Data Model version <b>{fromVersion}</b> to <b>{toVersion}</b> ...
             </div>
           </div>
           : undefined)}
@@ -726,9 +747,9 @@ export default class extends React.Component {
           <div className="ui bottom attached icon error message">
             <i className="warning circle icon"></i>
             <div className="content">
-              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} failed
-              to complete because of {numeral(nUpgradeErrors).format('0,0')}
-              {' error' + (nUpgradeErrors === 1 ? '' : 's') + '.'}
+              Upgrading the contribution from MagIC Data Model
+              version <b>{fromVersion}</b> to <b>{toVersion}</b> failed to complete because
+              of <b>{strUpgradeErrors}</b>.
             </div>
           </div>
           : undefined)}
@@ -736,9 +757,9 @@ export default class extends React.Component {
           <div className="ui bottom attached icon success message">
             <i className="check circle icon"></i>
             <div className="content">
-              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} completed
-              successfully with {numeral(nUpgradeWarnings).format('0,0')}
-              {' warning' + (nUpgradeWarnings === 1 ? '' : 's') + '.'}
+              Upgrading the contribution from MagIC Data Model
+              version <b>{fromVersion}</b> to <b>{toVersion}</b> completed successfully
+              with <b>{strUpgradeWarnings}</b>.
             </div>
           </div>
           : undefined)}
@@ -746,8 +767,8 @@ export default class extends React.Component {
           <div className="ui bottom attached icon success message">
             <i className="check circle icon"></i>
             <div className="content">
-              Upgrading the contribution from MagIC Data Model version {fromVersion} to {toVersion} completed
-              successfully.
+              Upgrading the contribution from MagIC Data Model
+              version <b>{fromVersion}</b> to <b>{toVersion}</b> completed successfully.
             </div>
           </div>
           : undefined)}

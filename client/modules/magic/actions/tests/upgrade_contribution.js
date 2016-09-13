@@ -1,9 +1,10 @@
 const {describe, it} = global;
-import _ from 'lodash';
 import {expect} from 'chai';
+import _ from 'lodash';
 import Promise from 'bluebird';
-import ParseContribution from '../parse_contribution.js';
-import UpgradeContribution from '../upgrade_contribution.js';
+import ParseContribution from '../parse_contribution';
+import UpgradeContribution from '../upgrade_contribution';
+import ValidateContribution from '../validate_contribution';
 import {default as contribution10507} from './files/contributions/10507';
 
 describe('magic.actions.upgrade_contribution', () => {
@@ -231,6 +232,21 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return upgradeContributionJSONTest(jsonOld, jsonNew);
+    });
+
+    it('should warn about guessing the data model version', () => {
+      const jsonOld = {
+        locations: [{
+          location: 'A'
+        }],
+        measurements: {
+          columns: ['number', 'experiment'],
+          rows: [
+            ['1','A']
+          ]
+        }
+      };
+      return upgradeContributionWarningTest(jsonOld, /guessed that the contribution is using/i);
     });
 
   });
@@ -1751,6 +1767,10 @@ describe('magic.actions.upgrade_contribution', () => {
 // Expect the warnings to contain one warning that matches the reWarningMsg regex.
 const upgradeContributionWarningTest = (jsonOld, reWarningMsg) => {
   const upgrader = new UpgradeContribution({});
+  //let runnerState = upgrader.runnerState;
+  //const validator1 = new ValidateContribution({runnerState});
+  //const validator2 = new ValidateContribution({});
+  //validator1.getVersion(jsonOld);
   return upgrader.upgradePromise({json: jsonOld}).then(() => {
     expect(upgrader.warnings().length).to.be.at.least(1);
     expect(_.find(upgrader.warnings(), warning => warning.message.match(reWarningMsg))).to.not.be.undefined;

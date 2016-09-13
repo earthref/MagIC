@@ -1,6 +1,5 @@
 import React from 'react';
 import Dropzone from 'react-dropzone';
-import {parseContribution} from '../actions/parse_contribution.js';
 
 export default class extends React.Component {
 

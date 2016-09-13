@@ -1,43 +1,35 @@
 export default class {
 
-  constructor(name, {LocalState}) {
-
-    if (LocalState === undefined) LocalState = new Map();
-
-    this.name = name.toUpperCase();
-    this.LocalState = LocalState;
-
-    this.reset();
-
+  constructor({runnerState}) {
+    if (runnerState === undefined) runnerState = {};
+    this.runnerState = runnerState;
+    this.runnerState['_runner_errors'  ] = [];
+    this.runnerState['_runner_warnings'] = [];
   }
 
   reset() {
-    this.LocalState.set(`${this.name}_ERRORS`, []);
-    this.LocalState.set(`${this.name}_WARNINGS`, []);
+    this.runnerState['_runner_errors'  ] = [];
+    this.runnerState['_runner_warnings'] = [];
   }
 
   warnings() {
-    return this.LocalState.get(`${this.name}_WARNINGS`);
+    return this.runnerState['_runner_warnings'];
   }
 
   errors() {
-    return this.LocalState.get(`${this.name}_ERRORS`);
+    return this.runnerState['_runner_errors'];
   }
 
   _appendWarning(warningMessage) {
-    const warnings = this.LocalState.get(`${this.name}_WARNINGS`);
-    const warning = {lineNumber:this.lineNumber, message:warningMessage};
+    const warning = {lineNumber: this.lineNumber, message: warningMessage};
     console.warn('WARNING: ', warningMessage);
-    warnings.push(warning);
-    this.LocalState.set(`${this.name}_WARNINGS`, warnings);
+    this.runnerState['_runner_warnings'].push(warning);
   }
 
   _appendError(errorMessage) {
-    const errors = this.LocalState.get(`${this.name}_ERRORS`);
-    const error = {lineNumber:this.lineNumber, message:errorMessage};
+    const error = {lineNumber: this.lineNumber, message: errorMessage};
     console.error('ERROR: ', errorMessage);
-    errors.push(error);
-    this.LocalState.set(`${this.name}_ERRORS`, errors);
+    this.runnerState['_runner_errors'].push(error);
   }
 
   _reportProgress() {

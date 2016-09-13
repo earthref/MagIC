@@ -1,48 +1,69 @@
-import {_} from 'lodash';
+import _ from 'lodash';
 import jQuery from 'jquery';
 import XLSX from 'xlsx-style';
 import Runner from '../../er/actions/runner.js';
-import Parser from './parse_contribution';
-//import json2csv from 'json2csv';
+import ValidateContribution from './validate_contribution';
 
-import {default as magicVersions} from '../configs/magic_versions';
-import {default as magicDataModels} from '../configs/data_models/data_models';
+import { default as magicVersions   } from '../configs/magic_versions';
+import { default as magicDataModels } from '../configs/data_models/data_models';
 
 export default class extends Runner {
 
-  constructor({LocalState}) {
-    super('EXPORT_CONTRIBUTION', {LocalState});
-    this.parser = new Parser({LocalState});
+  constructor({runnerState}) {
+    super({runnerState});
+    runnerState = this.runnerState;
+    this.validator = new ValidateContribution({runnerState});
     this.version;
     this.model;
   }
 
-  /*To extended text is a boolean indicating whether or not the text should be extended*/
-  toText(jsonToExport, toExtendedText) {
+  // Convert a JSON contribution to a MagIC Text Format string.
+  toText(json) {
     // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
 
     // Retrieve the data model version used in the jsonToExport
-    this.version = this.parser.getVersion(jsonToExport)
-    if (!this.version) return jsonToExport;
+    let { version } = this.validator.getVersion(json);
+    this.version = version;
+    if (!this.version) return json;
 
     // Retrieve the data model
     this.model = magicDataModels[this.version];
     this.orderedModel = this.createOrderedModel();
 
-    this.testValidityOfTablesAndColumns(jsonToExport);
+    this.testValidityOfTablesAndColumns(json);
 
-    // TODO: use the model to build up text string here
-    let text = this.createTSVfile(jsonToExport, toExtendedText);
+    let text = this.createTSVfile(json, false);
+
+    return text;
+  }
+
+  // Convert a JSON contribution to a MagIC Extended Text Format string.
+  toExtendedText(json) {
+    // Text should be a valid MagIC tab delimited text file with the tables and columns in the order defined in the data model.
+
+    // Retrieve the data model version used in the jsonToExport
+    let { version } = this.validator.getVersion(json);
+    this.version = version;
+    if (!this.version) return json;
+
+    // Retrieve the data model
+    this.model = magicDataModels[this.version];
+    this.orderedModel = this.createOrderedModel();
+
+    this.testValidityOfTablesAndColumns(json);
+
+    let text = this.createTSVfile(json, true);
 
     return text;
   }
 
   //Per requirements, this will only work for model 3.0
   toExcel(jsonToExport) {
-    this.version = this.parser.getVersion(jsonToExport);//Todo: refactor the init of class variables into a separate function
-    //console.log(this.version);
+
+    let { version } = this.validator.getVersion(jsonToExport);
+    this.version = version;
+
     this.model = magicDataModels[this.version];
-    //console.log(this.model);
     this.orderedModel = this.createOrderedModel();
 
     // Create an empty workbook.
@@ -66,25 +87,29 @@ export default class extends Runner {
       ];
 
       // Iterate through all of the data rows in the table.
-      for (let rowIdx in jsonToExport[modelTable]) {
+      for (let rowIdx in (jsonToExport[modelTable].rows || jsonToExport[modelTable])) {
 
         // Add a blank column at the beginning of each data row for the row headers.
         let wsRow = [''];
 
-        // Iterate through each column name in the header.
-        for (let columnName of tableHeaders.columnNameHeader) {
-          let value = jsonToExport[modelTable][rowIdx][columnName];
+        if (jsonToExport[modelTable].rows) wsRow = wsRow.concat(jsonToExport[modelTable].rows[rowIdx]);
+        else
+          // Iterate through each column name in the header.
+          for (let columnName of tableHeaders.columnNameHeader) {
+            let value = jsonToExport[modelTable][rowIdx][columnName];
+            wsRow.push(value);
+          }
 
+        wsData.push(wsRow.map((value, i) => {
           if (Array.isArray(value) && value.length > 0 && !Array.isArray(value[0])) value = value.join(':');
-
-          wsRow.push(value);
-        }
-        wsData.push(wsRow);
+          return value;
+        }));
 
       }
 
       // Convert the data matrix into a worksheet object.
       let worksheet = this._toSheet(wsData);
+      let range = {};
       let rowIdx;
 
       // Format the group header row.
@@ -93,14 +118,13 @@ export default class extends Runner {
 
         let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
         let cellStyle = {
-          font:   {bold: 'true'},
-          fill:   {fgColor: {rgb: 'CCCCCC'}},
-          border: {top:    {style: 'thick' , color: {rgb: '555555'}},
-                   bottom: {style: 'medium', color: {rgb: '555555'}}}
+          font:      {bold: 'true'},
+          alignment: {horizontal: (columnIdx == 0 ? 'right' : 'center'),
+                      vertical: 'center'},
+          fill:      {fgColor: {rgb: 'CCCCCC'}},
+          border:    {top:    {style: 'thick' , color: {rgb: '555555'}},
+                      bottom: {style: 'medium', color: {rgb: '555555'}}}
         };
-
-        // Set horizontal alignment.
-        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
 
         // Add borders.
         if (columnIdx == 0)
@@ -112,7 +136,19 @@ export default class extends Runner {
 
         worksheet[cellAddress].s = cellStyle;
 
+        // Define merged cells.
+        if (columnIdx > 0 && wsData[0][columnIdx] != '')
+          range.s = {r:rowIdx, c:columnIdx};
+        else if (columnIdx > 0 && wsData[0][columnIdx+1] != '') {
+          range.e = {r:rowIdx, c:columnIdx};
+          if (!worksheet['!merges']) worksheet['!merges'] = [];
+          console.log(range);
+          worksheet['!merges'].push(range); //XLSX.utils.encode_range(range));
+          range = {};
+        }
+
       }
+      console.log(worksheet['!merges']);
 
       // Format the name header row.
       rowIdx = 1;
@@ -120,12 +156,11 @@ export default class extends Runner {
 
         let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
         let cellStyle = {
-          fill:   {fgColor: {rgb: 'FFFFFF'}},
-          border: {}
+          alignment: {horizontal: (columnIdx == 0 ? 'right' : 'center'),
+                      vertical: 'center'},
+          fill:      {fgColor: {rgb: 'FFFFFF'}},
+          border:    {}
         };
-
-        // Set horizontal alignment.
-        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
 
         // Add borders.
         if (columnIdx == 0)
@@ -147,12 +182,12 @@ export default class extends Runner {
 
         let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
         let cellStyle = {
-          fill:   {fgColor: {rgb: 'FFFFFF'}},
-          border: {}
+          font:      {italic: 'true', color: {rgb: '888888'}},
+          alignment: {horizontal: (columnIdx == 0 ? 'right' : 'center'),
+                      vertical: 'center'},
+          fill:      {fgColor: {rgb: 'FFFFFF'}},
+          border:    {}
         };
-
-        // Set horizontal alignment.
-        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
 
         // Add borders.
         if (columnIdx == 0)
@@ -174,14 +209,13 @@ export default class extends Runner {
 
         let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
         let cellStyle = {
-          font:   {bold: 'true'},
-          fill:   {fgColor: {rgb: 'F2F2F2'}},
-          border: {top:    {style: 'thin' , color: {rgb: '555555'}},
-                   bottom: {style: 'thick', color: {rgb: '555555'}}}
+          font:      {bold: 'true'},
+          alignment: {horizontal: (columnIdx == 0 ? 'right' : 'center'),
+                      vertical: 'center'},
+          fill:      {fgColor: {rgb: 'F2F2F2'}},
+          border:    {top:    {style: 'thin' , color: {rgb: '555555'}},
+                      bottom: {style: 'thick', color: {rgb: '555555'}}}
         };
-
-        // Set horizontal alignment.
-        if (columnIdx == 0) cellStyle.alignment = {horizontal: 'right'};
 
         // Add borders.
         if (columnIdx == 0)
@@ -290,8 +324,7 @@ export default class extends Runner {
 
   };
 
-  createExtendedHeadersData(tableName, jsonToExport/*, orderedColumnArray*/)
-  {
+  createExtendedHeadersData(tableName, jsonToExport) {
     // returns data to be used for extra headers (groups, columns names, and units)
     let discoveredColumns = {};
     let previousGroupFound = '';
@@ -299,20 +332,19 @@ export default class extends Runner {
     let labelHeaderArray = [];
     let columnTypeOrUnitHeaderArray = [];
     let columnHeaderArray = [];
-    //let orderedTableIdx = _getOrderedColumnList
     let orderedColumnArray = this._getOrderedColumnList(tableName);
 
     //loop through ordered model columns for this table, see if json has data from that column
-    for(let orderedColumnIdx in orderedColumnArray)
-    {
+    for (let orderedColumnIdx in orderedColumnArray) {
+
       let potentialColumnToAdd = orderedColumnArray[orderedColumnIdx];
       //Traverse the entire JSON table's rows looking for usages of the each column found in the ordered model. If the JSON file has the column in question
       //extract the desired information and create the extended header
-      for(let jsonRowIdx in jsonToExport[tableName])
-      {
+      for(let jsonRowIdx in jsonToExport[tableName]) {
+
         if (jsonToExport[tableName][jsonRowIdx][potentialColumnToAdd] && //if this ordered column is found in the json file
-          !discoveredColumns[potentialColumnToAdd]) //and we haven't seen this column before
-        {
+            !discoveredColumns[potentialColumnToAdd]) {                    //and we haven't seen this column before
+
           //ggg gather data here from the model and add the header
           discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
           columnHeaderArray.push(potentialColumnToAdd);
@@ -320,15 +352,10 @@ export default class extends Runner {
           let labelToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['label'];
           labelHeaderArray.push(labelToAdd);
 
-          //we only want to add a 'group' header when the current group is different than the previous one. If the group is the same as the previous
-          //the we want to only add a tab
+          // Append the group name if it's not the same as the previous column.
           let currentGroupToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
-          if(previousGroupFound != currentGroupToAdd)
-            groupHeaderArray.push(currentGroupToAdd);
-          else
-            groupHeaderArray.push('');
-
-          previousGroupFound = currentGroupToAdd;//this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
+          groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
+          previousGroupFound = currentGroupToAdd;
 
           columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
         }
@@ -337,48 +364,36 @@ export default class extends Runner {
 
     let orderedHeaderData = {};
     orderedHeaderData.groupHeader = groupHeaderArray;
-    orderedHeaderData.labelHeader= labelHeaderArray;
+    orderedHeaderData.labelHeader = labelHeaderArray;
     orderedHeaderData.columnTypeOrUnitHeader = columnTypeOrUnitHeaderArray;
     orderedHeaderData.columnNameHeader = columnHeaderArray;
 
     return orderedHeaderData;
   }
 
-  getColumnTypeOrUnitString(tableName, potentialColumnToAdd)
-  {
-    // logic for column type/unit row:
-    // if type === 'Number'
-    //   if unit === 'Dimensionless' or 'Custom' or empty
-    //     print 'Number'
-    //   else
-    //     print 'Number in [unit]'
-    // else if unit === 'Flag'
-    //     print 'Flag'
-    // else
-    //     print '[type]'
+  getColumnTypeOrUnitString(table, column) {
 
     let columnTypeOrUnitString = '';
-    let columnType = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['type'];
-    let columnUnit = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['unit'];
+    let columnType = this.model['tables'][table]['columns'][column]['type'];
+    let columnUnit = this.model['tables'][table]['columns'][column]['unit'];
 
-    if(columnType === 'Number')
-    {
-      if( columnUnit === 'Dimensionless' ||
-        columnUnit === 'Custom' ||
-        columnUnit === '')
-        columnTypeOrUnitString = 'Number';
-      else
-        columnTypeOrUnitString = `Number in ${columnUnit}`;
+    if (columnType === 'Number') {
+      columnTypeOrUnitString = 'Number';
+      if (columnUnit !== 'Dimensionless' &&
+          columnUnit !== 'Custom' &&
+          columnUnit !== '')
+        columnTypeOrUnitString += ` in ${columnUnit}`;
     }
     else if (columnUnit === 'Flag')
-      columnTypeOrUnitString= 'Flag';
+      columnTypeOrUnitString = 'Flag';
     else
       columnTypeOrUnitString = columnType;
 
     return columnTypeOrUnitString;
+
   }
 
-  createTSVfile( jsonToExport, toExtendedText){
+  createTSVfile(jsonToExport, toExtendedText){
     //  loop through the used tables in data model order,
     //   print the table header (note: "tab delimited\ttable_name" format)
     //   loop through the used columns for that table in data model order,
@@ -386,7 +401,7 @@ export default class extends Runner {
     //   loop through the rows in that table in the order in the jsonToTranslate,
     //     loop through the used columns for that table in data model order,
     //       print the column value for that row
-    //         note: arrays turn into :val1:val2 string,
+    //         note: arrays turn into val1:val2 string,
     //               any string in an array that contains a ":" gets double quotes around it
     //   and print the table separator if there is another table.
     let text = ``;
@@ -407,7 +422,6 @@ export default class extends Runner {
           /*let orderedColumnArray = orderedModel[orderedTableIdx][tableName];*/
           text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport/*, orderedColumnArray*/)
         }
-
 
         //*********now create the column headers for this table*************
         let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort
