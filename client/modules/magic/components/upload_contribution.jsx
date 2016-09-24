@@ -368,7 +368,7 @@ export default class extends React.Component {
                             </div>
                           </div>
                           {(file.format === 'tsv' ?
-                            <div data-i={i} className="ui right floated dropdown small basic button error table-dropdown">
+                            <div data-i={i} className="ui right floated dropdown small basic button table-dropdown">
                               <div className="text">Data Model Table</div>
                               <i className="dropdown icon"></i>
                               <div className="menu">
@@ -766,12 +766,14 @@ export default class extends React.Component {
             </div>
           </div>
         </div>
-        <div className="ui bottom attached icon message">
-          <i className="purple circle info icon"></i>
-          <div className="content">
-            The selected file or files can be partial or complete contributions.
+        {(step === 1 ?
+          <div className="ui bottom attached icon message">
+            <i className="purple circle info icon"></i>
+            <div className="content">
+              The selected file or files can be partial or complete contributions.
+            </div>
           </div>
-        </div>
+        : undefined)}
       </div>
     )
   }

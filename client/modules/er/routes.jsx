@@ -2,11 +2,11 @@ import {_} from 'lodash';
 import React from 'react';
 import {mount} from 'react-mounter';
 
-import {portals} from './configs/portals.js';
+import {portals} from '../common/configs/portals.js';
 const rePortals = _.without(Object.keys(portals), 'EarthRef.org').join('|');
 
-import Layout from './components/layout.jsx';
-import Home from './components/home.jsx';
+import Layout from '../common/components/layout.jsx';
+import Home from '../common/components/home.jsx';
 import Vocabularies from './components/vocabularies.jsx';
 
 export default function (injectDeps, {FlowRouter}) {

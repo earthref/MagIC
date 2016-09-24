@@ -603,8 +603,8 @@ export default class extends React.Component {
                     <div className="center aligned column">
                       <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upload/">
                         <i className="icons">
-                          <i className="database icon"></i>
-                          <i className="purple corner search icon" style={{fontSize:'1.5em'}}></i>
+                          <i className="table icon"></i>
+                          <i className="purple corner add icon" style={{fontSize:'1.5em'}}></i>
                         </i>
                         <div className="content">
                           <div className="ui purple header">Upload</div>

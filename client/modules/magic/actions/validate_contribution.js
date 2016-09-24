@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import Runner from '../../er/actions/runner.js';
+import Runner from '../../common/actions/runner.js';
 
 import { default as versions } from '../configs/magic_versions';
 import { default as models   } from '../configs/data_models/data_models';

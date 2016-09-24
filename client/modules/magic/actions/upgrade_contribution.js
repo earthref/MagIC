@@ -2,7 +2,7 @@ import _ from 'lodash';
 import jQuery from 'jquery';
 import moment from 'moment-timezone';
 import Promise from 'bluebird';
-import Runner from '../../er/actions/runner';
+import Runner from '../../common/actions/runner';
 import ValidateContribution from './validate_contribution';
 
 import {default as versions} from '../configs/magic_versions';

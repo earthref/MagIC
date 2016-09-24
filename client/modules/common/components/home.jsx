@@ -3,8 +3,6 @@ import {portals} from '../configs/portals.js';
 
 export default class extends React.Component {
 
-
-
   render() {
     const {portal} = this.props;
     return (

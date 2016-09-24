@@ -8,6 +8,8 @@
     "url": "git://github.com/earthref/earthref.git"
   },
   "devDependencies": {
+    "@kadira/storybook": "^2.5.2",
+    "autoprefixer": "^6.4.1",
     "babel-core": "6.x.x",
     "babel-plugin-react-require": "2.x.x",
     "babel-polyfill": "6.x.x",
@@ -21,7 +23,10 @@
     "eslint": "1.10.x",
     "eslint-plugin-react": "3.15.x",
     "jsdom": "^8.0.4",
+    "less": "^2.7.1",
+    "less-loader": "^2.2.3",
     "mocha": "^2.5.3",
+    "postcss-loader": "^0.13.0",
     "react-addons-test-utils": "^0.14.6"
   },
   "dependencies": {
@@ -29,7 +34,7 @@
     "bluebird": "^3.4.1",
     "domready": "^1.0.8",
     "filesize": "^3.3.0",
-    "jquery": "^3.1.0",
+    "jquery": "^3.1.1",
     "jszip": "^3.0.0",
     "lodash": "^4.6.1",
     "mantra-core": "^1.2.0",
@@ -44,10 +49,22 @@
     "react-mounter": "^1.0.0",
     "react-simple-di": "^1.0.1",
     "save-as": "^0.1.4",
+    "semantic-ui-less": "^2.2.4",
     "xlsx-style": "^0.8.13"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {
+        "browsers": [
+          "last 2 versions"
+        ]
+      }
+    }
   },
   "scripts": {
     "lint-only": "eslint ./lib ./client ./server --ext .js --ext .jsx",
-    "lint-fix": "npm run lint-only -- --fix"
+    "lint-fix": "npm run lint-only -- --fix",
+    "storybook": "start-storybook -p 6006",
+    "build-storybook": "build-storybook"
   }
 }

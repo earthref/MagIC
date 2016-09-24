@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import jQuery from 'jquery';
 import XLSX from 'xlsx-style';
-import Runner from '../../er/actions/runner.js';
+import Runner from '../../common/actions/runner.js';
 import ValidateContribution from './validate_contribution';
 
 import { default as magicVersions   } from '../configs/magic_versions';

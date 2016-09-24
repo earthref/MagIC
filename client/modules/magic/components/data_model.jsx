@@ -2,7 +2,7 @@ import {_} from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '../../er/configs/portals';
+import {portals} from '../../common/configs/portals';
 import {default as versions} from '../configs/magic_versions';
 import {default as models} from '../configs/data_models/data_models';
 import Upgrader from '../actions/upgrade_contribution';
