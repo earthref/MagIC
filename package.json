@@ -48,6 +48,7 @@
     "react-komposer": "^1.8.0",
     "react-mounter": "^1.0.0",
     "react-simple-di": "^1.0.1",
+    "react-storybook-addon-backgrounds": "0.0.4",
     "save-as": "^0.1.4",
     "semantic-ui-less": "^2.2.4",
     "xlsx-style": "^0.8.13"
