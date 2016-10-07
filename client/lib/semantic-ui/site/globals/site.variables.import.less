@@ -30,7 +30,7 @@
 @orange: rgb(187,  75,  28);
 @pink  : rgb(139,  33, 106);
 @purple: rgb(121,  47, 145);
-@red   : rgb(134,   2,   2);
+@red   : rgb(159,   2,   2);
 @teal  : rgb(0  ,  91, 135);
 @yellow: rgb(240, 173,  78);
 
@@ -53,15 +53,25 @@
 @darkWhite: rgb(240, 240, 240);
 @white    : rgb(255, 255, 255);
 
-@linkColor: @purple;
-@highlightBackground: @lightPurple;
+@linkColor: @black;
+@highlightBackground: @lightGrey;
 
 /*-------------------
     Brand Colors
 --------------------*/
 
-@primaryColor       : @green;
-@secondaryColor     : @darkGrey;
+@primaryColor       : @grey;
+@secondaryColor     : @grey;
 
-@lightPrimaryColor  : @lightGreen;
-@lightSecondaryColor: @grey;
+@lightPrimaryColor  : @lightGrey;
+@lightSecondaryColor: @lightGrey;
+
+/*-------------------
+    Focused Input
+--------------------*/
+
+/* Used on inputs, textarea etc */
+@focusedFormBorderColor: @darkGrey;
+
+/* Used on dropdowns, other larger blocks */
+@focusedFormMutedBorderColor: @grey;

@@ -1,4 +1,5 @@
 import React from 'react';
+import IconButton from '../../common/components/icon_button.jsx';
 
 export default class extends React.Component {
 
@@ -12,7 +13,7 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui mini icon floating message">
+        <div className="ui small icon floating message">
           <i className="purple users icon"></i>
           <i className="close icon"></i>
           <div className="content">
@@ -51,112 +52,79 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui hidden divider"></div>
-          <div className="ui five column grid">
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/search/">
-              <i className="icons">
-                <i className="database icon"></i>
-                <i className="purple corner search icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Search</div>
-                <div className="sub header">Browse, combine, and save contributions.</div>
-              </div>
-            </a>
-          </div>
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upload/">
-              <i className="icons">
-                <i className="table icon"></i>
-                <i className="purple corner add icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Upload</div>
-                <div className="sub header">Import data into a private workspace.</div>
-              </div>
-            </a>
-          </div>
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/validate/">
-              <i className="icons">
-                <i className="file text outline icon"></i>
-                <i className="purple corner help icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Validate</div>
-                <div className="sub header">Confirm your contribution is ready.</div>
-              </div>
-            </a>
-          </div>
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/activate/">
-              <i className="icons">
-                <i className="file text outline icon"></i>
-                <i className="purple corner checkmark icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Activate</div>
-                <div className="sub header">Make your contribution publicly visible.</div>
-              </div>
-            </a>
-          </div>
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upgrade/">
-              <i className="icons">
-                <i className="file text outline icon"></i>
-                <i className="purple corner arrow up icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Upgrade</div>
-                <div className="sub header">Convert a contribution to the latest data model.</div>
-              </div>
-            </a>
-          </div>
+        <div className="ui five cards">
+          <IconButton className="card" href="/MagIC/search" portal="MagIC">
+            <i className="icons">
+              <i className="database icon"/>
+              <i className="corner search icon"/>
+            </i>
+            <div className="title">Search</div>
+            <div className="subtitle">Browse, combine, and save contributions.</div>
+          </IconButton>
+          <IconButton className="card" href="/MagIC/upload" portal="MagIC">
+            <i className="icons">
+              <i className="table icon"/>
+              <i className="corner add icon"/>
+            </i>
+            <div className="title">Upload</div>
+            <div className="subtitle">Import data into a private workspace.</div>
+          </IconButton>
+          <IconButton className="card" href="/MagIC/validate" portal="MagIC">
+            <i className="icons">
+              <i className="file text outline icon"/>
+              <i className="corner help icon"/>
+            </i>
+            <div className="title">Validate</div>
+            <div className="subtitle">Confirm your contribution is ready.</div>
+          </IconButton>
+          <IconButton className="card" href="/MagIC/activate" portal="MagIC">
+            <i className="icons">
+              <i className="file text outline icon"/>
+              <i className="corner checkmark icon"/>
+            </i>
+            <div className="title">Activate</div>
+            <div className="subtitle">Make your contribution publicly visible.</div>
+          </IconButton>
+          <IconButton className="card" href="/MagIC/upgrade" portal="MagIC">
+            <i className="icons">
+              <i className="file text outline icon"/>
+              <i className="corner arrow up icon"/>
+            </i>
+            <div className="title">Upgrade</div>
+            <div className="subtitle">Convert a contribution to the latest data model.</div>
+          </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
           MagIC Resources
         </h2>
-        <div className="ui three column relaxed padded grid">
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'none'}} href="/MagIC/data-model/">
-              <i className="icons">
-                <i className="sitemap icon"></i>
-                <i className="purple corner table icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Data Model</div>
-              </div>
-            </a>
-          </div>
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'none'}} href="/MagIC/method-codes/">
-              <i className="icons">
-                <i className="lab icon"></i>
-                <i className="purple corner write icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Method Codes</div>
-              </div>
-            </a>
-          </div>
-          <div className="center aligned column">
-            <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'none'}} href="/vocabularies/">
-              <i className="icons">
-                <i className="list icon"></i>
-                <i className="purple corner lock icon" style={{fontSize:'1.5em'}}></i>
-              </i>
-              <div className="content">
-                <div className="ui purple header">Vocabularies</div>
-              </div>
-            </a>
-          </div>
+        <div className="ui three cards">
+          <IconButton className="borderless card" href="/MagIC/data-model" portal="MagIC">
+            <i className="large icons">
+              <i className="sitemap icon"/>
+              <i className="corner table icon"/>
+            </i>
+            <div className="title">Data Model</div>
+          </IconButton>
+          <IconButton className="borderless card" href="/MagIC/method-codes" portal="MagIC">
+            <i className="large icons">
+              <i className="lab icon"/>
+              <i className="corner write icon"/>
+            </i>
+            <div className="title">Method Codes</div>
+          </IconButton>
+          <IconButton className="borderless card" href="/vocabularies" portal="MagIC">
+            <i className="large icons">
+              <i className="list icon"/>
+              <i className="corner lock icon"/>
+            </i>
+            <div className="title">Vocabularies</div>
+          </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
           MagIC Statistics
         </h2>
-        <div className="ui hidden divider"></div>
-        <div className="ui four column grid">
-          <div className="center aligned column">
+        <div className="ui four cards">
+          <IconButton className="borderless card" href="" portal="MagIC">
             <div className="ui purple statistic">
               <div className="value">
                 7
@@ -166,8 +134,8 @@ export default class extends React.Component {
               </div>
               <span>This Quarter</span>
             </div>
-          </div>
-          <div className="center aligned column">
+          </IconButton>
+          <IconButton className="borderless card" href="" portal="MagIC">
             <div className="ui purple statistic">
               <div className="value">
                 4.2K
@@ -177,8 +145,8 @@ export default class extends React.Component {
               </div>
               <span>Publicly Visible</span>
             </div>
-          </div>
-          <div className="center aligned column">
+          </IconButton>
+          <IconButton className="borderless card" href="" portal="MagIC">
             <div className="ui purple statistic">
               <div className="value">
                 147.7K
@@ -188,8 +156,8 @@ export default class extends React.Component {
               </div>
               <span>Publicly Visible</span>
             </div>
-          </div>
-          <div className="center aligned column">
+          </IconButton>
+          <IconButton className="borderless card" href="" portal="MagIC">
             <div className="ui purple statistic">
               <div className="value">
                 25
@@ -199,7 +167,7 @@ export default class extends React.Component {
               </div>
               <span>This Month</span>
             </div>
-          </div>
+          </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
           MagIC Community

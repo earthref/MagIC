@@ -14,7 +14,9 @@ function loadStories() {
   lessFiles.keys().forEach(lessFiles);
 
   // Require stories list
-  require('../.stories/index.jsx');
+  require('../.stories/home.jsx');
+  require('../.stories/icon_button.jsx');
+  require('../.stories/data_importer.jsx');
 
 }
 

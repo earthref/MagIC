@@ -50,7 +50,7 @@ meteorhacks:inject-data@2.0.0
 meteorhacks:kadira@2.30.0
 meteorhacks:meteorx@1.4.1
 meteorhacks:picker@1.0.3
-minifier-css@1.1.13
+minifier-css@1.2.14
 minifier-js@1.2.14
 minimongo@1.0.17
 mobile-experience@1.0.4

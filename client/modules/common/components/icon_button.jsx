@@ -3,18 +3,40 @@ import {portals} from '../configs/portals.js';
 
 export default class extends React.Component {
 
-  render() {
-    const {portal, title, style, children, className, icons} = this.props;
-    const color = portals[portal].color;
+  portalColor() {
+    const portal = this.props.portal || 'EarthRef.org';
+    return portals[portal] && portals[portal].color || 'green';
+  }
+
+  renderChildren () {
     return (
-      <div className={'ui basic icon header button ' + color + ' ' + className} style={style}>
-        <div className="content">
-          <div className={'ui header ' + color}>{title}</div>
-          {children}
-        </div>
+      <div className="content">
+        {React.Children.map(this.props.children, (child, i) => {
+          if (child.props.className === 'title')
+            child = React.cloneElement(child, { className: 'ui header ' + this.portalColor()});
+          if (child.props.className === 'subtitle')
+            child = React.cloneElement(child, { className: 'ui sub header'});
+          return child;
+        })}
       </div>
-    )
+    );
+  }
+
+  render() {
+    const className = 'ui icon header basic fluid button ' + this.portalColor() + ' ' +
+                      this.props.className + ' er-icon-button';
+    return (
+      <div className={className} style={this.props.style}>
+      {(this.props.href ?
+        <a className="content" href={this.props.href}>
+          {this.renderChildren()}
+        </a>
+      :
+        <div className="content">
+          {this.renderChildren()}
+        </div>
+      )}
+      </div>);
   }
 
 }
-
