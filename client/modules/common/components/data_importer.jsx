@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import FixedTable from './fixed_table.jsx';
 import {portals} from '../configs/portals.js';
@@ -189,7 +190,9 @@ export default class extends React.Component {
             <div ref="table name dropdown"
                  className={"ui selection fluid dropdown" + (this.state.tableName === '' ? ' error' : '')}>
               <i className="dropdown icon"/>
-              <div className="default text">Select One</div>
+              <div className="default text">
+                <span className="text">Select One</span>
+              </div>
               <div className="menu">
                 {(_.keys(this.props.model.tables).map((table, i) => {
                   return (
@@ -220,7 +223,9 @@ export default class extends React.Component {
             <div ref="import template dropdown"
                  className="ui disabled selection fluid dropdown">
               <i className="dropdown icon"/>
-              <div className="default text">Select One</div>
+              <div className="default text">
+                <span className="text">Select One</span>
+              </div>
               <div className="menu">
                 {(_.keys(this.props.model.tables).map((table, i) => {
                   return (
@@ -297,152 +302,158 @@ export default class extends React.Component {
   renderTable() {
     const nHeaderRowsInt = (this.state.nHeaderRows === '' ? 0 : Number.parseInt(this.state.nHeaderRows));
     return (
-      <FixedTable className="ui compact celled striped definition single line table">
-        <thead>
-          <tr ref="table column headers">
-            <th></th>
-            {(this.state.inColumnNames.map((columnName, i) => {
-              return (
-                <th key={i}>
-                  <div className="ui fitted toggle checkbox" data-position="bottom right"
-                       data-tooltip={(this.state.includeColumns[i] ? 'Exclude' : 'Include') + ' this column'}>
-                    <input type="checkbox" checked={this.state.includeColumns[i]} data-column-idx={i}/>
-                  </div>
-                  <span>{columnName}</span>
-                </th>
-              );
-            }))}
-          </tr>
-        </thead>
-        <tbody ref="table body">
-          <tr ref="table column names">
-            <td className="collapsing right aligned">Column</td>
-            {(this.state.outColumnNames.map((outColumnName, i) => {
-              return (this.state.includeColumns[i] ?
-                <td key={i}
-                    className={
-                      'ui fluid dropdown' +
-                      (this.state.errors.tableName.length > 0 ? '' : ' search') +
-                      (this.state.errors.tableName.length > 0 ||
-                        outColumnName === undefined ||
-                        this.props.model.tables[this.state.tableName].columns[outColumnName] === undefined ?
-                      ' error' : '')
-                    }
-                    style={{display:'table-cell'}}
-                    data-outColumnName={outColumnName}
-                >
-                  <input type="hidden" value={outColumnName}/>
-                  <i className="dropdown icon"/>
-                  <div className="default text">Select One</div>
-                  {this.renderColumnHeaderDropdownMenu(i)}
-                </td>
-              :
-                <td key={i} className="disabled"> </td>
-              );
-            }))}
-          </tr>
-          <tr ref="table column units">
-            <td className="collapsing right aligned">Units</td>
-            {(this.state.inColumnNames.map((columnName, i) => {
-              const outColumnName = this.state.outColumnNames[i];
-              const modelColumn = (
-                this.state.errors.tableName.length > 0 || outColumnName === undefined ?
-                  undefined
-                :
-                  this.props.model.tables[this.state.tableName].columns[outColumnName]
-              );
-              return (this.state.includeColumns[i] ?
-                (modelColumn === undefined ?
-                  <td key={i} className="error"></td>
-                :
-                  (modelColumn.other_units === undefined ?
-                    <td key={i} className={(modelColumn.unit === undefined ? 'disabled' : '')}>
-                      {(modelColumn.unit === undefined ? 'None' : modelColumn.unit)}
-                    </td>
-                  :
-                    <td key={i} className="ui dropdown" style={{display:'table-cell'}}>
-                      <div className="default text">Select One</div>
-                      <i className="caret down icon"/>
-                      <div className="menu">
-                        {_.concat(modelColumn.unit, _.keys(modelColumn.other_units)).map((unit, j) =>
-                          <div className="item" key={j}>
-                            {unit}
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  )
-                )
-              :
-                <td key={i} className="disabled"></td>
-              );
-            }))}
-          </tr>
-          {(this.state.nHeaderRows === '' && this.state.in.length === 0 ||
-            this.state.nHeaderRows >= this.state.in.length ?
-              <tr>
-                <td className="center aligned error" colSpan={this.state.inColumnNames.length + 1}>Error: No data rows.</td>
-              </tr>
-            :
-              this.state.in.map((row, i) => {
-                return (
-                  i < nHeaderRowsInt + this.state.maxDataRows && (
-                  this.state.nHeaderRows === '' ||
-                  this.state.errors.nHeaderRows.length > 0 ||
-                  i >= nHeaderRowsInt) ?
-                    <tr key={i}>
-                      <td className="collapsing right aligned">
-                        <div className="ui fitted toggle checkbox" data-position="top left"
-                             data-tooltip={(this.state.includeRows[i] ? 'Exclude' : 'Include') + ' this row'}>
-                          <input type="checkbox" checked={this.state.includeRows[i]} data-row-idx={i}/>
-                        </div>
-                        {i+1}
-                      </td>
-                      {(row.map((col, j) => {
-                        const className = (this.state.includeRows[i] && this.state.includeColumns[j] ? '' : 'disabled');
-                        return (
-                          <td key={j} className={className}>{col}</td>
-                        );
-                      }))}
-                    </tr>
-                :
-                  undefined
-                );
-              })
-          )}
-        </tbody>
-        {(this.state.maxDataRows > 5 || nHeaderRowsInt + this.state.maxDataRows < this.state.in.length ?
-          <tfoot className="full-width">
-            <tr>
+      <div style={{marginTop:'1em'}}>
+        <FixedTable className="ui compact celled striped definition single line table">
+          <thead>
+            <tr ref="table column headers">
               <th></th>
-              <th colSpan={this.state.inColumnNames.length} className="center aligned">
-                {(nHeaderRowsInt + this.state.maxDataRows < this.state.in.length ?
-                  <a className="ui label" onClick={(e) => this.setState({maxDataRows: this.state.maxDataRows + 5})}>
-                    View 5 more rows
-                  </a>
-                :
-                  undefined
-                )}
-                {(this.state.maxDataRows > 5 ?
-                  <a className="ui label" onClick={(e) => this.setState({maxDataRows: 5})}>
-                    Reset to view up to 5 rows
-                  </a>
-                :
-                  undefined
-                )}
-              </th>
+              {(this.state.inColumnNames.map((columnName, i) => {
+                return (
+                  <th key={i}>
+                    <div className="ui fitted toggle checkbox" data-position="bottom right"
+                         data-tooltip={(this.state.includeColumns[i] ? 'Exclude' : 'Include') + ' this column'}>
+                      <input type="checkbox" checked={this.state.includeColumns[i]} data-column-idx={i}/>
+                    </div>
+                    <span>{columnName}</span>
+                  </th>
+                );
+              }))}
             </tr>
-          </tfoot>
-        :
-          undefined
-        )}
-      </FixedTable>
+          </thead>
+          <tbody ref="table body">
+            <tr ref="table column names">
+              <td className="collapsing right aligned">Column</td>
+              {(this.state.outColumnNames.map((outColumnName, i) => {
+                return (this.state.includeColumns[i] ?
+                  <td key={i}
+                      className={
+                        'ui fluid dropdown' +
+                        (this.state.errors.tableName.length > 0 ? '' : ' search') +
+                        (this.state.errors.tableName.length > 0 ||
+                          outColumnName === undefined ||
+                          this.props.model.tables[this.state.tableName].columns[outColumnName] === undefined ?
+                        ' error' : '')
+                      }
+                      style={{display:'table-cell'}}
+                      data-outColumnName={outColumnName}
+                  >
+                    <input type="hidden" value={outColumnName}/>
+                    <i className="dropdown icon"/>
+                    <div className="default text">
+                      <span className="text">Select One</span>
+                    </div>
+                    {this.renderColumnHeaderDropdownMenu(i)}
+                  </td>
+                :
+                  <td key={i} className="disabled"> </td>
+                );
+              }))}
+            </tr>
+            <tr ref="table column units">
+              <td className="collapsing right aligned">Units</td>
+              {(this.state.inColumnNames.map((columnName, i) => {
+                const outColumnName = this.state.outColumnNames[i];
+                const modelColumn = (
+                  this.state.errors.tableName.length > 0 || outColumnName === undefined ?
+                    undefined
+                  :
+                    this.props.model.tables[this.state.tableName].columns[outColumnName]
+                );
+                return (this.state.includeColumns[i] ?
+                  (modelColumn === undefined ?
+                    <td key={i} className="error"></td>
+                  :
+                    (modelColumn.other_units === undefined ?
+                      <td key={i} className={(modelColumn.unit === undefined ? 'disabled' : '')}>
+                        {(modelColumn.unit === undefined ? 'None' : modelColumn.unit)}
+                      </td>
+                    :
+                      <td key={i} className="ui dropdown" style={{display:'table-cell'}}>
+                        <div className="default text">
+                          <span className="text">Select One</span>
+                        </div>
+                        <i className="caret down icon"/>
+                        <div className="menu">
+                          {_.concat(modelColumn.unit, _.keys(modelColumn.other_units)).map((unit, j) =>
+                            <div className="item" key={j}>
+                              {unit}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    )
+                  )
+                :
+                  <td key={i} className="disabled"></td>
+                );
+              }))}
+            </tr>
+            {(this.state.nHeaderRows === '' && this.state.in.length === 0 ||
+              this.state.nHeaderRows >= this.state.in.length ?
+                <tr>
+                  <td className="center aligned error" colSpan={this.state.inColumnNames.length + 1}>Error: No data rows.</td>
+                </tr>
+              :
+                this.state.in.map((row, i) => {
+                  return (
+                    i < nHeaderRowsInt + this.state.maxDataRows && (
+                    this.state.nHeaderRows === '' ||
+                    this.state.errors.nHeaderRows.length > 0 ||
+                    i >= nHeaderRowsInt) ?
+                      <tr key={i}>
+                        <td className="collapsing right aligned">
+                          <div className="ui fitted toggle checkbox" data-position="top left"
+                               data-tooltip={(this.state.includeRows[i] ? 'Exclude' : 'Include') + ' this row'}>
+                            <input type="checkbox" checked={this.state.includeRows[i]} data-row-idx={i}/>
+                          </div>
+                          {i+1}
+                        </td>
+                        {(row.map((col, j) => {
+                          const className = (this.state.includeRows[i] && this.state.includeColumns[j] ? '' : 'disabled');
+                          return (
+                            <td key={j} className={className}>{col}</td>
+                          );
+                        }))}
+                      </tr>
+                  :
+                    undefined
+                  );
+                })
+            )}
+          </tbody>
+          {(this.state.maxDataRows > 5 || nHeaderRowsInt + this.state.maxDataRows < this.state.in.length ?
+            <tfoot className="full-width">
+              <tr>
+                <th></th>
+                <th colSpan={this.state.inColumnNames.length} className="center aligned">
+                  {(nHeaderRowsInt + this.state.maxDataRows < this.state.in.length ?
+                    <a className="ui label" onClick={(e) => this.setState({maxDataRows: this.state.maxDataRows + 5})}>
+                      View 5 more rows
+                    </a>
+                  :
+                    undefined
+                  )}
+                  {(this.state.maxDataRows > 5 ?
+                    <a className="ui label" onClick={(e) => this.setState({maxDataRows: 5})}>
+                      Reset to view up to 5 rows
+                    </a>
+                  :
+                    undefined
+                  )}
+                </th>
+              </tr>
+            </tfoot>
+          :
+            undefined
+          )}
+        </FixedTable>
+      </div>
     );
   }
 
   render() {
     return (
-      <div className={'er-data-importer ' + this.props.className} style={this.props.style}>
+      <div className={'er-data-importer ' + (this.props.className || '')} style={this.props.style}>
         {this.renderOptions()}
         {this.renderErrors()}
         {this.renderTable()}

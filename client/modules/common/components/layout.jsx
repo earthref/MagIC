@@ -38,19 +38,6 @@ export default class extends React.Component {
             </div>
           </div>
         </div>
-        <div className="ui top fixed secondary pointing menu right-menu">
-          <div className="ui search search-earthref">
-            <div className="ui transparent icon input item">
-              <input className="prompt" type="text" placeholder="Search EarthRef ..."/>
-              <i className="search icon"/>
-            </div>
-            <div className="results"></div>
-          </div>
-          <a className="ui dropdown item">
-            Login
-            <i className="dropdown icon"/>
-          </a>
-        </div>
         <div className="ui bottom fixed small menu footer">
           <div className="ui container">
             <div className="left menu">
@@ -81,4 +68,21 @@ export default class extends React.Component {
     );
   }
 
+  renderLogin() {
+   return (
+     <div className="ui top fixed secondary pointing menu right-menu">
+       <div className="ui search search-earthref">
+         <div className="ui transparent icon input item">
+           <input className="prompt" type="text" placeholder="Search EarthRef ..."/>
+           <i className="search icon"/>
+         </div>
+         <div className="results"></div>
+       </div>
+       <a className="ui dropdown item">
+         Login
+         <i className="dropdown icon"/>
+       </a>
+     </div>
+   );
+  }
 }

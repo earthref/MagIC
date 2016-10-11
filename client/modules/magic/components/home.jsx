@@ -15,16 +15,18 @@ export default class extends React.Component {
       <div>
         <div className="ui small icon floating message">
           <i className="purple users icon"></i>
-          <i className="close icon"></i>
           <div className="content">
-            <div className="header">
+            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">
               MagIC 2017 Workshop: Earth's Magnetic Field from the Beginning
-            </div>
-            MagIC is hosting a workshop on January 24th-26th, 2017 at SIO in La Jolla, CA.&nbsp;&nbsp;
-            <a>Register here to attend.</a>
+            </a>
+            MagIC is hosting a workshop on January 24th-26th, 2017 at SIO in La Jolla, CA.
           </div>
+          <a className="ui basic purple button" style={{margin:'0 1em'}}
+             href="https://earthref.org/cgi-bin/erml-c0-introduction.cgi?event=MAGIC">
+            Register
+          </a>
           <div className="ui purple tiny statistic" style={{margin:'0 1em'}}>
-            <div className="value">146</div>
+            <div className="value">104</div>
             <div className="label">Days To Go!</div>
           </div>
         </div>
@@ -53,37 +55,13 @@ export default class extends React.Component {
         </div>
         <div className="ui hidden divider"></div>
         <div className="ui five cards">
-          <IconButton className="card" href="/MagIC/search" portal="MagIC">
+          <IconButton className="disabled card" href="/MagIC/search" portal="MagIC">
             <i className="icons">
               <i className="database icon"/>
               <i className="corner search icon"/>
             </i>
             <div className="title">Search</div>
             <div className="subtitle">Browse, combine, and save contributions.</div>
-          </IconButton>
-          <IconButton className="card" href="/MagIC/upload" portal="MagIC">
-            <i className="icons">
-              <i className="table icon"/>
-              <i className="corner add icon"/>
-            </i>
-            <div className="title">Upload</div>
-            <div className="subtitle">Import data into a private workspace.</div>
-          </IconButton>
-          <IconButton className="card" href="/MagIC/validate" portal="MagIC">
-            <i className="icons">
-              <i className="file text outline icon"/>
-              <i className="corner help icon"/>
-            </i>
-            <div className="title">Validate</div>
-            <div className="subtitle">Confirm your contribution is ready.</div>
-          </IconButton>
-          <IconButton className="card" href="/MagIC/activate" portal="MagIC">
-            <i className="icons">
-              <i className="file text outline icon"/>
-              <i className="corner checkmark icon"/>
-            </i>
-            <div className="title">Activate</div>
-            <div className="subtitle">Make your contribution publicly visible.</div>
           </IconButton>
           <IconButton className="card" href="/MagIC/upgrade" portal="MagIC">
             <i className="icons">
@@ -93,12 +71,36 @@ export default class extends React.Component {
             <div className="title">Upgrade</div>
             <div className="subtitle">Convert a contribution to the latest data model.</div>
           </IconButton>
+          <IconButton className="card" href="/MagIC/upload" portal="MagIC">
+            <i className="icons">
+              <i className="table icon"/>
+              <i className="corner add icon"/>
+            </i>
+            <div className="title">Upload</div>
+            <div className="subtitle">Import data into a private workspace.</div>
+          </IconButton>
+          <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC">
+            <i className="icons">
+              <i className="file text outline icon"/>
+              <i className="corner help icon"/>
+            </i>
+            <div className="title">Validate</div>
+            <div className="subtitle">Confirm your contribution is ready.</div>
+          </IconButton>
+          <IconButton className="disabled card" href="/MagIC/activate" portal="MagIC">
+            <i className="icons">
+              <i className="file text outline icon"/>
+              <i className="corner checkmark icon"/>
+            </i>
+            <div className="title">Activate</div>
+            <div className="subtitle">Make your contribution publicly visible.</div>
+          </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
           MagIC Resources
         </h2>
         <div className="ui three cards">
-          <IconButton className="borderless card" href="/MagIC/data-model" portal="MagIC">
+          <IconButton className="borderless card" href="/MagIC/data-model/3.0" portal="MagIC">
             <i className="large icons">
               <i className="sitemap icon"/>
               <i className="corner table icon"/>
@@ -169,6 +171,13 @@ export default class extends React.Component {
             </div>
           </IconButton>
         </div>
+      </div>
+    );
+  }
+
+  renderCommunity() {
+    return (
+      <div>
         <h2 className="ui horizontal divider header">
           MagIC Community
         </h2>

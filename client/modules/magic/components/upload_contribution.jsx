@@ -4,6 +4,10 @@ import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
 import ParseContribution from '../actions/parse_contribution';
+import {default as versions} from '../configs/magic_versions';
+import {default as models} from '../configs/data_models/data_models';
+import DataImporter from '../../common/components/data_importer.jsx';
+import IconButton from '../../common/components/icon_button.jsx';
 
 export default class extends React.Component {
 
@@ -45,16 +49,12 @@ export default class extends React.Component {
       if (!isNaN($(this).attr('data-percent')))
         $(this).progress('set').progress($(this).attr('data-percent'));
     });
-    $('.upload-contribution .parse-step-content .format-dropdown').dropdown({
-      onChange: (value, text, $item) => {
-        this.parse({idxFile: $item.data('i'), format: value});
+    $('.upload-contribution .parse-step-content .format-dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
+      onChange: (value, text, $choice) => {
+        this.parse({idxFile: $choice.data('i'), format: value});
       }
     });
-    $('.upload-contribution .parse-step-content .table-dropdown').dropdown({
-      onChange: (value, text, $item) => {
-        $('.upload-contribution .parse-step-content .table-dropdown[data-i=' + $item.data('i') + ']').removeClass('error');
-      }
-    });
+    $('.upload-contribution .parse-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
   }
 
   reviewParse() {
@@ -153,9 +153,9 @@ export default class extends React.Component {
         totalParseErrors: totalParseErrors,
         totalParseWarnings: totalParseWarnings
       });
-      console.log(this.files, this.parser);
-      if (totalParseErrors === 0)
-        this.upload();
+      console.log(totalParseErrors, totalParseWarnings, this.files, this.parser);
+      //if (totalParseErrors === 0)
+      //  this.upload();
     });
   }
 
@@ -251,13 +251,14 @@ export default class extends React.Component {
           <div ref="accordion" className="ui accordion">
             <div className="active title"></div>
             <div ref="select step message" className="active content select-step-content">
+              <div className="ui basic segment">
               {(step === 1 ?
-                <Dropzone ref="dropzone" className="upgrade-dropzone" onDrop={this.readFiles.bind(this)}>
+                <Dropzone ref="dropzone" className="upload-dropzone" onDrop={this.readFiles.bind(this)}>
                   <div className="ui center aligned two column relaxed grid">
                     <div className="column">
                       <i className="huge purple folder open outline icon"></i>
                       <h5>Click and select</h5>
-                      <h5>files to upgrade.</h5>
+                      <h5>files to upload.</h5>
                     </div>
                     <div className="ui vertical divider">
                       OR
@@ -265,11 +266,42 @@ export default class extends React.Component {
                     <div className="column">
                       <i className="huge purple external icon"></i>
                       <h5>Drag and drop files</h5>
-                      <h5>here to upgrade.</h5>
+                      <h5>here to upload.</h5>
                     </div>
                   </div>
                 </Dropzone>
-                : undefined)}
+              : undefined)}
+              </div>
+              <div className="ui divider"></div>
+              <div className="ui header" style={{marginBottom: '1em'}}>
+                Upload an Example File:
+              </div>
+              <div className="ui four cards">
+                <IconButton className="borderless card" href="" portal="MagIC">
+                  <i className="icons">
+                    <i className="file text outline icon"/>
+                  </i>
+                  <div className="title">3.0 MagIC Text File</div>
+                </IconButton>
+                <IconButton className="borderless card" href="" portal="MagIC">
+                  <i className="icons">
+                    <i className="file text outline icon"/>
+                  </i>
+                  <div className="title">2.5 MagIC Text File</div>
+                </IconButton>
+                <IconButton className="borderless card" href="" portal="MagIC">
+                  <i className="icons">
+                    <i className="table icon"/>
+                  </i>
+                  <div className="title">Tab Delimited Text File</div>
+                </IconButton>
+                <IconButton className="borderless card" href="" portal="MagIC">
+                  <i className="icons">
+                    <i className="file excel outline icon"/>
+                  </i>
+                  <div className="title">Excel File</div>
+                </IconButton>
+              </div>
             </div>
             <div className="title"></div>
             <div ref="parse step message" className="content parse-step-content">
@@ -320,7 +352,7 @@ export default class extends React.Component {
                         </div>
                         <div className="description">
                           <div className={
-                            (file.readErrors ? 'error ' : '') +
+                            (file.readErrors && file.readErrors.length > 0 ? 'error ' : '') +
                             'ui tiny purple progress'
                           }
                                data-percent={file.readProgress}>
@@ -341,13 +373,14 @@ export default class extends React.Component {
                               </tbody>
                             </table>
                             : undefined)}
-                          <div className="ui small buttons">
-                            <div className="ui disabled button">
+                          <div className="ui labeled fluid action input">
+                            <div className="ui label">
                               Parse As
                             </div>
-                            <div className="ui dropdown button format-dropdown">
-                              <div className="text">MagIC Text File</div>
+                            <div className="ui fluid selection dropdown format-dropdown">
+                              <input name="format" type="hidden" value="magic"/>
                               <i className="dropdown icon"></i>
+                              <div className="text">MagIC Text File</div>
                               <div className="menu">
                                 <div data-i={i} data-value="magic" className="item">
                                   MagIC Text File
@@ -361,44 +394,12 @@ export default class extends React.Component {
                                 <div data-i={i} data-value="fw" className="disabled item">
                                   Fixed Width Text File
                                 </div>
-                                <div data-i={i} data-value="xls" className="disabled item">
+                                <div data-i={i} data-value="xls" className="item">
                                   Excel File
                                 </div>
                               </div>
                             </div>
                           </div>
-                          {(file.format === 'tsv' ?
-                            <div data-i={i} className="ui right floated dropdown small basic button table-dropdown">
-                              <div className="text">Data Model Table</div>
-                              <i className="dropdown icon"></i>
-                              <div className="menu">
-                                <div data-i={i} data-value="contribution" className="item">
-                                  Contribution
-                                </div>
-                                <div data-i={i} data-value="locations" className="item">
-                                  Locations
-                                </div>
-                                <div data-i={i} data-value="sites" className="item">
-                                  Sites
-                                </div>
-                                <div data-i={i} data-value="samples" className="item">
-                                  Samples
-                                </div>
-                                <div data-i={i} data-value="specimens" className="item">
-                                  Specimens
-                                </div>
-                                <div data-i={i} data-value="measurements" className="item">
-                                  Measurmeents
-                                </div>
-                                <div data-i={i} data-value="ages" className="item">
-                                  Ages
-                                </div>
-                                <div data-i={i} data-value="images" className="item">
-                                  Images
-                                </div>
-                              </div>
-                            </div>
-                            : undefined )}
                           <div className={
                             (file.parseErrors && file.parseErrors.length ? 'error ' :
                               (file.parseWarnings && file.parseWarnings.length ? 'warning ' : '')) +
@@ -434,155 +435,11 @@ export default class extends React.Component {
                                 </table>
                               : undefined)
                             :
-                                <table className="ui celled definition small compact table">
-                                  <thead>
-                                  <tr>
-                                    <th></th>
-                                    <th>Site</th>
-                                    <th>Latitude</th>
-                                    <th>Longitude</th>
-                                    <th>D</th>
-                                    <th>I</th>
-                                    <th>Intensity</th>
-                                  </tr>
-                                  </thead>
-                                  <tbody>
-                                  <tr>
-                                    <td className="right aligned collapsing">Column</td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">site</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">lat</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">lon</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td className="negative">
-                                      <div className="ui fluid dropdown error">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1"></div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">dir_inc</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">int_abs</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="right aligned collapsing">Unit</td>
-                                    <td>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">Degrees</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">Degrees</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td className="negative">
-                                      <div className="ui fluid dropdown error">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">Degrees</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">Degrees</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                    <td>
-                                      <div className="ui fluid dropdown">
-                                        <input type="hidden"/>
-                                        <i className="dropdown icon"></i>
-                                        <div className="menu">
-                                          <div className="active item" data-value="1">mT</div>
-                                        </div>
-                                      </div>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td className="right aligned collapsing">1</td>
-                                    <td>mc20</td>
-                                    <td className="right aligned">-77.88</td>
-                                    <td className="right aligned">165.02</td>
-                                    <td className="right aligned negative">138.7</td>
-                                    <td className="right aligned">-77.3</td>
-                                    <td className="right aligned">0.01431</td>
-                                  </tr>
-                                  <tr>
-                                    <td className="right aligned collapsing">2</td>
-                                    <td>mc200</td>
-                                    <td className="right aligned">-77.54995</td>
-                                    <td className="right aligned">166.16148</td>
-                                    <td className="right aligned negative">296.8</td>
-                                    <td className="right aligned">-83.7</td>
-                                    <td></td>
-                                  </tr>
-                                  <tr>
-                                    <td className="right aligned collapsing">3</td>
-                                    <td>mc201</td>
-                                    <td className="right aligned">-77.56284</td>
-                                    <td className="right aligned">166.21958</td>
-                                    <td className="negative"></td>
-                                    <td></td>
-                                    <td className="right aligned">0.04716</td>
-                                  </tr>
-                                  </tbody>
-                                </table>
+                              <DataImporter
+                                portal="MagIC"
+                                data={file.text.split('\n').map((line, i) => line.split('\t'))}
+                                model={models[_.last(versions)]}
+                              />
                             )}
                           </div>
                         </div>
@@ -593,176 +450,8 @@ export default class extends React.Component {
               </div>
             </div>
             <div className="title"></div>
-            <div ref="import step message" className="content import-step-content">
-              <div className="content">
-                <h3>Reading and parsing each of the files in the contribution:</h3>
-                <div ref="files" className="ui divided items">
-                  {this.files.map((file, i) => {
-                    return (
-                      <div key={i} className="item" data-file={file.name}>
-                        <div className="title">
-                          {file.name}
-                        </div>
-                        <div className="content">
-                          <table className="ui celled definition small compact table">
-                        <thead>
-                          <tr>
-                            <th></th>
-                            <th>Site</th>
-                            <th>Latitude</th>
-                            <th>Longitude</th>
-                            <th>D</th>
-                            <th>I</th>
-                            <th>Intensity</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td className="right aligned collapsing">Column</td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">site</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">lat</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">lon</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="negative">
-                              <div className="ui fluid dropdown error">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1"></div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">dir_inc</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">int_abs</div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="right aligned collapsing">Unit</td>
-                            <td>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">Degrees</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">Degrees</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="negative">
-                              <div className="ui fluid dropdown error">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">Degrees</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">Degrees</div>
-                                </div>
-                              </div>
-                            </td>
-                            <td>
-                              <div className="ui fluid dropdown">
-                                <input type="hidden"/>
-                                <i className="dropdown icon"></i>
-                                <div className="menu">
-                                  <div className="active item" data-value="1">mT</div>
-                                </div>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="right aligned collapsing">1</td>
-                            <td>mc20</td>
-                            <td className="right aligned">-77.88</td>
-                            <td className="right aligned">165.02</td>
-                            <td className="right aligned negative">138.7</td>
-                            <td className="right aligned">-77.3</td>
-                            <td className="right aligned">0.01431</td>
-                          </tr>
-                          <tr>
-                            <td className="right aligned collapsing">2</td>
-                            <td>mc200</td>
-                            <td className="right aligned">-77.54995</td>
-                            <td className="right aligned">166.16148</td>
-                            <td className="right aligned negative">296.8</td>
-                            <td className="right aligned">-83.7</td>
-                            <td></td>
-                          </tr>
-                          <tr>
-                            <td className="right aligned collapsing">3</td>
-                            <td>mc201</td>
-                            <td className="right aligned">-77.56284</td>
-                            <td className="right aligned">166.21958</td>
-                            <td className="negative"></td>
-                            <td></td>
-                            <td className="right aligned">0.04716</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-            <div className="title"></div>
             <div ref="upload step message" className="content upload-step-content">
-              Step 3
+
             </div>
           </div>
         </div>

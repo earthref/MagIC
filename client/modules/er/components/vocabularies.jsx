@@ -50,16 +50,16 @@ export default class extends React.Component {
 
   search(str) {
     return;
-    const $tbls  = $(this.refs['accordion']).find('.data-model-table');
-    const $grps  = $(this.refs['accordion']).find('.data-model-group');
-    const $cols  = $(this.refs['accordion']).find('.data-model-column');
+    const $tbls  = $(this.refs['accordion']).find('.vocabularies-table');
+    const $grps  = $(this.refs['accordion']).find('.vocabularies-group');
+    const $cols  = $(this.refs['accordion']).find('.vocabularies-column');
 
     // Enable columns that contain the string and disable others.
     if (str !== '') {
       $cols.addClass('no-match').filter(':icontains(' + str + ')').removeClass('no-match');
-      $tbls.find('.data-model-table-count').each(function() {
-        const $table = $(this).parents('.data-model-table');
-        const n_match = $table.find('.data-model-column').not('.no-match').length;
+      $tbls.find('.vocabularies-table-count').each(function() {
+        const $table = $(this).parents('.vocabularies-table');
+        const n_match = $table.find('.vocabularies-column').not('.no-match').length;
         $(this).addClass(portals['MagIC'].color);
         $(this).children('span').remove();
         $(this).prepend(`<span>${n_match} of </span>`);
@@ -68,9 +68,9 @@ export default class extends React.Component {
         else
           $table.removeClass('no-match');
       });
-      $grps.find('.data-model-group-count').each(function() {
-        const $group = $(this).parents('.data-model-group');
-        const n_match = $group.find('.data-model-column').not('.no-match').length;
+      $grps.find('.vocabularies-group-count').each(function() {
+        const $group = $(this).parents('.vocabularies-group');
+        const n_match = $group.find('.vocabularies-column').not('.no-match').length;
         $(this).addClass(portals['MagIC'].color);
         $(this).children('span').remove();
         $(this).prepend(`<span>${n_match} of </span>`);
@@ -88,7 +88,7 @@ export default class extends React.Component {
       $tbls.removeClass('no-match');
       $grps.removeClass('no-match');
       $cols.removeClass('no-match');
-      const $counts = $tbls.find('.data-model-table-count, .data-model-group-count');
+      const $counts = $tbls.find('.vocabularies-table-count, .vocabularies-group-count');
       $counts.removeClass(portals['MagIC'].color);
       $counts.children().remove();
       $(this.refs['count']).html($cols.length);
@@ -139,7 +139,7 @@ export default class extends React.Component {
   render() {
     const vocabularies = (this.props.vocabularies === 'controlled' ? cvs : svs);
     return (
-      <div className="data-model">
+      <div className="vocabularies">
         <div className="ui top attached tabular menu">
           <a className={(this.props.vocabularies === 'controlled' ? 'active ' : '') + 'item'} href={'controlled'}>
             Controlled Vocabularies
@@ -179,13 +179,13 @@ export default class extends React.Component {
           <div ref="accordion" className="ui styled fluid accordion">
             {_.keys(vocabularies).sort().map((group,i) => {
               if (this.state.loaded) return (
-                <div className="data-model-table" key={i}>
+                <div className="vocabularies-table" key={i}>
                   <div className={(i === 0 ? 'active ' : '') + 'title'}>
                     <i className="dropdown icon"/>
                     <span>
                       {vocabularies[group].label}
                     </span>
-                    <div className="ui circular small basic label data-model-table-count">
+                    <div className="ui circular small basic label vocabularies-table-count">
                       {vocabularies[group].items.length}
                     </div>
                   </div>

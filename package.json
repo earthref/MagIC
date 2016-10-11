@@ -35,7 +35,6 @@
     "domready": "^1.0.8",
     "filesize": "^3.3.0",
     "jquery": "^3.1.1",
-    "jszip": "^3.1.2",
     "lodash": "^4.6.1",
     "mantra-core": "^1.2.0",
     "meteor-node-stubs": "^0.2.3",
