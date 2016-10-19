@@ -1,4 +1,4 @@
-export const portalsOrder = ['EarthRef.org', 'GERM', 'MagIC', 'SBN', 'FeMO', 'SCC', 'ERESE'];
+export const portalsOrder = ['EarthRef.org', 'GERM', 'MagIC', 'ERDA', 'References', 'SBN', 'FeMO', 'SCC', 'ERESE'];
 
 export const portals = {
   'EarthRef.org': {
@@ -14,8 +14,20 @@ export const portals = {
     subtitle: 'Chemical characterization of the Earth, its major reservoirs and the fluxes between them.'
   },
   'MagIC': {
-    url: '/MagIC/',
+    url: '/MagIC',
     color: 'purple',
+    title: 'Magnetics Information Consortium (MagIC)',
+    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
+  },
+  'ERDA': {
+    url: 'https://earthref.org/ERDA/',
+    color: 'green',
+    title: 'Magnetics Information Consortium (MagIC)',
+    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
+  },
+  'References': {
+    url: 'https://earthref.org/ERR/',
+    color: 'green',
     title: 'Magnetics Information Consortium (MagIC)',
     subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
   },

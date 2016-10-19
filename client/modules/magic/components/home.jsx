@@ -1,4 +1,5 @@
 import React from 'react';
+import moment from 'moment';
 import IconButton from '../../common/components/icon_button.jsx';
 
 export default class extends React.Component {
@@ -26,100 +27,156 @@ export default class extends React.Component {
             Register
           </a>
           <div className="ui purple tiny statistic" style={{margin:'0 1em'}}>
-            <div className="value">104</div>
+            <div className="value">{moment('2017-01-24').diff(moment(), 'days')}</div>
             <div className="label">Days To Go!</div>
           </div>
         </div>
         <div className="ui header">
-          <div className="ui one column padded centered grid">
-            <div className="ui piled segment items">
-              <a className="item" href="/MagIC/upgrade/">
-                <div className="ui bordered images image" style={{marginBottom:'1em'}}>
-                  <video className="image" autoPlay loop width="500" height="350">
-                    <source src="/MagIC/upgrade.webm" type="video/webm"></source>
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-                <div className="content" style={{textAlign:'left', margin:'auto'}}>
-                  <div className="header">Upgrade</div>
-                  <div className="extra">
-                    Convert a<br/>
-                    contribution<br/>
-                    to the latest<br/>
-                    data model.
+          <div className="ui column padded grid">
+            <div className="ten wide column">
+              <div className="ui piled segment items">
+                <a className="item" href="/MagIC/upgrade/">
+                  <div className="ui bordered images image" style={{marginBottom:'1em'}}>
+                    <video className="image" autoPlay loop width="500" height="350">
+                      <source src="/MagIC/upgrade.webm" type="video/webm"></source>
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
-                </div>
-              </a>
+                  <div className="content" style={{textAlign:'left', margin:'auto'}}>
+                    <div className="header">Upgrade</div>
+                    <div className="extra">
+                      Convert a<br/>
+                      dataset<br/>
+                      to the latest<br/>
+                      data model.
+                    </div>
+                  </div>
+                </a>
+              </div>
+            </div>
+            <div className="six wide column">
+              <div className="ui header">
+                Recent Activity
+              </div>
+              <div className="ui divided relaxed feed items">
+                <a className="item">
+                  <div className="ui tiny image">
+                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)'}}/>
+                  </div>
+                  <div className="content">
+                    <h5 className="ui header">Selkin, P.A., Gee, J.S. and Tauxe, L. (2007).</h5>
+                    <div className="description" style={{fontWeight:'normal'}}>
+                      Nonlinear thermoremanence acquisition and implications for paleointensity data. EPSL.
+                    </div>
+                  </div>
+                </a>
+                <a className="event item">
+                  <div className="content">
+                    <div className="summary">
+                      Guillaume St-Onge, PhD
+                      <div className="date">5 days ago</div>
+                    </div>
+                    <div className="extra text" style={{fontWeight:'normal'}}>
+                      Postdoctoral fellowship in paleomagnetism at the Institut des sciences de la mer de Rimouski (ISMER)
+                    </div>
+                  </div>
+                </a>
+                <a className="event item">
+                  <div className="content">
+                    <div className="summary">
+                      Guillaume St-Onge, PhD
+                      <div className="date">5 days ago</div>
+                    </div>
+                    <div className="extra text" style={{fontWeight:'normal'}}>
+                      Postdoctoral fellowship in paleomagnetism at the Institut des sciences de la mer de Rimouski (ISMER)
+                    </div>
+                  </div>
+                </a>
+              </div>
             </div>
           </div>
         </div>
         <div className="ui hidden divider"></div>
         <div className="ui five cards">
-          <IconButton className="disabled card" href="/MagIC/search" portal="MagIC">
-            <i className="icons">
+          <IconButton className="card" href="/MagIC/search" portal="MagIC">
+            <i className="large icons">
               <i className="database icon"/>
               <i className="corner search icon"/>
             </i>
             <div className="title">Search</div>
-            <div className="subtitle">Browse, combine, and save contributions.</div>
+            <div className="subtitle">Browse, combine, and save datasets.</div>
           </IconButton>
           <IconButton className="card" href="/MagIC/upgrade" portal="MagIC">
-            <i className="icons">
+            <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner arrow up icon"/>
             </i>
             <div className="title">Upgrade</div>
-            <div className="subtitle">Convert a contribution to the latest data model.</div>
+            <div className="subtitle">Convert a dataset to the latest data model.</div>
           </IconButton>
           <IconButton className="card" href="/MagIC/upload" portal="MagIC">
-            <i className="icons">
+            <i className="large icons">
               <i className="table icon"/>
               <i className="corner add icon"/>
             </i>
             <div className="title">Upload</div>
-            <div className="subtitle">Import data into a private workspace.</div>
+            <div className="subtitle">Import data into your private workspace.</div>
           </IconButton>
           <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC">
-            <i className="icons">
+            <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner help icon"/>
             </i>
             <div className="title">Validate</div>
-            <div className="subtitle">Confirm your contribution is ready.</div>
+            <div className="subtitle">Confirm your dataset is ready.</div>
           </IconButton>
           <IconButton className="disabled card" href="/MagIC/activate" portal="MagIC">
-            <i className="icons">
+            <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner checkmark icon"/>
             </i>
             <div className="title">Activate</div>
-            <div className="subtitle">Make your contribution publicly visible.</div>
+            <div className="subtitle">Make your dataset publicly visible.</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
           MagIC Resources
         </h2>
-        <div className="ui three cards">
-          <IconButton className="borderless card" href="/MagIC/data-model/3.0" portal="MagIC">
-            <i className="large icons">
+        <div className="ui five cards">
+          <IconButton className="borderless card" href="/MagIC/data-models/3.0" portal="MagIC">
+            <i className="icons">
               <i className="sitemap icon"/>
               <i className="corner table icon"/>
             </i>
-            <div className="title">Data Model</div>
+            <div className="title">Data<br/>Model</div>
           </IconButton>
           <IconButton className="borderless card" href="/MagIC/method-codes" portal="MagIC">
-            <i className="large icons">
+            <i className="icons">
               <i className="lab icon"/>
               <i className="corner write icon"/>
             </i>
-            <div className="title">Method Codes</div>
+            <div className="title">Method<br/>Codes</div>
           </IconButton>
           <IconButton className="borderless card" href="/vocabularies" portal="MagIC">
-            <i className="large icons">
+            <i className="icons">
               <i className="list icon"/>
               <i className="corner lock icon"/>
             </i>
-            <div className="title">Vocabularies</div>
+            <div className="title">Vocabulary<br/>Lists</div>
+          </IconButton>
+          <IconButton className="borderless card" href="https://github.com/PmagPy/PmagPy" portal="MagIC">
+            <i className="icons">
+              <i className="bar chart icon"/>
+              <i className="corner calculator icon"/>
+            </i>
+            <div className="title">PmagPy<br/>Software</div>
+          </IconButton>
+          <IconButton className="disabled borderless card" href="/vocabularies" portal="MagIC">
+            <i className="icons">
+              <i className="file text icon"/>
+              <i className="corner write icon"/>
+            </i>
+            <div className="title">Data Management<br/>Plan Tool</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
@@ -127,7 +184,7 @@ export default class extends React.Component {
         </h2>
         <div className="ui four cards">
           <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui purple statistic">
+            <div className="ui statistic">
               <div className="value">
                 7
               </div>
@@ -138,7 +195,7 @@ export default class extends React.Component {
             </div>
           </IconButton>
           <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui purple statistic">
+            <div className="ui statistic">
               <div className="value">
                 4.2K
               </div>
@@ -149,7 +206,7 @@ export default class extends React.Component {
             </div>
           </IconButton>
           <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui purple statistic">
+            <div className="ui statistic">
               <div className="value">
                 147.7K
               </div>
@@ -160,7 +217,7 @@ export default class extends React.Component {
             </div>
           </IconButton>
           <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui purple statistic">
+            <div className="ui statistic">
               <div className="value">
                 25
               </div>

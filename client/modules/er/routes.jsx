@@ -15,6 +15,9 @@ export default function (injectDeps, {FlowRouter}) {
   const mounterWithContext = injectDeps(mounter);
 
   FlowRouter.route(`/`, {
+    action() { FlowRouter.go('/MagIC'); }
+  });
+  /*FlowRouter.route(`/`, {
     name: 'erHome',
     action({}) {
       mount(mounterWithContext, {
@@ -29,7 +32,7 @@ export default function (injectDeps, {FlowRouter}) {
         )
       });
     }
-  });
+  });*/
 
   FlowRouter.route(`/vocabularies`, {
     action() { FlowRouter.go('/vocabularies/controlled'); }

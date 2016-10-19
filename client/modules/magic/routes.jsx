@@ -7,6 +7,7 @@ import Home from '../common/components/home.jsx';
 
 import {default as magicVersions} from './configs/magic_versions.js';
 import MagICHome from './components/home.jsx';
+import MagICSearch from './components/search.jsx';
 import MagICDataModel from './components/data_model.jsx';
 import MagICMethodCodes from './components/method_codes.jsx';
 import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
@@ -22,7 +23,7 @@ export default function (injectDeps, {FlowRouter}) {
     prefix: '/MagIC',
     name: 'MagIC',
     triggersEnter: [function(context, redirect) {
-      console.log('running MagIC group triggers', context, redirect);
+      //console.log('running MagIC group triggers', context, redirect);
     }]
   });
 
@@ -40,7 +41,61 @@ export default function (injectDeps, {FlowRouter}) {
       });
     }
   });
-  
+
+  magicRoutes.route(`/search`, {
+    name: 'magicSearch',
+    action({q}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Search the MagIC Database references:
+              </h3>
+              <MagICSearch view="public" search={q}/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/private`, {
+    name: 'magicSearch',
+    action({q}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Manage your contributions:
+              </h3>
+              <MagICSearch view="private" search={q}/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
+  magicRoutes.route(`/shared`, {
+    name: 'magicSearch',
+    action({q}) {
+      mount(mounterWithContext, {
+        content: () => (
+          <Layout portal="MagIC">
+            <Home portal="MagIC">
+              <h3>
+                Manage your collaborators' contributions:
+              </h3>
+              <MagICSearch view="shared" search={q}/>
+            </Home>
+          </Layout>
+        )
+      });
+    }
+  });
+
   magicRoutes.route(`/data-model`, {
     action() { FlowRouter.go(`/MagIC/data-models/${magicVersions.slice(-1)[0]}`); }
   });

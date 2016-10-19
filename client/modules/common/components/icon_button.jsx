@@ -14,6 +14,8 @@ export default class extends React.Component {
         {React.Children.map(this.props.children, (child, i) => {
           if (child.props.className === 'title')
             child = React.cloneElement(child, { className: 'ui header ' + this.portalColor()});
+          if (child.props.className.indexOf('statistic') !== -1)
+            child = React.cloneElement(child, { className: child.props.className + ' ' + this.portalColor()});
           if (child.props.className === 'subtitle')
             child = React.cloneElement(child, { className: 'ui sub header'});
           return child;
@@ -23,16 +25,17 @@ export default class extends React.Component {
   }
 
   render() {
-    const className = 'ui icon header basic fluid button ' + this.portalColor() + ' ' +
-                      this.props.className + ' er-icon-button';
+    let {className, portal, tooltip, position, ...props} = this.props;
+    className = 'ui icon header basic fluid button ' + this.portalColor() + ' ' +
+      className + ' er-icon-button';
     return (
-      <div className={className} style={this.props.style}>
+      <div className={className} {...props}>
       {(this.props.href ?
-        <a className="content" href={this.props.href}>
+        <a href={this.props.href} data-tooltip={tooltip} data-position={position}>
           {this.renderChildren()}
         </a>
       :
-        <div className="content">
+        <div data-tooltip={tooltip} data-position={position}>
           {this.renderChildren()}
         </div>
       )}

@@ -11,7 +11,7 @@ export default class extends React.Component {
       nHeaderRows: '1',
       maxDataRows: 5,
       tableName: '',
-      in: (!Array.isArray(props.data) ? [] : props.data),
+      in: [],
       inColumnNames: [],
       outColumnNames: [],
       includeColumns: [],
@@ -32,6 +32,7 @@ export default class extends React.Component {
       }
     });
     $(this.refs['errors accordion']).accordion();
+    this.setState({in: (!Array.isArray(this.props.data) ? [] : this.props.data)});
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -157,7 +158,6 @@ export default class extends React.Component {
 
     $(this.refs['table column names']).find('.ui.dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
       fullTextSearch: 'exact',
-      //selector: {search: '.menu > .item > .text'},
       onChange: (value, text, $choice) => {
         if ($choice.data) {
           let outColumnNames = this.state.outColumnNames;
@@ -169,7 +169,7 @@ export default class extends React.Component {
     $(this.refs['table column names']).find('.ui.dropdown.ui-dropdown').dropdown('refresh');
 
     $(this.refs['table column units']).find('.ui.dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
-      fullTextSearch: true
+      fullTextSearch: 'exact'
     });
     $(this.refs['table column units']).find('.ui.dropdown.ui-dropdown').dropdown('refresh');
   }
@@ -311,7 +311,7 @@ export default class extends React.Component {
                 return (
                   <th key={i}>
                     <div className="ui fitted toggle checkbox" data-position="bottom right"
-                         data-tooltip={(this.state.includeColumns[i] ? 'Exclude' : 'Include') + ' this column'}>
+                         data-tooltip={'Click to ' + (this.state.includeColumns[i] ? 'exclude' : 'include') + ' this column'}>
                       <input type="checkbox" checked={this.state.includeColumns[i]} data-column-idx={i}/>
                     </div>
                     <span>{columnName}</span>
@@ -324,10 +324,11 @@ export default class extends React.Component {
             <tr ref="table column names">
               <td className="collapsing right aligned">Column</td>
               {(this.state.outColumnNames.map((outColumnName, i) => {
-                return (this.state.includeColumns[i] ?
+                return (
                   <td key={i}
                       className={
                         'ui fluid dropdown' +
+                        (this.state.includeColumns[i] ? '' : ' disabled') +
                         (this.state.errors.tableName.length > 0 ? '' : ' search') +
                         (this.state.errors.tableName.length > 0 ||
                           outColumnName === undefined ||
@@ -344,8 +345,6 @@ export default class extends React.Component {
                     </div>
                     {this.renderColumnHeaderDropdownMenu(i)}
                   </td>
-                :
-                  <td key={i} className="disabled"> </td>
                 );
               }))}
             </tr>

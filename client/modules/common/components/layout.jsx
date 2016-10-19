@@ -38,6 +38,12 @@ export default class extends React.Component {
             </div>
           </div>
         </div>
+        <div className="ui top fixed secondary pointing menu right-menu">
+          <a className="ui dropdown item">
+            Login
+            <i className="dropdown icon"/>
+          </a>
+        </div>
         <div className="ui bottom fixed small menu footer">
           <div className="ui container">
             <div className="left menu">

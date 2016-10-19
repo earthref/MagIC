@@ -77,5 +77,23 @@ storiesOf('Icon Button', module)
           <div className="subtitle">Card 2 with the same height</div>
         </IconButton>
       </div>
+      <div className="ui two cards">
+        <IconButton className="card" portal="SBN" tooltip="A tooltip..." position="bottom left">
+          <i className="icons">
+            <i className="database icon"></i>
+            <i className="corner search icon"></i>
+          </i>
+          <div className="title">SBN</div>
+          <div className="subtitle">With a bottom left tooltip</div>
+        </IconButton>
+        <IconButton className="card" portal="SCC" tooltip="A tooltip...">
+          <i className="icons">
+            <i className="database icon"></i>
+            <i className="corner search icon"></i>
+          </i>
+          <div className="title">SCC</div>
+          <div className="subtitle">With a tooltip</div>
+        </IconButton>
+      </div>
     </div>
   ));
