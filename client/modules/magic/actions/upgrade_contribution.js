@@ -5,8 +5,8 @@ import Promise from 'bluebird';
 import Runner from '../../common/actions/runner';
 import ValidateContribution from './validate_contribution';
 
-import {default as versions} from '../configs/magic_versions';
-import {default as models} from '../configs/data_models/data_models';
+import {default as versions} from '../../../../lib/modules/magic/magic_versions';
+import {default as models} from '../../../../lib/modules/magic/data_models';
 
 // This class upgrades the json data from its current model to the newest model if a newer model is available.
 export default class extends Runner {

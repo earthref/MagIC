@@ -26,7 +26,7 @@ export default class extends React.Component {
              href="https://earthref.org/cgi-bin/erml-c0-introduction.cgi?event=MAGIC">
             Register
           </a>
-          <div className="ui purple tiny statistic" style={{margin:'0 1em'}}>
+          <div className="ui tiny statistic" style={{margin:'0 1em'}}>
             <div className="value">{moment('2017-01-24').diff(moment(), 'days')}</div>
             <div className="label">Days To Go!</div>
           </div>

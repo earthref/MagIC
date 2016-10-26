@@ -4,8 +4,8 @@ import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
 import ParseContribution from '../actions/parse_contribution';
-import {default as versions} from '../configs/magic_versions';
-import {default as models} from '../configs/data_models/data_models';
+import {default as versions} from '../../../../lib/modules/magic/magic_versions';
+import {default as models} from '../../../../lib/modules/magic/data_models';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 

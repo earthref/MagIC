@@ -3,9 +3,9 @@ import React from 'react';
 import saveAs from 'save-as';
 import IconButton from '../../common/components/icon_button.jsx';
 import {portals} from '../../common/configs/portals';
-import {default as cvs} from '../../er/configs/controlled_vocabularies';
-import {default as svs} from '../../er/configs/suggested_vocabularies';
-import {default as contributions} from '../configs/contributions';
+import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
+import {default as svs} from '../../../../lib/modules/er/suggested_vocabularies';
+import {default as contributions} from '../../../../lib/modules/magic/contributions';
 
 export default class extends React.Component {
 
@@ -42,14 +42,26 @@ export default class extends React.Component {
     return (
       <div className="magic-search">
         <div className="ui top attached tabular menu">
-          <a className={(this.props.view === 'public' ? 'active ' : '') + 'item'} href={'/MagIC/search'}>
-            Public
+          <a className={'active item'} href="">
+            Contributions
           </a>
-          <a className={(this.props.view === 'private' ? 'active ' : '') + 'item'} href={'/MagIC/private'}>
-            Private
+          <a className={'item'} href="">
+            Locations
           </a>
-          <a className={(this.props.view === 'shared' ? 'active ' : '') + 'item'} href={'/MagIC/shared'}>
-            Shared
+          <a className={'item'} href="">
+            Sites
+          </a>
+          <a className={'item'} href="">
+            Samples
+          </a>
+          <a className={'item'} href="">
+            Specimens
+          </a>
+          <a className={'item'} href="">
+            Synthetics
+          </a>
+          <a className={'item'} href="">
+            Experiments
           </a>
           <div className="right menu">
             <div className="active item">
@@ -78,9 +90,10 @@ export default class extends React.Component {
                   <h4 className="ui header" style={{marginTop:0}}>
                     References Sort
                   </h4>
-                  <i className="ui sort numeric descending icon"/><b>Upload Date</b><br/><br/>
-                  <i className="ui icon"/>Number of Rows<br/><br/>
-                  <i className="ui icon"/>Number of Citations<br/>
+                  <i className="ui sort numeric descending icon"/> <b>Upload Date</b><br/><br/>
+                  <i className="ui icon"/> Number of Rows<br/><br/>
+                  <i className="ui icon"/> Number of Citations<br/><br/>
+                  <i className="ui plus icon"/> Custom Sort Column<br/>
                   <div className="ui divider"></div>
                   <h4 className="ui header">
                     References Filters

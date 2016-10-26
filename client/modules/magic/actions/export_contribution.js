@@ -5,8 +5,8 @@ import XLSX from 'xlsx-style';
 import Runner from '../../common/actions/runner.js';
 import ValidateContribution from './validate_contribution';
 
-import { default as magicVersions   } from '../configs/magic_versions';
-import { default as magicDataModels } from '../configs/data_models/data_models';
+import { default as magicVersions   } from '../../../../lib/modules/magic/magic_versions';
+import { default as magicDataModels } from '../../../../lib/modules/magic/data_models';
 
 export default class extends Runner {
 

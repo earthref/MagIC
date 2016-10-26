@@ -3,8 +3,8 @@ import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
 import {portals} from '../../common/configs/portals';
-import {default as versions} from '../configs/magic_versions';
-import {default as models} from '../configs/data_models/data_models';
+import {default as versions} from '../../../../lib/modules/magic/magic_versions';
+import {default as models} from '../../../../lib/modules/magic/data_models';
 import Upgrader from '../actions/upgrade_contribution';
 import DataModelColumn from './data_model_column';
 
