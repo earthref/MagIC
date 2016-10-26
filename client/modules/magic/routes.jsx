@@ -47,7 +47,7 @@ export default function (injectDeps, {FlowRouter}) {
     action({q}) {
       mount(mounterWithContext, {
         content: () => (
-          <Layout portal="MagIC">
+          <Layout portal="MagIC" fullWidth={true}>
             <Home portal="MagIC">
               <h3>
                 Search the MagIC Database references:

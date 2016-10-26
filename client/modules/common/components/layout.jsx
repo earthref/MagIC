@@ -6,6 +6,12 @@ export default class extends React.Component {
 
   componentDidMount() {
     $(this.refs['sidebar menu']).sidebar({context:$(this.refs['layout']), transition:'overlay'});
+    $(this.refs['beta modal']).modal({
+      closable: false,
+      onApprove: ($modal) => {
+        $modal.modal('close');
+      }
+    }).modal('show');
   }
 
   componentDidUpdate() {
@@ -17,14 +23,33 @@ export default class extends React.Component {
   }
 
   render() {
-    const {portal} = this.props;
+    const {portal, fullWidth} = this.props;
     return (
       <div ref="layout" className="layout">
         <div ref="sidebar menu" className="ui vertical inverted left sidebar menu">
           <Navigation location="sidebar" portal={portal}/>
         </div>
         <div className="pusher">
-          <div className="ui main container layout-content">
+          <div className={'ui main layout-content' + (fullWidth ? '' : ' container')}>
+            <div ref="beta modal" className="ui modal">
+              <i className="close icon"></i>
+              <h1 className="ui centered header">
+                Beta Site
+              </h1>
+              <div className="content">
+                <div className="description">
+                  <div className="ui header">The EarthRef Beta Site is under active development.</div>
+                  <p>Some features are disabled, some are incomplete, and some are mocked-up. Work is in progress.</p>
+                  <p>For questions and comments, please contact Nick (<a href="mailto:njarboe@ucsd.edu">njarboe@ucsd.edu</a>) or Rupert (<a href="mailto:rminnett@earthref.org">rminnett@earthref.org</a>).</p>
+                </div>
+              </div>
+              <div className="actions">
+                <div className="ui purple right labeled icon approve button">
+                  OK
+                  <i className="checkmark icon"></i>
+                </div>
+              </div>
+            </div>
             {this.props.children}
           </div>
         </div>
@@ -32,7 +57,7 @@ export default class extends React.Component {
           <a className="item sidebar-button" onClick={this.showSidebar.bind(this)}>
             <i className="sidebar icon"/>
           </a>
-          <div className="ui container">
+          <div className={'ui' + (fullWidth ? '' : ' container')}>
             <div className="left menu top-menu-navigation">
               <Navigation location="top" portal={portal}/>
             </div>
@@ -45,7 +70,7 @@ export default class extends React.Component {
           </a>
         </div>
         <div className="ui bottom fixed small menu footer">
-          <div className="ui container">
+          <div className={'ui' + (0 && fullWidth ? '' : ' container')}>
             <div className="left menu">
               <div className="ui vertical segment">
                 <div>
