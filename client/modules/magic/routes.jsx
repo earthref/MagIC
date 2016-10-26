@@ -5,7 +5,7 @@ import {mount} from 'react-mounter';
 import Layout from '../common/components/layout.jsx';
 import Home from '../common/components/home.jsx';
 
-import {default as magicVersions} from './configs/magic_versions.js';
+import {default as magicVersions} from '../../../lib/modules/magic/magic_versions.js';
 import MagICHome from './components/home.jsx';
 import MagICSearch from './components/search.jsx';
 import MagICDataModel from './components/data_model.jsx';

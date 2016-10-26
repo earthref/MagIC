@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import React from 'react';
 import {storiesOf, action, linkTo} from '@kadira/storybook';
-import {default as versions} from '../client/modules/magic/configs/magic_versions';
-import {default as models} from '../client/modules/magic/configs/data_models/data_models';
+import {default as versions} from '../lib/modules/magic/magic_versions';
+import {default as models} from '../lib/modules/magic/data_models';
 import DataImporter from '../client/modules/common/components/data_importer.jsx';
 
 const importerData = [
