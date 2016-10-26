@@ -1,4 +1,4 @@
-export const portalsOrder = ['EarthRef.org', 'GERM', 'MagIC', 'ERDA', 'References', 'SBN', 'FeMO', 'SCC', 'ERESE'];
+export const portalsOrder = ['EarthRef.org', 'MagIC', 'GERM', 'SBN', 'FeMO', 'SCC', 'ERESE', 'ERDA', 'References'];
 
 export const portals = {
   'EarthRef.org': {
