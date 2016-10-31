@@ -5,20 +5,29 @@ A Meteor application for the EarthRef.org website.
 ### Creating a Development Environment
 
 Download and install:
-- [Webstorm](https://www.jetbrains.com/webstorm/download/)
-- [Node.js 4](https://nodejs.org/dist/latest-v4.x/)
-- [Meteor](https://www.meteor.com/install)
+- [Webstorm](https://www.jetbrains.com/webstorm/download/) - a great IDE for Javascript development
+- [Node.js 4](https://nodejs.org/dist/latest-v4.x/) - the Javascript runtime to run the server locally  
+  - For OSX, it's better to install [brew](http://brew.sh/) and then type:  
+  ```brew install homebrew/versions/node4-lts```
+- [Meteor](https://www.meteor.com/install) - the full-stack web framework
 - [Git Kraken](https://www.gitkraken.com/download) or another Git UI or Git shell  
-(referred to as Git from now on)
+  - This document refers to whichever Git software you choose simply as **Git** from now on.
 
-Pull the develop branch and branch it to a user/[user name] brach or a feature/[feature name] in Git.
+Pull the **develop** branch and branch it to a **user/[user name]** branch or a **feature/[feature name]** branch in **Git**.
 
-Check out the new branch and make changes in Webstorm.
+Check out the new branch in **Git** and make changes in **Webstorm**.
 
-Retrieve the latest packages in the terminal in Webstorm by typing:
+Retrieve the latest packages in the terminal in **Webstorm** by typing:
 
-```meteor update && npm update```
+```npm update```
 
-Run the Meteor application from Webstorm by typing:
+Run the **Meteor** application from **Webstorm** by typing:
 
 ```meteor```
+
+### Contributing to the Repository
+
+### Deployment
+
+### About
+
