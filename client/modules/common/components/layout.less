@@ -5,15 +5,15 @@
   height: 100% !important;
 }
 
-.layout.pushable {
+#react-root > .layout.pushable {
   transform: none !important;
   overflow-y: scroll !important;
 }
 
-.layout.pushable > .ui.sidebar,
-.layout.pushable > .fixed,
-.layout.pushable > .pusher:after {
-  position: fixed !important;
+#react-root > .layout.pushable > .ui.sidebar,
+#react-root > .layout.pushable > .fixed,
+#react-root > .layout.pushable > .pusher:after {
+  //position: fixed !important;
 }
 
 .top-menu, .footer {
@@ -40,7 +40,7 @@
 
 .layout-content {
   padding-top: 4em !important;
-  padding-bottom: 6em !important;
+  padding-bottom: 1em !important;
 }
 
 @media only screen and (max-width: @largestTabletScreen) {
@@ -55,7 +55,12 @@
   }
 }
 
-.footer .segment {
+#react-root > .layout.pushable > .footer {
+  margin-top: -47px;
+  position: static;
+}
+
+#react-root > .layout.pushable > .footer .segment {
   padding-top: 0.25em;
   padding-bottom: 0.25em;
 }

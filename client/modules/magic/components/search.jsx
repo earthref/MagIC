@@ -12,7 +12,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: this.props.search,
+      search: "",
       loaded: false,
       updating: false
     };
@@ -58,9 +58,6 @@ export default class extends React.Component {
             Specimens
           </a>
           <a className={'item'} href="">
-            Synthetics
-          </a>
-          <a className={'item'} href="">
             Experiments
           </a>
           <div className="right menu">
@@ -83,20 +80,20 @@ export default class extends React.Component {
         </div>
         {(this.props.view === 'public' ?
           <div ref="segment" className="ui bottom attached segment">
-            <div className="ui divided grid" style={{marginTop:0, marginBottom:0}}>
-              <div className="three wide column" style={{fontSize:'small', paddingTop:0}}>
+            <div className="ui divided two column grid" style={{marginTop:0, marginBottom:0}}>
+              <div className="column" style={{fontSize:'small', paddingTop:0, width:'200px'}}>
                 <div className="ui fixed top">
                   <i className="ui large angle double left icon" style={{float:'right'}}/>
                   <h4 className="ui header" style={{marginTop:0}}>
-                    References Sort
+                    Sort
                   </h4>
                   <i className="ui sort numeric descending icon"/> <b>Upload Date</b><br/><br/>
-                  <i className="ui icon"/> Number of Rows<br/><br/>
-                  <i className="ui icon"/> Number of Citations<br/><br/>
+                  <i className="ui icon"/> Author<br/><br/>
+                  <i className="ui icon"/> Age<br/><br/>
                   <i className="ui plus icon"/> Custom Sort Column<br/>
                   <div className="ui divider"></div>
                   <h4 className="ui header">
-                    References Filters
+                    Filters
                   </h4>
                   <i className="ui caret right icon"/>Bounding Box<br/><br/>
                   <i className="ui caret right icon"/>Age Range<br/><br/>
@@ -120,7 +117,7 @@ export default class extends React.Component {
                   <i className="ui small plus icon"/> Custom Column Filter
                 </div>
               </div>
-              <div className="thirteen wide column" id="results" style={{paddingTop:0}}>
+              <div className="column" id="results" style={{paddingTop:0}}>
                 <div className="ui equal width grid">
                   <div className="left aligned column">
                     <i className="plus icon"/>

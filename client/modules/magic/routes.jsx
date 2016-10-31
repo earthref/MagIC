@@ -50,7 +50,7 @@ export default function (injectDeps, {FlowRouter}) {
           <Layout portal="MagIC" fullWidth={true}>
             <Home portal="MagIC">
               <h3>
-                Search the MagIC Database references:
+                Search the MagIC Database:
               </h3>
               <MagICSearch view="public" search={q}/>
             </Home>

@@ -6,12 +6,14 @@ export default class extends React.Component {
 
   componentDidMount() {
     $(this.refs['sidebar menu']).sidebar({context:$(this.refs['layout']), transition:'overlay'});
-    $(this.refs['beta modal']).modal({
-      closable: false,
-      onApprove: ($modal) => {
-        $modal.modal('close');
-      }
-    }).modal('show');
+    if (!localStorage.getItem("modal 2016-10-29 beta"))
+      $(this.refs['beta modal']).modal({
+        closable: false,
+        onApprove: ($modal) => {
+          localStorage.setItem("modal 2016-10-29 beta", true);
+          $modal.modal('close');
+        }
+      }).modal('show');
   }
 
   componentDidUpdate() {
@@ -32,7 +34,6 @@ export default class extends React.Component {
         <div className="pusher">
           <div className={'ui main layout-content' + (fullWidth ? '' : ' container')}>
             <div ref="beta modal" className="ui modal">
-              <i className="close icon"></i>
               <h1 className="ui centered header">
                 Beta Site
               </h1>
@@ -70,7 +71,7 @@ export default class extends React.Component {
           </a>
         </div>
         <div className="ui bottom fixed small menu footer">
-          <div className={'ui' + (0 && fullWidth ? '' : ' container')}>
+          <div className="ui container" style={(fullWidth ? {width:'100%'} : {})}>
             <div className="left menu">
               <div className="ui vertical segment">
                 <div>

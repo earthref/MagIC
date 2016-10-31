@@ -10,7 +10,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: this.props.search,
+      search: "",
       loaded: false,
       updating: false
     };
