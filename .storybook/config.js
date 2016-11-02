@@ -17,6 +17,7 @@ function loadStories() {
   require('../.stories/home.jsx');
   require('../.stories/icon_button.jsx');
   require('../.stories/data_importer.jsx');
+  require('../.stories/magic_search.jsx');
 
 }
 

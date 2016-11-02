@@ -1,3 +1,5 @@
+/*
+
 .vocabularies .vocabularies-table .grid > .column {
   padding: .25rem !important;
 }
@@ -15,7 +17,7 @@
   max-height: 100vh !important;
 }
 
-.magic-search .search input.prompt {
+.search .search input.prompt {
   min-width: 200px !important;
   border-radius: 0 !important;
 }
@@ -24,20 +26,7 @@
   white-space: nowrap !important;
 }
 
-.magic-search .accordion {
-  margin-top: 1em !important;
-  box-shadow: none !important;
-}
-
-.vocFlights
-Flights
-Explore map
-Tracked prices
-Currency · USD
-Language · English (United States)
-Help
-Feedback
-abularies .accordion .title {
+.vocabularies .accordion .title {
   padding: 0.5em 0em !important;
   display: flex;
 }
@@ -54,39 +43,8 @@ abularies .accordion .title {
   margin-right: 0.5em !important;
 }
 
-.magic-search .accordion .title .description {
-  font-weight: normal !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-  flex-shrink: 1 !important;
-  flex-grow: 1 !important;
-}
-
-.magic-search .accordion .vocabularies-column .title.active .description {
-  visibility: hidden !important;
-}
-
-/*.vocabularies .accordion .vocabularies-table:first-of-type > .title {
+.vocabularies .accordion .vocabularies-table:first-of-type > .title {
   border-top: none !important;
-}*/
-
-.magic-search .accordion .title > span:not(.description) {
-  color: black;
-}
-.magic-search .accordion .title span.table,
-.magic-search .accordion .title span.column {
-  font-weight: normal !important;
-}
-
-.vocabularies .accordion .content {
-  padding: 0em 1.75em 0.5em !important;
-}
-
-.magic-search .label {
-  font-weight: normal !important;
-  color: rgba(0, 0, 0, 0.6) !important;
-  padding: 0.4em !important;
 }
 
 .vocabularies .accordion .vocabularies-table.no-match,
@@ -95,6 +53,113 @@ abularies .accordion .title {
   display: none !important;
 }
 
-.magic-search .vocabulary-label {
+
+.vocabularies .accordion .content {
+  padding: 0em 1.75em 0.5em !important;
+}
+
+.search .accordion .vocabularies-column .title.active .description {
+  visibility: hidden !important;
+}
+
+.search .vocabulary-label {
   color: rgba(0, 0, 0, 0.4) !important;
+}
+
+.search .accordion .title > span:not(.description) {
+  color: black;
+}
+
+*/
+
+.search a {
+  color: #792f91 !important;
+}
+
+.search > .level-tabs > .right.menu {
+  flex-grow: 1;
+  margin-left: 1em !important;
+}
+.search > .level-tabs > .right.menu * {
+  width: 100%;
+  background: none !important;
+}
+.search > .level-tabs .ui.search input {
+  border-radius: 0;
+}
+
+.search .search-hide-settings {
+  float: right;
+}
+.search .search-hide-settings > .icon {
+  margin: 0 0 0 0.25em;
+}
+
+.search .search-show-settings {
+  padding-left: 0 !important;
+}
+
+.search > .segment > table {
+  width: 100%;
+}
+
+.search > .segment > table > tbody > tr > td {
+  vertical-align: top;
+}
+
+
+.search .search-settings {
+  white-space: nowrap;
+  overflow-y: auto;
+  padding-right: 1em;
+  margin-right: 1em;
+  border-right: 2px solid rgba(34, 36, 38, 0.15);
+  transition: all 0.5s ease;
+}
+
+.search .search-settings.hidden {
+  width: 0;
+  padding-right: 0;
+  margin-right: 0;
+  border-right: none;
+}
+
+.search .search-tab-menu {
+  margin-top: -0.85714286em !important;
+}
+
+.search .search-tab-menu .right.menu > .item:last-child {
+  padding-right: 0;
+}
+
+.search .search-results {
+  overflow: auto;
+  margin-top: 1em !important;
+  box-shadow: none !important;
+}
+
+.search .search-results > .magic-contribution:first-child > .title {
+  border-top: none;
+  padding-top: 0;
+}
+
+.search .search-results .title .description {
+  font-weight: normal !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+  flex-shrink: 1 !important;
+  flex-grow: 1 !important;
+}
+
+
+.search .search-results .title span.table,
+.search .search-results .title span.column {
+  font-weight: normal !important;
+}
+
+.search .label {
+  font-weight: normal !important;
+  color: rgba(0, 0, 0, 0.6) !important;
+  padding: 0.4em !important;
 }
