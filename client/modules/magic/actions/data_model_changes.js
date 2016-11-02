@@ -1,4 +1,4 @@
-import {_} from 'lodash';
+import _ from  'lodash';
 import Runner from '../../common/actions/runner';
 
 import {default as magicVersions} from '../../../../lib/modules/magic/magic_versions';

@@ -1,4 +1,4 @@
-import {_} from 'lodash';
+import _ from  'lodash';
 import React from 'react';
 import {mount} from 'react-mounter';
 
@@ -52,7 +52,7 @@ export default function (injectDeps, {FlowRouter}) {
               <h3>
                 Search the MagIC Database:
               </h3>
-              <MagICSearch view="public" search={q}/>
+              <MagICSearch search={q} bottomOffset={70}/>
             </Home>
           </Layout>
         )

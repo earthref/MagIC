@@ -1,4 +1,4 @@
-import {_} from 'lodash';
+import _ from  'lodash';
 import React from 'react';
 import saveAs from 'save-as';
 import {portals} from '../../common/configs/portals';

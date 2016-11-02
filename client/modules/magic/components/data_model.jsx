@@ -1,4 +1,4 @@
-import {_} from 'lodash';
+import _ from  'lodash';
 import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';

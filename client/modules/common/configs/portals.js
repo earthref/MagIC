@@ -1,4 +1,4 @@
-export const portalsOrder = ['EarthRef.org', 'MagIC', 'GERM', 'SBN', 'FeMO', 'SCC', 'ERESE', 'ERDA', 'References'];
+export const portalsOrder = ['EarthRef.org', 'MagIC', 'GERM', 'SBN', 'FeMO', 'SCC', 'ERESE', 'ERDA', 'References', 'Users'];
 
 export const portals = {
   'EarthRef.org': {
@@ -16,18 +16,6 @@ export const portals = {
   'MagIC': {
     url: '/MagIC',
     color: 'purple',
-    title: 'Magnetics Information Consortium (MagIC)',
-    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
-  },
-  'ERDA': {
-    url: 'https://earthref.org/ERDA/',
-    color: 'green',
-    title: 'Magnetics Information Consortium (MagIC)',
-    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
-  },
-  'References': {
-    url: 'https://earthref.org/ERR/',
-    color: 'green',
     title: 'Magnetics Information Consortium (MagIC)',
     subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
   },
@@ -54,5 +42,23 @@ export const portals = {
     color: 'blue',
     title: 'Enduring Resources for Earth Sciences Education (ERESE)',
     subtitle: 'Promoting, creating and publishing of Enduring Resources for Earth Science Education in a collaboration between middle and high school teachers and Earth scientists.'
+  },
+  'ERDA': {
+    url: 'https://earthref.org/ERDA/',
+    color: 'green',
+    title: 'Magnetics Information Consortium (MagIC)',
+    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
+  },
+  'References': {
+    url: 'https://earthref.org/ERR/',
+    color: 'green',
+    title: 'Magnetics Information Consortium (MagIC)',
+    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
+  },
+  'Users': {
+    url: 'https://earthref.org/ERML/',
+    color: 'green',
+    title: 'Magnetics Information Consortium (MagIC)',
+    subtitle: 'Promoting information technology infrastructures for the international paleomagnetic, geomagnetic and rock magnetic community.'
   }
 };
