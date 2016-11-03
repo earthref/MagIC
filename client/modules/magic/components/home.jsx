@@ -29,9 +29,10 @@ export default class extends React.Component {
         </div>
         <div className="ui small icon floating warning message">
           <div className="content">
-            <div className="ui warning header">Routine Maintenance on Friday, March 3rd, 2017.</div>
-            The MagIC Database is undergoing routine maintenance to upgrade the servers today.
-            Searching, uploading, and private workspaces are temporarily disabled.
+            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">
+              MagIC 2017 Workshop: Earth's Magnetic Field from the Beginning
+            </a>
+            MagIC is hosting a workshop on January 24th-27th, 2017 at SIO in La Jolla, CA.
           </div>
         </div>
         <div className="ui header" style={{display:'none'}}>
