@@ -49,9 +49,6 @@ export default function (injectDeps, {FlowRouter}) {
         content: () => (
           <Layout portal="MagIC" fullWidth={true}>
             <Home portal="MagIC">
-              <h3>
-                Search the MagIC Database:
-              </h3>
               <MagICSearch search={q} bottomOffset={70}/>
             </Home>
           </Layout>

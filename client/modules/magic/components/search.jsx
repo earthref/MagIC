@@ -38,7 +38,7 @@ export default class extends React.Component {
   }
 
   onWindowResize() {
-    const windowHeight = $(window).height() - (this.props.bottomOffset || 0) - 15;
+    const windowHeight = $(window).height() - (this.props.bottomOffset || 0) - 29;
     if (windowHeight !== this.windowHeight) {
       this.windowHeight = windowHeight;
       $(this.refs['settings']).height(windowHeight - $(this.refs['settings']).offset().top);
@@ -51,12 +51,16 @@ export default class extends React.Component {
 
   showSettings() {
     $(this.refs['show settings']).hide()
+    $(this.refs['hide settings']).show();
     $(this.refs['settings']).show();
+    $(this.refs['results']).addClass('settings-visible');
   }
 
   hideSettings() {
     $(this.refs['show settings']).show()
+    $(this.refs['hide settings']).hide();
     $(this.refs['settings']).hide();
+    $(this.refs['results']).removeClass('settings-visible');
   }
 
   renderSortSettings() {
@@ -123,7 +127,7 @@ export default class extends React.Component {
 
   renderTabMenu() {
     return (
-      <div className="ui secondary pointing menu search-tab-menu">
+      <div className="ui top attached tabular small menu search-tab-menu">
         <a ref="show settings" className="item search-show-settings" onClick={this.showSettings.bind(this)}>
           <i className="ui chevron circle right black icon"/>
           Settings
@@ -139,14 +143,6 @@ export default class extends React.Component {
         </a>
         <div className="right menu">
           <div className="item">
-            <i className="plus icon"/>
-            <a href="#">Create</a>
-          </div>
-          <div className="item">
-            <i className="up arrow icon"/>
-            <a href="#">Upload</a>
-          </div>
-          <div className="item">
             <i className="download icon"/>
             <a href="#">Download</a>
           </div>
@@ -157,7 +153,7 @@ export default class extends React.Component {
 
   render() {
     return (
-      <div className="search">
+      <div className="magic-search">
         <div className="ui top attached tabular menu level-tabs">
           <div className={'active item'}>
             Contributions
@@ -178,33 +174,49 @@ export default class extends React.Component {
             Experiments
           </a>
           <div className="right menu">
-            <div className="active item">
-              <div className="ui search">
-                <div className="ui transparent icon input">
-                  <i className={portals['MagIC'].color + ' search icon'}/>
-                  <input
-                    ref="search"
-                    className="prompt"
-                    type="text"
-                    placeholder="Search MagIC ..."
-                    value={this.state.search}
-                  />
-                </div>
-                <div className="results"></div>
-              </div>
+            <div className="item">
+              <i className="plus icon"/>
+              <a href="#">Create</a>
+            </div>
+            <div className="item">
+              <i className="up arrow icon"/>
+              <a href="#">Upload</a>
             </div>
           </div>
         </div>
-        <div className="ui bottom attached segment">
+        <div className="ui bottom attached secondary segment">
+          <div className="ui labeled fluid input">
+            <div className={portals['MagIC'].color + ' ui label'}>
+              Search MagIC
+            </div>
+            <input
+              ref="search"
+              className="prompt"
+              type="text"
+              placeholder="e.g. igneous outcrop"
+              value={this.state.search}
+            />
+          </div>
           <table><tbody><tr>
-            <td rowSpan="2">
+            <td>
+              <a href="#" ref="hide settings" className="ui top attached tabular small menu hide-settings-tab-menu" onClick={this.hideSettings.bind(this)}>
+                <div className="active item hide-settings">
+                  Settings
+                </div>
+                <div className="right menu">
+                  <div className="item hide-settings-button">
+                    <i className="ui chevron circle left black icon"/>
+                  </div>
+                </div>
+              </a>
+            </td>
+            <td>
+              {this.renderTabMenu()}
+            </td>
+          </tr>
+          <tr>
+            <td>
               <div ref="settings" className="search-settings">
-                <a className="search-hide-settings" onClick={this.hideSettings.bind(this)}>
-                  <i className="ui chevron circle left black icon"></i>
-                </a>
-                <h5 className="ui header" style={{marginTop:0}}>
-                  Sort Settings
-                </h5>
                 {this.renderSortSettings()}
                 <div className="ui divider"></div>
                 <h5 className="ui header">
@@ -214,13 +226,8 @@ export default class extends React.Component {
               </div>
             </td>
             <td>
-              {this.renderTabMenu()}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div ref="results" className="ui styled fluid accordion search-results">
-                {contributions.contributions.map((c,i) =>
+              <div ref="results" className="ui styled fluid accordion settings-visible search-results">
+                {contributions.contributions.slice(0, 10).map((c,i) =>
                   <MagICContribution contribution={c} key={i}></MagICContribution>
                 )}
               </div>

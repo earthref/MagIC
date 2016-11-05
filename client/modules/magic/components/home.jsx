@@ -20,7 +20,7 @@ export default class extends React.Component {
             <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">
               MagIC 2017 Workshop: Earth's Magnetic Field from the Beginning
             </a>
-            MagIC is hosting a workshop on January 24th-26th, 2017 at SIO in La Jolla, CA.
+            MagIC is hosting a workshop on January 24th-27th, 2017 at SIO in La Jolla, CA.
           </div>
           <a className="ui basic purple button" style={{margin:'0 1em'}}
              href="https://earthref.org/cgi-bin/erml-c0-introduction.cgi?event=MAGIC">
