@@ -21,6 +21,6 @@ reactive-dict@1.1.8
 kadira:flow-router-ssr
 shell-server@0.2.1
 semantic:ui
-less@2.7.6
+less@2.7.7
 juliancwirko:postcss
 meteorhacks:picker
