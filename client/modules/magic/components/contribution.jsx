@@ -130,7 +130,7 @@ export default class extends React.Component {
                       style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
                     />
                   :
-                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}/>
+                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
                   )}
                 </div>
               </div>
@@ -189,29 +189,6 @@ export default class extends React.Component {
             </tbody>
           </table>
         </div>
-        <div ref="data modal" className="ui fullscreen basic modal">
-          <i className="close icon" style={{color: 'white', top:'.5rem', right: '0'}}></i>
-          <div className="ui top attached inverted tabular menu">
-            <a className="item" href="#">
-              Locations
-            </a>
-            <a className="active item" href="#">
-              Sites
-            </a>
-            <a className="item" href="#">
-              Samples
-            </a>
-            <a className="item" href="#">
-              Specimens
-            </a>
-            <a className="item" href="#">
-              Experiments
-            </a>
-          </div>
-          <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 10em)'}}>
-            {this.renderData()}
-          </div>
-        </div>
         <div ref="map modal" className="ui fullscreen modal">
           <i className="close icon"></i>
           <div className="header">
@@ -223,5 +200,32 @@ export default class extends React.Component {
     );
   }
 
+  renderDataModal() {
+    return (
+      <div ref="data modal" className="ui fullscreen basic modal">
+        <i className="close icon" style={{color: 'white', top:'.5rem', right: '0'}}></i>
+        <div className="ui top attached inverted tabular menu">
+          <a className="item" href="#">
+            Locations
+          </a>
+          <a className="active item" href="#">
+            Sites
+          </a>
+          <a className="item" href="#">
+            Samples
+          </a>
+          <a className="item" href="#">
+            Specimens
+          </a>
+          <a className="item" href="#">
+            Experiments
+          </a>
+        </div>
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 10em)'}}>
+          {this.renderData()}
+        </div>
+      </div>
+    );
+  }
 }
 

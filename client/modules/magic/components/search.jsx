@@ -3,6 +3,8 @@ import React from 'react';
 import saveAs from 'save-as';
 import IconButton from '../../common/components/icon_button.jsx';
 import MagICContribution from './contribution.jsx';
+import MagICSearchSummariesContributions from '../containers/search_summaries_contributions';
+import MagICSearchSummariesContributionsCountTab from '../containers/search_summaries_contributions_count_tab';
 import {portals} from '../../common/configs/portals';
 import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
 import {default as svs} from '../../../../lib/modules/er/suggested_vocabularies';
@@ -13,9 +15,25 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: "",
-      loaded: false,
-      updating: false
+      search: '',
+      level: 'Contributions',
+      view: 'Summaries',
+      sort: 'updated',
+      sortDirection: -1,
+      settingsVisible: true
+    };
+    this.styles = {
+      a: {cursor: 'pointer', color: '#792f91'},
+      table: {width: '100%'},
+      td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease'},
+      segment: {padding: '0'},
+      activeTab: {backgroundColor: '#F0F0F0'},
+      searchInput: {padding: '1em'},
+      hideSettings: {paddingLeft: '1em'},
+      showSettings: {overflow: 'hidden', transition: 'all 0.5s ease'},
+      hideSettingsIcon: {paddingLeft: '0.5em', paddingRight: '0.5em'},
+      settings: {whiteSpace: 'nowrap', overflowY: 'auto', padding: '1em'},
+      results: {overflow: 'auto', padding: '1em', borderLeft: '1px solid #D4D4D5', transition: 'all 0.5s ease', borderRadius: '0', boxShadow: 'none'}
     };
   }
 
@@ -32,6 +50,7 @@ export default class extends React.Component {
 
   componentDidUpdate() {
     this.onWindowResize();
+    $(this.refs['results']).accordion({exclusive: false});
   }
 
   componentWillReceiveProps(nextProps) {
@@ -42,7 +61,9 @@ export default class extends React.Component {
     if (windowHeight !== this.windowHeight) {
       this.windowHeight = windowHeight;
       $(this.refs['settings']).height(windowHeight - $(this.refs['settings']).offset().top);
-      $(this.refs['results' ]).height(windowHeight - $(this.refs['results' ]).offset().top);
+      $('> td > table > tbody >  tr > td > div.search-results', this.refs['search tabs']).each(function() {
+        $(this).height(windowHeight - $(this).offset().top);
+      });
     }
   }
 
@@ -66,23 +87,40 @@ export default class extends React.Component {
   renderSortSettings() {
     return (
       <div className="ui link list">
-        <div className="active item">
-          <i className="ui sort numeric descending icon"/>
-          <div className="active content header">Upload Date</div>
-        </div>
-        <a className="item">
-          <i className="ui icon"/>
-          <div className="content">Publication Year</div>
+        <a className="item"
+           style={(this.state.sort === 'updated' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
+           onClick={() => this.setState({
+             sort: 'updated',
+             sortDirection: (this.state.sort === 'updated' ? -1 * this.state.sortDirection : -1)
+           })}>
+          <i className={'ui icon' +
+            (this.state.sort === 'updated' ? ' sort numeric' +
+            (this.state.sortDirection === 1 ? ' ascending' : ' descending') : '')}/>
+          <div className="content">Upload Date</div>
         </a>
-        <a className="item">
-          <i className="ui icon"/>
+        <a className="item"
+           style={(this.state.sort === 'long_authors' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
+           onClick={() => this.setState({
+             sort: 'long_authors',
+             sortDirection: (this.state.sort === 'long_authors' ? -1 * this.state.sortDirection : 1)
+           })}>
+          <i className={'ui icon' +
+            (this.state.sort === 'long_authors' ? ' sort alphabet' +
+            (this.state.sortDirection === 1 ? ' ascending' : ' descending') : '')}/>
           <div className="content">First Author</div>
         </a>
-        <a className="item">
-          <i className="ui icon"/>
+        <a className="item"
+           style={(this.state.sort === 'max_ages' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
+           onClick={() => this.setState({
+             sort: 'max_ages',
+             sortDirection: (this.state.sort === 'max_ages' ? -1 * this.state.sortDirection : -1)
+           })}>
+          <i className={'ui icon' +
+            (this.state.sort === 'max_ages' ? ' sort numeric' +
+            (this.state.sortDirection === 1 ? ' ascending' : ' descending') : '')}/>
           <div className="content">Age</div>
         </a>
-        <a className="item">
+        <a className={'item'} style={this.styles.a}>
           <i className="ui plus icon"/>
           <div className="content">Custom Sort Column</div>
         </a>
@@ -125,26 +163,50 @@ export default class extends React.Component {
     );
   }
 
-  renderTabMenu() {
+  renderTabMenu(level) {
     return (
       <div className="ui top attached tabular small menu search-tab-menu">
-        <a ref="show settings" className="item search-show-settings" onClick={this.showSettings.bind(this)}>
-          <i className="ui chevron circle right black icon"/>
-          Settings
-        </a>
-        <div className="active item">
-          Contributions
+        <div style={_.merge({}, this.styles.showSettings, {maxWidth: (this.state.settingsVisible ? '0px' : '125px')})}>
+          <a className="item" onClick={() => this.setState({settingsVisible: true})}>
+            <i className="ui chevron circle right black icon"/>
+            Settings
+          </a>
         </div>
-        <a className="item">
-          Images
-        </a>
-        <a className="item">
-          Map
-        </a>
+        {this.state.view == 'Summaries' ?
+          <div className="active item">
+            {level}
+          </div>
+        :
+          <a className="item" onClick={() => this.setState({view: 'Summaries'})}>
+            {level}
+          </a>
+        }
+        {this.state.view == 'Images' ?
+          <div className="active item">
+            Images
+          </div>
+          :
+          <a className="item" onClick={() => this.setState({view: 'Images'})}>
+            Images
+          </a>
+        }
+        {this.state.view == 'Map' ?
+          <div className="active item">
+            Map
+          </div>
+          :
+          <a className="item" onClick={() => this.setState({view: 'Map'})}>
+            Map
+          </a>
+        }
         <div className="right menu">
           <div className="item">
+            <i className="save icon"/>
+            <a className="ui" style={this.styles.a}>Save Search</a>
+          </div>
+          <div className="item">
             <i className="download icon"/>
-            <a href="#">Download</a>
+            <a className="ui" style={this.styles.a}>Download Results</a>
           </div>
         </div>
       </div>
@@ -155,38 +217,37 @@ export default class extends React.Component {
     return (
       <div className="magic-search">
         <div className="ui top attached tabular menu level-tabs">
-          <div className={'active item'}>
+          <div className={'active item'} style={this.styles.activeTab}>
             Contributions
           </div>
-          <a className="item" href="#">
+          <a className="item" style={this.styles.a}>
             Locations
           </a>
-          <a className="item" href="#">
+          <a className="item" style={this.styles.a}>
             Sites
           </a>
-          <a className="item" href="#">
+          <a className="item" style={this.styles.a}>
             Samples
           </a>
-          <a className="item" href="#">
+          <a className="item"style={this.styles.a}>
             Specimens
           </a>
-          <a className="item" href="#">
+          <a className="item" style={this.styles.a}>
             Experiments
           </a>
           <div className="right menu">
-            <div className="item">
-              <i className="plus icon"/>
-              <a href="#">Create</a>
-            </div>
-            <div className="item">
-              <i className="up arrow icon"/>
-              <a href="#">Upload</a>
+            <div className="item" style={{paddingRight: 0}}>
+              <div className={portals['MagIC'].color + ' ui compact button'}>
+                <i className="plus icon"/>
+                Upload Data
+              </div>
             </div>
           </div>
         </div>
-        <div className="ui bottom attached secondary segment">
-          <div className="ui labeled fluid input">
+        <div className="ui bottom attached secondary segment" style={this.styles.segment}>
+          <div className="ui labeled fluid input" style={this.styles.searchInput}>
             <div className={portals['MagIC'].color + ' ui label'}>
+              <i className="search icon"/>
               Search MagIC
             </div>
             <input
@@ -195,42 +256,82 @@ export default class extends React.Component {
               type="text"
               placeholder="e.g. igneous outcrop"
               value={this.state.search}
+              onChange={() => this.setState({search: this.refs['search'].value})}
             />
           </div>
-          <table><tbody><tr>
-            <td>
-              <a href="#" ref="hide settings" className="ui top attached tabular small menu hide-settings-tab-menu" onClick={this.hideSettings.bind(this)}>
-                <div className="active item hide-settings">
-                  Settings
-                </div>
-                <div className="right menu">
-                  <div className="item hide-settings-button">
-                    <i className="ui chevron circle left black icon"/>
+          <table style={this.styles.table}><tbody><tr ref="search tabs">
+            <td style={_.merge({}, this.styles.td, {maxWidth: (this.state.settingsVisible ? 'calc(25vw)' : '0px')})}>
+              <div ref="hide settings">
+                <a className="ui top attached tabular small menu"
+                   style={_.merge({}, this.styles.a, this.styles.hideSettings)}
+                   onClick={() => this.setState({settingsVisible: false})}>
+                  <div className="active item" style={this.styles.activeTab}>
+                    Settings
                   </div>
+                  <div className="right menu">
+                    <div className="item" style={this.styles.hideSettingsIcon}>
+                      <i className="ui chevron circle left black icon"/>
+                    </div>
+                  </div>
+                </a>
+              </div>
+              <div ref="settings" style={this.styles.settings}>
+                <div>
+                  {this.renderSortSettings()}
+                  <div className="ui divider"></div>
+                  <h5 className="ui header">
+                    Filter Settings
+                  </h5>
+                  {this.renderFilterSettings()}
                 </div>
-              </a>
-            </td>
-            <td>
-              {this.renderTabMenu()}
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div ref="settings" className="search-settings">
-                {this.renderSortSettings()}
-                <div className="ui divider"></div>
-                <h5 className="ui header">
-                  Filter Settings
-                </h5>
-                {this.renderFilterSettings()}
               </div>
             </td>
-            <td>
-              <div ref="results" className="ui styled fluid accordion settings-visible search-results">
-                {contributions.contributions.slice(0, 10).map((c,i) =>
-                  <MagICContribution contribution={c} key={i}></MagICContribution>
-                )}
-              </div>
+            <td style={_.merge({},
+              this.styles.td,
+              (this.state.level === 'Contributions' ?
+                {width: '100%', maxWidth: 'calc(100vw)'} :
+                {width: '0%', maxWidth: '0px'})
+            )}>
+              {this.renderTabMenu('Contributions')}
+              <table style={this.styles.table}><tbody><tr>
+                <td style={_.merge({},
+                    this.styles.td,
+                    (this.state.level === 'Contributions' && this.state.view === 'Summaries' ?
+                      {width: '100%', maxWidth: 'calc(100vw)'} :
+                      {width: '0%', maxWidth: '0px'})
+                  )}>
+                  <div className="ui styled fluid accordion search-results"
+                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}>
+                    {this.props.contribution ?
+                      <MagICContribution contribution={this.props.contribution}/>
+                    :
+                      <MagICSearchSummariesContributions
+                        selector={(this.state.search != '' ? {$text: {$search: this.state.search}} : {})}
+                        options={{sort: {[this.state.sort]: this.state.sortDirection}, limit: 50}}/>
+                    }
+                  </div>
+                </td>
+                <td style={_.merge({},
+                  this.styles.td,
+                  (this.state.level === 'Contributions' && this.state.view === 'Images' ?
+                    {width: '100%', maxWidth: 'calc(100vw)'} :
+                    {width: '0%', maxWidth: '0px'})
+                )}>
+                  <div className="ui styled fluid accordion search-results"
+                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}>
+                  </div>
+                </td>
+                <td style={_.merge({},
+                  this.styles.td,
+                  (this.state.level === 'Contributions' && this.state.view === 'Map' ?
+                    {width: '100%', maxWidth: 'calc(100vw)'} :
+                    {width: '0%', maxWidth: '0px'})
+                )}>
+                  <div ref="results" className="ui styled fluid accordion search-results"
+                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}>
+                  </div>
+                </td>
+              </tr></tbody></table>
             </td>
           </tr></tbody></table>
         </div>
