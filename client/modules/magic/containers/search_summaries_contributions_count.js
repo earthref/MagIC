@@ -1,15 +1,15 @@
-import MagICSearchCountTab from '../components/search_count_tab';
+import Count from '../../common/components/count';
 import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
 
 export const composer = ({context, selector}, onData) => {
   const {Meteor, Collections} = context();
   if (Meteor.subscribe('magic.summaries.contributions.count', selector).ready()) {
-    const contribution_count = Collections.MagICSummariesContributions.find().count();
-    onData(null, {contribution_count});
+    const count = Collections.MagICSummariesContributionsCounts.findOne(JSON.stringify(selector)).count;
+    onData(null, {count});
   }
 };
 
 export default composeAll(
   composeWithTracker(composer),
   useDeps()
-)(MagICSearchCountTab);
+)(Count);

@@ -3,8 +3,8 @@ import React from 'react';
 import saveAs from 'save-as';
 import IconButton from '../../common/components/icon_button.jsx';
 import MagICContribution from './contribution.jsx';
-import MagICSearchSummariesContributions from '../containers/search_summaries_contributions';
-import MagICSearchSummariesContributionsCountTab from '../containers/search_summaries_contributions_count_tab';
+import MagICSearchSummariesContributions from '../containers/search_summaries_contributions_list';
+import MagICSearchSummariesContributionsCountTab from '../containers/search_summaries_contributions_count';
 import {portals} from '../../common/configs/portals';
 import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
 import {default as svs} from '../../../../lib/modules/er/suggested_vocabularies';
@@ -219,6 +219,9 @@ export default class extends React.Component {
         <div className="ui top attached tabular menu level-tabs">
           <div className={'active item'} style={this.styles.activeTab}>
             Contributions
+            <MagICSearchSummariesContributionsCount
+              selector={(this.state.search != '' ? {$text: {$search: this.state.search}} : {})}
+            />
           </div>
           <a className="item" style={this.styles.a}>
             Locations
