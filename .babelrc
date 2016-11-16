@@ -1,6 +1,8 @@
 {
   "presets": [
-    "stage-3"
+    "es2015",
+    "stage-3",
+    "react"
   ],
   "plugins": [
     "react-require",

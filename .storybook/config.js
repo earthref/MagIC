@@ -14,10 +14,11 @@ function loadStories() {
   lessFiles.keys().forEach(lessFiles);
 
   // Require stories list
-  require('../.stories/home.jsx');
-  require('../.stories/icon_button.jsx');
-  require('../.stories/data_importer.jsx');
-  require('../.stories/magic_search.jsx');
+  require('../.stories/home');
+  require('../.stories/icon_button');
+  require('../.stories/data_importer');
+  require('../.stories/magic_search');
+  require('../.stories/magic_contribution');
 
 }
 
