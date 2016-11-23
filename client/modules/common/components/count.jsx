@@ -1,8 +1,9 @@
 import React from 'react';
+import numeral from 'numeral';
 
 const Count = ({count}) => (
   <div>
-    {count}
+    {numeral(count).format('0,0')}
   </div>
 );
 
