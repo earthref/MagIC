@@ -67,6 +67,7 @@
     "lint-only": "eslint ./lib ./client ./server --ext .js --ext .jsx",
     "lint-fix": "npm run lint-only -- --fix",
     "storybook": "start-storybook -p 6006",
-    "build-storybook": "build-storybook"
+    "build-storybook": "build-storybook",
+    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.6/semantic.css"
   }
 }
