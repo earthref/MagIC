@@ -4,14 +4,14 @@ export default class extends React.Component {
 
   render() {
     return (
-      <table><tbody>
+      <table style={{width: '100%'}}><tbody>
         {this.props.buckets.map((bucket, i) => (
           <tr key={i}>
             <td>
-              {bucket.key}
+              <a href="#"><b>{bucket.key}</b></a>
             </td>
             <td>
-              <div className="ui circular small basic label">
+              <div className="ui circular small basic right floated label">
                 {bucket.doc_count}
               </div>
             </td>

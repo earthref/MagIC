@@ -2,6 +2,7 @@ import _ from 'lodash';
 import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
+import GoogleStaticMap from '../../common/components/google_static_map';
 
 export default class extends React.Component {
 
@@ -12,9 +13,8 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-
+    $(this.refs['contribution']).accordion({exclusive: false});
   }
-
   showData() {
     /*$(this.refs['data modal']).modal('show');
     e.stopPropagation();
@@ -28,43 +28,46 @@ export default class extends React.Component {
   }
 
   renderMapThumbnail() {
-    const c = this.props.contribution;
-    let lat1s = c.begin_lats;
-    let lat2s = c.end_lats;
-    let lon1s = c.begin_lons;
-    let lon2s = c.end_lons;
-    if (lat1s !== undefined && lat2s !== undefined && lon1s !== undefined && lon2s !== undefined) {
-      let src = '//static.earthref.org/images/gstatic_maps/size=100x100&maptype=relief';
-      //let lat1s = lat1.split(':').map(x => parseInt(100*parseFloat(x))/100);
-      //let lat2s = lat2.split(':').map(x => parseInt(100*parseFloat(x))/100);
-      //let lon1s = lon1.split(':').map(x => parseInt(100*parseFloat(x))/100);
-      //let lon2s = lon2.split(':').map(x => parseInt(100*parseFloat(x))/100);
-      //debugger;
-      for (let i = 0; i < lat1s.length; i++) {
-        if (src.length < 800) {
-          src += '&path=color:0x800080FF|weight:1|fillcolor:0xBBBBBB99|';
-          src += (lat1s[i]-.25) + ',' + (lon1s[i]-.25) + '|' +
-                 (lat1s[i]-.25) + ',' + (lon2s[i]+.25) + '|' +
-                 (lat2s[i]+.25) + ',' + (lon2s[i]+.25) + '|' +
-                 (lat2s[i]+.25) + ',' + (lon1s[i]-.25) + '|' +
-                 (lat1s[i]-.25) + ',' + (lon1s[i]-.25);
-        }
-      }
-      src += '&path=color:0x00000000|' +
-        lat1s[0] + ',' + (Math.min(...lon1s) + 5) + '|' + lat1s[0] + ',' + (Math.max(...lon2s) + 5);
-      src = src.replace(/(.{200})/g, '$1/');
-      src += '.png';
+    //const c = this.props.contribution;
+    //let lat1s = c.begin_lats;
+    //let lat2s = c.end_lats;
+    //let lon1s = c.begin_lons;
+    //let lon2s = c.end_lons;
+    //if (lat1s !== undefined && lat2s !== undefined && lon1s !== undefined && lon2s !== undefined) {
+    //  let src = '//static.earthref.org/images/gstatic_maps/size=100x100&maptype=relief';
+    //  //let lat1s = lat1.split(':').map(x => parseInt(100*parseFloat(x))/100);
+    //  //let lat2s = lat2.split(':').map(x => parseInt(100*parseFloat(x))/100);
+    //  //let lon1s = lon1.split(':').map(x => parseInt(100*parseFloat(x))/100);
+    //  //let lon2s = lon2.split(':').map(x => parseInt(100*parseFloat(x))/100);
+    //  //debugger;
+    //  for (let i = 0; i < lat1s.length; i++) {
+    //    if (src.length < 800) {
+    //      src += '&path=color:0x800080FF|weight:1|fillcolor:0xBBBBBB99|';
+    //      src += (lat1s[i]-.25) + ',' + (lon1s[i]-.25) + '|' +
+    //             (lat1s[i]-.25) + ',' + (lon2s[i]+.25) + '|' +
+    //             (lat2s[i]+.25) + ',' + (lon2s[i]+.25) + '|' +
+    //             (lat2s[i]+.25) + ',' + (lon1s[i]-.25) + '|' +
+    //             (lat1s[i]-.25) + ',' + (lon1s[i]-.25);
+    //    }
+    //  }
+    //  src += '&path=color:0x00000000|' +
+    //    lat1s[0] + ',' + (Math.min(...lon1s) + 5) + '|' + lat1s[0] + ',' + (Math.max(...lon2s) + 5);
+    //  src = src.replace(/(.{200})/g, '$1/');
+    //  src += '.png';
+    //  return (
+    //    <img className="ui bordered image"
+    //         src={src}
+    //         style={{border: '1px solid rgba(0, 0, 0, 0.1)', maxWidth: '100px', maxHeight: '100px'}}/>
+    //  );
+    //}
+    //else {
       return (
-        <img className="ui bordered image"
-             src={src}
-             style={{border: '1px solid rgba(0, 0, 0, 0.1)', maxWidth: '100px', maxHeight: '100px'}}/>
+        <GoogleStaticMap></GoogleStaticMap>
       );
-    }
-    else {
       return (
         <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
       );
-    }
+    //}
   }
 
   renderData() {
@@ -136,8 +139,8 @@ export default class extends React.Component {
   render() {
     const c = this.props.contribution;
     return (
-      <div className="magic-contribution">
-        <div className="title" style={(this.props.index === 0 ? {borderTop: 'none'} : {})}>
+      <div ref="contribution" className="ui accordion magic-contribution">
+        <div className="title" style={{paddingLeft:'1em'}}>
           <i className="dropdown icon" style={{position:'relative', left:'-1.3rem'}}/>
           <div className="ui doubling grid" style={{marginTop:'-2.5rem'}}>
             <div className="row" style={{paddingBottom:0}}>
@@ -152,21 +155,21 @@ export default class extends React.Component {
             </div>
             <div className="row" style={{paddingTop:'.5em', fontWeight:'normal', whiteSpace:'nowrap'}}>
               <div className="two wide right aligned column">
-                <div className="ui basic tiny fluid icon button"><i className="star icon"/> Follow</div>
-                <div className="ui basic tiny fluid icon button" style={{marginTop:'0.5em'}}><i className="ui linkify icon"/> Copy Link</div>
-                <a className="ui basic tiny fluid icon button" style={{marginTop:'0.5em'}}
-                  href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                    (c.folder === 'zmab' ?
-                      `/projects/earthref/archive/bgfiles/${c.folder}/${c.file_name}.txt`
-                    :
-                      `/projects/earthref/local/oracle/earthref/magic/uploads/${c.contributor_id}/${c.folder}/${c.file_name}`
-                    )
-                  }
+                <a className="ui basic tiny fluid compact icon button" style={{marginTop:'0.5em'}}
+                   href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                   (c.folder === 'zmab' ?
+                       `/projects/earthref/archive/bgfiles/${c.folder}/${c.file_name}.txt`
+                       :
+                       `/projects/earthref/local/oracle/earthref/magic/uploads/${c.contributor_id}/${c.folder}/${c.file_name}`
+                   )
+                   }
                 >
                   <i className="ui file text outline icon"/> Download
                 </a>
+                <div className="ui basic tiny fluid compact icon button" style={{marginTop:'0.5em'}}><i className="ui linkify icon"/> Copy Link</div>
+                <div className="ui basic tiny fluid compact icon disabled button"><i className="star icon"/> Follow</div>
               </div>
-              <div className="three wide column" style={{fontSize:'small'}}>
+              <div className="two wide column" style={{fontSize:'small'}}>
                 {(c.n_locations ?    <a onClick={this.showData.bind(this)}>{c.n_locations    + ' Location'    + (c.n_locations    > 1 ? 's' : '')}</a> : undefined)}<br/>
                 {(c.n_sites ?        <a onClick={this.showData.bind(this)}>{c.n_sites        + ' Site'        + (c.n_sites        > 1 ? 's' : '')}</a> : undefined)}<br/>
                 {(c.n_samples ?      <a onClick={this.showData.bind(this)}>{c.n_samples      + ' Sample'      + (c.n_samples      > 1 ? 's' : '')}</a> : undefined)}<br/>
@@ -191,7 +194,29 @@ export default class extends React.Component {
                   {this.renderMapThumbnail()}
                 </a>
               </div>
-              <div className="three wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+              <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {() => {
+                  let geologic = [];
+                  if (c.plate_block) geologic.push(c.plate_block);
+                  if (c.terrane) geologic.push(c.terrane);
+                  if (c.geological_province_section) geologic.push(c.geological_province_section);
+                  if (c.setting) geologic.push(c.setting);
+                  let geographic = [];
+                  if (c.country) geographic.push(c.country);
+                  if (c.region) geographic.push(c.region);
+                  if (c.village_city) geographic.push(c.village_city);
+                  let oceanographic = [];
+                  if (c.continent_ocean) oceanographic.push(c.continent_ocean);
+                  if (c.ocean_sea) oceanographic.push(c.ocean_sea);
+                  return <div>
+                    {(/*geologic.length      > 0*/ 1 ? <span><b>Geologic:</b><br/>{geologic.join(', ')}<br/></span> : undefined)}
+                    {(/*geographic.length    > 0*/ 1 ? <span><b>Geographic:</b><br/>{geographic.join(', ')}<br/></span> : undefined)}
+                    {(/*oceanographic.length > 0*/ 1 ? <span><b>Oceanographic:</b><br/>{oceanographic.join(', ')}<br/></span> : undefined)}
+                  </div>
+                    ;
+                }}
+              </div>
+              <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {(c.class ? <span><b>Class:</b><br/>{c.class.join(', ')}<br/></span> : undefined)}
                 {(c.type ? <span><b>Type:</b><br/>{c.type.join(', ')}<br/></span> : undefined)}
                 {(c.lithologies ? <span><b>Lithology:</b><br/>{c.lithologies.join(', ')}<br/></span> : undefined)}

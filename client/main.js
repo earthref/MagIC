@@ -1,7 +1,7 @@
 import {createApp} from 'mantra-core';
 import initContext from './configs/context';
 
-// modules
+// Import the client modules.
 import erModule from './modules/er';
 import germModule from './modules/germ';
 import magicModule from './modules/magic';
@@ -10,10 +10,10 @@ import femoModule from './modules/femo';
 import sccModule from './modules/scc';
 import ereseModule from './modules/erese';
 
-// init context
+// Initialize the client context.
 const context = initContext();
 
-// create app
+// Create the client application.
 const app = createApp(context);
 app.loadModule(erModule);
 app.loadModule(germModule);

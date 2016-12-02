@@ -6,9 +6,14 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        {this.props.contributions.map((c, i) => (
-          <MagICContribution contribution={c} index={i} key={c.contribution_id}/>
-        ))}
+        <div className="ui divided list" style={{margin: 0}}>
+          {this.props.contributions.map((c, i) => (
+            <div className="item" key={c.contribution_id}>
+              <MagICContribution contribution={c}/>
+            </div>
+          ))}
+        </div>
+        <div className="ui fitted divider"></div>
       </div>
     );
   }

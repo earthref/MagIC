@@ -1,11 +1,12 @@
 import React from 'react';
-import Count from '../../common/components/count';
+import Count from '../components/count';
 import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
 
-export const composer = ({context, elasticsearchQuery}, onData) => {
+export const composer = ({context, subscriptionName, elasticsearchQuery, elasticsearchFilters}, onData) => {
   const {Meteor, Collections} = context();
-  if (Meteor.subscribe('elasticsearch/magic-search-summaries/sample/_count', elasticsearchQuery).ready()) {
-    const doc = Collections.MagICSearchSummariesSampleCount.findOne();
+  const subscriptionHandle = Meteor.subscribe(subscriptionName, elasticsearchQuery, elasticsearchFilters);
+  if (subscriptionHandle.ready()) {
+    const doc = Collections[subscriptionName].findOne();
     if (doc !== undefined) {
       const count = doc.count;
       onData(null, {count});

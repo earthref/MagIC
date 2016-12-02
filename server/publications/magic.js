@@ -1,120 +1,207 @@
-import {MagICSearchSummariesContributionSearch} from '/lib/collections';
-import {MagICSearchSummariesContributionCount} from '/lib/collections';
-import {MagICSearchAgesContributionCount} from '/lib/collections';
-import {MagICSearchImagesContributionCount} from '/lib/collections';
-import {MagICSearchSummariesLocationCount} from '/lib/collections';
-import {MagICSearchSummariesSiteCount} from '/lib/collections';
-import {MagICSearchSummariesSampleCount} from '/lib/collections';
-import {MagICSearchSummariesSpecimenCount} from '/lib/collections';
-import {MagICSearchFiltersContributionReferenceYearBuckets} from '/lib/collections';
-import {MagICSearchFiltersContributionContributorIDBuckets} from '/lib/collections';
-import {MagICSearchFiltersContributionExternalDBNameBuckets} from '/lib/collections';
+import _ from 'lodash';
+import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
-import elasticsearch from 'elasticsearch';
-const esClient = new elasticsearch.Client({
-  //log: 'trace',
-  host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' // Haviside
-});
+import {esClient} from '../configs/elasticsearch';
 
 export default function () {
 
-  Meteor.publish('elasticsearch/magic-search-filters/contribution/reference_year/_buckets', function (query) {
+  _.forEach(collectionDefinitions.magic.filters, (levelDefinitions, level) => {
+    _.forEach(levelDefinitions, (definition) => {
 
-    let publishedKeys = {};
-    let search = {
-      size: 0,
-      query: {
-        bool: {
-          filter: [{
-            term: {
-              upload: 1
+      Meteor.publish(definition.recordSet, function (query) {
+
+        let search = {
+          size: 0,
+          query: {
+            bool: {
+              filter: [{
+                term: {
+                  upload: 1
+                }
+              }]
             }
-          }]
-        }
-      },
-      "aggs" : {
-        "buckets" : {
-          "histogram" : {
-            "field" : "reference_year",
-            "interval": 5
-          }
-        }
-      }
-    };
-    if (query !== undefined) search.query.bool.must = query;
+          },
+          aggs : definition.aggs
+        };
+        if (query !== undefined) search.query.bool.must = query;
 
-    esClient.search({
-      index: 'magic-contributions',
-      type: 'contribution',
-      body: search
-    }).then((resp) => {
-      resp.aggregations.buckets.buckets.forEach((bucket) => {
-        if (publishedKeys[bucket.key]) {
-          console.log('changing bucket', bucket.key);
-          this.changed('elasticsearch/magic-search-filters/contribution/reference_year/_buckets', bucket.key, bucket);
-        } else {
-          console.log('adding bucket', bucket.key);
-          publishedKeys[bucket.key] = true;
-          this.added('elasticsearch/magic-search-filters/contribution/reference_year/_buckets', bucket.key, bucket);
-        }
+        let publishedKeys = {};
+        esClient.search({
+          index: definition.index,
+          type: definition.type,
+          body: search
+        }).then((resp) => {
+          resp.aggregations.buckets.buckets.forEach((bucket) => {
+            if (publishedKeys[bucket.key]) {
+              //console.log('changing bucket', bucket.key);
+              this.changed(definition.recordSet, bucket.key, bucket);
+            } else {
+              //console.log('adding bucket', bucket.key);
+              publishedKeys[bucket.key] = true;
+              this.added(definition.recordSet, bucket.key, bucket);
+            }
+          });
+          this.ready();
+        }, function (err) {
+          console.trace(err.message);
+        });
+
       });
-    }, function (err) {
-      console.trace(err.message);
-    });
-
-    return MagICSearchFiltersContributionReferenceYearBuckets.find({});
-
+    })
   });
 
-  Meteor.publish('elasticsearch/magic-search-filters/contribution/external_db_name/_buckets', function (query) {
+  _.forEach(collectionDefinitions.magic.count, (levelDefinitions, level) => {
+    _.forEach(levelDefinitions, (definition) => {
 
-    let publishedKeys = {};
-    let search = {
-      size: 0,
-      query: {
-        bool: {
-          filter: [{
-            term: {
-              upload: 1
+      Meteor.publish(definition.recordSet, function (query, filters) {
+
+        let search = {
+          query: {
+            bool: {
+              filter: [{
+                term: {
+                  upload: 1
+                }
+              }]
             }
-          }]
-        }
-      },
-      "aggs" : {
-        "buckets" : {
-          "terms" : {
-            "field" : "external_database_ids"
           }
-        }
-      }
-    };
-    if (query !== undefined) search.query.bool.must = query;
+        };
+        if (query !== undefined) search.query.bool.must = query;
+        if (filters && filters.length) search.query.bool.filter.push(filters);
+        console.log("count publishing", definition.recordSet, search, search.query.bool.filter);
 
-    esClient.search({
-      index: 'magic-contributions',
-      type: 'contribution',
-      body: search
-    }).then((resp) => {
-      resp.aggregations.buckets.buckets.forEach((bucket) => {
-        if (publishedKeys[bucket.key]) {
-          console.log('changing bucket', bucket.key);
-          this.changed('elasticsearch/magic-search-filters/contribution/external_db_name/_buckets', bucket.key, bucket);
-        } else {
-          console.log('adding bucket', bucket.key);
-          publishedKeys[bucket.key] = true;
-          this.added('elasticsearch/magic-search-filters/contribution/external_db_name/_buckets', bucket.key, bucket);
-        }
+        let count;
+        esClient.count({
+          index: definition.index,
+          type: definition.type,
+          body: search
+        }).then((resp) => {
+          if (count === undefined) {
+            console.log('adding count', definition.recordSet, resp.count);
+            this.added(definition.recordSet, 'id', {count: resp.count});
+          } else {
+            console.log('changing count', definition.recordSet, resp.count);
+            this.changed(definition.recordSet, 'id', {count: resp.count});
+          }
+          count = resp.count;
+          this.ready();
+        }, function (err) {
+          console.trace(err.message);
+        });
+
       });
-    }, function (err) {
-      console.trace(err.message);
-    });
-
-    return MagICSearchFiltersContributionExternalDBNameBuckets.find({});
-
+    })
   });
 
-  Meteor.publish('elasticsearch/magic-search-filters/contribution/contributor_id/_buckets', function (query) {
+  _.forEach(collectionDefinitions.magic.sum, (levelDefinitions, level) => {
+    _.forEach(levelDefinitions, (definition) => {
+
+      Meteor.publish(definition.recordSet, function (query, filters) {
+
+        let search = {
+          size: 0,
+          query: {
+            bool: {
+              filter: [{
+                term: {
+                  upload: 1
+                }
+              }]
+            }
+          },
+          aggs: {
+            sum: {
+              sum: {
+                field: definition.field
+              }
+            }
+          }
+        };
+        if (query !== undefined) search.query.bool.must = query;
+        if (filters && filters.length) search.query.bool.filter.push(filters);
+        console.log("count sum", definition.field, definition.recordSet, search, search.query.bool.filter);
+
+        let sum;
+        esClient.search({
+          index: definition.index,
+          type: definition.type,
+          body: search
+        }).then((resp) => {
+          if (sum === undefined) {
+            console.log('adding sum', definition.recordSet, resp.aggregations.sum.value);
+            this.added(definition.recordSet, 'id', {count: resp.aggregations.sum.value});
+          } else {
+            console.log('changing sum', definition.recordSet, resp.aggregations.sum.value);
+            this.changed(definition.recordSet, 'id', {count: resp.aggregations.sum.value});
+          }
+          sum = resp.aggregations.sum.value;
+          this.ready();
+        }, function (err) {
+          console.trace(err.message);
+        });
+
+      });
+    })
+  });
+
+  _.forEach(collectionDefinitions.magic.pages, (levelDefinitions, level) => {
+    _.forEach(levelDefinitions, (definition) => {
+
+      console.log(definition.recordSet);
+
+      Meteor.publish(definition.recordSet, function (query, filters, sort, pageSize, pageNumber) {
+        let publishedIDs = {};
+        let search = {
+          from: 0,
+          size: 10,
+          query: {
+            bool: {
+              filter: [{
+                term: {
+                  upload: 1
+                }
+              }]
+            }
+          }
+        };
+        if (definition._source !== undefined) search._source = definition._source;
+        //if (definition.filters && definition.filters.length) search.query.bool.filter.push(definition.filters);
+        if (query !== undefined) search.query.bool.must = query;
+        //if (filters && filters.length) search.query.bool.filter.push(filters);
+        if (sort  !== undefined) search.sort  = sort;
+        if (pageSize !== undefined) search.size  = pageSize;
+        if (pageNumber !== undefined) search.from  = (pageNumber - 1) * search.size;
+        console.log("search publishing", Object.keys(publishedIDs).length, search);
+
+        esClient.search({
+          index: 'magic-contributions',
+          type: 'contribution',
+          body: search
+        }).then((resp) => {
+          resp.hits.hits.forEach((hit) => {
+            console.log('resp', hit._id, pageNumber, Object.keys(publishedIDs).length);
+            if (publishedIDs[hit._id]) {
+              //console.log('changing', hit._id, Object.keys(publishedIDs).length);
+              this.changed(definition.recordSet, hit._id, _.extend(hit._source, {_id: hit._id, _score: hit._score, _page: pageNumber}));
+            } else {
+              //console.log('adding', hit._id, Object.keys(publishedIDs).length);
+              publishedIDs[hit._id] = true;
+              this.added(definition.recordSet, hit._id, _.extend(hit._source, {_id: hit._id, _score: hit._score, _page: pageNumber}));
+            }
+          });
+          this.ready();
+        }, function (err) {
+          console.trace(err.message);
+          this.error(new Meteor.Error(e, 'hey!'));
+        });
+
+      });
+
+    })
+  });
+
+  /*Meteor.publish('elasticsearch/magic-search-filters/contribution/contributor_id/_buckets', function (query) {
 
     let publishedKeys = {};
     let search = {
@@ -145,10 +232,10 @@ export default function () {
     }).then((resp) => {
       resp.aggregations.buckets.buckets.forEach((bucket) => {
         if (publishedKeys[bucket.key]) {
-          console.log('changing bucket', bucket.key);
+          //console.log('changing bucket', bucket.key);
           this.changed('elasticsearch/magic-search-filters/contribution/contributor_id/_buckets', bucket.key, bucket);
         } else {
-          console.log('adding bucket', bucket.key);
+          //console.log('adding bucket', bucket.key);
           publishedKeys[bucket.key] = true;
           this.added('elasticsearch/magic-search-filters/contribution/contributor_id/_buckets', bucket.key, bucket);
         }
@@ -162,8 +249,8 @@ export default function () {
   });
 
   Meteor.publish('elasticsearch/magic-search-summaries/contribution/_search', function (query, sort, limit) {
-
     let publishedIDs = {};
+    console.log("search publishing", Object.keys(publishedIDs).length);
     let search = {
       size: 10,
       query: {
@@ -186,20 +273,25 @@ export default function () {
       body: search
     }).then((resp) => {
       resp.hits.hits.forEach((hit) => {
+        console.log('resp', hit._id, Object.keys(publishedIDs).length);
         if (publishedIDs[hit._id]) {
-          console.log('changing', hit._id);
+          console.log('changing', hit._id, Object.keys(publishedIDs).length);
           this.changed('elasticsearch/magic-search-summaries/contribution/_search', hit._id, _.extend(hit._source, {_id: hit._id, _score: hit._score}));
         } else {
-          console.log('adding', hit._id);
+          console.log('adding', hit._id, Object.keys(publishedIDs).length);
           publishedIDs[hit._id] = true;
           this.added('elasticsearch/magic-search-summaries/contribution/_search', hit._id, _.extend(hit._source, {_id: hit._id, _score: hit._score}));
         }
       });
+      this.ready();
     }, function (err) {
       console.trace(err.message);
+      this.error(new Meteor.Error(e, 'hey!'));
     });
 
-    return MagICSearchSummariesContributionSearch.find({});
+    console.log("search published", Object.keys(publishedIDs).length);
+    //return MagICSearchSummariesContributionSearch.find({});
+
 
   });
 
@@ -225,10 +317,10 @@ export default function () {
       body: search
     }).then((resp) => {
       if (count === undefined) {
-        console.log('adding count', resp.count);
+        //console.log('adding count', resp.count);
         this.added('elasticsearch/magic-search-summaries/contribution/_count', 'id', {count: resp.count});
       } else {
-        console.log('changing count', resp.count);
+        //console.log('changing count', resp.count);
         this.changed('elasticsearch/magic-search-summaries/contribution/_count', 'id', {count: resp.count});
       }
       count = resp.count;
@@ -271,10 +363,10 @@ export default function () {
     }).then((resp) => {
       const resp_count = resp.aggregations.count.value;
       if (count === undefined) {
-        console.log('adding count', );
+        //console.log('adding count', );
         this.added('elasticsearch/magic-search-summaries/location/_count', 'id', {count: resp_count});
       } else {
-        console.log('changing count', resp_count);
+        //console.log('changing count', resp_count);
         this.changed('elasticsearch/magic-search-summaries/location/_count', 'id', {count: resp_count});
       }
       count = resp.count;
@@ -317,10 +409,10 @@ export default function () {
     }).then((resp) => {
       const resp_count = resp.aggregations.count.value;
       if (count === undefined) {
-        console.log('adding count', );
+        //console.log('adding count', );
         this.added('elasticsearch/magic-search-ages/contribution/_count', 'id', {count: resp_count});
       } else {
-        console.log('changing count', resp_count);
+        //console.log('changing count', resp_count);
         this.changed('elasticsearch/magic-search-ages/contribution/_count', 'id', {count: resp_count});
       }
       count = resp.count;
@@ -368,10 +460,10 @@ export default function () {
     }).then((resp) => {
       const resp_count = resp.aggregations.images_count.value + resp.aggregations.plots_count.value;
       if (count === undefined) {
-        console.log('adding count', );
+        //console.log('adding count', );
         this.added('elasticsearch/magic-search-images/contribution/_count', 'id', {count: resp_count});
       } else {
-        console.log('changing count', resp_count);
+        //console.log('changing count', resp_count);
         this.changed('elasticsearch/magic-search-images/contribution/_count', 'id', {count: resp_count});
       }
       count = resp.count;
@@ -414,10 +506,10 @@ export default function () {
     }).then((resp) => {
       const resp_count = resp.aggregations.count.value;
       if (count === undefined) {
-        console.log('adding count', );
+        //console.log('adding count', );
         this.added('elasticsearch/magic-search-summaries/site/_count', 'id', {count: resp_count});
       } else {
-        console.log('changing count', resp_count);
+        //console.log('changing count', resp_count);
         this.changed('elasticsearch/magic-search-summaries/site/_count', 'id', {count: resp_count});
       }
       count = resp.count;
@@ -460,10 +552,10 @@ export default function () {
     }).then((resp) => {
       const resp_count = resp.aggregations.count.value;
       if (count === undefined) {
-        console.log('adding count', );
+        //console.log('adding count', );
         this.added('elasticsearch/magic-search-summaries/sample/_count', 'id', {count: resp_count});
       } else {
-        console.log('changing count', resp_count);
+        //console.log('changing count', resp_count);
         this.changed('elasticsearch/magic-search-summaries/sample/_count', 'id', {count: resp_count});
       }
       count = resp.count;
@@ -506,10 +598,10 @@ export default function () {
     }).then((resp) => {
       const resp_count = resp.aggregations.count.value;
       if (count === undefined) {
-        console.log('adding count', );
+        //console.log('adding count', );
         this.added('elasticsearch/magic-search-summaries/specimen/_count', 'id', {count: resp_count});
       } else {
-        console.log('changing count', resp_count);
+        //console.log('changing count', resp_count);
         this.changed('elasticsearch/magic-search-summaries/specimen/_count', 'id', {count: resp_count});
       }
       count = resp.count;
