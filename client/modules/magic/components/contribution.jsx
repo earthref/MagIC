@@ -28,46 +28,30 @@ export default class extends React.Component {
   }
 
   renderMapThumbnail() {
-    //const c = this.props.contribution;
-    //let lat1s = c.begin_lats;
-    //let lat2s = c.end_lats;
-    //let lon1s = c.begin_lons;
-    //let lon2s = c.end_lons;
-    //if (lat1s !== undefined && lat2s !== undefined && lon1s !== undefined && lon2s !== undefined) {
-    //  let src = '//static.earthref.org/images/gstatic_maps/size=100x100&maptype=relief';
-    //  //let lat1s = lat1.split(':').map(x => parseInt(100*parseFloat(x))/100);
-    //  //let lat2s = lat2.split(':').map(x => parseInt(100*parseFloat(x))/100);
-    //  //let lon1s = lon1.split(':').map(x => parseInt(100*parseFloat(x))/100);
-    //  //let lon2s = lon2.split(':').map(x => parseInt(100*parseFloat(x))/100);
-    //  //debugger;
-    //  for (let i = 0; i < lat1s.length; i++) {
-    //    if (src.length < 800) {
-    //      src += '&path=color:0x800080FF|weight:1|fillcolor:0xBBBBBB99|';
-    //      src += (lat1s[i]-.25) + ',' + (lon1s[i]-.25) + '|' +
-    //             (lat1s[i]-.25) + ',' + (lon2s[i]+.25) + '|' +
-    //             (lat2s[i]+.25) + ',' + (lon2s[i]+.25) + '|' +
-    //             (lat2s[i]+.25) + ',' + (lon1s[i]-.25) + '|' +
-    //             (lat1s[i]-.25) + ',' + (lon1s[i]-.25);
-    //    }
-    //  }
-    //  src += '&path=color:0x00000000|' +
-    //    lat1s[0] + ',' + (Math.min(...lon1s) + 5) + '|' + lat1s[0] + ',' + (Math.max(...lon2s) + 5);
-    //  src = src.replace(/(.{200})/g, '$1/');
-    //  src += '.png';
-    //  return (
-    //    <img className="ui bordered image"
-    //         src={src}
-    //         style={{border: '1px solid rgba(0, 0, 0, 0.1)', maxWidth: '100px', maxHeight: '100px'}}/>
-    //  );
-    //}
-    //else {
-      return (
-        <GoogleStaticMap></GoogleStaticMap>
-      );
-      return (
-        <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
-      );
-    //}
+    const c = this.props.contribution;
+    let paths = [];
+
+    if (c.begin_lats !== undefined &&
+        c.end_lats   !== undefined && c.begin_lats.length == c.end_lats  .length &&
+        c.begin_lons !== undefined && c.begin_lats.length == c.begin_lons.length &&
+        c.end_lons   !== undefined && c.begin_lats.length == c.end_lons  .length) {
+      _(c.begin_lats).forEach(([], i) => {
+        paths.push({
+          lat_s: c.begin_lats[i],
+          lat_n: c.end_lats  [i],
+          lon_w: c.begin_lons[i],
+          lon_e: c.end_lons  [i]})
+      });
+    }
+
+    return (
+      <GoogleStaticMap
+        width={100}
+        height={100}
+        paths={paths}
+      />
+    );
+
   }
 
   renderData() {
