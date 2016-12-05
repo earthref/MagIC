@@ -13,7 +13,7 @@ function loadStories() {
   require('../.stories/filter_buckets_list');
   //require('../.stories/data_importer');
   //require('../.stories/magic_search');
- // require('../.stories/magic_contribution');
+  require('../.stories/magic_contribution');
 
 }
 

@@ -120,6 +120,28 @@ export default class extends React.Component {
     );
   }
 
+  renderGeo(c) {
+    let geologic = [];
+    if (c.plate_block) geologic.push(c.plate_block);
+    if (c.terrane) geologic.push(c.terrane);
+    if (c.geological_province_section) geologic.push(c.geological_province_section);
+    if (c.setting) geologic.push(c.setting);
+    let geographic = [];
+    if (c.country) geographic.push(c.country);
+    if (c.region) geographic.push(c.region);
+    if (c.village_city) geographic.push(c.village_city);
+    let oceanographic = [];
+    if (c.continent_ocean) oceanographic.push(c.continent_ocean);
+    if (c.ocean_sea) oceanographic.push(c.ocean_sea);
+    return (
+      <div>
+        {(geologic.length      > 0 ? <span><b>Geologic:</b><br/>{geologic.join(', ')}<br/></span> : undefined)}
+        {(geographic.length    > 0 ? <span><b>Geographic:</b><br/>{geographic.join(', ')}<br/></span> : undefined)}
+        {(oceanographic.length > 0 ? <span><b>Oceanographic:</b><br/>{oceanographic.join(', ')}<br/></span> : undefined)}
+      </div>
+    );
+  }
+
   render() {
     const c = this.props.contribution;
     return (
@@ -179,26 +201,7 @@ export default class extends React.Component {
                 </a>
               </div>
               <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {() => {
-                  let geologic = [];
-                  if (c.plate_block) geologic.push(c.plate_block);
-                  if (c.terrane) geologic.push(c.terrane);
-                  if (c.geological_province_section) geologic.push(c.geological_province_section);
-                  if (c.setting) geologic.push(c.setting);
-                  let geographic = [];
-                  if (c.country) geographic.push(c.country);
-                  if (c.region) geographic.push(c.region);
-                  if (c.village_city) geographic.push(c.village_city);
-                  let oceanographic = [];
-                  if (c.continent_ocean) oceanographic.push(c.continent_ocean);
-                  if (c.ocean_sea) oceanographic.push(c.ocean_sea);
-                  return <div>
-                    {(/*geologic.length      > 0*/ 1 ? <span><b>Geologic:</b><br/>{geologic.join(', ')}<br/></span> : undefined)}
-                    {(/*geographic.length    > 0*/ 1 ? <span><b>Geographic:</b><br/>{geographic.join(', ')}<br/></span> : undefined)}
-                    {(/*oceanographic.length > 0*/ 1 ? <span><b>Oceanographic:</b><br/>{oceanographic.join(', ')}<br/></span> : undefined)}
-                  </div>
-                    ;
-                }}
+                {this.renderGeo(c)}
               </div>
               <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {(c.class ? <span><b>Class:</b><br/>{c.class.join(', ')}<br/></span> : undefined)}

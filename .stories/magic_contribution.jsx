@@ -6,44 +6,87 @@ import MagICContribution from '../client/modules/magic/components/contribution.j
 storiesOf('Search', module)
   .add('MagIC Contribution', () => (
     <MagICContribution contribution={{
-      "contributor_id" : "7154",
-      "reference_html" : "<b>Tarduno, J.A., Watkeys, M.K., Huffman, T.N., Cottrell, R.D., Blackman, E.G., Wendt, A., Scribner, C.A. and Wagner, C.W. (2015).</b> Antiquity of the South Atlantic Anomaly and evidence for top-down control on the geodynamo.<i> Nature Communications 6: 1-6. doi: <a href=\"//dx.doi.org/10.1038/ncomms8865\">10.1038/ncomms8865</a>.</i>",
-      "n_samples" : "42",
-      "n_locations" : "6",
-      "n_sites" : "11",
-      "file_name" : "MagIC_Contribution_11315.txt",
-      "min_inc" : "-61.5",
-      "min_ages" : "2963",
-      "updated" : "13-SEP-2016",
-      "contributor" : "Rory Cottrell",
-      "citation" : "Tarduno et al. (2015)",
-      "doi" : "10.1038/ncomms8865",
-      "end_lats" : "-22.31:-22.31:-22.31:-22.31:-22.31:-22.31",
-      "magic_contribution_id" : "11315",
-      "max_ages" : "3535",
-      "type" : ":Archeological Site:Burnt Structure:Ceramic:",
-      "class" : ":Archeologic:",
-      "location_types" : ":Archeological Site:",
-      "n_dec" : "93",
-      "begin_lats" : "-22.31:-22.31:-22.31:-22.31:-22.31:-22.31",
-      "begin_lons" : "29.29:29.28:29.28:29.27:29.27:29.27",
-      "status" : "2",
-      "max_dec" : "359.5",
-      "private_key" : "btg6tBqrPuO8",
-      "folder" : "1473774122.45486",
-      "n_specimens" : "93",
-      "min_dec" : "1",
-      "upload" : "1",
-      "n_ages" : "5",
-      "version" : "1",
-      "max_inc" : "50.9",
-      "inserted" : "13-SEP-2016",
-      "long_authors" : "Tarduno, J.A., Watkeys, M.K., Huffman, T.N., Cottrell, R.D., Blackman, E.G., Wendt, A., Scribner, C.A. and Wagner, C.W.",
-      "magic_version" : "2.5",
-      "method_codes" : ":IE-SH:LP-DIR-T:DE-BFL-O:LP-PI-ALT-DH:DE-BFL-O-LP-PI-ALT-DH:LP-DIR-AF:DA-DIR-GEO:DE-BLF-O:DE-BFL:",
-      "lithology" : ":Not Specified:",
-      "n_inc" : "93",
-      "end_lons" : "29.29:29.28:29.28:29.27:29.27:29.27",
-      "er_citation_id" : "193942"
+      "contributor_id": 6382,
+      "location_type": [
+        "Outcrop"
+      ],
+      "reference_html": "<b>Bucker, C., Schult, A., Bloch, W. and Guerreiro, S.D.C. (1986).</b> Rockmagnetism and palaeomagnetism of an Early Cretaceous/Late Jurassic dike swarm in Rio Grande do Norte, Brazil.<i> Journal of Geophysics 60: 129-135.</i>",
+      "n_locations": 1,
+      "reference_id": 90086,
+      "n_plots": 1,
+      "contribution_id": 4297,
+      "file_name": "zmab0090086tmp01",
+      "min_inc": 20.8,
+      "min_ages": 125000000,
+      "citation": "Bucker et al. (1986)",
+      "contributor": "MagIC Database Team",
+      "end_lats": [
+        -5.7
+      ],
+      "mdt_code": "m006169dt20061219131543",
+      "region": [
+        "NE Brazil"
+      ],
+      "n_vgp": 1,
+      "geologic_classes": [
+        "Intrusive"
+      ],
+      "max_ages": 167000000,
+      "geologic_types": [
+        "Outcrop"
+      ],
+      "n_dec": 1,
+      "begin_lats": [
+        -5.7
+      ],
+      "lithologies": [
+        "dykes"
+      ],
+      "begin_lons": [
+        323.6
+      ],
+      "status": 2,
+      "max_dec": 186.6,
+      "private_key": "oRekB9L6tWin",
+      "random_plot_name": "LO:_Mesozoic Dykes, Rio Grande do Norte_SI:__SA:__SP:__CO:_g_TY:_eqarea_.png",
+      "folder": "zmab",
+      "reference_year": 1986,
+      "min_dec": 186.6,
+      "version_history": [
+        {
+          "activated": "2006-12-19T13:15:47-05:00",
+          "contribution_id": 4297,
+          "file_name": "zmab0090086tmp01",
+          "version": 1,
+          "upload": 1,
+          "magic_version": 2.2,
+          "folder": "zmab"
+        }
+      ],
+      "upload": 1,
+      "n_ages": 1,
+      "country": [
+        "Brazil"
+      ],
+      "activated": "2006-12-19T13:15:47-05:00",
+      "version": 1,
+      "long_authors": "Bucker, C., Schult, A., Bloch, W. and Guerreiro, S.D.C.",
+      "magic_version": 2.2,
+      "max_inc": 20.8,
+      "method_codes": [
+        "LP-DC3",
+        "DE-VGP",
+        "LT-AF-Z"
+      ],
+      "continent_ocean": [
+        "South America"
+      ],
+      "n_inc": 1,
+      "end_lons": [
+        323.6
+      ],
+      "external_database_ids": {
+        "name": "GPMDB"
+      }
     }}/>
   ));
