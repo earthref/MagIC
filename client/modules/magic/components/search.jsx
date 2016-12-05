@@ -3,12 +3,12 @@ import React from 'react';
 import saveAs from 'save-as';
 import DebounceInput from 'react-debounce-input';
 import Count from '../../common/containers/count';
+import FiltersList from '../../common/containers/filters_list';
 import InfiniteScrollerWithCount from '../../common/containers/infinite_scroller_with_count';
 import GoogleStaticMap from '../../common/components/google_static_map';
 import IconButton from '../../common/components/icon_button.jsx';
 import MagICContribution from './contribution.jsx';
 import MagICSearchSummariesContributionSearch from '../containers/search_pages_contributions_summaries';
-import MagICSearchFilterBucket from '../containers/search_filter_bucket';
 import {portals} from '../../common/configs/portals';
 import GoogleMap from '../../common/containers/google_map';
 import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
@@ -28,7 +28,7 @@ export default class extends React.Component {
       sortDirection: -1,
       sortDefault: true,
       settingsVisible: true,
-      filters: []
+      filters: {}
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
@@ -36,15 +36,14 @@ export default class extends React.Component {
       input: {borderColor: '#888888'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
       segment: {padding: '0'},
-      saveButton: {backgroundColor: '#FFFFFF !important'},
-      downloadButton: {backgroundColor: '#FFFFFF !important', marginLeft: '-1px'},
+      downloadButton: {marginLeft: '-1px'},
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
       searchInput: {padding: '1em', paddingBottom: 0},
       hideSettings: {paddingLeft: '1em'},
       showSettings: {overflow: 'hidden', transition: 'all 0.5s ease'},
       hideSettingsIcon: {paddingLeft: '0.5em', paddingRight: '0.5em'},
-      settings: {whiteSpace: 'nowrap', overflowY: 'scroll', padding: '1em', borderRight: '1px solid #D4D4D5', },
+      settings: {whiteSpace: 'nowrap', overflowY: 'scroll', border: 'none' },
       settingsHeader: {margin: 0},
       filterBuckets: {paddingLeft: '0.5em', position: 'relative'},
       scroller: {overflowY: 'scroll', background: 'white', padding: '1em', transition: 'all 0.5s ease', borderRadius: '0', boxShadow: 'none'}
@@ -55,8 +54,6 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    //$(this.refs['results']).accordion({exclusive: false});
-    $(this.refs['filters']).accordion({exclusive: false});
     window.addEventListener("resize", this.onWindowResize.bind(this));
     this.onWindowResize();
     this.showSettings();
@@ -74,10 +71,6 @@ export default class extends React.Component {
 
   componentDidUpdate() {
     this.onWindowResize();
-    //$(this.refs['results']).accordion({exclusive: false});
-  }
-
-  componentWillReceiveProps(nextProps) {
   }
 
   onWindowResize() {
@@ -88,17 +81,6 @@ export default class extends React.Component {
       $('> td > table > tbody >  tr > td > div', this.refs['search tabs']).each(function() {
         $(this).height(windowHeight - $(this).offset().top);
       });
-    }
-  }
-
-  onResultsScroll(e) {
-    const scrollPaneHeight = $(e.target).height();
-    const scrollPanePosition = e.target.scrollTop;
-    const scrollContentHeight = $(e.target).children().first().height();
-    console.log(e.target.scrollTop, $(e.target).children().last().height() - $(e.target).height(), $(e.target).children().last().position().top, $(e.target).children().last().height(), $(e.target).height(), this.state.pageNumber, $(e.target), $(e.target).children().last());
-    if (e.target.scrollTop > $(e.target).children().last().height() - $(e.target).height() - 50) {
-      this.setState({pageNumber: this.state.pageNumber + 1});
-      console.log('pageNumber:', this.state.pageNumber + 1)
     }
   }
 
@@ -159,61 +141,33 @@ export default class extends React.Component {
   }
 
   renderFilterSettings() {
+    const filters = [
+      //{type: 'bbox'     , name: '', title: 'Geospatial Boundary'},
+      //{type: 'histogram', name: 'magic.filters.contributions.reference_year', term: 'reference_year', title: 'Publication Year'},
+      {type: 'string'   , name: 'magic.filters.contributions.contributor'   , term: 'contributor'               , title: 'Contributor'     },
+      {type: 'string'   , name: 'magic.filters.contributions.external_db'   , term: 'external_database_ids.name', title: 'External DB'     },
+      {type: 'string'   , name: 'magic.filters.contributions.location_type' , term: 'location_type'             , title: 'Location Type'   },
+      {type: 'string'   , name: 'magic.filters.contributions.geologic_type' , term: 'geologic_types'            , title: 'Geologic Type'   },
+      {type: 'string'   , name: 'magic.filters.contributions.geologic_class', term: 'geologic_classes'          , title: 'Geologic Class'  },
+      {type: 'string'   , name: 'magic.filters.contributions.lithology'     , term: 'lithologies'               , title: 'Lithology'       }
+    ];
     return (
-      <div ref="filters" className="ui accordion">
-        <div className="title"><i className="dropdown icon"/>Geospatial Boundary</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <GoogleStaticMap></GoogleStaticMap>
-        </div>
-        <div className="title"><i className="dropdown icon"/>Publication Year</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="reference_year"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>Contributor</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="contributor"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>External DB</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="external_db"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>Location Type</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="location_type"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>Geologic Type</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="geologic_type"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>Geologic Class</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="geologic_class"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>Lithology</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFilterBucket
-            name="lithology"
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
+      <div>
+        {filters.map((filter, i) =>
+          <div key={i}>
+            <FiltersList
+              name={filter.name}
+              title={filter.title}
+              elasticsearchQuery={this.getSearchQuery()}
+              activeFilters={this.state.filters[filter.term]}
+              onChange={(filters) => {
+                let allFilters = this.state.filters;
+                allFilters[filter.term] = filters;
+                this.setState({filters: allFilters});
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -235,6 +189,15 @@ export default class extends React.Component {
     } : {});
   }
 
+  getFilters() {
+    const filters = _.reduce(_.keys(this.state.filters).sort(), (filters, term) => {
+      filters.push(..._.map(this.state.filters[term], (key) => { return {term: {[term]: key}}}));
+      return filters;
+    }, []);
+    console.log('new filters', filters[0]);
+    return filters;
+  }
+
   renderViewTabMenu(level) {
     return (
       <div className="ui top attached tabular small menu search-tab-menu">
@@ -250,16 +213,18 @@ export default class extends React.Component {
         {this.renderViewTab('Poles'    , 'magic.count.contributions.poles'    )}
         {this.renderViewTab('Images'   , 'magic.sum.contributions.images'     )}
         {this.renderViewTab('Map')}
-        <a className="item">
+        <div className="item">
+          <a className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
           <i className="ui plus icon"/>
-          Custom View
-        </a>
+            Custom View
+          </a>
+        </div>
         <div className="right menu">
           <div className="item" style={{paddingRight: '1em'}}>
-            <div className="ui icon dropdown button" style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
+            <div className="ui dropdown icon button" style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
               <input type="hidden" name="sort"/>
-              <i className="ui sort icon"/>
               <div className="default text">Upload Date</div>
+              <i className="ui dropdown icon"/>
               <div className="menu">
                 <div className="item" data-value="1">Ascending</div>
                 <div className="item" data-value="0">Descending</div>
@@ -281,7 +246,7 @@ export default class extends React.Component {
               <Count
                 subscriptionName="magic.count.contributions.summaries"
                 elasticsearchQuery={this.getSearchQuery()}
-                elasticsearchFilters={[]}
+                elasticsearchFilters={this.getFilters()}
               />
             </div>
           </div>
@@ -306,21 +271,33 @@ export default class extends React.Component {
           <a className="item" style={this.styles.a}>
             Samples
             <div className="ui circular small basic label" style={this.styles.countLabel}>
+              <Count
+                subscriptionName="magic.sum.samples.summaries"
+                elasticsearchQuery={this.getSearchQuery()}
+              />
             </div>
           </a>
           <a className="item"style={this.styles.a}>
             Specimens
             <div className="ui circular small basic label" style={this.styles.countLabel}>
+              <Count
+                subscriptionName="magic.sum.specimens.summaries"
+                elasticsearchQuery={this.getSearchQuery()}
+              />
             </div>
           </a>
           <a className="item" style={this.styles.a}>
             Measurements
             <div className="ui circular small basic label" style={this.styles.countLabel}>
+              <Count
+                subscriptionName="magic.sum.measurements.summaries"
+                elasticsearchQuery={this.getSearchQuery()}
+              />
             </div>
           </a>
           <div className="right menu">
             <div className="item" style={{paddingRight: 0}}>
-              <div className={portals['MagIC'].color + ' ui compact button'}>
+              <div className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
                 <i className="plus icon"/>
                 Upload Data
               </div>
@@ -334,8 +311,6 @@ export default class extends React.Component {
               Search MagIC
             </div>
             <input
-              minLength={0}
-              debounceTimeout={500}
               className="prompt"
               type="text"
               placeholder={'e.g. metamorphic "field intensity" -precambrian'}
@@ -343,11 +318,11 @@ export default class extends React.Component {
               style={this.styles.input}
               onChange={(e) => { this.setState({_search: e.target.value}); this.handleSearch(e.target.value); }}
             />
-            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.saveButton}>
+            <div className={portals['MagIC'].color + ' ui basic icon button'}>
               <i className="save icon"/>
               Save Search
             </div>
-            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.downloadButton}>
+            <div className={portals['MagIC'].color + ' ui basic icon button'} style={this.styles.downloadButton}>
               <i className="download icon"/>
               Download Results
             </div>
@@ -372,16 +347,16 @@ export default class extends React.Component {
                   </div>
                 </a>
               </div>
-              <div ref="settings" style={this.styles.settings}>
+              <div ref="settings" className="ui small basic attached segment" style={this.styles.settings}>
                 <div>
-                  <h4 className="ui header" style={this.styles.settingsHeader}>
+                  <h5 className="ui header" style={this.styles.settingsHeader}>
                     Sort By
-                  </h4>
+                  </h5>
                   {this.renderSortSettings()}
                   <div className="ui divider"></div>
-                  <h4 className="ui header" style={this.styles.settingsHeader}>
+                  <h5 className="ui header" style={this.styles.settingsHeader}>
                     Filter By
-                  </h4>
+                  </h5>
                   {this.renderFilterSettings()}
                 </div>
               </div>
@@ -404,12 +379,14 @@ export default class extends React.Component {
                   <InfiniteScrollerWithCount
                       style={this.styles.scroller}
                       subscriptionName="magic.count.contributions.summaries"
-                      searchQuery={this.getSearchQuery()}
+                      elasticsearchQuery={this.getSearchQuery()}
+                      elasticsearchFilters={this.getFilters()}
                       pageNumberPropName="elasticsearchPageNumber"
                       pageSize={5}
                   >
                     <MagICSearchSummariesContributionSearch
                       elasticsearchQuery={this.getSearchQuery()}
+                      elasticsearchFilters={this.getFilters()}
                       elasticsearchSort={[{[this.getSortColumn()]: (this.getSortDirection() == 1 ? 'asc' : 'desc')}]}
                       elasticsearchPageSize={5}
                       minimongoSort={{[this.getSortColumn()]: this.getSortDirection()}}
@@ -424,7 +401,6 @@ export default class extends React.Component {
                 )}>
                   <div className="ui styled fluid accordion search-results"
                        style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}
-                       onScroll={this.onResultsScroll.bind(this)}
                   >
                   </div>
                 </td>
@@ -436,7 +412,6 @@ export default class extends React.Component {
                 )}>
                   <div className="ui styled fluid accordion search-results"
                        style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}
-                       onScroll={this.onResultsScroll.bind(this)}
                   >
                   </div>
                 </td>
@@ -451,7 +426,7 @@ export default class extends React.Component {
                       <GoogleMap
                         onReady={this.handleMapReady}
                         mapOptions={this.handleMapOptions}
-                      ></GoogleMap>
+                      />
                     </div>
                   </div>
                 </td>
@@ -472,6 +447,7 @@ export default class extends React.Component {
             <Count
               subscriptionName={subscriptionName}
               elasticsearchQuery={this.getSearchQuery()}
+              elasticsearchFilters={this.getFilters()}
             />
           </div>
         : undefined}
@@ -484,6 +460,7 @@ export default class extends React.Component {
             <Count
               subscriptionName={subscriptionName}
               elasticsearchQuery={this.getSearchQuery()}
+              elasticsearchFilters={this.getFilters()}
             />
           </div>
           : undefined}

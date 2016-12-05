@@ -1,9 +1,9 @@
 import React from 'react';
 import Count from '../components/count';
-import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
+import {compose} from 'react-komposer';
+import {Collections} from '/lib/collections';
 
-export const composer = ({context, subscriptionName, elasticsearchQuery, elasticsearchFilters}, onData) => {
-  const {Meteor, Collections} = context();
+export const composer = ({subscriptionName, elasticsearchQuery, elasticsearchFilters}, onData) => {
   const subscriptionHandle = Meteor.subscribe(subscriptionName, elasticsearchQuery, elasticsearchFilters);
   if (subscriptionHandle.ready()) {
     const doc = Collections[subscriptionName].findOne();
@@ -18,9 +18,27 @@ export const composer = ({context, subscriptionName, elasticsearchQuery, elastic
   }
 };
 
-export default composeAll(
-  composeWithTracker(composer, () => (
-    <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i>
-  )),
-  useDeps()
+function composeWithTracker(reactiveMapper) {
+  return (props, onData, env) => {
+    let trackerCleanup = null;
+    const handler = Tracker.nonreactive(() => {
+      return Tracker.autorun(() => {
+        trackerCleanup = reactiveMapper(props, onData, env);
+      });
+    });
+
+    return () => {
+      if(typeof trackerCleanup === 'function') trackerCleanup();
+      return handler.stop();
+    };
+  };
+}
+
+export default compose(
+  composeWithTracker(composer),
+  {
+    loadingHandler: () => (
+      <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i>
+    )
+  }
 )(Count);

@@ -8,6 +8,7 @@ export const composer = ({context, elasticsearchQuery, elasticsearchFilters, ela
   const subscriptionHandle = Meteor.subscribe(setName, elasticsearchQuery, elasticsearchFilters, elasticsearchSort, elasticsearchPageSize, elasticsearchPageNumber);
   if (subscriptionHandle.ready()) {
     const contributions = Collections[setName].find({_page: elasticsearchPageNumber}, {sort: minimongoSort}).fetch();
+    console.log('page', elasticsearchPageNumber, contributions.length);
     _.delay(() => onData(null, {contributions}));
   } else {
     onData();
