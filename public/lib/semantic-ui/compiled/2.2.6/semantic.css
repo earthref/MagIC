@@ -6271,6 +6271,10 @@ input::selection {
 /*******************************
          Site Overrides
 *******************************/
+.ui.basic.buttons .button,
+.ui.basic.button {
+  background: #FFFFFF !important;
+}
 /*!
  * # Semantic UI - Container
  * http://github.com/semantic-org/semantic-ui/
