@@ -32,7 +32,7 @@ export default class extends React.Component {
           <Navigation location="sidebar" portal={portal}/>
         </div>
         <div className="pusher">
-          <div className={'ui main layout-content' + (fullWidth ? '' : ' container')}>
+          <div className={'ui main layout-content' + (fullWidth ? ' full-width' : ' container')}>
             <div ref="beta modal" className="ui modal">
               <h1 className="ui centered header">
                 Beta Site
@@ -71,7 +71,7 @@ export default class extends React.Component {
           </a>
         </div>
         <div className="ui bottom fixed small menu footer">
-          <div className="ui container" style={(fullWidth ? {width:'100%'} : {})}>
+          <div className="ui container" style={(fullWidth ? {width:'calc(100% - 4em)'} : {})}>
             <div className="left menu">
               <div className="ui vertical segment">
                 <div>

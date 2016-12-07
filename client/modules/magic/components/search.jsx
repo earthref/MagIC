@@ -1,24 +1,9 @@
 import _ from 'lodash';
 import React from 'react';
-import saveAs from 'save-as';
-import IconButton from '../../common/components/icon_button.jsx';
-import MagICContribution from './contribution.jsx';
-import MagICSearchSummariesContributionSearch from '../containers/search_summaries_contribution_search';
-import MagICSearchSummariesContributionCount from '../containers/search_summaries_contribution_count';
-import MagICSearchAgesContributionCount from '../containers/search_ages_contribution_count';
-import MagICSearchImagesContributionCount from '../containers/search_images_contribution_count';
-import MagICSearchSummariesLocationCount from '../containers/search_summaries_location_count';
-import MagICSearchSummariesSiteCount from '../containers/search_summaries_site_count';
-import MagICSearchSummariesSampleCount from '../containers/search_summaries_sample_count';
-import MagICSearchSummariesSpecimenCount from '../containers/search_summaries_specimen_count';
-import MagICSearchFiltersContributionReferenceYearBuckets from '../containers/search_filters_reference_year_buckets';
-import MagICSearchFiltersContributionContributorIDBuckets from '../containers/search_filters_contributor_id_buckets';
-import MagICSearchFiltersContributionExternalDBNameBuckets from '../containers/search_filters_external_db_name_buckets';
+import Count from '../../common/containers/search_count';
+import FiltersList from '../../common/containers/search_filters_list';
+import SearchLevel from '../../common/components/search_level';
 import {portals} from '../../common/configs/portals';
-import {GoogleMapLoader, GoogleMap, Marker} from 'react-google-maps';
-import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
-import {default as svs} from '../../../../lib/modules/er/suggested_vocabularies';
-import {default as contributions} from '../../../../lib/modules/magic/contributions';
 
 export default class extends React.Component {
 
@@ -26,36 +11,38 @@ export default class extends React.Component {
     super(props);
     this.state = {
       search: '',
-      level: 'Contributions',
-      view: 'Summaries',
+      _search: '',
+      levelNumber: 0,
       sort: 'activated',
       sortDirection: -1,
       sortDefault: true,
-      limit: 20,
       settingsVisible: true,
-      filters: []
+      filters: {}
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
       table: {width: '100%'},
+      input: {borderColor: '#888888'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
       segment: {padding: '0'},
+      downloadButton: {marginLeft: '-1px'},
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
       searchInput: {padding: '1em', paddingBottom: 0},
       hideSettings: {paddingLeft: '1em'},
-      showSettings: {overflow: 'hidden', transition: 'all 0.5s ease'},
+      //showSettings: {overflow: 'hidden', transition: 'all 0.5s ease'},
       hideSettingsIcon: {paddingLeft: '0.5em', paddingRight: '0.5em'},
-      settings: {whiteSpace: 'nowrap', overflowY: 'auto', padding: '1em'},
+      settings: {whiteSpace: 'nowrap', overflowY: 'scroll', border: 'none', flex: 1 },
       settingsHeader: {margin: 0},
       filterBuckets: {paddingLeft: '0.5em', position: 'relative'},
-      results: {overflow: 'auto', padding: '1em', borderLeft: '1px solid #D4D4D5', transition: 'all 0.5s ease', borderRadius: '0', boxShadow: 'none'}
+      //scroller: {overflowY: 'scroll', background: 'white', padding: '1em', transition: 'all 0.5s ease', borderRadius: '0', boxShadow: 'none'}
     };
+    this.handleSearch = _.throttle((value) => {
+      this.setState({search: value});
+    }, 1000);
   }
 
   componentDidMount() {
-    $(this.refs['results']).accordion({exclusive: false});
-    $(this.refs['filters']).accordion({exclusive: false});
     window.addEventListener("resize", this.onWindowResize.bind(this));
     this.onWindowResize();
     this.showSettings();
@@ -66,47 +53,35 @@ export default class extends React.Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    if (nextState.search !== this.state.search || !_.isEqual(nextState.filters, this.state.filters))
-      this.setState({limit: 20});
+    if (nextState.view !== this.state.view) {
+      _.delay(() => $(window).trigger('resize'), 500);
+    }
   }
 
   componentDidUpdate() {
     this.onWindowResize();
-    //$(this.refs['results']).accordion({exclusive: false});
-  }
-
-  componentWillReceiveProps(nextProps) {
   }
 
   onWindowResize() {
-    const windowHeight = $(window).height() - (this.props.bottomOffset || 0) - 29;
+    const windowHeight = $(window).height() - (this.props.bottomOffset || 0);
     if (windowHeight !== this.windowHeight) {
       this.windowHeight = windowHeight;
-      $(this.refs['settings']).height(windowHeight - $(this.refs['settings']).offset().top);
-      $('> td > table > tbody >  tr > td > div.search-results', this.refs['search tabs']).each(function() {
-        $(this).height(windowHeight - $(this).offset().top);
-      });
+      $(this.refs['results']).height(windowHeight - $(this.refs['settings']).offset().top + 20);
     }
   }
 
-  onResultsScroll(e) {
-    if (e.target.scrollTop > $(e.target).children().first().height() - 2 * $(e.target).height())
-      this.setState({limit: this.state.limit + 10});
-    //console.log(e.target.scrollTop, $(e.target).height(), $(e.target).children().first().height(), this.state.limit);
-  }
-
   showSettings() {
-    $(this.refs['show settings']).hide();
-    $(this.refs['hide settings']).show();
-    $(this.refs['settings']).show();
-    $(this.refs['results']).addClass('settings-visible');
+    //$(this.refs['show settings']).hide();
+    //$(this.refs['hide settings']).show();
+    //$(this.refs['settings']).show();
+    //$(this.refs['results']).addClass('settings-visible');
   }
 
   hideSettings() {
-    $(this.refs['show settings']).show();
-    $(this.refs['hide settings']).hide();
-    $(this.refs['settings']).hide();
-    $(this.refs['results']).removeClass('settings-visible');
+    //$(this.refs['show settings']).show();
+    //$(this.refs['hide settings']).hide();
+    //$(this.refs['settings']).hide();
+    //$(this.refs['results']).removeClass('settings-visible');
   }
 
   renderSortSettings() {
@@ -152,26 +127,33 @@ export default class extends React.Component {
   }
 
   renderFilterSettings() {
+    const filters = [
+      //{type: 'bbox'     , name: '', title: 'Geospatial Boundary'},
+      //{type: 'histogram', name: 'magic.filters.contributions.reference_year', term: 'reference_year', title: 'Publication Year'},
+      {type: 'string'   , name: 'magic.filters.contributions.contributor'   , term: 'contributor'               , title: 'Contributor'     },
+      {type: 'string'   , name: 'magic.filters.contributions.external_db'   , term: 'external_database_ids.name', title: 'External DB'     },
+      {type: 'string'   , name: 'magic.filters.contributions.location_type' , term: 'location_type'             , title: 'Location Type'   },
+      {type: 'string'   , name: 'magic.filters.contributions.geologic_type' , term: 'geologic_types'            , title: 'Geologic Type'   },
+      {type: 'string'   , name: 'magic.filters.contributions.geologic_class', term: 'geologic_classes'          , title: 'Geologic Class'  },
+      {type: 'string'   , name: 'magic.filters.contributions.lithology'     , term: 'lithologies'               , title: 'Lithology'       }
+    ];
     return (
-      <div ref="filters" className="ui accordion">
-        <div className="title"><i className="dropdown icon"/>Publication Year</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFiltersContributionReferenceYearBuckets
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>Uploader</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFiltersContributionContributorIDBuckets
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
-        <div className="title"><i className="dropdown icon"/>External DB</div>
-        <div className="content" style={this.styles.filterBuckets}>
-          <MagICSearchFiltersContributionExternalDBNameBuckets
-            elasticsearchQuery={this.getSearchQuery()}
-          />
-        </div>
+      <div>
+        {filters.map((filter, i) =>
+          <div key={i}>
+            <FiltersList
+              name={filter.name}
+              title={filter.title}
+              elasticsearchQuery={this.getSearchQuery()}
+              activeFilters={this.state.filters[filter.term]}
+              onChange={(filters) => {
+                let allFilters = this.state.filters;
+                allFilters[filter.term] = filters;
+                this.setState({filters: allFilters});
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   }
@@ -193,145 +175,77 @@ export default class extends React.Component {
     } : {});
   }
 
-  renderTabMenu(level) {
-    return (
-      <div className="ui top attached tabular small menu search-tab-menu">
-        <div style={_.merge({}, this.styles.showSettings, {maxWidth: (this.state.settingsVisible ? '0px' : '125px')})}>
-          <a className="item" onClick={() => this.setState({settingsVisible: true})}>
-            <i className="ui chevron circle right black icon"/>
-            Settings
-          </a>
-        </div>
-        {this.state.view == 'Summaries' ?
-          <div className="active item">
-            {level}
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </div>
-        :
-          <a className="item" onClick={() => this.setState({view: 'Summaries'})}>
-            {level}
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-        }
-        {this.state.view == 'Ages' ?
-          <div className="active item">
-            Ages
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchAgesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </div>
-          :
-          <a className="item" onClick={() => this.setState({view: 'Ages'})}>
-            Ages
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchAgesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-        }
-        {this.state.view == 'Images' ?
-          <div className="active item">
-            Images
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchImagesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </div>
-          :
-          <a className="item" onClick={() => this.setState({view: 'Images'})}>
-            Images
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchImagesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-        }
-        {this.state.view == 'Map' ?
-          <div className="active item">
-            Map
-          </div>
-          :
-          <a className="item" onClick={() => this.setState({view: 'Map'})}>
-            Map
-          </a>
-        }
-        <div className="right menu">
-          <div className="item">
-            <i className="save icon"/>
-            <a className="ui" style={this.styles.a}>Save Search</a>
-          </div>
-          <div className="item">
-            <i className="download icon"/>
-            <a className="ui" style={this.styles.a}>Download Results</a>
-          </div>
-        </div>
-      </div>
-    );
+  getFilters() {
+    const filters = _.reduce(_.keys(this.state.filters).sort(), (filters, term) => {
+      filters.push(..._.map(this.state.filters[term], (key) => { return {term: {[term]: key}}}));
+      return filters;
+    }, []);
+    console.log('new filters', filters[0]);
+    return filters;
   }
 
   render() {
+    const levels = [
+      { name: 'Contributions' },
+      { name: 'Locations'     },
+      { name: 'Sites'         },
+      { name: 'Samples'       },
+      { name: 'Specimens'     },
+      { name: 'Measurements'  }
+    ];
+    levels[0].views = [
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      {name: 'Poles'    , type: 'list',    subscriptionName: 'magic.pages.contributions.poles'    , countSubscriptionName: 'magic.count.contributions.poles'    },
+      {name: 'Ages'     , type: 'list',    subscriptionName: 'magic.pages.contributions.ages'     , countSubscriptionName: 'magic.sum.contributions.ages'       },
+      {name: 'PMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      {name: 'RMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      {name: 'Plots'    , type: 'plots'  , subscriptionName: 'magic.pages.contributions.plots'    , countSubscriptionName: 'magic.sum.contributions.plots'      },
+      {name: 'Map'      , type: 'map'    , subscriptionName: 'magic.pages.contributions.map'      , countSubscriptionName: 'magic.count.contributions.map'      },
+      //{name: 'Images'   , type: 'gallery', subscriptionName: 'magic.sum.contributions.images'     , countSubscriptionName: 'magic.sum.contributions.images'     },
+    ];
+    levels[1].views = [
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.count.locations.summaries'},
+      {name: 'Poles'    , type: 'list',    subscriptionName: 'magic.pages.contributions.poles'    , countSubscriptionName: 'magic.count.contributions.poles'    },
+      {name: 'Ages'     , type: 'list',    subscriptionName: 'magic.pages.locations.ages'         , countSubscriptionName: 'magic.sum.locations.ages'       },
+      {name: 'PMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      {name: 'RMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      {name: 'Plots'    , type: 'plots'  , subscriptionName: 'magic.pages.locations.plots'        , countSubscriptionName: 'magic.sum.locations.plots'      },
+      //{name: 'Images'   , type: 'gallery', subscriptionName: 'magic.sum.contributions.images'     , countSubscriptionName: 'magic.sum.contributions.images'     },
+      {name: 'Map'      , type: 'map'    , subscriptionName: 'magic.pages.locations.map'          , countSubscriptionName: 'magic.count.locations.map'      }
+    ];
+    levels[2].views = [
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.sites.summaries'        , countSubscriptionName: 'magic.sum.sites.summaries'}
+    ];
+    levels[3].views = [
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.sum.samples.summaries'}
+    ];
+    levels[4].views = [
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.sum.specimens.summaries'}
+    ];
+    levels[5].views = [
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.sum.measurements.summaries'}
+    ];
+
     return (
       <div className="magic-search">
         <div className="ui top attached tabular menu level-tabs">
-          <div className={'active item'} style={this.styles.activeTab}>
-            Contributions
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesContributionCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
+          {levels.map((level, i) =>
+            <div key={i} className={(this.state.levelNumber === i ? 'active ' : '') + 'item'}
+                 style={(this.state.levelNumber === i ? this.styles.activeTab : this.styles.a)}
+                 onClick={() => this.setState({levelNumber: i})}>
+              {level.name}
+              <div className="ui circular small basic label" style={this.styles.countLabel}>
+                <Count
+                  subscriptionName={level.views[0].countSubscriptionName}
+                  elasticsearchQuery={this.getSearchQuery()}
+                  elasticsearchFilters={this.getFilters()}
+                />
+              </div>
             </div>
-          </div>
-          <a className="item" style={this.styles.a}>
-            Locations
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesLocationCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-          <a className="item" style={this.styles.a}>
-            Sites
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesSiteCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-          <a className="item" style={this.styles.a}>
-            Samples
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesSampleCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-          <a className="item"style={this.styles.a}>
-            Specimens
-            <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <MagICSearchSummariesSpecimenCount
-                elasticsearchQuery={this.getSearchQuery()}
-              />
-            </div>
-          </a>
-          <a className="item" style={this.styles.a}>
-            Experiments
-          </a>
+          )}
           <div className="right menu">
             <div className="item" style={{paddingRight: 0}}>
-              <div className={portals['MagIC'].color + ' ui compact button'}>
+              <div className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
                 <i className="plus icon"/>
                 Upload Data
               </div>
@@ -339,124 +253,76 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui bottom attached secondary segment" style={this.styles.segment}>
-          <div className="ui labeled fluid input" style={this.styles.searchInput}>
+          <div className="ui labeled fluid action input" style={this.styles.searchInput}>
             <div className={portals['MagIC'].color + ' ui label'}>
               <i className="search icon"/>
               Search MagIC
             </div>
             <input
-              ref="search"
               className="prompt"
               type="text"
-              placeholder="e.g. igneous outcrop"
-              value={this.state.search}
-              onChange={() => this.setState({search: this.refs['search'].value})}
+              placeholder={'e.g. metamorphic "field intensity" -precambrian'}
+              value={this.state._search}
+              style={this.styles.input}
+              onChange={(e) => { this.setState({_search: e.target.value}); this.handleSearch(e.target.value); }}
             />
+            <div className={portals['MagIC'].color + ' ui basic icon button'}>
+              <i className="save icon"/>
+              Save Search
+            </div>
+            <div className={portals['MagIC'].color + ' ui basic icon button'} style={this.styles.downloadButton}>
+              <i className="download icon"/>
+              Download Results
+            </div>
           </div>
-          <table style={this.styles.table}><tbody><tr ref="search tabs">
-            <td style={_.merge({},
-              this.styles.td,
-              {paddingTop: '1em'},
-              {maxWidth: (this.state.settingsVisible ? '250px' : '0px')}
-            )}>
-              <div ref="hide settings">
-                <a className="ui top attached tabular small menu"
-                   style={_.merge({}, this.styles.a, this.styles.hideSettings)}
-                   onClick={() => this.setState({settingsVisible: false})}>
-                  <div className="active item" style={this.styles.activeTab}>
-                    Settings
-                  </div>
-                  <div className="right menu">
-                    <div className="item" style={this.styles.hideSettingsIcon}>
-                      <i className="ui chevron circle left black icon"/>
+          <div ref="results" style={{width: '100%', display: 'flex', paddingTop: '1em'}}>
+            <div>
+              <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+                <div ref="settings tab">
+                  <div className="ui top attached tabular small menu"
+                     style={_.merge({}, this.styles.a, this.styles.hideSettings)}
+                     onClick={() => this.setState({settingsVisible: false})}>
+                    <div className="active item" style={this.styles.activeTab}>
+                      Settings
+                    </div>
+                    <div className="right menu">
+                      <div className="item" style={this.styles.hideSettingsIcon}>
+                        <i className="ui chevron circle left black icon"/>
+                      </div>
                     </div>
                   </div>
-                </a>
-              </div>
-              <div ref="settings" style={this.styles.settings}>
-                <div>
-                  <h4 className="ui header" style={this.styles.settingsHeader}>
-                    Sort By
-                  </h4>
-                  {this.renderSortSettings()}
-                  <div className="ui divider"></div>
-                  <h4 className="ui header" style={this.styles.settingsHeader}>
-                    Filter By
-                  </h4>
-                  {this.renderFilterSettings()}
+                </div>
+                <div ref="settings" className="ui small basic attached segment" style={this.styles.settings}>
+                  <div>
+                    <h5 className="ui header" style={this.styles.settingsHeader}>
+                      Sort By
+                    </h5>
+                    {this.renderSortSettings()}
+                    <div className="ui divider"></div>
+                    <h5 className="ui header" style={this.styles.settingsHeader}>
+                      Filter By
+                    </h5>
+                    {this.renderFilterSettings()}
+                  </div>
                 </div>
               </div>
-            </td>
-            <td style={_.merge({},
-              this.styles.td,
-              {paddingTop: '1em'},
-              (this.state.level === 'Contributions' ?
-                {width: '100%', maxWidth: 'calc(100vw)'} :
-                {width: '0%', maxWidth: '0px'})
-            )}>
-              {this.renderTabMenu('Contributions')}
-              <table style={this.styles.table}><tbody><tr>
-                <td style={_.merge({},
-                    this.styles.td,
-                    (this.state.level === 'Contributions' && this.state.view === 'Summaries' ?
-                      {width: '100%', maxWidth: 'calc(100vw)'} :
-                      {width: '0%', maxWidth: '0px'})
-                  )}>
-                  <div ref="results" className="ui styled fluid accordion search-results"
-                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}
-                       onScroll={this.onResultsScroll.bind(this)}
-                  >
-                    <MagICSearchSummariesContributionSearch
-                        elasticsearchQuery={this.getSearchQuery()}
-                        elasticsearchSort={[{[this.getSortColumn()]: (this.getSortDirection() == 1 ? 'asc' : 'desc')}]}
-                        minimongoSort={{[this.getSortColumn()]: this.getSortDirection()}}
-                        elasticsearchLimit={this.state.limit}
-                    />
-                  </div>
-                </td>
-                <td style={_.merge({},
-                  this.styles.td,
-                  (this.state.level === 'Contributions' && this.state.view === 'Ages' ?
-                    {width: '100%', maxWidth: 'calc(100vw)'} :
-                    {width: '0%', maxWidth: '0px'})
-                )}>
-                  <div className="ui styled fluid accordion search-results"
-                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}
-                       onScroll={this.onResultsScroll.bind(this)}
-                  >
-                  </div>
-                </td>
-                <td style={_.merge({},
-                  this.styles.td,
-                  (this.state.level === 'Contributions' && this.state.view === 'Images' ?
-                    {width: '100%', maxWidth: 'calc(100vw)'} :
-                    {width: '0%', maxWidth: '0px'})
-                )}>
-                  <div className="ui styled fluid accordion search-results"
-                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}))}
-                       onScroll={this.onResultsScroll.bind(this)}
-                  >
-                  </div>
-                </td>
-                <td style={_.merge({},
-                  this.styles.td,
-                  (this.state.level === 'Contributions' && this.state.view === 'Map' ?
-                    {width: '100%', maxWidth: 'calc(100vw)'} :
-                    {width: '0%', maxWidth: '0px'})
-                )}>
-                  <div className="ui styled fluid accordion search-results"
-                       style={_.merge({}, this.styles.results, (this.state.settingsVisible ? {} : {borderLeft: 'none'}), {padding: 0})}
-                  >
-
-                  </div>
-                </td>
-              </tr></tbody></table>
-            </td>
-          </tr></tbody></table>
+            </div>
+            <div style={{flex: 1}}>
+              <SearchLevel
+                views={levels[this.state.levelNumber].views}
+                elasticsearchQuery={this.getSearchQuery()}
+                elasticsearchFilters={this.getFilters()}
+                elasticsearchSort={[{[this.getSortColumn()]: (this.getSortDirection() == 1 ? 'asc' : 'desc')}]}
+                minimongoSort={{[this.getSortColumn()]: this.getSortDirection()}}
+              />
+            </div>
+          </div>
         </div>
       </div>
     );
   }
+
+
 
 }
 

@@ -9,6 +9,7 @@
     "transform-runtime"
   ],
   "ignore": [
-    "*.es5.js"
+    "*.es5.js",
+    "/client/lib/semantic-ui/*"
   ]
 }

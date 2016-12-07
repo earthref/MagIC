@@ -1,10 +1,10 @@
 import React from 'react';
 import {storiesOf, action, linkTo} from '@kadira/storybook';
-import MagICSearch from '../client/modules/magic/components/search.jsx';
+import MagICMap from '../client/modules/magic/components/search_map_view';
 
 storiesOf('Search', module)
-  .add('MagIC Search', () => (
-    <MagICSearch contribution={{
+  .add('MagIC Map', () => (
+    <MagICMap contribution={{
       "contributor_id" : "7154",
       "reference_html" : "<b>Tarduno, J.A., Watkeys, M.K., Huffman, T.N., Cottrell, R.D., Blackman, E.G., Wendt, A., Scribner, C.A. and Wagner, C.W. (2015).</b> Antiquity of the South Atlantic Anomaly and evidence for top-down control on the geodynamo.<i> Nature Communications 6: 1-6. doi: <a href=\"//dx.doi.org/10.1038/ncomms8865\">10.1038/ncomms8865</a>.</i>",
       "n_samples" : "42",
