@@ -29,12 +29,12 @@ export default class FilterList extends React.Component {
 
   toggleList() {
     $(this.refs['title']).toggleClass('active');
-    $(this.refs['content']).slideToggle();
+    $(this.refs['content']).slideToggle(250);
   }
 
   toggleOverflow() {
     this.setState({showAll: !this.state.showAll}, () => {
-      this.state.showAll ? $(this.refs['overflow']).slideDown(): $(this.refs['overflow']).slideUp();
+      this.state.showAll ? $(this.refs['overflow']).slideDown(250): $(this.refs['overflow']).slideUp(250);
     });
   }
 

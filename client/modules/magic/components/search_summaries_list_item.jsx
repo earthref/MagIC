@@ -13,7 +13,7 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    $(this.refs['contribution']).accordion({exclusive: false});
+    $(this.refs['accordion']).accordion({exclusive: false});
   }
   showData() {
     /*$(this.refs['data modal']).modal('show');
@@ -27,8 +27,7 @@ export default class extends React.Component {
     e.nativeEvent.stopImmediatePropagation();*/
   }
 
-  renderMapThumbnail() {
-    const c = this.props.contribution;
+  renderMapThumbnail(c) {
     let paths = [];
 
     if (c.begin_lats !== undefined &&
@@ -143,9 +142,10 @@ export default class extends React.Component {
   }
 
   render() {
-    const c = this.props.contribution;
+    const c = this.props.doc;
+    console.log('summary', c);
     return (
-      <div ref="contribution" className="ui accordion magic-contribution">
+      <div ref="accordion" className="ui accordion magic-contribution">
         <div className="title" style={{paddingLeft:'1em'}}>
           <i className="dropdown icon" style={{position:'relative', left:'-1.3rem'}}/>
           <div className="ui doubling grid" style={{marginTop:'-2.5rem'}}>
@@ -197,7 +197,7 @@ export default class extends React.Component {
               </div>
               <div className="two wide column">
                 <a className="ui tiny image" href="#" onClick={this.showMap.bind(this)}>
-                  {this.renderMapThumbnail()}
+                  {this.renderMapThumbnail(c)}
                 </a>
               </div>
               <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
@@ -227,16 +227,17 @@ export default class extends React.Component {
         <div className="content">
           <div dangerouslySetInnerHTML={{__html: c.reference_html}} />
           <div dangerouslySetInnerHTML={{__html: c.abstract_html}} />
-          <table className="ui very basic small table">
-            <thead>
-            <tr>
-              <th>Version</th>
-              <th>Data Model</th>
-              <th>Uploaded</th>
-              <th>Download</th>
-            </tr>
-            </thead>
-            <tbody>
+          {c.version ?
+            <table className="ui very basic small table">
+              <thead>
+              <tr>
+                <th>Version</th>
+                <th>Data Model</th>
+                <th>Uploaded</th>
+                <th>Download</th>
+              </tr>
+              </thead>
+              <tbody>
               {c.version_history.map((v, i) => {
                 return (
                   <tr key={i}>
@@ -259,8 +260,9 @@ export default class extends React.Component {
                   </tr>
                 );
               })}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          : undefined}
         </div>
         <div ref="map modal" className="ui fullscreen modal">
           <i className="close icon"></i>

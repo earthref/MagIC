@@ -5,22 +5,23 @@ GoogleMaps.load({v: '3', key: 'AIzaSyBLZOmrD0zBidUXezxmNRHcpPp5cA45pUQ'});
 
 export default class GoogleMap extends React.Component {
 
-  componentDidMount() {
-    console.log('GoogleMap.loaded', this.props.loaded);
-    if (this.props.loaded) {
-      this.name = Random.id();
-
-      GoogleMaps.create({
-        name: this.name,
-        element: this.container,
-        options: this.props.mapOptions(),
-      });
-
-      this.props.onReady(this.name);
-    }
+  constructor(props) {
+    super(props);
+    this.loaded = false;
   }
 
   componentDidUpdate() {
+    if (!this.loaded && GoogleMaps.loaded()) {
+      this.loaded = true;
+      this.name = Random.id();
+      GoogleMaps.create({
+        name: this.name,
+        element: this.container,
+        options: this.props.mapOptions()
+      });
+      this.props.onReady(this);
+    }
+
     if (GoogleMaps.maps[this.name])
       _.delay(() => google.maps.event.trigger(GoogleMaps.maps[this.name].instance,'resize'), 500);
   }
@@ -34,7 +35,7 @@ export default class GoogleMap extends React.Component {
 
   render() {
     return (
-      <div ref={c => (this.container = c)} style={{width: '100%', height: '100%'}}>
+      <div ref={c => (this.container = c)} style={_.extend({width: '100%', height: '100%'}, this.props.style)}>
         {this.props.children}
       </div>
     );
@@ -42,9 +43,7 @@ export default class GoogleMap extends React.Component {
 }
 
 GoogleMap.propTypes = {
-  loaded: PropTypes.bool.isRequired,
-  onReady: PropTypes.func.isRequired,
-  options: PropTypes.object,
-  mapOptions: PropTypes.func.isRequired,
-  children: PropTypes.node,
+  onReady:  PropTypes.func.isRequired,
+  mapOptions:  PropTypes.func.isRequired,
+  children: PropTypes.node
 };

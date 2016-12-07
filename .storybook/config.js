@@ -12,8 +12,9 @@ function loadStories() {
   require('../.stories/histogram_selector');
   require('../.stories/filter_buckets_list');
   //require('../.stories/data_importer');
-  //require('../.stories/magic_search');
+  //require('../.stories/magic_search'); Needs server connection to elasticsearch
   require('../.stories/magic_contribution');
+  //require('../.stories/magic_map'); Needs Meteor for Google Map
 
 }
 

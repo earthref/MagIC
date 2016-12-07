@@ -1,6 +1,6 @@
 import React from 'react';
 import {storiesOf, action, linkTo} from '@kadira/storybook';
-import MagICContribution from '../client/modules/magic/components/contribution.jsx';
+import MagICContribution from '../client/modules/magic/components/search_summaries_list_item.jsx';
 
 
 storiesOf('Search', module)
