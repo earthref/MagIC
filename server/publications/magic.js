@@ -2,7 +2,8 @@ import _ from 'lodash';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
-import {esClient} from '../configs/elasticsearch';
+//import {esClient} from '../configs/elasticsearch';
+import elasticsearch from 'elasticsearch';
 
 export default function () {
 
@@ -11,13 +12,18 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query) {
 
+        const esClient = new elasticsearch.Client({
+          //log: 'trace',
+          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
+        });
+
         let search = {
           size: 0,
           query: {
             bool: {
               filter: [{
                 term: {
-                  upload: 1
+                  UPLOAD: 1
                 }
               }]
             }
@@ -56,6 +62,11 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query, filters) {
 
+        const esClient = new elasticsearch.Client({
+          //log: 'trace',
+          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
+        });
+
         let search = {
           size: 0,
           query: {
@@ -63,7 +74,7 @@ export default function () {
               must: [],
               filter: [{
                 term: {
-                  upload: 1
+                  UPLOAD: 1
                 }
               }]
             }
@@ -97,6 +108,11 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query, filters) {
 
+        const esClient = new elasticsearch.Client({
+          //log: 'trace',
+          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
+        });
+
         let search = {
           size: 0,
           query: {
@@ -104,7 +120,7 @@ export default function () {
               must: [],
               filter: [{
                 term: {
-                  upload: 1
+                  UPLOAD: 1
                 }
               }]
             }
@@ -146,6 +162,11 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query, filters, sort, pageSize, pageNumber) {
 
+        const esClient = new elasticsearch.Client({
+          //log: 'trace',
+          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
+        });
+
         console.log("pages", definition.recordSet);
 
         let search = {
@@ -156,7 +177,7 @@ export default function () {
               must: [],
               filter: [{
                 term: {
-                  upload: 1
+                  UPLOAD: 1
                 }
               }]
             }
@@ -174,7 +195,7 @@ export default function () {
         if (_.isInteger(pageSize)) search.size  = pageSize;
         if (_.isInteger(pageNumber)) search.from  = (pageNumber - 1) * search.size;
         if (search.size === 0) { delete search.from; delete search.size; }
-        console.log("pages", definition.recordSet, search.from, search.size, search.query.bool);
+        console.log("pages", definition.recordSet, search.from, search.size, JSON.stringify(search.query.bool));
 
         esClient.search({
           index: definition.index,

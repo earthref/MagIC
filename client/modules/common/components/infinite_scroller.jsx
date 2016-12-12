@@ -10,15 +10,17 @@ export default class InfiniteScroller extends React.Component {
     };
     this.onScroll = _.throttle(() => {
       this._onScroll();
-    }, 1000);
+    }, 100);
   }
 
   componentDidMount() {
-    window.addEventListener("resize", this.onScroll);
+    this.timeoutScroll = setInterval(this.onScroll, 500);
+    //window.addEventListener("resize", this.onScroll);
   }
 
   componentWillUnmount() {
-    window.removeEventListener("resize", this.onScroll);
+    //window.removeEventListener("resize", this.onScroll);
+    clearInterval(this.timeoutScroll);
   }
 
   componentWillUpdate(nextProps, nextState) {
@@ -29,22 +31,25 @@ export default class InfiniteScroller extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    this.onScroll();
+    //if (!_.isEqual(prevProps, this.props))
+    //  this.onScroll();
   }
 
   _onScroll() {
     const scrollerHeight = $(this.refs['scroller']).height();
     const scrollerPosition = this.refs['scroller'] && this.refs['scroller'].scrollTop;
     const contentHeight = $(this.refs['content']).height();
+    //console.log(scrollerHeight, scrollerPosition, contentHeight);
 
     let maxPages;
     if (this.props.count && this.props.pageSize)
       maxPages = Math.ceil(this.props.count / this.props.pageSize);
 
-    console.log('scroll', this.state.nPages, maxPages, scrollerPosition, scrollerHeight, contentHeight);
+    //console.log('scroll', this.state.nPages, maxPages, scrollerPosition, scrollerHeight, contentHeight);
     if (scrollerPosition > contentHeight - scrollerHeight - 50 ||
         scrollerHeight > contentHeight) {
-      if (maxPages === undefined || this.state.nPages < maxPages) {
+      //if (maxPages === undefined || this.state.nPages < maxPages) {
+      if (maxPages !== undefined && this.state.nPages < maxPages) {
         console.log('nPages:', this.state.nPages + 1, 'maxPages', maxPages);
         this.setState({nPages: this.state.nPages + 1});
       }
@@ -56,13 +61,16 @@ export default class InfiniteScroller extends React.Component {
     return (
       <div ref="scroller" style={this.props.style} onScroll={this.onScroll}>
         <div ref="content">
-          {_.times(this.state.nPages, (iPage) =>
-            <div key={iPage} style={{position: 'relative'}}>
-              {React.Children.map(this.props.children, (child) =>
-                React.cloneElement(child, {[pageNumberPropName]: iPage+1})
-              )}
-            </div>
-          )}
+          {_.times(this.state.nPages, (iPage) => {
+            //console.log(this.props.children);
+            return (
+              <div key={iPage} style={{position: 'relative'}}>
+                {React.Children.map(this.props.children, (child) =>
+                 React.cloneElement(child, {[pageNumberPropName]: iPage+1})
+                 )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );

@@ -17,7 +17,7 @@ export const composer = ({context, subscriptionName, elasticsearchQuery, elastic
 
 export default composeAll(
   composeWithTracker(composer, () => (
-    <div className="ui active inverted dimmer" style={{minHeight: '100px'}}>
+    <div className="ui active inverted dimmer" style={{minHeight: '500px'}}>
       <div className="ui text loader">Loading</div>
     </div>
   )),

@@ -3,7 +3,7 @@ import React from 'react';
 import Count from '../containers/search_count';
 import SearchSummariesView from '../../magic/components/search_summaries_view';
 import SearchMapView from '../../magic/components/search_map_view';
-import SearchPlotsView from '../../magic/components/search_plots_view';
+import SearchImagesView from '../../magic/components/search_images_view';
 import {portals} from '../../common/configs/portals';
 
 export default class extends React.Component {
@@ -35,7 +35,7 @@ export default class extends React.Component {
         {this.props.views.map((view) =>
           <div key={view.name}
                className={(this.state.view === view.name ? 'active ' : '') + 'item'}
-               onClick={() => this.setState({view: view.name})}
+               onClick={() => this.setState({view: view.name === 'Map' ? 'Map' : 'Summaries'})}
                style={(this.state.view !== view.name ? this.styles.a : {})}
           >
             {view.name}
@@ -56,19 +56,6 @@ export default class extends React.Component {
             Custom View
           </a>
         </div>
-        <div className="right menu">
-          <div className="item" style={{paddingRight: '1em'}}>
-            <div className="ui dropdown icon button" style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
-              <input type="hidden" name="sort"/>
-              <div className="default text">Upload Date</div>
-              <i className="ui dropdown icon"/>
-              <div className="menu">
-                <div className="item" data-value="1">Ascending</div>
-                <div className="item" data-value="0">Descending</div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     );
   }
@@ -77,7 +64,7 @@ export default class extends React.Component {
     return (
         <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column'}}>
           {this.renderTabs()}
-          <div style={{flex: 1, display: 'flex'}}>
+          <div style={{flex: 1, display: 'flex', borderLeft: '1px solid #D4D4D5'}}>
             {this.props.views.map((view) => {
               if (view.type === 'list' && this.state.view === view.name)
                 return <SearchSummariesView
@@ -101,8 +88,8 @@ export default class extends React.Component {
                   elasticsearchSort={this.props.elasticsearchSort}
                   minimongoSort={this.props.minimongoSort}
                 />;
-              if (view.type === 'plots' && this.state.view === view.name)
-                return <SearchPlotsView
+              if (view.type === 'images' && this.state.view === view.name)
+                return <SearchImagesView
                   key={view.name}
                   style={{flex: 1}}
                   subscriptionName={view.subscriptionName}
