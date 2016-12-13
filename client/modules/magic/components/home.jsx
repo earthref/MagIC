@@ -114,7 +114,7 @@ export default class extends React.Component {
             <div className="title">Upgrade</div>
             <div className="subtitle">Convert a dataset to the latest data model.</div>
           </IconButton>
-          <IconButton className="disabled card" href="/MagIC/upload" portal="MagIC">
+          <IconButton className="card" href="/MagIC/upload" portal="MagIC">
             <i className="large icons">
               <i className="table icon"/>
               <i className="corner add icon"/>

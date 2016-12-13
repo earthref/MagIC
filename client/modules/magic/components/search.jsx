@@ -25,7 +25,7 @@ export default class extends React.Component {
       input: {borderColor: '#888888'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
       segment: {padding: '0'},
-      downloadButton: {marginLeft: '-1px'},
+      searchButton: {marginLeft: '-1px'},
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
       searchInput: {padding: '1em', paddingBottom: 0},
@@ -268,11 +268,15 @@ export default class extends React.Component {
               style={this.styles.input}
               onChange={(e) => { this.setState({_search: e.target.value}); this.handleSearch(e.target.value); }}
             />
-            <div className={portals['MagIC'].color + ' ui basic icon button'}>
+            <div className={'ui basic black button'} onClick={(e) => { this.setState({_search: ''}); this.handleSearch(''); }}>
+              <i className="remove circle icon"/>
+              Clear Search
+            </div>
+            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.searchButton}>
               <i className="save icon"/>
               Save Search
             </div>
-            <div className={portals['MagIC'].color + ' ui basic icon button'} style={this.styles.downloadButton}>
+            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.searchButton}>
               <i className="download icon"/>
               Download Results
             </div>
@@ -301,6 +305,10 @@ export default class extends React.Component {
                     </h5>
                     {this.renderSortSettings()}
                     <div className="ui divider"></div>
+                    <div className="ui right floated tiny compact icon button" style={{padding:'0.5em 0'}}>
+                      <i className="remove circle icon"/>
+                      Clear
+                    </div>
                     <h5 className="ui header" style={this.styles.settingsHeader}>
                       Filter By
                     </h5>

@@ -53,6 +53,41 @@ export default class extends React.Component {
 
   }
 
+  renderAge(c) {
+    if (c.MAX_AGES && c.MIN_AGES) {
+      let min_ages = c.MIN_AGES, max_ages = c.MAX_AGES;
+      if (c.MIN_AGES < 0 || c.MAX_AGES < 0)
+        [min_ages, max_ages] = [-c.MAX_AGES, c.MIN_AGES];
+      min_ages = numeral(min_ages)
+        .format('0[.]0 a')
+        .replace(/b$/, 'Ga')
+        .replace(/m$/, 'Ma')
+        .replace(/k$/, 'ka')
+        .replace(/(\d)\s*$/, '$1 a');
+      max_ages = numeral(max_ages)
+        .format('0[.]0 a')
+        .replace(/b$/, 'Ga')
+        .replace(/m$/, 'Ma')
+        .replace(/k$/, 'ka')
+        .replace(/(\d)\s*$/, '$1 a');
+      return (min_ages === max_ages ?
+        <span>
+          <b>Age:</b><br/>
+          {min_ages}
+        </span>
+        :
+        <span>
+          <b>Min. Age:</b><br/>
+          {min_ages}<br/>
+          <b>Max. Age:</b><br/>
+          {max_ages}
+        </span>
+      );
+    } else {
+      return undefined;
+    }
+  }
+
   renderData() {
     let columns = `site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon\tage\tage_sigma\tage_unit\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_specimens\tdir_polarity\tdir_nrm_origin\tvgp_lat\tvgp_lon\tvdm\tvdm_n_samples\tvadm\tvadm_n_samples\tint_abs\tint_abs_sigma\tdescription\tsoftware_packages`;
     let data = `01a\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
@@ -162,7 +197,7 @@ export default class extends React.Component {
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
               <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className="ui basic tiny fluid compact icon header button" style={{padding:'1.25em 0', height:'100'}}
+                <a className="ui basic tiny fluid compact icon header button" style={{padding:'1.25em 0', height:'100px'}}
                    href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
                    (c.FOLDER === 'zmab' ?
                        `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
@@ -208,14 +243,7 @@ export default class extends React.Component {
                 {(c.LITHOLOGY ? <span><b>Lithology:</b><br/>{c.LITHOLOGY.replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
               </div>
               <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {(c.MAX_AGES || c.MIN_AGES ?
-                    <span>
-                      <b>Age:</b><br/>
-                      {numeral(c.MIN_AGES).format('0[.]0 a').replace(/(k$)/g, 'ka').replace(/(m$)/g, 'Ma').replace(/(b$)/g, 'Ga')} to <br/>
-                      {numeral(c.MAX_AGES).format('0[.]0 a').replace(/(k$)/g, 'ka').replace(/(m$)/g, 'Ma').replace(/(b$)/g, 'Ga')}<br/>
-                      {/\d$/.test(numeral(c.MAX_AGES).format('0[.]0 a')) ? 'Years BP' : ''}
-                    </span>
-                  : undefined)}
+                {this.renderAge(c)}
               </div>
               <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {(c.METHOD_CODES ? <span><b>Method Codes:</b><br/><span dangerouslySetInnerHTML={{__html: c.METHOD_CODES.replace(/(^:|:$)/g, '').split(':').slice(0,5).join('<br/>') + (c.METHOD_CODES.replace(/(^:|:$)/g, '').split(':').length > 5 ? ' ...' : '')}} /></span> : undefined)}
