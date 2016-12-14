@@ -35,7 +35,7 @@ export default class extends React.Component {
         {this.props.views.map((view) =>
           <div key={view.name}
                className={(this.state.view === view.name ? 'active ' : '') + 'item'}
-               onClick={() => this.setState({view: view.name === 'Map' ? 'Map' : 'Summaries'})}
+               onClick={() => this.setState({view: view.name})}
                style={(this.state.view !== view.name ? this.styles.a : {})}
           >
             {view.name}
@@ -70,6 +70,7 @@ export default class extends React.Component {
                 return <SearchSummariesView
                   key={view.name}
                   style={{flex: 1}}
+                  isPoles={view.isPoles}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
                   elasticsearchQuery={this.props.elasticsearchQuery}

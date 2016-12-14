@@ -5,22 +5,23 @@ import {check} from 'meteor/check';
 //import {esClient} from '../configs/elasticsearch';
 import elasticsearch from 'elasticsearch';
 
+const esClient = new elasticsearch.Client({
+  //log: 'trace',
+  host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
+});
+
 export default function () {
 
   _.forEach(collectionDefinitions.magic.filters, (levelDefinitions, level) => {
     _.forEach(levelDefinitions, (definition) => {
 
-      Meteor.publish(definition.recordSet, function (query) {
-
-        const esClient = new elasticsearch.Client({
-          //log: 'trace',
-          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
-        });
+      Meteor.publish(definition.recordSet, function (query, filters) {
 
         let search = {
           size: 0,
           query: {
             bool: {
+              must: [],
               filter: [{
                 term: {
                   UPLOAD: 1
@@ -30,7 +31,12 @@ export default function () {
           },
           aggs : definition.aggs
         };
-        if (query !== undefined) search.query.bool.must = query;
+        if (_.isPlainObject(query)) search.query.bool.must.push(query);
+        if (_.isArray(definition.queries)) search.query.bool.must.push(...definition.queries);
+
+        //if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        //if (_.isArray(filters)) search.query.bool.must.push(...filters);
+        //if (_.isArray(definition.filters)) search.query.bool.filter.push(...definition.filters);
 
         let publishedKeys = {};
         esClient.search({
@@ -62,11 +68,6 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query, filters) {
 
-        const esClient = new elasticsearch.Client({
-          //log: 'trace',
-          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
-        });
-
         let search = {
           size: 0,
           query: {
@@ -84,7 +85,8 @@ export default function () {
         if (_.isPlainObject(query)) search.query.bool.must.push(query);
         if (_.isArray(definition.queries)) search.query.bool.must.push(...definition.queries);
 
-        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        //if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        if (_.isArray(filters)) search.query.bool.must.push(...filters);
         if (_.isArray(definition.filters)) search.query.bool.filter.push(...definition.filters);
 
         esClient.search({
@@ -107,11 +109,6 @@ export default function () {
     _.forEach(levelDefinitions, (definition) => {
 
       Meteor.publish(definition.recordSet, function (query, filters) {
-
-        const esClient = new elasticsearch.Client({
-          //log: 'trace',
-          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
-        });
 
         let search = {
           size: 0,
@@ -137,7 +134,8 @@ export default function () {
         if (_.isPlainObject(query)) search.query.bool.must.push(query);
         if (_.isArray(definition.queries)) search.query.bool.must.push(...definition.queries);
 
-        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        //if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        if (_.isArray(filters)) search.query.bool.must.push(...filters);
         if (_.isArray(definition.filters)) search.query.bool.filter.push(...definition.filters);
 
         esClient.search({
@@ -162,11 +160,6 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query, filters, sort, pageSize, pageNumber) {
 
-        const esClient = new elasticsearch.Client({
-          //log: 'trace',
-          host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
-        });
-
         console.log("pages", definition.recordSet);
 
         let search = {
@@ -188,7 +181,8 @@ export default function () {
         if (_.isPlainObject(query)) search.query.bool.must.push(query);
         if (_.isArray(definition.queries)) search.query.bool.must.push(...definition.queries);
 
-        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        //if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+        if (_.isArray(filters)) search.query.bool.must.push(...filters);
         if (_.isArray(definition.filters)) search.query.bool.filter.push(...definition.filters);
 
         if (_.isArray(sort)) search.sort  = sort;

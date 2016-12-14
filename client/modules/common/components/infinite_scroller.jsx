@@ -62,7 +62,7 @@ export default class InfiniteScroller extends React.Component {
       <div ref="scroller" style={this.props.style} onScroll={this.onScroll}>
         <div ref="content">
           {_.times(this.state.nPages, (iPage) => {
-            //console.log(this.props.children);
+            //console.log('infinite scroller', this.state.nPages);//, this.props.children);
             return (
               <div key={iPage} style={{position: 'relative'}}>
                 {React.Children.map(this.props.children, (child) =>
