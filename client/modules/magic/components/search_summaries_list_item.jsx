@@ -175,6 +175,7 @@ export default class extends React.Component {
           <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
           <div className="ui doubling grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
             <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
+                {c._i || '?'}
                 <span style={{fontSize:'small', fontWeight:'bold'}}>
                   {c.TITLE || c.CITATION + ' v. ' + c.VERSION}
                 </span>
