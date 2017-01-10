@@ -3,6 +3,8 @@ import filesize from 'filesize';
 import React from 'react';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
+import {Mongo} from 'meteor/mongo';
+import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
 import ParseContribution from '../actions/parse_contribution';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
@@ -26,10 +28,15 @@ export default class extends React.Component {
       totalParseWarnings: 0,
       totalParseErrors: 0,
       isParsed: false,
-      contribution_id: 'new',
-      contribution_name: 'My Contribution'
+      _id: '',
+      _name: 'My Contribution',
+      _contributor: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined)
     };
     this.state = this.initialState;
+    this.contributions = new Mongo.Collection('magic.private.contributions.summaries');
+    Tracker.autorun(function () {
+      Meteor.subscribe('magic.private.contributions.summaries', (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined));
+    });
   }
 
   restart() {
@@ -132,6 +139,7 @@ export default class extends React.Component {
 
     // Parse sequentially through the files.
     Promise.each(this.files, (file, i) => {
+      console.log('parsing file', i, this.files[i].format);
       return (idxFile === undefined || idxFile == i ?
         new Promise((resolve) => {
           this.parser.resetProgress();
@@ -146,8 +154,10 @@ export default class extends React.Component {
             this.files[i].parseProgress = 100;
             this.files[i].parseWarnings = this.parser.warnings();
             this.files[i].parseErrors = this.parser.errors();
-            if (this.files[i].format === 'magic' && this.files[i].parseErrors.length > 0)
+            if (this.files[i].format === 'magic' && this.files[i].parseErrors.length > 0) {
+              console.log('magic format errors', this.files[i].parseErrors);
               $('.upload-contribution .parse-step-content .format-dropdown').eq(i).dropdown('set selected', 'tsv');
+            }
             resolve();
           });
         }).delay() : Promise.resolve());
@@ -167,7 +177,23 @@ export default class extends React.Component {
 
   upload() {
 
-    Meteor.call('uploadContribution', 1, 'test', {a: 1});
+    let c = this.parser.json;
+    if (c.contribution) {
+      delete c.contribution.version;
+      delete c.contribution.id;
+    } else {
+      c.contribution = {};
+    }
+    c.contribution.contributor = this.state._contributor;
+    c.contribution.timestamp = (new Date()).toISOString();
+    c._name = this.state._name;
+
+    console.log('inserting', c.contribution);
+
+    if (this.state._id !== '')
+      Meteor.call('updateContribution', this.state._id, c);
+    else
+      Meteor.call('insertContribution', c);
 
   }
 
@@ -214,7 +240,7 @@ export default class extends React.Component {
 
   render() {
     const step = this.state.visibleStep;
-    if (!Cookies.get('mail_id')) return (
+    if (!this.state._contributor) return (
       <div>
         <div className="ui top attached segment">
           <div className="ui center aligned two column relaxed grid">
@@ -371,7 +397,7 @@ export default class extends React.Component {
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom left"
+                  className="disabled borderless card" href="" portal="MagIC" position="bottom left"
                   tooltip={'Click to upload this example dataset into your private' +
                            'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleMagICv2.bind(this)}
@@ -572,29 +598,30 @@ export default class extends React.Component {
                   Upload To
                 </div>
                 <div className="ui fluid selection dropdown">
-                  <input name="contribution_id" type="hidden"/>
+                  <input name="_id" type="hidden"/>
                   <i className="dropdown icon"/>
                   <div className="text">A New Private Contribution</div>
                   <div className="menu">
-                    <div data-value="new" className="item">
+                    <div data-value="" className="item">
                       A New Private Contribution
                     </div>
                   </div>
                 </div>
               </div>
               <br/>
+              {() => console.log(this.contributions.find().fetch())}
               <div>
-                <div className={"ui labeled fluid input" + (this.state.contribution_name.length > 0 ? '' : ' error')}>
-                  <div className={"ui label" + (this.state.contribution_name.length > 0 ? '' : ' red')}>
+                <div className={"ui labeled fluid input" + (this.state._name.length > 0 ? '' : ' error')}>
+                  <div className={"ui label" + (this.state._name.length > 0 ? '' : ' red')}>
                     Temporary Private Contribution Name
                   </div>
-                  <input ref="contribution name" type="text" default="None" value={this.state.contribution_name}
+                  <input ref="contribution name" type="text" default="None" value={this.state._name}
                          onChange={(e) => {
-                           this.setState({contribution_name: this.refs['contribution name'].value})}}/>
+                           this.setState({_name: this.refs['contribution name'].value})}}/>
                 </div>
               </div>
               <br/>
-              <div className={'ui fluid purple button' + (this.state.contribution_name.length > 0 ? '' : ' disabled')}
+              <div className={'ui fluid purple button' + (this.state._name.length > 0 ? '' : ' disabled')}
                    onClick={this.upload.bind(this)}>
                 Save Changes to Your Private Workspace
               </div>

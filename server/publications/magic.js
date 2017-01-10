@@ -15,6 +15,10 @@ const cache = {};
 
 export default function () {
 
+  Meteor.publish('magic.private.contributions.summaries', function (contributor) {
+    return Collections['magic.private.contributions'].find({'contribution.contributor': contributor});
+  });
+
   _.forEach(collectionDefinitions.magic.filters, (levelDefinitions, level) => {
     _.forEach(levelDefinitions, (definition) => {
 
