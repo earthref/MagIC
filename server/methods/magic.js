@@ -14,21 +14,45 @@ const esClient = new elasticsearch.Client({
 export default function () {
 
   Meteor.methods({
-    'insertContribution': function (c) {
+    'insertContribution': function (contributor, name, c) {
       //check(id, Integer);
       //check(name, String);
       //check(data, Object);
+      if (c.contribution && c.contribution.length > 0) {
+        c.contribution = c.contribution.splice(0,1);
+        delete c.contribution[0].version;
+        delete c.contribution[0].id;
+        delete c.contribution[0].magic_version;
+        delete c.contribution[0].timestamp;
+      } else {
+        c.contribution = [{}];
+      }
+      c.contribution[0].contributor = contributor;
+      c._inserted = new Date();
+      c._name = name;
+
       console.log('insertContribution', c.contribution);
       Collections['magic.private.contributions'].insert(c);
     },
-    'updateContribution': function (_id, c) {
+    'updateContribution': function (id, contributor, name, c) {
       //check(id, Integer);
       //check(name, String);
       //check(data, Object);
-      //console.log('uploadContribution', id, name, Collections['magic.private.contributions']);
-      let c_old = Collections['magic.private.contributions'].findOne(_id);
-      let c_new = _.merge({}, c_old, c);
-      Collections['magic.private.contributions'].update(_id, c_new);
+      console.log('updateContribution', id, name, c.contribution);
+      let c_old = Collections['magic.private.contributions'].findOne(id);
+      c = _.merge({}, c_old, c);
+      if (c.contribution) {
+        delete c.contribution.version;
+        delete c.contribution.id;
+        delete c.contribution[0].magic_version;
+        delete c.contribution[0].timestamp;
+      } else {
+        c.contribution = {};
+      }
+      c.contribution.contributor = contributor;
+      c.contribution.timestamp = (new Date()).toISOString();
+      c._name = name;
+      Collections['magic.private.contributions'].update(id, c);
     }
   });
 

@@ -1,11 +1,14 @@
 import _ from 'lodash';
+import moment from 'moment';
 import filesize from 'filesize';
 import React from 'react';
+import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
 import {Mongo} from 'meteor/mongo';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
+import {Collections} from '/lib/collections';
 import ParseContribution from '../actions/parse_contribution';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
@@ -30,13 +33,16 @@ export default class extends React.Component {
       isParsed: false,
       _id: '',
       _name: 'My Contribution',
-      _contributor: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined)
+      _contributor: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
+      uploading: false,
+      uploaded: false,
+      uploadError: undefined
     };
     this.state = this.initialState;
-    this.contributions = new Mongo.Collection('magic.private.contributions.summaries');
-    Tracker.autorun(function () {
-      Meteor.subscribe('magic.private.contributions.summaries', (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined));
-    });
+    if (Cookies.get('user_id'))
+      Tracker.autorun(function () {
+        Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'));
+      });
   }
 
   restart() {
@@ -51,6 +57,12 @@ export default class extends React.Component {
 
   componentDidMount() {
     $(this.refs['accordion']).accordion({on: null, collapsible: false});
+    $(this.refs['private contributions']).dropdown({
+      onChange: (value, text, $choice) => {
+        console.log('private contribution as changed', value, text, $choice);
+        this.setState({_id: value});
+      }
+    });
   }
 
   componentDidUpdate() {
@@ -66,6 +78,7 @@ export default class extends React.Component {
       }
     }).dropdown('set selected', 'magic');
     $('.upload-contribution .parse-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
+    $(this.refs['private contributions']).dropdown('refresh');
   }
 
   reviewParse() {
@@ -177,23 +190,23 @@ export default class extends React.Component {
 
   upload() {
 
-    let c = this.parser.json;
-    if (c.contribution) {
-      delete c.contribution.version;
-      delete c.contribution.id;
-    } else {
-      c.contribution = {};
-    }
-    c.contribution.contributor = this.state._contributor;
-    c.contribution.timestamp = (new Date()).toISOString();
-    c._name = this.state._name;
-
-    console.log('inserting', c.contribution);
-
+    this.setState({uploading: true});
     if (this.state._id !== '')
-      Meteor.call('updateContribution', this.state._id, c);
+      Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._name, this.parser.json,
+        (error) => {
+          console.log('updated contribution', this.state._id, error);
+          if (error) this.setState({uploadError: error, uploading: false});
+          else       this.setState({uploaded: true, uploading: false});
+        }
+      );
     else
-      Meteor.call('insertContribution', c);
+      Meteor.call('insertContribution', this.state._contributor, this.state._name, this.parser.json,
+        (error) => {
+          console.log('inserted contribution', this.state._id, error);
+          if (error) this.setState({uploadError: error, uploading: false});
+          else       this.setState({uploaded: true, uploading: false});
+        }
+      );
 
   }
 
@@ -238,8 +251,19 @@ export default class extends React.Component {
     this.parse();
   }
 
+  downloadExampleMagICv3() {
+    const blob = new Blob([examples['MagIC Text File in Data Model v. 3.0']], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, 'MagIC Example Text File in Data Model v. 3.0.txt');
+  }
+
+  downloadExampleTabDelimitedSpecimens() {
+    const blob = new Blob([examples['Tab Delimited File with Specimens Data']], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, 'MagIC Example Tab Delimited File with Specimens Data.txt');
+  }
+
   render() {
     const step = this.state.visibleStep;
+    console.log('private contributions', Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch());
     if (!this.state._contributor) return (
       <div>
         <div className="ui top attached segment">
@@ -332,7 +356,7 @@ export default class extends React.Component {
             <div ref="upload step" className={(step == 3 ? 'active' : 'disabled') + ' pointing below step'}>
               <i className="icons">
                 <i className="file text outline icon"></i>
-                <i className="corner folder open icon"></i>
+                <i className="corner plus icon"></i>
               </i>
               <div className="content">
                 <div className="title">Step 3. Upload</div>
@@ -345,7 +369,7 @@ export default class extends React.Component {
                onClick={this.reviewUpload.bind(this)}>
               <i className="icons">
                 <i className="file text outline icon"></i>
-                <i className="corner folder open icon"></i>
+                <i className="corner plus icon"></i>
               </i>
               <div className="content">
                 <div className="title">Step 3. Upload</div>
@@ -383,11 +407,11 @@ export default class extends React.Component {
               <h4 className="ui header" style={{marginBottom: '1em'}}>
                 If you don't have a file handy or want to try a different format, upload an example file:
               </h4>
-              <div className="ui five stackable cards">
+              <div className="ui four stackable cards">
                 <IconButton
                   className="borderless card" href="" portal="MagIC" position="bottom left"
                   tooltip={'Click to upload this example dataset into your private' +
-                           'workspace. You can always delete it later.'}
+                  'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleMagICv3.bind(this)}
                 >
                   <i className="icons">
@@ -399,7 +423,7 @@ export default class extends React.Component {
                 <IconButton
                   className="disabled borderless card" href="" portal="MagIC" position="bottom left"
                   tooltip={'Click to upload this example dataset into your private' +
-                           'workspace. You can always delete it later.'}
+                  'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleMagICv2.bind(this)}
                 >
                   <i className="icons">
@@ -409,21 +433,9 @@ export default class extends React.Component {
                   <div className="subtitle">Data Model v. 2.5</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom center"
-                  tooltip={'Click to upload this example dataset into your private' +
-                  'workspace. You can always delete it later.'}
-                  onClick={this.uploadExampleTabDelimitedSites.bind(this)}
-                >
-                  <i className="icons">
-                    <i className="table icon"/>
-                  </i>
-                  <div className="title">Tab Delimited File</div>
-                  <div className="subtitle">Sites Data</div>
-                </IconButton>
-                <IconButton
                   className="borderless card" href="" portal="MagIC" position="bottom right"
                   tooltip={'Click to upload this example dataset into your private' +
-                           'workspace. You can always delete it later.'}
+                  'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleTabDelimitedSpecimens.bind(this)}
                 >
                   <i className="icons">
@@ -443,6 +455,36 @@ export default class extends React.Component {
                   <div className="title">Excel File</div>
                   <div className="subtitle">Locations and Sites Data</div>
                 </IconButton>
+              </div>
+              <div className="ui four stackable cards" style={{marginTop:'-1.5em'}}>
+                <IconButton
+                  className="borderless card" href="" portal="MagIC" position="bottom left"
+                  tooltip={'Click to download this example dataset before uploading it.'}
+                  onClick={this.downloadExampleMagICv3.bind(this)}
+                >
+                  <div className="subtitle">Or Download the Example</div>
+                </IconButton>
+                <IconButton
+                  className="disabled borderless card" href="" portal="MagIC" position="bottom left"
+                  tooltip={'Click to download this example dataset before uploading it.'}
+                  onClick={this.uploadExampleMagICv2.bind(this)}
+                >
+                  <div className="subtitle">Or Download the Example</div>
+                </IconButton>
+                <IconButton
+                  className="borderless card" href="" portal="MagIC" position="bottom right"
+                  tooltip={'Click to download this example dataset before uploading it.'}
+                  onClick={this.downloadExampleTabDelimitedSpecimens.bind(this)}
+                >
+                  <div className="subtitle">Or Download the Example</div>
+                </IconButton>
+                <IconButton
+                  className="disabled borderless card" href="" portal="MagIC" position="bottom right"
+                  tooltip={'Click to download this example dataset before uploading it.'}
+                >
+                  <div className="subtitle">Or Download the Example</div>
+                </IconButton>
+
               </div>
             </div>
             <div className="title"></div>
@@ -593,40 +635,70 @@ export default class extends React.Component {
             </div>
             <div className="title"></div>
             <div ref="upload step message" className="content upload-step-content">
-              <div className="ui labeled fluid action input">
-                <div className="ui label">
-                  Upload To
-                </div>
-                <div className="ui fluid selection dropdown">
-                  <input name="_id" type="hidden"/>
-                  <i className="dropdown icon"/>
-                  <div className="text">A New Private Contribution</div>
-                  <div className="menu">
-                    <div data-value="" className="item">
-                      A New Private Contribution
+              <div className="ui items">
+                <div className="item">
+                  <div className="ui image">
+                    <div className="icon loader wrapper">
+                      <div className={(this.state.uploading ? 'active ' : '') + 'ui inverted dimmer'}>
+                        <div className="ui loader"></div>
+                      </div>
+                      <i className="file icons">
+                        <i className="fitted file text outline icon"></i>
+                        {(this.state.uploadErrors ? <i className="corner red warning circle icon"></i>
+                            : (this.state.uploaded ? <i className="corner green check circle icon"></i> : <i className="corner plus icon"></i>)
+                        )}
+                      </i>
                     </div>
                   </div>
-                </div>
-              </div>
-              <br/>
-              {() => console.log(this.contributions.find().fetch())}
-              <div>
-                <div className={"ui labeled fluid input" + (this.state._name.length > 0 ? '' : ' error')}>
-                  <div className={"ui label" + (this.state._name.length > 0 ? '' : ' red')}>
-                    Temporary Private Contribution Name
+                  <div className="content">
+                    <div className="ui labeled fluid action input">
+                      <div className="ui label">
+                        Upload To
+                      </div>
+                      <div ref="private contributions" className="ui fluid selection dropdown">
+                        <input name="_id" type="hidden"/>
+                        <i className="dropdown icon"/>
+                        <div className="text">A New Private Contribution</div>
+                        <div className="menu">
+                          <div data-value="" className="item">
+                            A New Private Contribution
+                          </div>
+                          {Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch().map((c, i) =>
+                            <div key={i} data-value={c._id} className="item">
+                              <span className="description">{moment(c._inserted).calendar()}</span>
+                              <span className="text">{c._name}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <br/>
+                    <div>
+                      <div className={"ui labeled fluid input" + (this.state._name.length > 0 ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
+                        <div className={"ui label" + (this.state._name.length > 0 ? '' : ' red')}>
+                          Temporary Private Contribution Name
+                        </div>
+                        <input ref="contribution name" type="text" default="None" value={this.state._name}
+                               onChange={(e) => {
+                                 this.setState({_name: this.refs['contribution name'].value})}}/>
+                      </div>
+                    </div>
+                    <br/>
+                    {(this.state.uploaded ?
+                      <a className="ui fluid green button"
+                         href="">
+                        View Your Private Workspace
+                      </a>
+                    :
+                      <div className={'ui fluid purple button' + (this.state._name.length > 0 && !this.state.uploading ? '' : ' disabled')}
+                           onClick={this.upload.bind(this)}>
+                        Upload to {this.state._id ? 'your existing private contribution: ' + this.state._name : 'a new private contribution: ' + this.state._name}
+                      </div>
+                    )}
                   </div>
-                  <input ref="contribution name" type="text" default="None" value={this.state._name}
-                         onChange={(e) => {
-                           this.setState({_name: this.refs['contribution name'].value})}}/>
                 </div>
-              </div>
-              <br/>
-              <div className={'ui fluid purple button' + (this.state._name.length > 0 ? '' : ' disabled')}
-                   onClick={this.upload.bind(this)}>
-                Save Changes to Your Private Workspace
               </div>
             </div>
-
           </div>
         </div>
         {(step === 1 ?
@@ -675,6 +747,44 @@ export default class extends React.Component {
             </div>
             <div className="ui right floated purple button" onClick={this.reviewUpload.bind(this)}>
               Upload
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && !this.state.uploading && !this.state.uploaded ?
+          <div className="ui bottom attached icon message">
+            <i className="purple circle info icon"/>
+            <div className="content">
+              Select where to upload the {this.files.length === 1 ? ' file' : ' files'} to in your private workspace.
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && this.state.uploading ?
+          <div className="ui bottom attached icon message">
+            <i className="purple circle info icon"/>
+            <div className="content">
+              Uploading the {this.files.length === 1 ? ' file' : ' files'} to
+              {this.state._id ? ' your existing ' : ' a new '}
+              private contribution called <b>{this.state._name}</b>.
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && this.state.uploadError ?
+          <div className="ui bottom attached icon error message">
+            <i className="warning sign icon"></i>
+            <div className="content">
+              Failed to upload the {this.files.length === 1 ? ' file' : ' files'} to
+              {this.state._id ? ' your existing ' : ' a new '}
+              private contribution called <b>{this.state._name}</b>. Error: {this.state.uploadError.error}
+            </div>
+          </div>
+          : undefined)}
+        {(step === 3 && this.state.uploaded ?
+          <div className="ui bottom attached icon success message">
+            <i className="check circle icon"></i>
+            <div className="content">
+              The {this.files.length === 1 ? ' file was' : ' files were'} uploaded successfully to
+              {this.state._id ? ' your existing ' : ' a new '}
+              private contribution called <b>{this.state._name}</b>.
             </div>
           </div>
           : undefined)}
@@ -811,85 +921,85 @@ sample\tsite\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon
 >>>>>>>>>>
 tab delimited\tspecimens
 specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tmagn_volume\tint_corr\tint_treat_dc_field
-1B475-2\t1B475-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.39\tu\t3.5e-05
-1B487-3\t1B487-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.67\tu\t3.5e-05
-1B704-1\t1B704-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.4\tu\t3.5e-05
-1B708-3\t1B708-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.04\tu\t3.5e-05
-1B710-1\t1B710-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.3\tu\t3.5e-05
-1B714-3\t1B714-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t23.5\tu\t3.5e-05
-1B730-1\t1B730-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.2\tu\t3.5e-05
-1B732-2\t1B732-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t27.2\tu\t3.5e-05
-1B733-1\t1B733-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t17.9\tu\t3.5e-05
-1B734-2\t1B734-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.1\tu\t3.5e-05
-1B755-1\t1B755-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.3\tu\t3.5e-05
-1B757-3\t1B757-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t21.1\tu\t3.5e-05
-8B416-4\t8B416-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.01\tu\t3.5e-05
-8B417-1\t8B417-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.3\tu\t3.5e-05
-8B437-5\t8B437-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.4\tu\t3.5e-05
-8B439-2\t8B439-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.7\tu\t3.5e-05
-8B440-2\t8B440-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t20\tu\t3.5e-05
-8B625-1\t8B625-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.41\tu\t3.5e-05
-8B631-1\t8B631-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.43\tu\t3.5e-05
-8B794-2\t8B794-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.5\tu\t3.5e-05
-8B829-2\t8B829-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t17.8\tu\t3.5e-05
-8B833-4\t8B833-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t22.9\tu\t3.5e-05
-8B835-2\t8B835-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t26\tu\t3.5e-05
-8B836-3\t8B836-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t20.6\tu\t3.5e-05
-8B889-4\t8B889-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10\tu\t3.5e-05
-8B891-4\t8B891-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.7\tu\t3.5e-05
-8B896-2\t8B896-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t8.95\tu\t3.5e-05
-8B897-4\t8B897-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t23.3\tu\t3.5e-05
-8B906-1\t8B906-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.25\tu\t3.5e-05
-8B907-2\t8B907-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.89\tu\t3.5e-05
-8B910-3\t8B910-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.57\tu\t3.5e-05
-9B039-2\t9B039-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.42\tu\t3.5e-05
-9B040-1\t9B040-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.92\tu\t3.5e-05
-9B041-3\t9B041-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.76\tu\t3.5e-05
-9B042-3\t9B042-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.96\tu\t3.5e-05
-9B046-3\t9B046-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.5\tu\t3.5e-05
-9B109-2\t9B109-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.6\tu\t3.5e-05
-9B110-4\t9B110-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.9\tu\t3.5e-05
-9B113-4\t9B113-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.02\tu\t3.5e-05
-9B117-2\t9B117-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t23.5\tu\t3.5e-05
-9B131-5\t9B131-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.94\tu\t3.5e-05
-9B433-5\t9B433-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t3.9\tu\t3.5e-05
-9B437-5\t9B437-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t3.34\tu\t3.5e-05
-9B445-3\t9B445-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.8\tu\t3.5e-05
-9B448-4\t9B448-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.1\tu\t3.5e-05
-9B449-2\t9B449-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.7\tu\t3.5e-05
-9B451-2\t9B451-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.7\tu\t3.5e-05
-9B454-4\t9B454-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.2\tu\t3.5e-05
-9B483-2\t9B483-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.39\tu\t3.5e-05
-9B486-4\t9B486-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.75\tu\t3.5e-05
-9B489-2\t9B489-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.26\tu\t3.5e-05
-9B490-3\t9B490-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t8.58\tu\t3.5e-05
-9B492-4\t9B492-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.22\tu\t3.5e-05
-9B659-2\t9B659-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.39\tu\t3.5e-05
-9B660-4\t9B660-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.5\tu\t3.5e-05
-9B666-3\t9B666-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.14\tu\t3.5e-05
-9B669-2\t9B669-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.1\tu\t3.5e-05
-9B670-2\t9B670-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.8\tu\t3.5e-05
-9B902-3\t9B902-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.68\tu\t3.5e-05
-9B904-2\t9B904-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.12\tu\t3.5e-05
-9B905-2\t9B905-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t8.64\tu\t3.5e-05
-9B937-2\t9B937-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t1.5\tu\t3.5e-05
-9B944-1\t9B944-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.2\tu\t3.5e-05
-9B945-3\t9B945-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.32\tu\t3.5e-05
-9B947-2\t9B947-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.12\tu\t3.5e-05
-9B948-1\t9B948-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.6\tu\t3.5e-05
-9B949-2\t9B949-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.27\tu\t3.5e-05
-9B950-3\t9B950-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.3\tu\t3.5e-05
-9B953-3\t9B953-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.29\tu\t3.5e-05
-9B955-2\t9B955-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.1\tu\t3.5e-05
-9B959-3\t9B959-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.5\tu\t3.5e-05
-9B961-2\t9B961-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.58\tu\t3.5e-05
-9B962-3\t9B962-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.23\tu\t3.5e-05
-9B964-1\t9B964-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.84\tu\t3.5e-05
-9B965-2\t9B965-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t3.39\tu\t3.5e-05
-9B975-2\t9B975-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.8\tu\t3.5e-05
-9B976-1\t9B976-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.83\tu\t3.5e-05
-9B977-1\t9B977-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.04\tu\t3.5e-05
-9B984-2\t9B984-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t13.6\tu\t3.5e-05
+1B475-2\t1B475-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.39\tu\t3.5e-05
+1B487-3\t1B487-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.67\tu\t3.5e-05
+1B704-1\t1B704-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t16.4\tu\t3.5e-05
+1B708-3\t1B708-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.04\tu\t3.5e-05
+1B710-1\t1B710-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t11.3\tu\t3.5e-05
+1B714-3\t1B714-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t23.5\tu\t3.5e-05
+1B730-1\t1B730-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t16.2\tu\t3.5e-05
+1B732-2\t1B732-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t27.2\tu\t3.5e-05
+1B733-1\t1B733-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t17.9\tu\t3.5e-05
+1B734-2\t1B734-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.1\tu\t3.5e-05
+1B755-1\t1B755-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t14.3\tu\t3.5e-05
+1B757-3\t1B757-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t21.1\tu\t3.5e-05
+8B416-4\t8B416-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.01\tu\t3.5e-05
+8B417-1\t8B417-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t12.3\tu\t3.5e-05
+8B437-5\t8B437-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t11.4\tu\t3.5e-05
+8B439-2\t8B439-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t11.7\tu\t3.5e-05
+8B440-2\t8B440-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t20\tu\t3.5e-05
+8B625-1\t8B625-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t7.41\tu\t3.5e-05
+8B631-1\t8B631-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t4.43\tu\t3.5e-05
+8B794-2\t8B794-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t10.5\tu\t3.5e-05
+8B829-2\t8B829-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t17.8\tu\t3.5e-05
+8B833-4\t8B833-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t22.9\tu\t3.5e-05
+8B835-2\t8B835-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t26\tu\t3.5e-05
+8B836-3\t8B836-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t20.6\tu\t3.5e-05
+8B889-4\t8B889-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t10\tu\t3.5e-05
+8B891-4\t8B891-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t12.7\tu\t3.5e-05
+8B896-2\t8B896-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t8.95\tu\t3.5e-05
+8B897-4\t8B897-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t23.3\tu\t3.5e-05
+8B906-1\t8B906-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t4.25\tu\t3.5e-05
+8B907-2\t8B907-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.89\tu\t3.5e-05
+8B910-3\t8B910-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.57\tu\t3.5e-05
+9B039-2\t9B039-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.42\tu\t3.5e-05
+9B040-1\t9B040-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.92\tu\t3.5e-05
+9B041-3\t9B041-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.76\tu\t3.5e-05
+9B042-3\t9B042-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.96\tu\t3.5e-05
+9B046-3\t9B046-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t16.5\tu\t3.5e-05
+9B109-2\t9B109-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t12.6\tu\t3.5e-05
+9B110-4\t9B110-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t14.9\tu\t3.5e-05
+9B113-4\t9B113-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t7.02\tu\t3.5e-05
+9B117-2\t9B117-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t23.5\tu\t3.5e-05
+9B131-5\t9B131-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.94\tu\t3.5e-05
+9B433-5\t9B433-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t3.9\tu\t3.5e-05
+9B437-5\t9B437-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t3.34\tu\t3.5e-05
+9B445-3\t9B445-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.8\tu\t3.5e-05
+9B448-4\t9B448-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.1\tu\t3.5e-05
+9B449-2\t9B449-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t12.7\tu\t3.5e-05
+9B451-2\t9B451-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t14.7\tu\t3.5e-05
+9B454-4\t9B454-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t14.2\tu\t3.5e-05
+9B483-2\t9B483-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.39\tu\t3.5e-05
+9B486-4\t9B486-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t7.75\tu\t3.5e-05
+9B489-2\t9B489-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.26\tu\t3.5e-05
+9B490-3\t9B490-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t8.58\tu\t3.5e-05
+9B492-4\t9B492-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.22\tu\t3.5e-05
+9B659-2\t9B659-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.39\tu\t3.5e-05
+9B660-4\t9B660-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t11.5\tu\t3.5e-05
+9B666-3\t9B666-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.14\tu\t3.5e-05
+9B669-2\t9B669-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t10.1\tu\t3.5e-05
+9B670-2\t9B670-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t5.8\tu\t3.5e-05
+9B902-3\t9B902-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t7.68\tu\t3.5e-05
+9B904-2\t9B904-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t4.12\tu\t3.5e-05
+9B905-2\t9B905-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t8.64\tu\t3.5e-05
+9B937-2\t9B937-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t1.5\tu\t3.5e-05
+9B944-1\t9B944-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t16.2\tu\t3.5e-05
+9B945-3\t9B945-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.32\tu\t3.5e-05
+9B947-2\t9B947-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.12\tu\t3.5e-05
+9B948-1\t9B948-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t14.6\tu\t3.5e-05
+9B949-2\t9B949-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.27\tu\t3.5e-05
+9B950-3\t9B950-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t16.3\tu\t3.5e-05
+9B953-3\t9B953-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.29\tu\t3.5e-05
+9B955-2\t9B955-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t10.1\tu\t3.5e-05
+9B959-3\t9B959-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.5\tu\t3.5e-05
+9B961-2\t9B961-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.58\tu\t3.5e-05
+9B962-3\t9B962-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t7.23\tu\t3.5e-05
+9B964-1\t9B964-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t9.84\tu\t3.5e-05
+9B965-2\t9B965-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t3.39\tu\t3.5e-05
+9B975-2\t9B975-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t10.8\tu\t3.5e-05
+9B976-1\t9B976-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t6.83\tu\t3.5e-05
+9B977-1\t9B977-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t4.04\tu\t3.5e-05
+9B984-2\t9B984-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t13.6\tu\t3.5e-05
 >>>>>>>>>>
 tab delimited\tages
 location\tsite\tage\tage_sigma\tage_unit\tmethod_codes\tcitations
@@ -1300,85 +1410,85 @@ LP-PI-TRM`,
 22\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.072\t204.44\t13210\t570\tYears BP\t100\t357.50\t54.6\t1.4\t916\t11\tn\tp\t73.8\t197.20\t6.93E+22\t4\t8.51E+22\t4\t3.79E-05\t3.40E-06\t22\t:PINT03:
 `,
   'Tab Delimited File with Specimens Data':
-`specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tmagn_volume\tint_corr\tint_treat_dc_field
-1B475-2\t1B475-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.39\tu\t3.5e-05
-1B487-3\t1B487-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.67\tu\t3.5e-05
-1B704-1\t1B704-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.4\tu\t3.5e-05
-1B708-3\t1B708-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.04\tu\t3.5e-05
-1B710-1\t1B710-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.3\tu\t3.5e-05
-1B714-3\t1B714-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t23.5\tu\t3.5e-05
-1B730-1\t1B730-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.2\tu\t3.5e-05
-1B732-2\t1B732-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t27.2\tu\t3.5e-05
-1B733-1\t1B733-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t17.9\tu\t3.5e-05
-1B734-2\t1B734-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.1\tu\t3.5e-05
-1B755-1\t1B755-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.3\tu\t3.5e-05
-1B757-3\t1B757-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t21.1\tu\t3.5e-05
-8B416-4\t8B416-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.01\tu\t3.5e-05
-8B417-1\t8B417-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.3\tu\t3.5e-05
-8B437-5\t8B437-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.4\tu\t3.5e-05
-8B439-2\t8B439-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.7\tu\t3.5e-05
-8B440-2\t8B440-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t20\tu\t3.5e-05
-8B625-1\t8B625-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.41\tu\t3.5e-05
-8B631-1\t8B631-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.43\tu\t3.5e-05
-8B794-2\t8B794-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.5\tu\t3.5e-05
-8B829-2\t8B829-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t17.8\tu\t3.5e-05
-8B833-4\t8B833-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t22.9\tu\t3.5e-05
-8B835-2\t8B835-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t26\tu\t3.5e-05
-8B836-3\t8B836-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t20.6\tu\t3.5e-05
-8B889-4\t8B889-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10\tu\t3.5e-05
-8B891-4\t8B891-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.7\tu\t3.5e-05
-8B896-2\t8B896-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t8.95\tu\t3.5e-05
-8B897-4\t8B897-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t23.3\tu\t3.5e-05
-8B906-1\t8B906-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.25\tu\t3.5e-05
-8B907-2\t8B907-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.89\tu\t3.5e-05
-8B910-3\t8B910-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.57\tu\t3.5e-05
-9B039-2\t9B039-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.42\tu\t3.5e-05
-9B040-1\t9B040-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.92\tu\t3.5e-05
-9B041-3\t9B041-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.76\tu\t3.5e-05
-9B042-3\t9B042-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.96\tu\t3.5e-05
-9B046-3\t9B046-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.5\tu\t3.5e-05
-9B109-2\t9B109-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.6\tu\t3.5e-05
-9B110-4\t9B110-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.9\tu\t3.5e-05
-9B113-4\t9B113-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.02\tu\t3.5e-05
-9B117-2\t9B117-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t23.5\tu\t3.5e-05
-9B131-5\t9B131-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.94\tu\t3.5e-05
-9B433-5\t9B433-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t3.9\tu\t3.5e-05
-9B437-5\t9B437-5\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t3.34\tu\t3.5e-05
-9B445-3\t9B445-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.8\tu\t3.5e-05
-9B448-4\t9B448-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.1\tu\t3.5e-05
-9B449-2\t9B449-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t12.7\tu\t3.5e-05
-9B451-2\t9B451-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.7\tu\t3.5e-05
-9B454-4\t9B454-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.2\tu\t3.5e-05
-9B483-2\t9B483-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.39\tu\t3.5e-05
-9B486-4\t9B486-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.75\tu\t3.5e-05
-9B489-2\t9B489-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.26\tu\t3.5e-05
-9B490-3\t9B490-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t8.58\tu\t3.5e-05
-9B492-4\t9B492-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.22\tu\t3.5e-05
-9B659-2\t9B659-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.39\tu\t3.5e-05
-9B660-4\t9B660-4\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t11.5\tu\t3.5e-05
-9B666-3\t9B666-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.14\tu\t3.5e-05
-9B669-2\t9B669-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.1\tu\t3.5e-05
-9B670-2\t9B670-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t5.8\tu\t3.5e-05
-9B902-3\t9B902-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.68\tu\t3.5e-05
-9B904-2\t9B904-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.12\tu\t3.5e-05
-9B905-2\t9B905-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t8.64\tu\t3.5e-05
-9B937-2\t9B937-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t1.5\tu\t3.5e-05
-9B944-1\t9B944-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.2\tu\t3.5e-05
-9B945-3\t9B945-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.32\tu\t3.5e-05
-9B947-2\t9B947-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.12\tu\t3.5e-05
-9B948-1\t9B948-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t14.6\tu\t3.5e-05
-9B949-2\t9B949-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.27\tu\t3.5e-05
-9B950-3\t9B950-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t16.3\tu\t3.5e-05
-9B953-3\t9B953-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.29\tu\t3.5e-05
-9B955-2\t9B955-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.1\tu\t3.5e-05
-9B959-3\t9B959-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.5\tu\t3.5e-05
-9B961-2\t9B961-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.58\tu\t3.5e-05
-9B962-3\t9B962-3\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t7.23\tu\t3.5e-05
-9B964-1\t9B964-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t9.84\tu\t3.5e-05
-9B965-2\t9B965-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t3.39\tu\t3.5e-05
-9B975-2\t9B975-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t10.8\tu\t3.5e-05
-9B976-1\t9B976-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t6.83\tu\t3.5e-05
-9B977-1\t9B977-1\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t4.04\tu\t3.5e-05
-9B984-2\t9B984-2\tg\t:"LP-PI-ALT-PTRM:LP-PI-TRM":\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t13.6\tu\t3.5e-05`,
+`specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies
+1B475-2\t1B475-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B487-3\t1B487-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B704-1\t1B704-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B708-3\t1B708-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B710-1\t1B710-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B714-3\t1B714-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B730-1\t1B730-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B732-2\t1B732-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B733-1\t1B733-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B734-2\t1B734-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B755-1\t1B755-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+1B757-3\t1B757-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B416-4\t8B416-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B417-1\t8B417-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B437-5\t8B437-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B439-2\t8B439-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B440-2\t8B440-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B625-1\t8B625-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B631-1\t8B631-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B794-2\t8B794-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B829-2\t8B829-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B833-4\t8B833-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B835-2\t8B835-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B836-3\t8B836-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B889-4\t8B889-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B891-4\t8B891-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B896-2\t8B896-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B897-4\t8B897-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B906-1\t8B906-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B907-2\t8B907-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+8B910-3\t8B910-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B039-2\t9B039-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B040-1\t9B040-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B041-3\t9B041-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B042-3\t9B042-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B046-3\t9B046-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B109-2\t9B109-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B110-4\t9B110-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B113-4\t9B113-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B117-2\t9B117-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B131-5\t9B131-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B433-5\t9B433-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B437-5\t9B437-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B445-3\t9B445-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B448-4\t9B448-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B449-2\t9B449-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B451-2\t9B451-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B454-4\t9B454-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B483-2\t9B483-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B486-4\t9B486-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B489-2\t9B489-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B490-3\t9B490-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B492-4\t9B492-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B659-2\t9B659-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B660-4\t9B660-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B666-3\t9B666-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B669-2\t9B669-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B670-2\t9B670-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B902-3\t9B902-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B904-2\t9B904-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B905-2\t9B905-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B937-2\t9B937-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B944-1\t9B944-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B945-3\t9B945-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B947-2\t9B947-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B948-1\t9B948-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B949-2\t9B949-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B950-3\t9B950-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B953-3\t9B953-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B955-2\t9B955-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B959-3\t9B959-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B961-2\t9B961-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B962-3\t9B962-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B964-1\t9B964-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B965-2\t9B965-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B975-2\t9B975-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B976-1\t9B976-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B977-1\t9B977-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
+9B984-2\t9B984-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:`,
   'Excel File': ``
 };
