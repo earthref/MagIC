@@ -159,7 +159,7 @@ export default function (injectDeps, {FlowRouter}) {
           <Layout portal="MagIC">
             <Home portal="MagIC">
               <h3>
-                Upload data into a private workspace:
+                Upload data into your private workspace:
               </h3>
               <MagICUploadContribution/>
             </Home>

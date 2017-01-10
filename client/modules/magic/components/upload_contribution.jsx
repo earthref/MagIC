@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import filesize from 'filesize';
 import React from 'react';
+import Cookies from 'js-cookie';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
 import ParseContribution from '../actions/parse_contribution';
@@ -24,7 +25,9 @@ export default class extends React.Component {
       parseProgressTaps: 0,
       totalParseWarnings: 0,
       totalParseErrors: 0,
-      isParsed: false
+      isParsed: false,
+      contribution_id: 'new',
+      contribution_name: 'My Contribution'
     };
     this.state = this.initialState;
   }
@@ -51,9 +54,10 @@ export default class extends React.Component {
     });
     $('.upload-contribution .parse-step-content .format-dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
       onChange: (value, text, $choice) => {
+        console.log('parse as changed', value, text, $choice);
         this.parse({idxFile: $choice.data('i'), format: value});
       }
-    });
+    }).dropdown('set selected', 'magic');
     $('.upload-contribution .parse-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
   }
 
@@ -142,6 +146,8 @@ export default class extends React.Component {
             this.files[i].parseProgress = 100;
             this.files[i].parseWarnings = this.parser.warnings();
             this.files[i].parseErrors = this.parser.errors();
+            if (this.files[i].format === 'magic' && this.files[i].parseErrors.length > 0)
+              $('.upload-contribution .parse-step-content .format-dropdown').eq(i).dropdown('set selected', 'tsv');
             resolve();
           });
         }).delay() : Promise.resolve());
@@ -161,10 +167,7 @@ export default class extends React.Component {
 
   upload() {
 
-    this.setState({
-      processingStep: 3,
-      visibleStep: 3
-    });
+    Meteor.call('uploadContribution', 1, 'test', {a: 1});
 
   }
 
@@ -211,7 +214,48 @@ export default class extends React.Component {
 
   render() {
     const step = this.state.visibleStep;
-    return (
+    if (!Cookies.get('mail_id')) return (
+      <div>
+        <div className="ui top attached segment">
+          <div className="ui center aligned two column relaxed grid">
+            <div className="column">
+              <IconButton
+                className="borderless card" href="" portal="MagIC"
+                onClick={() => location.href = '//earthref.org/log-in/?next_url=' + window.location.href}
+              >
+                <i className="icons">
+                  <i className="user icon"/>
+                  <i className="sign in corner icon"/>
+                </i>
+                <div className="title">Log In</div>
+              </IconButton>
+            </div>
+            <div className="ui vertical divider">
+              OR
+            </div>
+            <div className="column">
+              <IconButton
+                className="borderless card" href="" portal="MagIC"
+                onClick={() => location.href = '//earthref.org/register/'}
+              >
+                <i className="icons">
+                  <i className="user icon"/>
+                  <i className="plus corner icon"/>
+                </i>
+                <div className="title">Join EarthRef.org</div>
+              </IconButton>
+            </div>
+          </div>
+        </div>
+        <div className="ui bottom attached icon error message">
+          <i className="warning sign icon"/>
+          <div className="content">
+            Please log in before uploading to your private workspace.
+          </div>
+        </div>
+      </div>
+    );
+    else return (
       <div className="upload-contribution">
         <div className="ui top attached stackable three steps">
           {(this.state.processingStep === 1 ?
@@ -258,7 +302,7 @@ export default class extends React.Component {
               </div>
             </a>
           )}
-          {(this.state.processingStep < 3 || step === 3 ?
+          {(this.state.processingStep < 2 || this.state.totalReadErrors > 0 || this.state.totalParseErrors > 0 || step === 3 ?
             <div ref="upload step" className={(step == 3 ? 'active' : 'disabled') + ' pointing below step'}>
               <i className="icons">
                 <i className="file text outline icon"></i>
@@ -377,7 +421,7 @@ export default class extends React.Component {
             </div>
             <div className="title"></div>
             <div ref="parse step message" className="content parse-step-content">
-              <h3>Reading and parsing each of the files in the contribution:</h3>
+              <h3>Reading and parsing the {this.files.length === 1 ? ' file' : ' files'} for upload:</h3>
               <div ref="files" className="ui divided items">
                 {this.files.map((file, i) => {
                   const fileIsDone = (file.parseProgress === 100 ||
@@ -450,7 +494,7 @@ export default class extends React.Component {
                               Parse As
                             </div>
                             <div className="ui fluid selection dropdown format-dropdown">
-                              <input name="format" type="hidden" value="magic"/>
+                              <input name="format" type="hidden"/>
                               <i className="dropdown icon"></i>
                               <div className="text">MagIC Text File</div>
                               <div className="menu">
@@ -466,7 +510,7 @@ export default class extends React.Component {
                                 <div data-i={i} data-value="fw" className="disabled item">
                                   Fixed Width Text File
                                 </div>
-                                <div data-i={i} data-value="xls" className="item">
+                                <div data-i={i} data-value="xls" className="disabled item">
                                   Excel File
                                 </div>
                               </div>
@@ -523,18 +567,90 @@ export default class extends React.Component {
             </div>
             <div className="title"></div>
             <div ref="upload step message" className="content upload-step-content">
-
+              <div className="ui labeled fluid action input">
+                <div className="ui label">
+                  Upload To
+                </div>
+                <div className="ui fluid selection dropdown">
+                  <input name="contribution_id" type="hidden"/>
+                  <i className="dropdown icon"/>
+                  <div className="text">A New Private Contribution</div>
+                  <div className="menu">
+                    <div data-value="new" className="item">
+                      A New Private Contribution
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <br/>
+              <div>
+                <div className={"ui labeled fluid input" + (this.state.contribution_name.length > 0 ? '' : ' error')}>
+                  <div className={"ui label" + (this.state.contribution_name.length > 0 ? '' : ' red')}>
+                    Temporary Private Contribution Name
+                  </div>
+                  <input ref="contribution name" type="text" default="None" value={this.state.contribution_name}
+                         onChange={(e) => {
+                           this.setState({contribution_name: this.refs['contribution name'].value})}}/>
+                </div>
+              </div>
+              <br/>
+              <div className={'ui fluid purple button' + (this.state.contribution_name.length > 0 ? '' : ' disabled')}
+                   onClick={this.upload.bind(this)}>
+                Save Changes to Your Private Workspace
+              </div>
             </div>
+
           </div>
         </div>
         {(step === 1 ?
           <div className="ui bottom attached icon message">
-            <i className="purple circle info icon"></i>
+            <i className="purple circle info icon"/>
             <div className="content">
               The selected file or files can be partial or complete contributions.
             </div>
           </div>
-        : undefined)}
+          : undefined)}
+        {(step === 2 && this.state.totalReadErrors > 0 ?
+          <div className="ui bottom attached icon error message">
+            <i className="warning sign icon"/>
+            <div className="content">
+              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be read.
+              Please address the errors and/or change the <b>Parse As</b> format.
+            </div>
+          </div>
+          : undefined)}
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors > 0 ?
+          <div className="ui bottom attached icon error message">
+            <i className="warning sign icon"/>
+            <div className="content">
+              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be parsed.
+              Please address the errors and/or change the <b>Parse As</b> format.
+            </div>
+          </div>
+          : undefined)}
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors == 0 && this.state.totalParseWarnings > 0 ?
+          <div className="ui bottom attached icon error message">
+            <i className="warning sign icon"></i>
+            <div className="content">
+              The selected {this.files.length === 1 ? ' file was' : ' files were'} parsed with warnings.
+              Please check the warnings before continuing.
+            </div>
+            <div className="ui right floated purple button" onClick={this.reviewUpload.bind(this)}>
+              Upload
+            </div>
+          </div>
+          : undefined)}
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors == 0 && this.state.totalParseWarnings == 0 ?
+          <div className="ui bottom attached icon success message">
+            <i className="check circle icon"></i>
+            <div className="content">
+              The selected {this.files.length === 1 ? ' file was' : ' files were'} parsed successfully.
+            </div>
+            <div className="ui right floated purple button" onClick={this.reviewUpload.bind(this)}>
+              Upload
+            </div>
+          </div>
+          : undefined)}
       </div>
     )
   }

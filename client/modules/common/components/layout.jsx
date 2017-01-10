@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import React from 'react';
+import Cookies from 'js-cookie';
 import Navigation from './navigation.jsx';
 
 export default class extends React.Component {
@@ -65,10 +66,14 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui top fixed secondary pointing menu right-menu">
-          <a className="ui dropdown item">
-            Login
-            <i className="dropdown icon"/>
-          </a>
+          {Cookies.get('mail_id') && Cookies.get('name') ?
+            <a className="ui button item" href="//earthref.org/edit-profile/">
+              {Cookies.get('name')}
+            </a> :
+            <a className="ui button item" href={'//earthref.org/log-in/?next_url=' + window.location.href}>
+              Login
+            </a>
+          }
         </div>
         <div className="ui bottom fixed small menu footer">
           <div className="ui container" style={(fullWidth ? {width:'calc(100% - 4em)'} : {})}>

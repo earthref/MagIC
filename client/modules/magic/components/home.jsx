@@ -27,7 +27,7 @@ export default class extends React.Component {
             Register
           </a>
           <div className="ui tiny statistic" style={{margin:'0 1em'}}>
-            <div className="value">{moment('2017-01-24').diff(moment(), 'days')}</div>
+            <div className="value">{moment('2017-01-26').diff(moment(), 'days')}</div>
             <div className="label">Days To Go!</div>
           </div>
         </div>
