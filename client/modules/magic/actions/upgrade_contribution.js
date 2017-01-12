@@ -339,7 +339,7 @@ export default class extends Runner {
                 if (!this.upgradeMap[jsonTableOld] || !this.upgradeMap[jsonTableOld][jsonColumnOld]) {
                   if (!this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
                     this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-                      `was deleted in MagIC Data Model version ${this.versionNew}.`);
+                      `is unnecesary in MagIC Data Model version ${this.versionNew}.`);
                   this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
                   pullIdxs.push(columnIdx);
                   continue;
@@ -468,7 +468,7 @@ export default class extends Runner {
           joinTable = 'locations';
         else
           this._appendWarning(`Row ${(parseInt(jsonRowOldIdx)+1)} in table "${jsonTableOld}" was deleted in ` +
-            `MagIC data model version ${this.versionNew} since it is a contribution-level result.`);
+            `MagIC Data Model version ${this.versionNew} since it is a contribution-level result.`);
       }
 
       // Record the type of relative intensity normalization and remove the associated method code.
@@ -846,7 +846,7 @@ export default class extends Runner {
       if (!this.upgradeMap[jsonTableOld] || !this.upgradeMap[jsonTableOld][jsonColumnOld]) {
         if (!this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
           this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-            `was deleted in MagIC Data Model version ${this.versionNew}.`);
+            `is unnecessary in MagIC Data Model version ${this.versionNew}.`);
         this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
         continue;
       }

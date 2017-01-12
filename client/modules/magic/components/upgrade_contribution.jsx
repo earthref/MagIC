@@ -584,7 +584,7 @@ export default class extends React.Component {
                       className="borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
                     >
                       <i className="icons">
-                        <i className="file excel outline icon"/>
+                        <i className="file text outline icon"/>
                       </i>
                       <div className="title">Save as Text</div>
                       <div className="subtitle">Download the upgraded contribution as a MagIC Text File.</div>
@@ -593,7 +593,8 @@ export default class extends React.Component {
                       className="disabled borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
                     >
                       <i className="icons">
-                        <i className="file excel outline icon"/>
+                        <i className="file text outline icon"/>
+                        <i className="corner help icon"></i>
                       </i>
                       <div className="title">Validate</div>
                       <div className="subtitle">Confirm that the upgraded contribution adheres to the MagIC Data Model.</div>
@@ -602,7 +603,8 @@ export default class extends React.Component {
                       className="disabled borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
                     >
                       <i className="icons">
-                        <i className="file excel outline icon"/>
+                        <i className="table icon"/>
+                        <i className="corner add icon"></i>
                       </i>
                       <div className="title">Upload</div>
                       <div className="subtitle">Upload the upgraded contribution to your private workspace.</div>
@@ -611,7 +613,8 @@ export default class extends React.Component {
                       className="borderless card" portal="MagIC" onClick={this.restart.bind(this)}
                     >
                       <i className="icons">
-                        <i className="file excel outline icon"/>
+                        <i className="file text outline icon"/>
+                        <i className="corner arrow up icon"></i>
                       </i>
                       <div className="title">New Upgrade</div>
                       <div className="subtitle">Restart the upgrading tool with another dataset.</div>

@@ -87,19 +87,29 @@ export default class extends Runner {
         ['Column: ', ... tableHeaders.columnNameHeader      ]
       ];
 
+      // Create an index mapping from the JSON measurements columns to the ordered data model columns.
+      let columnOrderIdxs = {};
+      if (modelTable.toLowerCase() === 'measurements') {
+        for (let columnName of tableHeaders.columnNameHeader) {
+          columnOrderIdxs[columnName] = _.indexOf(jsonToExport[modelTable].columns, columnName);
+        }
+      }
+
       // Iterate through all of the data rows in the table.
       for (let rowIdx in (jsonToExport[modelTable].rows || jsonToExport[modelTable])) {
 
         // Add a blank column at the beginning of each data row for the row headers.
         let wsRow = [''];
 
-        if (jsonToExport[modelTable].rows) wsRow = wsRow.concat(jsonToExport[modelTable].rows[rowIdx]);
-        else
-          // Iterate through each column name in the header.
-          for (let columnName of tableHeaders.columnNameHeader) {
-            let value = jsonToExport[modelTable][rowIdx][columnName];
-            wsRow.push(value);
-          }
+        // Iterate through each column name in the header.
+        for (let columnName of tableHeaders.columnNameHeader) {
+          let value;
+          if (modelTable.toLowerCase() === 'measurements')
+            value = jsonToExport[modelTable].rows[rowIdx][columnOrderIdxs[columnName]];
+          else
+            value = jsonToExport[modelTable][rowIdx][columnName];
+          wsRow.push(value);
+        }
 
         wsData.push(wsRow.map((value, i) => {
           if (Array.isArray(value) && value.length > 0 && !Array.isArray(value[0])) value = value.join(':');
@@ -331,28 +341,54 @@ export default class extends Runner {
     for (let orderedColumnIdx in orderedColumnArray) {
 
       let potentialColumnToAdd = orderedColumnArray[orderedColumnIdx];
-      //Traverse the entire JSON table's rows looking for usages of the each column found in the ordered model. If the JSON file has the column in question
-      //extract the desired information and create the extended header
-      for(let jsonRowIdx in jsonToExport[tableName]) {
+      // Traverse the entire JSON table's rows looking for usages of the each column found in the ordered model.
+      // If the JSON file has the column in question extract the desired information and create the extended header.
+      if (tableName.toLowerCase() === 'measurements') {
+        for(let jsonRowIdx in jsonToExport[tableName].columns) {
 
-        if (jsonToExport[tableName][jsonRowIdx][potentialColumnToAdd] && //if this ordered column is found in the json file
+          // If this ordered column is found in the JSON file:
+          if (jsonToExport[tableName].columns[jsonRowIdx].toLowerCase() === potentialColumnToAdd.toLowerCase() &&
             !discoveredColumns[potentialColumnToAdd]) {                    //and we haven't seen this column before
 
-          //ggg gather data here from the model and add the header
-          discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
-          columnHeaderArray.push(potentialColumnToAdd);
+            // Gather data here from the model and add the header.
+            discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
+            columnHeaderArray.push(potentialColumnToAdd);
 
-          let labelToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['label'];
-          labelHeaderArray.push(labelToAdd);
+            let labelToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].label;
+            labelHeaderArray.push(labelToAdd);
 
-          // Append the group name if it's not the same as the previous column.
-          let currentGroupToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
-          groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
-          previousGroupFound = currentGroupToAdd;
+            // Append the group name if it's not the same as the previous column.
+            let currentGroupToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].group;
+            groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
+            previousGroupFound = currentGroupToAdd;
 
-          columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+            columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+          }
         }
       }
+      else {
+        for(let jsonRowIdx in jsonToExport[tableName]) {
+
+          if (jsonToExport[tableName][jsonRowIdx][potentialColumnToAdd] && //if this ordered column is found in the json file
+            !discoveredColumns[potentialColumnToAdd]) {                    //and we haven't seen this column before
+
+            //ggg gather data here from the model and add the header
+            discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
+            columnHeaderArray.push(potentialColumnToAdd);
+
+            let labelToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].label;
+            labelHeaderArray.push(labelToAdd);
+
+            // Append the group name if it's not the same as the previous column.
+            let currentGroupToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].group;
+            groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
+            previousGroupFound = currentGroupToAdd;
+
+            columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+          }
+        }
+      }
+
     }
 
     let orderedHeaderData = {};
@@ -367,8 +403,8 @@ export default class extends Runner {
   getColumnTypeOrUnitString(table, column) {
 
     let columnTypeOrUnitString = '';
-    let columnType = this.model['tables'][table]['columns'][column]['type'];
-    let columnUnit = this.model['tables'][table]['columns'][column]['unit'];
+    let columnType = this.model.tables[table].columns[column].type;
+    let columnUnit = this.model.tables[table].columns[column].unit;
 
     if (columnType === 'Number') {
       columnTypeOrUnitString = 'Number';
@@ -610,19 +646,19 @@ export default class extends Runner {
    */
   createOrderedModel()
   {
-    let tableNames = Object.getOwnPropertyNames(this.model['tables']);
+    let tableNames = Object.getOwnPropertyNames(this.model.tables);
     let orderedModel = [];
     for(let tableIdx in tableNames)
     {
-      let properTablePositionIdx = this.model['tables'][tableNames[tableIdx]].position - 1;
+      let properTablePositionIdx = this.model.tables[tableNames[tableIdx]].position - 1;
       orderedModel[properTablePositionIdx] = {[tableNames[tableIdx]]:[]};
 
       let columnPositionMap = [];
-      let columnNames = Object.getOwnPropertyNames(this.model['tables'][tableNames[tableIdx]].columns);
+      let columnNames = Object.getOwnPropertyNames(this.model.tables[tableNames[tableIdx]].columns);
       for(let columnIdx in columnNames)
       {
         let columnName = columnNames[columnIdx];
-        let columnPosition = this.model['tables'][tableNames[tableIdx]]['columns'][columnName].position;
+        let columnPosition = this.model.tables[tableNames[tableIdx]].columns[columnName].position;
         columnPositionMap[columnPosition-1] = columnName;
       }
       //assign the properly ordered array of columns to the object keyed via the current table
