@@ -45,7 +45,7 @@
     "filesize": "*",
     "jquery": "*",
     "js-cookie": "^2.1.3",
-    "jszip": "*",
+    "jszip": "2.6.1",
     "lodash": "*",
     "mantra-core": "*",
     "meteor-node-stubs": "*",

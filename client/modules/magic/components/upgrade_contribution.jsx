@@ -12,6 +12,7 @@ import ParseContribution from '../actions/parse_contribution';
 import UpgradeContribution from '../actions/upgrade_contribution';
 import ValidateContribution from '../actions/validate_contribution';
 import ExportContribution from '../actions/export_contribution';
+import IconButton from '../../common/components/icon_button.jsx';
 
 export default class extends React.Component {
 
@@ -202,6 +203,7 @@ export default class extends React.Component {
 
   saveText() {
     const exporter = new ExportContribution({});
+    console.log(this.upgrader.json);
     let blob = new Blob([exporter.toText(this.upgrader.json)], {type: "text/plain;charset=utf-8"});
     saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.txt');
   }
@@ -408,7 +410,7 @@ export default class extends React.Component {
                             <div className="two column row">
                               <div className="column">
                                 <div className={
-                                       (file.readErrors ? 'error ' : '') +
+                                       (file.readErrors && file.readErrors.length ? 'error ' : '') +
                                        'ui tiny purple progress'
                                      }
                                      data-percent={file.readProgress}>
@@ -492,7 +494,7 @@ export default class extends React.Component {
                       <div ref="from version"
                            className={(fromVersion ? 'black ' : 'red ') + 'ui inline dropdown compact basic icon button'}>
                         <div className="text">
-                          {fromVersion || 'Unknown'}
+                          {fromVersion || 'Unknown'}&nbsp;
                         </div>
                         <i className="dropdown icon"></i>
                         <div className="menu">
@@ -568,60 +570,52 @@ export default class extends React.Component {
                       Next Steps
                     </span>
                   </div>
-                  <div className="ui five column grid">
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} onClick={this.saveExcel.bind(this)}>
-                        <i className="icons">
-                          <i className="file excel outline icon"></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Save as Excel</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}}  onClick={this.saveText.bind(this)}>
-                        <i className="icons">
-                          <i className="file text outline icon"></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Save as Text</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/validate/">
-                        <i className="icons">
-                          <i className="file text outline icon"></i>
-                          <i className="purple corner help icon" style={{fontSize:'1.5em'}}></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Validate</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upload/">
-                        <i className="icons">
-                          <i className="table icon"></i>
-                          <i className="purple corner add icon" style={{fontSize:'1.5em'}}></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Upload</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upgrade/">
-                        <i className="icons">
-                          <i className="file text outline icon"></i>
-                          <i className="purple corner arrow up icon" style={{fontSize:'1.5em'}}></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">New Upgrade</div>
-                        </div>
-                      </a>
-                    </div>
+                  <div className="ui five stackable cards">
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.saveExcel.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file excel outline icon"/>
+                      </i>
+                      <div className="title">Save as Excel</div>
+                      <div className="subtitle">Download the upgraded contribution as an Excel Worksheet.</div>
+                    </IconButton>
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file excel outline icon"/>
+                      </i>
+                      <div className="title">Save as Text</div>
+                      <div className="subtitle">Download the upgraded contribution as a MagIC Text File.</div>
+                    </IconButton>
+                    <IconButton
+                      className="disabled borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file excel outline icon"/>
+                      </i>
+                      <div className="title">Validate</div>
+                      <div className="subtitle">Confirm that the upgraded contribution adheres to the MagIC Data Model.</div>
+                    </IconButton>
+                    <IconButton
+                      className="disabled borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file excel outline icon"/>
+                      </i>
+                      <div className="title">Upload</div>
+                      <div className="subtitle">Upload the upgraded contribution to your private workspace.</div>
+                    </IconButton>
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.restart.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file excel outline icon"/>
+                      </i>
+                      <div className="title">New Upgrade</div>
+                      <div className="subtitle">Restart the upgrading tool with another dataset.</div>
+                    </IconButton>
                   </div>
                   {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
                   <div></div>
