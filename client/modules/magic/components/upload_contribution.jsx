@@ -52,10 +52,26 @@ export default class extends React.Component {
     this.files = [];
     this.parser.reset();
     this.setState(this.initialState);
-    // TODO: cancel active reading or parsing
   }
 
   componentDidMount() {
+    let text = localStorage.getItem('Text to Upload');
+    if (text) {
+      localStorage.removeItem('Text to Upload');
+      this.files = [{
+        readProgress: 100,
+        readErrors: [],
+        text: text,
+        name: 'Output from Upload Tool.txt',
+        size: text.length
+      }];
+      this.setState({
+        isRead: true,
+        totalReadErrors: 0,
+        processingStep: 2,
+        visibleStep: 2
+      }, this.parse);
+    }
     $(this.refs['accordion']).accordion({on: null, collapsible: false});
     $(this.refs['private contributions']).dropdown({
       onChange: (value, text, $choice) => {

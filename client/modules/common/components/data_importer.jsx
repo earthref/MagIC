@@ -41,17 +41,17 @@ export default class extends React.Component {
     // Copy the props data to the state input data.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
 
-    // Validate the header row number.
+    // Validate the number of header rows.
     const nHeaderRows = newState.nHeaderRows;
     newState.errors.nHeaderRows = [];
     if (nHeaderRows !== '' && isNaN(nHeaderRows))
-      newState.errors.nHeaderRows.push('"Header Row Number" must be empty (for no header) or numeric.');
+      newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or numeric.');
     else if (nHeaderRows !== '' && nHeaderRows !== String(Number.parseInt(nHeaderRows)))
-      newState.errors.nHeaderRows.push('"Header Row Number" must be empty (for no header) or an integer.');
-    else if (nHeaderRows !== '' && Number.parseInt(nHeaderRows) < 1)
-      newState.errors.nHeaderRows.push('"Header Row Number" must be empty (for no header) or greater than or equal to 1.');
+      newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or an integer.');
+    else if (nHeaderRows !== '' && Number.parseInt(nHeaderRows) < 0)
+      newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or greater than or equal to 0.');
     else if (nHeaderRows !== '' && Number.parseInt(nHeaderRows) > newState.in.length)
-      newState.errors.nHeaderRows.push('"Header Row Number" must be empty (for no header) or less than or equal to ' + newState.in.length + ' (the number of rows in the dataset).');
+      newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or less than or equal to ' + newState.in.length + ' (the number of rows in the dataset).');
 
     // Validate the table name.
     newState.errors.tableName = [];
@@ -208,7 +208,7 @@ export default class extends React.Component {
         <div className="column">
           <div className={"ui labeled fluid input" + (this.state.errors.nHeaderRows.length === 0 ? '' : ' error')}>
             <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 ? '' : ' red')}>
-              Header Row Number
+              Number of Header Rows
             </div>
             <input ref="header_row_input" type="text" default="None" value={this.state.nHeaderRows}
                    onChange={(e) => {

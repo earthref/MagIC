@@ -229,6 +229,12 @@ export default class extends React.Component {
     saveAs(workbookBlob, 'Upgraded Contribution v' + _.last(versions) + '.xlsx');
   }
 
+  upload() {
+    const exporter = new ExportContribution({});
+    localStorage.setItem('Text to Upload', exporter.toText(this.upgrader.json));
+    location.href = '/MagIC/upload';
+  }
+
   render() {
     const step = this.state.visibleStep;
     const fromVersion = this.state.fromVersion;
@@ -600,7 +606,7 @@ export default class extends React.Component {
                       <div className="subtitle">Confirm that the upgraded contribution adheres to the MagIC Data Model.</div>
                     </IconButton>
                     <IconButton
-                      className="disabled borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
+                      className="borderless card" portal="MagIC" onClick={this.upload.bind(this)}
                     >
                       <i className="icons">
                         <i className="table icon"/>
