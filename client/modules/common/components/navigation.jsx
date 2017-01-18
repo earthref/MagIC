@@ -10,7 +10,12 @@ export default class extends React.Component {
       <div className={navigationClasses}>
         {portalsOrder.map((p, i) => {
           const classes = (p === portal ? portals[p].color + ' active ' : '') + 'item';
-          return (<a key={i} className={classes} href={portals[p].url}>{p}</a>);
+          const styles = (i === 0 ? {paddingLeft: '0px'} : {});
+          return (
+            <a key={i} className={classes} href={portals[p].url} style={styles}>
+              {p}
+            </a>
+          );
         })}
       </div>
     );

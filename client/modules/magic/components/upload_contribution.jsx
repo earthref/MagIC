@@ -8,29 +8,28 @@ import Promise from 'bluebird';
 import {Mongo} from 'meteor/mongo';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
+import jszip from 'jszip'; // not used, but makes xlsx-style happy
+import XLSX from 'xlsx-style';
 import {Collections} from '/lib/collections';
-import ParseContribution from '../actions/parse_contribution';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
-export default class extends React.Component {
+export default class MagICUploadContribution extends React.Component {
 
   constructor(props) {
     super(props);
     this.files = [];
-    this.parser = new ParseContribution({});
     this.initialState = {
       processingStep: 1,
       visibleStep: 1,
       readProgressTaps: 0,
       totalReadErrors: 0,
       isRead: false,
-      parseProgressTaps: 0,
-      totalParseWarnings: 0,
-      totalParseErrors: 0,
-      isParsed: false,
+      fileFormats: [],
+      importProgressTaps: 0,
+      totalImportErrors: 0,
       _id: '',
       _name: 'My Contribution',
       _contributor: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
@@ -50,7 +49,6 @@ export default class extends React.Component {
       if (this.files[i].fileReader)
         this.files[i].fileReader.abort();
     this.files = [];
-    this.parser.reset();
     this.setState(this.initialState);
   }
 
@@ -63,14 +61,16 @@ export default class extends React.Component {
         readErrors: [],
         text: text,
         name: 'Output from Upload Tool.txt',
-        size: text.length
+        size: text.length,
+        format: 'magic'
       }];
       this.setState({
         isRead: true,
+        fileFormats: ['magic'],
         totalReadErrors: 0,
         processingStep: 2,
         visibleStep: 2
-      }, this.parse);
+      });
     }
     $(this.refs['accordion']).accordion({on: null, collapsible: false});
     $(this.refs['private contributions']).dropdown({
@@ -87,17 +87,21 @@ export default class extends React.Component {
       if (!isNaN($(this).attr('data-percent')))
         $(this).progress('set').progress($(this).attr('data-percent'));
     });
-    $('.upload-contribution .parse-step-content .format-dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
+    $('.upload-contribution .import-step-content .format-dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
       onChange: (value, text, $choice) => {
-        console.log('parse as changed', value, text, $choice);
-        this.parse({idxFile: $choice.data('i'), format: value});
+        let i = $choice.data('i');
+        let fileFormats = this.state.fileFormats;
+        fileFormats[i] = value;
+        this.setState({fileFormats: fileFormats});
+        //if (value === 'xls' && this.files[$choice.data('i')].workbook === undefined)
+        //  this.files
       }
-    }).dropdown('set selected', 'magic');
-    $('.upload-contribution .parse-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
+    });//.dropdown('set selected', 'magic');
+    $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
     $(this.refs['private contributions']).dropdown('refresh');
   }
 
-  reviewParse() {
+  reviewImport() {
     this.setState({visibleStep: 2});
   }
 
@@ -114,15 +118,17 @@ export default class extends React.Component {
     for (let i in this.files) {
       this.files[i].readProgress = 0;
       this.files[i].readErrors = [];
+      this.files[i].format = 'magic';
     }
     this.setState({
       processingStep: 2,
       visibleStep: 2,
-      readProgressTaps: 0
+      readProgressTaps: 0,
+      fileFormats: this.files.map((f) => f.format)
     });
 
     // Read the files in parallel.
-    Promise.all(files.map((file, i) => {
+    Promise.all(this.files.map((file, i) => {
       return new Promise((resolve, reject) => {
         this.files[i].fileReader = new FileReader();
         this.files[i].fileReader.onprogress = e => {
@@ -131,7 +137,9 @@ export default class extends React.Component {
         };
         this.files[i].fileReader.onload = e => {
           this.files[i].readProgress = 100;
-          this.files[i].text = e.target.result;
+          if (this.files[i].format === 'xls') {
+            this.files[i].workbook = XLSX.read(e.target.result, {type: 'binary'});
+          } else this.files[i].text = e.target.result;
           this.setState({readProgressTaps: this.state.readProgressTaps + 1});
           resolve();
         };
@@ -140,75 +148,85 @@ export default class extends React.Component {
           this.setState({readProgressTaps: this.state.readProgressTaps + 1});
           reject();
         };
-        this.files[i].fileReader.readAsText(file);
+        if (/\.xls(x)?$/.test(file.name)) {
+          this.files[i].format = 'xls';
+          let fileFormats = this.state.fileFormats;
+          fileFormats[i] = 'xls';
+          this.setState({fileFormats: fileFormats});
+          this.files[i].fileReader.readAsBinaryString(file);
+        } else this.files[i].fileReader.readAsText(file);
       }).delay();
     })).then(() => {
       this.setState({
         isRead: true,
         totalReadErrors: _.reduce(this.files, (n, file) => n + file.readErrors.length, 0)
       });
-      this.parse();
     });
   }
+  
+  xlsSheetToArray(sheet) {
+    let data = [];
+    let nSkipRows = 0;
+    let nSkipColumns = 0;
 
-  parse({idxFile = undefined, format = 'magic'} = {}) {
+    // Check if this is a MagIC Excel file by looking for "Group:" in cell A1 and "Column:" in cell A4.
+    if (sheet.A1 && /Group:/.test(sheet.A1.v) &&
+        sheet.A4 && /Column:/.test(sheet.A4.v)) {
+      nSkipRows = 3;
+      nSkipColumns = 1;
+    }
 
-    // Initialize the parse progress state.
-    for (let i in this.files) {
-      if (idxFile === undefined || idxFile == i) {
-        this.files[i].parseProgress = 0;
-        this.files[i].parseWarnings = [];
-        this.files[i].parseErrors = [];
-        this.files[i].format = format;
+    // Loop through the sheet and copy the values into the data array.
+    for (let cellName in sheet) {
+      const cellCoordinates = XLSX.utils.decode_cell(cellName);
+      const rowIdx = cellCoordinates.r;
+      const columnIdx = cellCoordinates.c;
+      if (rowIdx >= nSkipRows && columnIdx >= nSkipColumns) {
+        if (data[rowIdx - nSkipRows] === undefined)
+          data[rowIdx - nSkipRows] = [];
+        if (data[rowIdx - nSkipRows].length < columnIdx - nSkipColumns + 1)
+          _.times(columnIdx - nSkipColumns + 1 - data[rowIdx - nSkipRows].length,
+            () => data[rowIdx - nSkipRows].push(''));
+        data[rowIdx - nSkipRows][columnIdx - nSkipColumns] = sheet[cellName].v;
       }
     }
-    this.setState({
-      parseProgressTaps: 0
-    });
 
-    // Parse sequentially through the files.
-    Promise.each(this.files, (file, i) => {
-      console.log('parsing file', i, this.files[i].format);
-      return (idxFile === undefined || idxFile == i ?
-        new Promise((resolve) => {
-          this.parser.resetProgress();
-          this.parser.parsePromise({
-            text: this.files[i].text,
-            onProgress: (percent) => {
-              this.files[i].parseProgress = percent;
-              this.setState({parseProgressTaps: this.state.parseProgressTaps + 1});
-            },
-            format: this.files[i].format
-          }).then(() => {
-            this.files[i].parseProgress = 100;
-            this.files[i].parseWarnings = this.parser.warnings();
-            this.files[i].parseErrors = this.parser.errors();
-            if (this.files[i].format === 'magic' && this.files[i].parseErrors.length > 0) {
-              console.log('magic format errors', this.files[i].parseErrors);
-              $('.upload-contribution .parse-step-content .format-dropdown').eq(i).dropdown('set selected', 'tsv');
-            }
-            resolve();
-          });
-        }).delay() : Promise.resolve());
-    }).then(() => {
-      const totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
-      const totalParseWarnings = _.reduce(this.files, (n, file) => n + file.parseWarnings.length, 0);
-      this.setState({
-        isParsed: true,
-        totalParseErrors: totalParseErrors,
-        totalParseWarnings: totalParseWarnings
-      });
-      console.log(totalParseErrors, totalParseWarnings, this.files, this.parser);
-      //if (totalParseErrors === 0)
-      //  this.upload();
-    });
+    // Make sure each row has the same number of columns.
+    let maxRowLength = _.reduce(data, (max, row) => Math.max(max, row.length), 0);
+    for (let rowIdx in data) {
+      if (data[rowIdx].length < maxRowLength)
+        _.times(maxRowLength - data[rowIdx].length, () => data[rowIdx].push(''));
+    }
+
+    return data;
   }
 
   upload() {
 
+    let contribution = {};
+    for (let file of this.files) {
+      if (file.imported) file.imported.map((data) => {
+        if (data.table && data.columns && data.rows) {
+          if (data.table === 'measurements') {
+            //contribution[data.table] = {
+            //  columns: data.columns,
+            //  rows: data.rows
+            //};
+          } else {
+            contribution[data.table] = contribution[data.table] || [];
+            data.rows.map((row, i) =>
+              contribution[data.table].push(
+                _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
+              )
+            );
+          }
+        }
+      });
+    }
+
     this.setState({uploading: true});
     if (this.state._id !== '')
-      Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._name, this.parser.json,
+      Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._name, contribution,
         (error) => {
           console.log('updated contribution', this.state._id, error);
           if (error) this.setState({uploadError: error, uploading: false});
@@ -216,7 +234,7 @@ export default class extends React.Component {
         }
       );
     else
-      Meteor.call('insertContribution', this.state._contributor, this.state._name, this.parser.json,
+      Meteor.call('insertContribution', this.state._contributor, this.state._name, contribution,
         (error) => {
           console.log('inserted contribution', this.state._id, error);
           if (error) this.setState({uploadError: error, uploading: false});
@@ -252,7 +270,7 @@ export default class extends React.Component {
 
   uploadExample(name) {
     this.files = [{
-      name: name,
+      name: name + '.txt',
       size: examples[name].length,
       readProgress: 100,
       readErrors: [],
@@ -262,9 +280,14 @@ export default class extends React.Component {
       processingStep: 2,
       visibleStep: 2,
       isRead: true,
-      totalReadErrors: 0
+      totalReadErrors: 0,
+      fileFormats: ['magic']
     });
-    this.parse();
+  }
+
+  downloadFile(file) {
+    const blob = new Blob([file.text], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, file.name);
   }
 
   downloadExampleMagICv3() {
@@ -277,6 +300,33 @@ export default class extends React.Component {
     saveAs(blob, 'MagIC Example Tab Delimited File with Specimens Data.txt');
   }
 
+  renderDataImporter(i, j, data, tableName, nHeaderRows) {
+    return (
+      <DataImporter
+        portal="MagIC"
+        tableName={tableName}
+        nHeaderRows={nHeaderRows}
+        data={data}
+        onReady={(t, c, r) => {
+          this.files[i].imported = this.files[i].imported || [];
+          this.files[i].imported[j] = {table: t, columns: c, rows: r};
+          this.files[i].importErrors = [];
+          this.setState({
+            totalImportErrors: _.reduce(this.files, (n, file) => n + file.importErrors.length, 0),
+            importProgressTaps: this.state.importProgressTaps + 1
+          });
+        }}
+        onNotReady={() => {
+          this.files[i].importErrors = [{}];
+          this.setState({
+            totalImportErrors: _.reduce(this.files, (n, file) => n + file.importErrors.length, 0),
+            importProgressTaps: this.state.importProgressTaps + 1
+          });
+        }}
+      />
+    );
+  }
+  
   render() {
     const step = this.state.visibleStep;
     console.log('private contributions', Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch());
@@ -351,24 +401,24 @@ export default class extends React.Component {
                 <i className="file text outline icon"></i>
               </i>
               <div className="content">
-                <div className="title">Step 2. Parse</div>
+                <div className="title">Step 2. Import</div>
                 <div className="description">Read and parse the files.</div>
               </div>
             </div>
             :
             <a ref="read link step"
                className="pointing below step"
-               onClick={this.reviewParse.bind(this)}>
+               onClick={this.reviewImport.bind(this)}>
               <i className="icons">
                 <i className="file text outline icon"></i>
               </i>
               <div className="content">
-                <div className="title">Step 2. Parse</div>
+                <div className="title">Step 2. Import</div>
                 <div className="description">Read and parse the files.</div>
               </div>
             </a>
           )}
-          {(this.state.processingStep < 2 || this.state.totalReadErrors > 0 || this.state.totalParseErrors > 0 || step === 3 ?
+          {(this.state.processingStep < 2 || this.state.totalReadErrors > 0 || this.state.totalImportErrors > 0 || step === 3 ?
             <div ref="upload step" className={(step == 3 ? 'active' : 'disabled') + ' pointing below step'}>
               <i className="icons">
                 <i className="file text outline icon"></i>
@@ -423,110 +473,85 @@ export default class extends React.Component {
               <h4 className="ui header" style={{marginBottom: '1em'}}>
                 If you don't have a file handy or want to try a different format, upload an example file:
               </h4>
-              <div className="ui four stackable cards">
+              <div className="ui five stackable cards">
                 <IconButton
                   className="borderless card" href="" portal="MagIC" position="bottom left"
-                  tooltip={'Click to upload this example dataset into your private' +
+                  tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleMagICv3.bind(this)}
                 >
                   <i className="icons">
                     <i className="file text outline icon"/>
                   </i>
-                  <div className="title">MagIC Text File</div>
+                  <div className="title">MagIC Text</div>
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="disabled borderless card" href="" portal="MagIC" position="bottom left"
-                  tooltip={'Click to upload this example dataset into your private' +
+                  className="borderless card" href="" portal="MagIC" position="bottom left"
+                  tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
-                  onClick={this.uploadExampleMagICv2.bind(this)}
+                  onClick={this.uploadExampleTabDelimitedSites.bind(this)}
                 >
                   <i className="icons">
-                    <i className="file text outline icon"/>
+                    <i className="table icon"/>
                   </i>
-                  <div className="title">MagIC Text File</div>
-                  <div className="subtitle">Data Model v. 2.5</div>
+                  <div className="title">Tab Delimited</div>
+                  <div className="subtitle">Sites Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom right"
-                  tooltip={'Click to upload this example dataset into your private' +
+                  className="borderless card" href="" portal="MagIC" position="bottom center"
+                  tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleTabDelimitedSpecimens.bind(this)}
                 >
                   <i className="icons">
                     <i className="table icon"/>
                   </i>
-                  <div className="title">Tab Delimited File</div>
+                  <div className="title">Comma Delimited</div>
                   <div className="subtitle">Specimens Data</div>
                 </IconButton>
                 <IconButton
-                  className="disabled borderless card" href="" portal="MagIC" position="bottom right"
-                  tooltip={'Click to upload this example dataset into your private' +
+                  className="borderless disabled card" href="" portal="MagIC" position="bottom right"
+                  tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                 >
                   <i className="icons">
                     <i className="file excel outline icon"/>
                   </i>
-                  <div className="title">Excel File</div>
+                  <div className="title">MagIC Excel</div>
                   <div className="subtitle">Locations and Sites Data</div>
                 </IconButton>
-              </div>
-              <div className="ui four stackable cards" style={{marginTop:'-1.5em'}}>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom left"
-                  tooltip={'Click to download this example dataset before uploading it.'}
-                  onClick={this.downloadExampleMagICv3.bind(this)}
+                  className="borderless disabled card" href="" portal="MagIC" position="bottom right"
+                    tooltip={'Click to upload this example dataset into your private ' +
+                  'workspace. You can always delete it later.'}
                 >
-                  <div className="subtitle">Or Download the Example</div>
+                  <i className="icons">
+                    <i className="file excel outline icon"/>
+                  </i>
+                  <div className="title">Excel</div>
+                  <div className="subtitle">Measurement Data</div>
                 </IconButton>
-                <IconButton
-                  className="disabled borderless card" href="" portal="MagIC" position="bottom left"
-                  tooltip={'Click to download this example dataset before uploading it.'}
-                  onClick={this.uploadExampleMagICv2.bind(this)}
-                >
-                  <div className="subtitle">Or Download the Example</div>
-                </IconButton>
-                <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom right"
-                  tooltip={'Click to download this example dataset before uploading it.'}
-                  onClick={this.downloadExampleTabDelimitedSpecimens.bind(this)}
-                >
-                  <div className="subtitle">Or Download the Example</div>
-                </IconButton>
-                <IconButton
-                  className="disabled borderless card" href="" portal="MagIC" position="bottom right"
-                  tooltip={'Click to download this example dataset before uploading it.'}
-                >
-                  <div className="subtitle">Or Download the Example</div>
-                </IconButton>
-
               </div>
             </div>
             <div className="title"></div>
-            <div ref="parse step message" className="content parse-step-content">
+            <div ref="import step message" className="content import-step-content">
               <h3>Reading and parsing the {this.files.length === 1 ? ' file' : ' files'} for upload:</h3>
               <div ref="files" className="ui divided items">
-                {this.files.map((file, i) => {
-                  const fileIsDone = (file.parseProgress === 100 ||
-                    (file.readErrors && file.readErrors.length > 0) ||
-                    (file.parseErrors && file.parseErrors.length > 0));
+                {step === 2 ? this.files.map((file, i) => {
+                  const fileIsDone = (file.readErrors && file.readErrors.length > 0);
                   const fileHasErrors = ((file.readErrors && file.readErrors.length > 0) ||
-                    (file.parseErrors && file.parseErrors.length > 0));
-                  const fileHasWarnings = (file.parseWarnings && file.parseWarnings.length > 0);
+                    (file.importErrors && file.importErrors.length > 0));
                   return (
                     <div key={i} className="item" data-file={file.name}>
                       <div className="ui image">
                         <div className="icon loader wrapper">
-                          <div className={(fileIsDone ? '' : 'active ') + 'ui inverted dimmer'}>
+                          <div className={(this.state.isRead ? '' : 'active ') + 'ui inverted dimmer'}>
                             <div className="ui loader"></div>
                           </div>
                           <i className="file icons">
                             <i className="fitted file text outline icon"></i>
-                            {(fileHasErrors ? <i className="corner red warning circle icon"></i>
-                                : (fileHasWarnings ? <i className="corner yellow warning circle icon"></i>
-                                : undefined )
-                            )}
+                            {(fileHasErrors ? <i className="corner red warning circle icon"></i> : undefined )}
                           </i>
                         </div>
                       </div>
@@ -534,19 +559,15 @@ export default class extends React.Component {
                         <div className="ui header">
                           {file.name + ' '}
                           <div className="ui horizontal label">{filesize(file.size)}</div>
+                          <div className="ui horizontal label button" onClick={() => this.downloadFile(file)}>Download Original</div>
                           {(file.readErrors && file.readErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.readErrors.length).format('0,0') + ' Read Error' + (file.readErrors.length === 1 ? '' : 's')}
                             </div>
                             : undefined)}
-                          {(file.parseErrors && file.parseErrors.length > 0 ?
+                          {(file.importErrors && file.importErrors.length > 0 ?
                             <div className="ui horizontal red label">
-                              {numeral(file.parseErrors.length).format('0,0') + ' Parse Error' + (file.parseErrors.length === 1 ? '' : 's')}
-                            </div>
-                            : undefined)}
-                          {(file.parseWarnings && file.parseWarnings.length > 0 ?
-                            <div className="ui horizontal yellow label">
-                              {numeral(file.parseWarnings.length).format('0,0') + ' Parse Warning' + (file.parseWarnings.length === 1 ? '' : 's')}
+                              {numeral(file.importErrors.length).format('0,0') + ' Import Error' + (file.importErrors.length === 1 ? '' : 's')}
                             </div>
                             : undefined)}
                         </div>
@@ -574,11 +595,11 @@ export default class extends React.Component {
                             </table>
                             : undefined)}
                           <div className="ui labeled fluid action input">
-                            <div className="ui label">
+                            <div className="ui purple label">
                               Parse As
                             </div>
                             <div className="ui fluid selection dropdown format-dropdown">
-                              <input name="format" type="hidden"/>
+                              <input name="format" type="hidden" value={this.state.fileFormats[i]}/>
                               <i className="dropdown icon"></i>
                               <div className="text">MagIC Text File</div>
                               <div className="menu">
@@ -588,70 +609,66 @@ export default class extends React.Component {
                                 <div data-i={i} data-value="tsv" className="item">
                                   Tab Delimited Text File
                                 </div>
-                                <div data-i={i} data-value="csv" className="disabled item">
+                                <div data-i={i} data-value="csv" className="item">
                                   Comma Delimited Text File
                                 </div>
-                                <div data-i={i} data-value="fw" className="disabled item">
-                                  Fixed Width Text File
-                                </div>
-                                <div data-i={i} data-value="xls" className="disabled item">
+                                <div data-i={i} data-value="xls" className="item">
                                   Excel File
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className={
-                            (file.parseErrors && file.parseErrors.length ? 'error ' :
-                              (file.parseWarnings && file.parseWarnings.length ? 'warning ' : '')) +
-                            'ui tiny purple progress'
-                          }
-                               data-percent={file.parseProgress}>
-                            <div className="bar"></div>
-                            <div className="label">Parse</div>
-                          </div>
                           <div>
-                            {(file.format === 'magic' ?
-                              ((file.parseErrors && file.parseErrors.length > 0) ||
-                                (file.parseWarnings && file.parseWarnings.length > 0) ?
-                                <table className="ui compact table">
-                                  <tbody>
-                                    {file.parseErrors.map((error, j) => {
-                                      return (
-                                        <tr key={j} className="error">
-                                          <td>Line {error.lineNumber}</td>
-                                          <td>{error.message}</td>
-                                        </tr>
-                                      );
-                                    })}
-                                    {file.parseWarnings.map((warning, j) => {
-                                      return (
-                                        <tr key={j} className="warning">
-                                          <td>Line {warning.lineNumber}</td>
-                                          <td>{warning.message}</td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                              : undefined)
-                            :
-                              <DataImporter
-                                portal="MagIC"
-                                data={file.text.split('\n').map((line, i) => line.split('\t'))}
-                                model={models[_.last(versions)]}
-                              />
+                            {(this.state.fileFormats[i] === 'magic' && this.files[i].text ?
+                              this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
+                                let tableName = table.match(/^tab( delimited)?\t(.+)\n/);
+                                tableName = (tableName && table.length >= 3 ? tableName[2] : '');
+                                let data = table.split('\n').map((line, j) => line.split('\t'));
+                                return (
+                                  <div key={j}>
+                                    <div className="ui divider"></div>
+                                    {this.renderDataImporter(i, j, data, tableName, "2")}
+                                  </div>
+                                );
+                              })
+                              : undefined)}
+                            {(this.state.fileFormats[i] === 'tsv' && this.files[i].text ?
+                              <div>
+                                <div className="ui divider"></div>
+                                {this.renderDataImporter(i, 1, this.files[i].text.split('\n').map((line, j) => line.split('\t')))}
+                              </div>
+                              : undefined
+                            )}
+                            {(this.state.fileFormats[i] === 'csv' && this.files[i].text ?
+                              <div>
+                                <div className="ui divider"></div>
+                                {this.renderDataImporter(i, 1, this.files[i].text.split('\n').map((line, j) => line.split(',')))}
+                              </div>
+                              : undefined
+                            )}
+                            {(this.state.fileFormats[i] === 'xls' && this.files[i].workbook ?
+                              this.files[i].workbook.SheetNames.map((tableName, j) => {
+                                let data = this.xlsSheetToArray(this.files[i].workbook.Sheets[tableName]);
+                                return (
+                                  <div key={j}>
+                                    <div className="ui divider"></div>
+                                    {this.renderDataImporter(i, j, data, tableName)}
+                                  </div>
+                                );
+                              })
+                              : undefined
                             )}
                           </div>
                         </div>
                       </div>
                     </div>
                   );
-                })}
+                }) : undefined}
               </div>
             </div>
             <div className="title"></div>
             <div ref="upload step message" className="content upload-step-content">
-              <div className="ui items">
+              {step === 3 ? <div className="ui items">
                 <div className="item">
                   <div className="ui image">
                     <div className="icon loader wrapper">
@@ -700,6 +717,35 @@ export default class extends React.Component {
                       </div>
                     </div>
                     <br/>
+                    <div>
+                      <div className={"ui labeled fluid input" + (this.state._name.length > 0 ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
+                        <div className={"ui label"}>
+                          Publication DOI
+                        </div>
+                        <input ref="doi" type="text" default={"Optional until activation"}
+                               onChange={(e) => {
+                                 this.setState({_doi: this.refs['doi'].value})}}/>
+                      </div>
+                    </div>
+                    <br/>
+                    <div>
+                      <div className={"ui labeled fluid input"}>
+                        <div className={"ui label"}>
+                          Persistent URL
+                        </div>
+                        <input ref="url" type="text" readOnly={true} value={"https://earthref.org/MagIC/11753"}/>
+                      </div>
+                    </div>
+                    <br/>
+                    <div>
+                      <div className={"ui labeled fluid input"}>
+                        <div className={"ui label"}>
+                          EarthRef Data DOI
+                        </div>
+                        <input ref="data doi" type="text" readOnly={true} value={"10.7288/V4/MagIC/11753"}/>
+                      </div>
+                    </div>
+                    <br/>
                     {(this.state.uploaded ?
                       <a className="ui fluid green button"
                          href="">
@@ -713,7 +759,7 @@ export default class extends React.Component {
                     )}
                   </div>
                 </div>
-              </div>
+              </div> : undefined}
             </div>
           </div>
         </div>
@@ -734,28 +780,16 @@ export default class extends React.Component {
             </div>
           </div>
           : undefined)}
-        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors > 0 ?
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalImportErrors > 0 ?
           <div className="ui bottom attached icon error message">
             <i className="warning sign icon"/>
             <div className="content">
-              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be parsed.
+              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be imported.
               Please address the errors and/or change the <b>Parse As</b> format.
             </div>
           </div>
           : undefined)}
-        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors == 0 && this.state.totalParseWarnings > 0 ?
-          <div className="ui bottom attached icon error message">
-            <i className="warning sign icon"></i>
-            <div className="content">
-              The selected {this.files.length === 1 ? ' file was' : ' files were'} parsed with warnings.
-              Please check the warnings before continuing.
-            </div>
-            <div className="ui right floated purple button" onClick={this.reviewUpload.bind(this)}>
-              Upload
-            </div>
-          </div>
-          : undefined)}
-        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors == 0 && this.state.totalParseWarnings == 0 ?
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalImportErrors == 0 ?
           <div className="ui bottom attached icon success message">
             <i className="check circle icon"></i>
             <div className="content">
@@ -1426,85 +1460,85 @@ LP-PI-TRM`,
 22\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.072\t204.44\t13210\t570\tYears BP\t100\t357.50\t54.6\t1.4\t916\t11\tn\tp\t73.8\t197.20\t6.93E+22\t4\t8.51E+22\t4\t3.79E-05\t3.40E-06\t22\t:PINT03:
 `,
   'Tab Delimited File with Specimens Data':
-`specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies
-1B475-2\t1B475-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B487-3\t1B487-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B704-1\t1B704-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B708-3\t1B708-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B710-1\t1B710-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B714-3\t1B714-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B730-1\t1B730-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B732-2\t1B732-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B733-1\t1B733-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B734-2\t1B734-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B755-1\t1B755-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-1B757-3\t1B757-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B416-4\t8B416-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B417-1\t8B417-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B437-5\t8B437-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B439-2\t8B439-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B440-2\t8B440-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B625-1\t8B625-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B631-1\t8B631-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B794-2\t8B794-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B829-2\t8B829-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B833-4\t8B833-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B835-2\t8B835-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B836-3\t8B836-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B889-4\t8B889-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B891-4\t8B891-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B896-2\t8B896-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B897-4\t8B897-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B906-1\t8B906-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B907-2\t8B907-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-8B910-3\t8B910-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B039-2\t9B039-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B040-1\t9B040-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B041-3\t9B041-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B042-3\t9B042-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B046-3\t9B046-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B109-2\t9B109-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B110-4\t9B110-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B113-4\t9B113-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B117-2\t9B117-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B131-5\t9B131-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B433-5\t9B433-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B437-5\t9B437-5\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B445-3\t9B445-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B448-4\t9B448-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B449-2\t9B449-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B451-2\t9B451-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B454-4\t9B454-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B483-2\t9B483-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B486-4\t9B486-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B489-2\t9B489-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B490-3\t9B490-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B492-4\t9B492-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B659-2\t9B659-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B660-4\t9B660-4\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B666-3\t9B666-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B669-2\t9B669-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B670-2\t9B670-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B902-3\t9B902-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B904-2\t9B904-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B905-2\t9B905-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B937-2\t9B937-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B944-1\t9B944-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B945-3\t9B945-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B947-2\t9B947-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B948-1\t9B948-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B949-2\t9B949-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B950-3\t9B950-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B953-3\t9B953-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B955-2\t9B955-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B959-3\t9B959-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B961-2\t9B961-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B962-3\t9B962-3\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B964-1\t9B964-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B965-2\t9B965-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B975-2\t9B975-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B976-1\t9B976-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B977-1\t9B977-1\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:
-9B984-2\t9B984-2\tg\t:LP-PI-ALT-PTRM:LP-PI-TRM:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:`,
+`specimen,sample,result_quality,method_codes,citations,geologic_classes,geologic_types,lithologies
+1B475-2,1B475-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B487-3,1B487-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B704-1,1B704-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B708-3,1B708-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B710-1,1B710-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B714-3,1B714-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B730-1,1B730-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B732-2,1B732-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B733-1,1B733-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B734-2,1B734-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B755-1,1B755-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+1B757-3,1B757-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B416-4,8B416-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B417-1,8B417-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B437-5,8B437-5,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B439-2,8B439-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B440-2,8B440-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B625-1,8B625-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B631-1,8B631-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B794-2,8B794-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B829-2,8B829-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B833-4,8B833-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B835-2,8B835-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B836-3,8B836-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B889-4,8B889-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B891-4,8B891-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B896-2,8B896-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B897-4,8B897-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B906-1,8B906-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B907-2,8B907-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+8B910-3,8B910-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B039-2,9B039-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B040-1,9B040-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B041-3,9B041-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B042-3,9B042-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B046-3,9B046-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B109-2,9B109-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B110-4,9B110-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B113-4,9B113-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B117-2,9B117-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B131-5,9B131-5,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B433-5,9B433-5,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B437-5,9B437-5,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B445-3,9B445-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B448-4,9B448-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B449-2,9B449-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B451-2,9B451-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B454-4,9B454-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B483-2,9B483-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B486-4,9B486-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B489-2,9B489-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B490-3,9B490-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B492-4,9B492-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B659-2,9B659-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B660-4,9B660-4,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B666-3,9B666-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B669-2,9B669-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B670-2,9B670-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B902-3,9B902-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B904-2,9B904-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B905-2,9B905-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B937-2,9B937-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B944-1,9B944-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B945-3,9B945-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B947-2,9B947-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B948-1,9B948-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B949-2,9B949-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B950-3,9B950-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B953-3,9B953-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B955-2,9B955-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B959-3,9B959-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B961-2,9B961-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B962-3,9B962-3,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B964-1,9B964-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B965-2,9B965-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B975-2,9B975-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B976-1,9B976-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B977-1,9B977-1,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:
+9B984-2,9B984-2,g,:LP-PI-ALT-PTRM:LP-PI-TRM:,:This study:,:Extrusive:Igneous:,:Lava Flow:,:Not Specified:`,
   'Excel File': ``
 };

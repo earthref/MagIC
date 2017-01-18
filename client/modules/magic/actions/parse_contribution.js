@@ -14,12 +14,6 @@ export default class extends Runner {
     this.json = {};
   }
 
-  resetProgress() {
-    super.reset();
-    this.lineNumber = 0;
-    this.progress = 0;
-  }
-
   parsePromise({text = undefined, nLinesBetweenProgressEvents = 1000, onProgress = undefined, format = 'magic'} = {}) {
 
     // Check for a valid input.
@@ -37,6 +31,8 @@ export default class extends Runner {
     this.columns = [];
     this.skipTable = false;
     this.tableLineNumber = 0;
+    this.lineNumber = 0;
+    this.progress = 0;
 
     return new Promise.each(
       _.chunk(text.match(/[^\r\n]+/g), nLinesBetweenProgressEvents),
@@ -94,7 +90,7 @@ export default class extends Runner {
 
       // Check the column delimiter is "tab".
       if (!tableDefinition[0].match(/^tab( delimited)?(\s|$)/i)) {
-        this._appendError(`Unrecognized column delimiter "${tableDefinition[0]}" on line ${this.lineNumber}. Expected "tab" or "tab delimited".`);
+        this._appendError(`Invalid table definition column delimiter "${tableDefinition[0]}" on line ${this.lineNumber}. Expected "tab" or "tab delimited".`);
         this.skipTable = true;
       }
 
@@ -139,7 +135,7 @@ export default class extends Runner {
 
       // Check for duplicate column names.
       if (this.columns.length !== _.uniq(this.columns).length) {
-        this._appendError(`Found duplicate column names on line ${this.lineNumber}: ${line}`);
+        this._appendError(`Found duplicate column names on line ${this.lineNumber}.`);
         this.skipTable = true;
       }
 
@@ -158,7 +154,7 @@ export default class extends Runner {
 
       // Check there are enough column names.
       if (values.length > this.columns.length) {
-        this._appendError(`More values found than columns on line ${this.lineNumber}.`);
+        this._appendError(`More values found than columns on line ${this.lineNumber}: ${line}`);
         this.skipTable = true;
       }
 

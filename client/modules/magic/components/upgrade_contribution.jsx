@@ -138,7 +138,6 @@ export default class extends React.Component {
     // Parse sequentially through the files.
     Promise.each(this.files, (file, i) => {
       return new Promise((resolve) => {
-        this.parser.resetProgress();
         this.parser.parsePromise({
           text: file.text,
           onProgress: (percent) => {
@@ -231,8 +230,12 @@ export default class extends React.Component {
 
   upload() {
     const exporter = new ExportContribution({});
-    localStorage.setItem('Text to Upload', exporter.toText(this.upgrader.json));
-    location.href = '/MagIC/upload';
+    try {
+      localStorage.setItem('Text to Upload', exporter.toText(this.upgrader.json));
+      location.href = '/MagIC/upload';
+    } catch(e) {
+      alert("This contribution is too large to pass to the Upload tool. Please save the contribution as a text file and select it in the Upload tool.");
+    }
   }
 
   render() {

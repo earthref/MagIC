@@ -56,7 +56,7 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui top fixed secondary pointing menu top-menu">
-          <a className="item sidebar-button" onClick={this.showSidebar.bind(this)}>
+          <a className="item sidebar-button" onClick={this.showSidebar.bind(this)} style={(fullWidth ? {} : {position: 'fixed'})}>
             <i className="sidebar icon"/>
           </a>
           <div className={'ui' + (fullWidth ? '' : ' container')}>
