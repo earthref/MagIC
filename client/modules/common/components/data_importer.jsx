@@ -69,7 +69,8 @@ export default class DataImporter extends React.Component {
 
     // Update the input column names list.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
-    const nColumns = _.reduce(newState.in, (maxColumns, row) => Math.max(row.length, maxColumns), 0);
+    const nColumns = _.reduce(newState.in, (maxColumns, row, rowIdx) =>
+      (rowIdx >= newState.nHeaderRowsInt ? Math.max(row.length, maxColumns) : maxColumns), 0);
     newState.inColumnNames = _.map(_.range(nColumns), (x) => 'Column ' + (x+1));
     if (newState.nHeaderRows !== '' && newState.errors.nHeaderRows.length === 0) {
       const columnNames = newState.in[newState.nHeaderRows - 1].map((x, i) =>
@@ -81,6 +82,8 @@ export default class DataImporter extends React.Component {
       );
     }
 
+    console.log(newState.tableName, newState.in, newState.inColumnNames);
+
     // Update the output column names list.
     newState.errors.columnNames = [];
     newState.outColumnNames = _.concat(
@@ -88,7 +91,6 @@ export default class DataImporter extends React.Component {
       _.slice(Array(newState.inColumnNames.length), newState.outColumnNames.length)
     );
     newState.outColumnNameCounts = _.countBy(newState.outColumnNames);
-    console.log('newState.outColumnNameCounts', newState.outColumnNameCounts);
     newState.outColumnNames = newState.outColumnNames.map((outColumnName, i) => {
 
       // If the table name is not selected, don't add errors and leave the column name selections intact.
