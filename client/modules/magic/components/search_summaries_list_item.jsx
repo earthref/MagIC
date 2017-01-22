@@ -180,8 +180,8 @@ export default class extends React.Component {
                 </span>
                 <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
                       dangerouslySetInnerHTML={{
-                        __html: (c.TITLE ? c.CITATION + ' v. ' + c.VERSION + ' ' : '') +
-                                 c.REFERENCE_HTML.replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, '')
+                        __html: (c.TITLE && c.CITATION && c.VERSION ? c.CITATION + ' v. ' + c.VERSION + ' ' : '') +
+                        (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, '')
                       }}>
                 </span>
                 <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
@@ -190,7 +190,7 @@ export default class extends React.Component {
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
               <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className="ui basic tiny fluid compact icon header button" style={{padding:'1.25em 0', height:'100px'}}
+                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
                    href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
                    (c.FOLDER === 'zmab' ?
                        `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
@@ -202,11 +202,25 @@ export default class extends React.Component {
                   <i className="ui file text outline icon"/> Download
                 </a>
               </div>
+              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                   href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                   (c.FOLDER === 'zmab' ?
+                       `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
+                       :
+                       `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
+                   )
+                   }
+                >
+                  <i className="ui file excel outline icon"/> Download
+                </a>
+              </div>
               <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
                 {(c.N_SITES        ? <a onClick={this.showData.bind(this)}>{c.N_SITES        + ' Site'        + (c.N_SITES        > 1 ? 's' : '')}<br/></a> : undefined)}
                 {(c.N_SAMPLES      ? <a onClick={this.showData.bind(this)}>{c.N_SAMPLES      + ' Sample'      + (c.N_SAMPLES      > 1 ? 's' : '')}<br/></a> : undefined)}
                 {(c.N_SPECIMENS    ? <a onClick={this.showData.bind(this)}>{c.N_SPECIMENS    + ' Specimen'    + (c.N_SPECIMENS    > 1 ? 's' : '')}<br/></a> : undefined)}
+                {(c.N_EXPERIMENTS  ? <a onClick={this.showData.bind(this)}>{c.N_EXPERIMENTS  + ' Experiment'  + (c.N_EXPERIMENTS  > 1 ? 's' : '')}<br/></a> : undefined)}
                 {(c.N_MEASUREMENTS ? <a onClick={this.showData.bind(this)}>{c.N_MEASUREMENTS + ' Measurement' + (c.N_MEASUREMENTS > 1 ? 's' : '')}     </a> : undefined)}
               </div>
               <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
@@ -245,23 +259,23 @@ export default class extends React.Component {
                 {(c.METHOD_CODES || c.MAGIC_METHOD_CODES ?
                   <span><b>Method Codes:</b><br/>
                     <span dangerouslySetInnerHTML={{__html:
-                    (c.METHOD_CODES || c.MAGIC_METHOD_CODES).replace(/(^:|:$)/g, '').split(':').slice(0,5).join('<br/>') +
-                    ((c.METHOD_CODES || c.MAGIC_METHOD_CODES).replace(/(^:|:$)/g, '').split(':').length > 5 ? ' ...' : '')}} />
+                    (c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').slice(0,5).join('<br/>') +
+                    ((c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').length > 5 ? ' ...' : '')}} />
                   </span> : undefined)}
               </div>
               <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {(c.ER_CITATION_NAMES && _.without(c.ER_CITATION_NAMES.replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 0 ?
                   <span><b>Citations:</b><br/>
                       <span dangerouslySetInnerHTML={{__html:
-                      _.without(c.ER_CITATION_NAMES.replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
-                      (_.without(c.ER_CITATION_NAMES.replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
+                      _.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
+                      (_.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
                     </span> : undefined)}
               </div>
             </div>
           </div>
         </div>
         <div className="content" style={{fontSize:'small'}}>
-          <div dangerouslySetInnerHTML={{__html: c.REFERENCE_HTML.replace(/<u> INCOMPLETE REFERENCE !<\/u>/g, '')}} />
+          <div dangerouslySetInnerHTML={{__html: (c.REFERENCE_HTML || '').replace(/<u> INCOMPLETE REFERENCE !<\/u>/g, '')}} />
           <div dangerouslySetInnerHTML={{__html: c.ABSTRACT}} />
           {c.REFERENCE_KEYWORDS ?
             <div dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + c.REFERENCE_KEYWORDS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />

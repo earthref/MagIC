@@ -10,6 +10,7 @@ import {default as versions} from '../../../../lib/modules/magic/magic_versions'
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import ParseContribution from '../actions/parse_contribution';
 import UpgradeContribution from '../actions/upgrade_contribution';
+import SummarizeContribution from '../actions/summarize_contribution';
 import ValidateContribution from '../actions/validate_contribution';
 import ExportContribution from '../actions/export_contribution';
 import IconButton from '../../common/components/icon_button.jsx';
@@ -21,6 +22,7 @@ export default class extends React.Component {
     this.files = [];
     this.parser = new ParseContribution({});
     this.upgrader = new UpgradeContribution({});
+    this.summarizer = new SummarizeContribution({});
     this.initialState = {
       processingStep: 1,
       visibleStep: 1,
@@ -193,6 +195,7 @@ export default class extends React.Component {
         this.setState({upgradeProgress: percent});
       }
     }).then(() => {
+      this.summary = this.summarizer.summarize(this.upgrader.json);
       this.setState({
         isUpgraded: true
       });
@@ -202,7 +205,7 @@ export default class extends React.Component {
 
   saveText() {
     const exporter = new ExportContribution({});
-    console.log(this.upgrader.json);
+    //console.log(this.upgrader.json);
     let blob = new Blob([exporter.toText(this.upgrader.json)], {type: "text/plain;charset=utf-8"});
     saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.txt');
   }
@@ -235,6 +238,49 @@ export default class extends React.Component {
       location.href = '/MagIC/upload';
     } catch(e) {
       alert("This contribution is too large to pass to the Upload tool. Please save the contribution as a text file and select it in the Upload tool.");
+    }
+  }
+
+  renderAgesDetails() {
+    if ((this.upgrader.json && this.upgrader.json.ages) || (this.summary && this.summary.ages)) {
+      const nRows = (this.upgrader.json && this.upgrader.json.ages && this.upgrader.json.ages.length || 0);
+      let nAges = [];
+      if (this.summary && this.summary.ages && this.summary.ages.N_LOCATION_AGES)
+        nAges.push({
+          label: 'Location Age' + (this.summary.ages.N_LOCATION_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_LOCATION_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SITE_AGES)
+        nAges.push({
+          label: 'Site Age' + (this.summary.ages.N_SITE_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SITE_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SAMPLE_AGES)
+        nAges.push({
+          label: 'Sample Age' + (this.summary.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SAMPLE_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SPECIMEN_AGES)
+        nAges.push({
+          label: 'Specimen Age' + (this.summary.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SPECIMEN_AGES
+        });
+      if (nRows > 0 || nAges.length > 0) return (
+        <tbody>
+        <tr>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}} className="top aligned" rowSpan={nAges.length || 1}><h4>Ages</h4></td>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}} className="top aligned" rowSpan={nAges.length || 1}>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}} className="right aligned">{nAges.length > 0 ? numeral(nAges[0].n).format('0,0') : undefined}</td>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}}>{nAges.length > 0 ? nAges[0].label : undefined}</td>
+        </tr>
+        {nAges.slice(1).map((nAge, i) =>
+          <tr key={i}>
+            <td className="right aligned" style={{borderLeft:'1px solid rgba(0, 0, 0, 0.1)'}}>{numeral(nAge.n).format('0,0')}</td>
+            <td>{nAge.label}</td>
+          </tr>
+        )}
+        </tbody>
+      );
     }
   }
 
@@ -647,7 +693,7 @@ export default class extends React.Component {
                           <thead>
                           <tr>
                             <th>{this.state.fromVersion} Table</th>
-                            <th>Rows</th>
+                            <th>N Rows</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -675,7 +721,8 @@ export default class extends React.Component {
                           <thead>
                           <tr>
                             <th>{toVersion} Table</th>
-                            <th>Rows</th>
+                            <th>N Rows</th>
+                            <th colSpan={2}>Assignment</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -685,14 +732,27 @@ export default class extends React.Component {
                             let json = this.upgrader.json;
                             const tableName = models[toVersion].tables[t].label;
                             const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
-                            return (nRows > 0 ?
+                            const n = (this.summary && this.summary[t] && _.keys(this.summary[t]).length || 0);
+                            const nExperiments = (t === 'measurements' && this.summary && this.summary.contribution && this.summary.contribution.N_EXPERIMENTS || 0);
+                            return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
                               <tr key={i}>
                                 <td><h4>{tableName}</h4></td>
-                                <td>{numeral(nRows).format('0,0')}</td>
+                                <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+                                {t === 'measurements' ?
+                                  <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
+                                :
+                                  <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
+                                }
+                                {t === 'measurements' ?
+                                  <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
+                                :
+                                  <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
+                                }
                               </tr>
                             : undefined);
-                          })}
+                            })}
                           </tbody>
+                          {this.renderAgesDetails()}
                         </table>
                       </div>
                     </div>

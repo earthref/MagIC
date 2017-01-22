@@ -14,7 +14,7 @@ const esClient = new elasticsearch.Client({
 export default function () {
 
   Meteor.methods({
-    'insertContribution': function (contributor, name, c) {
+    'insertContribution': function (contributor, user, mailid, name, c, s) {
       //check(id, Integer);
       //check(name, String);
       //check(data, Object);
@@ -27,31 +27,49 @@ export default function () {
       } else {
         c.contribution = [{}];
       }
-      c.contribution[0].contributor = contributor;
+      c.contribution[0].contributor = user;
       c._inserted = new Date();
       c._name = name;
+
+      s = s || {};
+      s.contribution = s.contribution || {};
+      s.contribution.TITLE = c._name;
+      s.contribution.CONTRIBUTOR = contributor;
+      s.contribution.CONTRIBUTOR_ID = mailid;
+      s.contribution.INSERTED = c._inserted;
+      c._summary = s;
 
       console.log('insertContribution', c.contribution);
       Collections['magic.private.contributions'].insert(c);
     },
-    'updateContribution': function (id, contributor, name, c) {
+    'updateContribution': function (id, contributor, user, mailid, name, c, s) {
       //check(id, Integer);
       //check(name, String);
       //check(data, Object);
       console.log('updateContribution', id, name, c.contribution);
-      let c_old = Collections['magic.private.contributions'].findOne(id);
-      c = _.merge({}, c_old, c);
-      if (c.contribution) {
-        delete c.contribution.version;
-        delete c.contribution.id;
+      //let c_old = Collections['magic.private.contributions'].findOne(id);
+      //c = _.merge({}, c_old, c);
+      if (c.contribution && c.contribution.length > 0) {
+        c.contribution = c.contribution.splice(0,1);
+        delete c.contribution[0].version;
+        delete c.contribution[0].id;
         delete c.contribution[0].magic_version;
         delete c.contribution[0].timestamp;
       } else {
-        c.contribution = {};
+        c.contribution = [{}];
       }
-      c.contribution.contributor = contributor;
-      c.contribution.timestamp = (new Date()).toISOString();
+      c.contribution[0].contributor = user;
+      c._inserted = new Date();
       c._name = name;
+
+      s = s || {};
+      s.contribution = s.contribution || {};
+      s.contribution.TITLE = c._name;
+      s.contribution.CONTRIBUTOR = contributor;
+      s.contribution.CONTRIBUTOR_ID = mailid;
+      s.contribution.INSERTED = c._inserted;
+      c._summary = s;
+
       Collections['magic.private.contributions'].update(id, c);
     }
   });

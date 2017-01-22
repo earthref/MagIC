@@ -250,10 +250,10 @@ export default class extends React.Component {
           )}
           <div className="right menu">
             <div className="item" style={{paddingRight: 0}}>
-              <div className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
+              <a className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}} href="/MagIC/upload">
                 <i className="plus icon"/>
                 Upload Data
-              </div>
+              </a>
             </div>
           </div>
         </div>

@@ -13,6 +13,7 @@ import XLSX from 'xlsx-style';
 import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
+import SummarizeContribution from '../actions/summarize_contribution';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
@@ -28,15 +29,19 @@ export default class MagICUploadContribution extends React.Component {
       totalReadErrors: 0,
       isRead: false,
       fileFormats: [],
+      totalParseErrors: 0,
       importProgressTaps: 0,
       totalImportErrors: 0,
       _id: '',
       _name: 'My Contribution',
-      _contributor: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
+      _contributor: Cookies.get('name'),
+      _userid: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
+      _mailid: Cookies.get('mail_id'),
       uploading: false,
       uploaded: false,
       uploadError: undefined
     };
+    this.summarizer = new SummarizeContribution({});
     this.state = this.initialState;
     if (Cookies.get('user_id'))
       Tracker.autorun(function () {
@@ -70,15 +75,9 @@ export default class MagICUploadContribution extends React.Component {
         totalReadErrors: 0,
         processingStep: 2,
         visibleStep: 2
-      });
+      }, () => this.parse(0));
     }
     $(this.refs['accordion']).accordion({on: null, collapsible: false});
-    $(this.refs['private contributions']).dropdown({
-      onChange: (value, text, $choice) => {
-        console.log('private contribution as changed', value, text, $choice);
-        this.setState({_id: value});
-      }
-    });
   }
 
   componentDidUpdate() {
@@ -92,12 +91,16 @@ export default class MagICUploadContribution extends React.Component {
         let i = $choice.data('i');
         let fileFormats = this.state.fileFormats;
         fileFormats[i] = value;
-        this.setState({fileFormats: fileFormats});
-        //if (value === 'xls' && this.files[$choice.data('i')].workbook === undefined)
-        //  this.files
+        this.setState({fileFormats: fileFormats}, () => this.parse(i));
       }
-    });//.dropdown('set selected', 'magic');
+    });
     $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
+    $(this.refs['private contributions']).not('.ui-dropdown').addClass('ui-dropdown').dropdown({
+      onChange: (value, text, $choice) => {
+        console.log('private contribution as changed', value, text, $choice);
+        this.setState({_id: value});
+      }
+    });
     $(this.refs['private contributions']).dropdown('refresh');
   }
 
@@ -106,7 +109,47 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   reviewUpload() {
-    this.setState({visibleStep: 3});
+    if (!this.contribution) {
+      this.contribution = {};
+      for (let file of this.files) {
+        if (file.imported) file.imported.map((data) => {
+          if (data.table && data.columns && data.rows) {
+            if (data.table === 'measurements') {
+              /* this.contribution.experiments = {};
+              let experimentColumnIdx = data.columns.indexOf('experiment');
+              data.rows.map((row, i) => {
+                this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
+                  columns: data.columns,
+                  rows: []
+                };
+                this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
+              }); */
+              if (this.contribution.measurements !== undefined) {
+                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
+              } else {
+                this.contribution.measurements = {
+                  columns: data.columns,
+                  rows: data.rows
+                }
+              }
+            } else {
+              this.contribution[data.table] = this.contribution[data.table] || [];
+              data.rows.map((row, i) =>
+                this.contribution[data.table].push(
+                  _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
+                )
+              );
+            }
+          }
+        });
+      }
+      this.summary = this.summarizer.summarize(this.contribution);
+    }
+    let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
+    this.setState({
+      totalParseErrors: totalParseErrors,
+      visibleStep: (totalParseErrors > 0 ? 2 : 3)
+    });
   }
 
   readFiles(files) {
@@ -140,7 +183,7 @@ export default class MagICUploadContribution extends React.Component {
           if (this.files[i].format === 'xls') {
             this.files[i].workbook = XLSX.read(e.target.result, {type: 'binary'});
           } else this.files[i].text = e.target.result;
-          this.setState({readProgressTaps: this.state.readProgressTaps + 1});
+          this.setState({readProgressTaps: this.state.readProgressTaps + 1}, () => this.parse(i));
           resolve();
         };
         this.files[i].fileReader.onerror = e => {
@@ -163,7 +206,57 @@ export default class MagICUploadContribution extends React.Component {
       });
     });
   }
-  
+
+  parse(i) {
+    this.contribution = undefined;
+    this.files[i].parseErrors = [];
+
+    if (this.state.fileFormats[i] === 'magic') {
+      if (this.files[i].text) {
+        this.files[i].tableNames = [];
+        this.files[i].data = [];
+        this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
+          let tableName = table.match(/^tab( delimited)?\t(.+)\n/);
+          this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
+          this.files[i].data[j] = table.split('\n').map((line, j) => line.split('\t'));
+        });
+      } else {
+        this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
+      }
+    }
+    if (this.state.fileFormats[i] === 'tsv') {
+      if (this.files[i].text) {
+        this.files[i].data = table.split('\n').map((line, j) => line.split('\t'));
+      } else {
+        this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
+      }
+    }
+    if (this.state.fileFormats[i] === 'csv') {
+      if (this.files[i].text) {
+        this.files[i].data = table.split('\n').map((line, j) => line.split(','));
+      } else {
+        this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
+      }
+    }
+    if (this.state.fileFormats[i] === 'xls') {
+      if (this.files[i].workbook) {
+        this.files[i].tableNames = [];
+        this.files[i].data = [];
+        this.files[i].workbook.SheetNames.map((tableName, j) => {
+          this.files[i].tableNames[j] = tableName;
+          this.files[i].data[j] = this.xlsSheetToArray(this.files[i].workbook.Sheets[tableName]);
+        });
+      } else {
+        this.files[i].parseErrors.push("Failed to parse this file as an Excel File.")
+      }
+    }
+
+    this.setState({
+      totalParseErrors: _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0)
+    });
+
+  }
+
   xlsSheetToArray(sheet) {
     let data = [];
     let nSkipRows = 0;
@@ -202,50 +295,32 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   upload() {
-
-    let contribution = {};
-    for (let file of this.files) {
-      if (file.imported) file.imported.map((data) => {
-        if (data.table && data.columns && data.rows) {
-          if (data.table === 'measurements') {
-            //contribution[data.table] = {
-            //  columns: data.columns,
-            //  rows: data.rows
-            //};
-          } else {
-            contribution[data.table] = contribution[data.table] || [];
-            data.rows.map((row, i) =>
-              contribution[data.table].push(
-                _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
-              )
-            );
+    if (!this.contribution) {
+      this.setState({
+        uploadError: "The contribution could not be prepared for upload.",
+        uploading: false
+      });
+  } else {
+      if (this.state._id !== '')
+        Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
+          (error) => {
+            console.log('updated contribution', this.state._id, error);
+            if (error) this.setState({uploadError: error, uploading: false});
+            else       this.setState({uploaded: true, uploading: false});
           }
-        }
+        );
+      else
+        Meteor.call('insertContribution', this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
+          (error) => {
+            console.log('inserted contribution', this.state._id, error);
+            if (error) this.setState({uploadError: error, uploading: false});
+            else       this.setState({uploaded: true, uploading: false});
+          }
+        );
+      this.setState({
+        uploading: true
       });
     }
-
-    this.setState({uploading: true});
-    if (this.state._id !== '')
-      Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._name, contribution,
-        (error) => {
-          console.log('updated contribution', this.state._id, error);
-          if (error) this.setState({uploadError: error, uploading: false});
-          else       this.setState({uploaded: true, uploading: false});
-        }
-      );
-    else
-      Meteor.call('insertContribution', this.state._contributor, this.state._name, contribution,
-        (error) => {
-          console.log('inserted contribution', this.state._id, error);
-          if (error) this.setState({uploadError: error, uploading: false});
-          else       this.setState({uploaded: true, uploading: false});
-        }
-      );
-
-  }
-
-  saveContributionFile() {
-    console.log('Saving files to ...');
   }
 
   uploadExampleMagICv3() {
@@ -274,7 +349,8 @@ export default class MagICUploadContribution extends React.Component {
       size: examples[name].length,
       readProgress: 100,
       readErrors: [],
-      text: examples[name]
+      text: examples[name],
+      format: 'magic'
     }];
     this.setState({
       processingStep: 2,
@@ -282,7 +358,7 @@ export default class MagICUploadContribution extends React.Component {
       isRead: true,
       totalReadErrors: 0,
       fileFormats: ['magic']
-    });
+    }, () => this.parse(0));
   }
 
   downloadFile(file) {
@@ -326,10 +402,80 @@ export default class MagICUploadContribution extends React.Component {
       />
     );
   }
-  
+
+  renderParseErrors(i) {
+    const nErrors = this.files[i].parseErrors.length;
+    return (nErrors > 0 ?
+        <table className="ui compact small inverted red table">
+          <tbody>
+          <tr>
+            <td><i className="warning sign icon"></i><b>
+              {nErrors + ' Parse Error' + (nErrors > 1 ? 's' : '')}
+            </b></td>
+          </tr>
+          {this.files[i].parseErrors.map((error, i) =>
+            <tr className="error" key={i}>
+              <td>{error}</td>
+            </tr>
+          )}
+          </tbody>
+        </table>
+        : undefined
+    );
+  }
+
+  renderAgesDetails() {
+    if ((this.contribution && this.contribution.ages) || (this.summary && this.summary.ages)) {
+      const nRows = (this.contribution && this.contribution.ages && this.contribution.ages.length || 0);
+      let nAges = [];
+      if (this.summary && this.summary.ages && this.summary.ages.N_LOCATION_AGES)
+        nAges.push({
+          label: 'Location Age' + (this.summary.ages.N_LOCATION_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_LOCATION_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SITE_AGES)
+        nAges.push({
+          label: 'Site Age' + (this.summary.ages.N_SITE_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SITE_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SAMPLE_AGES)
+        nAges.push({
+          label: 'Sample Age' + (this.summary.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SAMPLE_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SPECIMEN_AGES)
+        nAges.push({
+          label: 'Specimen Age' + (this.summary.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SPECIMEN_AGES
+        });
+      if (nRows > 0 || nAges.length > 0) return (
+        <tbody>
+        <tr>
+          <td style={{borderTop: '1px solid rgba(0, 0, 0, 0.1)'}} className="top aligned" rowSpan={nAges.length || 1}>
+            <h4>Ages</h4></td>
+          <td style={{borderTop: '1px solid rgba(0, 0, 0, 0.1)'}} className="top aligned"
+              rowSpan={nAges.length || 1}>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+          <td style={{borderTop: '1px solid rgba(0, 0, 0, 0.1)'}}
+              className="right aligned">{nAges.length > 0 ? numeral(nAges[0].n).format('0,0') : undefined}</td>
+          <td style={{borderTop: '1px solid rgba(0, 0, 0, 0.1)'}}>{nAges.length > 0 ? nAges[0].label : undefined}</td>
+        </tr>
+        {nAges.slice(1).map((nAge, i) =>
+          <tr key={i}>
+            <td className="right aligned"
+                style={{borderLeft: '1px solid rgba(0, 0, 0, 0.1)'}}>{numeral(nAge.n).format('0,0')}</td>
+            <td>{nAge.label}</td>
+          </tr>
+        )}
+        </tbody>
+      );
+    }
+  }
+
   render() {
+    const privateContributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
+    console.log('privateContributions', privateContributions, Cookies.get('user_id'));
+
     const step = this.state.visibleStep;
-    console.log('private contributions', Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch());
     if (!this.state._contributor) return (
       <div>
         <div className="ui top attached segment">
@@ -540,8 +686,11 @@ export default class MagICUploadContribution extends React.Component {
               <div ref="files" className="ui divided items">
                 {step === 2 ? this.files.map((file, i) => {
                   const fileIsDone = (file.readErrors && file.readErrors.length > 0);
-                  const fileHasErrors = ((file.readErrors && file.readErrors.length > 0) ||
-                    (file.importErrors && file.importErrors.length > 0));
+                  const fileHasErrors = (
+                    (file.readErrors && file.readErrors.length > 0) ||
+                    (file.parseErrors && file.parseErrors.length > 0) ||
+                    (file.importErrors && file.importErrors.length > 0)
+                  );
                   return (
                     <div key={i} className="item" data-file={file.name}>
                       <div className="ui image">
@@ -563,6 +712,11 @@ export default class MagICUploadContribution extends React.Component {
                           {(file.readErrors && file.readErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.readErrors.length).format('0,0') + ' Read Error' + (file.readErrors.length === 1 ? '' : 's')}
+                            </div>
+                            : undefined)}
+                          {(file.parseErrors && file.parseErrors.length > 0 ?
+                            <div className="ui horizontal red label">
+                              {numeral(file.parseErrors.length).format('0,0') + ' Parse Error' + (file.parseErrors.length === 1 ? '' : 's')}
                             </div>
                             : undefined)}
                           {(file.importErrors && file.importErrors.length > 0 ?
@@ -618,47 +772,40 @@ export default class MagICUploadContribution extends React.Component {
                               </div>
                             </div>
                           </div>
-                          <div>
-                            {(this.state.fileFormats[i] === 'magic' && this.files[i].text ?
-                              this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
-                                let tableName = table.match(/^tab( delimited)?\t(.+)\n/);
-                                tableName = (tableName && table.length >= 3 ? tableName[2] : '');
-                                let data = table.split('\n').map((line, j) => line.split('\t'));
-                                return (
-                                  <div key={j}>
+                          {(this.files[i].parseErrors && this.files[i].parseErrors.length > 0 ?
+                            this.renderParseErrors(i)
+                          :
+                            <div>
+                              {(this.state.fileFormats[i] === 'magic' && this.files[i].data ?
+                                  this.files[i].data.map((table, j) =>
+                                    <div key={j}>
+                                      <div className="ui divider"></div>
+                                      {this.renderDataImporter(i, j, this.files[i].data[j], this.files[i].tableNames[j], "2")}
+                                    </div>
+                                  ) : undefined
+                              )}
+                              {(this.state.fileFormats[i] === 'tsv' && this.files[i].data ?
+                                  <div>
                                     <div className="ui divider"></div>
-                                    {this.renderDataImporter(i, j, data, tableName, "2")}
-                                  </div>
-                                );
-                              })
-                              : undefined)}
-                            {(this.state.fileFormats[i] === 'tsv' && this.files[i].text ?
-                              <div>
-                                <div className="ui divider"></div>
-                                {this.renderDataImporter(i, 1, this.files[i].text.split('\n').map((line, j) => line.split('\t')))}
-                              </div>
-                              : undefined
-                            )}
-                            {(this.state.fileFormats[i] === 'csv' && this.files[i].text ?
-                              <div>
-                                <div className="ui divider"></div>
-                                {this.renderDataImporter(i, 1, this.files[i].text.split('\n').map((line, j) => line.split(',')))}
-                              </div>
-                              : undefined
-                            )}
-                            {(this.state.fileFormats[i] === 'xls' && this.files[i].workbook ?
-                              this.files[i].workbook.SheetNames.map((tableName, j) => {
-                                let data = this.xlsSheetToArray(this.files[i].workbook.Sheets[tableName]);
-                                return (
-                                  <div key={j}>
+                                    {this.renderDataImporter(i, 1, this.files[i].data)}
+                                  </div> : undefined
+                              )}
+                              {(this.state.fileFormats[i] === 'csv' && this.files[i].data ?
+                                  <div>
                                     <div className="ui divider"></div>
-                                    {this.renderDataImporter(i, j, data, tableName)}
-                                  </div>
-                                );
-                              })
-                              : undefined
-                            )}
-                          </div>
+                                    {this.renderDataImporter(i, 1, this.files[i].data)}
+                                  </div> : undefined
+                              )}
+                              {(this.state.fileFormats[i] === 'xls' && this.files[i].data ?
+                                  this.files[i].data.map((table, j) =>
+                                    <div key={j}>
+                                      <div className="ui divider"></div>
+                                      {this.renderDataImporter(i, j, this.files[i].data[j], this.files[i].tableNames[j])}
+                                    </div>
+                                  ) : undefined
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -717,38 +864,9 @@ export default class MagICUploadContribution extends React.Component {
                       </div>
                     </div>
                     <br/>
-                    <div>
-                      <div className={"ui labeled fluid input" + (this.state._name.length > 0 ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
-                        <div className={"ui label"}>
-                          Publication DOI
-                        </div>
-                        <input ref="doi" type="text" default={"Optional until activation"}
-                               onChange={(e) => {
-                                 this.setState({_doi: this.refs['doi'].value})}}/>
-                      </div>
-                    </div>
-                    <br/>
-                    <div>
-                      <div className={"ui labeled fluid input"}>
-                        <div className={"ui label"}>
-                          Persistent URL
-                        </div>
-                        <input ref="url" type="text" readOnly={true} value={"https://earthref.org/MagIC/11753"}/>
-                      </div>
-                    </div>
-                    <br/>
-                    <div>
-                      <div className={"ui labeled fluid input"}>
-                        <div className={"ui label"}>
-                          EarthRef Data DOI
-                        </div>
-                        <input ref="data doi" type="text" readOnly={true} value={"10.7288/V4/MagIC/11753"}/>
-                      </div>
-                    </div>
-                    <br/>
                     {(this.state.uploaded ?
                       <a className="ui fluid green button"
-                         href="">
+                         href="/MagIC/private">
                         View Your Private Workspace
                       </a>
                     :
@@ -757,6 +875,59 @@ export default class MagICUploadContribution extends React.Component {
                         Upload to {this.state._id ? 'your existing private contribution: ' + this.state._name : 'a new private contribution: ' + this.state._name}
                       </div>
                     )}
+                    {(this.summary || this.contribution ?
+                      <div>
+                        <div className="ui horizontal divider">
+                          <span className="content">
+                            Upload Details
+                          </span>
+                        </div>
+                        <div className="ui basic segment">
+                          <div className="ui one column very relaxed stackable grid">
+                            <div className="center aligned column">
+                              <table className="ui very basic collapsing compact celled table" style={{display: 'inline'}}>
+                                <thead>
+                                <tr>
+                                  <th>Table</th>
+                                  <th>N Rows</th>
+                                  <th colSpan={2}>Assignment</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {_.sortBy(_.keys(models[_.last(versions)].tables),
+                                  (t) => { return models[_.last(versions)].tables[t].position; }
+                                ).map((t,i) => {
+                                  let json = this.contribution;
+                                  const tableName = models[_.last(versions)].tables[t].label;
+                                  const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
+                                  const n = (this.summary && this.summary[t] && _.keys(this.summary[t]).length || 0);
+                                  const nExperiments = (t === 'measurements' && this.summary && this.summary.contribution && this.summary.contribution.N_EXPERIMENTS || 0);
+                                  return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
+                                    <tr key={i}>
+                                      <td><h4>{tableName}</h4></td>
+                                      <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+                                      {t === 'measurements' ?
+                                        <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
+                                        :
+                                        <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
+                                      }
+                                      {t === 'measurements' ?
+                                        <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
+                                        :
+                                        <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
+                                      }
+                                    </tr>
+                                    : undefined);
+                                })}
+                                </tbody>
+                                {this.renderAgesDetails()}
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                        {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
+                        <div></div>
+                      </div> : undefined)}
                   </div>
                 </div>
               </div> : undefined}
@@ -776,20 +947,31 @@ export default class MagICUploadContribution extends React.Component {
             <i className="warning sign icon"/>
             <div className="content">
               The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be read.
-              Please address the errors and/or change the <b>Parse As</b> format.
             </div>
           </div>
           : undefined)}
-        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalImportErrors > 0 ?
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors > 0 ?
+          <div className="ui bottom attached icon error message">
+            <i className="warning sign icon"/>
+            <div className="content">
+              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be parsed.
+              Please change the <b>Parse As</b> format.
+            </div>
+          </div>
+          : undefined)}
+        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalParseErrors == 0 && this.state.totalImportErrors > 0 ?
           <div className="ui bottom attached icon error message">
             <i className="warning sign icon"/>
             <div className="content">
               The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be imported.
-              Please address the errors and/or change the <b>Parse As</b> format.
+              Please address the list of errors.
             </div>
           </div>
           : undefined)}
-        {(step === 2 && this.state.totalReadErrors == 0 && this.state.totalImportErrors == 0 ?
+        {(step === 2 &&
+            this.state.totalReadErrors == 0 &&
+            this.state.totalParseErrors == 0 &&
+            this.state.totalImportErrors == 0 ?
           <div className="ui bottom attached icon success message">
             <i className="check circle icon"></i>
             <div className="content">
@@ -860,7 +1042,6 @@ site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic
 01b\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
 01c\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
 2\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-01c\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
 2\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.552\t204.70\t440\t240\tYears BP\t100\t7.60\t36.6\t1.1\t1662\t12\tn\tp\t82.9\t287.40\t1.06E+23\t4\t1.07E+23\t4\t4.79E-05\t6.00E-07\t2\t:PINT03:
 3\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.296\t204.69\t700\t210\tYears BP\t100\t2.80\t41.4\t1.2\t905\t18\tn\tp\t84.8\t234.30\t9.42E+22\t2\t9.97E+22\t2\t4.45E-05\t1.20E-06\t3\t:PINT03:
 4\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.494\t204.66\t760\t210\tYears BP\t100\t353.00\t25.8\t1.6\t849\t11\tn\tp\t81.1\t74.50\t1.05E+23\t2\t9.86E+22\t2\t4.41E-05\t8.00E-07\t4\t:PINT03:

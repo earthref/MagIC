@@ -82,8 +82,6 @@ export default class DataImporter extends React.Component {
       );
     }
 
-    console.log(newState.tableName, newState.in, newState.inColumnNames);
-
     // Update the output column names list.
     newState.errors.columnNames = [];
     newState.outColumnNames = _.concat(
@@ -313,28 +311,7 @@ export default class DataImporter extends React.Component {
           })}
         </tbody>
       </table>
-      : undefined);
-    return (nErrors > 0 ?
-      <div ref="errors accordion" className="ui accordion red message">
-        <div className="ui red title">
-          <i className="dropdown icon"/>
-          {nErrors + ' Error' + (nErrors > 1 ? 's' : '')}
-        </div>
-        <div className="ui relaxed list content">
-          {_.keys(this.state.errors).map((error_group, i) => {
-            return this.state.errors[error_group].map((error, j) => {
-              return (
-                <div className="item" key={i + '.' + j}>
-                  <i className="warning circle icon"/>
-                  <div className="content">
-                    {error}
-                  </div>
-                </div>
-              );
-            })
-          })}
-        </div>
-      </div> : undefined
+      : undefined
     );
   }
 
@@ -393,7 +370,7 @@ export default class DataImporter extends React.Component {
                     <div className={'ui fitted toggle checkbox' + (downloadOnly ? ' disabled' : '')}
                          data-position="bottom right"
                          data-tooltip={tooltip}>
-                      <input type="checkbox" checked={!downloadOnly && !excluded} data-column-idx={i}/>
+                      <input type="checkbox" defaultChecked={!downloadOnly && !excluded} data-column-idx={i}/>
                     </div>
                     <span style={!downloadOnly && !excluded ? {color: this.portalColor()} : {}}>
                       {columnName}
@@ -490,7 +467,7 @@ export default class DataImporter extends React.Component {
                         <td className="collapsing right aligned">
                           <div className="ui fitted toggle checkbox" data-position="top left"
                                data-tooltip={'Click to ' + (this.state.excludeRowIdxs.indexOf(i) === -1 ? 'exclude' : 'include')}>
-                            <input type="checkbox" checked={this.state.excludeRowIdxs.indexOf(i) === -1} data-row-idx={i}/>
+                            <input type="checkbox" defaultChecked={this.state.excludeRowIdxs.indexOf(i) === -1} data-row-idx={i}/>
                           </div>
                           <span style={this.state.excludeRowIdxs.indexOf(i) === -1 ? {color: this.portalColor()} : {}}>
                             {i+1}

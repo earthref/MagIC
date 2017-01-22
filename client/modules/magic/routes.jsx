@@ -10,6 +10,7 @@ import MagICHome from './components/home.jsx';
 import MagICSearch from './components/search.jsx';
 import MagICDataModel from './components/data_model.jsx';
 import MagICMethodCodes from './components/method_codes.jsx';
+import MagICPrivateContributions from './components/private_contributions.jsx';
 import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
 import MagICUploadContribution from './components/upload_contribution.jsx';
 import MagICValidateContribution from './components/validate_contribution.jsx';
@@ -67,7 +68,7 @@ export default function (injectDeps, {FlowRouter}) {
               <h3>
                 Manage your contributions:
               </h3>
-              <MagICSearch view="private" search={q}/>
+              <MagICPrivateContributions search={q}/>
             </Home>
           </Layout>
         )

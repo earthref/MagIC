@@ -130,7 +130,7 @@ export default class extends React.Component {
             <div className="title">Validate</div>
             <div className="subtitle">Confirm your dataset is ready.</div>
           </IconButton>
-          <IconButton className="disabled card" href="/MagIC/activate" portal="MagIC">
+          <IconButton className="card" href="/MagIC/private" portal="MagIC">
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner checkmark icon"/>

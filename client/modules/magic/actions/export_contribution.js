@@ -153,13 +153,13 @@ export default class extends Runner {
         else if (columnIdx > 0 && wsData[0][columnIdx+1] != '') {
           range.e = {r:rowIdx, c:columnIdx};
           if (!worksheet['!merges']) worksheet['!merges'] = [];
-          console.log(range);
+          //console.log(range);
           worksheet['!merges'].push(range); //XLSX.utils.encode_range(range));
           range = {};
         }
 
       }
-      console.log(worksheet['!merges']);
+      //console.log(worksheet['!merges']);
 
       // Format the name header row.
       rowIdx = 1;
