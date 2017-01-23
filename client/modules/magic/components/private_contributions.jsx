@@ -45,7 +45,7 @@ export default class extends React.Component {
     $.ajax({
       type: "GET",
       dataType: "json",
-      url: "http://api.crossref.org/works/" + doi,
+      url: "//api.crossref.org/works/" + doi,
     }).done((doiData) => {
       console.log(c, doiData);
       if (c && c._id && doiData && doiData.status === 'ok') {
