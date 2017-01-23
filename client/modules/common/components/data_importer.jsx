@@ -164,6 +164,10 @@ export default class DataImporter extends React.Component {
 
     $(this.refs['table column names']).find('.ui.dropdown:not(.ui-dropdown)').addClass('ui-dropdown').each((i, dropdown) => {
       $(dropdown).dropdown({
+        direction: 'downward',
+        selectOnKeydown: false,
+        forceSelection: false,
+        keepOnScreen: false,
         fullTextSearch: 'exact',
         onChange: (value, text, $choice) => {
           if ($choice.data) {
@@ -265,7 +269,7 @@ export default class DataImporter extends React.Component {
         </div>
         <div className="column">
           <div className="ui labeled fluid action input">
-            <div className="ui disabled label">
+            <div className="ui label" data-tooltip="Save and share import settings. Coming soon..." data-position="bottom right">
               Import Template
             </div>
             <div ref="import template dropdown"

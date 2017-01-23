@@ -211,14 +211,13 @@ export default class extends React.Component {
   }
 
   saveJSON() {
-    const exporter = new ExportContribution({});
     const blob = new Blob([JSON.stringify(this.upgrader.json, null, '\t')], {type: "text/plain;charset=utf-8"});
     saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.json');
   }
 
   saveExcel() {
-    const Exporter = new ExportContribution({});
-    const workbook = Exporter.toExcel(this.upgrader.json);
+    const exporter = new ExportContribution({});
+    const workbook = exporter.toExcel(this.upgrader.json);
 
     // Prepare the workbook for output.
     const workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});

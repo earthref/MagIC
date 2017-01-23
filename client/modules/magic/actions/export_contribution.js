@@ -96,7 +96,8 @@ export default class extends Runner {
       }
 
       // Iterate through all of the data rows in the table.
-      for (let rowIdx in (jsonToExport[modelTable].rows || jsonToExport[modelTable])) {
+      let warningMerge = undefined;
+      for (let rowIdx = 0; rowIdx < (jsonToExport[modelTable].rows || jsonToExport[modelTable] || []).length; rowIdx++) {
 
         // Add a blank column at the beginning of each data row for the row headers.
         let wsRow = [''];
@@ -116,12 +117,22 @@ export default class extends Runner {
           return value;
         }));
 
+        if (rowIdx >= 5000) {
+          wsData.push(['Warning! Excel exports are currently limited to 5000 measurements. Please refer to the MagIC Text File export for all of the measurements.']);
+          warningMerge = {s:{r:rowIdx+5,c:0},e:{r:rowIdx+5,c:_.keys(tableHeaders.columnNameHeader).length}};
+          break;
+        }
       }
 
       // Convert the data matrix into a worksheet object.
       let worksheet = this._toSheet(wsData);
       let range = {};
       let rowIdx;
+
+      if (warningMerge) {
+        if (!worksheet['!merges']) worksheet['!merges'] = [];
+        worksheet['!merges'].push(warningMerge);
+      }
 
       // Format the group header row.
       rowIdx = 0;
@@ -248,7 +259,7 @@ export default class extends Runner {
         for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
           let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
           if (worksheet[cellAddress] !== undefined) {
-            if (worksheet[cellAddress].v !== undefined)
+            if (worksheet[cellAddress].v !== undefined && (columnIdx > 0 || worksheet[cellAddress].v.toString().slice(0,8) !== 'Warning!'))
               columnWidths[columnIdx] = Math.max(columnWidths[columnIdx], worksheet[cellAddress].v.toString().length);
             if (worksheet[cellAddress].s === undefined) worksheet[cellAddress].s = {};
             if (worksheet[cellAddress].s.font === undefined) worksheet[cellAddress].s.font = {};

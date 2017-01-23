@@ -3,6 +3,9 @@ import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
 import GoogleStaticMap from '../../common/components/google_static_map';
+import saveAs from 'save-as';
+import XLSX from 'xlsx-style';
+import ExportContribution from '../actions/export_contribution';
 
 export default class extends React.Component {
 
@@ -176,11 +179,11 @@ export default class extends React.Component {
           <div className="ui doubling grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
             <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
                 <span style={{fontSize:'small', fontWeight:'bold'}}>
-                  {c.TITLE || c.CITATION + ' v. ' + c.VERSION}
+                  {c.CITATION && c.VERSION ? c.CITATION + ' v. ' + c.VERSION : c.TITLE}
                 </span>
                 <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
                       dangerouslySetInnerHTML={{
-                        __html: (c.TITLE && c.CITATION && c.VERSION ? c.CITATION + ' v. ' + c.VERSION + ' ' : '') +
+                        __html: (c.CITATION && c.VERSION && c.TITLE ? c.TITLE + ' ' : '') +
                         (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, '')
                       }}>
                 </span>
@@ -190,30 +193,57 @@ export default class extends React.Component {
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
               <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                {this.props.mongoID || c.MONGO_ID ?
+                  <div className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
+                       onClick={(e) => {
+                         Meteor.call('getContribution', this.props.mongoID || c.MONGO_ID,
+                           (error, contribution) => {
+                             console.log('text', contribution);
+                             //const exporter = new ExportContribution({});
+                             //let blob = new Blob([exporter.toText(contribution)], {type: "text/plain;charset=utf-8"});
+                             //saveAs(blob, (contribution._summary && contribution._summary.CITATION || 'MagIC Contribution') +
+                             //  ' v' + (contribution._summary && contribution._summary.VERSION || 1)  + '.txt');
+                           }
+                         );
+                       }}
+                  >
+                    <i className="ui file text outline icon"/> Download
+                  </div> :
+                  <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
                    href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
                    (c.FOLDER === 'zmab' ?
                        `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
                        :
                        `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
-                   )
-                   }
+                   )}
                 >
                   <i className="ui file text outline icon"/> Download
-                </a>
+                </a>}
               </div>
               <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
-                   href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                   (c.FOLDER === 'zmab' ?
-                       `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
-                       :
-                       `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
-                   )
-                   }
+                {this.props.mongoID || c.MONGO_ID ?
+                <div className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
+                  onClick={(e) => {
+                    Meteor.call('getContribution', this.props.mongoID || c.MONGO_ID,
+                      (error, contribution) => {
+                        const Exporter = new ExportContribution({});
+                        const workbook = Exporter.toExcel(contribution);
+
+                        // Prepare the workbook for output.
+                        const workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});
+                        const workbookBuffer = new ArrayBuffer(workbookBinary.length);
+                        const workbookEncoded = new Uint8Array(workbookBuffer);
+                        for (var i=0; i!=workbookBinary.length; ++i)
+                          workbookEncoded[i] = workbookBinary.charCodeAt(i) & 0xFF;
+                        const workbookBlob = new Blob([workbookBuffer], {type: 'application/octet-stream'});
+                        saveAs(workbookBlob, (contribution._summary && contribution._summary.CITATION || 'MagIC Contribution') +
+                          ' v' + (contribution._summary && contribution._summary.VERSION || 1)  + '.xlsx');
+                      }
+                    );
+                  }}
                 >
                   <i className="ui file excel outline icon"/> Download
-                </a>
+                </div> : undefined}
               </div>
               <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}

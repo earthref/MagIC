@@ -21,8 +21,9 @@ export default class extends Runner {
       contribution.measurements.rows.map((measurementRow) => {
 
         const experimentColumnIdx = contribution.measurements.columns.indexOf('experiment');
-        const experimentName = measurementRow[experimentColumnIdx];
+        let experimentName = measurementRow[experimentColumnIdx];
         if (experimentName !== undefined && experimentName !== '') {
+          experimentName = experimentName.replace('.', '_');
           if (!summary.experiments[experimentName])
             summary.experiments[experimentName] = {};
 
@@ -32,8 +33,9 @@ export default class extends Runner {
           summary.experiments[experimentName].N_MEASUREMENTS += 1;
 
           const specimenColumnIdx = contribution.measurements.columns.indexOf('specimen');
-          const specimenName = measurementRow[specimenColumnIdx];
+          let specimenName = measurementRow[specimenColumnIdx];
           if (specimenName !== undefined && specimenName !== '') {
+            specimenName = specimenName.replace('.', '_');
             summary.experiments[experimentName].ER_SPECIMEN_NAME = specimenName;
             if (!summary.specimens[specimenName])
               summary.specimens[specimenName] = {};
@@ -71,6 +73,7 @@ export default class extends Runner {
 
         let specimenName = specimenRow.specimen;
         if (specimenName !== undefined && specimenName !== '') {
+          specimenName = specimenName.replace('.', '_');
           if (!summary.specimens[specimenName])
             summary.specimens[specimenName] = {};
           if (specimenRow.lithologies)
@@ -79,6 +82,7 @@ export default class extends Runner {
 
         let sampleName = specimenRow.sample;
         if (sampleName !== undefined && sampleName !== '') {
+          sampleName = sampleName.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
           if (specimenRow.lithologies) {
@@ -129,12 +133,14 @@ export default class extends Runner {
 
         let sampleName = sampleRow.sample;
         if (sampleName !== undefined && sampleName !== '') {
+          sampleName = sampleName.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
         }
 
         let siteName = sampleRow.site;
         if (siteName !== undefined && siteName !== '') {
+          siteName = siteName.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
         }
@@ -184,12 +190,14 @@ export default class extends Runner {
 
         let siteName = siteRow.site;
         if (siteName !== undefined && siteName !== '') {
+          siteName = siteName.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
         }
 
         let locationName = siteRow.location;
         if (locationName !== undefined && locationName !== '') {
+          locationName = locationName.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};
         }
@@ -244,19 +252,20 @@ export default class extends Runner {
 
         let locationName = locationRow.location;
         if (locationName !== undefined && locationName !== '') {
+          locationName = locationName.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};
+
+          // Increment the number of location results for this contribution.
+          if (!summary.contribution.N_LOCATION_RESULTS)
+            summary.contribution.N_LOCATION_RESULTS = 0;
+          summary.contribution.N_LOCATION_RESULTS += 1;
+
+          // Add the location name to the list for this contribution.
+          if (!summary.contribution.ER_LOCATION_NAMES)
+            summary.contribution.ER_LOCATION_NAMES = {};
+          summary.contribution.ER_LOCATION_NAMES[locationName] = true;
         }
-
-        // Increment the number of location results for this contribution.
-        if (!summary.contribution.N_LOCATION_RESULTS)
-          summary.contribution.N_LOCATION_RESULTS = 0;
-        summary.contribution.N_LOCATION_RESULTS += 1;
-
-        // Add the location name to the list for this contribution.
-        if (!summary.contribution.ER_LOCATION_NAMES)
-          summary.contribution.ER_LOCATION_NAMES = {};
-        summary.contribution.ER_LOCATION_NAMES[locationName] = true;
 
       });
 
@@ -291,6 +300,7 @@ export default class extends Runner {
 
         let criterionName = criteriaRow.criterion;
         if (criterionName !== undefined && criterionName !== '') {
+          criterionName = criterionName.replace('.', '_');
           if (!summary.criteria[criterionName])
             summary.criteria[criterionName] = {};
         }
@@ -303,7 +313,7 @@ export default class extends Runner {
       contribution.ages.map((agesRow) => {
 
         if (agesRow.specimen !== undefined && agesRow.specimen !== '') {
-          let specimenName = agesRow.specimen;
+          let specimenName = agesRow.specimen.replace('.', '_');
           if (!summary.specimens[specimenName])
             summary.specimens[specimenName] = {};
 
@@ -319,7 +329,7 @@ export default class extends Runner {
         }
 
         else if (agesRow.sample !== undefined && agesRow.sample !== '') {
-          let sampleName = agesRow.sample;
+          let sampleName = agesRow.sample.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
 
@@ -335,7 +345,7 @@ export default class extends Runner {
         }
 
         else if (agesRow.site !== undefined && agesRow.site !== '') {
-          let siteName = agesRow.site;
+          let siteName = agesRow.site.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
 
@@ -351,7 +361,7 @@ export default class extends Runner {
         }
 
         else if (agesRow.location !== undefined && agesRow.location !== '') {
-          let locationName = agesRow.location;
+          let locationName = agesRow.location.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};
 

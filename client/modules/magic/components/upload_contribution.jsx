@@ -75,7 +75,7 @@ export default class MagICUploadContribution extends React.Component {
         totalReadErrors: 0,
         processingStep: 2,
         visibleStep: 2
-      }, () => this.parse(0));
+      },() =>  _.defer(() => this.parse(0)));
     }
     $(this.refs['accordion']).accordion({on: null, collapsible: false});
   }
@@ -91,7 +91,7 @@ export default class MagICUploadContribution extends React.Component {
         let i = $choice.data('i');
         let fileFormats = this.state.fileFormats;
         fileFormats[i] = value;
-        this.setState({fileFormats: fileFormats}, () => this.parse(i));
+        this.setState({fileFormats: fileFormats}, () => _.defer(() => this.parse(i)));
       }
     });
     $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
@@ -183,7 +183,7 @@ export default class MagICUploadContribution extends React.Component {
           if (this.files[i].format === 'xls') {
             this.files[i].workbook = XLSX.read(e.target.result, {type: 'binary'});
           } else this.files[i].text = e.target.result;
-          this.setState({readProgressTaps: this.state.readProgressTaps + 1}, () => this.parse(i));
+          this.setState({readProgressTaps: this.state.readProgressTaps + 1}, () => _.defer(() => this.parse(i)));
           resolve();
         };
         this.files[i].fileReader.onerror = e => {
@@ -226,14 +226,14 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'tsv') {
       if (this.files[i].text) {
-        this.files[i].data = table.split('\n').map((line, j) => line.split('\t'));
+        this.files[i].data = this.files[i].text.split('\n').map((line, j) => line.split('\t'));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'csv') {
       if (this.files[i].text) {
-        this.files[i].data = table.split('\n').map((line, j) => line.split(','));
+        this.files[i].data = this.files[i].text.split('\n').map((line, j) => line.split(','));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
       }
@@ -358,7 +358,7 @@ export default class MagICUploadContribution extends React.Component {
       isRead: true,
       totalReadErrors: 0,
       fileFormats: ['magic']
-    }, () => this.parse(0));
+    }, () => _.defer(() => this.parse(0)));
   }
 
   downloadFile(file) {
