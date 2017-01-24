@@ -33,6 +33,11 @@ export default class extends React.Component {
   renderMapThumbnail(c) {
     let paths = [];
 
+    c.BEGIN_LATS = c.BEGIN_LATS || c.LAT_S || c.LAT;
+    c.END_LATS   = c.END_LATS   || c.LAT_N || c.LAT;
+    c.BEGIN_LONS = c.BEGIN_LONS || c.LON_W || c.LON;
+    c.END_LONS   = c.END_LONS   || c.LON_E || c.LON;
+
     if (c.BEGIN_LATS !== undefined &&
         c.END_LATS   !== undefined && c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':').length == c.END_LATS  .replace(/(^:|:$)/g, '').split(':').length &&
         c.BEGIN_LONS !== undefined && c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':').length == c.BEGIN_LONS.replace(/(^:|:$)/g, '').split(':').length &&
@@ -80,10 +85,10 @@ export default class extends React.Component {
 
   renderAge(c) {
     let avg_ages = c.AVERAGE_AGE,
-        min_ages = c.MIN_AGES || c.AVERAGE_AGE_LOW,
-      max_ages = c.MAX_AGES || c.AVERAGE_AGE_HIGH;
-    let n_ages = c.N_AGES || c.AVERAGE_NN;
-    let age_unit = c.AVERAGE_AGE_UNIT;
+        min_ages = c.MIN_AGES || c.AVERAGE_AGE_LOW || (c.AGE && _.min(c.AGE.split(':'))),
+        max_ages = c.MAX_AGES || c.AVERAGE_AGE_HIGH || (c.AGE && _.max(c.AGE.split(':')));
+    let n_ages = c.N_AGES || c.AVERAGE_NN || (c.AGE && c.AGE.split(':').length);
+    let age_unit = c.AVERAGE_AGE_UNIT || c.AGE_UNIT;
     if (avg_ages || min_ages && max_ages) {
       if (min_ages < 0 || max_ages < 0)
         [min_ages, max_ages] = [-max_ages, -min_ages];
@@ -193,23 +198,7 @@ export default class extends React.Component {
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
               <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                {this.props.mongoID || c.MONGO_ID ?
-                  <div className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
-                       onClick={(e) => {
-                         Meteor.call('getContribution', this.props.mongoID || c.MONGO_ID,
-                           (error, contribution) => {
-                             console.log('text', contribution);
-                             //const exporter = new ExportContribution({});
-                             //let blob = new Blob([exporter.toText(contribution)], {type: "text/plain;charset=utf-8"});
-                             //saveAs(blob, (contribution._summary && contribution._summary.CITATION || 'MagIC Contribution') +
-                             //  ' v' + (contribution._summary && contribution._summary.VERSION || 1)  + '.txt');
-                           }
-                         );
-                       }}
-                  >
-                    <i className="ui file text outline icon"/> Download
-                  </div> :
-                  <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
                    href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
                    (c.FOLDER === 'zmab' ?
                        `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
@@ -219,31 +208,6 @@ export default class extends React.Component {
                 >
                   <i className="ui file text outline icon"/> Download
                 </a>}
-              </div>
-              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                {this.props.mongoID || c.MONGO_ID ?
-                <div className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
-                  onClick={(e) => {
-                    Meteor.call('getContribution', this.props.mongoID || c.MONGO_ID,
-                      (error, contribution) => {
-                        const Exporter = new ExportContribution({});
-                        const workbook = Exporter.toExcel(contribution);
-
-                        // Prepare the workbook for output.
-                        const workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});
-                        const workbookBuffer = new ArrayBuffer(workbookBinary.length);
-                        const workbookEncoded = new Uint8Array(workbookBuffer);
-                        for (var i=0; i!=workbookBinary.length; ++i)
-                          workbookEncoded[i] = workbookBinary.charCodeAt(i) & 0xFF;
-                        const workbookBlob = new Blob([workbookBuffer], {type: 'application/octet-stream'});
-                        saveAs(workbookBlob, (contribution._summary && contribution._summary.CITATION || 'MagIC Contribution') +
-                          ' v' + (contribution._summary && contribution._summary.VERSION || 1)  + '.xlsx');
-                      }
-                    );
-                  }}
-                >
-                  <i className="ui file excel outline icon"/> Download
-                </div> : undefined}
               </div>
               <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
@@ -275,9 +239,9 @@ export default class extends React.Component {
               </div>}
               {!c.SVW_ER_LO_PMAG_RESULT_ID && this.renderGeo(c)}
               {!c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {(c.CLASS ? <span><b>Class:</b><br/>{c.CLASS.replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
-                {(c.TYPE ? <span><b>Type:</b><br/>{c.TYPE.replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
-                {(c.LITHOLOGY ? <span><b>Lithology:</b><br/>{c.LITHOLOGY.replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                {((c.CLASS || c.GEOLOGIC_CLASSES) ? <span><b>Class:</b><br/>{(c.CLASS || c.GEOLOGIC_CLASSES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                {((c.TYPE || c.GEOLOGIC_TYPES) ? <span><b>Type:</b><br/>{(c.TYPE || c.GEOLOGIC_TYPES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                {((c.LITHOLOGY || c.LITHOLOGIES) ? <span><b>Lithology:</b><br/>{(c.LITHOLOGY || c.LITHOLOGIES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
               </div>}
               {c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {this.renderPole(c)}

@@ -88,7 +88,14 @@ export default class DataImporter extends React.Component {
       _.slice(newState.outColumnNames, 0, newState.inColumnNames.length),
       _.slice(Array(newState.inColumnNames.length), newState.outColumnNames.length)
     );
+
     newState.outColumnNameCounts = _.countBy(newState.outColumnNames);
+    newState.excludeColumnIdxs.map((idx) => {
+      let columnName = newState.outColumnNames[idx];
+      if (columnName !== undefined && newState.outColumnNameCounts[columnName])
+        newState.outColumnNameCounts[columnName] -= 1;
+    });
+
     newState.outColumnNames = newState.outColumnNames.map((outColumnName, i) => {
 
       // If the table name is not selected, don't add errors and leave the column name selections intact.
@@ -127,7 +134,8 @@ export default class DataImporter extends React.Component {
 
       if (outColumnName !== undefined && newState.outColumnNameCounts[outColumnName] > 1)
         newState.errors.columnNames.push('Column name "' + newState.inColumnNames[i] +
-          '" in column number ' + (i + 1) + ' and another column are both importing into "' + outColumnName + '". ' +
+          '" in column number ' + (i + 1) + ' and another column are both importing into the "' +
+          newState.tableName + '.' + outColumnName + '" data model column. ' +
           'Either exclude the duplicate columns or change their import column.');
 
       // Otherwise, return the column name.

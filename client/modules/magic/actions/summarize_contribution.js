@@ -20,6 +20,11 @@ export default class extends Runner {
       summary.specimens   = summary.specimens   || {};
       contribution.measurements.rows.map((measurementRow) => {
 
+        // Increment the number of measurements for this contribution.
+        if (!summary.contribution.N_MEASUREMENTS)
+          summary.contribution.N_MEASUREMENTS = 0;
+        summary.contribution.N_MEASUREMENTS += 1;
+
         const experimentColumnIdx = contribution.measurements.columns.indexOf('experiment');
         let experimentName = measurementRow[experimentColumnIdx];
         if (experimentName !== undefined && experimentName !== '') {
@@ -27,10 +32,15 @@ export default class extends Runner {
           if (!summary.experiments[experimentName])
             summary.experiments[experimentName] = {};
 
-          // Increment the number of specimens for this sample.
+          // Increment the number of measurements for this experiment.
           if (!summary.experiments[experimentName].N_MEASUREMENTS)
             summary.experiments[experimentName].N_MEASUREMENTS = 0;
           summary.experiments[experimentName].N_MEASUREMENTS += 1;
+
+          // Add the experiment name to the list for this contribution.
+          if (!summary.contribution.EXPERIMENT_NAMES)
+            summary.contribution.EXPERIMENT_NAMES = {};
+          summary.contribution.EXPERIMENT_NAMES[experimentName] = true;
 
           const specimenColumnIdx = contribution.measurements.columns.indexOf('specimen');
           let specimenName = measurementRow[specimenColumnIdx];
@@ -53,15 +63,13 @@ export default class extends Runner {
 
         }
 
-
-
       });
 
       // Convert the list of experiment names into the number of experiments for each specimen.
       _.keys(summary.specimens).map((specimenName) => {
         if (summary.specimens[specimenName].EXPERIMENT_NAMES) {
-          summary.specimens[specimenName].EXPERIMENT_NAMES = _.keys(summary.specimens[specimenName].EXPERIMENT_NAMES);
-          summary.specimens[specimenName].N_EXPERIMENTS = summary.specimens[specimenName].EXPERIMENT_NAMES.length;
+          summary.specimens[specimenName].EXPERIMENT_NAMES = _.keys(summary.specimens[specimenName].EXPERIMENT_NAMES).join(':');
+          summary.specimens[specimenName].N_EXPERIMENTS = summary.specimens[specimenName].EXPERIMENT_NAMES.split(':').length;
         }
       });
     }
@@ -71,13 +79,35 @@ export default class extends Runner {
       summary.samples   = summary.samples   || {};
       contribution.specimens.map((specimenRow) => {
 
+        // Increment the number of specimen results for this contribution.
+        if (!summary.contribution.N_SPECIMEN_RESULTS)
+          summary.contribution.N_SPECIMEN_RESULTS = 0;
+        summary.contribution.N_SPECIMEN_RESULTS += 1;
+
+        _.keys(specimenRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.specimens.columns[column].type === 'List')
+            specimenRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+            if (_.trim(specimenRow[column]) !== '')
+              summary.contribution[column.toUpperCase()][_.trim(specimenRow[column])] = true
+        });
+
         let specimenName = specimenRow.specimen;
         if (specimenName !== undefined && specimenName !== '') {
           specimenName = specimenName.replace('.', '_');
           if (!summary.specimens[specimenName])
             summary.specimens[specimenName] = {};
-          if (specimenRow.lithologies)
-            summary.specimens[specimenName].LITHOLOGY = specimenRow.lithologies;
+
+          // Add the specimen name to the list for this contribution.
+          if (!summary.contribution.ER_SPECIMEN_NAMES)
+            summary.contribution.ER_SPECIMEN_NAMES = {};
+          summary.contribution.ER_SPECIMEN_NAMES[specimenName] = true;
+
         }
 
         let sampleName = specimenRow.sample;
@@ -85,11 +115,6 @@ export default class extends Runner {
           sampleName = sampleName.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
-          if (specimenRow.lithologies) {
-            if (!summary.samples[sampleName].child_lithologies)
-              summary.samples[sampleName].child_lithologies = [];
-            summary.samples[sampleName].child_lithologies.push(...specimenRow.lithologies.split(':'));
-          }
         }
 
         // If this specimen belongs to a sample:
@@ -97,7 +122,7 @@ export default class extends Runner {
             sampleName !== undefined && sampleName !== '') {
           summary.specimens[specimenName].ER_SAMPLE_NAME = sampleName;
 
-          // Increment the number of specimens for this sample.
+          // Increment the number of specimen results for this sample.
           if (!summary.samples[sampleName].N_SPECIMEN_RESULTS)
             summary.samples[sampleName].N_SPECIMEN_RESULTS = 0;
           summary.samples[sampleName].N_SPECIMEN_RESULTS += 1;
@@ -114,16 +139,17 @@ export default class extends Runner {
       // Convert the list of specimen names into the number of specimens for each sample.
       _.keys(summary.samples).map((sampleName) => {
         if (summary.samples[sampleName].ER_SPECIMEN_NAMES) {
-          summary.samples[sampleName].ER_SPECIMEN_NAMES = _.keys(summary.samples[sampleName].ER_SPECIMEN_NAMES);
-          summary.samples[sampleName].N_SPECIMENS = summary.samples[sampleName].ER_SPECIMEN_NAMES.length;
+          summary.samples[sampleName].ER_SPECIMEN_NAMES = _.keys(summary.samples[sampleName].ER_SPECIMEN_NAMES).join(':');
+          summary.samples[sampleName].N_SPECIMENS = summary.samples[sampleName].ER_SPECIMEN_NAMES.split(':').length;
           summary.samples[sampleName].N_EXPERIMENTS = 0;
           summary.samples[sampleName].N_MEASUREMENTS = 0;
-          summary.samples[sampleName].ER_SPECIMEN_NAMES.map((specimenName) => {
+          summary.samples[sampleName].ER_SPECIMEN_NAMES.split(':').map((specimenName) => {
             summary.samples[sampleName].N_EXPERIMENTS += summary.specimens[specimenName].N_EXPERIMENTS;
             summary.samples[sampleName].N_MEASUREMENTS += summary.specimens[specimenName].N_MEASUREMENTS;
           });
         }
       });
+
     }
 
     if (contribution.samples) {
@@ -131,11 +157,34 @@ export default class extends Runner {
       summary.sites   = summary.sites   || {};
       contribution.samples.map((sampleRow) => {
 
+        // Increment the number of sample results for this contribution.
+        if (!summary.contribution.N_SAMPLE_RESULTS)
+          summary.contribution.N_SAMPLE_RESULTS = 0;
+        summary.contribution.N_SAMPLE_RESULTS += 1;
+
+        _.keys(sampleRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.samples.columns[column].type === 'List')
+            sampleRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+          if (_.trim(sampleRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(sampleRow[column])] = true
+        });
+
         let sampleName = sampleRow.sample;
         if (sampleName !== undefined && sampleName !== '') {
           sampleName = sampleName.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
+
+          // Add the sample name to the list for this contribution.
+          if (!summary.contribution.ER_SAMPLE_NAMES)
+            summary.contribution.ER_SAMPLE_NAMES = {};
+          summary.contribution.ER_SAMPLE_NAMES[sampleName] = true;
         }
 
         let siteName = sampleRow.site;
@@ -167,13 +216,13 @@ export default class extends Runner {
       // Convert the list of sample names into the number of samples for each site.
       _.keys(summary.sites).map((siteName) => {
         if (summary.sites[siteName].ER_SAMPLE_NAMES) {
-          summary.sites[siteName].ER_SAMPLE_NAMES = _.keys(summary.sites[siteName].ER_SAMPLE_NAMES);
-          summary.sites[siteName].N_SAMPLES = summary.sites[siteName].ER_SAMPLE_NAMES.length;
+          summary.sites[siteName].ER_SAMPLE_NAMES = _.keys(summary.sites[siteName].ER_SAMPLE_NAMES).join(':');
+          summary.sites[siteName].N_SAMPLES = summary.sites[siteName].ER_SAMPLE_NAMES.split(':').length;
           summary.sites[siteName].N_SPECIMENS = 0;
           summary.sites[siteName].N_SPECIMEN_RESULTS = 0;
           summary.sites[siteName].N_EXPERIMENTS = 0;
           summary.sites[siteName].N_MEASUREMENTS = 0;
-          summary.sites[siteName].ER_SAMPLE_NAMES.map((sampleName) => {
+          summary.sites[siteName].ER_SAMPLE_NAMES.split(':').map((sampleName) => {
             summary.sites[siteName].N_SPECIMENS += summary.samples[sampleName].N_SPECIMENS;
             summary.sites[siteName].N_SPECIMEN_RESULTS += summary.samples[sampleName].N_SPECIMEN_RESULTS;
             summary.sites[siteName].N_EXPERIMENTS += summary.samples[sampleName].N_EXPERIMENTS;
@@ -188,11 +237,34 @@ export default class extends Runner {
       summary.locations = summary.locations || {};
       contribution.sites.map((siteRow) => {
 
+        // Increment the number of sites results for this contribution.
+        if (!summary.contribution.N_SITE_RESULTS)
+          summary.contribution.N_SITE_RESULTS = 0;
+        summary.contribution.N_SITE_RESULTS += 1;
+
+        _.keys(siteRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.sites.columns[column].type === 'List')
+            siteRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+          if (_.trim(siteRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(siteRow[column])] = true
+        });
+
         let siteName = siteRow.site;
         if (siteName !== undefined && siteName !== '') {
           siteName = siteName.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
+
+          // Add the site name to the list for this contribution.
+          if (!summary.contribution.ER_SITE_NAMES)
+            summary.contribution.ER_SITE_NAMES = {};
+          summary.contribution.ER_SITE_NAMES[siteName] = true;
         }
 
         let locationName = siteRow.location;
@@ -224,15 +296,15 @@ export default class extends Runner {
       // Convert the list of site names into the number of sites for each location.
       _.keys(summary.locations).map((locationName) => {
         if (summary.locations[locationName].ER_SITE_NAMES) {
-          summary.locations[locationName].ER_SITE_NAMES = _.keys(summary.locations[locationName].ER_SITE_NAMES);
-          summary.locations[locationName].N_SITES = summary.locations[locationName].ER_SITE_NAMES.length;
+          summary.locations[locationName].ER_SITE_NAMES = _.keys(summary.locations[locationName].ER_SITE_NAMES).join(':');
+          summary.locations[locationName].N_SITES = summary.locations[locationName].ER_SITE_NAMES.split(':').length;
           summary.locations[locationName].N_SAMPLES = 0;
           summary.locations[locationName].N_SAMPLE_RESULTS = 0;
           summary.locations[locationName].N_SPECIMENS = 0;
           summary.locations[locationName].N_SPECIMEN_RESULTS = 0;
           summary.locations[locationName].N_EXPERIMENTS = 0;
           summary.locations[locationName].N_MEASUREMENTS = 0;
-          summary.locations[locationName].ER_SITE_NAMES.map((siteName) => {
+          summary.locations[locationName].ER_SITE_NAMES.split(':').map((siteName) => {
             summary.locations[locationName].N_SAMPLES += summary.sites[siteName].N_SAMPLES;
             summary.locations[locationName].N_SAMPLE_RESULTS += summary.sites[siteName].N_SAMPLE_RESULTS;
             summary.locations[locationName].N_SPECIMENS += summary.sites[siteName].N_SPECIMENS;
@@ -250,16 +322,29 @@ export default class extends Runner {
       summary.contribution = summary.contribution || {};
       contribution.locations.map((locationRow) => {
 
+        // Increment the number of location results for this contribution.
+        if (!summary.contribution.N_LOCATION_RESULTS)
+          summary.contribution.N_LOCATION_RESULTS = 0;
+        summary.contribution.N_LOCATION_RESULTS += 1;
+
+        _.keys(locationRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.locations.columns[column].type === 'List')
+            locationRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+          if (_.trim(locationRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(locationRow[column])] = true
+        });
+
         let locationName = locationRow.location;
         if (locationName !== undefined && locationName !== '') {
           locationName = locationName.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};
-
-          // Increment the number of location results for this contribution.
-          if (!summary.contribution.N_LOCATION_RESULTS)
-            summary.contribution.N_LOCATION_RESULTS = 0;
-          summary.contribution.N_LOCATION_RESULTS += 1;
 
           // Add the location name to the list for this contribution.
           if (!summary.contribution.ER_LOCATION_NAMES)
@@ -269,28 +354,28 @@ export default class extends Runner {
 
       });
 
-      // Convert the list of location names into the number of locations for this contribution.
+    }
+
+    if (summary.contribution) {
+      _.keys(summary.contribution).map((column) => {
+        if (column.slice(0,2) != 'N_')
+          summary.contribution[column] = _.keys(summary.contribution[column]).join(':');
+      });
+
       if (summary.contribution.ER_LOCATION_NAMES) {
-        summary.contribution.ER_LOCATION_NAMES = _.keys(summary.contribution.ER_LOCATION_NAMES);
-        summary.contribution.N_LOCATIONS = summary.contribution.ER_LOCATION_NAMES.length;
-        summary.contribution.N_SITES = 0;
-        summary.contribution.N_SITE_RESULTS = 0;
-        summary.contribution.N_SAMPLES = 0;
-        summary.contribution.N_SAMPLE_RESULTS = 0;
-        summary.contribution.N_SPECIMENS = 0;
-        summary.contribution.N_SPECIMEN_RESULTS = 0;
-        summary.contribution.N_EXPERIMENTS = 0;
-        summary.contribution.N_MEASUREMENTS = 0;
-        summary.contribution.ER_LOCATION_NAMES.map((locationName) => {
-          summary.contribution.N_SITES += summary.locations[locationName].N_SITES;
-          summary.contribution.N_SITE_RESULTS += summary.locations[locationName].N_SITE_RESULTS;
-          summary.contribution.N_SAMPLES += summary.locations[locationName].N_SAMPLES;
-          summary.contribution.N_SAMPLE_RESULTS += summary.locations[locationName].N_SAMPLE_RESULTS;
-          summary.contribution.N_SPECIMENS += summary.locations[locationName].N_SPECIMENS;
-          summary.contribution.N_SPECIMEN_RESULTS += summary.locations[locationName].N_SPECIMEN_RESULTS;
-          summary.contribution.N_EXPERIMENTS += summary.locations[locationName].N_EXPERIMENTS;
-          summary.contribution.N_MEASUREMENTS += summary.locations[locationName].N_MEASUREMENTS;
-        });
+        summary.contribution.N_LOCATIONS = summary.contribution.ER_LOCATION_NAMES.split(':').length;
+      }
+      if (summary.contribution.ER_SITE_NAMES) {
+        summary.contribution.N_SITES = summary.contribution.ER_SITE_NAMES.split(':').length;
+      }
+      if (summary.contribution.ER_SAMPLE_NAMES) {
+        summary.contribution.N_SAMPLES = summary.contribution.ER_SAMPLE_NAMES.split(':').length;
+      }
+      if (summary.contribution.ER_SPECIMEN_NAMES) {
+        summary.contribution.N_SPECIMENS = summary.contribution.ER_SPECIMEN_NAMES.split(':').length;
+      }
+      if (summary.contribution.EXPERIMENT_NAMES) {
+        summary.contribution.N_EXPERIMENTS = summary.contribution.N_EXPERIMENTS.split(':').length;
       }
     }
 

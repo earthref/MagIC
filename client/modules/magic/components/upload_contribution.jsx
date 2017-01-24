@@ -14,6 +14,7 @@ import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
+import ExportContribution from '../actions/export_contribution';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
@@ -301,30 +302,52 @@ export default class MagICUploadContribution extends React.Component {
         uploading: false
       });
   } else {
-      if (this.state._id !== '')
-        Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
-          (error) => {
-            console.log('updated contribution', this.state._id, error);
-            if (error) this.setState({uploadError: error, uploading: false});
-            else       this.setState({uploaded: true, uploading: false});
-          }
-        );
-      else
-        Meteor.call('insertContribution', this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
-          (error) => {
-            console.log('inserted contribution', this.state._id, error);
-            if (error) this.setState({uploadError: error, uploading: false});
-            else       this.setState({uploaded: true, uploading: false});
-          }
-        );
-      this.setState({
-        uploading: true
+      const exporter = new ExportContribution({});
+      this.contribution._summary = this.contribution._summary || {contribution: {}};
+      this.contribution._summary.contribution.FOLDER = (new Date()).getMilliseconds();
+      this.contribution._summary.contribution.FILE_NAME = (this.contribution._summary.contribution.CITATION ||
+                                                           this.contribution._summary.contribution.TITLE ||
+                                                           'MagIC Contribution').slice(0, 30) + '.txt';
+      $.ajax({
+        type: "POST",
+        url: "https://earthref.org/cgi-bin/x-magic-upload-3.0-files.cgi",
+        data: {
+          file_dir: this.state._userid + '/' + this.contribution._summary.contribution.FOLDER,
+          file_name: this.contribution._summary.contribution.FILE_NAME,
+          file_content: exporter.toText(this.contribution)
+        }
+      }).done((response) => {
+        console.log('CGI', response);
+        if (this.state._id !== '')
+          Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
+            (error) => {
+              console.log('updated contribution', this.state._id, error);
+              if (error) this.setState({uploadError: error, uploading: false});
+              else       this.setState({uploaded: true, uploading: false});
+            }
+          );
+        else
+          Meteor.call('insertContribution', this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
+            (error) => {
+              console.log('inserted contribution', this.state._id, error);
+              if (error) this.setState({uploadError: error, uploading: false});
+              else       this.setState({uploaded: true, uploading: false});
+            }
+          );
+        this.setState({
+          uploading: true
+        });
+      }).fail(() => {
+        this.setState({
+          uploadError: "Failed to upload the contribution. Please try again in a few minutes.",
+          uploading: false
+        });
       });
     }
   }
 
   uploadExampleMagICv3() {
-    this.uploadExample('MagIC Text File in Data Model v. 3.0');
+    this.uploadExample('MagIC Text File in Data Model v. 3.0', 'magic');
   }
 
   uploadExampleMagICv2() {
@@ -332,32 +355,36 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   uploadExampleTabDelimitedSites() {
-    this.uploadExample('Tab Delimited File with Sites Data');
+    this.uploadExample('Tab Delimited File with Sites Data', 'tsv');
   }
 
   uploadExampleTabDelimitedSpecimens() {
-    this.uploadExample('Tab Delimited File with Specimens Data');
+    this.uploadExample('Tab Delimited File with Specimens Data', 'csv');
+  }
+
+  uploadExampleMagICExcel() {
+    this.uploadExample('MagIC Text File in Data Model v. 3.0', 'magic', 'MagIC Excel File.xls');
   }
 
   uploadExampleExcel() {
-    this.uploadExample('Excel File');
+    this.uploadExample('Tab Delimited File with Sites Data', 'tsv', 'Excel File.xls');
   }
 
-  uploadExample(name) {
+  uploadExample(name, format, file) {
     this.files = [{
-      name: name + '.txt',
+      name: file || name + '.txt',
       size: examples[name].length,
       readProgress: 100,
       readErrors: [],
       text: examples[name],
-      format: 'magic'
+      format: format
     }];
     this.setState({
       processingStep: 2,
       visibleStep: 2,
       isRead: true,
       totalReadErrors: 0,
-      fileFormats: ['magic']
+      fileFormats: [format]
     }, () => _.defer(() => this.parse(0)));
   }
 
@@ -512,7 +539,7 @@ export default class MagICUploadContribution extends React.Component {
         <div className="ui bottom attached icon error message">
           <i className="warning sign icon"/>
           <div className="content">
-            Please log in before uploading to your private workspace.
+            Please log in to EarthRef.org before uploading to your private workspace.
           </div>
         </div>
       </div>
@@ -629,7 +656,7 @@ export default class MagICUploadContribution extends React.Component {
                   <i className="icons">
                     <i className="file text outline icon"/>
                   </i>
-                  <div className="title">MagIC Text</div>
+                  <div className="title">Example<br/>MagIC Text</div>
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
@@ -641,7 +668,7 @@ export default class MagICUploadContribution extends React.Component {
                   <i className="icons">
                     <i className="table icon"/>
                   </i>
-                  <div className="title">Tab Delimited</div>
+                  <div className="title">Example<br/>Tab Delimited</div>
                   <div className="subtitle">Sites Data</div>
                 </IconButton>
                 <IconButton
@@ -653,30 +680,32 @@ export default class MagICUploadContribution extends React.Component {
                   <i className="icons">
                     <i className="table icon"/>
                   </i>
-                  <div className="title">Comma Delimited</div>
+                  <div className="title">Example<br/>Comma Delimited</div>
                   <div className="subtitle">Specimens Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless disabled card" href="" portal="MagIC" position="bottom right"
+                  className="borderless card" href="" portal="MagIC" position="bottom right"
                   tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
+                  onClick={this.uploadExampleMagICExcel.bind(this)}
                 >
                   <i className="icons">
                     <i className="file excel outline icon"/>
                   </i>
-                  <div className="title">MagIC Excel</div>
-                  <div className="subtitle">Locations and Sites Data</div>
+                  <div className="title">Example<br/>MagIC Excel File</div>
+                  <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless disabled card" href="" portal="MagIC" position="bottom right"
+                  className="borderless card" href="" portal="MagIC" position="bottom right"
                     tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
+                  onClick={this.uploadExampleExcel.bind(this)}
                 >
                   <i className="icons">
                     <i className="file excel outline icon"/>
                   </i>
-                  <div className="title">Excel</div>
-                  <div className="subtitle">Measurement Data</div>
+                  <div className="title">Example<br/>Excel File</div>
+                  <div className="subtitle">Sites Data</div>
                 </IconButton>
               </div>
             </div>
@@ -1038,31 +1067,31 @@ Hawaii\tOutcrop\t:Hawaiian Holocene Lavas:\tHawaiian Holocene Lavas\ta\t:This st
 >>>>>>>>>>
 tab delimited\tsites
 site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon\tage\tage_sigma\tage_unit\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_specimens\tdir_polarity\tdir_nrm_origin\tvgp_lat\tvgp_lon\tvdm\tvdm_n_samples\tvadm\tvadm_n_samples\tint_abs\tint_abs_sigma\tdescription\tsoftware_packages
-01a\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-01b\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-01c\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-2\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
+01a\tHawaii\t\t\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
+01b\tHawaii\t\t\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
+01c\tHawaii\t\t\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
+2\tHawaii\t\t\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
 2\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.552\t204.70\t440\t240\tYears BP\t100\t7.60\t36.6\t1.1\t1662\t12\tn\tp\t82.9\t287.40\t1.06E+23\t4\t1.07E+23\t4\t4.79E-05\t6.00E-07\t2\t:PINT03:
-3\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.296\t204.69\t700\t210\tYears BP\t100\t2.80\t41.4\t1.2\t905\t18\tn\tp\t84.8\t234.30\t9.42E+22\t2\t9.97E+22\t2\t4.45E-05\t1.20E-06\t3\t:PINT03:
-4\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.494\t204.66\t760\t210\tYears BP\t100\t353.00\t25.8\t1.6\t849\t11\tn\tp\t81.1\t74.50\t1.05E+23\t2\t9.86E+22\t2\t4.41E-05\t8.00E-07\t4\t:PINT03:
-5\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.564\t204.66\t1320\t150\tYears BP\t100\t2.20\t18.2\t2.2\t400\t12\tn\tp\t79.6\t12.80\t1.03E+23\t4\t9.27E+22\t4\t4.15E-05\t3.60E-06\t5\t:PINT03:
-6\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.533\t204.65\t1690\t210\tYears BP\t100\t355.50\t17.8\t1.9\t679\t10\tn\tp\t78.7\t48.00\t9.71E+22\t4\t8.71E+22\t4\t3.90E-05\t3.10E-06\t6\t:PINT03:
-7\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.118\t204.43\t2180\t180\tYears BP\t100\t11.20\t14.7\t2.1\t439\t12\tn\tp\t74.1\t340.00\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05\t7\t:PINT03:
-8\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.455\t204.71\t2190\t210\tYears BP\t100\t11.30\t15.2\t1.3\t1095\t12\tn\tp\t74\t340.00\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05\t8\t:PINT03:
-9\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.538\t204.66\t2550\t240\tYears BP\t100\t1.20\t21\t1.5\t987\t12\tn\tp\t81.3\t16.90\t1.07E+23\t4\t9.74E+22\t4\t4.36E-05\t2.30E-06\t9\t:PINT03:
-10\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.64\t204.96\t2890\t210\tYears BP\t100\t357.70\t25.7\t2.3\t370\t11\tn\tp\t83.5\t44.90\t1.24E+23\t5\t1.15E+23\t5\t5.17E-05\t1.16E-05\t10\t:PINT03:
-11\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.302\t204.69\t3480\t240\tYears BP\t100\t3.70\t36.4\t1.4\t1091\t12\tn\tp\t86.4\t279.50\t1.06E+23\t2\t1.07E+23\t2\t4.79E-05\t1.03E-05\t11\t:PINT03:
-12\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.713\t204.88\t4050\t150\tYears BP\t100\t4.50\t33.4\t1.1\t1467\t11\tn\tp\t85.5\t313.10\t1.15E+23\t3\t1.13E+23\t3\t5.06E-05\t1.70E-06\t12\t:PINT03:
-13\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.161\t204.46\t5160\t300\tYears BP\t100\t4.70\t27.6\t2\t493\t12\tn\tp\t83.6\t339.20\t8.54E+22\t5\t8.10E+22\t5\t3.61E-05\t2.60E-06\t13\t:PINT03:
-14\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.543\t204.88\t5650\t270\tYears BP\t100\t5.40\t33.7\t1.4\t958\t12\tn\tp\t84.8\t305.80\t7.67E+22\t3\t7.57E+22\t3\t3.39E-05\t2.50E-06\t14\t:PINT03:
-15\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.086\t204.41\t6160\t330\tYears BP\t100\t357.80\t54.9\t1.7\t819\t12\tn\tp\t73.5\t198.10\t6.41E+22\t2\t7.91E+22\t2\t3.52E-05\t3.50E-06\t15\t:PINT03:
-16\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44\t7300\t300\tYears BP\t100\t2.30\t25.4\t1.4\t914\t10\tn\tp\t83.9\t3.00\t6.47E+22\t4\t6.02E+22\t4\t2.70E-05\t2.10E-06\t16\t:PINT03:
-17\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.145\t204.48\t7950\t330\tYears BP\t100\t359.50\t33.4\t1.5\t917\t12\tn\tp\t89\t53.10\t6.97E+22\t3\t6.89E+22\t3\t3.07E-05\t1.10E-06\t17\t:PINT03:
-18\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.42\t204.66\t8740\t300\tYears BP\t100\t357.30\t36\t2.3\t413\t11\tn\tp\t87.4\t127.20\t9.91E+22\t5\t9.98E+22\t5\t4.46E-05\t6.90E-06\t18\t:PINT03:
-19\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.418\t204.66\t9500\t420\tYears BP\t100\t3.00\t33.7\t2.3\t351\t11\tn\tp\t87\t313.60\t9.30E+22\t5\t9.19E+22\t5\t4.11E-05\t4.90E-06\t19\t:PINT03:
-20\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.101\t204.44\t10290\t450\tYears BP\t100\t3.60\t31.9\t1.8\t570\t12\tn\tp\t86.1\t322.00\t8.26E+22\t5\t8.08E+22\t5\t3.60E-05\t8.40E-06\t20\t:PINT03:
-21\tHawaii\ti\t:DE-BFL:\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.972\t204.38\t11780\t300\tYears BP\t100\t2.10\t8.7\t1.7\t738\t12\tn\tp\t75.2\t16.20\t8.55E+22\t3\t7.51E+22\t3\t3.34E-05\t5.00E-06\t21\t:PINT03:
-22\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
+3\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.296\t204.69\t700\t210\tYears BP\t100\t2.80\t41.4\t1.2\t905\t18\tn\tp\t84.8\t234.30\t9.42E+22\t2\t9.97E+22\t2\t4.45E-05\t1.20E-06\t3\t:PINT03:
+4\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.494\t204.66\t760\t210\tYears BP\t100\t353.00\t25.8\t1.6\t849\t11\tn\tp\t81.1\t74.50\t1.05E+23\t2\t9.86E+22\t2\t4.41E-05\t8.00E-07\t4\t:PINT03:
+5\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.564\t204.66\t1320\t150\tYears BP\t100\t2.20\t18.2\t2.2\t400\t12\tn\tp\t79.6\t12.80\t1.03E+23\t4\t9.27E+22\t4\t4.15E-05\t3.60E-06\t5\t:PINT03:
+6\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.533\t204.65\t1690\t210\tYears BP\t100\t355.50\t17.8\t1.9\t679\t10\tn\tp\t78.7\t48.00\t9.71E+22\t4\t8.71E+22\t4\t3.90E-05\t3.10E-06\t6\t:PINT03:
+7\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.118\t204.43\t2180\t180\tYears BP\t100\t11.20\t14.7\t2.1\t439\t12\tn\tp\t74.1\t340.00\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05\t7\t:PINT03:
+8\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.455\t204.71\t2190\t210\tYears BP\t100\t11.30\t15.2\t1.3\t1095\t12\tn\tp\t74\t340.00\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05\t8\t:PINT03:
+9\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.538\t204.66\t2550\t240\tYears BP\t100\t1.20\t21\t1.5\t987\t12\tn\tp\t81.3\t16.90\t1.07E+23\t4\t9.74E+22\t4\t4.36E-05\t2.30E-06\t9\t:PINT03:
+10\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.64\t204.96\t2890\t210\tYears BP\t100\t357.70\t25.7\t2.3\t370\t11\tn\tp\t83.5\t44.90\t1.24E+23\t5\t1.15E+23\t5\t5.17E-05\t1.16E-05\t10\t:PINT03:
+11\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.302\t204.69\t3480\t240\tYears BP\t100\t3.70\t36.4\t1.4\t1091\t12\tn\tp\t86.4\t279.50\t1.06E+23\t2\t1.07E+23\t2\t4.79E-05\t1.03E-05\t11\t:PINT03:
+12\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.713\t204.88\t4050\t150\tYears BP\t100\t4.50\t33.4\t1.1\t1467\t11\tn\tp\t85.5\t313.10\t1.15E+23\t3\t1.13E+23\t3\t5.06E-05\t1.70E-06\t12\t:PINT03:
+13\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.161\t204.46\t5160\t300\tYears BP\t100\t4.70\t27.6\t2\t493\t12\tn\tp\t83.6\t339.20\t8.54E+22\t5\t8.10E+22\t5\t3.61E-05\t2.60E-06\t13\t:PINT03:
+14\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.543\t204.88\t5650\t270\tYears BP\t100\t5.40\t33.7\t1.4\t958\t12\tn\tp\t84.8\t305.80\t7.67E+22\t3\t7.57E+22\t3\t3.39E-05\t2.50E-06\t14\t:PINT03:
+15\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.086\t204.41\t6160\t330\tYears BP\t100\t357.80\t54.9\t1.7\t819\t12\tn\tp\t73.5\t198.10\t6.41E+22\t2\t7.91E+22\t2\t3.52E-05\t3.50E-06\t15\t:PINT03:
+16\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44\t7300\t300\tYears BP\t100\t2.30\t25.4\t1.4\t914\t10\tn\tp\t83.9\t3.00\t6.47E+22\t4\t6.02E+22\t4\t2.70E-05\t2.10E-06\t16\t:PINT03:
+17\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.145\t204.48\t7950\t330\tYears BP\t100\t359.50\t33.4\t1.5\t917\t12\tn\tp\t89\t53.10\t6.97E+22\t3\t6.89E+22\t3\t3.07E-05\t1.10E-06\t17\t:PINT03:
+18\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.42\t204.66\t8740\t300\tYears BP\t100\t357.30\t36\t2.3\t413\t11\tn\tp\t87.4\t127.20\t9.91E+22\t5\t9.98E+22\t5\t4.46E-05\t6.90E-06\t18\t:PINT03:
+19\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.418\t204.66\t9500\t420\tYears BP\t100\t3.00\t33.7\t2.3\t351\t11\tn\tp\t87\t313.60\t9.30E+22\t5\t9.19E+22\t5\t4.11E-05\t4.90E-06\t19\t:PINT03:
+20\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.101\t204.44\t10290\t450\tYears BP\t100\t3.60\t31.9\t1.8\t570\t12\tn\tp\t86.1\t322.00\t8.26E+22\t5\t8.08E+22\t5\t3.60E-05\t8.40E-06\t20\t:PINT03:
+21\tHawaii\ti\t:DE-BFL:\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.972\t204.38\t11780\t300\tYears BP\t100\t2.10\t8.7\t1.7\t738\t12\tn\tp\t75.2\t16.20\t8.55E+22\t3\t7.51E+22\t3\t3.34E-05\t5.00E-06\t21\t:PINT03:
+22\tHawaii\t\t\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
 01a\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.545\t204.91\t260\t210\tYears BP\t100\t5.50\t41.3\t1.7\t630\t12\tn\tp\t83.4\t254.60\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06\t01a\t:PINT03:
 01b\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.58\t204.94\t260\t210\tYears BP\t100\t3.20\t44.2\t1.4\t906\t12\tn\tp\t83\t229.20\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06\t01b\t:PINT03:
 01c\tHawaii\ti\t:DE-BFL:\t:This study:\t\t\t\t19.572\t204.94\t260\t210\tYears BP\t100\t3.10\t46\t2.1\t418\t12\tn\tp\t81.7\t224.10\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06\t01c\t:PINT03:
@@ -1070,85 +1099,85 @@ site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic
 >>>>>>>>>>
 tab delimited\tsamples
 sample\tsite\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon
-1B475-2\t3\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.296\t204.69
-1B487-3\t3\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.296\t204.69
-1B704-1\t9\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
-1B708-3\t9\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
-1B710-1\t9\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
-1B714-3\t9\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
-1B730-1\t6\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
-1B732-2\t6\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
-1B733-1\t6\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
-1B734-2\t6\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
-1B755-1\t4\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.494\t204.66
-1B757-3\t4\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.494\t204.66
-8B416-4\t11\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.302\t204.69
-8B417-1\t11\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.302\t204.69
-8B437-5\t12\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.713\t204.88
-8B439-2\t12\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.713\t204.88
-8B440-2\t12\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.713\t204.88
-8B625-1\t8\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.455\t204.71
-8B631-1\t8\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.455\t204.71
-8B794-2\t01a\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.545\t204.91
-8B829-2\t2\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
-8B833-4\t2\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
-8B835-2\t2\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
-8B836-3\t2\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
-8B889-4\t7\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
-8B891-4\t7\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
-8B896-2\t7\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
-8B897-4\t7\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
-8B906-1\t14\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.543\t204.88
-8B907-2\t14\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.543\t204.88
-8B910-3\t14\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.543\t204.88
-9B039-2\t10\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
-9B040-1\t10\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
-9B041-3\t10\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
-9B042-3\t10\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
-9B046-3\t10\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
-9B109-2\t5\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
-9B110-4\t5\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
-9B113-4\t5\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
-9B117-2\t5\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
-9B131-5\t01b\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.58\t204.94
-9B433-5\t01c\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.572\t204.94
-9B437-5\t01c\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.572\t204.94
-9B445-3\t13\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
-9B448-4\t13\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
-9B449-2\t13\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
-9B451-2\t13\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
-9B454-4\t13\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
-9B483-2\t20\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
-9B486-4\t20\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
-9B489-2\t20\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
-9B490-3\t20\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
-9B492-4\t20\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
-9B659-2\t15\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.086\t204.41
-9B660-4\t15\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.086\t204.41
-9B666-3\t17\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.145\t204.48
-9B669-2\t17\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.145\t204.48
-9B670-2\t17\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.145\t204.48
-9B902-3\t21\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.972\t204.38
-9B904-2\t21\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.972\t204.38
-9B905-2\t21\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t18.972\t204.38
-9B937-2\t18\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
-9B944-1\t18\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
-9B945-3\t18\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
-9B947-2\t18\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
-9B948-1\t18\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
-9B949-2\t19\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
-9B950-3\t19\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
-9B953-3\t19\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
-9B955-2\t19\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
-9B959-3\t19\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
-9B961-2\t16\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B962-3\t16\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B964-1\t16\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B965-2\t16\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B975-2\t22\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B976-1\t22\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B977-1\t22\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
-9B984-2\t22\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+1B475-2\t3\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.296\t204.69
+1B487-3\t3\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.296\t204.69
+1B704-1\t9\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
+1B708-3\t9\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
+1B710-1\t9\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
+1B714-3\t9\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.538\t204.66
+1B730-1\t6\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
+1B732-2\t6\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
+1B733-1\t6\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
+1B734-2\t6\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.533\t204.65
+1B755-1\t4\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.494\t204.66
+1B757-3\t4\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.494\t204.66
+8B416-4\t11\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.302\t204.69
+8B417-1\t11\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.302\t204.69
+8B437-5\t12\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.713\t204.88
+8B439-2\t12\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.713\t204.88
+8B440-2\t12\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.713\t204.88
+8B625-1\t8\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.455\t204.71
+8B631-1\t8\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.455\t204.71
+8B794-2\t01a\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.545\t204.91
+8B829-2\t2\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
+8B833-4\t2\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
+8B835-2\t2\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
+8B836-3\t2\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.552\t204.70
+8B889-4\t7\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
+8B891-4\t7\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
+8B896-2\t7\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
+8B897-4\t7\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.118\t204.43
+8B906-1\t14\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.543\t204.88
+8B907-2\t14\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.543\t204.88
+8B910-3\t14\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.543\t204.88
+9B039-2\t10\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
+9B040-1\t10\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
+9B041-3\t10\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
+9B042-3\t10\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
+9B046-3\t10\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.64\t204.96
+9B109-2\t5\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
+9B110-4\t5\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
+9B113-4\t5\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
+9B117-2\t5\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.564\t204.66
+9B131-5\t01b\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.58\t204.94
+9B433-5\t01c\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.572\t204.94
+9B437-5\t01c\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.572\t204.94
+9B445-3\t13\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
+9B448-4\t13\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
+9B449-2\t13\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
+9B451-2\t13\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
+9B454-4\t13\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.161\t204.46
+9B483-2\t20\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
+9B486-4\t20\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
+9B489-2\t20\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
+9B490-3\t20\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
+9B492-4\t20\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.101\t204.44
+9B659-2\t15\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.086\t204.41
+9B660-4\t15\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.086\t204.41
+9B666-3\t17\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.145\t204.48
+9B669-2\t17\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.145\t204.48
+9B670-2\t17\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.145\t204.48
+9B902-3\t21\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.972\t204.38
+9B904-2\t21\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.972\t204.38
+9B905-2\t21\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t18.972\t204.38
+9B937-2\t18\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
+9B944-1\t18\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
+9B945-3\t18\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
+9B947-2\t18\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
+9B948-1\t18\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.42\t204.66
+9B949-2\t19\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
+9B950-3\t19\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
+9B953-3\t19\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
+9B955-2\t19\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
+9B959-3\t19\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.418\t204.66
+9B961-2\t16\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B962-3\t16\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B964-1\t16\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B965-2\t16\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B975-2\t22\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B976-1\t22\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B977-1\t22\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
+9B984-2\t22\t:This study:\t:Extrusive:Igneous:\t:Lava Flow:\t:Not Specified:\t19.072\t204.44
 >>>>>>>>>>
 tab delimited\tspecimens
 specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tmagn_volume\tint_corr\tint_treat_dc_field

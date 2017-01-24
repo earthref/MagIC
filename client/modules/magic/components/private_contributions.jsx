@@ -61,9 +61,50 @@ export default class extends React.Component {
   render() {
     //const privateContributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
     console.log('privateContributions', this.state.contributions, Cookies.get('user_id'));
-    return (
-      <div style={{marginTop: '-3em'}}>
-        <div ref="segment" className="ui bottom attached segment" style={{minHeight: '8em'}}>
+    if (!Cookies.get('user_id')) return (
+      <div>
+        <div className="ui top attached segment">
+          <div className="ui center aligned two column relaxed grid">
+            <div className="column">
+              <IconButton
+                className="borderless card" href="" portal="MagIC"
+                onClick={() => location.href = '//earthref.org/log-out/?next_url=/log-in%3Fnext_url=' + window.location.href}
+              >
+                <i className="icons">
+                  <i className="user icon"/>
+                  <i className="sign in corner icon"/>
+                </i>
+                <div className="title">Log In</div>
+              </IconButton>
+            </div>
+            <div className="ui vertical divider">
+              OR
+            </div>
+            <div className="column">
+              <IconButton
+                className="borderless card" href="" portal="MagIC"
+                onClick={() => location.href = '//earthref.org/register/'}
+              >
+                <i className="icons">
+                  <i className="user icon"/>
+                  <i className="plus corner icon"/>
+                </i>
+                <div className="title">Join EarthRef.org</div>
+              </IconButton>
+            </div>
+          </div>
+        </div>
+        <div className="ui bottom attached icon error message">
+          <i className="warning sign icon"/>
+          <div className="content">
+            Please log in to EarthRef.org before managing to your private workspace.
+          </div>
+        </div>
+      </div>
+    );
+    else return (
+      <div>
+        <div ref="segment" className="ui segment" style={{minHeight: '8em'}}>
           {!this.state.loaded ?
             <div ref="loading" className="ui inverted active dimmer">
               <div className="ui text loader">Loading</div>

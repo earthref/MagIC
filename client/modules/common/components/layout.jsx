@@ -2,19 +2,20 @@ import $ from 'jquery';
 import React from 'react';
 import Cookies from 'js-cookie';
 import Navigation from './navigation.jsx';
+import {portals} from '../../common/configs/portals';
 
 export default class extends React.Component {
 
   componentDidMount() {
     $(this.refs['sidebar menu']).sidebar({context:$(this.refs['layout']), transition:'overlay'});
-    if (!localStorage.getItem("modal 2016-10-29 beta"))
+    /*if (!localStorage.getItem("modal 2016-10-29 beta"))
       $(this.refs['beta modal']).modal({
         closable: false,
         onApprove: ($modal) => {
           localStorage.setItem("modal 2016-10-29 beta", true);
           $modal.modal('close');
         }
-      }).modal('show');
+      }).modal('show');*/
   }
 
   componentDidUpdate() {
@@ -68,9 +69,11 @@ export default class extends React.Component {
         <div className="ui top fixed secondary pointing menu right-menu">
           {Cookies.get('mail_id') && Cookies.get('name') ?
             <a className="ui button item" href="//earthref.org/edit-profile/">
+              <i className={'user icon ' + portals[portal].color}/>
               {Cookies.get('name')}
             </a> :
             <a className="ui button item" href={'//earthref.org/log-in/?next_url=' + window.location.href}>
+              <i className={'user icon ' + portals[portal].color}/>
               Login
             </a>
           }
@@ -80,22 +83,29 @@ export default class extends React.Component {
             <div className="left menu">
               <div className="ui vertical segment">
                 <div>
-                  Sponsored by <a href="https://www.nsf.gov">NSF</a>.
+                  Sponsored by <a href="https://www.nsf.gov" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>NSF</a>.
                 </div>
                 <div>
-                  Supported by <a href="https://scripps.ucsd.edu/">UCSD-SIO</a>
+                  Supported by <a href="https://scripps.ucsd.edu/" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>UCSD-SIO</a>
                   &nbsp;and&nbsp;
-                  <a href="http://ceoas.oregonstate.edu/">OSU-CEOAS</a>.
+                  <a href="http://ceoas.oregonstate.edu/" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>OSU-CEOAS</a>.
                 </div>
               </div>
+            </div>
+            <div className="menu">
+              <a className={'ui button compact basic ' + portals[portal].color} style={{margin: '0.5em 0'}}
+                 href={"mailto:webmaster@earthref.org?subject=[" + portal + " Help]%20I%27m%20having%20trouble%20with%20" + window.location.href}>
+                <i className="mail icon"/>
+                <b>Having trouble?</b> Email Us
+              </a>
             </div>
             <div className="right menu">
               <div className="ui right aligned vertical segment">
                 <div>
-                  Unless otherwise noted, <a href="https://earthref.org/">EarthRef.org</a>
+                  Unless otherwise noted, <a href="https://earthref.org/" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>EarthRef.org</a>
                 </div>
                 <div>
-                  content is licensed under <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+                  content is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>CC BY 4.0</a>.
                 </div>
               </div>
             </div>

@@ -610,7 +610,7 @@ export default class extends Runner {
       let newTableObject = this.model.tables[newTableName];
       let columnErrorReported = {}; //keep track of invalid columns we have seen
       if(!newTableObject) {
-        this._appendError(`table ${newTableName} is not defined in magic data model version ${this.version}`);
+        //this._appendError(`table ${newTableName} is not defined in magic data model version ${this.version}`);
         continue;
       }
 
