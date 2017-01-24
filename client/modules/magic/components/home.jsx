@@ -14,7 +14,16 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui header">
+        <div className="ui small icon floating message">
+          <i className="purple users icon"></i>
+          <div className="content">
+            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
+            Workshop: Earth's Magnetic Field from the Beginning</a>
+            MagIC is hosting a workshop on
+            January 24th-27th, 2017 at SIO in La Jolla, CA.
+          </div>
+        </div>
+        <div className="ui header" style={{display:'none'}}>
           <div className="ui column padded grid">
             <div className="ten wide column">
               <div className="ui piled segment items">
@@ -37,7 +46,7 @@ export default class extends React.Component {
                 </a>
               </div>
             </div>
-            <div className="six wide column">
+            <div className="six wide column" style={{display:'none'}}>
               <div className="ui header">
                 Recent Activity
               </div>
@@ -80,7 +89,7 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui hidden divider"></div>
-        <div className="ui five cards">
+        <div className="ui four cards">
           <IconButton className="card" href="/MagIC/search" portal="MagIC">
             <i className="large icons">
               <i className="database icon"/>
@@ -105,7 +114,7 @@ export default class extends React.Component {
             <div className="title">Upload</div>
             <div className="subtitle">Import data into your private workspace.</div>
           </IconButton>
-          <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC">
+          <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC" style={{display:'none'}}>
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner help icon"/>
@@ -154,7 +163,7 @@ export default class extends React.Component {
             </i>
             <div className="title">PmagPy<br/>Software</div>
           </IconButton>
-          <IconButton className="disabled borderless card" href="/vocabularies" portal="MagIC">
+          <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
             <i className="icons">
               <i className="file text icon"/>
               <i className="corner write icon"/>
