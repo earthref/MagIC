@@ -328,16 +328,19 @@ export default class extends Runner {
         summary.contribution.N_LOCATION_RESULTS += 1;
 
         _.keys(locationRow).map((column) => {
-          if (!summary.contribution[column.toUpperCase()])
-            summary.contribution[column.toUpperCase()] = {};
-          if (models[_.last(versions)].tables.locations.columns[column].type === 'List')
+          if (models[_.last(versions)].tables.locations.columns[column].type === 'List') {
+            if (!summary.contribution[column.toUpperCase()])
+              summary.contribution[column.toUpperCase()] = {};
             locationRow[column].split(':').map((val) => {
               if (_.trim(val) !== '')
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
-          else
-          if (_.trim(locationRow[column]) !== '')
+          } else {
+            if (_.trim(locationRow[column]) !== '')
+              if (!summary.contribution[column.toUpperCase()])
+                summary.contribution[column.toUpperCase()] = {};
             summary.contribution[column.toUpperCase()][_.trim(locationRow[column])] = true
+          }
         });
 
         let locationName = locationRow.location;
@@ -362,20 +365,31 @@ export default class extends Runner {
           summary.contribution[column] = _.keys(summary.contribution[column]).join(':');
       });
 
+      /*if (column === 'LAT' ||
+          column === 'LON'
+      ) {
+        summary.contribution[column + 'S'] = summary.contribution[column];
+        delete summary.contribution[column];
+      }*/
+
       if (summary.contribution.ER_LOCATION_NAMES) {
         summary.contribution.N_LOCATIONS = summary.contribution.ER_LOCATION_NAMES.split(':').length;
       }
       if (summary.contribution.ER_SITE_NAMES) {
         summary.contribution.N_SITES = summary.contribution.ER_SITE_NAMES.split(':').length;
+        delete summary.contribution.ER_SITE_NAMES;
       }
       if (summary.contribution.ER_SAMPLE_NAMES) {
         summary.contribution.N_SAMPLES = summary.contribution.ER_SAMPLE_NAMES.split(':').length;
+        delete summary.contribution.ER_SAMPLE_NAMES;
       }
       if (summary.contribution.ER_SPECIMEN_NAMES) {
         summary.contribution.N_SPECIMENS = summary.contribution.ER_SPECIMEN_NAMES.split(':').length;
+        delete summary.contribution.ER_SPECIMEN_NAMES;
       }
       if (summary.contribution.EXPERIMENT_NAMES) {
-        summary.contribution.N_EXPERIMENTS = summary.contribution.N_EXPERIMENTS.split(':').length;
+        summary.contribution.N_EXPERIMENTS = summary.contribution.EXPERIMENT_NAMES.split(':').length;
+        delete summary.contribution.EXPERIMENT_NAMES;
       }
     }
 

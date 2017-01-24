@@ -45,12 +45,13 @@ export default function (injectDeps, {FlowRouter}) {
 
   magicRoutes.route(`/search`, {
     name: 'magicSearch',
-    action({q}) {
+    action(params, queryParams) {
+      console.log('magic search', params, queryParams);
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="MagIC" fullWidth={true}>
             <Home portal="MagIC">
-              <MagICSearch search={q} bottomOffset={60}/>
+              <MagICSearch search={queryParams.q || ''} bottomOffset={60}/>
             </Home>
           </Layout>
         )

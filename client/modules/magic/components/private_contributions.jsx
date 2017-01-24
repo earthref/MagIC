@@ -51,11 +51,32 @@ export default class extends React.Component {
       if (c && c._id && doiData && doiData.status === 'ok') {
         Meteor.call('updateDOI', c._id, doiData.message,
           (error) => {
-            this.updateContributions();
+            //this.updateContributions();
           }
         );
       }
     });
+  }
+
+  updateES(c) {
+    console.log(JSON.parse($("#textarea").val()));
+    Meteor.call('updateES', c._es_id, JSON.parse($("#textarea").val()),
+      (error) => {
+        console.log('updated contribution', this.state._id, error);
+      }
+    );
+  }
+
+  preview() {
+
+  }
+
+  deactivate() {
+
+  }
+
+  activate() {
+
   }
 
   render() {
@@ -123,6 +144,17 @@ export default class extends React.Component {
                 let doi = this.state.dois && this.state.dois[i] || '';
                 return (
                   <div className="item" key={i}>
+                    {Cookies.get('mail_id') == '6869' ?
+                    <div>
+                      <textarea id="textarea" defaultValue={JSON.stringify(c._summary.contribution, null, '  ')} style={{width: '800px', height: '500px'}}></textarea>
+                      <button
+                        onClick={() => this.updateES(c)}
+                      >
+                        Update
+                      </button>
+                    </div>
+                    : undefined
+                    }
                     <div style={{display: 'flex', flexFlow: 'row wrap', marginTop: '0.5em', marginBottom: '0.5em'}}>
                       <div style={{flex: '1 1 auto'}}>
                         <div className={"ui labeled fluid input" + (doi ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
@@ -142,10 +174,28 @@ export default class extends React.Component {
                         <i className="add user icon"/>
                         Share
                       </div>
-                      <div className={portals['MagIC'].color + ' ui basic button' + (c.contribution && c.contribution[0] && c.contribution[0].doi ? '' : ' disabled')} style={{margin: '0 0 0 0.5em'}}>
+                      <div className={portals['MagIC'].color + ' ui button'} style={{margin: '0 0 0 0.5em'}}
+                           onClick={this.preview.bind(this)}
+                      >
+                        <i className="checkmark icon"/>
+                        Preview
+                      </div>
+                      <div className={portals['MagIC'].color + ' ui basic button' + (c.contribution && c.contribution[0] && c.contribution[0].doi ? '' : ' disabled')} style={{margin: '0 0 0 0.5em'}}
+                           onClick={this.activate.bind(this)}
+                      >
                         <i className="checkmark icon"/>
                         Activate
                       </div>
+                      {Cookies.get('user_id') === 'rminnett' ?
+                        <div className={portals['MagIC'].color + ' ui basic button' + (c.UPLOAD !== 0 ? '' : ' disabled')} style={{margin: '0 0 0 0.5em'}}
+                             onClick={this.deactivate.bind(this)}
+                        >
+                        <i className="checkmark icon"/>
+                        Deactivate
+                        </div>
+                        :
+                        undefined
+                      }
                       <div className={portals['MagIC'].color + ' ui icon button'} style={{margin: '0 0 0 0.5em'}}
                         onClick={(e) => {
                           Meteor.call('deleteContribution', c._id, '@' + Cookies.get('user_id'),

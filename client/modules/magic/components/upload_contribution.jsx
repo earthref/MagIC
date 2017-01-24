@@ -303,21 +303,22 @@ export default class MagICUploadContribution extends React.Component {
       });
   } else {
       const exporter = new ExportContribution({});
+      this.contribution.UPLOAD = 0;
       this.contribution._summary = this.contribution._summary || {contribution: {}};
       this.contribution._summary.contribution.FOLDER = (new Date()).getMilliseconds();
       this.contribution._summary.contribution.FILE_NAME = (this.contribution._summary.contribution.CITATION ||
                                                            this.contribution._summary.contribution.TITLE ||
                                                            'MagIC Contribution').slice(0, 30) + '.txt';
-      $.ajax({
-        type: "POST",
-        url: "https://earthref.org/cgi-bin/x-magic-upload-3.0-files.cgi",
-        data: {
-          file_dir: this.state._userid + '/' + this.contribution._summary.contribution.FOLDER,
-          file_name: this.contribution._summary.contribution.FILE_NAME,
-          file_content: exporter.toText(this.contribution)
-        }
-      }).done((response) => {
-        console.log('CGI', response);
+      //$.ajax({
+      //  type: "POST",
+      //  url: "https://earthref.org/cgi-bin/x-magic-upload-3.0-files.cgi",
+      //  data: {
+      //    file_dir: this.state._userid + '/' + this.contribution._summary.contribution.FOLDER,
+      //    file_name: this.contribution._summary.contribution.FILE_NAME,
+      //    file_content: exporter.toText(this.contribution)
+      //  }
+      //}).done((response) => {
+      //  console.log('CGI', response);
         if (this.state._id !== '')
           Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
             (error) => {
@@ -337,12 +338,12 @@ export default class MagICUploadContribution extends React.Component {
         this.setState({
           uploading: true
         });
-      }).fail(() => {
-        this.setState({
-          uploadError: "Failed to upload the contribution. Please try again in a few minutes.",
-          uploading: false
-        });
-      });
+      //}).fail(() => {
+      //  this.setState({
+      //    uploadError: "Failed to upload the contribution. Please try again in a few minutes.",
+      //    uploading: false
+      //  });
+      //});
     }
   }
 
