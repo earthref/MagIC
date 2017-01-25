@@ -10,10 +10,10 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: '',
-      _search: '',
+      search: this.props.search || '',
+      _search: this.props.search || '',
       levelNumber: 0,
-      sort: 'activated',
+      sort: 'INSERTED',
       sortDirection: -1,
       sortDefault: true,
       settingsVisible: true,
@@ -22,17 +22,17 @@ export default class extends React.Component {
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
       table: {width: '100%'},
-      input: {borderColor: '#888888'},
+      input: {borderColor: '#888888', borderLeft: 'none', borderRight: 'none'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
       segment: {padding: '0'},
-      downloadButton: {marginLeft: '-1px'},
+      searchButton: {marginLeft: '-1px', display: 'none'},
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
       searchInput: {padding: '1em', paddingBottom: 0},
       hideSettings: {paddingLeft: '1em'},
       //showSettings: {overflow: 'hidden', transition: 'all 0.5s ease'},
       hideSettingsIcon: {paddingLeft: '0.5em', paddingRight: '0.5em'},
-      settings: {whiteSpace: 'nowrap', overflowY: 'scroll', border: 'none', flex: 1 },
+      settings: {whiteSpace: 'nowrap', overflowY: 'auto', border: 'none', flex: 1 },
       settingsHeader: {margin: 0},
       filterBuckets: {paddingLeft: '0.5em', position: 'relative'},
       //scroller: {overflowY: 'scroll', background: 'white', padding: '1em', transition: 'all 0.5s ease', borderRadius: '0', boxShadow: 'none'}
@@ -99,26 +99,26 @@ export default class extends React.Component {
           <div className="content">Relevance</div>
         </a>
         <a className="item"
-           style={(this.getSortColumn() === 'activated' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
+           style={(this.getSortColumn() === 'INSERTED' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
            onClick={() => this.setState({
-             sort: 'activated',
-             sortDirection: (this.state.sort === 'activated' ? -1 * this.state.sortDirection : -1),
+             sort: 'INSERTED',
+             sortDirection: (this.state.sort === 'INSERTED' ? -1 * this.state.sortDirection : -1),
              sortDefault: false
            })}>
           <i className={'ui icon' +
-          (this.getSortColumn() === 'activated' ? ' arrow circle' +
+          (this.getSortColumn() === 'INSERTED' ? ' arrow circle' +
           (this.getSortDirection() === 1 ? ' up' : ' down') : '')}/>
           <div className="content">Upload Date</div>
         </a>
         <a className="item"
-           style={(this.getSortColumn() === 'max_ages' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
+           style={(this.getSortColumn() === 'MAX_AGES' ? _.merge({}, this.styles.a, {fontWeight: 'bold', color: 'black'}) : this.styles.a)}
            onClick={() => this.setState({
-             sort: 'max_ages',
-             sortDirection: (this.state.sort === 'max_ages' ? -1 * this.state.sortDirection : -1),
+             sort: 'MAX_AGES',
+             sortDirection: (this.state.sort === 'MAX_AGES' ? -1 * this.state.sortDirection : -1),
              sortDefault: false
            })}>
           <i className={'ui icon' +
-            (this.getSortColumn() === 'max_ages' ? ' arrow circle' +
+            (this.getSortColumn() === 'MAX_AGES' ? ' arrow circle' +
             (this.getSortDirection() === 1 ? ' up' : ' down') : '')}/>
           <div className="content">Age</div>
         </a>
@@ -130,12 +130,13 @@ export default class extends React.Component {
     const filters = [
       //{type: 'bbox'     , name: '', title: 'Geospatial Boundary'},
       //{type: 'histogram', name: 'magic.filters.contributions.reference_year', term: 'reference_year', title: 'Publication Year'},
-      {type: 'string'   , name: 'magic.filters.contributions.contributor'   , term: 'contributor'               , title: 'Contributor'     },
-      {type: 'string'   , name: 'magic.filters.contributions.external_db'   , term: 'external_database_ids.name', title: 'External DB'     },
-      {type: 'string'   , name: 'magic.filters.contributions.location_type' , term: 'location_type'             , title: 'Location Type'   },
-      {type: 'string'   , name: 'magic.filters.contributions.geologic_type' , term: 'geologic_types'            , title: 'Geologic Type'   },
-      {type: 'string'   , name: 'magic.filters.contributions.geologic_class', term: 'geologic_classes'          , title: 'Geologic Class'  },
-      {type: 'string'   , name: 'magic.filters.contributions.lithology'     , term: 'lithologies'               , title: 'Lithology'       }
+      {type: 'string'   , name: 'magic.filters.contributions.contributor'   , term: 'CONTRIBUTOR.raw'              , title: 'Contributor'     },
+      {type: 'string'   , name: 'magic.filters.contributions.external_db'   , term: 'EXTERNAL_DATABASE_NAMES-colon', title: 'External DB'     },
+      {type: 'string'   , name: 'magic.filters.contributions.location_type' , term: 'LOCATION_TYPES-colon'         , title: 'Location Type'   },
+      {type: 'string'   , name: 'magic.filters.contributions.geologic_type' , term: 'TYPE-colon'                   , title: 'Geologic Type'   },
+      {type: 'string'   , name: 'magic.filters.contributions.geologic_class', term: 'CLASS-colon'                  , title: 'Geologic Class'  },
+      {type: 'string'   , name: 'magic.filters.contributions.lithology'     , term: 'LITHOLOGY-colon'              , title: 'Lithology'       },
+      {type: 'string'   , name: 'magic.filters.contributions.method_code'   , term: 'METHOD_CODES-colon'           , title: 'Method Code'     }
     ];
     return (
       <div>
@@ -145,6 +146,7 @@ export default class extends React.Component {
               name={filter.name}
               title={filter.title}
               elasticsearchQuery={this.getSearchQuery()}
+              elasticsearchFilters={this.getFilters()}
               activeFilters={this.state.filters[filter.term]}
               onChange={(filters) => {
                 let allFilters = this.state.filters;
@@ -177,7 +179,7 @@ export default class extends React.Component {
 
   getFilters() {
     const filters = _.reduce(_.keys(this.state.filters).sort(), (filters, term) => {
-      filters.push(..._.map(this.state.filters[term], (key) => { return {term: {[term]: key}}}));
+      filters.push({bool: {should: _.map(this.state.filters[term], (key) => { return {term: {[term]: key}}})}});
       return filters;
     }, []);
     console.log('new filters', filters[0]);
@@ -195,35 +197,38 @@ export default class extends React.Component {
     ];
     levels[0].views = [
       {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
-      {name: 'Poles'    , type: 'list',    subscriptionName: 'magic.pages.contributions.poles'    , countSubscriptionName: 'magic.count.contributions.poles'    },
-      {name: 'Ages'     , type: 'list',    subscriptionName: 'magic.pages.contributions.ages'     , countSubscriptionName: 'magic.sum.contributions.ages'       },
-      {name: 'PMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
-      {name: 'RMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
-      {name: 'Plots'    , type: 'plots'  , subscriptionName: 'magic.pages.contributions.plots'    , countSubscriptionName: 'magic.sum.contributions.plots'      },
+      //{name: 'Poles'    , type: 'list',    subscriptionName: 'magic.pages.contributions.poles'    , countSubscriptionName: 'magic.count.contributions.poles'    },
+      //{name: 'Ages'     , type: 'list',    subscriptionName: 'magic.pages.contributions.ages'     , countSubscriptionName: 'magic.count.contributions.ages'       },
+      //{name: 'PMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.pmag'     , countSubscriptionName: 'magic.count.contributions.pmag'},
+      //{name: 'RMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.rmag'     , countSubscriptionName: 'magic.count.contributions.rmag'},
+      //{name: 'Plots'    , type: 'images' , subscriptionName: 'magic.pages.contributions.plots'    , countSubscriptionName: 'magic.count.contributions.plots'      },
+      //{name: 'Images'   , type: 'images' , subscriptionName: 'magic.pages.contributions.images'   , countSubscriptionName: 'magic.count.contributions.images'     },
       {name: 'Map'      , type: 'map'    , subscriptionName: 'magic.pages.contributions.map'      , countSubscriptionName: 'magic.count.contributions.map'      },
       //{name: 'Images'   , type: 'gallery', subscriptionName: 'magic.sum.contributions.images'     , countSubscriptionName: 'magic.sum.contributions.images'     },
     ];
     levels[1].views = [
       {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.count.locations.summaries'},
-      {name: 'Poles'    , type: 'list',    subscriptionName: 'magic.pages.contributions.poles'    , countSubscriptionName: 'magic.count.contributions.poles'    },
-      {name: 'Ages'     , type: 'list',    subscriptionName: 'magic.pages.locations.ages'         , countSubscriptionName: 'magic.sum.locations.ages'       },
-      {name: 'PMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
-      {name: 'RMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
-      {name: 'Plots'    , type: 'plots'  , subscriptionName: 'magic.pages.locations.plots'        , countSubscriptionName: 'magic.sum.locations.plots'      },
+      {name: 'Poles'    , type: 'list',    subscriptionName: 'magic.pages.locations.poles'        , countSubscriptionName: 'magic.count.locations.poles' ,   isPoles: true},
+      //{name: 'Ages'     , type: 'list',    subscriptionName: 'magic.pages.locations.ages'         , countSubscriptionName: 'magic.sum.locations.ages'       },
+      //{name: 'PMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      //{name: 'RMag'     , type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
+      //{name: 'Plots'    , type: 'plots'  , subscriptionName: 'magic.pages.locations.plots'        , countSubscriptionName: 'magic.sum.locations.plots'      },
       //{name: 'Images'   , type: 'gallery', subscriptionName: 'magic.sum.contributions.images'     , countSubscriptionName: 'magic.sum.contributions.images'     },
       {name: 'Map'      , type: 'map'    , subscriptionName: 'magic.pages.locations.map'          , countSubscriptionName: 'magic.count.locations.map'      }
     ];
     levels[2].views = [
-      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.sites.summaries'        , countSubscriptionName: 'magic.sum.sites.summaries'}
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.sites.summaries'        , countSubscriptionName: 'magic.count.sites.summaries'},
+      {name: 'Map'      , type: 'map'    , subscriptionName: 'magic.pages.sites.map'          , countSubscriptionName: 'magic.count.sites.map'      }
     ];
     levels[3].views = [
-      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.sum.samples.summaries'}
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.samples.summaries'    , countSubscriptionName: 'magic.count.samples.summaries'},
+      {name: 'Map'      , type: 'map'    , subscriptionName: 'magic.pages.samples.map'          , countSubscriptionName: 'magic.count.samples.map'      }
     ];
     levels[4].views = [
-      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.sum.specimens.summaries'}
+      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.specimens.summaries'    , countSubscriptionName: 'magic.count.specimens.summaries'}
     ];
     levels[5].views = [
-      {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.locations.summaries'    , countSubscriptionName: 'magic.sum.measurements.summaries'}
+      {name: 'Summaries', type: 'list'   , subscriptionName: ''    , countSubscriptionName: 'magic.sum.measurements.summaries'}
     ];
 
     return (
@@ -232,7 +237,7 @@ export default class extends React.Component {
           {levels.map((level, i) =>
             <div key={i} className={(this.state.levelNumber === i ? 'active ' : '') + 'item'}
                  style={(this.state.levelNumber === i ? this.styles.activeTab : this.styles.a)}
-                 onClick={() => this.setState({levelNumber: i})}>
+                 onClick={() => i < 5 && this.setState({levelNumber: i})}>
               {level.name}
               <div className="ui circular small basic label" style={this.styles.countLabel}>
                 <Count
@@ -245,10 +250,10 @@ export default class extends React.Component {
           )}
           <div className="right menu">
             <div className="item" style={{paddingRight: 0}}>
-              <div className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}}>
+              <a className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}} href="/MagIC/upload">
                 <i className="plus icon"/>
                 Upload Data
-              </div>
+              </a>
             </div>
           </div>
         </div>
@@ -266,11 +271,15 @@ export default class extends React.Component {
               style={this.styles.input}
               onChange={(e) => { this.setState({_search: e.target.value}); this.handleSearch(e.target.value); }}
             />
-            <div className={portals['MagIC'].color + ' ui basic icon button'}>
+            <div className={'ui basic black button'} onClick={(e) => { this.setState({_search: ''}); this.handleSearch(''); }}>
+              <i className="remove circle icon"/>
+              Clear Search
+            </div>
+            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.searchButton}>
               <i className="save icon"/>
               Save Search
             </div>
-            <div className={portals['MagIC'].color + ' ui basic icon button'} style={this.styles.downloadButton}>
+            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.searchButton}>
               <i className="download icon"/>
               Download Results
             </div>
@@ -287,7 +296,7 @@ export default class extends React.Component {
                     </div>
                     <div className="right menu">
                       <div className="item" style={this.styles.hideSettingsIcon}>
-                        <i className="ui chevron circle left black icon"/>
+                        <i className="ui icon"/>
                       </div>
                     </div>
                   </div>
@@ -299,6 +308,12 @@ export default class extends React.Component {
                     </h5>
                     {this.renderSortSettings()}
                     <div className="ui divider"></div>
+                    <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em'}}
+                       onClick={(e) => this.setState({filters: []})}
+                    >
+                      <i className="remove circle icon"/>
+                      Clear
+                    </div>
                     <h5 className="ui header" style={this.styles.settingsHeader}>
                       Filter By
                     </h5>

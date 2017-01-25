@@ -207,7 +207,7 @@ describe('magic.actions.upgrade_contribution', () => {
         }]
       };
       return upgradeContributionWarningTest(jsonOld,
-        /column .* in table .* was deleted in magic data model/i);
+        /column .* in table .* is unnecessary in magic data model/i);
     });
 
     it('should sort numeric merge keys', () => {
@@ -1122,6 +1122,62 @@ describe('magic.actions.upgrade_contribution', () => {
             lon_w: 5,
             lon_e: 10
           }]
+        };
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should prefer measurement specimen names over synthetic names', () => {
+        const jsonOld = {
+          contribution: [{
+            magic_version: '2.5'
+          }],
+          magic_measurements: {
+            columns: ['er_specimen_name', 'er_synthetic_name'],
+            rows: [
+              ['a', 'b'],
+              ['' , 'b'],
+              ['a',  '']
+            ]
+          }
+        };
+        const jsonNew = {
+          contribution: [{
+            magic_version: '3.0'
+          }],
+          measurements: {
+            columns: ['specimen'],
+            rows: [
+              ['a'],
+              ['b'],
+              ['a']
+            ]
+          }
+        };
+        return upgradeContributionJSONTest(jsonOld, jsonNew);
+      });
+
+      it('should map measurement synthetic names into specimen names', () => {
+        const jsonOld = {
+          contribution: [{
+            magic_version: '2.5'
+          }],
+          magic_measurements: {
+            columns: ['er_synthetic_name'],
+            rows: [
+              ['a']
+            ]
+          }
+        };
+        const jsonNew = {
+          contribution: [{
+            magic_version: '3.0'
+          }],
+          measurements: {
+            columns: ['specimen'],
+            rows: [
+              ['a']
+            ]
+          }
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
       });

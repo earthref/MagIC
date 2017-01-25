@@ -10,6 +10,7 @@ import MagICHome from './components/home.jsx';
 import MagICSearch from './components/search.jsx';
 import MagICDataModel from './components/data_model.jsx';
 import MagICMethodCodes from './components/method_codes.jsx';
+import MagICPrivateContributions from './components/private_contributions.jsx';
 import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
 import MagICUploadContribution from './components/upload_contribution.jsx';
 import MagICValidateContribution from './components/validate_contribution.jsx';
@@ -44,12 +45,13 @@ export default function (injectDeps, {FlowRouter}) {
 
   magicRoutes.route(`/search`, {
     name: 'magicSearch',
-    action({q}) {
+    action(params, queryParams) {
+      console.log('magic search', params, queryParams);
       mount(mounterWithContext, {
         content: () => (
           <Layout portal="MagIC" fullWidth={true}>
             <Home portal="MagIC">
-              <MagICSearch search={q} bottomOffset={60}/>
+              <MagICSearch search={queryParams.q || ''} bottomOffset={60}/>
             </Home>
           </Layout>
         )
@@ -67,7 +69,7 @@ export default function (injectDeps, {FlowRouter}) {
               <h3>
                 Manage your contributions:
               </h3>
-              <MagICSearch view="private" search={q}/>
+              <MagICPrivateContributions search={q}/>
             </Home>
           </Layout>
         )
@@ -159,7 +161,7 @@ export default function (injectDeps, {FlowRouter}) {
           <Layout portal="MagIC">
             <Home portal="MagIC">
               <h3>
-                Upload data into a private workspace:
+                Upload data into your private workspace:
               </h3>
               <MagICUploadContribution/>
             </Home>

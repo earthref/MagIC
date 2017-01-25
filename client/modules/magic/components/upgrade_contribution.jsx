@@ -5,13 +5,16 @@ import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
 import saveAs from 'save-as';
+import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx-style';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import ParseContribution from '../actions/parse_contribution';
 import UpgradeContribution from '../actions/upgrade_contribution';
+import SummarizeContribution from '../actions/summarize_contribution';
 import ValidateContribution from '../actions/validate_contribution';
 import ExportContribution from '../actions/export_contribution';
+import IconButton from '../../common/components/icon_button.jsx';
 
 export default class extends React.Component {
 
@@ -20,6 +23,7 @@ export default class extends React.Component {
     this.files = [];
     this.parser = new ParseContribution({});
     this.upgrader = new UpgradeContribution({});
+    this.summarizer = new SummarizeContribution({});
     this.initialState = {
       processingStep: 1,
       visibleStep: 1,
@@ -137,7 +141,6 @@ export default class extends React.Component {
     // Parse sequentially through the files.
     Promise.each(this.files, (file, i) => {
       return new Promise((resolve) => {
-        this.parser.resetProgress();
         this.parser.parsePromise({
           text: file.text,
           onProgress: (percent) => {
@@ -193,6 +196,7 @@ export default class extends React.Component {
         this.setState({upgradeProgress: percent});
       }
     }).then(() => {
+      this.summary = this.summarizer.summarize(this.upgrader.json);
       this.setState({
         isUpgraded: true
       });
@@ -202,19 +206,19 @@ export default class extends React.Component {
 
   saveText() {
     const exporter = new ExportContribution({});
+    //console.log(this.upgrader.json);
     let blob = new Blob([exporter.toText(this.upgrader.json)], {type: "text/plain;charset=utf-8"});
     saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.txt');
   }
 
   saveJSON() {
-    const exporter = new ExportContribution({});
     const blob = new Blob([JSON.stringify(this.upgrader.json, null, '\t')], {type: "text/plain;charset=utf-8"});
     saveAs(blob, 'Upgraded Contribution v' + _.last(versions) + '.json');
   }
 
   saveExcel() {
-    const Exporter = new ExportContribution({});
-    const workbook = Exporter.toExcel(this.upgrader.json);
+    const exporter = new ExportContribution({});
+    const workbook = exporter.toExcel(this.upgrader.json);
 
     // Prepare the workbook for output.
     const workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});
@@ -225,6 +229,59 @@ export default class extends React.Component {
     const workbookBlob = new Blob([workbookBuffer], {type: 'application/octet-stream'});
 
     saveAs(workbookBlob, 'Upgraded Contribution v' + _.last(versions) + '.xlsx');
+  }
+
+  upload() {
+    const exporter = new ExportContribution({});
+    try {
+      localStorage.setItem('Text to Upload', exporter.toText(this.upgrader.json));
+      location.href = '/MagIC/upload';
+    } catch(e) {
+      alert("This contribution is too large to pass to the Upload tool. Please save the contribution as a text file and select it in the Upload tool.");
+    }
+  }
+
+  renderAgesDetails() {
+    if ((this.upgrader.json && this.upgrader.json.ages) || (this.summary && this.summary.ages)) {
+      const nRows = (this.upgrader.json && this.upgrader.json.ages && this.upgrader.json.ages.length || 0);
+      let nAges = [];
+      if (this.summary && this.summary.ages && this.summary.ages.N_LOCATION_AGES)
+        nAges.push({
+          label: 'Location Age' + (this.summary.ages.N_LOCATION_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_LOCATION_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SITE_AGES)
+        nAges.push({
+          label: 'Site Age' + (this.summary.ages.N_SITE_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SITE_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SAMPLE_AGES)
+        nAges.push({
+          label: 'Sample Age' + (this.summary.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SAMPLE_AGES
+        });
+      if (this.summary && this.summary.ages && this.summary.ages.N_SPECIMEN_AGES)
+        nAges.push({
+          label: 'Specimen Age' + (this.summary.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
+          n: this.summary.ages.N_SPECIMEN_AGES
+        });
+      if (nRows > 0 || nAges.length > 0) return (
+        <tbody>
+        <tr>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}} className="top aligned" rowSpan={nAges.length || 1}><h4>Ages</h4></td>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}} className="top aligned" rowSpan={nAges.length || 1}>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}} className="right aligned">{nAges.length > 0 ? numeral(nAges[0].n).format('0,0') : undefined}</td>
+          <td style={{borderTop:'1px solid rgba(0, 0, 0, 0.1)'}}>{nAges.length > 0 ? nAges[0].label : undefined}</td>
+        </tr>
+        {nAges.slice(1).map((nAge, i) =>
+          <tr key={i}>
+            <td className="right aligned" style={{borderLeft:'1px solid rgba(0, 0, 0, 0.1)'}}>{numeral(nAge.n).format('0,0')}</td>
+            <td>{nAge.label}</td>
+          </tr>
+        )}
+        </tbody>
+      );
+    }
   }
 
   render() {
@@ -408,7 +465,7 @@ export default class extends React.Component {
                             <div className="two column row">
                               <div className="column">
                                 <div className={
-                                       (file.readErrors ? 'error ' : '') +
+                                       (file.readErrors && file.readErrors.length ? 'error ' : '') +
                                        'ui tiny purple progress'
                                      }
                                      data-percent={file.readProgress}>
@@ -492,7 +549,7 @@ export default class extends React.Component {
                       <div ref="from version"
                            className={(fromVersion ? 'black ' : 'red ') + 'ui inline dropdown compact basic icon button'}>
                         <div className="text">
-                          {fromVersion || 'Unknown'}
+                          {fromVersion || 'Unknown'}&nbsp;
                         </div>
                         <i className="dropdown icon"></i>
                         <div className="menu">
@@ -568,60 +625,55 @@ export default class extends React.Component {
                       Next Steps
                     </span>
                   </div>
-                  <div className="ui five column grid">
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} onClick={this.saveExcel.bind(this)}>
-                        <i className="icons">
-                          <i className="file excel outline icon"></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Save as Excel</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}}  onClick={this.saveText.bind(this)}>
-                        <i className="icons">
-                          <i className="file text outline icon"></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Save as Text</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/validate/">
-                        <i className="icons">
-                          <i className="file text outline icon"></i>
-                          <i className="purple corner help icon" style={{fontSize:'1.5em'}}></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Validate</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upload/">
-                        <i className="icons">
-                          <i className="table icon"></i>
-                          <i className="purple corner add icon" style={{fontSize:'1.5em'}}></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">Upload</div>
-                        </div>
-                      </a>
-                    </div>
-                    <div className="center aligned column">
-                      <a className="ui basic icon header button" style={{marginBottom:'0', boxShadow:'0px 0px 0px 1px #792f91 inset'}} href="/MagIC/upgrade/">
-                        <i className="icons">
-                          <i className="file text outline icon"></i>
-                          <i className="purple corner arrow up icon" style={{fontSize:'1.5em'}}></i>
-                        </i>
-                        <div className="content">
-                          <div className="ui purple header">New Upgrade</div>
-                        </div>
-                      </a>
-                    </div>
+                  <div className="ui five stackable cards">
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.saveExcel.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file excel outline icon"/>
+                      </i>
+                      <div className="title">Save as Excel</div>
+                      <div className="subtitle">Download the upgraded contribution as an Excel Worksheet.</div>
+                    </IconButton>
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file text outline icon"/>
+                      </i>
+                      <div className="title">Save as Text</div>
+                      <div className="subtitle">Download the upgraded contribution as a MagIC Text File.</div>
+                    </IconButton>
+                    <IconButton
+                      className="disabled borderless card" portal="MagIC" onClick={this.saveText.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file text outline icon"/>
+                        <i className="corner help icon"></i>
+                      </i>
+                      <div className="title">Validate</div>
+                      <div className="subtitle">Confirm that the upgraded contribution adheres to the MagIC Data Model.</div>
+                    </IconButton>
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.upload.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="table icon"/>
+                        <i className="corner add icon"></i>
+                      </i>
+                      <div className="title">Upload</div>
+                      <div className="subtitle">Upload the upgraded contribution to your private workspace.</div>
+                    </IconButton>
+                    <IconButton
+                      className="borderless card" portal="MagIC" onClick={this.restart.bind(this)}
+                    >
+                      <i className="icons">
+                        <i className="file text outline icon"/>
+                        <i className="corner arrow up icon"></i>
+                      </i>
+                      <div className="title">New Upgrade</div>
+                      <div className="subtitle">Restart the upgrading tool with another dataset.</div>
+                    </IconButton>
                   </div>
                   {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
                   <div></div>
@@ -641,7 +693,7 @@ export default class extends React.Component {
                           <thead>
                           <tr>
                             <th>{this.state.fromVersion} Table</th>
-                            <th>Rows</th>
+                            <th>N Rows</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -669,7 +721,8 @@ export default class extends React.Component {
                           <thead>
                           <tr>
                             <th>{toVersion} Table</th>
-                            <th>Rows</th>
+                            <th>N Rows</th>
+                            <th colSpan={2}>Assignment</th>
                           </tr>
                           </thead>
                           <tbody>
@@ -679,14 +732,27 @@ export default class extends React.Component {
                             let json = this.upgrader.json;
                             const tableName = models[toVersion].tables[t].label;
                             const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
-                            return (nRows > 0 ?
+                            const n = (this.summary && this.summary[t] && _.keys(this.summary[t]).length || 0);
+                            const nExperiments = (t === 'measurements' && this.summary && this.summary.contribution && this.summary.contribution.N_EXPERIMENTS || 0);
+                            return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
                               <tr key={i}>
                                 <td><h4>{tableName}</h4></td>
-                                <td>{numeral(nRows).format('0,0')}</td>
+                                <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+                                {t === 'measurements' ?
+                                  <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
+                                :
+                                  <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
+                                }
+                                {t === 'measurements' ?
+                                  <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
+                                :
+                                  <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
+                                }
                               </tr>
                             : undefined);
-                          })}
+                            })}
                           </tbody>
+                          {this.renderAgesDetails()}
                         </table>
                       </div>
                     </div>

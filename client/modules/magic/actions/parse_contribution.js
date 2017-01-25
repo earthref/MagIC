@@ -14,12 +14,6 @@ export default class extends Runner {
     this.json = {};
   }
 
-  resetProgress() {
-    super.reset();
-    this.lineNumber = 0;
-    this.progress = 0;
-  }
-
   parsePromise({text = undefined, nLinesBetweenProgressEvents = 1000, onProgress = undefined, format = 'magic'} = {}) {
 
     // Check for a valid input.
@@ -37,6 +31,8 @@ export default class extends Runner {
     this.columns = [];
     this.skipTable = false;
     this.tableLineNumber = 0;
+    this.lineNumber = 0;
+    this.progress = 0;
 
     return new Promise.each(
       _.chunk(text.match(/[^\r\n]+/g), nLinesBetweenProgressEvents),
@@ -57,7 +53,7 @@ export default class extends Runner {
     
   }
 
-  _parseLine(line, format) {
+  _parseLine(line, format, i) {
 
     // Skip empty lines.
     if (line === undefined || line.trim() === '') return;
@@ -85,7 +81,7 @@ export default class extends Runner {
 
       // Check table definition has at least 2 elements in it.
       if (tableDefinition.length < 2) {
-        this._appendError('Invalid table definition. Expected something like "tab[tab]measurements[new line]".');
+        this._appendError(`Invalid table definition on line ${i}. Expected something like "tab[tab]measurements[new line]".`);
         this.skipTable = true;
       }
 
@@ -93,14 +89,14 @@ export default class extends Runner {
       tableDefinition = tableDefinition.map((value) => { return value.trim(); });
 
       // Check the column delimiter is "tab".
-      if (!tableDefinition[0].match(/^tab(\s|$)/i)) {
-        this._appendError(`Unrecognized column delimiter "${tableDefinition[0]}". Expected "tab".`);
+      if (!tableDefinition[0].match(/^tab( delimited)?(\s|$)/i)) {
+        this._appendError(`Invalid table definition column delimiter "${tableDefinition[0]}" on line ${this.lineNumber}. Expected "tab" or "tab delimited".`);
         this.skipTable = true;
       }
 
       // Tab has been found, check for table name.
       else if (tableDefinition[1] === undefined || tableDefinition[1] === '') {
-        this._appendError(`No table name following tab delimiter.`);
+        this._appendError(`No table name following tab delimiter on line ${this.lineNumber}.`);
         this.skipTable = true;
       }
 
@@ -113,7 +109,7 @@ export default class extends Runner {
 
     }
 
-    // If this is the second line of a table, look for the column names.
+    // If this is the header line of a table, look for the column names.
     else if (
         (format === 'magic' && this.tableLineNumber === 2) ||
         (format === 'tsv' && this.tableLineNumber === 1)
@@ -124,7 +120,7 @@ export default class extends Runner {
 
       // Check for column names.
       if (this.columns.length === 0) {
-        this._appendError('No column names found.');
+        this._appendError(`No column names found on line ${this.lineNumber}.`);
         this.skipTable = true;
       }
 
@@ -133,13 +129,13 @@ export default class extends Runner {
 
       // Check for empty column names.
       if (_.findIndex(this.columns, '') !== -1) {
-        this._appendError('Empty column names are not allowed.');
+        this._appendError(`Empty column names are not allowed on line ${this.lineNumber}.`);
         this.skipTable = true;
       }
 
       // Check for duplicate column names.
       if (this.columns.length !== _.uniq(this.columns).length) {
-        this._appendError('Found duplicate column names.');
+        this._appendError(`Found duplicate column names on line ${this.lineNumber}.`);
         this.skipTable = true;
       }
 
@@ -158,7 +154,7 @@ export default class extends Runner {
 
       // Check there are enough column names.
       if (values.length > this.columns.length) {
-        this._appendError('More values found than columns.');
+        this._appendError(`More values found than columns on line ${this.lineNumber}: ${line}`);
         this.skipTable = true;
       }
 

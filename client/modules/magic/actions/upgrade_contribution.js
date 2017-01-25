@@ -305,87 +305,102 @@ export default class extends Runner {
             this.jsonOld['pmag_results'] = resultsNew;
           }
 
-          if (jsonTableOld === 'magic_measurements') {
+        }
 
-            // Check that the magic_measurements table has a list of columns and a list or rows.
-            if (!Array.isArray(this.jsonOld['magic_measurements'].columns) ||
-                !Array.isArray(this.jsonOld['magic_measurements'].rows)) {
-              this._appendError(`Table "${jsonTableOld}" ` +
-                `has not been parsed properly.`);
-            }
+        if (jsonTableOld === 'magic_measurements') {
 
-            else {
-
-              // Create a measurements table.
-              this.jsonNew['measurements'] = { columns: [], rows: [] };
-
-              // Map the magic_measurements columns into measurements columns.
-              let pullIdxs = [];
-              for (let columnIdx in this.jsonOld['magic_measurements'].columns) {
-
-                let jsonColumnOld = this.jsonOld['magic_measurements'].columns[columnIdx];
-
-                // Check that the old column is defined in the old data model.
-                if (!this.modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld]) {
-                  if (!this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
-                    this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-                      `is not defined in MagIC Data Model version ${this.versionOld}.`);
-                  this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
-                  pullIdxs.push(columnIdx);
-                  continue;
-                }
-
-                // Check that the old table and column are defined in the new data model.
-                if (!this.upgradeMap[jsonTableOld] || !this.upgradeMap[jsonTableOld][jsonColumnOld]) {
-                  if (!this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
-                    this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-                      `was deleted in MagIC Data Model version ${this.versionNew}.`);
-                  this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
-                  pullIdxs.push(columnIdx);
-                  continue;
-                }
-
-                if (jsonColumnOld === 'measurement_time_zone')
-                  pullIdxs.push(columnIdx);
-                else
-                  this.jsonNew['measurements'].columns.push(
-                    this.upgradeMap[jsonTableOld][jsonColumnOld][0].column
-                  );
-                
-              }
-
-              // Map the magic_measurements rows into measurements rows.
-              let dateIdx = this.jsonOld['magic_measurements'].columns.indexOf('measurement_date');
-              let tzIdx   = this.jsonOld['magic_measurements'].columns.indexOf('measurement_time_zone');
-              this.jsonNew['measurements'].rows = this.jsonOld['magic_measurements'].rows.map((row) => {
-
-                // Convert dates into ISO 8601 timestamps.
-                if (dateIdx >= 0) {
-                  let f = "YYYY:MM:DD:hh:mm:ss.SSS";
-                  let tz = 'UTC';
-                  if (tzIdx >= 0) tz = row[tzIdx];
-                  if (tz === 'CDT') tz = 'CST6CDT';
-                  if (tz === 'PDT') tz = 'PST8PDT';
-                  if (tz === '+8 GMT') tz = 'PRC';
-                  if (tz === '0') tz = 'UTC';
-                  if (tz === 'SAN') tz = 'US/Pacific';
-                  row[dateIdx] = moment.tz(row[dateIdx], f, tz).tz('UTC').format();
-                }
-
-                // Remove indexes that should not be part of the measurements table.
-                _.pullAt(row, pullIdxs);
-                return row;
-
-              });
-
-            }
-
-            rowProgressCounter += this.jsonOld[jsonTableOld].length;
-            this.progress = versionIdx * versionPercentProgress + (versionPercentProgress * rowProgressCounter / rowsTotal);
-            if (this.onProgress) this.onProgress(this.progress);
-            return Promise.resolve();
+          // Check that the magic_measurements table has a list of columns and a list or rows.
+          if (!Array.isArray(this.jsonOld['magic_measurements'].columns) ||
+            !Array.isArray(this.jsonOld['magic_measurements'].rows)) {
+            this._appendError(`Table "${jsonTableOld}" ` +
+              `has not been parsed properly.`);
           }
 
+          else {
+
+            // Create a measurements table.
+            let newMeasurementsTableName = (this.versionNew === '3.0' ? 'measurements' : 'magic_measurements');
+            this.jsonNew[newMeasurementsTableName] = { columns: [], rows: [] };
+
+            // Map the magic_measurements columns into measurements columns.
+            let pullIdxs = [];
+            let dateIdx      = this.jsonOld['magic_measurements'].columns.indexOf('measurement_date');
+            let tzIdx        = this.jsonOld['magic_measurements'].columns.indexOf('measurement_time_zone');
+            let specimenIdx  = this.jsonOld['magic_measurements'].columns.indexOf('er_specimen_name');
+            let syntheticIdx = this.jsonOld['magic_measurements'].columns.indexOf('er_synthetic_name');
+            for (let columnIdx in this.jsonOld['magic_measurements'].columns) {
+
+              let jsonColumnOld = this.jsonOld['magic_measurements'].columns[columnIdx];
+
+              // Check that the old column is defined in the old data model.
+              if (!this.modelOld['tables'][jsonTableOld]['columns'][jsonColumnOld]) {
+                if (!this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld])
+                  this._appendError(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                    `is not defined in MagIC Data Model version ${this.versionOld}.`);
+                this.undefinedTableColumnErrors[jsonTableOld + '.' + jsonColumnOld] = true;
+                pullIdxs.push(columnIdx);
+                continue;
+              }
+
+              // Check that the old table and column are defined in the new data model.
+              if (!this.upgradeMap[jsonTableOld] || !this.upgradeMap[jsonTableOld][jsonColumnOld]) {
+                if (!this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
+                  this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
+                    `is unnecesary in MagIC Data Model version ${this.versionNew}.`);
+                this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
+                pullIdxs.push(columnIdx);
+                continue;
+              }
+
+              if (this.versionNew === '3.0' && jsonColumnOld === 'measurement_time_zone' || jsonColumnOld === 'er_synthetic_name')
+                pullIdxs.push(columnIdx);
+              else
+                this.jsonNew[newMeasurementsTableName].columns.push(
+                  this.upgradeMap[jsonTableOld][jsonColumnOld][0].column
+                );
+
+            }
+
+            // If there are synthetic names and no specimen names, make space for the specimen names.
+            if (this.versionNew === '3.0' && syntheticIdx >= 0 && specimenIdx === -1)
+              this.jsonNew[newMeasurementsTableName].columns.push('specimen');
+
+            // Map the magic_measurements rows into measurements rows.
+            this.jsonNew[newMeasurementsTableName].rows = this.jsonOld['magic_measurements'].rows.map((row) => {
+
+              // Convert dates into ISO 8601 timestamps.
+              if (this.versionNew === '3.0' && dateIdx >= 0) {
+                let f = "YYYY:MM:DD:hh:mm:ss.SSS";
+                let tz = 'UTC';
+                if (tzIdx >= 0) tz = row[tzIdx];
+                if (tz === 'CDT') tz = 'CST6CDT';
+                if (tz === 'PDT') tz = 'PST8PDT';
+                if (tz === '+8 GMT') tz = 'PRC';
+                if (tz === '0') tz = 'UTC';
+                if (tz === 'SAN') tz = 'US/Pacific';
+                row[dateIdx] = moment.tz(row[dateIdx], f, tz).tz('UTC').format();
+              }
+
+              // Merge synthetic names with the specimen names if they're empty.
+              if (this.versionNew === '3.0' && syntheticIdx >= 0) {
+                if (specimenIdx === -1)
+                  row.push(row[syntheticIdx]);
+                else if (row[specimenIdx] === '')
+                  row[specimenIdx] = row[syntheticIdx];
+              }
+
+              // Remove indexes that should not be part of the measurements table.
+              _.pullAt(row, pullIdxs);
+              return row;
+
+            });
+
+          }
+
+          rowProgressCounter += this.jsonOld[jsonTableOld].length;
+          this.progress = versionIdx * versionPercentProgress + (versionPercentProgress * rowProgressCounter / rowsTotal);
+          if (this.onProgress) this.onProgress(this.progress);
+          return Promise.resolve();
         }
 
         // Check that the old table is defined in the old data model.
@@ -468,7 +483,7 @@ export default class extends Runner {
           joinTable = 'locations';
         else
           this._appendWarning(`Row ${(parseInt(jsonRowOldIdx)+1)} in table "${jsonTableOld}" was deleted in ` +
-            `MagIC data model version ${this.versionNew} since it is a contribution-level result.`);
+            `MagIC Data Model version ${this.versionNew} since it is a contribution-level result.`);
       }
 
       // Record the type of relative intensity normalization and remove the associated method code.
@@ -846,7 +861,7 @@ export default class extends Runner {
       if (!this.upgradeMap[jsonTableOld] || !this.upgradeMap[jsonTableOld][jsonColumnOld]) {
         if (!this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld])
           this._appendWarning(`Column "${jsonColumnOld}" in table "${jsonTableOld}" ` +
-            `was deleted in MagIC Data Model version ${this.versionNew}.`);
+            `is unnecessary in MagIC Data Model version ${this.versionNew}.`);
         this.deletedTableColumnWarnings[jsonTableOld + '.' + jsonColumnOld] = true;
         continue;
       }
