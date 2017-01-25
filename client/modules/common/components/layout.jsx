@@ -70,7 +70,7 @@ export default class extends React.Component {
               <div className="description">
                 <div className="ui header">The EarthRef MagIC Site is under active development.</div>
                 <p>While we fix a few issues with features that are incompatible with Safari, please use Chrome or Firefox.</p>
-                <p>For questions and comments, please contact us (<a href="mailto:webmaster@earthref.org">webmaster@earthref.org</a>) or Rupert (<a href="mailto:rminnett@earthref.org">rminnett@earthref.org</a>).</p>
+                <p>For questions and comments, please contact Nick (<a href="mailto:njarboe@ucsd.edu">njarboe@ucsd.edu</a>) or Rupert (<a href="mailto:rminnett@earthref.org">rminnett@earthref.org</a>).</p>
               </div>
             </div>
             <div className="actions">
