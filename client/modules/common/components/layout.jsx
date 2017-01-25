@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import React from 'react';
 import Cookies from 'js-cookie';
+import isSafari from 'is-safari';
 import Navigation from './navigation.jsx';
 import {portals} from '../../common/configs/portals';
 
@@ -16,6 +17,14 @@ export default class extends React.Component {
           $modal.modal('close');
         }
       }).modal('show');*/
+    if (isSafari && !localStorage.getItem("modal 2017-01-25 safari"))
+     $(this.refs['safari modal']).modal({
+       closable: false,
+       onApprove: ($modal) => {
+         localStorage.setItem("modal 2017-01-25 safari", true);
+         $modal.modal('close');
+       }
+     }).modal('show');
   }
 
   componentDidUpdate() {
@@ -53,6 +62,24 @@ export default class extends React.Component {
                 </div>
               </div>
             </div>
+            <div ref="safari modal" className="ui modal">
+            <h1 className="ui centered header">
+              Temporary Safari Warning
+            </h1>
+            <div className="content">
+              <div className="description">
+                <div className="ui header">The EarthRef MagIC Site is under active development.</div>
+                <p>While we fix a few issues with features that are incompatible with Safari, please use Chrome or Firefox.</p>
+                <p>For questions and comments, please contact us (<a href="mailto:webmaster@earthref.org">webmaster@earthref.org</a>) or Rupert (<a href="mailto:rminnett@earthref.org">rminnett@earthref.org</a>).</p>
+              </div>
+            </div>
+            <div className="actions">
+              <div className="ui purple right labeled icon approve button">
+                OK
+                <i className="checkmark icon"></i>
+              </div>
+            </div>
+          </div>
             {this.props.children}
           </div>
         </div>

@@ -5,6 +5,7 @@ import React from 'react';
 import Promise from 'bluebird';
 import Dropzone from 'react-dropzone';
 import saveAs from 'save-as';
+import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx-style';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';

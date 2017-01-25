@@ -3,9 +3,9 @@ import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
 import GoogleStaticMap from '../../common/components/google_static_map';
-import saveAs from 'save-as';
-import XLSX from 'xlsx-style';
-import ExportContribution from '../actions/export_contribution';
+//import saveAs from 'save-as';
+//import XLSX from 'xlsx-style';
+//import ExportContribution from '../actions/export_contribution';
 
 export default class extends React.Component {
 

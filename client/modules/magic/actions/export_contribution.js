@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import jQuery from 'jquery';
-import jszip from 'jszip'; // not used, but makes xlsx-style happy
+import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx-style';
 import Runner from '../../common/actions/runner.js';
 import ValidateContribution from './validate_contribution';

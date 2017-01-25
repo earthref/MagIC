@@ -8,7 +8,7 @@ import Promise from 'bluebird';
 import {Mongo} from 'meteor/mongo';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
-import jszip from 'jszip'; // not used, but makes xlsx-style happy
+import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx-style';
 import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';

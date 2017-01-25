@@ -43,6 +43,7 @@
     "eslint": "^3.12.2",
     "eslint-plugin-react": "^6.8.0",
     "filesize": "*",
+    "is-safari": "^1.0.0",
     "jquery": "*",
     "js-cookie": "^2.1.3",
     "jszip": "2.6.1",
