@@ -10,8 +10,8 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: '',
-      _search: '',
+      search: this.props.search || '',
+      _search: this.props.search || '',
       levelNumber: 0,
       sort: 'INSERTED',
       sortDirection: -1,
@@ -25,7 +25,7 @@ export default class extends React.Component {
       input: {borderColor: '#888888', borderLeft: 'none', borderRight: 'none'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
       segment: {padding: '0'},
-      searchButton: {marginLeft: '-1px'},
+      searchButton: {marginLeft: '-1px', display: 'none'},
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
       searchInput: {padding: '1em', paddingBottom: 0},

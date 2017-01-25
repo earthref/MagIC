@@ -33,10 +33,10 @@ export default class extends React.Component {
   renderMapThumbnail(c) {
     let paths = [];
 
-    c.BEGIN_LATS = c.BEGIN_LATS || c.LAT_S || c.LAT;
-    c.END_LATS   = c.END_LATS   || c.LAT_N || c.LAT;
-    c.BEGIN_LONS = c.BEGIN_LONS || c.LON_W || c.LON;
-    c.END_LONS   = c.END_LONS   || c.LON_E || c.LON;
+    c.BEGIN_LATS = c.BEGIN_LATS || c.LAT_S || c.LATS;
+    c.END_LATS   = c.END_LATS   || c.LAT_N || c.LATS;
+    c.BEGIN_LONS = c.BEGIN_LONS || c.LON_W || c.LONS;
+    c.END_LONS   = c.END_LONS   || c.LON_E || c.LONS;
 
     if (c.BEGIN_LATS !== undefined &&
         c.END_LATS   !== undefined && c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':').length == c.END_LATS  .replace(/(^:|:$)/g, '').split(':').length &&
@@ -85,9 +85,9 @@ export default class extends React.Component {
 
   renderAge(c) {
     let avg_ages = c.AVERAGE_AGE,
-        min_ages = c.MIN_AGES || c.AVERAGE_AGE_LOW || (c.AGE && _.min(c.AGE.split(':'))),
-        max_ages = c.MAX_AGES || c.AVERAGE_AGE_HIGH || (c.AGE && _.max(c.AGE.split(':')));
-    let n_ages = c.N_AGES || c.AVERAGE_NN || (c.AGE && c.AGE.split(':').length);
+        min_ages = c.MIN_AGES || c.AVERAGE_AGE_LOW || (c.AGES && _.min(c.AGES.split(':'))),
+        max_ages = c.MAX_AGES || c.AVERAGE_AGE_HIGH || (c.AGES && _.max(c.AGES.split(':')));
+    let n_ages = c.N_AGES || c.AVERAGE_NN || (c.AGES && c.AGES.split(':').length);
     let age_unit = c.AVERAGE_AGE_UNIT || c.AGE_UNIT;
     if (avg_ages || min_ages && max_ages) {
       if (min_ages < 0 && max_ages < 0)
@@ -162,10 +162,12 @@ export default class extends React.Component {
     if (c.TERRANE) geologic.push(c.TERRANE.replace(/(^:|:$)/g, '').split(':'));
     if (c.GEOLOGICAL_PROVINCE_SECTION) geologic.push(c.GEOLOGICAL_PROVINCE_SECTION.replace(/(^:|:$)/g, '').split(':'));
     if (c.SETTING) geologic.push(c.SETTING.replace(/(^:|:$)/g, '').split(':'));
+    if (c.LOCATION_TYPE) geologic.push(c.LOCATION_TYPE.replace(/(^:|:$)/g, '').split(':'));
     let geographic = [];
     if (c.COUNTRY) geographic.push(c.COUNTRY.replace(/(^:|:$)/g, '').split(':'));
     if (c.REGION) geographic.push(c.REGION.replace(/(^:|:$)/g, '').split(':'));
     if (c.VILLAGE_CITY) geographic.push(c.VILLAGE_CITY.replace(/(^:|:$)/g, '').split(':'));
+    if (c.LOCATION) geographic.push(c.LOCATION.replace(/(^:|:$)/g, '').split(':'));
     let oceanographic = [];
     if (c.CONTINENT_OCEAN) oceanographic.push(c.CONTINENT_OCEAN.replace(/(^:|:$)/g, '').split(':'));
     if (c.OCEAN_SEA) oceanographic.push(c.OCEAN_SEA.replace(/(^:|:$)/g, '').split(':'));
@@ -211,7 +213,7 @@ export default class extends React.Component {
                    )}
                 >
                   <i className="ui file text outline icon"/> Download
-                </a>}
+                </a>
               </div>
               <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
@@ -250,7 +252,7 @@ export default class extends React.Component {
               {c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {this.renderPole(c)}
               </div>}
-              <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                 {this.renderAge(c)}
               </div>
               <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
@@ -268,6 +270,11 @@ export default class extends React.Component {
                       _.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
                       (_.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
                     </span> : undefined)}
+              </div>
+              <div style={{marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
+                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
+                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi' + c.DOI}>{'earthref.org/MagIC/' + c.DOI}</a><br/></span> : undefined)}
+                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
               </div>
             </div>
           </div>

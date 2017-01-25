@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import Fiber from 'fibers';
+import uuid from 'uuid';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
@@ -44,7 +45,27 @@ export default function () {
       s.contribution.INSERTED = c._inserted;
       c._summary = s;
 
-      console.log('insertContribution', c.contribution);
+      c._es_id = uuid.v4();
+
+      /*let es = {};
+      _.keys(c._summary.contribution, (k) => {
+        if (k !== 'LAT' &&
+          k !== 'LON' &&
+          k !== 'VGP_LAT' &&
+          k !== 'VGP_LON')
+          es[k] = c._summary.contribution[k];
+      });*/
+
+      //console.log('insertContribution', c.contribution);
+      esClient.index({
+        index: 'magic_v5', type: 'contributions_summaries',
+        id: c._es_id,
+        body: {UPLOAD: 1}
+      }, function (error, response) {
+        console.log('insert es, c._es_id', error, response);
+        if(error) console.trace(error);
+      });
+
       Collections['magic.private.contributions'].insert(c);
     },
     'updateContribution': function (id, contributor, user, mailid, name, c, s) {
@@ -80,7 +101,43 @@ export default function () {
       s.contribution.INSERTED = c._inserted;
       c._summary = s;
 
+      c._es_id = c._es_id || uuid.v4();
+
+      /*let es = {};
+      _.keys(c._summary.contribution, (k) => {
+        if (k !== 'LAT' &&
+          k !== 'LON' &&
+          k !== 'VGP_LAT' &&
+          k !== 'VGP_LON')
+          es[k] = c._summary.contribution[k];
+      });
+
+      esClient.update({
+        index: 'magic_v5', type: 'contributions_summaries',
+        id: c._es_id,
+        body: es
+      }, function (error, response) {
+        console.log('insert es, c._es_id', error, response);
+        if(error) console.trace(error);
+      });*/
+
       Collections['magic.private.contributions'].update(id, c);
+    },
+    'updateES': function (id, es) {
+
+      es.UPLOAD = 1;
+      //es.INSERTED = new Date();
+
+      esClient.update({
+        index: 'magic_v5', type: 'contributions_summaries',
+        id: id,
+        body: {
+          doc: es
+        }
+      }, function (error, response) {
+        console.log('insert es',id, error, response);
+        if(error) console.trace(error);
+      });
     },
     'updateDOI': function (id, doiData) {
       let c = Collections['magic.private.contributions'].findOne(id);
@@ -111,7 +168,8 @@ export default function () {
       if (doiData && doiData.author && doiData.author.length > 2) {
         c._summary.contribution.CITATION = doiData.author[0].family + ' et al.';
       }
-      c._summary.contribution.CITATION += ' (' + c._summary.contribution.YEAR + ')';
+      if (c._summary.contribution.YEAR)
+        c._summary.contribution.CITATION += ' (' + c._summary.contribution.YEAR + ')';
       c._summary.contribution.REFERENCE_HTML = '<b>' +
         doiData.author.map((a) => a.family + ', ' + a.given).join(', ') +
         ' (' + c._summary.contribution.YEAR + ').</b> ' +
