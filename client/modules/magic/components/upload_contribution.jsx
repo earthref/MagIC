@@ -6,6 +6,7 @@ import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
 import {Mongo} from 'meteor/mongo';
+import numeral from 'numeral';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
 import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
