@@ -16,12 +16,12 @@ const cache = {};
 export default function () {
 
   Meteor.publish('magic.private.contributions.summaries', function (contributor) {
-    return Collections['magic.private.contributions'].find({'_contributor': contributor, '_activated': false});
+    return Collections['magic.private.contributions'].find({});
   });
 
-  Meteor.publish('magic.contributions.summaries', function (contributor) {
-    return Collections['magic.contributions'].find({'_activated': true});
-  });
+  //Meteor.publish('magic.contributions.summaries', function (contributor) {
+  //  return Collections['magic.private.contributions'].find({'_activated': true});
+  //});
 
   _.forEach(collectionDefinitions.magic.filters, (levelDefinitions, level) => {
     _.forEach(levelDefinitions, (definition) => {
@@ -105,7 +105,7 @@ export default function () {
           type: definition.type,
           body: search
         }).then((resp) => {
-          console.log('count', definition.recordSet, resp.hits.total);
+          //console.log('count', definition.recordSet, resp.hits.total);
           this.added(definition.recordSet, 'id', {count: resp.hits.total});
           this.ready();
         }, function (err) {
@@ -167,11 +167,11 @@ export default function () {
   _.forEach(collectionDefinitions.magic.page, (levelDefinitions, level) => {
     _.forEach(levelDefinitions, (definition) => {
 
-      console.log(definition.recordSet);
+      //console.log(definition.recordSet);
 
       Meteor.publish(definition.recordSet, function (query, filters, sort, pageSize, pageNumber) {
 
-        console.log("pages", definition.recordSet);
+        //console.log("pages", definition.recordSet);
 
         let search = {
           from: 0,
@@ -200,7 +200,7 @@ export default function () {
         if (_.isInteger(pageSize)) search.size  = pageSize;
         if (_.isInteger(pageNumber)) search.from  = (pageNumber - 1) * search.size;
         if (search.size === 0) { delete search.from; delete search.size; }
-        console.log("pages", definition.recordSet, search.from, search.size, JSON.stringify(search.query.bool));
+        //console.log("pages", definition.recordSet, search.from, search.size, JSON.stringify(search.query.bool));
 
         cache[definition.recordSet] = cache[definition.recordSet] || {};
         esClient.search({
@@ -220,11 +220,11 @@ export default function () {
             if (cache[definition.recordSet][hit._id] === undefined) {
               this.added(definition.recordSet, hit._id, source);
               cache[definition.recordSet][hit._id] = source;
-              console.log("pages: added", definition.recordSet, search.from, search.size, hit._id);
+              //console.log("pages: added", definition.recordSet, search.from, search.size, hit._id);
             } else {
               if (!_.isEqual(source, cache[definition.recordSet][hit._id]))
                 this.changed(definition.recordSet, hit._id, source);
-                console.log("pages: changed", definition.recordSet, search.from, search.size, hit._id);
+                //console.log("pages: changed", definition.recordSet, search.from, search.size, hit._id);
             }
             /*try {
               Collections[definition.recordSet].upsert(hit._id, _.extend(hit._source, {_id: hit._id, _score: hit._score, _page: pageNumber}));
@@ -286,7 +286,7 @@ export default function () {
         if (_.isInteger(pageSize)) search.size  = pageSize;
         if (_.isInteger(pageNumber)) search.from  = (pageNumber - 1) * search.size;
         if (search.size === 0) { delete search.from; delete search.size; }
-        console.log("pages", definition.recordSet, search.from, search.size, JSON.stringify(search.query.bool));
+        //console.log("pages", definition.recordSet, search.from, search.size, JSON.stringify(search.query.bool));
 
         esClient.search({
           index: definition.index,

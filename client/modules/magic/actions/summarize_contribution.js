@@ -171,8 +171,8 @@ export default class extends Runner {
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
           else
-          if (_.trim(sampleRow[column]) !== '')
-            summary.contribution[column.toUpperCase()][_.trim(sampleRow[column])] = true
+            if (_.trim(sampleRow[column]) !== '')
+              summary.contribution[column.toUpperCase()][_.trim(sampleRow[column])] = true
         });
 
         let sampleName = sampleRow.sample;
@@ -251,8 +251,8 @@ export default class extends Runner {
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
           else
-          if (_.trim(siteRow[column]) !== '')
-            summary.contribution[column.toUpperCase()][_.trim(siteRow[column])] = true
+            if (_.trim(siteRow[column]) !== '')
+              summary.contribution[column.toUpperCase()][_.trim(siteRow[column])] = true
         });
 
         let siteName = siteRow.site;
@@ -336,10 +336,10 @@ export default class extends Runner {
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
           } else {
+            if (!summary.contribution[column.toUpperCase()])
+              summary.contribution[column.toUpperCase()] = {};
             if (_.trim(locationRow[column]) !== '')
-              if (!summary.contribution[column.toUpperCase()])
-                summary.contribution[column.toUpperCase()] = {};
-            summary.contribution[column.toUpperCase()][_.trim(locationRow[column])] = true
+              summary.contribution[column.toUpperCase()][_.trim(locationRow[column])] = true
           }
         });
 

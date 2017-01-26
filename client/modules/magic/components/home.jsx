@@ -1,17 +1,27 @@
 import React from 'react';
 import moment from 'moment';
 import IconButton from '../../common/components/icon_button.jsx';
+import {Collections} from '/lib/collections';
+import Cookies from 'js-cookie';
+import Summary from './search_summaries_list_item';
 
 export default class extends React.Component {
 
   constructor(props) {
     super(props);
     this.initialState = {
+      loaded: false
     };
     this.state = this.initialState;
+    Meteor.subscribe('magic.private.contributions.summaries','', () => {
+      console.log('subscription ready');
+      this.setState({loaded: true});
+    });
   }
 
   render() {
+    let contributions = Collections['magic.private.contributions'].find({'_activated': true}, {fields: {'_summary': 1}}).fetch();
+    console.log(contributions);
     return (
       <div>
         <div className="ui small icon floating message">
@@ -172,53 +182,26 @@ export default class extends React.Component {
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
-          MagIC Statistics
+          Recent Contributions
         </h2>
-        <div className="ui four cards">
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                7
-              </div>
-              <div className="label">
-                New<br/>Contributors
-              </div>
-              <span>This Quarter</span>
-            </div>
-          </IconButton>
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                4.2K
-              </div>
-              <div className="label">
-                Contribution<br/>Articles
-              </div>
-              <span>Publicly Visible</span>
-            </div>
-          </IconButton>
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                147.7K
-              </div>
-              <div className="label">
-                Sites or<br/>Synthetics
-              </div>
-              <span>Publicly Visible</span>
-            </div>
-          </IconButton>
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                25
-              </div>
-              <div className="label">
-                New or Updated<br/>Contributions
-              </div>
-              <span>This Month</span>
-            </div>
-          </IconButton>
+        <div  style={{position: 'relative', minHeight: '5em'}}>
+          <div ref="loading" className={"ui inverted dimmer" + (this.state.loaded ? '' : ' active')}>
+            <div className="ui text loader">Loading</div>
+          </div>
+          <div className="ui divided list" style={{margin: '0'}}>
+            {contributions.map((c,i) => {
+              console.log(c);
+              return (c._summary.contribution.CONTRIBUTOR_ID !== '6382' &&
+              c._summary.contribution.CONTRIBUTOR_ID !== '6434' &&
+              c._summary.contribution.CONTRIBUTOR_ID !== '5730' &&
+              c._summary.contribution.MAGIC_CONTRIBUTION_ID !== 11823 ?
+                <div className="item" key={i}>
+                  {c && c._summary && c._summary.contribution ?
+                    <Summary doc={c._summary.contribution}/> : undefined}
+                </div>
+              : undefined);
+            })}
+          </div>
         </div>
       </div>
     );
