@@ -190,20 +190,20 @@ export default function () {
             body: summary,
           }, function (error, response) {
             if (error) {
-              console.trace(err.message);
+              console.trace(error.message);
               this.error(new Meteor.Error(e, 'hey!'));
             }
           });
 
-        }, function (err) {
+        }, function (error) {
           if (error) {
-            console.trace(err.message);
+            console.trace(error.message);
             this.error(new Meteor.Error(e, 'hey!'));
           }
         });
       } else {
         if (error) {
-          console.trace(err.message);
+          console.trace(error.message);
           this.error(new Meteor.Error(e, 'hey!'));
         }
       }
@@ -302,7 +302,7 @@ export default function () {
       let nRemoved = Collections['magic.private.contributions'].remove({_id: id, _contributor: user});
       if (nRemoved < 1) {
         if (error) {
-          console.trace(err.message);
+          console.trace(error.message);
           this.error(new Meteor.Error(e, 'hey!'));
         }
       }
