@@ -318,6 +318,7 @@ export default class MagICUploadContribution extends React.Component {
       });
   } else {
         this.contribution._activated = false;
+        console.log('upload', this.contribution, this.state._id);
         if (this.state._id !== '')
           Meteor.call('updateContribution', this._id, this.contribution, this.summary,
             (error) => {

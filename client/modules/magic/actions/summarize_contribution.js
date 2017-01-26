@@ -87,7 +87,7 @@ export default class extends Runner {
         _.keys(specimenRow).map((column) => {
           if (!summary.contribution[column.toUpperCase()])
             summary.contribution[column.toUpperCase()] = {};
-          if (models[_.last(versions)].tables.specimens.columns[column].type === 'List')
+          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.specimens.columns[column].type === 'List')
             specimenRow[column].split(':').map((val) => {
               if (_.trim(val) !== '')
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
@@ -165,7 +165,7 @@ export default class extends Runner {
         _.keys(sampleRow).map((column) => {
           if (!summary.contribution[column.toUpperCase()])
             summary.contribution[column.toUpperCase()] = {};
-          if (models[_.last(versions)].tables.samples.columns[column].type === 'List')
+          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.samples.columns[column].type === 'List')
             sampleRow[column].split(':').map((val) => {
               if (_.trim(val) !== '')
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
@@ -245,7 +245,7 @@ export default class extends Runner {
         _.keys(siteRow).map((column) => {
           if (!summary.contribution[column.toUpperCase()])
             summary.contribution[column.toUpperCase()] = {};
-          if (models[_.last(versions)].tables.sites.columns[column].type === 'List')
+          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.sites.columns[column].type === 'List')
             siteRow[column].split(':').map((val) => {
               if (_.trim(val) !== '')
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
@@ -328,7 +328,7 @@ export default class extends Runner {
         summary.contribution.N_LOCATION_RESULTS += 1;
 
         _.keys(locationRow).map((column) => {
-          if (models[_.last(versions)].tables.locations.columns[column].type === 'List') {
+          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.locations.columns[column].type === 'List') {
             if (!summary.contribution[column.toUpperCase()])
               summary.contribution[column.toUpperCase()] = {};
             locationRow[column].split(':').map((val) => {
