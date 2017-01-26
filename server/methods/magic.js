@@ -80,13 +80,13 @@ export default function () {
 
 
       /*let es = {};
-      _.keys(c._summary.contribution, (k) => {
-        if (k !== 'LAT' &&
-          k !== 'LON' &&
-          k !== 'VGP_LAT' &&
-          k !== 'VGP_LON')
-          es[k] = c._summary.contribution[k];
-      });*/
+       _.keys(c._summary.contribution, (k) => {
+       if (k !== 'LAT' &&
+       k !== 'LON' &&
+       k !== 'VGP_LAT' &&
+       k !== 'VGP_LON')
+       es[k] = c._summary.contribution[k];
+       });*/
 
 
       Collections['magic.private.contributions'].insert(c);
@@ -181,30 +181,30 @@ export default function () {
           ]);
           summary.UPLOAD = 1;
           summary.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
-          summary.MONGO_ID = id;
+          //summary.MONGO_ID = id;
 
           //console.log('insertContribution', c.contribution);
           esClient.index({
             index: 'magic_v5', type: 'contributions_summaries',
-            id: c._es_id,
+            id: id,
             body: summary,
           }, function (error, response) {
             if (error) {
               console.trace(error.message);
-              this.error(new Meteor.Error(e, 'hey!'));
+              //this.error(new Meteor.Error(e, 'hey!'));
             }
           });
 
         }, function (error) {
           if (error) {
             console.trace(error.message);
-            this.error(new Meteor.Error(e, 'hey!'));
+            //this.error(new Meteor.Error(e, 'hey!'));
           }
         });
       } else {
         if (error) {
           console.trace(error.message);
-          this.error(new Meteor.Error(e, 'hey!'));
+          //this.error(new Meteor.Error(e, 'hey!'));
         }
       }
     },
@@ -303,7 +303,7 @@ export default function () {
       if (nRemoved < 1) {
         if (error) {
           console.trace(error.message);
-          this.error(new Meteor.Error(e, 'hey!'));
+          //this.error(new Meteor.Error(e, 'hey!'));
         }
       }
     }
