@@ -80,13 +80,13 @@ export default function () {
 
 
       /*let es = {};
-      _.keys(c._summary.contribution, (k) => {
-        if (k !== 'LAT' &&
-          k !== 'LON' &&
-          k !== 'VGP_LAT' &&
-          k !== 'VGP_LON')
-          es[k] = c._summary.contribution[k];
-      });*/
+       _.keys(c._summary.contribution, (k) => {
+       if (k !== 'LAT' &&
+       k !== 'LON' &&
+       k !== 'VGP_LAT' &&
+       k !== 'VGP_LON')
+       es[k] = c._summary.contribution[k];
+       });*/
 
 
       Collections['magic.private.contributions'].insert(c);
