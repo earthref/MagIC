@@ -192,8 +192,8 @@ export default class extends React.Component {
       { name: 'Locations'     },
       { name: 'Sites'         },
       { name: 'Samples'       },
-      { name: 'Specimens'     },
-      { name: 'Measurements'  }
+      { name: 'Specimens'     }//,
+      //{ name: 'Measurements'  }
     ];
     levels[0].views = [
       {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.contributions.summaries', countSubscriptionName: 'magic.count.contributions.summaries'},
@@ -227,9 +227,9 @@ export default class extends React.Component {
     levels[4].views = [
       {name: 'Summaries', type: 'list'   , subscriptionName: 'magic.pages.specimens.summaries'    , countSubscriptionName: 'magic.count.specimens.summaries'}
     ];
-    levels[5].views = [
-      {name: 'Summaries', type: 'list'   , subscriptionName: ''    , countSubscriptionName: 'magic.sum.measurements.summaries'}
-    ];
+    //levels[5].views = [
+    //  {name: 'Summaries', type: 'list'   , subscriptionName: ''    , countSubscriptionName: 'magic.sum.measurements.summaries'}
+    //];
 
     return (
       <div className="magic-search">

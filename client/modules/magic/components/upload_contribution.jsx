@@ -34,6 +34,7 @@ export default class MagICUploadContribution extends React.Component {
       importProgressTaps: 0,
       totalImportErrors: 0,
       _id: '',
+      _old: {},
       _name: 'My Contribution',
       _contributor: Cookies.get('name'),
       _userid: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
@@ -55,6 +56,8 @@ export default class MagICUploadContribution extends React.Component {
       if (this.files[i].fileReader)
         this.files[i].fileReader.abort();
     this.files = [];
+    this.contribution = {};
+    this.summary = {};
     this.setState(this.initialState);
   }
 
@@ -98,8 +101,9 @@ export default class MagICUploadContribution extends React.Component {
     $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
     $(this.refs['private contributions']).not('.ui-dropdown').addClass('ui-dropdown').dropdown({
       onChange: (value, text, $choice) => {
-        console.log('private contribution as changed', value, text, $choice);
-        this.setState({_id: value});
+        let old = (value === '' ? {} : Collections['magic.private.contributions'].findOne(value));
+        console.log('private contribution as changed', value, text, $choice, old);
+        this.setState({_id: value, _old: old}, () => this.reviewUpload());
       }
     });
     $(this.refs['private contributions']).dropdown('refresh');
@@ -110,8 +114,16 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   reviewUpload() {
-    if (!this.contribution) {
-      this.contribution = {};
+    //if (!this.contribution) {
+      this.contribution = this.state._old;
+      console.log('before', this.state._old, this.contribution);
+      for (let file of this.files) {
+        if (file.imported) file.imported.map((data) => {
+          if (data.table && data.columns && data.rows) {
+            if (this.contribution[data.table]) delete this.contribution[data.table];
+          }
+        });
+      }
       for (let file of this.files) {
         if (file.imported) file.imported.map((data) => {
           if (data.table && data.columns && data.rows) {
@@ -145,10 +157,12 @@ export default class MagICUploadContribution extends React.Component {
         });
       }
       this.summary = this.summarizer.summarize(this.contribution);
-    }
+      console.log('after', this.contribution, this.summary);
+    //}
     let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
     this.setState({
       totalParseErrors: totalParseErrors,
+      importProgressTaps: this.state.importProgressTaps + 1,
       visibleStep: (totalParseErrors > 0 ? 2 : 3)
     });
   }
@@ -302,25 +316,9 @@ export default class MagICUploadContribution extends React.Component {
         uploading: false
       });
   } else {
-      const exporter = new ExportContribution({});
-      this.contribution.UPLOAD = 0;
-      this.contribution._summary = this.contribution._summary || {contribution: {}};
-      this.contribution._summary.contribution.FOLDER = (new Date()).getMilliseconds();
-      this.contribution._summary.contribution.FILE_NAME = (this.contribution._summary.contribution.CITATION ||
-                                                           this.contribution._summary.contribution.TITLE ||
-                                                           'MagIC Contribution').slice(0, 30) + '.txt';
-      //$.ajax({
-      //  type: "POST",
-      //  url: "https://earthref.org/cgi-bin/x-magic-upload-3.0-files.cgi",
-      //  data: {
-      //    file_dir: this.state._userid + '/' + this.contribution._summary.contribution.FOLDER,
-      //    file_name: this.contribution._summary.contribution.FILE_NAME,
-      //    file_content: exporter.toText(this.contribution)
-      //  }
-      //}).done((response) => {
-      //  console.log('CGI', response);
+        this.contribution._activated = false;
         if (this.state._id !== '')
-          Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
+          Meteor.call('updateContribution', this._id, this.contribution, this.summary,
             (error) => {
               console.log('updated contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
@@ -866,7 +864,7 @@ export default class MagICUploadContribution extends React.Component {
                         Upload To
                       </div>
                       <div ref="private contributions" className="ui fluid selection dropdown">
-                        <input name="_id" type="hidden"/>
+                        <input name="_id" type="hidden" value={this.state._id}/>
                         <i className="dropdown icon"/>
                         <div className="text">A New Private Contribution</div>
                         <div className="menu">

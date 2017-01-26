@@ -3,9 +3,11 @@ import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
 import GoogleStaticMap from '../../common/components/google_static_map';
-//import saveAs from 'save-as';
+import saveAs from 'save-as';
 //import XLSX from 'xlsx-style';
-//import ExportContribution from '../actions/export_contribution';
+import ExportContribution from '../actions/export_contribution';
+import {Collections} from '/lib/collections';
+
 
 export default class extends React.Component {
 
@@ -180,6 +182,16 @@ export default class extends React.Component {
     );
   }
 
+  downloadMongo(mongo_id) {
+    let c = Collections['magic.private.contributions'].findOne(mongo_id);
+    let id = '';
+    if (c && c.contribution && c.contribution[0] && c.contribution[0].id)
+      id =  c.contribution[0].id;
+    const exporter = new ExportContribution({});
+    let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, 'MagIC Contribution ' + id + '.txt');
+  }
+
   render() {
     const c = this.props.doc;
     console.log('summary', this.props);
@@ -190,11 +202,11 @@ export default class extends React.Component {
           <div className="ui doubling grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
             <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
                 <span style={{fontSize:'small', fontWeight:'bold'}}>
-                  {c.CITATION && c.VERSION ? c.CITATION + ' v. ' + c.VERSION : c.TITLE}
+                  {c.CITATION ? c.CITATION + ' v. ' + (c.VERSION || '') : c.TITLE}
                 </span>
                 <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
                       dangerouslySetInnerHTML={{
-                        __html: (c.CITATION && c.VERSION && c.TITLE ? c.TITLE + ' ' : '') +
+                        __html: (c.CITATION && c.TITLE ? c.TITLE + ' ' : '') +
                         (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, '')
                       }}>
                 </span>
@@ -203,18 +215,29 @@ export default class extends React.Component {
                 </span>
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
-              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
-                   href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                   (c.FOLDER === 'zmab' ?
-                       `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
-                       :
-                       `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
-                   )}
+              {c.FOLDER && c.FILE_NAME ?
+                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                  <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                     href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                     (c.FOLDER === 'zmab' ?
+                         `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
+                         :
+                         `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
+                     )}
+                  >
+                    <i className="ui file text outline icon"/> Download
+                  </a>
+                </div>
+                :
+                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                <a className={'ui basic tiny fluid compact icon header button' + (c.MONGO_ID || c._id ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                onClick={() => { this.downloadMongo(c.MONGO_ID || c._id); return false; }}
                 >
-                  <i className="ui file text outline icon"/> Download
+                <i className="ui file text outline icon"/> Download
                 </a>
-              </div>
+                </div>
+              }
+
               <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
                 {(c.N_SITES        ? <a onClick={this.showData.bind(this)}>{c.N_SITES        + ' Site'        + (c.N_SITES        > 1 ? 's' : '')}<br/></a> : undefined)}
@@ -273,7 +296,7 @@ export default class extends React.Component {
               </div>
               <div style={{marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
-                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi' + c.DOI}>{'earthref.org/MagIC/' + c.DOI}</a><br/></span> : undefined)}
+                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi' + c.DOI}>{'earthref.org/MagIC/doi' + c.DOI}</a><br/></span> : undefined)}
                 {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
               </div>
             </div>

@@ -2161,16 +2161,16 @@ a:hover {
 *******************************/
 /* Site */
 ::-webkit-selection {
-  background-color: #ffffff;
-  color: rgba(0, 0, 0, 0.87);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 1);
 }
 ::-moz-selection {
-  background-color: #ffffff;
-  color: rgba(0, 0, 0, 0.87);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 1);
 }
 ::selection {
-  background-color: #ffffff;
-  color: rgba(0, 0, 0, 0.87);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: rgba(0, 0, 0, 1);
 }
 /* Form */
 textarea::-webkit-selection,

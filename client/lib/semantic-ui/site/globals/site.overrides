@@ -27,6 +27,11 @@
   transform: translateY(-50%) translateX(-42%) rotate(45deg);
 }
 
+::selection {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 1);
+}
+
 .ui.attached.steps .active.step.pointing.below:before {
   top: calc(100% + 1px);
 }
