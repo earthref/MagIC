@@ -500,8 +500,8 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   render() {
-    const privateContributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
-    console.log('privateContributions', privateContributions, Cookies.get('user_id'));
+    //const privateContributions = Collections['magic.private.contributions'].find({_contributor: '@' + Cookies.get('user_id'), _activated: false}, {'_inserted': -1}).fetch();
+    //console.log('privateContributions', privateContributions, Cookies.get('user_id'));
 
     const step = this.state.visibleStep;
     if (!this.state._contributor) return (
@@ -873,7 +873,7 @@ export default class MagICUploadContribution extends React.Component {
                           <div data-value="" className="item">
                             A New Private Contribution
                           </div>
-                          {Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch().map((c, i) =>
+                          {Collections['magic.private.contributions'].find({_contributor: '@' + Cookies.get('user_id'), _activated: false}, {'_inserted': -1}).fetch().map((c, i) =>
                             <div key={i} data-value={c._id} className="item">
                               <span className="description">{moment(c._inserted).calendar()}</span>
                               <span className="text">{c._name}</span>

@@ -35,7 +35,7 @@ export default class extends Runner {
     this.progress = 0;
 
     return new Promise.each(
-      _.chunk(text.match(/[^\r\n]+/g), nLinesBetweenProgressEvents),
+      _.chunk(text.match(/(\r\n|[\n\v\f\r\x85\u2028\u2029])/), nLinesBetweenProgressEvents),
       (lines, i, t) => {
         return new Promise((resolve) => {
           lines.forEach(line => this._parseLine(line, format));

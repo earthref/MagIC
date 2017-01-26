@@ -80,7 +80,7 @@ export default class extends React.Component {
   }
 
   updateContributions() {
-    let contributions = Collections['magic.private.contributions'].find({'_contributor': '@' + Cookies.get('user_id'), '_activated': false}, {'_inserted': -1}).fetch();
+    let contributions = Collections['magic.private.contributions'].find({'_contributor': '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch();
     let privateContributions = contributions.map((c, i) => {
       let privateContribution = {contribution: c, errors: []};
       if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
@@ -209,7 +209,7 @@ export default class extends React.Component {
                            }}/>
                         </div>
                       </div>
-                      <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
+                      <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
                            onClick={(e) => {
                              this.confirmActivate(c.contribution._id);
                            }}
