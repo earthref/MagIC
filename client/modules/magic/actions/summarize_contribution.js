@@ -27,7 +27,7 @@ export default class extends Runner {
 
         const experimentColumnIdx = contribution.measurements.columns.indexOf('experiment');
         let experimentName = measurementRow[experimentColumnIdx];
-        if (experimentName !== undefined && experimentName !== '') {
+        if (experimentName !== undefined && _.isString(experimentName) && experimentName !== '') {
           experimentName = experimentName.replace('.', '_');
           if (!summary.experiments[experimentName])
             summary.experiments[experimentName] = {};
@@ -44,7 +44,7 @@ export default class extends Runner {
 
           const specimenColumnIdx = contribution.measurements.columns.indexOf('specimen');
           let specimenName = measurementRow[specimenColumnIdx];
-          if (specimenName !== undefined && specimenName !== '') {
+          if (specimenName !== undefined && _.isString(specimenName) && specimenName !== '') {
             specimenName = specimenName.replace('.', '_');
             summary.experiments[experimentName].ER_SPECIMEN_NAME = specimenName;
             if (!summary.specimens[specimenName])
@@ -87,7 +87,7 @@ export default class extends Runner {
         _.keys(specimenRow).map((column) => {
           if (!summary.contribution[column.toUpperCase()])
             summary.contribution[column.toUpperCase()] = {};
-          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.specimens.columns[column].type === 'List')
+          if (models[_.last(versions)].tables.specimens.columns[column] && models[_.last(versions)].tables.specimens.columns[column].type === 'List')
             specimenRow[column].split(':').map((val) => {
               if (_.trim(val) !== '')
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
@@ -98,7 +98,7 @@ export default class extends Runner {
         });
 
         let specimenName = specimenRow.specimen;
-        if (specimenName !== undefined && specimenName !== '') {
+        if (specimenName !== undefined && _.isString(specimenName) && specimenName !== '') {
           specimenName = specimenName.replace('.', '_');
           if (!summary.specimens[specimenName])
             summary.specimens[specimenName] = {};
@@ -111,7 +111,7 @@ export default class extends Runner {
         }
 
         let sampleName = specimenRow.sample;
-        if (sampleName !== undefined && sampleName !== '') {
+        if (sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
           sampleName = sampleName.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
@@ -119,7 +119,7 @@ export default class extends Runner {
 
         // If this specimen belongs to a sample:
         if (specimenName !== undefined && specimenName !== '' &&
-            sampleName !== undefined && sampleName !== '') {
+            sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
           summary.specimens[specimenName].ER_SAMPLE_NAME = sampleName;
 
           // Increment the number of specimen results for this sample.
@@ -176,7 +176,7 @@ export default class extends Runner {
         });
 
         let sampleName = sampleRow.sample;
-        if (sampleName !== undefined && sampleName !== '') {
+        if (sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
           sampleName = sampleName.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
@@ -188,7 +188,7 @@ export default class extends Runner {
         }
 
         let siteName = sampleRow.site;
-        if (siteName !== undefined && siteName !== '') {
+        if (siteName !== undefined && _.isString(siteName) && siteName !== '') {
           siteName = siteName.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
@@ -196,7 +196,7 @@ export default class extends Runner {
 
         // If this sample belongs to a site:
         if (sampleName !== undefined && sampleName !== '' &&
-            siteName !== undefined && siteName !== '') {
+            siteName !== undefined && _.isString(siteName) && siteName !== '') {
           summary.samples[sampleName].ER_SITE_NAME = siteName;
 
           // Increment the number of sample results for this site.
@@ -245,7 +245,7 @@ export default class extends Runner {
         _.keys(siteRow).map((column) => {
           if (!summary.contribution[column.toUpperCase()])
             summary.contribution[column.toUpperCase()] = {};
-          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.sites.columns[column].type === 'List')
+          if (models[_.last(versions)].tables.sites.columns[column] && models[_.last(versions)].tables.sites.columns[column].type === 'List')
             siteRow[column].split(':').map((val) => {
               if (_.trim(val) !== '')
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
@@ -256,7 +256,7 @@ export default class extends Runner {
         });
 
         let siteName = siteRow.site;
-        if (siteName !== undefined && siteName !== '') {
+        if (siteName !== undefined && _.isString(siteName) && siteName !== '') {
           siteName = siteName.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
@@ -268,7 +268,7 @@ export default class extends Runner {
         }
 
         let locationName = siteRow.location;
-        if (locationName !== undefined && locationName !== '') {
+        if (locationName !== undefined && _.isString(locationName) && locationName !== '') {
           locationName = locationName.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};
@@ -276,7 +276,7 @@ export default class extends Runner {
 
         // If this site belongs to a location:
         if (siteName !== undefined && siteName !== '' &&
-            locationName !== undefined && locationName !== '') {
+            locationName !== undefined && _.isString(locationName) && locationName !== '') {
           summary.sites[siteName].ER_SITE_NAME = siteName;
 
           // Increment the number of site results for this location.
@@ -328,7 +328,7 @@ export default class extends Runner {
         summary.contribution.N_LOCATION_RESULTS += 1;
 
         _.keys(locationRow).map((column) => {
-          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.locations.columns[column].type === 'List') {
+          if (models[_.last(versions)].tables.locations.columns[column] && models[_.last(versions)].tables.locations.columns[column].type === 'List') {
             if (!summary.contribution[column.toUpperCase()])
               summary.contribution[column.toUpperCase()] = {};
             locationRow[column].split(':').map((val) => {
@@ -344,7 +344,7 @@ export default class extends Runner {
         });
 
         let locationName = locationRow.location;
-        if (locationName !== undefined && locationName !== '') {
+        if (locationName !== undefined && _.isString(locationName) && locationName !== '') {
           locationName = locationName.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};
@@ -398,7 +398,7 @@ export default class extends Runner {
       contribution.criteria.map((criteriaRow) => {
 
         let criterionName = criteriaRow.criterion;
-        if (criterionName !== undefined && criterionName !== '') {
+        if (criterionName !== undefined && _.isString(criterionName) && criterionName !== '') {
           criterionName = criterionName.replace('.', '_');
           if (!summary.criteria[criterionName])
             summary.criteria[criterionName] = {};
@@ -411,7 +411,7 @@ export default class extends Runner {
       summary.ages = summary.ages || {};
       contribution.ages.map((agesRow) => {
 
-        if (agesRow.specimen !== undefined && agesRow.specimen !== '') {
+        if (agesRow.specimen !== undefined && _.isString(agesRow.specimen) && agesRow.specimen !== '') {
           let specimenName = agesRow.specimen.replace('.', '_');
           if (!summary.specimens[specimenName])
             summary.specimens[specimenName] = {};
@@ -427,7 +427,7 @@ export default class extends Runner {
           summary.ages.N_SPECIMEN_AGES += 1;
         }
 
-        else if (agesRow.sample !== undefined && agesRow.sample !== '') {
+        else if (agesRow.sample !== undefined && _.isString(agesRow.sample) && agesRow.sample !== '') {
           let sampleName = agesRow.sample.replace('.', '_');
           if (!summary.samples[sampleName])
             summary.samples[sampleName] = {};
@@ -443,7 +443,7 @@ export default class extends Runner {
           summary.ages.N_SAMPLE_AGES += 1;
         }
 
-        else if (agesRow.site !== undefined && agesRow.site !== '') {
+        else if (agesRow.site !== undefined && _.isString(agesRow.site) && agesRow.site !== '') {
           let siteName = agesRow.site.replace('.', '_');
           if (!summary.sites[siteName])
             summary.sites[siteName] = {};
@@ -459,7 +459,7 @@ export default class extends Runner {
           summary.ages.N_SITE_AGES += 1;
         }
 
-        else if (agesRow.location !== undefined && agesRow.location !== '') {
+        else if (agesRow.location !== undefined && _.isString(agesRow.location) && agesRow.location !== '') {
           let locationName = agesRow.location.replace('.', '_');
           if (!summary.locations[locationName])
             summary.locations[locationName] = {};

@@ -137,8 +137,8 @@ export default class extends React.Component {
               <i className="file text outline icon"/>
               <i className="corner checkmark icon"/>
             </i>
-            <div className="title">Activate</div>
-            <div className="subtitle">Make your dataset publicly visible.</div>
+            <div className="title">Private Workspace</div>
+            <div className="subtitle">Manage your contributions.</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">

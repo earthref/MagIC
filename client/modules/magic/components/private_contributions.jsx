@@ -120,7 +120,7 @@ export default class extends React.Component {
   }
 
   render() {
-    //const privateContributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
+    const privateContributions = Collections['magic.private.contributions'].find({'_contributor': '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch();
     console.log('privateContributions', this.state.privateContributions, Cookies.get('user_id'));
     if (!Cookies.get('user_id')) return (
       <div className="private-contributions">
@@ -200,7 +200,7 @@ export default class extends React.Component {
                           <div className={"ui label" + (c.doi && c.contribution._doiData ? '' : ' red')}>
                             DOI
                           </div>
-                          <input type="text" default="None" value={c.doi}
+                          <input type="text" default="None" value={c.doi} readOnly={c._activated}
                                  onChange={(e) => {
                                    let privateContributions = this.state.privateContributions;
                                    privateContributions[i].doi = e.target.value;
@@ -209,6 +209,7 @@ export default class extends React.Component {
                            }}/>
                         </div>
                       </div>
+                      {!c._activated ?
                       <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
                            onClick={(e) => {
                              this.confirmActivate(c.contribution._id);
@@ -216,15 +217,16 @@ export default class extends React.Component {
                       >
                         <i className="checkmark icon"/>
                         Activate
-                      </div>
-                      <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
+                      </div> :undefined}
+                      {!c._activated ?
+                        <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
                         onClick={(e) => {
                           this.confirmDelete(c.contribution._id);
                         }}
                       >
                         <i className="close icon"/>
                         Delete
-                      </div>
+                      </div> :undefined}
                     </div>
                     {c.contribution._summary && c.contribution._summary.contribution ?
                       <Summary doc={c.contribution._summary.contribution}/> : undefined

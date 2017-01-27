@@ -229,12 +229,14 @@ export default class MagICUploadContribution extends React.Component {
 
     if (this.state.fileFormats[i] === 'magic') {
       if (this.files[i].text) {
+        this.files[i].text.replace('\r\n','\n');
         this.files[i].tableNames = [];
         this.files[i].data = [];
         this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
-          let tableName = table.match(/^tab( delimited)?\t(.+)\n/);
+          let tableName = table.match(/^tab( delimited)?\s*?\t(.+)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
+          console.log('table', table, tableName);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
-          this.files[i].data[j] = table.split('\n').map((line, j) => line.split('\t'));
+          this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
         });
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
@@ -242,14 +244,16 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'tsv') {
       if (this.files[i].text) {
-        this.files[i].data = this.files[i].text.split('\n').map((line, j) => line.split('\t'));
+        this.files[i].text.replace('\r\n','\n');
+        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'csv') {
       if (this.files[i].text) {
-        this.files[i].data = this.files[i].text.split('\n').map((line, j) => line.split(','));
+        this.files[i].text.replace('\r\n','\n');
+        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
       }
@@ -296,7 +300,7 @@ export default class MagICUploadContribution extends React.Component {
         if (data[rowIdx - nSkipRows].length < columnIdx - nSkipColumns + 1)
           _.times(columnIdx - nSkipColumns + 1 - data[rowIdx - nSkipRows].length,
             () => data[rowIdx - nSkipRows].push(''));
-        data[rowIdx - nSkipRows][columnIdx - nSkipColumns] = sheet[cellName].v;
+        data[rowIdx - nSkipRows][columnIdx - nSkipColumns] = _.trim(String(sheet[cellName].v));
       }
     }
 
