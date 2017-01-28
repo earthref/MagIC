@@ -35,7 +35,7 @@ export default class MagICUploadContribution extends React.Component {
       importProgressTaps: 0,
       totalImportErrors: 0,
       _id: '',
-      _old: {},
+      _existing_contribution: {},
       _name: 'My Contribution',
       _contributor: Cookies.get('name'),
       _userid: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
@@ -104,7 +104,11 @@ export default class MagICUploadContribution extends React.Component {
       onChange: (value, text, $choice) => {
         let old = (value === '' ? {} : Collections['magic.private.contributions'].findOne(value));
         console.log('private contribution as changed', value, text, $choice, old);
-        this.setState({_id: value, _old: old}, () => this.reviewUpload());
+        this.setState({
+          _id: value, 
+          _existing_contribution: (value === '' ? undefined : old),
+          _existing_summary: (value === '' ? undefined : this.summarizer.summarize(old))
+      }, () => this.reviewUpload());
       }
     });
     $(this.refs['private contributions']).dropdown('refresh');
@@ -115,51 +119,50 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   reviewUpload() {
-    //if (!this.contribution) {
-      this.contribution = this.state._old;
-      console.log('before', this.state._old, this.contribution);
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (this.contribution[data.table]) delete this.contribution[data.table];
-          }
-        });
-      }
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (data.table === 'measurements') {
-              /* this.contribution.experiments = {};
-              let experimentColumnIdx = data.columns.indexOf('experiment');
-              data.rows.map((row, i) => {
-                this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
-                  columns: data.columns,
-                  rows: []
-                };
-                this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
-              }); */
-              if (this.contribution.measurements !== undefined) {
-                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
-              } else {
-                this.contribution.measurements = {
-                  columns: data.columns,
-                  rows: data.rows
-                }
-              }
+    this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
+    console.log('before merging', this.state._existing_contribution, this.contribution);
+    for (let file of this.files) {
+      if (file.imported) file.imported.map((data) => {
+        if (data.table && data.columns && data.rows) {
+          if (this.contribution[data.table]) delete this.contribution[data.table];
+        }
+      });
+    }
+    for (let file of this.files) {
+      if (file.imported) file.imported.map((data) => {
+        if (data.table && data.columns && data.rows) {
+          if (data.table === 'measurements') {
+            /* this.contribution.experiments = {};
+            let experimentColumnIdx = data.columns.indexOf('experiment');
+            data.rows.map((row, i) => {
+              this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
+                columns: data.columns,
+                rows: []
+              };
+              this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
+            }); */
+            if (this.contribution.measurements !== undefined) {
+              file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
             } else {
-              this.contribution[data.table] = this.contribution[data.table] || [];
-              data.rows.map((row, i) =>
-                this.contribution[data.table].push(
-                  _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
-                )
-              );
+              this.contribution.measurements = {
+                columns: data.columns,
+                rows: data.rows
+              }
             }
+          } else {
+            this.contribution[data.table] = this.contribution[data.table] || [];
+            data.rows.map((row, i) =>
+              this.contribution[data.table].push(
+                _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
+              )
+            );
           }
-        });
-      }
-      this.summary = this.summarizer.summarize(this.contribution);
-      console.log('after', this.contribution, this.summary);
-    //}
+        }
+      });
+    }
+    this.summary = this.summarizer.summarize(this.contribution);
+    console.log('after merging', this.contribution, this.summary);
+
     let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
     this.setState({
       totalParseErrors: totalParseErrors,
@@ -324,7 +327,7 @@ export default class MagICUploadContribution extends React.Component {
         this.contribution._activated = false;
         console.log('upload', this.contribution, this.state._id);
         if (this.state._id !== '')
-          Meteor.call('updateContribution', this._id, this.contribution, this.summary,
+          Meteor.call('updateContribution', this.state._id, this.contribution, this.summary,
             (error) => {
               console.log('updated contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
@@ -456,29 +459,71 @@ export default class MagICUploadContribution extends React.Component {
     );
   }
 
-  renderAgesDetails() {
-    if ((this.contribution && this.contribution.ages) || (this.summary && this.summary.ages)) {
-      const nRows = (this.contribution && this.contribution.ages && this.contribution.ages.length || 0);
+  renderDetails(c, s) {
+    return (
+      <table className="ui very basic collapsing compact celled table" style={{display: 'inline'}}>
+        <thead>
+        <tr>
+          <th>Table</th>
+          <th>N Rows</th>
+          <th colSpan={2}>Assignment</th>
+        </tr>
+        </thead>
+        <tbody>
+        {_.sortBy(_.keys(models[_.last(versions)].tables),
+          (t) => { return models[_.last(versions)].tables[t].position; }
+        ).map((t,i) => {
+          let json = c;
+          const tableName = models[_.last(versions)].tables[t].label;
+          const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
+          const n = (s && s[t] && _.keys(s[t]).length || 0);
+          const nExperiments = (t === 'measurements' && s && s.contribution && s.contribution.N_EXPERIMENTS || 0);
+          return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
+            <tr key={i}>
+              <td><h4>{tableName}</h4></td>
+              <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+              {t === 'measurements' ?
+                <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
+                :
+                <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
+              }
+              {t === 'measurements' ?
+                <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
+                :
+                <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
+              }
+            </tr>
+            : undefined);
+        })}
+        </tbody>
+        {this.renderAgesDetails(c, s)}
+      </table>
+    )  ;
+  }
+  
+  renderAgesDetails(c, s) {
+    if ((c && c.ages) || (s && s.ages)) {
+      const nRows = (c && c.ages && c.ages.length || 0);
       let nAges = [];
-      if (this.summary && this.summary.ages && this.summary.ages.N_LOCATION_AGES)
+      if (s && s.ages && s.ages.N_LOCATION_AGES)
         nAges.push({
-          label: 'Location Age' + (this.summary.ages.N_LOCATION_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_LOCATION_AGES
+          label: 'Location Age' + (s.ages.N_LOCATION_AGES === 1 ? '' : 's'),
+          n: s.ages.N_LOCATION_AGES
         });
-      if (this.summary && this.summary.ages && this.summary.ages.N_SITE_AGES)
+      if (s && s.ages && s.ages.N_SITE_AGES)
         nAges.push({
-          label: 'Site Age' + (this.summary.ages.N_SITE_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_SITE_AGES
+          label: 'Site Age' + (s.ages.N_SITE_AGES === 1 ? '' : 's'),
+          n: s.ages.N_SITE_AGES
         });
-      if (this.summary && this.summary.ages && this.summary.ages.N_SAMPLE_AGES)
+      if (s && s.ages && s.ages.N_SAMPLE_AGES)
         nAges.push({
-          label: 'Sample Age' + (this.summary.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_SAMPLE_AGES
+          label: 'Sample Age' + (s.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
+          n: s.ages.N_SAMPLE_AGES
         });
-      if (this.summary && this.summary.ages && this.summary.ages.N_SPECIMEN_AGES)
+      if (s && s.ages && s.ages.N_SPECIMEN_AGES)
         nAges.push({
-          label: 'Specimen Age' + (this.summary.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_SPECIMEN_AGES
+          label: 'Specimen Age' + (s.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
+          n: s.ages.N_SPECIMEN_AGES
         });
       if (nRows > 0 || nAges.length > 0) return (
         <tbody>
@@ -917,47 +962,34 @@ export default class MagICUploadContribution extends React.Component {
                           </span>
                         </div>
                         <div className="ui basic segment">
-                          <div className="ui one column very relaxed stackable grid">
-                            <div className="center aligned column">
-                              <table className="ui very basic collapsing compact celled table" style={{display: 'inline'}}>
-                                <thead>
-                                <tr>
-                                  <th>Table</th>
-                                  <th>N Rows</th>
-                                  <th colSpan={2}>Assignment</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {_.sortBy(_.keys(models[_.last(versions)].tables),
-                                  (t) => { return models[_.last(versions)].tables[t].position; }
-                                ).map((t,i) => {
-                                  let json = this.contribution;
-                                  const tableName = models[_.last(versions)].tables[t].label;
-                                  const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
-                                  const n = (this.summary && this.summary[t] && _.keys(this.summary[t]).length || 0);
-                                  const nExperiments = (t === 'measurements' && this.summary && this.summary.contribution && this.summary.contribution.N_EXPERIMENTS || 0);
-                                  return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
-                                    <tr key={i}>
-                                      <td><h4>{tableName}</h4></td>
-                                      <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
-                                      {t === 'measurements' ?
-                                        <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
-                                        :
-                                        <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
-                                      }
-                                      {t === 'measurements' ?
-                                        <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
-                                        :
-                                        <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
-                                      }
-                                    </tr>
-                                    : undefined);
-                                })}
-                                </tbody>
-                                {this.renderAgesDetails()}
-                              </table>
+                          {this.state._existing_contribution && this.state._existing_summary ?
+                            <div className="ui two column very relaxed stackable grid">
+                              <div className="center aligned column">
+                                <div className="ui small header">
+                                  {this.state._name} Before Upload
+                                </div>
+                                <br/>
+                                {this.renderDetails(this.state._existing_contribution, this.state._existing_summary)}
+                              </div>
+                              <div className="ui vertical divider">
+                                <i className="circle arrow right icon"></i>
+                              </div>
+                              <div className="center aligned column">
+                                <div className="ui small header">
+                                  {this.state._name} <span className={}>After</span> Upload
+                                </div>
+                                <br/>
+                                {this.renderDetails(this.contribution, this.summary)}
+                              </div>
                             </div>
-                          </div>
+                          :
+                            <div className="ui one column very relaxed stackable grid">
+                              <div className="center aligned column">
+                                {this.renderDetails(this.contribution, this.summary)}
+                              </div>
+                            </div>
+                          }
+
                         </div>
                         {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
                         <div></div>

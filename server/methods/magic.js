@@ -89,7 +89,7 @@ export default function () {
        });*/
 
 
-      Collections['magic.private.contributions'].insert(c);
+      Collections['magic.private.contributions'].insert(c, (error) => { console.log('insert', error)});
     },
     'updateContribution': function (id, c, s) {
       c._summary = s;
@@ -105,13 +105,13 @@ export default function () {
         }
       }
 
-      Collections['magic.private.contributions'].update(id, c);
+      Collections['magic.private.contributions'].update(id, c, (error) => { console.log('update', error, id, _.keys(c))});
     },
     'activateContribution': function (id) {
       let c = Collections['magic.private.contributions'].findOne(id);
       c._es_id = uuid.v4();
       c._activated = true;
-      Collections['magic.private.contributions'].update(id, c);
+      Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
 
       if (c && c.contribution && c.contribution[0].doi) {
         esClient.search({
@@ -262,7 +262,6 @@ export default function () {
       c.contribution = c.contribution || [{}];
 
       if (doiData && doiData.title && doiData.title[0]) {
-        c._name = doiData.title[0];
         c._summary.contribution.TITLE = doiData.title[0];
       }
       if (doiData && doiData['container-title'] && doiData['container-title'][0]) {
@@ -286,6 +285,7 @@ export default function () {
       }
       if (c._summary.contribution.YEAR)
         c._summary.contribution.CITATION += ' (' + c._summary.contribution.YEAR + ')';
+      c._name = c._summary.contribution.CITATION;
       c._summary.contribution.REFERENCE_HTML = '<b>' +
         doiData.author.map((a) => a.family + ', ' + a.given).join(', ') +
         ' (' + c._summary.contribution.YEAR + ').</b> ' +

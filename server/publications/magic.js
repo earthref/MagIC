@@ -257,7 +257,7 @@ export default function () {
 
       Meteor.publish(definition.recordSet, function (query, filters, sort, pageSize, pageNumber) {
 
-        console.log("page", definition.recordSet);
+        //console.log("page", definition.recordSet);
 
         let search = {
           from: 0,
