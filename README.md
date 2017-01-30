@@ -1,6 +1,6 @@
-# EarthRef.org
+# EarthRef's MagIC Web Application
 
-A Meteor application for the EarthRef.org website.
+A [Meteor](https://www.meteor.com) application for the EarthRef.org MagIC Database.
 
 ### Creating a Development Environment
 
