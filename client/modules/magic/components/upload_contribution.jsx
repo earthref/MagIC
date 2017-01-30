@@ -976,7 +976,7 @@ export default class MagICUploadContribution extends React.Component {
                               </div>
                               <div className="center aligned column">
                                 <div className="ui small header">
-                                  {this.state._name} <span className={}>After</span> Upload
+                                  {this.state._name} After Upload
                                 </div>
                                 <br/>
                                 {this.renderDetails(this.contribution, this.summary)}

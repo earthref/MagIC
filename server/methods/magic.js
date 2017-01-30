@@ -92,6 +92,31 @@ export default function () {
       Collections['magic.private.contributions'].insert(c, (error) => { console.log('insert', error)});
     },
     'updateContribution': function (id, c, s) {
+
+      if (c.contribution && c.contribution.length > 0) {
+        c.contribution = c.contribution.splice(0,1);
+        delete c.contribution[0].version;
+        delete c.contribution[0].id;
+        delete c.contribution[0].magic_version;
+        delete c.contribution[0].timestamp;
+      } else {
+        c.contribution = [{}];
+      }
+      c.contribution[0].contributor = user;
+      c.contribution[0].timestamp = moment().toISOString();
+      c._contributor = user;
+      c._inserted = c.contribution[0].timestamp;
+      c._name = name;
+      c._id = id;
+
+      s = s || {};
+      s.contribution = s.contribution || {};
+      s.contribution.TITLE = c._name;
+      s.contribution.CONTRIBUTOR = contributor;
+      s.contribution.CONTRIBUTOR_ID = mailid;
+      s.contribution.INSERTED = c._inserted;
+      s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
+      s.contribution._id = c._id;
       c._summary = s;
 
       if (c.measurements && c.measurements.rows && c.measurements.columns) {
@@ -295,6 +320,8 @@ export default function () {
         (doiData.issue ? ' (' + doiData.issue + ')' : '') +
         (doiData.page ? ':' + doiData.page : '') + '. ' +
         'doi:<a href="//dx.doi.org/' + doiData.DOI + '">' + doiData.DOI + '</a>.</i>';
+      c.contribution[0].doi = doiData.DOI;
+      c._summary.contribution.DOI = doiData.DOI;
       Collections['magic.private.contributions'].update(id, c);
     },
     'deleteContribution': function(id, user) {

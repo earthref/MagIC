@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
+import Cookies from 'js-cookie';
 import Count from '../../common/containers/search_count';
 import FiltersList from '../../common/containers/search_filters_list';
 import SearchLevel from '../../common/components/search_level';
@@ -248,14 +249,14 @@ export default class extends React.Component {
               </div>
             </div>
           )}
-          <div className="right menu">
-            <div className="item" style={{paddingRight: 0}}>
-              <a className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}} href="/MagIC/upload">
-                <i className="plus icon"/>
-                Upload Data
-              </a>
-            </div>
-          </div>
+          {Cookies.get('user_id') ?
+            <div className="right menu">
+              <div className="item" style={{paddingRight: 0}}>
+                <a className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}} href="/MagIC/private">
+                  Private Workspace
+                </a>
+              </div>
+            </div> : undefined}
         </div>
         <div className="ui bottom attached secondary segment" style={this.styles.segment}>
           <div className="ui labeled fluid action input" style={this.styles.searchInput}>

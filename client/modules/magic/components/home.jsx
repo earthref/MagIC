@@ -20,7 +20,9 @@ export default class extends React.Component {
   }
 
   render() {
-    let contributions = Collections['magic.private.contributions'].find({'_activated': true}, {fields: {'_summary': 1}}).fetch();
+    let contributions = Collections['magic.private.contributions'].find(
+      {'_activated': true},
+      {fields: {'_summary': 1}, sort: {'_inserted': -1}}).fetch();
     console.log(contributions);
     return (
       <div>
@@ -29,7 +31,7 @@ export default class extends React.Component {
           <div className="content">
             <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
             Workshop: Earth's Magnetic Field from the Beginning</a>
-            MagIC is hosting a workshop on
+            MagIC hosted a workshop on
             January 24th-27th, 2017 at SIO in La Jolla, CA.
           </div>
         </div>

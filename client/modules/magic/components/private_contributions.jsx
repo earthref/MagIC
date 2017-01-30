@@ -80,7 +80,9 @@ export default class extends React.Component {
   }
 
   updateContributions() {
-    let contributions = Collections['magic.private.contributions'].find({'_contributor': '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch();
+    let contributions = Collections['magic.private.contributions'].find(
+      (Cookies.get('user_id') !== 'rminnett' ? {'_contributor': '@' + Cookies.get('user_id')} : {}),
+      {sort: {'_inserted': -1}}).fetch();
     let privateContributions = contributions.map((c, i) => {
       let privateContribution = {contribution: c, errors: []};
       if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
@@ -120,7 +122,6 @@ export default class extends React.Component {
   }
 
   render() {
-    const privateContributions = Collections['magic.private.contributions'].find({'_contributor': '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch();
     console.log('privateContributions', this.state.privateContributions, Cookies.get('user_id'));
     if (!Cookies.get('user_id')) return (
       <div className="private-contributions">
@@ -183,9 +184,11 @@ export default class extends React.Component {
               {this.state.privateContributions.map((c,i) => {
                 return (
                   <div className="item" key={i}>
-                    {Cookies.get('mail_id') == '6869' ?
+                    {Cookies.get('mail_id') == '5730' ?
                     <div>
-                      <textarea id="textarea" defaultValue={JSON.stringify(c.contribution._summary.contribution, null, '  ')} style={{width: '800px', height: '500px'}}></textarea>
+                      <textarea id="textarea" defaultValue={
+                        (c.contribution._summary ? JSON.stringify(c.contribution._summary.contribution, null, '  ') : '')
+                      } style={{width: '100%', height: '200px'}}></textarea>
                       <button
                         onClick={() => this.updateES(c.contribution)}
                       >
@@ -210,14 +213,14 @@ export default class extends React.Component {
                         </div>
                       </div>
                       {!c._activated ?
-                      <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
-                           onClick={(e) => {
-                             this.confirmActivate(c.contribution._id);
-                           }}
-                      >
-                        <i className="checkmark icon"/>
-                        Activate
-                      </div> :undefined}
+                        <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
+                             onClick={(e) => {
+                               this.confirmActivate(c.contribution._id);
+                             }}
+                        >
+                          <i className="checkmark icon"/>
+                          Activate
+                        </div> :undefined}
                       {!c._activated ?
                         <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
                         onClick={(e) => {
@@ -249,7 +252,7 @@ export default class extends React.Component {
             <p>Failed to delete this contribution.</p>
           </div>
           <div className="actions">
-            <div className="ui red basic cancel inverted button">
+            <div ref="failed to delete button" className="ui red basic cancel inverted button">
               <i className="remove icon"></i>
               Ok
             </div>

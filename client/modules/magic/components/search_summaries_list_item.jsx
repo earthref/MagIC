@@ -14,7 +14,11 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loaded: false
     };
+    Meteor.subscribe('magic.private.contributions.summaries', '', () => {
+      this.setState({loaded: true});
+    });
   }
 
   componentDidMount() {
@@ -183,13 +187,18 @@ export default class extends React.Component {
   }
 
   downloadMongo(mongo_id) {
-    let c = Collections['magic.private.contributions'].findOne(mongo_id);
-    let id = '';
-    if (c && c.contribution && c.contribution[0] && c.contribution[0].id)
-      id =  c.contribution[0].id;
-    const exporter = new ExportContribution({});
-    let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, 'MagIC Contribution ' + id + '.txt');
+    let c = Collections['magic.private.contributions'].find({'_id': mongo_id}).fetch();
+    console.log('download', mongo_id, c);
+    if (c && c.length >= 1) {
+      let id = '';
+      if (c[0] && c[0].contribution && c[0].contribution[0] && c[0].contribution[0].id)
+        id = c[0].contribution[0].id;
+      const exporter = new ExportContribution({});
+      let blob = new Blob([exporter.toText(c[0])], {type: "text/plain;charset=utf-8"});
+      saveAs(blob, 'MagIC_Contribution_' + id + '.txt');
+    } else {
+      alert('Failed to find contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+    }
   }
 
   render() {
@@ -229,15 +238,19 @@ export default class extends React.Component {
                   </a>
                 </div>
                 :
-                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className={'ui basic tiny fluid compact icon header button' + (c.MONGO_ID || c._id ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
-                onClick={() => { this.downloadMongo(c.MONGO_ID || c._id); return false; }}
-                >
-                <i className="ui file text outline icon"/> Download
-                </a>
+                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, position: 'relative'}}>
+                  <a className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
+                  onClick={() => { this.downloadMongo(c._id); return false; }}
+                  >
+                    <i className="ui file text outline icon"/> Download
+                  </a>
                 </div>
               }
-
+              <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
+                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi/' + c.DOI}>{'earthref.org/MagIC/doi/' + c.DOI}</a><br/></span> : undefined)}
+                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
+              </div>
               <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
                 {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
                 {(c.N_SITES        ? <a onClick={this.showData.bind(this)}>{c.N_SITES        + ' Site'        + (c.N_SITES        > 1 ? 's' : '')}<br/></a> : undefined)}
@@ -293,11 +306,6 @@ export default class extends React.Component {
                       _.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
                       (_.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
                     </span> : undefined)}
-              </div>
-              <div style={{marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
-                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
-                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi' + c.DOI}>{'earthref.org/MagIC/doi' + c.DOI}</a><br/></span> : undefined)}
-                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
               </div>
             </div>
           </div>
