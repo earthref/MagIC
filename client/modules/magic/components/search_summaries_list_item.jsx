@@ -214,8 +214,8 @@ export default class extends React.Component {
                 </span>
                 <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
                       dangerouslySetInnerHTML={{
-                        __html: (c.CITATION && c.TITLE ? c.TITLE + ' ' : '') +
-                        (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, '')
+                        __html: (c.CITATION && c.TITLE ? c.TITLE :
+                        (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, ''))
                       }}>
                 </span>
                 <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
