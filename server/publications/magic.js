@@ -253,7 +253,7 @@ export default function () {
   _.forEach(collectionDefinitions.magic.pages, (levelDefinitions, level) => {
     _.forEach(levelDefinitions, (definition) => {
 
-      console.log(definition.recordSet);
+      //console.log(definition.recordSet);
 
       Meteor.publish(definition.recordSet, function (query, filters, sort, pageSize, pageNumber) {
 
