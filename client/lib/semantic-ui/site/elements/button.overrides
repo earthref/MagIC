@@ -1,0 +1,7 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+.ui.basic.buttons .button, .ui.basic.button {
+    background: #FFFFFF !important;
+}

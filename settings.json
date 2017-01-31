@@ -2,7 +2,8 @@
   "galaxy.meteor.com": {
     "env": {
       "MONGO_URL": "mongodb://earthref:aMru1coQdYFb7xRd7h98mEafDzgIJuRi@cluster0-shard-00-00-38h6d.mongodb.net:27017,cluster0-shard-00-01-38h6d.mongodb.net:27017,cluster0-shard-00-02-38h6d.mongodb.net:27017/earthref?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin",
-      "MONGO_OPLOG_URL": "mongodb://oplog:WWdrgmqZ7zkBdp5e@cluster0-shard-00-00-38h6d.mongodb.net:27017,cluster0-shard-00-01-38h6d.mongodb.net:27017,cluster0-shard-00-02-38h6d.mongodb.net:27017/local?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin"
+      "MONGO_OPLOG_URL": "mongodb://oplog:WWdrgmqZ7zkBdp5e@cluster0-shard-00-00-38h6d.mongodb.net:27017,cluster0-shard-00-01-38h6d.mongodb.net:27017,cluster0-shard-00-02-38h6d.mongodb.net:27017/local?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin",
+      "ELASTICSEARCH_URL": "https://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200"
     }
   },
   "kadira": {
