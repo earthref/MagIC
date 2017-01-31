@@ -28,7 +28,7 @@
 }
 
 .ui.attached.steps .active.step.pointing.below:before {
-  top: calc(100% - 1px);
+  top: calc(100% + 1px);
 }
 
 @media only screen and (max-width: (@largestMobileScreen)) {

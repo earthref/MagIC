@@ -27,10 +27,10 @@ export default class extends React.Component {
             <div className="row" style={{paddingBottom:0}}>
               <div className="sixteen wide column">
             <span>
-              {c.citation} v.{c.version}
+              {c.CITATION} v.{c.VERSION}
             </span>
             <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-              {moment(c.activated).calendar()} by <b>{c.contributor}</b>
+              {moment(c.INSERTED).calendar()} by <b>{c.CONTRIBUTOR}</b>
             </span>
               </div>
             </div>
@@ -39,8 +39,10 @@ export default class extends React.Component {
                 <div className="card" key={i} style={{width:'150px'}}>
                   <div className="image">
                     <img className="ui bordered image"
-                         src={'//static.earthref.org/imcache/Set(gravity:Center)%7CCrop(geometry:360x360+10+0)%7CResize(geometry:100x100)/images/MAGIC/static_plots/' +
-                         c.contribution_id + '/' + image.name}
+                         src={'//static.earthref.org/imcache/' +
+                         (/_TY:_(aniso|eq)/.test(c.RANDOM_PLOT_NAME) ? 'Crop(geometry:292x292+111+104)' : 'Set(gravity:Center)|Crop(geometry:360x360+10+0)') +
+                         '|Resize(geometry:100x100)/images/MAGIC/static_plots/' +
+                         c.MAGIC_CONTRIBUTION_ID + '/' + c.RANDOM_PLOT_NAME}
                          style={{minWidth:'150px', minHeight:'150px'}}
                     />
                   </div>

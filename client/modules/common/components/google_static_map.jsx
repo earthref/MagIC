@@ -53,7 +53,7 @@ export default class GoogleStaticMap extends React.Component {
           p.lon_w = (p.lon_w !== undefined ? p.lon_w : p.lon);
 
           if (p.lat_n < p.lat_s) [p.lat_n, p.lat_s] = [p.lat_s, p.lat_n];
-          if (p.lon_e < p.lon_w) [p.lon_w, p.lon_e] = [p.lon_w, p.lon_e];
+          if (p.lon_e < p.lon_w) [p.lon_e, p.lon_w] = [p.lon_w, p.lon_e];
 
           if (src.length < 800 &&
             p.lat_n !== undefined &&

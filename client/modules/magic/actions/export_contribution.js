@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import jQuery from 'jquery';
-import jszip from 'jszip'; // not used, but makes xlsx-style happy
+import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx-style';
 import Runner from '../../common/actions/runner.js';
 import ValidateContribution from './validate_contribution';
@@ -87,31 +87,52 @@ export default class extends Runner {
         ['Column: ', ... tableHeaders.columnNameHeader      ]
       ];
 
+      // Create an index mapping from the JSON measurements columns to the ordered data model columns.
+      let columnOrderIdxs = {};
+      if (modelTable.toLowerCase() === 'measurements') {
+        for (let columnName of tableHeaders.columnNameHeader) {
+          columnOrderIdxs[columnName] = _.indexOf(jsonToExport[modelTable].columns, columnName);
+        }
+      }
+
       // Iterate through all of the data rows in the table.
-      for (let rowIdx in (jsonToExport[modelTable].rows || jsonToExport[modelTable])) {
+      let warningMerge = undefined;
+      for (let rowIdx = 0; rowIdx < (jsonToExport[modelTable].rows || jsonToExport[modelTable] || []).length; rowIdx++) {
 
         // Add a blank column at the beginning of each data row for the row headers.
         let wsRow = [''];
 
-        if (jsonToExport[modelTable].rows) wsRow = wsRow.concat(jsonToExport[modelTable].rows[rowIdx]);
-        else
-          // Iterate through each column name in the header.
-          for (let columnName of tableHeaders.columnNameHeader) {
-            let value = jsonToExport[modelTable][rowIdx][columnName];
-            wsRow.push(value);
-          }
+        // Iterate through each column name in the header.
+        for (let columnName of tableHeaders.columnNameHeader) {
+          let value;
+          if (modelTable.toLowerCase() === 'measurements')
+            value = jsonToExport[modelTable].rows[rowIdx][columnOrderIdxs[columnName]];
+          else
+            value = jsonToExport[modelTable][rowIdx][columnName];
+          wsRow.push(value);
+        }
 
         wsData.push(wsRow.map((value, i) => {
           if (Array.isArray(value) && value.length > 0 && !Array.isArray(value[0])) value = value.join(':');
           return value;
         }));
 
+        if (rowIdx >= 5000) {
+          wsData.push(['Warning! Excel exports are currently limited to 5000 measurements. Please refer to the MagIC Text File export for all of the measurements.']);
+          warningMerge = {s:{r:rowIdx+5,c:0},e:{r:rowIdx+5,c:_.keys(tableHeaders.columnNameHeader).length}};
+          break;
+        }
       }
 
       // Convert the data matrix into a worksheet object.
       let worksheet = this._toSheet(wsData);
       let range = {};
       let rowIdx;
+
+      if (warningMerge) {
+        if (!worksheet['!merges']) worksheet['!merges'] = [];
+        worksheet['!merges'].push(warningMerge);
+      }
 
       // Format the group header row.
       rowIdx = 0;
@@ -143,13 +164,13 @@ export default class extends Runner {
         else if (columnIdx > 0 && wsData[0][columnIdx+1] != '') {
           range.e = {r:rowIdx, c:columnIdx};
           if (!worksheet['!merges']) worksheet['!merges'] = [];
-          console.log(range);
+          //console.log(range);
           worksheet['!merges'].push(range); //XLSX.utils.encode_range(range));
           range = {};
         }
 
       }
-      console.log(worksheet['!merges']);
+      //console.log(worksheet['!merges']);
 
       // Format the name header row.
       rowIdx = 1;
@@ -238,7 +259,7 @@ export default class extends Runner {
         for (let columnIdx = 0; columnIdx < wsData[rowIdx].length; columnIdx++) {
           let cellAddress = XLSX.utils.encode_cell({r: rowIdx,c: columnIdx});
           if (worksheet[cellAddress] !== undefined) {
-            if (worksheet[cellAddress].v !== undefined)
+            if (worksheet[cellAddress].v !== undefined && (columnIdx > 0 || worksheet[cellAddress].v.toString().slice(0,8) !== 'Warning!'))
               columnWidths[columnIdx] = Math.max(columnWidths[columnIdx], worksheet[cellAddress].v.toString().length);
             if (worksheet[cellAddress].s === undefined) worksheet[cellAddress].s = {};
             if (worksheet[cellAddress].s.font === undefined) worksheet[cellAddress].s.font = {};
@@ -309,20 +330,12 @@ export default class extends Runner {
 
   _getOrderedColumnList(tableName)
   {
-    /*GGG: this is hacky but i cant make indexOf work for an object in an array, and I'm on an airplane and cant look it up*/
     //Find the index that holds the object which represents a given table
-    for(let orderedTableIdx in this.orderedModel)
-    {
-      if (this.orderedModel[orderedTableIdx][tableName])
-      {
+    for(let orderedTableIdx in this.orderedModel) {
+      if (this.orderedModel[orderedTableIdx][tableName]) {
         return this.orderedModel[orderedTableIdx][tableName];
       }
     }
-
-    /*this.orderedModel.indexOf(this.orderedModel[tableName]);
-     console.log(`index of: ${orderedTableIdx}`);
-     let orderedColumnArray = this.orderedModel[orderedTableIdx][tableName];//this.orderedModel[orderedTableIdx][tableName];*/
-
   };
 
   createExtendedHeadersData(tableName, jsonToExport) {
@@ -339,28 +352,54 @@ export default class extends Runner {
     for (let orderedColumnIdx in orderedColumnArray) {
 
       let potentialColumnToAdd = orderedColumnArray[orderedColumnIdx];
-      //Traverse the entire JSON table's rows looking for usages of the each column found in the ordered model. If the JSON file has the column in question
-      //extract the desired information and create the extended header
-      for(let jsonRowIdx in jsonToExport[tableName]) {
+      // Traverse the entire JSON table's rows looking for usages of the each column found in the ordered model.
+      // If the JSON file has the column in question extract the desired information and create the extended header.
+      if (tableName.toLowerCase() === 'measurements') {
+        for(let jsonRowIdx in jsonToExport[tableName].columns) {
 
-        if (jsonToExport[tableName][jsonRowIdx][potentialColumnToAdd] && //if this ordered column is found in the json file
+          // If this ordered column is found in the JSON file:
+          if (jsonToExport[tableName].columns[jsonRowIdx].toLowerCase() === potentialColumnToAdd.toLowerCase() &&
             !discoveredColumns[potentialColumnToAdd]) {                    //and we haven't seen this column before
 
-          //ggg gather data here from the model and add the header
-          discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
-          columnHeaderArray.push(potentialColumnToAdd);
+            // Gather data here from the model and add the header.
+            discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
+            columnHeaderArray.push(potentialColumnToAdd);
 
-          let labelToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['label'];
-          labelHeaderArray.push(labelToAdd);
+            let labelToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].label;
+            labelHeaderArray.push(labelToAdd);
 
-          // Append the group name if it's not the same as the previous column.
-          let currentGroupToAdd = this.model['tables'][tableName]['columns'][potentialColumnToAdd]['group'];
-          groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
-          previousGroupFound = currentGroupToAdd;
+            // Append the group name if it's not the same as the previous column.
+            let currentGroupToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].group;
+            groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
+            previousGroupFound = currentGroupToAdd;
 
-          columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+            columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+          }
         }
       }
+      else {
+        for(let jsonRowIdx in jsonToExport[tableName]) {
+
+          if (jsonToExport[tableName][jsonRowIdx][potentialColumnToAdd] && //if this ordered column is found in the json file
+            !discoveredColumns[potentialColumnToAdd]) {                    //and we haven't seen this column before
+
+            //ggg gather data here from the model and add the header
+            discoveredColumns[potentialColumnToAdd] = potentialColumnToAdd;//again this is a bit of overlapping code here but i like the object notatoin for keeping track of a set
+            columnHeaderArray.push(potentialColumnToAdd);
+
+            let labelToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].label;
+            labelHeaderArray.push(labelToAdd);
+
+            // Append the group name if it's not the same as the previous column.
+            let currentGroupToAdd = this.model.tables[tableName].columns[potentialColumnToAdd].group;
+            groupHeaderArray.push((previousGroupFound != currentGroupToAdd ? currentGroupToAdd : ''));
+            previousGroupFound = currentGroupToAdd;
+
+            columnTypeOrUnitHeaderArray.push(this.getColumnTypeOrUnitString(tableName,potentialColumnToAdd));
+          }
+        }
+      }
+
     }
 
     let orderedHeaderData = {};
@@ -375,8 +414,8 @@ export default class extends Runner {
   getColumnTypeOrUnitString(table, column) {
 
     let columnTypeOrUnitString = '';
-    let columnType = this.model['tables'][table]['columns'][column]['type'];
-    let columnUnit = this.model['tables'][table]['columns'][column]['unit'];
+    let columnType = this.model.tables[table].columns[column].type;
+    let columnUnit = this.model.tables[table].columns[column].unit;
 
     if (columnType === 'Number') {
       columnTypeOrUnitString = 'Number';
@@ -410,173 +449,197 @@ export default class extends Runner {
     let numberOfTablesInAddedToTSV = 0;
     for(let orderedTableIdx in this.orderedModel)
     {
-      let tableName = Object.getOwnPropertyNames(this.orderedModel[orderedTableIdx]);//loop through the tables in the model
-      if(jsonToExport[tableName])//if the current table exists in the json to translate, add it to the output file
+      let tableName = Object.getOwnPropertyNames(this.orderedModel[orderedTableIdx])[0];//loop through the tables in the model
+      if(tableName && jsonToExport[tableName])//if the current table exists in the json to translate, add it to the output file
       {
-        text = text.concat(`tab delimited\t${tableName}`);
-        if (toExtendedText) {text = text.concat(`\t4 headers`);}
-        text = text.concat(`\n`);//in any case, we finish the header with a new line
+        text += `tab delimited\t${tableName}`;
+        if (toExtendedText)
+          text += `\t4 headers`;
+        text += `\n`;//in any case, we finish the header with a new line
 
         //If we want extended headers, pass in the ordered column list
         if (toExtendedText)
         {
           /*let orderedColumnArray = orderedModel[orderedTableIdx][tableName];*/
-          text = text + this.generateExtendedHeaderTSV(tableName, jsonToExport/*, orderedColumnArray*/)
+          text += this.generateExtendedHeaderTSV(tableName, jsonToExport/*, orderedColumnArray*/)
         }
 
         //*********now create the column headers for this table*************
         let columnsToAddToTSVheader = {};//TODO:the object and the array are a bit of a duplicate effort
         let orderedListOfColumnsAddedToHeader = [];//TODO:the object and the array are a bit of a duplicate effort
-        for(let orderedColIdx in this.orderedModel[orderedTableIdx][tableName])//loop through the columns in the ordered model
-        {
-          let orderedColumnNameToPotentiallyAdd = this.orderedModel[orderedTableIdx][tableName][orderedColIdx];
-          for(let jsonRowsIdx in jsonToExport[tableName])
+        if (tableName.toLowerCase() === 'measurements') {
+          orderedListOfColumnsAddedToHeader = jsonToExport[tableName].columns;
+        }
+        else {
+          for(let orderedColIdx in this.orderedModel[orderedTableIdx][tableName])//loop through the columns in the ordered model
           {
-            //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
-            // column header in the TSV, then add it
-            if(jsonToExport[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
-              !columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] )
+            let orderedColumnNameToPotentiallyAdd = this.orderedModel[orderedTableIdx][tableName][orderedColIdx];
+            for(let jsonRowsIdx in jsonToExport[tableName])
             {
-              columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';
-              orderedListOfColumnsAddedToHeader.push(orderedColumnNameToPotentiallyAdd);
+              //if the column from the model is found in the jsonToTranslate, and it hasn't already been added to the
+              // column header in the TSV, then add it
+              if(jsonToExport[tableName][jsonRowsIdx][orderedColumnNameToPotentiallyAdd] &&
+                !columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] )
+              {
+                columnsToAddToTSVheader[orderedColumnNameToPotentiallyAdd] = 'have already seen this column';
+                orderedListOfColumnsAddedToHeader.push(orderedColumnNameToPotentiallyAdd);
+              }
             }
           }
         }
+
         //add the collected column headers to the TSV here
         if (orderedListOfColumnsAddedToHeader.length > 0)
-          text = text.concat(orderedListOfColumnsAddedToHeader.join('\t') + '\n');
+          text += orderedListOfColumnsAddedToHeader.join('\t') + '\n';
 
 
         /***************Now add all data from the table to the TSV*****************/
-        for(let jsonRowsIdx in jsonToExport[tableName])
-          for(let colNameIdx in orderedListOfColumnsAddedToHeader)
-          {
-            let colName = orderedListOfColumnsAddedToHeader[colNameIdx];
-            let numberOfColumns = orderedListOfColumnsAddedToHeader.length;
-            let dataToAdd = jsonToExport[tableName][jsonRowsIdx][colName];
-
-            if (dataToAdd == undefined){dataToAdd = '';}//for rows with no data
-
-            if(colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
-            {text = text.concat('\t');}
-
-            dataToAdd =  this.handleSpecialCases(dataToAdd,tableName,colName);
-
-            text = text.concat(dataToAdd);
-
-            if(colNameIdx == numberOfColumns - 1){text = text.concat('\n');}
+        if (tableName.toLowerCase() === 'measurements') {
+          for (let jsonRowsIdx in jsonToExport[tableName].rows) {
+            text += jsonToExport[tableName].rows[jsonRowsIdx].join('\t') + '\n';
           }
+        }
+        else {
+          for (let jsonRowsIdx in jsonToExport[tableName]) {
+            for (let colNameIdx in orderedListOfColumnsAddedToHeader) {
+              let colName = orderedListOfColumnsAddedToHeader[colNameIdx];
+              let numberOfColumns = orderedListOfColumnsAddedToHeader.length;
+              let dataToAdd = jsonToExport[tableName][jsonRowsIdx][colName] || '';
+
+              if (colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
+                text += '\t';
+
+              text += this.handleSpecialCases(dataToAdd, tableName, colName);
+
+              if (colNameIdx == numberOfColumns - 1)
+                text += '\n';
+            }
+          }
+        }
 
         numberOfTablesInAddedToTSV++;
         if(numberOfTablesInAddedToTSV < numberOfTablesInJson)//no >>>> delimiter at end of file
-          text = text.concat('>>>>>>>>>>\n');
+          text += '>>>>>>>>>>\n';
       }
     }
     return text;
   }
 
-  handleSpecialCases(dataToManipulate, tableName, columnName)
-  {
-   if (dataToManipulate == '') return dataToManipulate;
+  handleSpecialCases(dataToManipulate, tableName, columnName) {
+    if (dataToManipulate == '') return dataToManipulate;
 
-   let manipulatedData = '';
+    let manipulatedData = '';
 
-   if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary')
-   //if(columnName == 'external_database_ids')
-   {
+    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary')
+    //if(columnName == 'external_database_ids')
+    {
 
-   //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
-   //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
-   let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
-   let numberOfElements = propertyNames.length;
-   let numberOfElementsProcessed = 0; //this counter is necessary because the loop index below is given some strange numbers from propertyNames i.e. they are not sequential
-   for(let propertyIdx in propertyNames)
-   {
-   let propertyName = propertyNames[propertyIdx];
-   let propertyValue = dataToManipulate[propertyName];
-   if(propertyValue == null) {propertyValue = '';}
-   manipulatedData = manipulatedData + `${propertyName}[${propertyValue}]`;
-   numberOfElementsProcessed++;
+      //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
+      //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
+      let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
+      let numberOfElements = propertyNames.length;
+      let numberOfElementsProcessed = 0; //this counter is necessary because the loop index below is given some strange numbers from propertyNames i.e. they are not sequential
+      for (let propertyIdx in propertyNames) {
+        let propertyName = propertyNames[propertyIdx];
+        let propertyValue = dataToManipulate[propertyName];
+        if (propertyValue == null) {
+          propertyValue = '';
+        }
+        manipulatedData = manipulatedData + `${propertyName}[${propertyValue}]`;
+        numberOfElementsProcessed++;
 
-   //we do not want a colon in front of the first
-   if (//propertyIdx < 1 ||
-   numberOfElementsProcessed < numberOfElements )
-   manipulatedData = manipulatedData + ':';
+        //we do not want a colon in front of the first
+        if (//propertyIdx < 1 ||
+        numberOfElementsProcessed < numberOfElements)
+          manipulatedData = manipulatedData + ':';
 
-   //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
-   }
-   return manipulatedData;
-   }
+        //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
+      }
+      return manipulatedData;
+    }
 
-   if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Matrix')
-   //if(columnName == 'rotation_sequence')
-   {
-   //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
-   //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
-   let numberOfSubArrays = dataToManipulate.length;
-   for(let nestedArrayIdx in dataToManipulate)
-   {
-   manipulatedData = manipulatedData + dataToManipulate[nestedArrayIdx].join(':');
+    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Matrix' && Array.isArray(dataToManipulate))
+    //if(columnName == 'rotation_sequence')
+    {
+      //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
+      //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
+      let numberOfSubArrays = dataToManipulate.length;
+      for (let nestedArrayIdx in dataToManipulate) {
+        //console.log(dataToManipulate, tableName, columnName, nestedArrayIdx, dataToManipulate[nestedArrayIdx]);
+        manipulatedData = manipulatedData + dataToManipulate[nestedArrayIdx].join(':');
 
-   //Each array worth of data is separated by a semi colon in the TSV
-   if (nestedArrayIdx + 1 < numberOfSubArrays) manipulatedData = manipulatedData + ';';
-   }
-   return manipulatedData;
-   }
+        //Each array worth of data is separated by a semi colon in the TSV
+        if (nestedArrayIdx + 1 < numberOfSubArrays) manipulatedData = manipulatedData + ';';
+      }
+      return manipulatedData;
+    }
 
-   if(magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'List')
-   //if( columnName == 'er_citation_names' ||
-   //  columnName == 'magic_method_codes'||
-   //  columnName == 'method_codes' ||
-   //  columnName == 'citations')
-   {
-   //console.log(dataToManipulate, typeof(dataToManipulate));
-   if (typeof(dataToManipulate) === 'string') dataToManipulate = [dataToManipulate];
-   manipulatedData = ':' + dataToManipulate.map(v => (v.match(/:/) ? '"' + v + '"' : v)).join(':') + ':';
+    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'List' && Array.isArray(dataToManipulate))
+    //if( columnName == 'er_citation_names' ||
+    //  columnName == 'magic_method_codes'||
+    //  columnName == 'method_codes' ||
+    //  columnName == 'citations')
+    {
+      //console.log(dataToManipulate, typeof(dataToManipulate));
+      if (typeof(dataToManipulate) === 'string') dataToManipulate = [dataToManipulate];
+      manipulatedData = ':' + dataToManipulate.map(v => (v.match(/:/) ? '"' + v + '"' : v)).join(':') + ':';
 
 
-   //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
-   //multi segment piece of data
-   //manipulatedData = ':';
-   //for(let dataIdx in dataToManipulate)
-   //{
-   //  if(dataToManipulate[dataIdx].match(/:/))
-   //  {
-   //    dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
-   //  }
-   //
-   //  manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
-   //  //console.log(`manipulated data: ${manipulatedData}`);
-   //}
+      //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
+      //multi segment piece of data
+      //manipulatedData = ':';
+      //for(let dataIdx in dataToManipulate)
+      //{
+      //  if(dataToManipulate[dataIdx].match(/:/))
+      //  {
+      //    dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
+      //  }
+      //
+      //  manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
+      //  //console.log(`manipulated data: ${manipulatedData}`);
+      //}
 
-   return manipulatedData;
-   }
+      return manipulatedData;
+    }
 
-   return dataToManipulate;//if not a special case, return the same string that was passed in
+    return dataToManipulate;//if not a special case, return the same string that was passed in
   }
 
   testValidityOfTablesAndColumns(jsonToTranslate){
     for (let newTableName in jsonToTranslate) {//this gets the string name of the property 'table'
       let newTableObject = this.model.tables[newTableName];
-      if(!newTableObject)
-      {
-        this._appendError(`table ${newTableName} is not defined in magic data model version ${this.version}`);
+      let columnErrorReported = {}; //keep track of invalid columns we have seen
+      if(!newTableObject) {
+        //this._appendError(`table ${newTableName} is not defined in magic data model version ${this.version}`);
         continue;
       }
 
-      //Test to make sure the column names are valid for a given model
-      let columnErrorTracker = {};//keep track of invalid columns we have seen
-      for (let jsonRowIdx in jsonToTranslate[newTableName]) {
-        let jsonColumnNames = Object.getOwnPropertyNames(jsonToTranslate[newTableName][jsonRowIdx]);
-        for (let jsonColumnNameIdx in jsonColumnNames) {
-          let modelColumn = this.model.tables[newTableName].columns[jsonColumnNames[jsonColumnNameIdx]];
+      if(newTableName.toLowerCase() === 'measurements') {
+        for (let jsonColumnName of jsonToTranslate[newTableName].columns) {
+          let modelColumn = this.model.tables[newTableName].columns[jsonColumnName];
           if (!modelColumn || modelColumn == undefined) {
-            if (!columnErrorTracker[jsonColumnNames[jsonColumnNameIdx]] ) {//only add an error if we don't already have an error on the same column
-              this._appendError(`column ${jsonColumnNames[jsonColumnNameIdx]} in table ${newTableName} is not defined in magic data model version ${this.version}`);
-              //Keeping track of column we have seen for this table. I really only care about the property here, not the value.
-              columnErrorTracker[jsonColumnNames[jsonColumnNameIdx]] = 'placeholder';
+            if (!columnErrorReported[jsonColumnName]) {
+              this._appendError(`column ${jsonColumnName} in table ${newTableName} is not defined in magic data model version ${this.version}`);
+              columnErrorReported[jsonColumnName] = true;
             }
             continue;
+          }
+        }
+      }
+
+      //Test to make sure the column names are valid for a given model
+      else {
+        for (let jsonRowIdx in jsonToTranslate[newTableName]) {
+          let jsonColumnNames = Object.getOwnPropertyNames(jsonToTranslate[newTableName][jsonRowIdx]);
+          for (let jsonColumnName of jsonColumnNames) {
+            let modelColumn = this.model.tables[newTableName].columns[jsonColumnName];
+            if (!modelColumn || modelColumn == undefined) {
+              if (!columnErrorReported[jsonColumnName]) {
+                this._appendError(`column ${jsonColumnName} in table ${newTableName} is not defined in magic data model version ${this.version}`);
+                columnErrorReported[jsonColumnName] = true;
+              }
+              continue;
+            }
           }
         }
       }
@@ -594,20 +657,20 @@ export default class extends Runner {
    */
   createOrderedModel()
   {
-    let tableNames = Object.getOwnPropertyNames(this.model['tables']);
+    let tableNames = Object.getOwnPropertyNames(this.model.tables);
     let orderedModel = [];
     for(let tableIdx in tableNames)
     {
-      let properTablePositionIdx = this.model['tables'][tableNames[tableIdx]].position - 1;
+      let properTablePositionIdx = this.model.tables[tableNames[tableIdx]].position - 1;
       orderedModel[properTablePositionIdx] = {[tableNames[tableIdx]]:[]};
 
       let columnPositionMap = [];
-      let columnNames = Object.getOwnPropertyNames(this.model['tables'][tableNames[tableIdx]].columns);
+      let columnNames = Object.getOwnPropertyNames(this.model.tables[tableNames[tableIdx]].columns);
       for(let columnIdx in columnNames)
       {
         let columnName = columnNames[columnIdx];
-        let columnPosition = this.model['tables'][tableNames[tableIdx]]['columns'][columnName].position;
-        columnPositionMap[columnPosition] = columnName;
+        let columnPosition = this.model.tables[tableNames[tableIdx]].columns[columnName].position;
+        columnPositionMap[columnPosition-1] = columnName;
       }
       //assign the properly ordered array of columns to the object keyed via the current table
       orderedModel[properTablePositionIdx][tableNames[tableIdx]] = columnPositionMap;

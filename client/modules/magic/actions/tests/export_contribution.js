@@ -101,7 +101,13 @@ describe('magic.actions.export_contribution', () => {
           location:          'lo1',
           citations:         ['10.1023/A1'],
           site_alternatives: 'Kiln'
-        }]
+        }],
+        measurements: {
+          columns: ['dir_inc', 'dir_dec'],
+          rows:   [['1'      , '2'      ],
+                   ['1'      , '2'      ],
+                   ['1'      , '2'      ]]
+        }
       };
       const text1 =
         'tab delimited\tcontribution\n' +
@@ -116,7 +122,13 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\tspecimens\n' +
         'specimen\tsample\tigsn\tcitations\tdip\n' +
         'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
-        'sp2\tsa1\tigsn2\t\t1.3\n';
+        'sp2\tsa1\tigsn2\t\t1.3\n' +
+        '>>>>>>>>>>\n' +
+        'tab delimited\tmeasurements\n' +
+        'dir_inc\tdir_dec\n' +
+        '1\t2\n' +
+        '1\t2\n' +
+        '1\t2\n';
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{

@@ -2245,7 +2245,7 @@ input::selection {
   transform: translateY(-50%) translateX(-42%) rotate(45deg);
 }
 .ui.attached.steps .active.step.pointing.below:before {
-  top: calc(99%);
+  top: calc(100% + 1px);
 }
 @media only screen and (max-width: 767px) {
   .ui.steps .active.step.pointing.below:before {

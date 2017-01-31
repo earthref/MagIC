@@ -3,6 +3,9 @@ import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
 import GoogleStaticMap from '../../common/components/google_static_map';
+//import saveAs from 'save-as';
+//import XLSX from 'xlsx-style';
+//import ExportContribution from '../actions/export_contribution';
 
 export default class extends React.Component {
 
@@ -30,16 +33,43 @@ export default class extends React.Component {
   renderMapThumbnail(c) {
     let paths = [];
 
-    if (c.begin_lats !== undefined &&
-        c.end_lats   !== undefined && c.begin_lats.length == c.end_lats  .length &&
-        c.begin_lons !== undefined && c.begin_lats.length == c.begin_lons.length &&
-        c.end_lons   !== undefined && c.begin_lats.length == c.end_lons  .length) {
-      _(c.begin_lats).forEach(([], i) => {
+    c.BEGIN_LATS = c.BEGIN_LATS || c.LAT_S || c.LATS;
+    c.END_LATS   = c.END_LATS   || c.LAT_N || c.LATS;
+    c.BEGIN_LONS = c.BEGIN_LONS || c.LON_W || c.LONS;
+    c.END_LONS   = c.END_LONS   || c.LON_E || c.LONS;
+
+    if (c.BEGIN_LATS !== undefined &&
+        c.END_LATS   !== undefined && c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':').length == c.END_LATS  .replace(/(^:|:$)/g, '').split(':').length &&
+        c.BEGIN_LONS !== undefined && c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':').length == c.BEGIN_LONS.replace(/(^:|:$)/g, '').split(':').length &&
+        c.END_LONS   !== undefined && c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':').length == c.END_LONS  .replace(/(^:|:$)/g, '').split(':').length) {
+      _.forEach(c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':'), ([], i) => {
         paths.push({
-          lat_s: c.begin_lats[i],
-          lat_n: c.end_lats  [i],
-          lon_w: c.begin_lons[i],
-          lon_e: c.end_lons  [i]})
+          lat_s: parseFloat(c.BEGIN_LATS.replace(/(^:|:$)/g, '').split(':')[i]),
+          lat_n: parseFloat(c.END_LATS  .replace(/(^:|:$)/g, '').split(':')[i]),
+          lon_w: parseFloat(c.BEGIN_LONS.replace(/(^:|:$)/g, '').split(':')[i]),
+          lon_e: parseFloat(c.END_LONS  .replace(/(^:|:$)/g, '').split(':')[i])})
+      });
+    }
+
+    if (c.BEGIN_LAT !== undefined &&
+        c.END_LAT   !== undefined &&
+        c.BEGIN_LON !== undefined &&
+        c.END_LON   !== undefined) {
+      paths.push({
+          lat_s: parseFloat(c.BEGIN_LAT),
+          lat_n: parseFloat(c.END_LAT  ),
+          lon_w: parseFloat(c.BEGIN_LON),
+          lon_e: parseFloat(c.END_LON  )
+      });
+    }
+
+    if (c.LAT !== undefined &&
+        c.LON !== undefined) {
+      paths.push({
+        lat_s: parseFloat(c.LAT),
+        lat_n: parseFloat(c.LAT),
+        lon_w: parseFloat(c.LON),
+        lon_e: parseFloat(c.LON)
       });
     }
 
@@ -51,6 +81,287 @@ export default class extends React.Component {
       />
     );
 
+  }
+
+  renderAge(c) {
+    let avg_ages = c.AVERAGE_AGE,
+        min_ages = c.MIN_AGES || c.AVERAGE_AGE_LOW || (c.AGES && _.min(c.AGES.split(':'))),
+        max_ages = c.MAX_AGES || c.AVERAGE_AGE_HIGH || (c.AGES && _.max(c.AGES.split(':')));
+    let n_ages = c.N_AGES || c.AVERAGE_NN || (c.AGES && c.AGES.split(':').length);
+    let age_unit = c.AVERAGE_AGE_UNIT || c.AGE_UNIT;
+    if (avg_ages || min_ages && max_ages) {
+      if (min_ages < 0 && max_ages < 0)
+        [min_ages, max_ages] = [-max_ages, -min_ages];
+      if (min_ages < 0)
+        min_ages = -min_ages;
+      if (max_ages < 0)
+        max_ages = -max_ages;
+      avg_ages = c.AVERAGE_AGE && (age_unit ? avg_ages + ' ' + age_unit : numeral(avg_ages)
+      .format('0[.]0 a')
+      .replace(/b$/, 'Ga')
+      .replace(/m$/, 'Ma')
+      .replace(/k$/, 'ka')
+      .replace(/(\d)\s*$/, '$1 a'));
+      min_ages = age_unit ? min_ages + ' ' + age_unit : numeral(min_ages)
+      .format('0[.]0 a')
+      .replace(/b$/, 'Ga')
+      .replace(/m$/, 'Ma')
+      .replace(/k$/, 'ka')
+      .replace(/(\d)\s*$/, '$1 a');
+      max_ages = age_unit ? max_ages + ' ' + age_unit : numeral(max_ages)
+        .format('0[.]0 a')
+        .replace(/b$/, 'Ga')
+        .replace(/m$/, 'Ma')
+        .replace(/k$/, 'ka')
+        .replace(/(\d)\s*$/, '$1 a');
+      return (avg_ages || min_ages === max_ages ?
+        <span>
+          <b>Age:</b><br/>
+          {avg_ages || min_ages}<br/>
+          {n_ages ? <span><b>N: </b>{n_ages}</span> : undefined}
+        </span>
+        :
+        <span>
+          <b>Min. Age:</b><br/>
+          {min_ages}<br/>
+          <b>Max. Age:</b><br/>
+          {max_ages}<br/>
+          {n_ages ? <span><b>N: </b>{n_ages}</span> : undefined}
+        </span>
+      );
+    } else {
+      return undefined;
+    }
+  }
+
+  renderPole(c) {
+
+    if (c.VGP_LAT && c.VGP_LON){
+      //console.log('pole', c.AVERAGE_LAT, c.AVERAGE_LON);
+      return (
+        <span>
+          <b>Pole:</b><br/>
+          {c.VGP_LAT < 0 ?
+          numeral(-c.VGP_LAT).format('0[.]00') + '°S' :
+          numeral( c.VGP_LAT).format('0[.]00') + '°N'}<br/>
+          {c.VGP_LON < 0 ?
+          numeral(-c.VGP_LON).format('0[.]00') + '°W' :
+          numeral( c.VGP_LON).format('0[.]00') + '°E'}<br/>
+          {c.VGP_ALPHA95 &&
+          <b>A<sub>95</sub>: </b>}
+          {c.VGP_ALPHA95 && numeral( c.VGP_ALPHA95).format('0[.]00')}
+        </span>
+      );
+    }
+    else return undefined;
+  }
+
+  renderGeo(c) {
+    let geologic = [];
+    if (c.PLATE_BLOCK) geologic.push(c.PLATE_BLOCK.replace(/(^:|:$)/g, '').split(':'));
+    if (c.TERRANE) geologic.push(c.TERRANE.replace(/(^:|:$)/g, '').split(':'));
+    if (c.GEOLOGICAL_PROVINCE_SECTION) geologic.push(c.GEOLOGICAL_PROVINCE_SECTION.replace(/(^:|:$)/g, '').split(':'));
+    if (c.SETTING) geologic.push(c.SETTING.replace(/(^:|:$)/g, '').split(':'));
+    if (c.LOCATION_TYPE) geologic.push(c.LOCATION_TYPE.replace(/(^:|:$)/g, '').split(':'));
+    let geographic = [];
+    if (c.COUNTRY) geographic.push(c.COUNTRY.replace(/(^:|:$)/g, '').split(':'));
+    if (c.REGION) geographic.push(c.REGION.replace(/(^:|:$)/g, '').split(':'));
+    if (c.VILLAGE_CITY) geographic.push(c.VILLAGE_CITY.replace(/(^:|:$)/g, '').split(':'));
+    if (c.LOCATION) geographic.push(c.LOCATION.replace(/(^:|:$)/g, '').split(':'));
+    let oceanographic = [];
+    if (c.CONTINENT_OCEAN) oceanographic.push(c.CONTINENT_OCEAN.replace(/(^:|:$)/g, '').split(':'));
+    if (c.OCEAN_SEA) oceanographic.push(c.OCEAN_SEA.replace(/(^:|:$)/g, '').split(':'));
+    return (
+      <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+        {(geologic.length      > 0 ? <span><b>Geologic:</b><br/>{geologic.join(', ')}<br/></span> : undefined)}
+        {(geographic.length    > 0 ? <span><b>Geographic:</b><br/>{geographic.join(', ')}<br/></span> : undefined)}
+        {(oceanographic.length > 0 ? <span><b>Oceanographic:</b><br/>{oceanographic.join(', ')}<br/></span> : undefined)}
+      </div>
+    );
+  }
+
+  render() {
+    const c = this.props.doc;
+    console.log('summary', this.props);
+    return (
+      <div ref="accordion" className="ui accordion magic-contribution">
+        <div className="title search_summaries_list_item" style={{paddingLeft:'1em'}}>
+          <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
+          <div className="ui doubling grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
+            <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
+                <span style={{fontSize:'small', fontWeight:'bold'}}>
+                  {c.CITATION && c.VERSION ? c.CITATION + ' v. ' + c.VERSION : c.TITLE}
+                </span>
+                <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
+                      dangerouslySetInnerHTML={{
+                        __html: (c.CITATION && c.VERSION && c.TITLE ? c.TITLE + ' ' : '') +
+                        (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, '')
+                      }}>
+                </span>
+                <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
+                  {moment(c.INSERTED).calendar()} by <b>{c.CONTRIBUTOR}</b>
+                </span>
+              </div>
+            <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                   href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                   (c.FOLDER === 'zmab' ?
+                       `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
+                       :
+                       `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
+                   )}
+                >
+                  <i className="ui file text outline icon"/> Download
+                </a>
+              </div>
+              <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
+                {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
+                {(c.N_SITES        ? <a onClick={this.showData.bind(this)}>{c.N_SITES        + ' Site'        + (c.N_SITES        > 1 ? 's' : '')}<br/></a> : undefined)}
+                {(c.N_SAMPLES      ? <a onClick={this.showData.bind(this)}>{c.N_SAMPLES      + ' Sample'      + (c.N_SAMPLES      > 1 ? 's' : '')}<br/></a> : undefined)}
+                {(c.N_SPECIMENS    ? <a onClick={this.showData.bind(this)}>{c.N_SPECIMENS    + ' Specimen'    + (c.N_SPECIMENS    > 1 ? 's' : '')}<br/></a> : undefined)}
+                {(c.N_EXPERIMENTS  ? <a onClick={this.showData.bind(this)}>{c.N_EXPERIMENTS  + ' Experiment'  + (c.N_EXPERIMENTS  > 1 ? 's' : '')}<br/></a> : undefined)}
+                {(c.N_MEASUREMENTS ? <a onClick={this.showData.bind(this)}>{c.N_MEASUREMENTS + ' Measurement' + (c.N_MEASUREMENTS > 1 ? 's' : '')}     </a> : undefined)}
+              </div>
+              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                <div className="ui image">
+                  {(c.RANDOM_PLOT_NAME ?
+                    <img className="ui bordered image"
+                    src={'//static.earthref.org/imcache/' +
+                      (/_TY:_(aniso|eq)/.test(c.RANDOM_PLOT_NAME) ? 'Crop(geometry:292x292+111+104)' : 'Set(gravity:Center)|Crop(geometry:360x360+10+0)') +
+                      '|Resize(geometry:100x100)/images/MAGIC/static_plots/' +
+                      c.MAGIC_CONTRIBUTION_ID + '/' + c.RANDOM_PLOT_NAME}
+                      style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
+                    />
+                  :
+                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
+                  )}
+                </div>
+              </div>
+              {!this.props.isPoles && <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                <a className="ui tiny image" href="#" onClick={this.showMap.bind(this)}>
+                  {this.renderMapThumbnail(c)}
+                </a>
+              </div>}
+              {!c.SVW_ER_LO_PMAG_RESULT_ID && this.renderGeo(c)}
+              {!c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {((c.CLASS || c.GEOLOGIC_CLASSES) ? <span><b>Class:</b><br/>{(c.CLASS || c.GEOLOGIC_CLASSES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                {((c.TYPE || c.GEOLOGIC_TYPES) ? <span><b>Type:</b><br/>{(c.TYPE || c.GEOLOGIC_TYPES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                {((c.LITHOLOGY || c.LITHOLOGIES) ? <span><b>Lithology:</b><br/>{(c.LITHOLOGY || c.LITHOLOGIES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+              </div>}
+              {c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {this.renderPole(c)}
+              </div>}
+              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {this.renderAge(c)}
+              </div>
+              <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {(c.METHOD_CODES || c.MAGIC_METHOD_CODES ?
+                  <span><b>Method Codes:</b><br/>
+                    <span dangerouslySetInnerHTML={{__html:
+                    (c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').slice(0,5).join('<br/>') +
+                    ((c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').length > 5 ? ' ...' : '')}} />
+                  </span> : undefined)}
+              </div>
+              <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                {(c.ER_CITATION_NAMES && _.without(c.ER_CITATION_NAMES.replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 0 ?
+                  <span><b>Citations:</b><br/>
+                      <span dangerouslySetInnerHTML={{__html:
+                      _.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
+                      (_.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
+                    </span> : undefined)}
+              </div>
+              <div style={{marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
+                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
+                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi' + c.DOI}>{'earthref.org/MagIC/' + c.DOI}</a><br/></span> : undefined)}
+                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="content" style={{fontSize:'small'}}>
+          <div dangerouslySetInnerHTML={{__html: (c.REFERENCE_HTML || '').replace(/<u> INCOMPLETE REFERENCE !<\/u>/g, '')}} />
+          <div dangerouslySetInnerHTML={{__html: c.ABSTRACT}} />
+          {c.REFERENCE_KEYWORDS ?
+            <div dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + c.REFERENCE_KEYWORDS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />
+            : undefined}
+          {c.REFERENCE_TAGS ?
+            <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + c.REFERENCE_TAGS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />
+            : undefined}
+          {c.version_history ?
+            <table className="ui very basic small compact table" style={{maxWidth:700}}>
+              <thead>
+              <tr>
+                <th>Version</th>
+                <th>Data Model</th>
+                <th>Uploaded</th>
+                <th>Download</th>
+              </tr>
+              </thead>
+              <tbody>
+              {c.version_history.map((v, i) => {
+                return (
+                  <tr key={i}>
+                    <td>{v.version}</td>
+                    <td>{v.magic_version}</td>
+                    <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
+                    <td>
+                      <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
+                         href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                           (v.folder === 'zmab' ?
+                               `/projects/earthref/archive/bgfiles/${v.folder}/${v.file_name}.txt`
+                               :
+                               `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${v.folder}/${v.file_name}`
+                           )
+                         }
+                      >
+                        <i className="ui file text outline icon"/> Download
+                      </a>
+                    </td>
+                  </tr>
+                );
+              })}
+              </tbody>
+            </table>
+          : undefined}
+        </div>
+        <div ref="map modal" className="ui fullscreen modal">
+          <i className="close icon"></i>
+          <div className="header">
+            {c.citation} Map
+          </div>
+          <img className="ui bordered image" src="/MagIC/map.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', width:'100%', height:'calc(100vh - 10em)'}}/>
+        </div>
+      </div>
+    );
+  }
+
+  renderDataModal() {
+    return (
+      <div ref="data modal" className="ui fullscreen basic modal">
+        <i className="close icon" style={{color: 'white', top:'.5rem', right: '0'}}></i>
+        <div className="ui top attached inverted tabular menu">
+          <a className="item" href="#">
+            Locations
+          </a>
+          <a className="active item" href="#">
+            Sites
+          </a>
+          <a className="item" href="#">
+            Samples
+          </a>
+          <a className="item" href="#">
+            Specimens
+          </a>
+          <a className="item" href="#">
+            Experiments
+          </a>
+        </div>
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 10em)'}}>
+          {this.renderData()}
+        </div>
+      </div>
+    );
   }
 
   renderData() {
@@ -119,188 +430,5 @@ export default class extends React.Component {
     );
   }
 
-  renderGeo(c) {
-    let geologic = [];
-    if (c.plate_block) geologic.push(c.plate_block);
-    if (c.terrane) geologic.push(c.terrane);
-    if (c.geological_province_section) geologic.push(c.geological_province_section);
-    if (c.setting) geologic.push(c.setting);
-    let geographic = [];
-    if (c.country) geographic.push(c.country);
-    if (c.region) geographic.push(c.region);
-    if (c.village_city) geographic.push(c.village_city);
-    let oceanographic = [];
-    if (c.continent_ocean) oceanographic.push(c.continent_ocean);
-    if (c.ocean_sea) oceanographic.push(c.ocean_sea);
-    return (
-      <div>
-        {(geologic.length      > 0 ? <span><b>Geologic:</b><br/>{geologic.join(', ')}<br/></span> : undefined)}
-        {(geographic.length    > 0 ? <span><b>Geographic:</b><br/>{geographic.join(', ')}<br/></span> : undefined)}
-        {(oceanographic.length > 0 ? <span><b>Oceanographic:</b><br/>{oceanographic.join(', ')}<br/></span> : undefined)}
-      </div>
-    );
-  }
-
-  render() {
-    const c = this.props.doc;
-    console.log('summary', c);
-    return (
-      <div ref="accordion" className="ui accordion magic-contribution">
-        <div className="title" style={{paddingLeft:'1em'}}>
-          <i className="dropdown icon" style={{position:'relative', left:'-1.3rem'}}/>
-          <div className="ui doubling grid" style={{marginTop:'-2.5rem'}}>
-            <div className="row" style={{paddingBottom:0}}>
-              <div className="sixteen wide column">
-            <span>
-              {c.citation} v.{c.version}
-            </span>
-            <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-              {moment(c.activated).calendar()} by <b>{c.contributor}</b>
-            </span>
-              </div>
-            </div>
-            <div className="row" style={{paddingTop:'.5em', fontWeight:'normal', whiteSpace:'nowrap'}}>
-              <div className="two wide right aligned column">
-                <a className="ui basic tiny fluid compact icon button" style={{marginTop:'0.5em'}}
-                   href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                   (c.folder === 'zmab' ?
-                       `/projects/earthref/archive/bgfiles/${c.folder}/${c.file_name}.txt`
-                       :
-                       `/projects/earthref/local/oracle/earthref/magic/uploads/${c.contributor_id}/${c.folder}/${c.file_name}`
-                   )
-                   }
-                >
-                  <i className="ui file text outline icon"/> Download
-                </a>
-                <div className="ui basic tiny fluid compact icon button" style={{marginTop:'0.5em'}}><i className="ui linkify icon"/> Copy Link</div>
-                <div className="ui basic tiny fluid compact icon disabled button"><i className="star icon"/> Follow</div>
-              </div>
-              <div className="two wide column" style={{fontSize:'small'}}>
-                {(c.n_locations ?    <a onClick={this.showData.bind(this)}>{c.n_locations    + ' Location'    + (c.n_locations    > 1 ? 's' : '')}</a> : undefined)}<br/>
-                {(c.n_sites ?        <a onClick={this.showData.bind(this)}>{c.n_sites        + ' Site'        + (c.n_sites        > 1 ? 's' : '')}</a> : undefined)}<br/>
-                {(c.n_samples ?      <a onClick={this.showData.bind(this)}>{c.n_samples      + ' Sample'      + (c.n_samples      > 1 ? 's' : '')}</a> : undefined)}<br/>
-                {(c.n_specimens ?    <a onClick={this.showData.bind(this)}>{c.n_specimens    + ' Specimen'    + (c.n_specimens    > 1 ? 's' : '')}</a> : undefined)}<br/>
-                {(c.n_measurements ? <a onClick={this.showData.bind(this)}>{c.n_measurements + ' Measurement' + (c.n_measurements > 1 ? 's' : '')}</a> : undefined)}
-              </div>
-              <div className="two wide column">
-                <div className="ui image">
-                  {(c.contribution_id && c.random_plot_name && !c.random_plot_name.match(/eqarea_\.png$/) ?
-                    <img className="ui bordered image"
-                      src={'//static.earthref.org/imcache/Set(gravity:Center)%7CCrop(geometry:360x360+10+0)%7CResize(geometry:100x100)/images/MAGIC/static_plots/' +
-                        c.contribution_id + '/' + c.random_plot_name}
-                      style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
-                    />
-                  :
-                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
-                  )}
-                </div>
-              </div>
-              <div className="two wide column">
-                <a className="ui tiny image" href="#" onClick={this.showMap.bind(this)}>
-                  {this.renderMapThumbnail(c)}
-                </a>
-              </div>
-              <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {this.renderGeo(c)}
-              </div>
-              <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {(c.class ? <span><b>Class:</b><br/>{c.class.join(', ')}<br/></span> : undefined)}
-                {(c.type ? <span><b>Type:</b><br/>{c.type.join(', ')}<br/></span> : undefined)}
-                {(c.lithologies ? <span><b>Lithology:</b><br/>{c.lithologies.join(', ')}<br/></span> : undefined)}
-              </div>
-              <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {(c.max_ages || c.min_ages ?
-                    <span>
-                      <b>Age:</b><br/>
-                      {numeral(c.min_ages).format('0[.]0 a')} - <br/>
-                      {numeral(c.max_ages).format('0[.]0 a')}<br/>
-                      Years BP
-                    </span>
-                  : undefined)}
-              </div>
-              <div className="two wide column" style={{fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-              {(c.method_codes ? <span><b>Method Codes:</b><br/><span dangerouslySetInnerHTML={{__html: c.method_codes.slice(0,4).join('<br/>') + (c.method_codes.length > 4 ? ' ...' : '')}} /></span> : undefined)}
-            </div>
-            </div>
-          </div>
-        </div>
-        <div className="content">
-          <div dangerouslySetInnerHTML={{__html: c.reference_html}} />
-          <div dangerouslySetInnerHTML={{__html: c.abstract_html}} />
-          {c.version ?
-            <table className="ui very basic small table">
-              <thead>
-              <tr>
-                <th>Version</th>
-                <th>Data Model</th>
-                <th>Uploaded</th>
-                <th>Download</th>
-              </tr>
-              </thead>
-              <tbody>
-              {c.version_history.map((v, i) => {
-                return (
-                  <tr key={i}>
-                    <td>{v.version}</td>
-                    <td>{v.magic_version}</td>
-                    <td>{moment(v.activated).calendar()} by <b>{c.contributor}</b></td>
-                    <td>
-                      <a className="ui basic tiny fluid icon button" style={{marginTop:'0.5em'}}
-                         href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                         (v.folder === 'zmab' ?
-                             `/projects/earthref/archive/bgfiles/${v.folder}/${v.file_name}.txt`
-                             :
-                             `/projects/earthref/local/oracle/earthref/magic/uploads/${c.contributor_id}/${v.folder}/${v.file_name}`
-                         )
-                         }
-                      >
-                        <i className="ui file text outline icon"/> Download
-                      </a>
-                    </td>
-                  </tr>
-                );
-              })}
-              </tbody>
-            </table>
-          : undefined}
-        </div>
-        <div ref="map modal" className="ui fullscreen modal">
-          <i className="close icon"></i>
-          <div className="header">
-            {c.citation} Map
-          </div>
-          <img className="ui bordered image" src="/MagIC/map.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', width:'100%', height:'calc(100vh - 10em)'}}/>
-        </div>
-      </div>
-    );
-  }
-
-  renderDataModal() {
-    return (
-      <div ref="data modal" className="ui fullscreen basic modal">
-        <i className="close icon" style={{color: 'white', top:'.5rem', right: '0'}}></i>
-        <div className="ui top attached inverted tabular menu">
-          <a className="item" href="#">
-            Locations
-          </a>
-          <a className="active item" href="#">
-            Sites
-          </a>
-          <a className="item" href="#">
-            Samples
-          </a>
-          <a className="item" href="#">
-            Specimens
-          </a>
-          <a className="item" href="#">
-            Experiments
-          </a>
-        </div>
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 10em)'}}>
-          {this.renderData()}
-        </div>
-      </div>
-    );
-  }
 }
 
