@@ -6,6 +6,7 @@ import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
 import {Mongo} from 'meteor/mongo';
+import numeral from 'numeral';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
 import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
@@ -34,6 +35,7 @@ export default class MagICUploadContribution extends React.Component {
       importProgressTaps: 0,
       totalImportErrors: 0,
       _id: '',
+      _existing_contribution: {},
       _name: 'My Contribution',
       _contributor: Cookies.get('name'),
       _userid: (Cookies.get('user_id') ? '@' + Cookies.get('user_id') : undefined),
@@ -55,6 +57,8 @@ export default class MagICUploadContribution extends React.Component {
       if (this.files[i].fileReader)
         this.files[i].fileReader.abort();
     this.files = [];
+    this.contribution = {};
+    this.summary = {};
     this.setState(this.initialState);
   }
 
@@ -98,8 +102,13 @@ export default class MagICUploadContribution extends React.Component {
     $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
     $(this.refs['private contributions']).not('.ui-dropdown').addClass('ui-dropdown').dropdown({
       onChange: (value, text, $choice) => {
-        console.log('private contribution as changed', value, text, $choice);
-        this.setState({_id: value});
+        let old = (value === '' ? {} : Collections['magic.private.contributions'].findOne(value));
+        console.log('private contribution as changed', value, text, $choice, old);
+        this.setState({
+          _id: value, 
+          _existing_contribution: (value === '' ? undefined : old),
+          _existing_summary: (value === '' ? undefined : this.summarizer.summarize(old))
+      }, () => this.reviewUpload());
       }
     });
     $(this.refs['private contributions']).dropdown('refresh');
@@ -110,45 +119,54 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   reviewUpload() {
-    if (!this.contribution) {
-      this.contribution = {};
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (data.table === 'measurements') {
-              /* this.contribution.experiments = {};
-              let experimentColumnIdx = data.columns.indexOf('experiment');
-              data.rows.map((row, i) => {
-                this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
-                  columns: data.columns,
-                  rows: []
-                };
-                this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
-              }); */
-              if (this.contribution.measurements !== undefined) {
-                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
-              } else {
-                this.contribution.measurements = {
-                  columns: data.columns,
-                  rows: data.rows
-                }
-              }
-            } else {
-              this.contribution[data.table] = this.contribution[data.table] || [];
-              data.rows.map((row, i) =>
-                this.contribution[data.table].push(
-                  _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
-                )
-              );
-            }
-          }
-        });
-      }
-      this.summary = this.summarizer.summarize(this.contribution);
+    this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
+    console.log('before merging', this.state._existing_contribution, this.contribution);
+    for (let file of this.files) {
+      if (file.imported) file.imported.map((data) => {
+        if (data.table && data.columns && data.rows) {
+          if (this.contribution[data.table]) delete this.contribution[data.table];
+        }
+      });
     }
+    for (let file of this.files) {
+      if (file.imported) file.imported.map((data) => {
+        if (data.table && data.columns && data.rows) {
+          if (data.table === 'measurements') {
+            /* this.contribution.experiments = {};
+            let experimentColumnIdx = data.columns.indexOf('experiment');
+            data.rows.map((row, i) => {
+              this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
+                columns: data.columns,
+                rows: []
+              };
+              this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
+            }); */
+            if (this.contribution.measurements !== undefined) {
+              file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
+            } else {
+              this.contribution.measurements = {
+                columns: data.columns,
+                rows: data.rows
+              }
+            }
+          } else {
+            this.contribution[data.table] = this.contribution[data.table] || [];
+            data.rows.map((row, i) =>
+              this.contribution[data.table].push(
+                _.reduce(row, (json, column, j) => { json[data.columns[j]] = column; return json; }, {})
+              )
+            );
+          }
+        }
+      });
+    }
+    this.summary = this.summarizer.summarize(this.contribution);
+    console.log('after merging', this.contribution, this.summary);
+
     let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
     this.setState({
       totalParseErrors: totalParseErrors,
+      importProgressTaps: this.state.importProgressTaps + 1,
       visibleStep: (totalParseErrors > 0 ? 2 : 3)
     });
   }
@@ -214,12 +232,14 @@ export default class MagICUploadContribution extends React.Component {
 
     if (this.state.fileFormats[i] === 'magic') {
       if (this.files[i].text) {
+        this.files[i].text.replace('\r\n','\n');
         this.files[i].tableNames = [];
         this.files[i].data = [];
         this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
-          let tableName = table.match(/^tab( delimited)?\t(.+)\n/);
+          let tableName = table.match(/^tab( delimited)?\s*?\t(.+)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
+          console.log('table', table, tableName);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
-          this.files[i].data[j] = table.split('\n').map((line, j) => line.split('\t'));
+          this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
         });
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
@@ -227,14 +247,16 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'tsv') {
       if (this.files[i].text) {
-        this.files[i].data = this.files[i].text.split('\n').map((line, j) => line.split('\t'));
+        this.files[i].text.replace('\r\n','\n');
+        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'csv') {
       if (this.files[i].text) {
-        this.files[i].data = this.files[i].text.split('\n').map((line, j) => line.split(','));
+        this.files[i].text.replace('\r\n','\n');
+        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
       }
@@ -281,7 +303,7 @@ export default class MagICUploadContribution extends React.Component {
         if (data[rowIdx - nSkipRows].length < columnIdx - nSkipColumns + 1)
           _.times(columnIdx - nSkipColumns + 1 - data[rowIdx - nSkipRows].length,
             () => data[rowIdx - nSkipRows].push(''));
-        data[rowIdx - nSkipRows][columnIdx - nSkipColumns] = sheet[cellName].v;
+        data[rowIdx - nSkipRows][columnIdx - nSkipColumns] = _.trim(String(sheet[cellName].v));
       }
     }
 
@@ -302,25 +324,10 @@ export default class MagICUploadContribution extends React.Component {
         uploading: false
       });
   } else {
-      const exporter = new ExportContribution({});
-      this.contribution.UPLOAD = 0;
-      this.contribution._summary = this.contribution._summary || {contribution: {}};
-      this.contribution._summary.contribution.FOLDER = (new Date()).getMilliseconds();
-      this.contribution._summary.contribution.FILE_NAME = (this.contribution._summary.contribution.CITATION ||
-                                                           this.contribution._summary.contribution.TITLE ||
-                                                           'MagIC Contribution').slice(0, 30) + '.txt';
-      //$.ajax({
-      //  type: "POST",
-      //  url: "https://earthref.org/cgi-bin/x-magic-upload-3.0-files.cgi",
-      //  data: {
-      //    file_dir: this.state._userid + '/' + this.contribution._summary.contribution.FOLDER,
-      //    file_name: this.contribution._summary.contribution.FILE_NAME,
-      //    file_content: exporter.toText(this.contribution)
-      //  }
-      //}).done((response) => {
-      //  console.log('CGI', response);
+        this.contribution._activated = false;
+        console.log('upload', this.contribution, this.state._id);
         if (this.state._id !== '')
-          Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
+          Meteor.call('updateContribution', this.state._id, this.contribution, this.summary,
             (error) => {
               console.log('updated contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
@@ -452,29 +459,71 @@ export default class MagICUploadContribution extends React.Component {
     );
   }
 
-  renderAgesDetails() {
-    if ((this.contribution && this.contribution.ages) || (this.summary && this.summary.ages)) {
-      const nRows = (this.contribution && this.contribution.ages && this.contribution.ages.length || 0);
+  renderDetails(c, s) {
+    return (
+      <table className="ui very basic collapsing compact celled table" style={{display: 'inline'}}>
+        <thead>
+        <tr>
+          <th>Table</th>
+          <th>N Rows</th>
+          <th colSpan={2}>Assignment</th>
+        </tr>
+        </thead>
+        <tbody>
+        {_.sortBy(_.keys(models[_.last(versions)].tables),
+          (t) => { return models[_.last(versions)].tables[t].position; }
+        ).map((t,i) => {
+          let json = c;
+          const tableName = models[_.last(versions)].tables[t].label;
+          const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
+          const n = (s && s[t] && _.keys(s[t]).length || 0);
+          const nExperiments = (t === 'measurements' && s && s.contribution && s.contribution.N_EXPERIMENTS || 0);
+          return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
+            <tr key={i}>
+              <td><h4>{tableName}</h4></td>
+              <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
+              {t === 'measurements' ?
+                <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
+                :
+                <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
+              }
+              {t === 'measurements' ?
+                <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
+                :
+                <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
+              }
+            </tr>
+            : undefined);
+        })}
+        </tbody>
+        {this.renderAgesDetails(c, s)}
+      </table>
+    )  ;
+  }
+  
+  renderAgesDetails(c, s) {
+    if ((c && c.ages) || (s && s.ages)) {
+      const nRows = (c && c.ages && c.ages.length || 0);
       let nAges = [];
-      if (this.summary && this.summary.ages && this.summary.ages.N_LOCATION_AGES)
+      if (s && s.ages && s.ages.N_LOCATION_AGES)
         nAges.push({
-          label: 'Location Age' + (this.summary.ages.N_LOCATION_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_LOCATION_AGES
+          label: 'Location Age' + (s.ages.N_LOCATION_AGES === 1 ? '' : 's'),
+          n: s.ages.N_LOCATION_AGES
         });
-      if (this.summary && this.summary.ages && this.summary.ages.N_SITE_AGES)
+      if (s && s.ages && s.ages.N_SITE_AGES)
         nAges.push({
-          label: 'Site Age' + (this.summary.ages.N_SITE_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_SITE_AGES
+          label: 'Site Age' + (s.ages.N_SITE_AGES === 1 ? '' : 's'),
+          n: s.ages.N_SITE_AGES
         });
-      if (this.summary && this.summary.ages && this.summary.ages.N_SAMPLE_AGES)
+      if (s && s.ages && s.ages.N_SAMPLE_AGES)
         nAges.push({
-          label: 'Sample Age' + (this.summary.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_SAMPLE_AGES
+          label: 'Sample Age' + (s.ages.N_SAMPLE_AGES === 1 ? '' : 's'),
+          n: s.ages.N_SAMPLE_AGES
         });
-      if (this.summary && this.summary.ages && this.summary.ages.N_SPECIMEN_AGES)
+      if (s && s.ages && s.ages.N_SPECIMEN_AGES)
         nAges.push({
-          label: 'Specimen Age' + (this.summary.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
-          n: this.summary.ages.N_SPECIMEN_AGES
+          label: 'Specimen Age' + (s.ages.N_SPECIMEN_AGES === 1 ? '' : 's'),
+          n: s.ages.N_SPECIMEN_AGES
         });
       if (nRows > 0 || nAges.length > 0) return (
         <tbody>
@@ -500,8 +549,8 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   render() {
-    const privateContributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
-    console.log('privateContributions', privateContributions, Cookies.get('user_id'));
+    //const privateContributions = Collections['magic.private.contributions'].find({_contributor: '@' + Cookies.get('user_id'), _activated: false}, {'_inserted': -1}).fetch();
+    //console.log('privateContributions', privateContributions, Cookies.get('user_id'));
 
     const step = this.state.visibleStep;
     if (!this.state._contributor) return (
@@ -866,14 +915,14 @@ export default class MagICUploadContribution extends React.Component {
                         Upload To
                       </div>
                       <div ref="private contributions" className="ui fluid selection dropdown">
-                        <input name="_id" type="hidden"/>
+                        <input name="_id" type="hidden" value={this.state._id}/>
                         <i className="dropdown icon"/>
                         <div className="text">A New Private Contribution</div>
                         <div className="menu">
                           <div data-value="" className="item">
                             A New Private Contribution
                           </div>
-                          {Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch().map((c, i) =>
+                          {Collections['magic.private.contributions'].find({_contributor: '@' + Cookies.get('user_id'), _activated: false}, {'_inserted': -1}).fetch().map((c, i) =>
                             <div key={i} data-value={c._id} className="item">
                               <span className="description">{moment(c._inserted).calendar()}</span>
                               <span className="text">{c._name}</span>
@@ -913,47 +962,34 @@ export default class MagICUploadContribution extends React.Component {
                           </span>
                         </div>
                         <div className="ui basic segment">
-                          <div className="ui one column very relaxed stackable grid">
-                            <div className="center aligned column">
-                              <table className="ui very basic collapsing compact celled table" style={{display: 'inline'}}>
-                                <thead>
-                                <tr>
-                                  <th>Table</th>
-                                  <th>N Rows</th>
-                                  <th colSpan={2}>Assignment</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {_.sortBy(_.keys(models[_.last(versions)].tables),
-                                  (t) => { return models[_.last(versions)].tables[t].position; }
-                                ).map((t,i) => {
-                                  let json = this.contribution;
-                                  const tableName = models[_.last(versions)].tables[t].label;
-                                  const nRows = (json && json[t] ? (json[t].rows ? json[t].rows.length : json[t].length) : 0);
-                                  const n = (this.summary && this.summary[t] && _.keys(this.summary[t]).length || 0);
-                                  const nExperiments = (t === 'measurements' && this.summary && this.summary.contribution && this.summary.contribution.N_EXPERIMENTS || 0);
-                                  return (t != 'contribution' && t != 'ages' && (nRows > 0 || n > 0 || nExperiments > 0) ?
-                                    <tr key={i}>
-                                      <td><h4>{tableName}</h4></td>
-                                      <td>{nRows > 0 && numeral(nRows).format('0,0')}</td>
-                                      {t === 'measurements' ?
-                                        <td className="right aligned">{nExperiments > 0 ? numeral(nExperiments).format('0,0') : undefined}</td>
-                                        :
-                                        <td className="right aligned">{(n > 0 ? numeral(n).format('0,0') : undefined)}</td>
-                                      }
-                                      {t === 'measurements' ?
-                                        <td>{nExperiments > 0 ? (nExperiments === 1 ? 'Experiment' : 'Experiments') : undefined}</td>
-                                        :
-                                        <td>{(n > 0 ? (n === 1 ? (t === 'criteria' ? 'Criterion' : tableName.slice(0, -1)) : tableName) : undefined)}</td>
-                                      }
-                                    </tr>
-                                    : undefined);
-                                })}
-                                </tbody>
-                                {this.renderAgesDetails()}
-                              </table>
+                          {this.state._existing_contribution && this.state._existing_summary ?
+                            <div className="ui two column very relaxed stackable grid">
+                              <div className="center aligned column">
+                                <div className="ui small header">
+                                  {this.state._name} Before Upload
+                                </div>
+                                <br/>
+                                {this.renderDetails(this.state._existing_contribution, this.state._existing_summary)}
+                              </div>
+                              <div className="ui vertical divider">
+                                <i className="circle arrow right icon"></i>
+                              </div>
+                              <div className="center aligned column">
+                                <div className="ui small header">
+                                  {this.state._name} After Upload
+                                </div>
+                                <br/>
+                                {this.renderDetails(this.contribution, this.summary)}
+                              </div>
                             </div>
-                          </div>
+                          :
+                            <div className="ui one column very relaxed stackable grid">
+                              <div className="center aligned column">
+                                {this.renderDetails(this.contribution, this.summary)}
+                              </div>
+                            </div>
+                          }
+
                         </div>
                         {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
                         <div></div>

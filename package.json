@@ -63,7 +63,10 @@
     "react-mounter": "*",
     "react-simple-di": "*",
     "react-storybook-addon-backgrounds": "*",
+    "request": "^2.79.0",
+    "s3": "^4.4.0",
     "save-as": "*",
+    "write": "^0.3.2",
     "xlsx-style": "*"
   },
   "postcss": {

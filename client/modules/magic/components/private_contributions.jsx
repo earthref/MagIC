@@ -13,11 +13,8 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: "",
       loaded: false,
-      updating: false,
-      contributions: [],
-      dois: []
+      privateContributions: []
     };
     if (Cookies.get('user_id'))
       //Tracker.autorun(() => {
@@ -29,61 +26,105 @@ export default class extends React.Component {
       //});
   }
 
-  updateContributions() {
-    let contributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
-    let dois = contributions.map((c) => {
-      if(c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
-        if (!c._summary || !c._summary.contribution || !c._summary.contribution.CITATION)
-          this.updateDOI(c, c.contribution[0].doi);
-        return c.contribution[0].doi;
-      } else return '';
+  componentDidMount() {
+    $(this.refs['failed to delete']).modal({
+      closable: false
     });
-    this.setState({contributions: contributions, dois: dois});
+    $(this.refs['confirm activate']).modal({
+      closable: false
+    });
+    $(this.refs['confirm delete']).modal({
+      closable: false,
+      onHide: ($modal) => {
+        $(this.refs['confirm delete input']).val("");
+      }
+    });
   }
 
-  updateDOI(c, doi) {
+  componentDidUpdate() {
+
+  }
+
+  confirmActivate(id) {
+    $(this.refs['confirm activate']).modal('setting', {
+      onApprove: ($modal) => {
+        Meteor.call('activateContribution', id,
+          (error) => {
+            if (error)
+              $(this.refs['failed to activate']).modal('show');
+            else
+              this.updateContributions();
+          }
+        );
+      }
+    }).modal('show');
+  }
+
+  confirmDelete(id) {
+    $(this.refs['confirm delete']).modal('setting', {
+      onApprove: ($modal) => {
+        console.log("delete?", $(this.refs['confirm delete input']).val());
+        if ($(this.refs['confirm delete input']).val() === 'DELETE') {
+          console.log("deleting");
+          Meteor.call('deleteContribution', id, '@' + Cookies.get('user_id'),
+            (error) => {
+              if (error)
+                $(this.refs['failed to delete']).modal('show');
+              else
+                this.updateContributions();
+            }
+          );
+        } else return false;
+      }
+    }).modal('show');
+  }
+
+  updateContributions() {
+    let contributions = Collections['magic.private.contributions'].find(
+      (Cookies.get('user_id') !== 'rminnett' ? {'_contributor': '@' + Cookies.get('user_id')} : {}),
+      {sort: {'_inserted': -1}}).fetch();
+    let privateContributions = contributions.map((c, i) => {
+      let privateContribution = {contribution: c, errors: []};
+      if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
+        if (!c.contribution._doiData || !c._summary || !c._summary.contribution || !c._summary.contribution.CITATION)
+          //this.updateDOI(i, c.contribution[0].doi);
+        privateContribution.doi = c.contribution[0].doi;
+      } else {
+        privateContribution.doi = '';
+      }
+      if (!c._doiData)
+        privateContribution.errors.push("The contribution requires a valid DOI prior to activation.");
+      return privateContribution;
+    });
+    this.setState({privateContributions: privateContributions});
+  }
+
+  updateDOI(i, doi) {
+    let privateContributions = this.state.privateContributions;
+    if (privateContributions[i] && privateContributions[i].contribution && privateContributions[i].contribution._doiData)
+      delete privateContributions[i].contribution._doiData;
+    this.setState({privateContributions: privateContributions});
     $.ajax({
       type: "GET",
       dataType: "json",
       url: "//api.crossref.org/works/" + doi,
     }).done((doiData) => {
-      console.log(c, doiData);
-      if (c && c._id && doiData && doiData.status === 'ok') {
-        Meteor.call('updateDOI', c._id, doiData.message,
+      console.log('doi data', privateContributions[i], doiData);
+      if (privateContributions[i] && privateContributions[i].contribution && privateContributions[i].contribution._id &&
+          doiData && doiData.status === 'ok') {
+        Meteor.call('updateDOI', privateContributions[i].contribution._id, doiData.message,
           (error) => {
-            //this.updateContributions();
+            this.updateContributions();
           }
         );
       }
     });
   }
 
-  updateES(c) {
-    console.log(JSON.parse($("#textarea").val()));
-    Meteor.call('updateES', c._es_id, JSON.parse($("#textarea").val()),
-      (error) => {
-        console.log('updated contribution', this.state._id, error);
-      }
-    );
-  }
-
-  preview() {
-
-  }
-
-  deactivate() {
-
-  }
-
-  activate() {
-
-  }
-
   render() {
-    //const privateContributions = Collections['magic.private.contributions'].find({}, {'_inserted': -1}).fetch();
-    console.log('privateContributions', this.state.contributions, Cookies.get('user_id'));
+    console.log('privateContributions', this.state.privateContributions, Cookies.get('user_id'));
     if (!Cookies.get('user_id')) return (
-      <div>
+      <div className="private-contributions">
         <div className="ui top attached segment">
           <div className="ui center aligned two column relaxed grid">
             <div className="column">
@@ -140,15 +181,16 @@ export default class extends React.Component {
                 <div className="title">Upload</div>
                 <div className="subtitle">Import data into your private workspace.</div>
               </IconButton>
-              {this.state.contributions.map((c,i) => {
-                let doi = this.state.dois && this.state.dois[i] || '';
+              {this.state.privateContributions.map((c,i) => {
                 return (
                   <div className="item" key={i}>
-                    {Cookies.get('mail_id') == '6869' ?
+                    {Cookies.get('mail_id') == '5730' ?
                     <div>
-                      <textarea id="textarea" defaultValue={JSON.stringify(c._summary.contribution, null, '  ')} style={{width: '800px', height: '500px'}}></textarea>
+                      <textarea id="textarea" defaultValue={
+                        (c.contribution._summary ? JSON.stringify(c.contribution._summary.contribution, null, '  ') : '')
+                      } style={{width: '100%', height: '200px'}}></textarea>
                       <button
-                        onClick={() => this.updateES(c)}
+                        onClick={() => this.updateES(c.contribution)}
                       >
                         Update
                       </button>
@@ -157,59 +199,41 @@ export default class extends React.Component {
                     }
                     <div style={{display: 'flex', flexFlow: 'row wrap', marginTop: '0.5em', marginBottom: '0.5em'}}>
                       <div style={{flex: '1 1 auto'}}>
-                        <div className={"ui labeled fluid input" + (doi ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
-                          <div className={"ui label" + (doi ? '' : ' red')}>
+                        <div className={"ui labeled fluid input" + (c.doi && c.contribution._doiData ? '' : ' error')}>
+                          <div className={"ui label" + (c.doi && c.contribution._doiData ? '' : ' red')}>
                             DOI
                           </div>
-                          <input type="text" default="None" value={doi}
+                          <input type="text" default="None" value={c.doi} readOnly={c._activated}
                                  onChange={(e) => {
-                                   let dois = this.state.dois;
-                                   dois[i] = e.target.value;
-                                   this.setState({dois: dois});
-                                   this.updateDOI(c, e.target.value);
+                                   let privateContributions = this.state.privateContributions;
+                                   privateContributions[i].doi = e.target.value;
+                                   this.setState({privateContributions: privateContributions});
+                                   this.updateDOI(i, e.target.value);
                            }}/>
                         </div>
                       </div>
-                      <div className={portals['MagIC'].color + ' ui basic disabled button'} style={{margin: '0 0 0 0.5em'}}>
-                        <i className="add user icon"/>
-                        Share
-                      </div>
-                      <div className={portals['MagIC'].color + ' ui button'} style={{margin: '0 0 0 0.5em'}}
-                           onClick={this.preview.bind(this)}
-                      >
-                        <i className="checkmark icon"/>
-                        Preview
-                      </div>
-                      <div className={portals['MagIC'].color + ' ui basic button' + (c.contribution && c.contribution[0] && c.contribution[0].doi ? '' : ' disabled')} style={{margin: '0 0 0 0.5em'}}
-                           onClick={this.activate.bind(this)}
-                      >
-                        <i className="checkmark icon"/>
-                        Activate
-                      </div>
-                      {Cookies.get('user_id') === 'rminnett' ?
-                        <div className={portals['MagIC'].color + ' ui basic button' + (c.UPLOAD !== 0 ? '' : ' disabled')} style={{margin: '0 0 0 0.5em'}}
-                             onClick={this.deactivate.bind(this)}
+                      {!c._activated ?
+                        <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
+                             onClick={(e) => {
+                               this.confirmActivate(c.contribution._id);
+                             }}
                         >
-                        <i className="checkmark icon"/>
-                        Deactivate
-                        </div>
-                        :
-                        undefined
-                      }
-                      <div className={portals['MagIC'].color + ' ui icon button'} style={{margin: '0 0 0 0.5em'}}
+                          <i className="checkmark icon"/>
+                          Activate
+                        </div> :undefined}
+                      {!c._activated ?
+                        <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
                         onClick={(e) => {
-                          Meteor.call('deleteContribution', c._id, '@' + Cookies.get('user_id'),
-                            (error) => {
-                              this.updateContributions();
-                            }
-                          );
+                          this.confirmDelete(c.contribution._id);
                         }}
                       >
                         <i className="close icon"/>
                         Delete
-                      </div>
+                      </div> :undefined}
                     </div>
-                    {c._summary && c._summary.contribution ? <Summary doc={c._summary.contribution} mongoID={c._id} key={i}/> : undefined}
+                    {c.contribution._summary && c.contribution._summary.contribution ?
+                      <Summary doc={c.contribution._summary.contribution}/> : undefined
+                    }
                   </div>
                 );
               })}
@@ -222,16 +246,75 @@ export default class extends React.Component {
         <div ref="failed to delete" className="ui basic modal">
           <div className="ui icon header">
             <i className="file text outline icon"></i>
-            Delete Private Contribution
+            Delete Your Private Contribution
           </div>
           <div className="content">
             <p>Failed to delete this contribution.</p>
+          </div>
+          <div className="actions">
+            <div ref="failed to delete button" className="ui red basic cancel inverted button">
+              <i className="remove icon"></i>
+              Ok
+            </div>
+          </div>
+        </div>
+        <div ref="confirm delete" className="ui modal">
+          <div className="ui icon header">
+            <i className="file text outline icon"></i>
+            Delete Your Private Contribution
+          </div>
+          <div className="content">
+            <div className="ui icon error message">
+              <i className="warning sign icon"></i>
+              Warning! Deleting this contribution is irreversible.
+            </div>
+            <div className="ui basic segment">
+              Please type "DELETE" below if this is your intention:
+            </div>
+            <div className="ui fluid large error input">
+              <input ref="confirm delete input" defaultValue={''}/>
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui red approve button">
+              <i className="remove icon"></i>
+              Delete
+            </div>
+            <div className="ui cancel button">Cancel</div>
+          </div>
+        </div>
+        <div ref="failed to activate" className="ui basic modal">
+          <div className="ui icon header">
+            <i className="file text outline icon"></i>
+            Activate Your Private Contribution
+          </div>
+          <div className="content">
+            <p>Failed to activate this contribution.</p>
           </div>
           <div className="actions">
             <div className="ui red basic cancel inverted button">
               <i className="remove icon"></i>
               Ok
             </div>
+          </div>
+        </div>
+        <div ref="confirm activate" className="ui modal">
+          <div className="ui icon header">
+            <i className="file text outline icon"></i>
+            Activate Your Private Contribution
+          </div>
+          <div className="content">
+            <div className="ui icon error message">
+              <i className="warning sign icon"></i>
+              Warning! Activating your contribution makes the data publicly visible.
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui red approve button">
+              <i className="check icon"></i>
+              Activate
+            </div>
+            <div className="ui cancel button">Cancel</div>
           </div>
         </div>
       </div>

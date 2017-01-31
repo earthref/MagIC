@@ -37,7 +37,7 @@ export default class DataImporter extends React.Component {
       }
     });
     if (this.props.tableName)
-      $(this.refs['table name dropdown']).dropdown('set selected', this.props.tableName);
+      $(this.refs['table name dropdown']).dropdown('set selected', _.trim(this.props.tableName));
     this.setState({in: (!Array.isArray(this.props.data) ? [] : this.props.data)});
   }
 
@@ -62,6 +62,7 @@ export default class DataImporter extends React.Component {
 
     // Validate the table name.
     newState.errors.tableName = [];
+    newState.tableName = _.trim(String(newState.tableName));
     if (newState.tableName === '')
       newState.errors.tableName.push('"Table Name" must be selected.');
     else if (_.indexOf(_.keys(dataModels[this.props.portal].tables), newState.tableName) === -1)
@@ -73,8 +74,8 @@ export default class DataImporter extends React.Component {
       (rowIdx >= newState.nHeaderRowsInt ? Math.max(row.length, maxColumns) : maxColumns), 0);
     newState.inColumnNames = _.map(_.range(nColumns), (x) => 'Column ' + (x+1));
     if (newState.nHeaderRows !== '' && newState.errors.nHeaderRows.length === 0) {
-      const columnNames = newState.in[newState.nHeaderRows - 1].map((x, i) =>
-        (x === undefined || x == '' ? 'Column ' + (i + 1) : x)
+      const columnNames = newState.in[newState.nHeaderRowsInt - 1].map((x, i) =>
+        (x === undefined || x == '' ? 'Column ' + (i + 1) : _.trim(String(x)))
       );
       newState.inColumnNames = _.concat(
         columnNames,
@@ -364,6 +365,7 @@ export default class DataImporter extends React.Component {
   }
 
   renderTable() {
+    console.log('data_importer', this.props.data);
     const nRows = this.props.data.length - this.state.excludeRowIdxs.length - this.state.nHeaderRows;
     const nCols = this.state.inColumnNames.length - this.state.excludeColumnIdxs.length;
     return (
