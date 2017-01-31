@@ -16,9 +16,9 @@ export default class extends React.Component {
     this.state = {
       loaded: false
     };
-    Meteor.subscribe('magic.private.contributions.summaries', '', () => {
-      this.setState({loaded: true});
-    });
+    //Meteor.subscribe('magic.private.contributions.summaries', '', () => {
+    //  this.setState({loaded: true});
+    //});
   }
 
   componentDidMount() {
