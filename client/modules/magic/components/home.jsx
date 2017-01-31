@@ -1,8 +1,6 @@
 import React from 'react';
-import moment from 'moment';
 import IconButton from '../../common/components/icon_button.jsx';
-import {Collections} from '/lib/collections';
-import Cookies from 'js-cookie';
+import SearchDividedList from '../../common/containers/search_divided_list';
 import Summary from './search_summaries_list_item';
 
 export default class extends React.Component {
@@ -13,17 +11,9 @@ export default class extends React.Component {
       loaded: false
     };
     this.state = this.initialState;
-    Meteor.subscribe('magic.private.contributions.summaries','', () => {
-      console.log('subscription ready');
-      this.setState({loaded: true});
-    });
   }
 
   render() {
-    let contributions = Collections['magic.private.contributions'].find(
-      {'_activated': true},
-      {fields: {'_summary': 1}, sort: {'_inserted': -1}}).fetch();
-    console.log(contributions);
     return (
       <div>
         <div className="ui small icon floating message">
@@ -186,25 +176,16 @@ export default class extends React.Component {
         <h2 className="ui horizontal divider header">
           Recent Contributions
         </h2>
-        <div  style={{position: 'relative', minHeight: '5em'}}>
-          <div ref="loading" className={"ui inverted dimmer" + (this.state.loaded ? '' : ' active')}>
-            <div className="ui text loader">Loading</div>
-          </div>
-          <div className="ui divided list" style={{margin: '0'}}>
-            {contributions.map((c,i) => {
-              console.log(c);
-              return (c._summary.contribution.CONTRIBUTOR_ID !== '6382' &&
-              c._summary.contribution.CONTRIBUTOR_ID !== '6434' &&
-              c._summary.contribution.CONTRIBUTOR_ID !== '5730' &&
-              c._summary.contribution.MAGIC_CONTRIBUTION_ID !== 11823 ?
-                <div className="item" key={i}>
-                  {c && c._summary && c._summary.contribution ?
-                    <Summary doc={c._summary.contribution}/> : undefined}
-                </div>
-              : undefined);
-            })}
-          </div>
-        </div>
+        <SearchDividedList
+          subscriptionName="magic.pages.contributions.summaries"
+          elasticsearchQuery={{}}
+          elasticsearchFilters={{}}
+          elasticsearchSort={[{'INSERTED': 'desc'}]}
+          elasticsearchPageSize={5}
+          minimongoSort={{'_inserted': -1}}
+        >
+          <Summary/>
+        </SearchDividedList>
       </div>
     );
   }
