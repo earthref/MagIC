@@ -188,7 +188,6 @@ export default class extends React.Component {
 
   downloadMongo(mongo_id) {
     let c = Collections['magic.private.contributions'].find({'_id': mongo_id}).fetch();
-    console.log('download', mongo_id, c);
     if (c && c.length >= 1) {
       let id = '';
       if (c[0] && c[0].contribution && c[0].contribution[0] && c[0].contribution[0].id)
@@ -220,7 +219,7 @@ export default class extends React.Component {
                       }}>
                 </span>
                 <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                  {moment(c.INSERTED).calendar()} by <b>{c.CONTRIBUTOR}</b>
+                  {moment(c.INSERTED).format('ll')} by <b>{c.CONTRIBUTOR}</b>
                 </span>
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
