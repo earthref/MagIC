@@ -1,6 +1,9 @@
 # Node
 node_modules
 
+# Scripts
+.scripts/elasticsearch/.*
+
 # JetBrains
 .idea/
 client/modules/magic/actions/tests/files/data_models/temp3.0.js
