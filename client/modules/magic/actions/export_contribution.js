@@ -445,7 +445,7 @@ export default class extends Runner {
     //               any string in an array that contains a ":" gets double quotes around it
     //   and print the table separator if there is another table.
     let text = ``;
-    let numberOfTablesInJson = _.reduce(_.keys(jsonToExport), (n, key) => { if (key.slice(0,1) !== '_') n += 1 }, 0);
+    let numberOfTablesInJson = _.reduce(_.keys(jsonToExport), (n, key) => { if (key.slice(0,1) !== '_') n += 1; return n; }, 0);
     let numberOfTablesInAddedToTSV = 0;
     for(let orderedTableIdx in this.orderedModel)
     {

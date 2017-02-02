@@ -1,8 +1,0 @@
-{
-  "galaxy.meteor.com": {
-    "env": {
-      "MONGO_URL": "mongodb://earthref:aMru1coQdYFb7xRd@aws-us-east-1-portal.14.dblayer.com:10262,aws-us-east-1-portal.13.dblayer.com:10193/earthref?ssl=true",
-      "MONGO_OPLOG_URL": "mongodb://earthref_oplog:bRng86Fy1q21wnBV@aws-us-east-1-portal.14.dblayer.com:10262,aws-us-east-1-portal.13.dblayer.com:10193/local?authSource=earthref;ssl=true"
-    }
-  }
-}
