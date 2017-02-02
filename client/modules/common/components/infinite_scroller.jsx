@@ -39,7 +39,6 @@ export default class InfiniteScroller extends React.Component {
     const scrollerHeight = $(this.refs['scroller']).height();
     const scrollerPosition = this.refs['scroller'] && this.refs['scroller'].scrollTop;
     const contentHeight = $(this.refs['content']).height();
-    //console.log(scrollerHeight, scrollerPosition, contentHeight);
 
     let maxPages;
     if (this.props.count && this.props.pageSize)
@@ -50,7 +49,7 @@ export default class InfiniteScroller extends React.Component {
         scrollerHeight > contentHeight) {
       //if (maxPages === undefined || this.state.nPages < maxPages) {
       if (maxPages !== undefined && this.state.nPages < maxPages) {
-        console.log('nPages:', this.state.nPages + 1, 'maxPages', maxPages);
+        //console.log('nPages:', this.state.nPages + 1, 'maxPages', maxPages);
         this.setState({nPages: this.state.nPages + 1});
       }
     }

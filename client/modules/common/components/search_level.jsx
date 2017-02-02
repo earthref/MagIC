@@ -25,7 +25,7 @@ export default class extends React.Component {
 
   renderTabs() {
     return (
-      <div className="ui top attached tabular small menu search-tab-menu">
+      <div style={{display: 'inline-flex', flex: '0 0 auto'}} className="ui top attached tabular small menu search-tab-menu">
         <div style={_.merge({}, this.styles.showSettings, {maxWidth: (this.state.settingsVisible ? '0px' : '125px')})}>
           <a className="item" onClick={() => this.setState({settingsVisible: true})}>
             <i className="ui chevron circle right black icon"/>
@@ -64,12 +64,12 @@ export default class extends React.Component {
     return (
         <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column'}}>
           {this.renderTabs()}
-          <div style={{flex: 1, display: 'flex', borderLeft: '1px solid #D4D4D5'}}>
+          <div style={{display: 'inline-flex', flex: '1 1 0', width: '100%', maxHeight: 'calc(100% - 40px)'}}>
             {this.props.views.map((view) => {
               if (view.type === 'list' && this.state.view === view.name)
                 return <SearchSummariesView
                   key={view.name}
-                  style={{flex: 1}}
+                  style={{width: '100%'}}
                   isPoles={view.isPoles}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
@@ -81,7 +81,6 @@ export default class extends React.Component {
               if (view.type === 'map' && this.state.view === view.name)
                 return <SearchMapView
                   key={view.name}
-                  style={{flex: 1}}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
                   elasticsearchQuery={this.props.elasticsearchQuery}
@@ -92,7 +91,6 @@ export default class extends React.Component {
               if (view.type === 'images' && this.state.view === view.name)
                 return <SearchImagesView
                   key={view.name}
-                  style={{flex: 1}}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
                   elasticsearchQuery={this.props.elasticsearchQuery}
@@ -100,7 +98,8 @@ export default class extends React.Component {
                   elasticsearchSort={this.props.elasticsearchSort}
                   minimongoSort={this.props.minimongoSort}
                 />;
-            })}
+            })
+          }
         </div>
       </div>
     );

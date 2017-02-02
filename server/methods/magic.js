@@ -15,14 +15,6 @@ const esClient = new elasticsearch.Client({
   host: process.env.ELASTICSEARCH_URL
 });
 
-
-//const s3Client = new s3.createClient({
-//  s3Options: {
-//    accessKeyId: "AKIAJUJ7HRHRA4OXLTTA",
-//    secretAccessKey: "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"
-//  }
-//});
-
 export default function () {
 
   Meteor.methods({
