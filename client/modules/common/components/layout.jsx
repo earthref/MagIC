@@ -17,14 +17,14 @@ export default class extends React.Component {
           $modal.modal('close');
         }
       }).modal('show');*/
-    if (isSafari && !localStorage.getItem("modal 2017-01-25 safari"))
+    /*if (isSafari && !localStorage.getItem("modal 2017-01-25 safari"))
      $(this.refs['safari modal']).modal({
        closable: false,
        onApprove: ($modal) => {
          localStorage.setItem("modal 2017-01-25 safari", true);
          $modal.modal('close');
        }
-     }).modal('show');
+     }).modal('show');*/
   }
 
   componentDidUpdate() {

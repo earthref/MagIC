@@ -25,7 +25,7 @@ export default class extends React.Component {
 
   renderTabs() {
     return (
-      <div style={{display: 'inline-flex', flex: '0 0 auto'}} className="ui top attached tabular small menu search-tab-menu">
+      <div ref="tabs" className="ui top attached tabular small menu search-tab-menu">
         <div style={_.merge({}, this.styles.showSettings, {maxWidth: (this.state.settingsVisible ? '0px' : '125px')})}>
           <a className="item" onClick={() => this.setState({settingsVisible: true})}>
             <i className="ui chevron circle right black icon"/>
@@ -62,14 +62,14 @@ export default class extends React.Component {
 
   render() {
     return (
-        <div style={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column'}}>
+        <div style={{width: '100%', height: '100%'}}>
           {this.renderTabs()}
-          <div style={{display: 'inline-flex', flex: '1 1 0', width: '100%', maxHeight: 'calc(100% - 40px)'}}>
+          <div style={{width: '100%', height: '100%'}}>
             {this.props.views.map((view) => {
               if (view.type === 'list' && this.state.view === view.name)
                 return <SearchSummariesView
                   key={view.name}
-                  style={{width: '100%'}}
+                  style={{borderLeft: '1px solid #d4d4d5', width: '100%', height: (this.props.height ? this.props.height - $(this.refs['tabs']).outerHeight() : '100%')}}
                   isPoles={view.isPoles}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
@@ -81,6 +81,7 @@ export default class extends React.Component {
               if (view.type === 'map' && this.state.view === view.name)
                 return <SearchMapView
                   key={view.name}
+                  style={{borderLeft: '1px solid #d4d4d5', width: '100%', height: (this.props.height ? this.props.height - $(this.refs['tabs']).outerHeight() : '100%')}}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
                   elasticsearchQuery={this.props.elasticsearchQuery}
@@ -91,6 +92,7 @@ export default class extends React.Component {
               if (view.type === 'images' && this.state.view === view.name)
                 return <SearchImagesView
                   key={view.name}
+                  style={{borderLeft: '1px solid #d4d4d5', width: '100%', height: (this.props.height ? this.props.height - $(this.refs['tabs']).outerHeight() : '100%')}}
                   subscriptionName={view.subscriptionName}
                   countSubscriptionName={view.countSubscriptionName}
                   elasticsearchQuery={this.props.elasticsearchQuery}
