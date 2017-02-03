@@ -9,7 +9,7 @@ import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
 
-
+console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
   //log: 'trace',
   host: Meteor.settings.elasticsearch.url
@@ -48,23 +48,23 @@ export default function () {
 
       c._id = uuid.v4();
 
-      if (c.measurements && c.measurements.rows && c.measurements.columns) {
-        let i = 0;
-        for (i = 0; i < c.measurements.rows.length; i+=1000) {
-          Collections['magic.private.measurements'].insert({
-            contribution_mongo_id: c._id,
-            columns: c.measurements.columns,
-            rows: c.measurements.rows.slice(i, 1000)
-          });
-        }
-      }
+      //if (c.measurements && c.measurements.rows && c.measurements.columns) {
+      //  let i = 0;
+      //  for (i = 0; i < c.measurements.rows.length; i+=1000) {
+      //    Collections['magic.private.measurements'].insert({
+      //      contribution_mongo_id: c._id,
+      //      columns: c.measurements.columns,
+      //      rows: c.measurements.rows.slice(i, 1000)
+      //    });
+      //  }
+      //}
 
       s = s || {};
       s.contribution = s.contribution || {};
       s.contribution.TITLE = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = c._inserted;
+      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
       s.contribution.VERSION = 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
@@ -83,44 +83,31 @@ export default function () {
 
       Collections['magic.private.contributions'].insert(c, (error) => { console.log('insert', error)});
     },
-    'updateContribution': function (id, c, s) {
+    'updateContribution': function (id, contributor, user, mailid, name, c, s) {
 
-      if (c.contribution && c.contribution.length > 0) {
-        c.contribution = c.contribution.splice(0,1);
-        delete c.contribution[0].version;
-        delete c.contribution[0].id;
-        delete c.contribution[0].magic_version;
-        delete c.contribution[0].timestamp;
-      } else {
-        c.contribution = [{}];
-      }
-      c.contribution[0].contributor = user;
-      c.contribution[0].timestamp = moment().toISOString();
-      c._contributor = user;
-      c._inserted = c.contribution[0].timestamp;
-      c._name = name;
       c._id = id;
 
-      s = s || {};
+      s = s || c._summary || {};
       s.contribution = s.contribution || {};
       s.contribution.TITLE = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = c._inserted;
+      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.VERSION = 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
       c._summary = s;
 
-      if (c.measurements && c.measurements.rows && c.measurements.columns) {
-        let i = 0;
-        for (i = 0; i < c.measurements.rows.length; i+=1000) {
-          Collections['magic.private.measurements'].insert({
-            contribution_mongo_id: c._id,
-            columns: c.measurements.columns,
-            rows: c.measurements.rows.slice(i, 1000)
-          });
-        }
-      }
+      //if (c.measurements && c.measurements.rows && c.measurements.columns) {
+      //  let i = 0;
+      //  for (i = 0; i < c.measurements.rows.length; i+=1000) {
+      //    Collections['magic.private.measurements'].insert({
+      //      contribution_mongo_id: c._id,
+      //      columns: c.measurements.columns,
+      //      rows: c.measurements.rows.slice(i, 1000)
+      //    });
+      //  }
+      //}
 
       Collections['magic.private.contributions'].update(id, c, (error) => { console.log('update', error, id, _.keys(c))});
     },

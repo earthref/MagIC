@@ -327,7 +327,7 @@ export default class MagICUploadContribution extends React.Component {
         this.contribution._activated = false;
         console.log('upload', this.contribution, this.state._id);
         if (this.state._id !== '')
-          Meteor.call('updateContribution', this.state._id, this.contribution, this.summary,
+          Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
             (error) => {
               console.log('updated contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
