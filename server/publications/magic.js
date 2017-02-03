@@ -3,12 +3,11 @@ import Fiber from 'fibers';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
-//import {esClient} from '../configs/elasticsearch';
 import elasticsearch from 'elasticsearch';
 
 const esClient = new elasticsearch.Client({
   //log: 'trace',
-  host: 'http://elastic:7UCqaDzNAmgRrPw7VnMVfm7JRBE6@128.193.70.68:9200' //process.env.ELASTICSEARCH_URL
+  host: process.env.ELASTICSEARCH_URL
 });
 
 const cache = {};
