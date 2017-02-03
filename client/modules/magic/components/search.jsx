@@ -18,7 +18,8 @@ export default class extends React.Component {
       sortDirection: -1,
       sortDefault: true,
       settingsVisible: true,
-      filters: {}
+      filters: {},
+      height: undefined
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
@@ -67,7 +68,8 @@ export default class extends React.Component {
     const windowHeight = $(window).height() - (this.props.bottomOffset || 0);
     if (windowHeight !== this.windowHeight) {
       this.windowHeight = windowHeight;
-      $(this.refs['results']).height(windowHeight - $(this.refs['settings']).offset().top + 20);
+      const height = windowHeight - $(this.refs['settings']).offset().top + 20;
+      this.setState({height: height});
     }
   }
 
@@ -231,7 +233,7 @@ export default class extends React.Component {
     //levels[5].views = [
     //  {name: 'Summaries', type: 'list'   , subscriptionName: ''    , countSubscriptionName: 'magic.sum.measurements.summaries'}
     //];
-
+    console.log('search', this.state.height)
     return (
       <div className="magic-search">
         <div className="ui top attached tabular menu level-tabs">
@@ -285,7 +287,7 @@ export default class extends React.Component {
               Download Results
             </div>
           </div>
-          <div ref="results" style={{width: '100%', display: 'flex', paddingTop: '1em'}}>
+          <div ref="results" style={{width: '100%', display: 'flex', marginTop: '1em', height: this.state.height || '100%'}}>
             <div>
               <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
                 <div ref="settings tab">
@@ -325,6 +327,7 @@ export default class extends React.Component {
             </div>
             <div style={{flex: 1}}>
               <SearchLevel
+                height={this.state.height}
                 views={levels[this.state.levelNumber].views}
                 elasticsearchQuery={this.getSearchQuery()}
                 elasticsearchFilters={this.getFilters()}
