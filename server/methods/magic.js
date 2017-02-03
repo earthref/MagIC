@@ -12,7 +12,7 @@ import {check} from 'meteor/check';
 
 const esClient = new elasticsearch.Client({
   //log: 'trace',
-  host: process.env.ELASTICSEARCH_URL
+  host: Meteor.settings.elasticsearch.url
 });
 
 export default function () {
