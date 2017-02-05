@@ -7,7 +7,7 @@ import elasticsearch from 'elasticsearch';
 
 const esClient = new elasticsearch.Client({
   //log: 'trace',
-  host: process.env.ELASTICSEARCH_URL
+  host: Meteor.settings.elasticsearch.url
 });
 
 const cache = {};

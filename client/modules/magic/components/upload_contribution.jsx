@@ -327,7 +327,7 @@ export default class MagICUploadContribution extends React.Component {
         this.contribution._activated = false;
         console.log('upload', this.contribution, this.state._id);
         if (this.state._id !== '')
-          Meteor.call('updateContribution', this.state._id, this.contribution, this.summary,
+          Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
             (error) => {
               console.log('updated contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
@@ -951,7 +951,7 @@ export default class MagICUploadContribution extends React.Component {
                     :
                       <div className={'ui fluid purple button' + (this.state._name.length > 0 && !this.state.uploading ? '' : ' disabled')}
                            onClick={this.upload.bind(this)}>
-                        Upload to {this.state._id ? 'your existing private contribution: ' + this.state._name : 'a new private contribution: ' + this.state._name}
+                        Upload to {this.state._id ? 'your existing private contribution: ' + this.state._existing_contribution._name : 'a new private contribution: ' + this.state._name}
                       </div>
                     )}
                     {(this.summary || this.contribution ?

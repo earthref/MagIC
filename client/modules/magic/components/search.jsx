@@ -233,7 +233,6 @@ export default class extends React.Component {
     //levels[5].views = [
     //  {name: 'Summaries', type: 'list'   , subscriptionName: ''    , countSubscriptionName: 'magic.sum.measurements.summaries'}
     //];
-    console.log('search', this.state.height)
     return (
       <div className="magic-search">
         <div className="ui top attached tabular menu level-tabs">
