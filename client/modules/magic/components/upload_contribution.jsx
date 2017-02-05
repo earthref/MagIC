@@ -951,7 +951,7 @@ export default class MagICUploadContribution extends React.Component {
                     :
                       <div className={'ui fluid purple button' + (this.state._name.length > 0 && !this.state.uploading ? '' : ' disabled')}
                            onClick={this.upload.bind(this)}>
-                        Upload to {this.state._id ? 'your existing private contribution: ' + this.state._name : 'a new private contribution: ' + this.state._name}
+                        Upload to {this.state._id ? 'your existing private contribution: ' + this.state._existing_contribution._name : 'a new private contribution: ' + this.state._name}
                       </div>
                     )}
                     {(this.summary || this.contribution ?
