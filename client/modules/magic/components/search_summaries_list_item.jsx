@@ -202,7 +202,7 @@ export default class extends React.Component {
 
   render() {
     const c = this.props.doc;
-    console.log('summary', this.props);
+    console.log('summary', c.INSERTED, moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll'), this.props);
     return (
       <div ref="accordion" className="ui accordion magic-contribution">
         <div className="title search_summaries_list_item" style={{paddingLeft:'1em'}}>
@@ -219,7 +219,7 @@ export default class extends React.Component {
                       }}>
                 </span>
                 <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                  {moment(c.INSERTED).format('ll')} by <b>{c.CONTRIBUTOR}</b>
+                  {moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll')} by <b>{c.CONTRIBUTOR}</b>
                 </span>
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
