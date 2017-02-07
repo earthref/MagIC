@@ -28,11 +28,11 @@ describe('magic.actions.parse_contribution', () => {
     });
 
     it('should reject nonsense', () => {
-      return parseContributionErrorTest('nonsense', /unrecognized column delimiter/i);
+      return parseContributionErrorTest('nonsense', /invalid table definition/i);
     });
 
     it('should reject nonsense with tab header', () => {
-      return parseContributionErrorTest('nonsense\ttable', /unrecognized column delimiter/i);
+      return parseContributionErrorTest('nonsense\ttable', /invalid table definition/i);
     });
 
     it('should reject leading space nonsense', () => {

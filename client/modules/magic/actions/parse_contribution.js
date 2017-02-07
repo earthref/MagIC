@@ -54,7 +54,7 @@ export default class extends Runner {
     
   }
 
-  _parseLine(line, format, i) {
+  _parseLine(line, format) {
 
     // Skip empty lines.
     if (line === undefined || line.trim() === '') return;
@@ -82,7 +82,7 @@ export default class extends Runner {
 
       // Check table definition has at least 2 elements in it.
       if (tableDefinition.length < 2) {
-        this._appendError(`Invalid table definition on line ${i}. Expected something like "tab[tab]measurements[new line]".`);
+        this._appendError(`Invalid table definition on line ${this.lineNumber}. Expected something like "tab[tab]measurements[new line]".`);
         this.skipTable = true;
       }
 
