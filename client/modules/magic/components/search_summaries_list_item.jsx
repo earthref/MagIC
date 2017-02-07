@@ -207,7 +207,7 @@ export default class extends React.Component {
       <div ref="accordion" className="ui accordion magic-contribution">
         <div className="title search_summaries_list_item" style={{paddingLeft:'1em'}}>
           <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
-          <div className="ui doubling grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
+          <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
             <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
                 <span style={{fontSize:'small', fontWeight:'bold'}}>
                   {c.CITATION ? c.CITATION + ' v. ' + (c.VERSION || '') : c.TITLE}
