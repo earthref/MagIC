@@ -325,6 +325,7 @@ export default class extends React.Component {
                 <th>Version</th>
                 <th>Data Model</th>
                 <th>Uploaded</th>
+                <th>Contribution Link</th>
                 <th>Download</th>
               </tr>
               </thead>
@@ -335,6 +336,7 @@ export default class extends React.Component {
                     <td>{v.version}</td>
                     <td>{v.magic_version}</td>
                     <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
+                    <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
                     <td>
                       <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
                          href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
