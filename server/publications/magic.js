@@ -18,6 +18,10 @@ export default function () {
     return Collections['magic.private.contributions'].find({});
   });
 
+  Meteor.publish('magic.import_settings', function (user_id) {
+    return Collections['magic.import_settings'].find({user_id: user_id});
+  });
+
   //Meteor.publish('magic.contributions.summaries', function (contributor) {
   //  return Collections['magic.private.contributions'].find({'_activated': true});
   //});
