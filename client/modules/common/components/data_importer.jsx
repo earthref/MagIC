@@ -12,15 +12,11 @@ export default class DataImporter extends React.Component {
     super(props);
     this.initialState = {
       nRows: 0,
-      nHeaderRows: this.props.nHeaderRows || '1',
       minDataRows: 6,
       maxDataRows: 6,
-      tableName: this.props.tableName || '',
       in: [],
       inColumnNames: [],
-      outColumnNames: [],
       loadedColumnMenu: {},
-      excludeColumnIdxs: [],
       excludeRowIdxs: [],
       excludeTable: false,
       errors: {
@@ -28,6 +24,12 @@ export default class DataImporter extends React.Component {
         nHeaderRows: [],
         tableName: [],
         columnNames: []
+      },
+      settings: {
+        nHeaderRows:        this.props.nHeaderRows || '1',
+        tableName:          this.props.tableName || '',
+        outColumnNames:     this.props.outColumnNames || {},
+        excludeColumnNames: this.props.excludeColumnNames || []
       }
     };
     this.excludedEmptyRows = false;
@@ -37,7 +39,9 @@ export default class DataImporter extends React.Component {
   componentDidMount() {
     $(this.refs['table name dropdown']).dropdown({
       onChange: (tableName) => {
-        _.delay(() => this.setState({tableName: tableName}));
+        let settings = this.state.settings;
+        settings.tableName = tableName;
+        _.delay(() => this.setState({settings: settings}));
       }
     });
     if (this.props.tableName)
@@ -52,7 +56,7 @@ export default class DataImporter extends React.Component {
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
 
     // Validate the number of header rows.
-    const nHeaderRows = newState.nHeaderRows;
+    const nHeaderRows = newState.settings.nHeaderRows;
     newState.errors.nHeaderRows = [];
     if (nHeaderRows !== '' && isNaN(nHeaderRows))
       newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or numeric.');
@@ -66,11 +70,11 @@ export default class DataImporter extends React.Component {
 
     // Validate the table name.
     newState.errors.tableName = [];
-    newState.tableName = _.trim(String(newState.tableName));
-    if (newState.tableName === '')
+    newState.settings.tableName = _.trim(String(newState.settings.tableName));
+    if (newState.settings.tableName === '')
       newState.errors.tableName.push('"Table Name" must be selected.');
-    else if (_.indexOf(_.keys(dataModels[this.props.portal].tables), newState.tableName) === -1)
-      newState.errors.tableName.push('Table name "' + newState.tableName + '" is not recognized.');
+    else if (_.indexOf(_.keys(dataModels[this.props.portal].tables), newState.settings.tableName) === -1)
+      newState.errors.tableName.push('Table name "' + newState.settings.tableName + '" is not recognized.');
 
     // Update the input column names list.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
@@ -89,41 +93,49 @@ export default class DataImporter extends React.Component {
 
     // Update the output column names list.
     newState.errors.columnNames = [];
-    newState.outColumnNames = _.concat(
-      _.slice(newState.outColumnNames, 0, newState.inColumnNames.length),
-      _.slice(Array(newState.inColumnNames.length), newState.outColumnNames.length)
+    newState.settings.outColumnNames = _.zipObject(
+      newState.inColumnNames,
+      _.concat(
+        _.slice(newState.settings.outColumnNames, 0, newState.inColumnNames.length),
+        _.slice(Array(newState.inColumnNames.length), newState.settings.outColumnNames.length)
+      )
     );
 
-    newState.outColumnNameCounts = _.countBy(newState.outColumnNames);
-    newState.excludeColumnIdxs.map((idx) => {
-      let columnName = newState.outColumnNames[idx];
-      if (columnName !== undefined && newState.outColumnNameCounts[columnName])
-        newState.outColumnNameCounts[columnName] -= 1;
+    // Calculate the number of times an output column name is used.
+    newState.outColumnNameCounts = _.keys(newState.settings.outColumnNames).length;
+    newState.inColumnNames.map((idx) => {
+      let inColumnName = newState.inColumnNames[idx];
+      let outColumnName = newState.settings.outColumnNames[inColumnName];
+      if (outColumnName !== undefined && newState.outColumnNameCounts[outColumnName])
+        newState.outColumnNameCounts[outColumnName] -= 1;
     });
+    debugger;
 
-    newState.outColumnNames = newState.outColumnNames.map((outColumnName, i) => {
+    _.keys(newState.settings.outColumnNames).map((inColumnName, i) => {
+
+      let outColumnName = newState.settings.outColumnNames[inColumnName];
 
       // If the table name is not selected, don't add errors and leave the column name selections intact.
-      if (newState.errors.tableName.length > 0 || this.state.excludeColumnIdxs.indexOf(i) >= 0) return outColumnName;
+      if (newState.errors.tableName.length > 0 || this.state.settings.excludeColumnNames.indexOf(inColumnName) >= 0) return;
 
       // If the output column name isn't empty, check that it's valid for the selected table.
       if (outColumnName !== undefined &&
           _.indexOf(
-            _.keys(dataModels[this.props.portal].tables[newState.tableName].columns),
+            _.keys(dataModels[this.props.portal].tables[newState.settings.tableName].columns),
             outColumnName
           ) === -1) {
         newState.errors.columnNames.push('Selected column name "' + outColumnName +
-          '" is unrecognized in column number ' + (i+1) + ' for table name "' + newState.tableName + '".');
+          '" is unrecognized in column number ' + (i+1) + ' for table name "' + newState.settings.tableName + '".');
       }
 
       // If the output column name is empty, see if the input column name is valid for the selected table.
       if (outColumnName === undefined) {
         let modelColumnByName, modelColumnByLabel;
-        for (let columnName in dataModels[this.props.portal].tables[newState.tableName].columns) {
+        for (let columnName in dataModels[this.props.portal].tables[newState.settings.tableName].columns) {
           if (columnName === newState.inColumnNames[i].toLowerCase())
             modelColumnByName = columnName;
           else {
-            const columnLabel = dataModels[this.props.portal].tables[newState.tableName].columns[columnName].label;
+            const columnLabel = dataModels[this.props.portal].tables[newState.settings.tableName].columns[columnName].label;
             if (columnLabel.toLowerCase() === newState.inColumnNames[i].toLowerCase())
               modelColumnByLabel = columnName;
           }
@@ -134,17 +146,17 @@ export default class DataImporter extends React.Component {
           outColumnName = modelColumnByLabel;
         else
           newState.errors.columnNames.push('Column name "' + newState.inColumnNames[i] +
-            '" is unrecognized in column number ' + (i + 1) + ' for table name "' + newState.tableName + '".');
+            '" is unrecognized in column number ' + (i + 1) + ' for table name "' + newState.settings.tableName + '".');
       }
 
       if (outColumnName !== undefined && newState.outColumnNameCounts[outColumnName] > 1)
         newState.errors.columnNames.push('Column name "' + newState.inColumnNames[i] +
           '" in column number ' + (i + 1) + ' and another column are both importing into the "' +
-          newState.tableName + '.' + outColumnName + '" data model column. ' +
+          newState.settings.tableName + '.' + outColumnName + '" data model column. ' +
           'Either exclude the duplicate columns or change their import column.');
 
-      // Otherwise, return the column name.
-      return outColumnName;
+      // Otherwise, set the column name.
+      newState.settings.outColumnNames[inColumnName] = outColumnName;
 
     });
 
@@ -172,14 +184,14 @@ export default class DataImporter extends React.Component {
     newState.errors.data = [];
     if (!Array.isArray(nextProps.data))
       newState.errors.data.push('Failed to parse the data into an array.');
-    if (Array.isArray(nextProps.data) && newState.inColumnNames.length - newState.excludeColumnIdxs.length <= 0)
+    if (Array.isArray(nextProps.data) && newState.inColumnNames.length - newState.settings.excludeColumnNames.length <= 0)
       newState.errors.data.push('There are no rows to import.');
-    else if (Array.isArray(nextProps.data) && nextProps.data.length - newState.excludeRowIdxs.length - newState.nHeaderRowsInt <= 0)
+    else if (Array.isArray(nextProps.data) && nextProps.data.length - newState.settings.excludeColumnNames.length - newState.nHeaderRowsInt <= 0)
       newState.errors.data.push('There are no columns to import.');
     if (newState.errors.data.length > 0)
       newState.excludeTable = true;
     if (newState.excludeTable)
-      newState.errors.data.push('Skipping table "' + newState.tableName + '".');
+      newState.errors.data.push('Skipping table "' + newState.settings.tableName + '".');
 
     // Update the state instead of the component if necessary.
     if (!_.isEqual(newState, nextState)) {
@@ -199,11 +211,12 @@ export default class DataImporter extends React.Component {
             react.setState({excludeTable: !$(this).prop('checked')})
           });
         } else {
-          let excludeColumnIdxs = react.state.excludeColumnIdxs;
-          _.pull(excludeColumnIdxs, columnIdx);
-          if (!$(this).prop('checked')) excludeColumnIdxs.push(columnIdx);
+          const inColumnName = react.state.inColumnNames[columnIdx];
+          let settings = react.state.settings;
+          _.pull(settings.excludeColumnNames, inColumnName);
+          if (!$(this).prop('checked')) settings.excludeColumnNames.push(inColumnName);
           _.delay(() => {
-            react.setState({excludeColumnIdxs: excludeColumnIdxs})
+            react.setState({settings: settings})
           });
         }
       }, undefined, this)
@@ -226,8 +239,9 @@ export default class DataImporter extends React.Component {
         fullTextSearch: 'exact',
         onChange: (value, text, $choice) => {
           if ($choice.data) {
-            let outColumnNames = this.state.outColumnNames;
-            outColumnNames[$choice.data('column-idx')] = value;
+            let outColumnNames = this.state.settings.outColumnNames;
+            let inColumnName = this.state.settings.inColumnNames[$choice.data('column-idx')];
+            outColumnNames[inColumnName] = value;
             _.delay(() => this.setState({outColumnNames: outColumnNames}));
           }
         },
@@ -247,10 +261,10 @@ export default class DataImporter extends React.Component {
     $(this.refs['table column units']).find('.ui.dropdown.ui-dropdown').dropdown('refresh');
 
     let readyState = {
-      tableName: this.state.tableName,
+      tableName: this.state.settings.tableName,
       nErrors: _.reduce(this.state.errors, (sum, errors) => sum + errors.length, 0),
-      outColumnNames: this.state.outColumnNames,
-      nExcludeColumnIdxs: this.state.excludeColumnIdxs.length,
+      outColumnNames: this.state.settings.outColumnNames,
+      nExcludeColumnNames: this.state.settings.excludeColumnNames.length,
       nExcludeRowIdxs: this.state.excludeRowIdxs.length,
       excludeTable: this.state.excludeTable
     };
@@ -258,15 +272,17 @@ export default class DataImporter extends React.Component {
       this.lastReadyState = readyState;
       if (readyState.nErrors === 0 || readyState.excludeTable && this.props.onReady) {
         let columns = [];
-        for (let columnIdx in this.state.outColumnNames)
-          if (this.state.excludeColumnIdxs.indexOf(columnIdx) === -1)
-            columns.push(this.state.outColumnNames[columnIdx]);
+        for (let columnIdx in this.state.settings.inColumnNames) {
+          const inColumnName = this.state.settings.inColumnNames[columnIdx];
+          if (this.state.nExcludeColumnNames.indexOf(inColumnName) === -1)
+            columns.push(this.state.settings.outColumnNames[inColumnName]);
+        }
         let rows = [];
         for (let rowIdx in this.state.in) {
           if (rowIdx >= this.state.nHeaderRowsInt && this.state.excludeRowIdxs.indexOf(rowIdx) === -1)
             rows.push(this.state.in[rowIdx]);
         }
-        this.props.onReady(this.state.tableName, columns, rows);
+        this.props.onReady(this.state.settings.tableName, columns, rows);
       }
       else if (this.props.onNotReady)
         this.props.onNotReady();
@@ -280,8 +296,9 @@ export default class DataImporter extends React.Component {
   }
 
   columnIsDownloadOnly(i) {
-    let outColumnName = (i < this.state.outColumnNames.length ? this.state.outColumnNames[i] : undefined);
-    let dataModelTable = this.state.tableName && dataModels[this.props.portal].tables[this.state.tableName];
+    let inColumnName = (i < this.state.inColumnNames.length ? this.state.inColumnNames[i] : undefined);
+    let outColumnName = this.state.settings.outColumnNames[inColumnName];
+    let dataModelTable = this.state.settings.tableName && dataModels[this.props.portal].tables[this.state.settings.tableName];
     let dataModelColumn = dataModelTable && dataModelTable.columns[outColumnName];
     let validations = dataModelColumn && dataModelColumn.validations;
     return validations && /downloadOnly\(\)/.test(validations);
@@ -292,14 +309,14 @@ export default class DataImporter extends React.Component {
       <div className="ui three column stackable grid">
         <div className="column">
           <div className="ui labeled fluid action input">
-            <div className={'ui basic label ' + (this.state.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
+            <div className={'ui basic label ' + (this.state.settings.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
               Table Name
             </div>
             <div ref="table name dropdown"
-                 className={"ui selection fluid dropdown" + (this.state.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
+                 className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
               <i className="dropdown icon"/>
               <div className="default text">
-                <span className="text">{this.state.tableName || 'Select One'}</span>
+                <span className="text">{this.state.settings.tableName || 'Select One'}</span>
               </div>
               <div className="menu">
                 {(_.keys(dataModels[this.props.portal].tables).map((table, i) => {
@@ -318,9 +335,13 @@ export default class DataImporter extends React.Component {
             <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' red')}>
               Number of Header Rows
             </div>
-            <input ref="header_row_input" type="text" default="None" value={this.state.nHeaderRows}
-                   onChange={(e) => {
-                     this.setState({nHeaderRows: this.refs['header_row_input'].value})}}/>
+            <input ref="header_row_input" type="text" default="None" value={this.state.settings.nHeaderRows}
+              onChange={(e) => {
+                let settings = this.state.settings;
+                settings.nHeaderRows = this.refs['header_row_input'].value;
+                this.setState({settings: settings});
+              }}
+            />
           </div>
         </div>
         <div className="column">
@@ -412,16 +433,17 @@ export default class DataImporter extends React.Component {
     :
       <div className="menu">
         {_.sortBy(
-            _.keys(dataModels[this.props.portal].tables[this.state.tableName].columns),
-            (columnName) => dataModels[this.props.portal].tables[this.state.tableName].columns[columnName].position
+            _.keys(dataModels[this.props.portal].tables[this.state.settings.tableName].columns),
+            (columnName) => dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].position
           ).map((columnName, i) => {
-            return (menuLoaded || this.state.outColumnNames[columnIdx] === columnName ?
+            let inColumnName = this.state.inColumnNames[columnIdx];
+            return (menuLoaded || this.state.settings.outColumnNames[inColumnName] === columnName ?
               <div className="item" key={i} data-value={columnName} data-column-idx={columnIdx}>
                 <span className="description">
                   {columnName}
                 </span>
                 <span className="text">
-                  {dataModels[this.props.portal].tables[this.state.tableName].columns[columnName].label}
+                  {dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].label}
                 </span>
               </div> : undefined
             );
@@ -439,7 +461,7 @@ export default class DataImporter extends React.Component {
   renderTable() {
     console.log(_.keys(this.props.data).length, this.props.data);
     const nRows = Math.max(0, this.state.nRows - this.state.excludeRowIdxs.length - this.state.nHeaderRows);
-    const nCols = Math.max(0, this.state.inColumnNames.length - this.state.excludeColumnIdxs.length);
+    const nCols = Math.max(0, this.state.inColumnNames.length - this.state.settings.excludeColumnNames.length);
     const tableTooltip = 'Click to ' + (this.state.excludeTable ? 'include' : 'exclude') + ' this table.';
     return (
       <div style={{marginTop:'1em'}}>
@@ -453,7 +475,7 @@ export default class DataImporter extends React.Component {
               </th>
               {(this.state.inColumnNames.map((columnName, i) => {
                 const downloadOnly = this.columnIsDownloadOnly(i);
-                const excluded = this.state.excludeColumnIdxs.indexOf(i) >= 0;
+                const excluded = this.state.settings.excludeColumnNames.indexOf(columnName) >= 0;
                 const tooltip = (downloadOnly ? 'Column is "Download Only".' :
                     'Click to ' + (excluded ? 'include' : 'exclude') + '.');
                 return (
@@ -474,17 +496,19 @@ export default class DataImporter extends React.Component {
           <tbody ref="table body">
             <tr ref="table column names">
               <td className="collapsing right aligned">Column</td>
-              {(this.state.outColumnNames.map((outColumnName, i) => {
+              {(this.state.inColumnNames.map((inColumnName, i) => {
+                const outColumnName = this.state.settings.outColumnNames[inColumnName];
+                console.log('here', outColumnName);
                 return (
                   <td key={i}
                       className={
                         'ui fluid dropdown' +
-                        (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.excludeTable ? '' : ' disabled') +
+                        (this.state.settings.excludeColumnNames.indexOf(inColumnName) === -1 && !this.state.excludeTable ? '' : ' disabled') +
                         (this.state.errors.tableName.length > 0 ? '' : ' search') +
                         (!this.state.excludeTable && (this.state.errors.tableName.length > 0 ||
                           outColumnName === undefined ||
                           this.state.outColumnNameCounts[outColumnName] > 1 ||
-                          dataModels[this.props.portal].tables[this.state.tableName].columns[outColumnName] === undefined) ?
+                          dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
                         ' error' : '')
                       }
                       style={{display: 'table-cell', width: 'initial'}}
@@ -503,15 +527,15 @@ export default class DataImporter extends React.Component {
             </tr>
             <tr ref="table column units">
               <td className="collapsing right aligned">Units</td>
-              {(this.state.inColumnNames.map((columnName, i) => {
-                const outColumnName = this.state.outColumnNames[i];
+              {(this.state.inColumnNames.map((inColumnName, i) => {
+                const outColumnName = this.state.settings.outColumnNames[inColumnName];
                 const modelColumn = (
                   this.state.errors.tableName.length > 0 || outColumnName === undefined ?
                     undefined
                   :
-                    dataModels[this.props.portal].tables[this.state.tableName].columns[outColumnName]
+                    dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName]
                 );
-                return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.excludeTable ?
+                return (this.state.settings.excludeColumnNames.indexOf(inColumnName) === -1 && !this.state.excludeTable ?
                   (modelColumn === undefined ?
                     <td key={i} className="error"></td>
                   :
@@ -543,7 +567,7 @@ export default class DataImporter extends React.Component {
             {this.state.in.map((row, i) => {
               return (
                 i < this.state.nHeaderRowsInt + this.state.maxDataRows && (
-                this.state.nHeaderRows === '' ||
+                this.state.settings.nHeaderRows === '' ||
                 this.state.errors.nHeaderRows.length > 0 ||
                 i >= this.state.nHeaderRowsInt) ?
                   <tr key={i}>
@@ -557,8 +581,9 @@ export default class DataImporter extends React.Component {
                       </span>
                     </td>
                     {(row.map((col, j) => {
+                      const inColumnName = this.state.inColumnNames[j];
                       const downloadOnly = this.columnIsDownloadOnly(j);
-                      const className = (downloadOnly || this.state.excludeColumnIdxs.indexOf(j) >= 0 ||
+                      const className = (downloadOnly || this.state.settings.excludeColumnNames.indexOf(inColumnName) >= 0 ||
                                          this.state.excludeRowIdxs.indexOf(i) >= 0 || this.state.excludeTable ? 'disabled' : '');
                       return (
                         <td key={j} className={className}>{col}</td>
@@ -569,12 +594,12 @@ export default class DataImporter extends React.Component {
                 undefined
               );
             })}
-            {(this.state.nHeaderRows === '' && this.state.in.length === 0 ||
-              this.state.nHeaderRows >= this.state.in.length ? undefined :
+            {(this.state.settings.nHeaderRows === '' && this.state.in.length === 0 ||
+              this.state.settings.nHeaderRows >= this.state.in.length ? undefined :
               _.times(this.state.nHeaderRowsInt + this.state.minDataRows - this.state.in.length, (i) =>
               <tr key={i}>
                 <td className="collapsing right aligned">{this.state.in.length + i + 1}</td>
-                <td colSpan={this.state.outColumnNames.length}></td>
+                <td colSpan={_.keys(this.state.settings.outColumnNames).length}></td>
               </tr>))}
           </tbody>
         </FixedTable>
