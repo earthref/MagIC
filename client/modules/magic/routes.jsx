@@ -43,7 +43,7 @@ export default function (injectDeps, {FlowRouter}) {
     }
   });
 
-  /*magicRoutes.route(`/search`, {
+  magicRoutes.route(`/search`, {
     name: 'magicSearch',
     action(params, queryParams) {
       console.log('magic search', params, queryParams);
@@ -57,9 +57,9 @@ export default function (injectDeps, {FlowRouter}) {
         )
       });
     }
-  });*/
+  });
 
-  /*magicRoutes.route(`/private`, {
+  magicRoutes.route(`/private`, {
     name: 'magicSearch',
     action({q}) {
       mount(mounterWithContext, {
@@ -75,7 +75,7 @@ export default function (injectDeps, {FlowRouter}) {
         )
       });
     }
-  });*/
+  });
 
   magicRoutes.route(`/shared`, {
     name: 'magicSearch',
@@ -153,7 +153,7 @@ export default function (injectDeps, {FlowRouter}) {
     }
   });
 
-  /*magicRoutes.route(`/upload`, {
+  magicRoutes.route(`/upload`, {
     name: 'magicUpload',
     action({}) {
       mount(mounterWithContext, {
@@ -169,9 +169,9 @@ export default function (injectDeps, {FlowRouter}) {
         )
       });
     }
-  });*/
+  });
 
-  /*magicRoutes.route(`/validate`, {
+  magicRoutes.route(`/validate`, {
     name: 'magicValidate',
     action({}) {
       mount(mounterWithContext, {
@@ -187,6 +187,6 @@ export default function (injectDeps, {FlowRouter}) {
         )
       });
     }
-  });*/
+  });
 
 }
