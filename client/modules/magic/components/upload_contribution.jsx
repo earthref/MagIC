@@ -16,7 +16,7 @@ import {default as versions} from '../../../../lib/modules/magic/magic_versions'
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
 import ExportContribution from '../actions/export_contribution';
-import DataImporter from '../../common/components/data_importer.jsx';
+import DataImporter from '../containers/data_importer.js';
 import IconButton from '../../common/components/icon_button.jsx';
 
 export default class MagICUploadContribution extends React.Component {
@@ -308,7 +308,7 @@ export default class MagICUploadContribution extends React.Component {
     }
 
     // Make sure each row has the same number of columns.
-    let maxRowLength = _.reduce(data, (max, row) => Math.max(max, row.length), 0);
+    let maxRowLength = _.reduce(data, (max, row) => row && row.length && Math.max(max, row.length) || max, 0);
     for (let rowIdx in data) {
       if (data[rowIdx].length < maxRowLength)
         _.times(maxRowLength - data[rowIdx].length, () => data[rowIdx].push(''));
@@ -787,22 +787,22 @@ export default class MagICUploadContribution extends React.Component {
                         <div className="ui header">
                           {file.name + ' '}
                           <div className="ui horizontal label">{filesize(file.size)}</div>
-                          <div className="ui horizontal label button" onClick={() => this.downloadFile(file)}>Download Original</div>
-                          {(file.readErrors && file.readErrors.length > 0 ?
+                          {file.format !== 'xls' ? <div className="ui horizontal label button" onClick={() => this.downloadFile(file)}>Download Original</div> : undefined}
+                          {file.readErrors && file.readErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.readErrors.length).format('0,0') + ' Read Error' + (file.readErrors.length === 1 ? '' : 's')}
                             </div>
-                            : undefined)}
-                          {(file.parseErrors && file.parseErrors.length > 0 ?
+                            : undefined}
+                          {file.parseErrors && file.parseErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.parseErrors.length).format('0,0') + ' Parse Error' + (file.parseErrors.length === 1 ? '' : 's')}
                             </div>
-                            : undefined)}
-                          {(file.importErrors && file.importErrors.length > 0 ?
+                            : undefined}
+                          {file.importErrors && file.importErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.importErrors.length).format('0,0') + ' Import Error' + (file.importErrors.length === 1 ? '' : 's')}
                             </div>
-                            : undefined)}
+                            : undefined}
                         </div>
                         <div className="description">
                           <div className={
@@ -966,7 +966,7 @@ export default class MagICUploadContribution extends React.Component {
                             <div className="ui two column very relaxed stackable grid">
                               <div className="center aligned column">
                                 <div className="ui small header">
-                                  {this.state._name} Before Upload
+                                  {this.state._id ? this.state._existing_contribution._name : this.state._name} Before Upload
                                 </div>
                                 <br/>
                                 {this.renderDetails(this.state._existing_contribution, this.state._existing_summary)}
@@ -976,7 +976,7 @@ export default class MagICUploadContribution extends React.Component {
                               </div>
                               <div className="center aligned column">
                                 <div className="ui small header">
-                                  {this.state._name} After Upload
+                                  {this.state._id ? this.state._existing_contribution._name : this.state._name} After Upload
                                 </div>
                                 <br/>
                                 {this.renderDetails(this.contribution, this.summary)}

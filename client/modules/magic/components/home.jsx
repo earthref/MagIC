@@ -16,13 +16,22 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui small icon floating message">
-          <i className="purple users icon"></i>
+        <div>
+          <div className="ui small icon floating message">
+            <i className="purple users icon"/>
+            <div className="content">
+              <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
+                Workshop: Earth's Magnetic Field from the Beginning</a>
+              MagIC hosted a workshop on
+              January 24th-27th, 2017 at SIO in La Jolla, CA.
+            </div>
+          </div>
+        </div>
+        <div className="ui small icon floating warning message">
           <div className="content">
-            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
-            Workshop: Earth's Magnetic Field from the Beginning</a>
-            MagIC hosted a workshop on
-            January 24th-27th, 2017 at SIO in La Jolla, CA.
+            <div className="ui warning header">Routine Maintenance on Friday, March 3rd, 2017.</div>
+            The MagIC Database is undergoing routine maintenance to upgrade the servers today.
+            Searching, uploading, and private workspaces are temporarily disabled.
           </div>
         </div>
         <div className="ui header" style={{display:'none'}}>
@@ -32,7 +41,7 @@ export default class extends React.Component {
                 <a className="item" href="/MagIC/upgrade/">
                   <div className="ui bordered images image" style={{marginBottom:'1em'}}>
                     <video className="image" autoPlay loop width="500" height="350">
-                      <source src="/MagIC/upgrade.webm" type="video/webm"></source>
+                      <source src="/MagIC/upgrade.webm" type="video/webm"/>
                       Your browser does not support the video tag.
                     </video>
                   </div>
@@ -92,7 +101,7 @@ export default class extends React.Component {
         </div>
         <div className="ui hidden divider"></div>
         <div className="ui four cards">
-          <IconButton className="card" href="/MagIC/search" portal="MagIC">
+          <IconButton className="disabled card" href="/MagIC/search" portal="MagIC">
             <i className="large icons">
               <i className="database icon"/>
               <i className="corner search icon"/>
@@ -108,7 +117,7 @@ export default class extends React.Component {
             <div className="title">Upgrade</div>
             <div className="subtitle">Convert a dataset to the latest data model.</div>
           </IconButton>
-          <IconButton className="card" href="/MagIC/upload" portal="MagIC">
+          <IconButton className="disabled card" href="/MagIC/upload" portal="MagIC">
             <i className="large icons">
               <i className="table icon"/>
               <i className="corner add icon"/>
@@ -124,7 +133,7 @@ export default class extends React.Component {
             <div className="title">Validate</div>
             <div className="subtitle">Confirm your dataset is ready.</div>
           </IconButton>
-          <IconButton className="card" href="/MagIC/private" portal="MagIC">
+          <IconButton className="disabled card" href="/MagIC/private" portal="MagIC">
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner checkmark icon"/>
@@ -173,6 +182,13 @@ export default class extends React.Component {
             <div className="title">Data Management<br/>Plan Tool</div>
           </IconButton>
         </div>
+      </div>
+    );
+  }
+
+  renderRecentContributions() {
+    return (
+      <div>
         <h2 className="ui horizontal divider header">
           Recent Contributions
         </h2>
