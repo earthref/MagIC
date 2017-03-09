@@ -16,7 +16,7 @@ import {default as versions} from '../../../../lib/modules/magic/magic_versions'
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
 import ExportContribution from '../actions/export_contribution';
-import DataImporter from '../containers/data_importer.js';
+import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
 export default class MagICUploadContribution extends React.Component {
