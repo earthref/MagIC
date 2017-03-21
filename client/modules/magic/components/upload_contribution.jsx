@@ -236,10 +236,14 @@ export default class MagICUploadContribution extends React.Component {
         this.files[i].tableNames = [];
         this.files[i].data = [];
         this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
-          let tableName = table.match(/^tab( delimited)?\s*?\t(.+)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
-          console.log('table', table, tableName);
+          let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
-          this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
+          this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => {
+            line = line.replace(/\t+$/, '');
+            if (line != '') return line.split('\t');
+          });
+          _.pull(this.files[i].data[j], undefined);
+          console.log('parsed table', this.files[i].tableNames[j], this.files[i].data[j]);
         });
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
