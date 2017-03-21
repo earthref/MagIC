@@ -256,7 +256,10 @@ export default class DataImporter extends React.Component {
     };
     if (!_.isEqual(this.lastReadyState, readyState)) {
       this.lastReadyState = readyState;
-      if (readyState.nErrors === 0 || readyState.excludeTable && this.props.onReady) {
+      if (readyState.excludeTable && this.props.onReady) {
+        this.props.onReady(undefined, undefined, undefined);
+      }
+      else if (readyState.nErrors === 0 && this.props.onReady) {
         let columns = [];
         for (let columnIdx in this.state.outColumnNames)
           if (this.state.excludeColumnIdxs.indexOf(columnIdx) === -1)
