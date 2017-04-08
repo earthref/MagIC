@@ -46,10 +46,11 @@ export default class MagICUploadContribution extends React.Component {
     };
     this.summarizer = new SummarizeContribution({});
     this.state = this.initialState;
-    if (Cookies.get('user_id'))
+    if (Cookies.get('user_id')) {
       Tracker.autorun(function () {
         Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'));
       });
+    }
   }
 
   restart() {
@@ -233,8 +234,8 @@ export default class MagICUploadContribution extends React.Component {
     if (this.state.fileFormats[i] === 'magic') {
       if (this.files[i].text) {
         this.files[i].text.replace('\r\n','\n');
-        this.files[i].tableNames = [];
-        this.files[i].data = [];
+        this.files[i].tableNames = [''];
+        this.files[i].data = [[[]]];
         this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
           let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
@@ -267,8 +268,8 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'xls') {
       if (this.files[i].workbook) {
-        this.files[i].tableNames = [];
-        this.files[i].data = [];
+        this.files[i].tableNames = [''];
+        this.files[i].data = [[[]]];
         this.files[i].workbook.SheetNames.map((tableName, j) => {
           this.files[i].tableNames[j] = tableName;
           this.files[i].data[j] = this.xlsSheetToArray(this.files[i].workbook.Sheets[tableName]);
@@ -859,7 +860,7 @@ export default class MagICUploadContribution extends React.Component {
                             this.renderParseErrors(i)
                           :
                             <div>
-                              {(this.state.fileFormats[i] === 'magic' && this.files[i].data ?
+                              {(this.state.fileFormats[i] === 'magic' && this.files[i].data && this.files[i].tableNames ?
                                   this.files[i].data.map((table, j) =>
                                     <div key={j}>
                                       <div className="ui divider"></div>
@@ -879,7 +880,7 @@ export default class MagICUploadContribution extends React.Component {
                                     {this.renderDataImporter(i, 1, this.files[i].data)}
                                   </div> : undefined
                               )}
-                              {(this.state.fileFormats[i] === 'xls' && this.files[i].data ?
+                              {(this.state.fileFormats[i] === 'xls' && this.files[i].workbook && this.files[i].data && this.files[i].tableNames ?
                                   this.files[i].data.map((table, j) =>
                                     <div key={j}>
                                       <div className="ui divider"></div>

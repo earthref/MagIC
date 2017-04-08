@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import React from 'react';
 import FixedTable from './fixed_table.jsx';
+import Cookies from 'js-cookie';
+import {Collections} from '/lib/collections';
 import {portals} from '../configs/portals.js';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
@@ -11,6 +13,8 @@ export default class DataImporter extends React.Component {
   constructor(props) {
     super(props);
     this.initialState = {
+      isLoaded: false,
+      hasChanged: false,
       nRows: 0,
       nHeaderRows: this.props.nHeaderRows || '1',
       minDataRows: 6,
@@ -28,10 +32,23 @@ export default class DataImporter extends React.Component {
         nHeaderRows: [],
         tableName: [],
         columnNames: []
+      },
+      templateID: undefined,
+      templateName: undefined,
+      settings: {
+        nHeaderRows:        this.props.nHeaderRows || '1',
+        tableName:          this.props.tableName || '',
+        outColumnNames:     this.props.outColumnNames || {},
+        excludeColumnNames: this.props.excludeColumnNames || []
       }
     };
     this.excludedEmptyRows = false;
     this.state = this.initialState;
+    if (Cookies.get('user_id')) {
+      Tracker.autorun(function () {
+        Meteor.subscribe('magic.import_templates', '@' + Cookies.get('user_id'));
+      });
+    }
   }
 
   componentDidMount() {
@@ -46,7 +63,8 @@ export default class DataImporter extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    let newState = nextState;
+    let newState = _.cloneDeep(nextState);
+    newState.isLoaded = true;
 
     // Copy the props data to the state input data.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
@@ -120,13 +138,11 @@ export default class DataImporter extends React.Component {
       if (outColumnName === undefined) {
         let modelColumnByName, modelColumnByLabel;
         for (let columnName in dataModels[this.props.portal].tables[newState.tableName].columns) {
-          if (columnName === newState.inColumnNames[i].toLowerCase())
-            modelColumnByName = columnName;
-          else {
-            const columnLabel = dataModels[this.props.portal].tables[newState.tableName].columns[columnName].label;
-            if (columnLabel.toLowerCase() === newState.inColumnNames[i].toLowerCase())
-              modelColumnByLabel = columnName;
-          }
+          const columnLabel = dataModels[this.props.portal].tables[newState.tableName].columns[columnName].label;
+          if (newState.inColumnNames[i] && (
+              newState.inColumnNames[i].toLowerCase() === columnName ||
+              newState.inColumnNames[i].toLowerCase() === columnLabel.toLowerCase()))
+            modelColumnByLabel = columnName;
         }
         if (modelColumnByName !== undefined)
           outColumnName = modelColumnByName;
@@ -179,17 +195,23 @@ export default class DataImporter extends React.Component {
     if (newState.errors.data.length > 0)
       newState.excludeTable = true;
     if (newState.excludeTable)
-      newState.errors.data.push('Skipping table "' + newState.tableName + '".');
+      newState.errors.data.push(newState.tableName ? 'Skipping table "' + newState.tableName + '".' : 'Skipping this table.');
 
     // Update the state instead of the component if necessary.
+    console.log('changed?', newState, nextState);
     if (!_.isEqual(newState, nextState)) {
+      console.log('state changed!');
+      newState.hasChanged = true;
       this.setState(newState);
-      return false;
+      return true;
     }
-    else return true;
+    else return true; //TODO: return false
   }
 
   componentDidUpdate(prevProps, prevState) {
+
+    console.log('updated');
+
     $(this.refs['errors accordion']).not('.ui-accordion').addClass('ui-accordion').accordion();
     $(this.refs['table column headers']).find('.ui.checkbox:not(.ui-checkbox)').addClass('ui-checkbox').checkbox({
       onChange: $.proxy(function (react) {
@@ -240,6 +262,18 @@ export default class DataImporter extends React.Component {
       });
     });
     $(this.refs['table column names']).find('.ui.dropdown.ui-dropdown').dropdown('refresh');
+
+    $(this.refs['import template dropdown']).not('.ui-dropdown').addClass('ui-dropdown').dropdown({
+      onChange: (value, text, $choice) => {
+        let template = Collections['magic.import_templates'].findOne(value);
+        this.setState({
+          templateID: template._id,
+          templateName: template.name,
+          settings: template.settings
+        }, () => this.reviewUpload());
+      }
+    });
+    $(this.refs['import template dropdown']).dropdown('refresh');
 
     $(this.refs['table column units']).find('.ui.dropdown:not(.ui-dropdown)').addClass('ui-dropdown').dropdown({
       fullTextSearch: 'exact'
@@ -292,51 +326,55 @@ export default class DataImporter extends React.Component {
 
   renderOptions() {
     return (
-      <div className="ui three column stackable grid">
-        <div className="column">
-          <div className="ui labeled fluid action input">
-            <div className={'ui basic label ' + (this.state.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
-              Table Name
-            </div>
-            <div ref="table name dropdown"
-                 className={"ui selection fluid dropdown" + (this.state.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
-              <i className="dropdown icon"/>
-              <div className="default text">
-                <span className="text">{this.state.tableName || 'Select One'}</span>
-              </div>
-              <div className="menu">
-                {(_.keys(dataModels[this.props.portal].tables).map((table, i) => {
-                  return (
-                    <div key={i} data-value={table} className="item">
-                      {dataModels[this.props.portal].tables[table].label}
-                    </div>
-                  );
-                }))}
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="column">
-          <div className={"ui labeled fluid input" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' error')}>
-            <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' red')}>
-              Number of Header Rows
-            </div>
-            <input ref="header_row_input" type="text" default="None" value={this.state.nHeaderRows}
-                   onChange={(e) => {
-                     this.setState({nHeaderRows: this.refs['header_row_input'].value})}}/>
-          </div>
-        </div>
-        <div className="column">
-          {"" === "" ?
+      <div>
+        <div style={{display:'flex'}}>
+          <div style={{flex:'1 1 auto'}}>
             <div className="ui labeled fluid action input">
-              <div className="ui label" data-tooltip="Save and share import settings. Coming soon..." data-position="bottom right">
+              <div className="ui label" style={{whiteSpace:'nowrap', flex:'0 0 auto'}}>
                 Import Template
               </div>
-              <div ref="import template dropdown"
-                   className="ui disabled selection fluid dropdown">
+              <div ref="import template dropdown" className="ui selection fluid dropdown button" style={{borderRadius:0, flex:'1 1 auto'}}>
                 <i className="dropdown icon"/>
                 <div className="default text">
-                  <span className="text">Select One</span>
+                  <span className="text">Select One to Load Settings</span>
+                </div>
+                <div className="menu">
+                  {Collections['magic.import_templates'].find({_user: '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch().map((template, i) => {
+                    return (
+                      <div key={i} data-value={template} className="item">
+                        {template.name}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+              <div ref="import template save" className={'ui button' + (this.state.hasChanged ? '' : ' disabled')}
+                style={{flex:'0 0 auto'}}
+                onClick={(e) => {
+                  $(this.refs['save import template']).modal('setting', {
+                    onApprove: ($modal) => {
+                      console.log("save as", $(this.refs['save import template dropdown']).val());
+                    }
+                  }).modal('show');
+                }}
+              >
+                Save Changes
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div className="ui two column stackable grid" style={{marginTop:0}}>
+          <div className="column">
+            <div className="ui labeled fluid action input">
+              <div className={'ui basic label ' + (this.state.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
+                Table Name
+              </div>
+              <div ref="table name dropdown"
+                   className={"ui selection fluid dropdown" + (this.state.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
+                <i className="dropdown icon"/>
+                <div className="default text">
+                  <span className="text">{this.state.tableName || 'Select One'}</span>
                 </div>
                 <div className="menu">
                   {(_.keys(dataModels[this.props.portal].tables).map((table, i) => {
@@ -349,14 +387,17 @@ export default class DataImporter extends React.Component {
                 </div>
               </div>
             </div>
-            :
-            <div className="ui labeled fluid input">
-              <div className="ui label" data-tooltip="Save and share import settings." data-position="bottom right">
-                Save Import Template As
+          </div>
+          <div className="column">
+            <div className={"ui labeled fluid input" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' error')}>
+              <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' red')}>
+                Number of Header Rows
               </div>
-              <input type="text"/>
+              <input ref="header_row_input" type="text" default="None" value={this.state.nHeaderRows}
+                     onChange={(e) => {
+                       this.setState({nHeaderRows: this.refs['header_row_input'].value})}}/>
             </div>
-          }
+          </div>
         </div>
       </div>
     );
@@ -440,7 +481,6 @@ export default class DataImporter extends React.Component {
   }
 
   renderTable() {
-    console.log(_.keys(this.props.data).length, this.props.data);
     const nRows = Math.max(0, this.state.nRows - this.state.excludeRowIdxs.length - this.state.nHeaderRows);
     const nCols = Math.max(0, this.state.inColumnNames.length - this.state.excludeColumnIdxs.length);
     const tableTooltip = 'Click to ' + (this.state.excludeTable ? 'include' : 'exclude') + ' this table.';
@@ -613,6 +653,40 @@ export default class DataImporter extends React.Component {
   render() {
     return (
       <div className={'er-data-importer ' + (this.props.className || '')} style={this.props.style}>
+        <div ref="save import template" className="ui modal">
+          <div className="ui icon header">
+            <i className="settings icon"></i>
+            Immport Settings Template
+          </div>
+          <div className="content">
+            <div className="ui basic segment">
+              Save the template as:
+            </div>
+            <div ref="save import template dropdown" className="ui selection fluid search dropdown">
+              <input type="hidden" name="save import template name"/>
+              <i className="dropdown icon"/>
+              <div className="default text">
+                <span className="text">Select One or Type a New Name</span>
+              </div>
+              <div className="menu">
+                {Collections['magic.import_templates'].find({_user: '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch().map((template, i) => {
+                  return (
+                    <div key={i} data-value={template} className="item">
+                      {template.name}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui red approve button">
+              <i className="save icon"></i>
+              Save Changes
+            </div>
+            <div className="ui cancel button">Cancel</div>
+          </div>
+        </div>
         {this.renderOptions()}
         {this.renderErrors()}
         {this.props.data && this.props.data.length && this.renderTable() || undefined}
