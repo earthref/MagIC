@@ -9,15 +9,24 @@ import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
 
-console.log('es', Meteor.settings.elasticsearch.url);
+//console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
   //log: 'trace',
-  host: Meteor.settings.elasticsearch.url
+  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || ''
 });
 
 export default function () {
 
   Meteor.methods({
+    'saveImportSettingsTemplate': function (user, name, settings) {
+      console.log('save import', user, name, settings, Collections['magic.import.settings.templates'].findOne(''));
+      Collections['magic.import.settings.templates'].insert({
+        _user: user,
+        _name: name,
+        _inserted: moment().toISOString(),
+        settings: settings
+      }, (error) => { console.log('save import', error)});
+    },
     'insertContribution': function (contributor, user, mailid, name, c, s) {
       //check(id, Integer);
       //check(name, String);
