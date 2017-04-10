@@ -7,7 +7,7 @@ import elasticsearch from 'elasticsearch';
 
 const esClient = new elasticsearch.Client({
   //log: 'trace',
-  host: Meteor.settings.elasticsearch.url
+  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || ''
 });
 
 const cache = {};
@@ -18,8 +18,8 @@ export default function () {
     return Collections['magic.private.contributions'].find({});
   });
 
-  Meteor.publish('magic.import_templates', function (user_id) {
-    return Collections['magic.import_templates'].find({user_id: user_id});
+  Meteor.publish('magic.import_templates.read', function (user_id) {
+    return Collections['magic.import_templates'].find({_user: user_id});
   });
 
   //Meteor.publish('magic.contributions.summaries', function (contributor) {

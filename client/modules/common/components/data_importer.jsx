@@ -16,10 +16,8 @@ export default class DataImporter extends React.Component {
       isLoaded: false,
       hasChanged: false,
       nRows: 0,
-      nHeaderRows: this.props.nHeaderRows || '1',
       minDataRows: 6,
       maxDataRows: 6,
-      tableName: this.props.tableName || '',
       in: [],
       inColumnNames: [],
       outColumnNames: [],
@@ -36,6 +34,7 @@ export default class DataImporter extends React.Component {
       templateID: undefined,
       templateName: undefined,
       settings: {
+        tableName:          this.props.tableName || '',
         nHeaderRows:        this.props.nHeaderRows || '1',
         tableName:          this.props.tableName || '',
         outColumnNames:     this.props.outColumnNames || {},
@@ -54,7 +53,9 @@ export default class DataImporter extends React.Component {
   componentDidMount() {
     $(this.refs['table name dropdown']).dropdown({
       onChange: (tableName) => {
-        _.delay(() => this.setState({tableName: tableName}));
+        let settings = this.state.settings;
+        settings.tableName = tableName;
+        _.delay(() => this.setState({settings: settings}));
       }
     });
     if (this.props.tableName)
@@ -70,7 +71,7 @@ export default class DataImporter extends React.Component {
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
 
     // Validate the number of header rows.
-    const nHeaderRows = newState.nHeaderRows;
+    const nHeaderRows = newState.settings.nHeaderRows;
     newState.errors.nHeaderRows = [];
     if (nHeaderRows !== '' && isNaN(nHeaderRows))
       newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or numeric.');
@@ -84,11 +85,11 @@ export default class DataImporter extends React.Component {
 
     // Validate the table name.
     newState.errors.tableName = [];
-    newState.tableName = _.trim(String(newState.tableName));
-    if (newState.tableName === '')
+    newState.settings.tableName = _.trim(String(newState.settings.tableName));
+    if (newState.settings.tableName === '')
       newState.errors.tableName.push('"Table Name" must be selected.');
-    else if (_.indexOf(_.keys(dataModels[this.props.portal].tables), newState.tableName) === -1)
-      newState.errors.tableName.push('Table name "' + newState.tableName + '" is not recognized.');
+    else if (_.indexOf(_.keys(dataModels[this.props.portal].tables), newState.settings.tableName) === -1)
+      newState.errors.tableName.push('Table name "' + newState.settings.tableName + '" is not recognized.');
 
     // Update the input column names list.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
@@ -127,18 +128,18 @@ export default class DataImporter extends React.Component {
       // If the output column name isn't empty, check that it's valid for the selected table.
       if (outColumnName !== undefined &&
         _.indexOf(
-          _.keys(dataModels[this.props.portal].tables[newState.tableName].columns),
+          _.keys(dataModels[this.props.portal].tables[newState.settings.tableName].columns),
           outColumnName
         ) === -1) {
         newState.errors.columnNames.push('Selected column name "' + outColumnName +
-          '" is unrecognized in column number ' + (i+1) + ' for table name "' + newState.tableName + '".');
+          '" is unrecognized in column number ' + (i+1) + ' for table name "' + newState.settings.tableName + '".');
       }
 
       // If the output column name is empty, see if the input column name is valid for the selected table.
       if (outColumnName === undefined) {
         let modelColumnByName, modelColumnByLabel;
-        for (let columnName in dataModels[this.props.portal].tables[newState.tableName].columns) {
-          const columnLabel = dataModels[this.props.portal].tables[newState.tableName].columns[columnName].label;
+        for (let columnName in dataModels[this.props.portal].tables[newState.settings.tableName].columns) {
+          const columnLabel = dataModels[this.props.portal].tables[newState.settings.tableName].columns[columnName].label;
           if (newState.inColumnNames[i] && (
               newState.inColumnNames[i].toLowerCase() === columnName ||
               newState.inColumnNames[i].toLowerCase() === columnLabel.toLowerCase()))
@@ -150,13 +151,13 @@ export default class DataImporter extends React.Component {
           outColumnName = modelColumnByLabel;
         else
           newState.errors.columnNames.push('Column name "' + newState.inColumnNames[i] +
-            '" is unrecognized in column number ' + (i + 1) + ' for table name "' + newState.tableName + '".');
+            '" is unrecognized in column number ' + (i + 1) + ' for table name "' + newState.settings.tableName + '".');
       }
 
       if (outColumnName !== undefined && newState.outColumnNameCounts[outColumnName] > 1)
         newState.errors.columnNames.push('Column name "' + newState.inColumnNames[i] +
           '" in column number ' + (i + 1) + ' and another column are both importing into the "' +
-          newState.tableName + '.' + outColumnName + '" data model column. ' +
+          newState.settings.tableName + '.' + outColumnName + '" data model column. ' +
           'Either exclude the duplicate columns or change their import column.');
 
       // Otherwise, return the column name.
@@ -195,7 +196,7 @@ export default class DataImporter extends React.Component {
     if (newState.errors.data.length > 0)
       newState.excludeTable = true;
     if (newState.excludeTable)
-      newState.errors.data.push(newState.tableName ? 'Skipping table "' + newState.tableName + '".' : 'Skipping this table.');
+      newState.errors.data.push(newState.settings.tableName ? 'Skipping table "' + newState.settings.tableName + '".' : 'Skipping this table.');
 
     // Update the state instead of the component if necessary.
     console.log('changed?', newState, nextState);
@@ -281,7 +282,7 @@ export default class DataImporter extends React.Component {
     $(this.refs['table column units']).find('.ui.dropdown.ui-dropdown').dropdown('refresh');
 
     let readyState = {
-      tableName: this.state.tableName,
+      tableName: this.state.settings.tableName,
       nErrors: _.reduce(this.state.errors, (sum, errors) => sum + errors.length, 0),
       outColumnNames: this.state.outColumnNames,
       nExcludeColumnIdxs: this.state.excludeColumnIdxs.length,
@@ -303,7 +304,7 @@ export default class DataImporter extends React.Component {
           if (rowIdx >= this.state.nHeaderRowsInt && this.state.excludeRowIdxs.indexOf(rowIdx) === -1)
             rows.push(this.state.in[rowIdx]);
         }
-        this.props.onReady(this.state.tableName, columns, rows);
+        this.props.onReady(this.state.settings.tableName, columns, rows);
       }
       else if (this.props.onNotReady)
         this.props.onNotReady();
@@ -318,13 +319,14 @@ export default class DataImporter extends React.Component {
 
   columnIsDownloadOnly(i) {
     let outColumnName = (i < this.state.outColumnNames.length ? this.state.outColumnNames[i] : undefined);
-    let dataModelTable = this.state.tableName && dataModels[this.props.portal].tables[this.state.tableName];
+    let dataModelTable = this.state.settings.tableName && dataModels[this.props.portal].tables[this.state.settings.tableName];
     let dataModelColumn = dataModelTable && dataModelTable.columns[outColumnName];
     let validations = dataModelColumn && dataModelColumn.validations;
     return validations && /downloadOnly\(\)/.test(validations);
   }
 
   renderOptions() {
+    const templates = Collections['magic.import_templates'].find({_user: '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch();
     return (
       <div>
         <div style={{display:'flex'}}>
@@ -339,21 +341,34 @@ export default class DataImporter extends React.Component {
                   <span className="text">Select One to Load Settings</span>
                 </div>
                 <div className="menu">
-                  {Collections['magic.import_templates'].find({_user: '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch().map((template, i) => {
+                  {templates.length ? templates.map((template, i) => {
                     return (
                       <div key={i} data-value={template} className="item">
                         {template.name}
                       </div>
                     );
-                  })}
+                  }) :
+                    <div className="item">
+                      There are currently no templates in your private workspace. Please save a template to reuse it in future uploads.
+                    </div>
+                  }
                 </div>
               </div>
               <div ref="import template save" className={'ui button' + (this.state.hasChanged ? '' : ' disabled')}
                 style={{flex:'0 0 auto'}}
                 onClick={(e) => {
-                  $(this.refs['save import template']).modal('setting', {
+                  this.refs['save import settings template name'].value = '';
+                  $(this.refs['save import settings template']).modal('setting', {
                     onApprove: ($modal) => {
-                      console.log("save as", $(this.refs['save import template dropdown']).val());
+                      Meteor.call('saveImportSettingsTemplate',
+                        '@' + Cookies.get('user_id'),
+                        this.refs['save import settings template name'].value,
+                        this.state.settings,
+                        (error) => {
+                          console.log('saved import settings template', error);
+                          this.setState({hasChanged: false});
+                        }
+                      );
                     }
                   }).modal('show');
                 }}
@@ -367,14 +382,14 @@ export default class DataImporter extends React.Component {
         <div className="ui two column stackable grid" style={{marginTop:0}}>
           <div className="column">
             <div className="ui labeled fluid action input">
-              <div className={'ui basic label ' + (this.state.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
+              <div className={'ui basic label ' + (this.state.settings.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
                 Table Name
               </div>
               <div ref="table name dropdown"
-                   className={"ui selection fluid dropdown" + (this.state.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
+                   className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
                 <i className="dropdown icon"/>
                 <div className="default text">
-                  <span className="text">{this.state.tableName || 'Select One'}</span>
+                  <span className="text">{this.state.settings.tableName || 'Select One'}</span>
                 </div>
                 <div className="menu">
                   {(_.keys(dataModels[this.props.portal].tables).map((table, i) => {
@@ -393,9 +408,11 @@ export default class DataImporter extends React.Component {
               <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' red')}>
                 Number of Header Rows
               </div>
-              <input ref="header_row_input" type="text" default="None" value={this.state.nHeaderRows}
+              <input ref="header_row_input" type="text" default="None" value={this.state.settings.nHeaderRows}
                      onChange={(e) => {
-                       this.setState({nHeaderRows: this.refs['header_row_input'].value})}}/>
+                       let settings = this.state.settings;
+                       settings.nHeaderRows = this.refs['header_row_input'].value;
+                       this.setState({settings: settings})}}/>
             </div>
           </div>
         </div>
@@ -456,8 +473,8 @@ export default class DataImporter extends React.Component {
         :
         <div className="menu">
           {_.sortBy(
-            _.keys(dataModels[this.props.portal].tables[this.state.tableName].columns),
-            (columnName) => dataModels[this.props.portal].tables[this.state.tableName].columns[columnName].position
+            _.keys(dataModels[this.props.portal].tables[this.state.settings.tableName].columns),
+            (columnName) => dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].position
           ).map((columnName, i) => {
             return (menuLoaded || this.state.outColumnNames[columnIdx] === columnName ?
                 <div className="item" key={i} data-value={columnName} data-column-idx={columnIdx}>
@@ -465,7 +482,7 @@ export default class DataImporter extends React.Component {
                   {columnName}
                 </span>
                   <span className="text">
-                  {dataModels[this.props.portal].tables[this.state.tableName].columns[columnName].label}
+                  {dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].label}
                 </span>
                 </div> : undefined
             );
@@ -527,7 +544,7 @@ export default class DataImporter extends React.Component {
                       (!this.state.excludeTable && (this.state.errors.tableName.length > 0 ||
                       outColumnName === undefined ||
                       this.state.outColumnNameCounts[outColumnName] > 1 ||
-                      dataModels[this.props.portal].tables[this.state.tableName].columns[outColumnName] === undefined) ?
+                      dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
                         ' error' : '')
                     }
                     style={{display: 'table-cell', width: 'initial'}}
@@ -552,7 +569,7 @@ export default class DataImporter extends React.Component {
                 this.state.errors.tableName.length > 0 || outColumnName === undefined ?
                   undefined
                   :
-                  dataModels[this.props.portal].tables[this.state.tableName].columns[outColumnName]
+                  dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName]
               );
               return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.excludeTable ?
                   (modelColumn === undefined ?
@@ -653,30 +670,17 @@ export default class DataImporter extends React.Component {
   render() {
     return (
       <div className={'er-data-importer ' + (this.props.className || '')} style={this.props.style}>
-        <div ref="save import template" className="ui modal">
+        <div ref="save import settings template" className="ui modal">
           <div className="ui icon header">
             <i className="settings icon"></i>
-            Immport Settings Template
+            Import Settings Template
           </div>
           <div className="content">
-            <div className="ui basic segment">
+            <div className="ui header">
               Save the template as:
             </div>
-            <div ref="save import template dropdown" className="ui selection fluid search dropdown">
-              <input type="hidden" name="save import template name"/>
-              <i className="dropdown icon"/>
-              <div className="default text">
-                <span className="text">Select One or Type a New Name</span>
-              </div>
-              <div className="menu">
-                {Collections['magic.import_templates'].find({_user: '@' + Cookies.get('user_id')}, {'_inserted': -1}).fetch().map((template, i) => {
-                  return (
-                    <div key={i} data-value={template} className="item">
-                      {template.name}
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="ui fluid input">
+              <input ref="save import settings template name"/>
             </div>
           </div>
           <div className="actions">
