@@ -73,6 +73,20 @@ export default class DataImporter extends React.Component {
         $(this.refs['table name dropdown']).dropdown('set selected', template.settings.tableName);
       }
     });
+    $(this.refs['save import settings template']).modal({
+      onApprove: ($modal) => {
+        const templateName = this.refs['save import settings template name'].value;
+        Meteor.call('saveImportSettingsTemplate',
+          '@' + Cookies.get('user_id'),
+          templateName,
+          this.state.settings,
+          (error, templateID) => {
+            console.log('saved import settings template', error, templateID, templateName);
+            this.setState({hasChanged: false, templateID: templateID, templateName: templateName});
+          }
+        );
+      }
+    })
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -368,19 +382,7 @@ export default class DataImporter extends React.Component {
                 style={{flex:'0 0 auto'}}
                 onClick={(e) => {
                   this.refs['save import settings template name'].value = '';
-                  $(this.refs['save import settings template']).modal('setting', {
-                    onApprove: ($modal) => {
-                      Meteor.call('saveImportSettingsTemplate',
-                        '@' + Cookies.get('user_id'),
-                        this.refs['save import settings template name'].value,
-                        this.state.settings,
-                        (error) => {
-                          console.log('saved import settings template', error);
-                          this.setState({hasChanged: false});
-                        }
-                      );
-                    }
-                  }).modal('show');
+                  $(this.refs['save import settings template']).modal('show');
                 }}
               >
                 Save Changes
