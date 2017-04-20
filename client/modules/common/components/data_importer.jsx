@@ -86,7 +86,35 @@ export default class DataImporter extends React.Component {
           }
         );
       }
-    })
+    });
+    $(this.refs['delete import settings template']).modal({
+      onApprove: ($modal) => {
+        const templateID = this.refs['delete import settings template ID'].value;
+        Meteor.call('deleteImportSettingsTemplate',
+          '@' + Cookies.get('user_id'),
+          templateID,
+          (error) => {
+            console.log('deleted import settings template', error);
+            this.setState({taps: this.state.taps || 1});
+          }
+        );
+      }
+    });
+    $(this.refs['rename import settings template']).modal({
+      onApprove: ($modal) => {
+        const templateName = this.refs['rename import settings template name'].value;
+        const templateID = this.refs['rename import settings template ID'].value;
+        Meteor.call('renameImportSettingsTemplate',
+          '@' + Cookies.get('user_id'),
+          templateID,
+          templateName,
+          (error) => {
+            console.log('renamed import settings template', error);
+            this.setState({taps: this.state.taps || 1});
+          }
+        );
+      }
+    });
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -359,6 +387,26 @@ export default class DataImporter extends React.Component {
                   {this.state.templatesReady ?
                       templates.length ? templates.map((template, i) =>
                         <div key={i} data-value={template._id} data-text={template._name} className="item">
+                          <div className="ui icon compact mini right floated negative button" style={{margin:'-0.5em'}}
+                            onClick={(e) => {
+                              $(this.refs['delete import settings template name']).text(template._name);
+                              $(this.refs['delete import settings template ID']).val(template._id);
+                              $(this.refs['delete import settings template']).modal('show');
+                            }}
+                          >
+                            <i className="close icon"/>
+                            Delete
+                          </div>
+                          <div className="ui icon compact mini right floated button" style={{margin:'-0.5em'}}
+                            onClick={(e) => {
+                              $(this.refs['rename import settings template name']).val(template._name);
+                              $(this.refs['rename import settings template ID']).val(template._id);
+                              $(this.refs['rename import settings template']).modal('show');
+                            }}
+                          >
+                            <i className="write icon"/>
+                            Rename
+                          </div>
                           <span className="description">
                             {moment(template._inserted).calendar()}
                           </span>
@@ -693,6 +741,47 @@ export default class DataImporter extends React.Component {
             </div>
             <div className="ui fluid input">
               <input ref="save import settings template name"/>
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui red approve button">
+              <i className="save icon"></i>
+              Save Changes
+            </div>
+            <div className="ui cancel button">Cancel</div>
+          </div>
+        </div>
+        <div ref="delete import settings template" className="ui modal">
+          <div className="ui icon header">
+            <i className="settings icon"></i>
+            Import Settings Template
+          </div>
+          <div className="content">
+            <input type="hidden" ref="delete import settings template ID"/>
+            <div className="ui header">
+              Delete template <span ref="delete import settings template name"></span>?
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui red approve button">
+              <i className="save icon"></i>
+              Delete Template
+            </div>
+            <div className="ui cancel button">Cancel</div>
+          </div>
+        </div>
+        <div ref="rename import settings template" className="ui modal">
+          <div className="ui icon header">
+            <i className="settings icon"></i>
+            Import Settings Template
+          </div>
+          <div className="content">
+            <input type="hidden" ref="rename import settings template ID"/>
+            <div className="ui header">
+              Rename template as:
+            </div>
+            <div className="ui fluid input">
+              <input ref="rename import settings template name"/>
             </div>
           </div>
           <div className="actions">
