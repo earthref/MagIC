@@ -20,7 +20,7 @@ export default function () {
   Meteor.methods({
     'saveImportSettingsTemplate': function (user, name, settings) {
       console.log('save import', user, name, settings, Collections['magic.import.settings.templates'].findOne(''));
-      Collections['magic.import.settings.templates'].insert({
+      return Collections['magic.import.settings.templates'].insert({
         _user: user,
         _name: name,
         _inserted: moment().toISOString(),
