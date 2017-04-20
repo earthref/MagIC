@@ -233,10 +233,11 @@ export default class MagICUploadContribution extends React.Component {
 
     if (this.state.fileFormats[i] === 'magic') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
         this.files[i].tableNames = [''];
         this.files[i].data = [[[]]];
-        this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
+        text.split(/\s*>+\s*\n/).map((table, j) => {
           let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
           this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => {
@@ -252,16 +253,18 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'tsv') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].data = text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'csv') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].data = text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
       }
@@ -417,6 +420,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
+    console.log('renderDataImporter', data);
     return (
       <DataImporter
         portal="MagIC"
