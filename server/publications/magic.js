@@ -18,7 +18,7 @@ export default function () {
     return Collections['magic.private.contributions'].find({});
   });
   Meteor.publish('magic.import.settings.templates.subscription', function (user) {
-    return Collections['magic.import.settings.templates'].find({});
+    return Collections['magic.import.settings.templates'].find({_user: user});
   });
 
   //Meteor.publish('magic.contributions.summaries', function (contributor) {
