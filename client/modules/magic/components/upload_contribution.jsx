@@ -5,17 +5,17 @@ import React from 'react';
 import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
-import {Mongo} from 'meteor/mongo';
+//import {Mongo} from 'meteor/mongo';
 import numeral from 'numeral';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
-import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
+//import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx-style';
 import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
-import ExportContribution from '../actions/export_contribution';
+//import ExportContribution from '../actions/export_contribution';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
@@ -420,7 +420,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
-    console.log('renderDataImporter', data);
+    console.log('renderDataImporter', this.files[i].format, data);
     return (
       <DataImporter
         portal="MagIC"

@@ -40,7 +40,8 @@ export default class DataImporter extends React.Component {
         tableName:   this.props.tableName || '',
         nHeaderRows: this.props.nHeaderRows || '1',
         columnMap: {}
-      }
+      },
+      importTemplatesTaps: 0
     };
     this.state = this.initialState;
     if (Cookies.get('user_id')) {
@@ -69,6 +70,8 @@ export default class DataImporter extends React.Component {
           return template.settings.columnMap[inColumnName];
         });
         this.setState({
+          isLoaded: false,
+          hasChanged: false,
           templateID: template._id,
           templateName: template._name,
           settings: template.settings,
@@ -77,17 +80,29 @@ export default class DataImporter extends React.Component {
         $(this.refs['table name dropdown']).dropdown('set selected', template.settings.tableName);
       }
     });
-    $(this.refs['save import settings template']).modal({
+    $(this.refs['create import settings template']).modal({
       onApprove: ($modal) => {
-        const templateName = this.refs['save import settings template name'].value;
-        let settings = this.state.settings;
-        Meteor.call('saveImportSettingsTemplate',
+        const templateName = this.refs['create import settings template name'].value;
+        Meteor.call('createImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           templateName,
           this.state.settings,
           (error, templateID) => {
-            console.log('saved import settings template', error, templateID, templateName);
+            console.log('created import settings template', error, templateID, templateName);
             this.setState({hasChanged: false, templateID: templateID, templateName: templateName});
+          }
+        );
+      }
+    });
+    $(this.refs['save import settings template']).modal({
+      onApprove: ($modal) => {
+        Meteor.call('saveImportSettingsTemplate',
+          '@' + Cookies.get('user_id'),
+          this.state.templateID,
+          this.state.settings,
+          (error) => {
+            console.log('saved import settings template', error);
+            this.setState({hasChanged: false});
           }
         );
       }
@@ -100,7 +115,9 @@ export default class DataImporter extends React.Component {
           templateID,
           (error) => {
             console.log('deleted import settings template', error);
-            this.setState({templateID: undefined, templateName: undefined});
+            this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
+            if (templateID === this.state.templateID)
+              this.setState({templateID: undefined, templateName: undefined});
           }
         );
       }
@@ -114,21 +131,23 @@ export default class DataImporter extends React.Component {
           templateID,
           templateName,
           (error) => {
-            console.log('renamed import settings template', error);
-            this.setState({templateID: templateID, templateName: templateName});
+            console.log('renamed import settings template', error, templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value);
+            this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
+            if (templateID === this.state.templateID)
+              this.setState({templateName: this.refs['rename import settings template name'].value});
           }
         );
       }
     });
   }
 
-  componentWillUpdate() {
-    let newState = _.cloneDeep(this.state);
+  componentWillUpdate(nextProps, nextState) {
+    let newState = _.cloneDeep(nextState);
     newState.isLoaded = true;
 
     // Copy the props data to the state input data.
-    newState.in = (!Array.isArray(this.props.data) ? [] : this.props.data);
-    console.log('in', this.props.data, this.state.in, newState.in);
+    newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
+    console.log('in', nextProps.data, nextState.in, newState.in);
 
     // Validate the number of header rows.
     const nHeaderRows = newState.settings.nHeaderRows;
@@ -148,7 +167,7 @@ export default class DataImporter extends React.Component {
     newState.settings.tableName = _.trim(String(newState.settings.tableName));
     if (newState.settings.tableName === '')
       newState.errors.tableName.push('"Table Name" must be selected.');
-    else if (_.indexOf(_.keys(dataModels[this.props.portal].tables), newState.settings.tableName) === -1)
+    else if (_.indexOf(_.keys(dataModels[nextProps.portal].tables), newState.settings.tableName) === -1)
       newState.errors.tableName.push('Table name "' + newState.settings.tableName + '" is not recognized.');
 
     // Update the input column names list.
@@ -182,12 +201,12 @@ export default class DataImporter extends React.Component {
     newState.outColumnNames = newState.outColumnNames.map((outColumnName, i) => {
 
       // If the table name is not selected, don't add errors and leave the column name selections intact.
-      if (newState.errors.tableName.length > 0 || this.state.excludeColumnIdxs.indexOf(i) >= 0) return outColumnName;
+      if (newState.errors.tableName.length > 0 || nextState.excludeColumnIdxs.indexOf(i) >= 0) return outColumnName;
 
       // If the output column name isn't empty, check that it's valid for the selected table.
       if (outColumnName !== undefined &&
         _.indexOf(
-          _.keys(dataModels[this.props.portal].tables[newState.settings.tableName].columns),
+          _.keys(dataModels[nextProps.portal].tables[newState.settings.tableName].columns),
           outColumnName
         ) === -1) {
         newState.errors.columnNames.push('Selected column name "' + outColumnName +
@@ -197,8 +216,8 @@ export default class DataImporter extends React.Component {
       // If the output column name is empty, see if the input column name is valid for the selected table.
       if (outColumnName === undefined) {
         let modelColumnByName, modelColumnByLabel;
-        for (let columnName in dataModels[this.props.portal].tables[newState.settings.tableName].columns) {
-          const columnLabel = dataModels[this.props.portal].tables[newState.settings.tableName].columns[columnName].label;
+        for (let columnName in dataModels[nextProps.portal].tables[newState.settings.tableName].columns) {
+          const columnLabel = dataModels[nextProps.portal].tables[newState.settings.tableName].columns[columnName].label;
           if (newState.inColumnNames[i] && (
               newState.inColumnNames[i].toLowerCase() === columnName ||
               newState.inColumnNames[i].toLowerCase() === columnLabel.toLowerCase()))
@@ -231,7 +250,7 @@ export default class DataImporter extends React.Component {
     });
 
     let nRows = 0;
-    this.state.in.forEach((row, rowIdx) => {
+    nextState.in.forEach((row, rowIdx) => {
       nRows += 1;
       if (Array.isArray(row)) {
         let isEmptyRow = true;
@@ -249,11 +268,11 @@ export default class DataImporter extends React.Component {
 
     // Validate the data array.
     newState.errors.data = [];
-    if (!Array.isArray(this.props.data))
+    if (!Array.isArray(nextProps.data))
       newState.errors.data.push('Failed to parse the data into an array.');
-    if (Array.isArray(this.props.data) && newState.inColumnNames.length - newState.excludeColumnIdxs.length <= 0)
+    if (Array.isArray(nextProps.data) && newState.inColumnNames.length - newState.excludeColumnIdxs.length <= 0)
       newState.errors.data.push('There are no rows to import.');
-    else if (Array.isArray(this.props.data) && this.props.data.length - newState.excludeRowIdxs.length - newState.nHeaderRowsInt <= 0)
+    else if (Array.isArray(nextProps.data) && nextProps.data.length - newState.excludeRowIdxs.length - newState.nHeaderRowsInt <= 0)
       newState.errors.data.push('There are no columns to import.');
     //if (newState.errors.data.length > 0)
     //  newState.excludeTable = true;
@@ -261,12 +280,12 @@ export default class DataImporter extends React.Component {
       newState.errors.data.push(newState.settings.tableName ? 'Skipping table "' + newState.settings.tableName + '".' : 'Skipping this table.');
 
     // Update the state instead of the component if necessary.
-    console.log('changed?', newState, this.state);
-    if (!_.isEqual(newState.settings, this.state.settings)) {
+    console.log('changed?', newState, nextState);
+    if (nextState.isLoaded && !_.isEqual(newState.settings, nextState.settings)) {
       console.log('settings changed!');
       newState.hasChanged = true;
     }
-    if (!_.isEqual(newState, this.state)) {
+    if (!_.isEqual(newState, nextState)) {
       console.log('state changed!');
       this.setState(newState);
     }
@@ -383,7 +402,7 @@ export default class DataImporter extends React.Component {
   }
 
   renderOptions() {
-    const templates = Collections['magic.import.settings.templates'].find({}, {'_inserted': -1}).fetch();
+    const templates = Collections['magic.import.settings.templates'].find({}, {sort: {'_inserted': -1}}).fetch();
     console.log('templates collection', templates);
     return (
       <div>
@@ -441,14 +460,24 @@ export default class DataImporter extends React.Component {
                   }
                 </div>
               </div>
-              <div ref="import template save" className={'ui button' + (this.state.hasChanged ? '' : ' disabled')}
-                style={{flex:'0 0 auto'}}
-                onClick={(e) => {
-                  this.refs['save import settings template name'].value = '';
-                  $(this.refs['save import settings template']).modal('show');
-                }}
+              <div ref="import template save" className={'ui icon button' + (this.state.templateID && this.state.hasChanged ? '' : ' disabled')}
+                   style={{flex:'0 0 auto'}}
+                   onClick={(e) => {
+                     $(this.refs['save import settings template']).modal('show');
+                   }}
               >
+                <i className="save icon"/>
                 Save Changes
+              </div>
+              <div ref="import template save" className="ui icon button"
+                   style={{flex:'0 0 auto', borderLeft: '1px solid rgba(34, 36, 38, 0.15)'}}
+                   onClick={(e) => {
+                     this.refs['create import settings template name'].value = '';
+                     $(this.refs['create import settings template']).modal('show');
+                   }}
+              >
+                <i className="star icon"/>
+                Create New
               </div>
             </div>
           </div>
@@ -746,17 +775,36 @@ export default class DataImporter extends React.Component {
   render() {
     return (
       <div className={'er-data-importer ' + (this.props.className || '')} style={this.props.style}>
-        <div ref="save import settings template" className="ui modal">
+        <div ref="create import settings template" className="ui modal">
           <div className="ui icon header">
             <i className="settings icon"></i>
             Import Settings Template
           </div>
           <div className="content">
             <div className="ui header">
-              Save the template as:
+              Create a new template from the current import settings with the name:
             </div>
             <div className="ui fluid input">
-              <input ref="save import settings template name"/>
+              <input ref="create import settings template name"/>
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui red approve button">
+              <i className="star icon"></i>
+              Create
+            </div>
+            <div className="ui cancel button">Cancel</div>
+          </div>
+        </div>
+        <div ref="save import settings template" className="ui modal">
+          <div className="ui icon header">
+            <i className="settings icon"></i>
+            Import Settings Template
+          </div>
+          <div className="content">
+            <input type="hidden" ref="save import settings template ID"/>
+            <div className="ui header">
+              Save changes to template "<span style={{verticalAlign: 'inherit'}}>{this.state.templateName}</span>"?
             </div>
           </div>
           <div className="actions">
@@ -775,12 +823,12 @@ export default class DataImporter extends React.Component {
           <div className="content">
             <input type="hidden" ref="delete import settings template ID"/>
             <div className="ui header">
-              Delete template <span ref="delete import settings template name"></span>?
+              Delete template "<span ref="delete import settings template name" style={{verticalAlign: 'inherit'}}></span>"?
             </div>
           </div>
           <div className="actions">
             <div className="ui red approve button">
-              <i className="save icon"></i>
+              <i className="close icon"></i>
               Delete Template
             </div>
             <div className="ui cancel button">Cancel</div>
@@ -802,8 +850,8 @@ export default class DataImporter extends React.Component {
           </div>
           <div className="actions">
             <div className="ui red approve button">
-              <i className="save icon"></i>
-              Save Changes
+              <i className="pencil icon"></i>
+              Rename
             </div>
             <div className="ui cancel button">Cancel</div>
           </div>
