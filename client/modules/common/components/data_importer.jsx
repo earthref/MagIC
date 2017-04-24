@@ -24,7 +24,6 @@ export default class DataImporter extends React.Component {
       inColumnNames: [],
       loadedColumnMenu: {},
       excludeRowIdxs: [],
-      excludeTable: false,
       errors: {
         data: [],
         nHeaderRows: [],
@@ -39,7 +38,9 @@ export default class DataImporter extends React.Component {
       settings: {
         tableName:   this.props.tableName || '',
         nHeaderRows: this.props.nHeaderRows || '1',
-        columnMap: {}
+        columnMap: {},
+        excludeColumnNames: [],
+        excludeTable: false
       },
       importTemplatesTaps: 0
     };
@@ -69,11 +70,18 @@ export default class DataImporter extends React.Component {
         let outColumnNames = this.state.inColumnNames.map((inColumnName, i) => {
           return template.settings.columnMap[inColumnName];
         });
+        let excludeColumnIdxs = [];
+        if (template.settings.excludeColumnNames)
+          template.settings.excludeColumnNames.forEach((inColumnName) => {
+            let idx = this.state.inColumnNames.indexOf(inColumnName);
+            if (idx >= 0) excludeColumnIdxs.push(idx);
+          });
         this.setState({
           isLoaded: false,
           hasChanged: false,
           templateID: template._id,
           templateName: template._name,
+          excludeColumnIdxs: excludeColumnIdxs,
           settings: template.settings,
           outColumnNames: outColumnNames
         });
@@ -249,6 +257,8 @@ export default class DataImporter extends React.Component {
         newState.settings.columnMap[inColumnName] = newState.outColumnNames[i];
     });
 
+    newState.settings.excludeColumnNames = newState.excludeColumnIdxs.map((idx) => newState.inColumnNames[idx]);
+
     let nRows = 0;
     nextState.in.forEach((row, rowIdx) => {
       nRows += 1;
@@ -275,8 +285,8 @@ export default class DataImporter extends React.Component {
     else if (Array.isArray(nextProps.data) && nextProps.data.length - newState.excludeRowIdxs.length - newState.nHeaderRowsInt <= 0)
       newState.errors.data.push('There are no columns to import.');
     //if (newState.errors.data.length > 0)
-    //  newState.excludeTable = true;
-    if (newState.excludeTable)
+    //  newState.settings.excludeTable = true;
+    if (newState.settings.excludeTable)
       newState.errors.data.push(newState.settings.tableName ? 'Skipping table "' + newState.settings.tableName + '".' : 'Skipping this table.');
 
     // Update the state instead of the component if necessary.
@@ -302,7 +312,9 @@ export default class DataImporter extends React.Component {
         const columnIdx = $(this).data('column-idx');
         if (columnIdx === -1) {
           _.delay(() => {
-            react.setState({excludeTable: !$(this).prop('checked')})
+            let settings = react.state.settings;
+            settings.excludeTable = !$(this).prop('checked');
+            react.setState({settings: settings})
           });
         } else {
           let excludeColumnIdxs = react.state.excludeColumnIdxs;
@@ -363,7 +375,7 @@ export default class DataImporter extends React.Component {
       outColumnNames: this.state.outColumnNames,
       nExcludeColumnIdxs: this.state.excludeColumnIdxs.length,
       nExcludeRowIdxs: this.state.excludeRowIdxs.length,
-      excludeTable: this.state.excludeTable
+      excludeTable: this.state.settings.excludeTable
     };
     if (!_.isEqual(this.lastReadyState, readyState)) {
       this.lastReadyState = readyState;
@@ -486,11 +498,11 @@ export default class DataImporter extends React.Component {
         <div className="ui two column stackable grid" style={{marginTop:0}}>
           <div className="column">
             <div className="ui labeled fluid action input">
-              <div className={'ui basic label ' + (this.state.settings.tableName === '' && !this.state.excludeTable ? 'red' : this.portalColor())}>
+              <div className={'ui basic label ' + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? 'red' : this.portalColor())}>
                 Table Name
               </div>
               <div ref="table name dropdown"
-                   className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.excludeTable ? ' error' : '')}>
+                   className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? ' error' : '')}>
                 <i className="dropdown icon"/>
                 <div className="text">
                   <span className="text">{this.state.settings.tableName || 'Select One'}</span>
@@ -508,8 +520,8 @@ export default class DataImporter extends React.Component {
             </div>
           </div>
           <div className="column">
-            <div className={"ui labeled fluid input" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' error')}>
-              <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.excludeTable ? '' : ' red')}>
+            <div className={"ui labeled fluid input" + (this.state.errors.nHeaderRows.length === 0 || this.state.settings.excludeTable ? '' : ' error')}>
+              <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.settings.excludeTable ? '' : ' red')}>
                 Number of Header Rows
               </div>
               <input ref="header_row_input" type="text" default="None" value={this.state.settings.nHeaderRows}
@@ -527,7 +539,7 @@ export default class DataImporter extends React.Component {
   renderErrors() {
     const nErrors = _.reduce(this.state.errors, (sum, errors) => sum + errors.length, 0);
     const nDataErrors = this.state.errors.data.length;
-    if (this.state.excludeTable || nDataErrors > 0)
+    if (this.state.settings.excludeTable || nDataErrors > 0)
       return (<table className="ui compact small inverted table yellow">
         <tbody>
         <tr>
@@ -604,7 +616,7 @@ export default class DataImporter extends React.Component {
   renderTable() {
     const nRows = Math.max(0, this.state.nRows - this.state.excludeRowIdxs.length - this.state.nHeaderRowsInt);
     const nCols = Math.max(0, this.state.inColumnNames.length - this.state.excludeColumnIdxs.length);
-    const tableTooltip = 'Click to ' + (this.state.excludeTable ? 'include' : 'exclude') + ' this table.';
+    const tableTooltip = 'Click to ' + (this.state.settings.excludeTable ? 'include' : 'exclude') + ' this table.';
     console.log('renderTable');
     return (
       <div style={{marginTop:'1em'}}>
@@ -613,7 +625,7 @@ export default class DataImporter extends React.Component {
           <tr ref="table column headers">
             <th style={{pointerEvents: 'auto'}}>
               <div className="ui fitted toggle left floated checkbox" data-position="bottom left" data-tooltip={tableTooltip}>
-                <input type="checkbox" defaultChecked={!this.state.excludeTable} data-column-idx={-1}/>
+                <input type="checkbox" defaultChecked={!this.state.settings.excludeTable} data-column-idx={-1}/>
               </div>
             </th>
             {(this.state.inColumnNames.map((columnName, i) => {
@@ -623,12 +635,12 @@ export default class DataImporter extends React.Component {
                 'Click to ' + (excluded ? 'include' : 'exclude') + '.');
               return (
                 <th key={i}>
-                  <div className={'ui fitted toggle right floated checkbox' + (downloadOnly || this.state.excludeTable ? ' disabled' : '')}
+                  <div className={'ui fitted toggle right floated checkbox' + (downloadOnly || this.state.settings.excludeTable ? ' disabled' : '')}
                        data-position="bottom right"
                        data-tooltip={tooltip}>
                     <input type="checkbox" defaultChecked={!downloadOnly && !excluded} data-column-idx={i}/>
                   </div>
-                  <span style={!downloadOnly && !excluded && !this.state.excludeTable ? {color: this.portalColor()} : {}}>
+                  <span style={!downloadOnly && !excluded && !this.state.settings.excludeTable ? {color: this.portalColor()} : {}}>
                       {columnName}
                     </span>
                 </th>
@@ -644,9 +656,9 @@ export default class DataImporter extends React.Component {
                 <td key={i}
                     className={
                       'ui fluid dropdown' +
-                      (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.excludeTable ? '' : ' disabled') +
+                      (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ? '' : ' disabled') +
                       (this.state.errors.tableName.length > 0 ? '' : ' search') +
-                      (!this.state.excludeTable && (this.state.errors.tableName.length > 0 ||
+                      (!this.state.settings.excludeTable && (this.state.errors.tableName.length > 0 ||
                       outColumnName === undefined ||
                       this.state.outColumnNameCounts[outColumnName] > 1 ||
                       dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
@@ -676,7 +688,7 @@ export default class DataImporter extends React.Component {
                   :
                   dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName]
               );
-              return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.excludeTable ?
+              return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ?
                   (modelColumn === undefined ?
                       <td key={i} className="error"></td>
                       :
@@ -713,18 +725,18 @@ export default class DataImporter extends React.Component {
               i >= this.state.nHeaderRowsInt) ?
                 <tr key={i}>
                   <td className="collapsing right aligned">
-                    <div className={'ui fitted toggle left floated checkbox' + (this.state.excludeTable ? ' disabled' : '')} data-position="top left"
+                    <div className={'ui fitted toggle left floated checkbox' + (this.state.settings.excludeTable ? ' disabled' : '')} data-position="top left"
                          data-tooltip={'Click to ' + (this.state.excludeRowIdxs.indexOf(i) === -1 ? 'exclude' : 'include')}>
                       <input type="checkbox" defaultChecked={this.state.excludeRowIdxs.indexOf(i) === -1} data-row-idx={i}/>
                     </div>
-                    <span style={this.state.excludeRowIdxs.indexOf(i) === -1 && !this.state.excludeTable ? {color: this.portalColor()} : {}}>
+                    <span style={this.state.excludeRowIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ? {color: this.portalColor()} : {}}>
                         {i+1}
                       </span>
                   </td>
                   {(row.map((col, j) => {
                     const downloadOnly = this.columnIsDownloadOnly(j);
                     const className = (downloadOnly || this.state.excludeColumnIdxs.indexOf(j) >= 0 ||
-                    this.state.excludeRowIdxs.indexOf(i) >= 0 || this.state.excludeTable ? 'disabled' : '');
+                    this.state.excludeRowIdxs.indexOf(i) >= 0 || this.state.settings.excludeTable ? 'disabled' : '');
                     return (
                       <td key={j} className={className}>{col}</td>
                     );
