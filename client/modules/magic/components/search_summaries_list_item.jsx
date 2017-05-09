@@ -207,7 +207,7 @@ export default class extends React.Component {
       <div ref="accordion" className="ui accordion magic-contribution">
         <div className="title search_summaries_list_item" style={{paddingLeft:'1em'}}>
           <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
-          <div className="ui doubling grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
+          <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
             <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
                 <span style={{fontSize:'small', fontWeight:'bold'}}>
                   {c.CITATION ? c.CITATION + ' v. ' + (c.VERSION || '') : c.TITLE}
@@ -325,6 +325,7 @@ export default class extends React.Component {
                 <th>Version</th>
                 <th>Data Model</th>
                 <th>Uploaded</th>
+                <th>Contribution Link</th>
                 <th>Download</th>
               </tr>
               </thead>
@@ -335,6 +336,7 @@ export default class extends React.Component {
                     <td>{v.version}</td>
                     <td>{v.magic_version}</td>
                     <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
+                    <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
                     <td>
                       <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
                          href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +

@@ -9,15 +9,49 @@ import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
 
-console.log('es', Meteor.settings.elasticsearch.url);
+//console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
   //log: 'trace',
-  host: Meteor.settings.elasticsearch.url
+  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || ''
 });
 
 export default function () {
 
   Meteor.methods({
+    'createImportSettingsTemplate': function (user, name, settings) {
+      console.log('create import', user, name, settings);
+      return Collections['magic.import.settings.templates'].insert({
+        _user: user,
+        _name: name,
+        _inserted: moment().toISOString(),
+        settings: settings
+      }, (error) => { console.log('create import', error)});
+    },
+    'saveImportSettingsTemplate': function (user, ID, settings) {
+      console.log('save import', user, ID, settings);
+      Collections['magic.import.settings.templates'].update({
+        _id: ID,
+        _user: user
+      }, {
+        $set: { settings: settings }
+      }, (error) => { console.log('save import', error)});
+    },
+    'renameImportSettingsTemplate': function (user, ID, name) {
+      console.log('rename import', user, ID, name);
+      Collections['magic.import.settings.templates'].update({
+        _id: ID,
+        _user: user
+      }, {
+        $set: { _name: name }
+      }, (error) => { console.log('rename import', error)});
+    },
+    'deleteImportSettingsTemplate': function (user, ID) {
+      console.log('delete import', user, ID);
+      Collections['magic.import.settings.templates'].remove({
+        _id: ID,
+        _user: user
+      }, (error) => { console.log('delete import', error)});
+    },
     'insertContribution': function (contributor, user, mailid, name, c, s) {
       //check(id, Integer);
       //check(name, String);

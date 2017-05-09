@@ -186,9 +186,9 @@ export default class extends React.Component {
                   <div className="item" key={i}>
                     {Cookies.get('mail_id') == '5730' ?
                     <div>
-                      <textarea id="textarea" defaultValue={
+                      <textarea defaultValue={
                         (c.contribution._summary ? JSON.stringify(c.contribution._summary.contribution, null, '  ') : '')
-                      } style={{width: '100%', height: '200px'}}></textarea>
+                      } style={{width: '100%', height: '50px'}}/>
                       <button
                         onClick={() => this.updateES(c.contribution)}
                       >
@@ -199,11 +199,11 @@ export default class extends React.Component {
                     }
                     <div style={{display: 'flex', flexFlow: 'row wrap', marginTop: '0.5em', marginBottom: '0.5em'}}>
                       <div style={{flex: '1 1 auto'}}>
-                        <div className={"ui labeled fluid input" + (c.doi && c.contribution._doiData ? '' : ' error')}>
-                          <div className={"ui label" + (c.doi && c.contribution._doiData ? '' : ' red')}>
+                        <div className={"ui labeled fluid input" + (c.contribution._activated || c.doi && c.contribution._doiData ? '' : ' error')}>
+                          <div className={"ui label" + (c.contribution._activated || c.doi && c.contribution._doiData ? '' : ' red')}>
                             DOI
                           </div>
-                          <input type="text" default="None" value={c.doi} readOnly={c._activated}
+                          <input type="text" default="None" value={c.doi} readOnly={c.contribution._activated }
                                  onChange={(e) => {
                                    let privateContributions = this.state.privateContributions;
                                    privateContributions[i].doi = e.target.value;
@@ -212,16 +212,21 @@ export default class extends React.Component {
                            }}/>
                         </div>
                       </div>
-                      {!c._activated ?
-                        <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
+                      {!c.contribution._activated ?
+                        <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c.contribution._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
                              onClick={(e) => {
                                this.confirmActivate(c.contribution._id);
                              }}
                         >
                           <i className="checkmark icon"/>
                           Activate
-                        </div> :undefined}
-                      {!c._activated ?
+                        </div> :
+                        <div className="ui green disabled button" style={{margin: '0 0 0 0.5em'}}>
+                          <i className="checkmark icon"/>
+                          Activated
+                        </div>
+                      }
+                      {!c.contribution._activated ?
                         <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
                         onClick={(e) => {
                           this.confirmDelete(c.contribution._id);

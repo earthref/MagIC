@@ -83,6 +83,7 @@
     "lint-fix": "npm run lint-only -- --fix",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
-    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.6/semantic.css"
+    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.6/semantic.css",
+    "upgrade": "meteor node C:/Users/rminn/Git/EarthRef/earthref/.scripts/upgrade/upgrade.js"
   }
 }

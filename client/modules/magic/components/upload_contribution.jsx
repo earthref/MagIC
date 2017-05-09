@@ -5,17 +5,17 @@ import React from 'react';
 import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
-import {Mongo} from 'meteor/mongo';
+//import {Mongo} from 'meteor/mongo';
 import numeral from 'numeral';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
-import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
+//import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx-style';
 import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
-import ExportContribution from '../actions/export_contribution';
+//import ExportContribution from '../actions/export_contribution';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
@@ -46,10 +46,11 @@ export default class MagICUploadContribution extends React.Component {
     };
     this.summarizer = new SummarizeContribution({});
     this.state = this.initialState;
-    if (Cookies.get('user_id'))
+    if (Cookies.get('user_id')) {
       Tracker.autorun(function () {
         Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'));
       });
+    }
   }
 
   restart() {
@@ -232,14 +233,19 @@ export default class MagICUploadContribution extends React.Component {
 
     if (this.state.fileFormats[i] === 'magic') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].tableNames = [];
-        this.files[i].data = [];
-        this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
-          let tableName = table.match(/^tab( delimited)?\s*?\t(.+)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
-          console.log('table', table, tableName);
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].tableNames = [''];
+        this.files[i].data = [[[]]];
+        text.split(/\s*>+\s*\n/).map((table, j) => {
+          let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
-          this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
+          this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => {
+            line = line.replace(/\t+$/, '');
+            if (line != '') return line.split('\t');
+          });
+          _.pull(this.files[i].data[j], undefined);
+          console.log('parsed table', this.files[i].tableNames[j], this.files[i].data[j]);
         });
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
@@ -247,24 +253,26 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'tsv') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].data = text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'csv') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].data = text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'xls') {
       if (this.files[i].workbook) {
-        this.files[i].tableNames = [];
-        this.files[i].data = [];
+        this.files[i].tableNames = [''];
+        this.files[i].data = [[[]]];
         this.files[i].workbook.SheetNames.map((tableName, j) => {
           this.files[i].tableNames[j] = tableName;
           this.files[i].data[j] = this.xlsSheetToArray(this.files[i].workbook.Sheets[tableName]);
@@ -308,7 +316,7 @@ export default class MagICUploadContribution extends React.Component {
     }
 
     // Make sure each row has the same number of columns.
-    let maxRowLength = _.reduce(data, (max, row) => Math.max(max, row.length), 0);
+    let maxRowLength = _.reduce(data, (max, row) => row && row.length && Math.max(max, row.length) || max, 0);
     for (let rowIdx in data) {
       if (data[rowIdx].length < maxRowLength)
         _.times(maxRowLength - data[rowIdx].length, () => data[rowIdx].push(''));
@@ -412,6 +420,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
+    console.log('renderDataImporter', this.files[i].format, data);
     return (
       <DataImporter
         portal="MagIC"
@@ -787,22 +796,22 @@ export default class MagICUploadContribution extends React.Component {
                         <div className="ui header">
                           {file.name + ' '}
                           <div className="ui horizontal label">{filesize(file.size)}</div>
-                          <div className="ui horizontal label button" onClick={() => this.downloadFile(file)}>Download Original</div>
-                          {(file.readErrors && file.readErrors.length > 0 ?
+                          {file.format !== 'xls' ? <div className="ui horizontal label button" onClick={() => this.downloadFile(file)}>Download Original</div> : undefined}
+                          {file.readErrors && file.readErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.readErrors.length).format('0,0') + ' Read Error' + (file.readErrors.length === 1 ? '' : 's')}
                             </div>
-                            : undefined)}
-                          {(file.parseErrors && file.parseErrors.length > 0 ?
+                            : undefined}
+                          {file.parseErrors && file.parseErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.parseErrors.length).format('0,0') + ' Parse Error' + (file.parseErrors.length === 1 ? '' : 's')}
                             </div>
-                            : undefined)}
-                          {(file.importErrors && file.importErrors.length > 0 ?
+                            : undefined}
+                          {file.importErrors && file.importErrors.length > 0 ?
                             <div className="ui horizontal red label">
                               {numeral(file.importErrors.length).format('0,0') + ' Import Error' + (file.importErrors.length === 1 ? '' : 's')}
                             </div>
-                            : undefined)}
+                            : undefined}
                         </div>
                         <div className="description">
                           <div className={
@@ -855,7 +864,7 @@ export default class MagICUploadContribution extends React.Component {
                             this.renderParseErrors(i)
                           :
                             <div>
-                              {(this.state.fileFormats[i] === 'magic' && this.files[i].data ?
+                              {(this.state.fileFormats[i] === 'magic' && this.files[i].data && this.files[i].tableNames ?
                                   this.files[i].data.map((table, j) =>
                                     <div key={j}>
                                       <div className="ui divider"></div>
@@ -875,7 +884,7 @@ export default class MagICUploadContribution extends React.Component {
                                     {this.renderDataImporter(i, 1, this.files[i].data)}
                                   </div> : undefined
                               )}
-                              {(this.state.fileFormats[i] === 'xls' && this.files[i].data ?
+                              {(this.state.fileFormats[i] === 'xls' && this.files[i].workbook && this.files[i].data && this.files[i].tableNames ?
                                   this.files[i].data.map((table, j) =>
                                     <div key={j}>
                                       <div className="ui divider"></div>
@@ -966,7 +975,7 @@ export default class MagICUploadContribution extends React.Component {
                             <div className="ui two column very relaxed stackable grid">
                               <div className="center aligned column">
                                 <div className="ui small header">
-                                  {this.state._name} Before Upload
+                                  {this.state._id ? this.state._existing_contribution._name : this.state._name} Before Upload
                                 </div>
                                 <br/>
                                 {this.renderDetails(this.state._existing_contribution, this.state._existing_summary)}
@@ -976,7 +985,7 @@ export default class MagICUploadContribution extends React.Component {
                               </div>
                               <div className="center aligned column">
                                 <div className="ui small header">
-                                  {this.state._name} After Upload
+                                  {this.state._id ? this.state._existing_contribution._name : this.state._name} After Upload
                                 </div>
                                 <br/>
                                 {this.renderDetails(this.contribution, this.summary)}
