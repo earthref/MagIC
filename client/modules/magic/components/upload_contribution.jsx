@@ -5,17 +5,17 @@ import React from 'react';
 import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
-import {Mongo} from 'meteor/mongo';
+//import {Mongo} from 'meteor/mongo';
 import numeral from 'numeral';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
-import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
+//import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx-style';
 import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
-import ExportContribution from '../actions/export_contribution';
+//import ExportContribution from '../actions/export_contribution';
 import DataImporter from '../../common/components/data_importer.jsx';
 import IconButton from '../../common/components/icon_button.jsx';
 
@@ -233,10 +233,11 @@ export default class MagICUploadContribution extends React.Component {
 
     if (this.state.fileFormats[i] === 'magic') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
         this.files[i].tableNames = [''];
         this.files[i].data = [[[]]];
-        this.files[i].text.split(/\s*>+\s*\n/).map((table, j) => {
+        text.split(/\s*>+\s*\n/).map((table, j) => {
           let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
           this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
           this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => {
@@ -252,16 +253,18 @@ export default class MagICUploadContribution extends React.Component {
     }
     if (this.state.fileFormats[i] === 'tsv') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].data = text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split('\t'));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Tab Delimited File.")
       }
     }
     if (this.state.fileFormats[i] === 'csv') {
       if (this.files[i].text) {
-        this.files[i].text.replace('\r\n','\n');
-        this.files[i].data = this.files[i].text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
+        let text = this.files[i].text;
+        text = text.replace('\r\n','\n');
+        this.files[i].data = text.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => line.split(','));
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a Comma Delimited File.")
       }
@@ -417,6 +420,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
+    console.log('renderDataImporter', this.files[i].format, data);
     return (
       <DataImporter
         portal="MagIC"
