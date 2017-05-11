@@ -138,39 +138,39 @@ export default class extends React.Component {
         </h2>
         <div className="ui five cards">
           <IconButton className="borderless card" href="/MagIC/data-models/3.0" portal="MagIC">
-            <i className="icons">
+            <i className="small icons">
               <i className="sitemap icon"/>
               <i className="corner table icon"/>
             </i>
-            <div className="title">Data<br/>Model</div>
+            <div className="small title">Data<br/>Model</div>
           </IconButton>
           <IconButton className="borderless card" href="/MagIC/method-codes" portal="MagIC">
-            <i className="icons">
+            <i className="small icons">
               <i className="lab icon"/>
               <i className="corner write icon"/>
             </i>
-            <div className="title">Method<br/>Codes</div>
+            <div className="small title">Method<br/>Codes</div>
           </IconButton>
           <IconButton className="borderless card" href="/vocabularies" portal="MagIC">
-            <i className="icons">
+            <i className="small icons">
               <i className="list icon"/>
               <i className="corner lock icon"/>
             </i>
-            <div className="title">Vocabulary<br/>Lists</div>
+            <div className="small title">Vocabulary<br/>Lists</div>
           </IconButton>
           <IconButton className="borderless card" href="https://github.com/PmagPy/PmagPy" portal="MagIC">
-            <i className="icons">
+            <i className="small icons">
               <i className="bar chart icon"/>
               <i className="corner calculator icon"/>
             </i>
-            <div className="title">PmagPy<br/>Software</div>
+            <div className="small title">PmagPy<br/>Software</div>
           </IconButton>
           <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
-            <i className="icons">
+            <i className="small icons">
               <i className="file text icon"/>
               <i className="corner write icon"/>
             </i>
-            <div className="title">Data Management<br/>Plan Tool</div>
+            <div className="small title">Data Management<br/>Plan Tool</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
