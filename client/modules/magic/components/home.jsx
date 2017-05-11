@@ -1,12 +1,14 @@
 import React from 'react';
-import moment from 'moment';
 import IconButton from '../../common/components/icon_button.jsx';
+import SearchDividedList from '../../common/containers/search_divided_list';
+import Summary from './search_summaries_list_item';
 
 export default class extends React.Component {
 
   constructor(props) {
     super(props);
     this.initialState = {
+      loaded: false
     };
     this.state = this.initialState;
   }
@@ -17,21 +19,13 @@ export default class extends React.Component {
         <div className="ui small icon floating message">
           <i className="purple users icon"></i>
           <div className="content">
-            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">
-              MagIC 2017 Workshop: Earth's Magnetic Field from the Beginning
-            </a>
-            MagIC is hosting a workshop on January 24th-27th, 2017 at SIO in La Jolla, CA.
-          </div>
-          <a className="ui basic purple button" style={{margin:'0 1em'}}
-             href="https://earthref.org/cgi-bin/erml-c0-introduction.cgi?event=MAGIC">
-            Register
-          </a>
-          <div className="ui tiny statistic" style={{margin:'0 1em'}}>
-            <div className="value">{moment('2017-01-24').diff(moment(), 'days')}</div>
-            <div className="label">Days To Go!</div>
+            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
+            Workshop: Earth's Magnetic Field from the Beginning</a>
+            MagIC hosted a workshop on
+            January 24th-27th, 2017 at SIO in La Jolla, CA.
           </div>
         </div>
-        <div className="ui header">
+        <div className="ui header" style={{display:'none'}}>
           <div className="ui column padded grid">
             <div className="ten wide column">
               <div className="ui piled segment items">
@@ -54,7 +48,7 @@ export default class extends React.Component {
                 </a>
               </div>
             </div>
-            <div className="six wide column">
+            <div className="six wide column" style={{display:'none'}}>
               <div className="ui header">
                 Recent Activity
               </div>
@@ -97,7 +91,7 @@ export default class extends React.Component {
           </div>
         </div>
         <div className="ui hidden divider"></div>
-        <div className="ui five cards">
+        <div className="ui four cards">
           <IconButton className="card" href="/MagIC/search" portal="MagIC">
             <i className="large icons">
               <i className="database icon"/>
@@ -122,7 +116,7 @@ export default class extends React.Component {
             <div className="title">Upload</div>
             <div className="subtitle">Import data into your private workspace.</div>
           </IconButton>
-          <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC">
+          <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC" style={{display:'none'}}>
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner help icon"/>
@@ -130,13 +124,13 @@ export default class extends React.Component {
             <div className="title">Validate</div>
             <div className="subtitle">Confirm your dataset is ready.</div>
           </IconButton>
-          <IconButton className="disabled card" href="/MagIC/activate" portal="MagIC">
+          <IconButton className="card" href="/MagIC/private" portal="MagIC">
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner checkmark icon"/>
             </i>
-            <div className="title">Activate</div>
-            <div className="subtitle">Make your dataset publicly visible.</div>
+            <div className="title">Private Workspace</div>
+            <div className="subtitle">Manage your contributions.</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
@@ -171,7 +165,7 @@ export default class extends React.Component {
             </i>
             <div className="title">PmagPy<br/>Software</div>
           </IconButton>
-          <IconButton className="disabled borderless card" href="/vocabularies" portal="MagIC">
+          <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
             <i className="icons">
               <i className="file text icon"/>
               <i className="corner write icon"/>
@@ -180,54 +174,18 @@ export default class extends React.Component {
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
-          MagIC Statistics
+          Recent Contributions
         </h2>
-        <div className="ui four cards">
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                7
-              </div>
-              <div className="label">
-                New<br/>Contributors
-              </div>
-              <span>This Quarter</span>
-            </div>
-          </IconButton>
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                4.2K
-              </div>
-              <div className="label">
-                Contribution<br/>Articles
-              </div>
-              <span>Publicly Visible</span>
-            </div>
-          </IconButton>
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                147.7K
-              </div>
-              <div className="label">
-                Sites or<br/>Synthetics
-              </div>
-              <span>Publicly Visible</span>
-            </div>
-          </IconButton>
-          <IconButton className="borderless card" href="" portal="MagIC">
-            <div className="ui statistic">
-              <div className="value">
-                25
-              </div>
-              <div className="label">
-                New or Updated<br/>Contributions
-              </div>
-              <span>This Month</span>
-            </div>
-          </IconButton>
-        </div>
+        <SearchDividedList
+          subscriptionName="magic.pages.contributions.summaries"
+          elasticsearchQuery={{}}
+          elasticsearchFilters={{}}
+          elasticsearchSort={[{'INSERTED': 'desc'}]}
+          elasticsearchPageSize={5}
+          minimongoSort={{'_inserted': -1}}
+        >
+          <Summary/>
+        </SearchDividedList>
       </div>
     );
   }

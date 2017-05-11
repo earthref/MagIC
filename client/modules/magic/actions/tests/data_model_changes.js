@@ -1,6 +1,6 @@
 const {describe, it} = global;
 import {expect} from 'chai';
-import {_} from 'lodash';
+import _ from  'lodash';
 import DataModelChanges from '../data_model_changes';
 import {default as magicDataModels} from '../../../../../lib/modules/magic/data_models';
 

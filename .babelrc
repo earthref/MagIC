@@ -1,14 +1,15 @@
 {
   "presets": [
     "es2015",
-    "stage-2",
+    "stage-3",
     "react"
   ],
   "plugins": [
     "react-require",
-    "babel-root-slash-import"
+    "transform-runtime"
   ],
   "ignore": [
-    "*.es5.js"
+    "*.es5.js",
+    "/client/lib/semantic-ui/*"
   ]
 }

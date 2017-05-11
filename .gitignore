@@ -1,10 +1,14 @@
 # Node
 node_modules
-*.log
+
+# Scripts
+.scripts/elasticsearch/.*
+
+# Settings
+settings.json
 
 # JetBrains
 .idea/
-.idea/libraries
 client/modules/magic/actions/tests/files/data_models/temp3.0.js
 client/modules/magic/actions/tests/files/data_models/tempForUpgradeMapOutput.js
 client/modules/magic/actions/tests/temp2.2.js

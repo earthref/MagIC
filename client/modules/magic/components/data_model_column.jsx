@@ -1,4 +1,4 @@
-import {_} from 'lodash';
+import _ from  'lodash';
 import React from 'react';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';

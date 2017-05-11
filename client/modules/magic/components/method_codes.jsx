@@ -1,4 +1,4 @@
-import {_} from 'lodash';
+import _ from  'lodash';
 import React from 'react';
 import saveAs from 'save-as';
 import {portals} from '../../common/configs/portals';
@@ -9,7 +9,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: this.props.search,
+      search: "",
       loaded: false,
       updating: false
     };

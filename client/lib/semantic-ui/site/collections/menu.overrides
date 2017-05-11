@@ -1,0 +1,9 @@
+/*******************************
+         Site Overrides
+*******************************/
+
+@import (multiple) '../../../../../.semantic-ui/src/themes/default/collections/menu.variables';
+
+.ui.tabular.menu .item.active {
+  border-bottom: @tabularBorderWidth dashed @tabularBorderColor;
+}

@@ -12,18 +12,6 @@ describe('magic.actions.export_contribution', () => {
 
   // Test exporting invalid JSON to text.
   describe('when exporting invalid JSON to text', () => {
-    it('should reject if the table name is invalid.', () => {
-      const invalidTable = {
-        contribution: [{
-          magic_version: '3.0'
-        }],
-        not_er_locations: [{
-          region: 'California'
-        }]
-      };
-      exportContributionToTextErrorTest(invalidTable,
-        /table .* is not defined in magic data model version/i);
-    });
 
     it('should reject if the column name is invalid.', () => {
       const invalidColumn = {
@@ -101,7 +89,16 @@ describe('magic.actions.export_contribution', () => {
           location:          'lo1',
           citations:         ['10.1023/A1'],
           site_alternatives: 'Kiln'
-        }]
+        }],
+        measurements: {
+          columns: ['dir_inc', 'dir_dec'],
+          rows:   [['1'      , '2'      ],
+                   ['1'      , '2'      ],
+                   ['1'      , '2'      ]]
+        },
+        _not_a_valid_table_name: {
+          // this should get skipped
+        }
       };
       const text1 =
         'tab delimited\tcontribution\n' +
@@ -111,12 +108,18 @@ describe('magic.actions.export_contribution', () => {
         'tab delimited\tsites\n' +
         'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
         'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\t:Kiln:\t\t:10.1023/A1:\t\n' +
+        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\n' +
         'specimen\tsample\tigsn\tcitations\tdip\n' +
         'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
-        'sp2\tsa1\tigsn2\t\t1.3\n';
+        'sp2\tsa1\tigsn2\t\t1.3\n' +
+        '>>>>>>>>>>\n' +
+        'tab delimited\tmeasurements\n' +
+        'dir_inc\tdir_dec\n' +
+        '1\t2\n' +
+        '1\t2\n' +
+        '1\t2\n';
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
@@ -188,7 +191,7 @@ describe('magic.actions.export_contribution', () => {
         'String\tString\tList\tList\tList\tString\n' +
         'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
         'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\t:Kiln:\t\t:10.1023/A1:\t\n' +
+        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
         'Names\t\tSpecimen\tResult\tOrientation\n' +
