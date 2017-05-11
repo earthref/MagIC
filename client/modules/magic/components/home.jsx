@@ -16,7 +16,7 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui small icon floating message">
+        <div className="ui small icon floating message" style={{display:'none'}}>
           <i className="purple users icon"></i>
           <div className="content">
             <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
