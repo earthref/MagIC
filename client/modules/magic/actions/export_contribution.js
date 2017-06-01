@@ -530,7 +530,7 @@ export default class extends Runner {
 
     let manipulatedData = '';
 
-    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary')
+    /*if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary' && Array.isArray(dataToManipulate))
     //if(columnName == 'external_database_ids')
     {
 
@@ -556,7 +556,7 @@ export default class extends Runner {
         //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
       }
       return manipulatedData;
-    }
+    }*/
 
     if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Matrix' && Array.isArray(dataToManipulate))
     //if(columnName == 'rotation_sequence')

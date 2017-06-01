@@ -84,6 +84,6 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.6/semantic.css",
-    "upgrade": "meteor node C:/Users/rminn/Git/EarthRef/earthref/.scripts/upgrade/upgrade.js"
+    "upgrade": "meteor node .scripts/upgrade/upgrade.js"
   }
 }
