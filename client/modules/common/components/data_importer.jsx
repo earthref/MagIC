@@ -463,7 +463,7 @@ export default class DataImporter extends React.Component {
                       )
                     :
                       <div className="item">
-                        There are currently no templates in your private workspace. Please save a template to reuse it in future uploads.
+                        There are currently no templates in your private workspace. Please create a new template to reuse it in future uploads.
                       </div>
                   :
                     <div className="item">

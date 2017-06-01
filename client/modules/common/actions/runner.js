@@ -22,7 +22,7 @@ export default class {
 
   _appendWarning(warningMessage) {
     const warning = {lineNumber: this.lineNumber, message: warningMessage};
-    console.warn('WARNING: ', warningMessage);
+    //console.warn('WARNING: ', warningMessage);
     this.runnerState['_runner_warnings'].push(warning);
   }
 
