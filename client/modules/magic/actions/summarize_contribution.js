@@ -350,7 +350,7 @@ export default class extends Runner {
                 this.json.contribution.summary[table],
                 model
               );
-              _.keys(this.json.locations[locationProp]).forEach((prop) => {
+              if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
                 this._initProp(this.json.locations[locationProp][prop].summary, table, {});
                 this._aggregateProps(
                   this.json[table][siteProp][locationProp].summary[table],
@@ -370,14 +370,14 @@ export default class extends Runner {
                 this.json.contribution.summary[table],
                 model
               );
-              _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+              if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
                 this._initProp(this.json.sites[siteProp][locationProp].summary, table, {});
                 this._aggregateProps(
                   this.json[table][sampleProp][siteProp].summary[table],
                   this.json.sites[siteProp][locationProp].summary[table],
                   model
                 );
-                _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
                   this._initProp(this.json.locations[locationProp][prop].summary, table, {});
                   this._aggregateProps(
                     this.json[table][sampleProp][siteProp].summary[table],
@@ -398,21 +398,21 @@ export default class extends Runner {
                 this.json.contribution.summary[table],
                 model
               );
-              _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+              if (this.json.samples) _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
                 this._initProp(this.json.samples[sampleProp][siteProp].summary, table, {});
                 this._aggregateProps(
                   this.json[table][specimenProp][sampleProp].summary[table],
                   this.json.samples[sampleProp][siteProp].summary[table],
                   model
                 );
-                _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
                   this._initProp(this.json.sites[siteProp][locationProp].summary, table, {});
                   this._aggregateProps(
                     this.json[table][specimenProp][sampleProp].summary[table],
                     this.json.sites[siteProp][locationProp].summary[table],
                     model
                   );
-                  _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                  if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
                     this._initProp(this.json.locations[locationProp][prop].summary, table, {});
                     this._aggregateProps(
                       this.json[table][specimenProp][sampleProp].summary[table],
@@ -434,28 +434,28 @@ export default class extends Runner {
                 this.json.contribution.summary.experiments,
                 model
               );
-              _.keys(this.json.specimens[specimenProp]).forEach((sampleProp) => {
+              if (this.json.specimens) _.keys(this.json.specimens[specimenProp]).forEach((sampleProp) => {
                 this._initProp(this.json.specimens[specimenProp][sampleProp].summary, 'experiments', {});
                 this._aggregateProps(
                   this.json.experiments[experimentProp][specimenProp].summary.experiments,
                   this.json.specimens[specimenProp][sampleProp].summary.experiments,
                   model
                 );
-                _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+                if (this.json.samples) _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
                   this._initProp(this.json.samples[sampleProp][siteProp].summary, 'experiments', {});
                   this._aggregateProps(
                     this.json.experiments[experimentProp][specimenProp].summary.experiments,
                     this.json.samples[sampleProp][siteProp].summary.experiments,
                     model
                   );
-                  _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                  if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
                     this._initProp(this.json.sites[siteProp][locationProp].summary, 'experiments', {});
                     this._aggregateProps(
                       this.json.experiments[experimentProp][specimenProp].summary.experiments,
                       this.json.sites[siteProp][locationProp].summary.experiments,
                       model
                     );
-                    _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                    if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
                       this._initProp(this.json.locations[locationProp][prop].summary, 'experiments', {});
                       this._aggregateProps(
                         this.json.experiments[experimentProp][specimenProp].summary.experiments,
@@ -490,7 +490,7 @@ export default class extends Runner {
         if (table === 'contribution') {
           this._initProp(this.json.contribution.summary, '_all', {});
           _.keys(this.json.contribution.summary).forEach((summaryTable) => {
-            if (summaryTable !== '_all') {
+            if (summaryTable !== '_all' && summaryTable !== 'contribution') {
               this._aggregateProps(
                 this.json.contribution.summary[summaryTable],
                 this.json.contribution.summary._all,
@@ -503,7 +503,7 @@ export default class extends Runner {
             _.keys(this.json.experiments[experimentProp]).forEach((specimenProp) => {
               this._initProp(this.json.experiments[experimentProp][specimenProp].summary, '_all', {});
               _.keys(this.json.experiments[experimentProp][specimenProp].summary).forEach((summaryTable) => {
-                if (summaryTable !== '_all') {
+                if (summaryTable !== '_all' && summaryTable !== 'contribution') {
                   this._aggregateProps(
                     this.json.experiments[experimentProp][specimenProp].summary[summaryTable],
                     this.json.experiments[experimentProp][specimenProp].summary._all,
@@ -520,7 +520,7 @@ export default class extends Runner {
             _.keys(this.json[table][prop]).forEach((parentProp) => {
               this._initProp(this.json[table][prop][parentProp].summary, '_all', {});
               _.keys(this.json[table][prop][parentProp].summary).forEach((summaryTable) => {
-                if (summaryTable !== '_all') {
+                if (summaryTable !== '_all' && summaryTable !== 'contribution') {
                   this._aggregateProps(
                     this.json[table][prop][parentProp].summary[summaryTable],
                     this.json[table][prop][parentProp].summary._all,
@@ -539,7 +539,7 @@ export default class extends Runner {
   }
 
   _nameToProp(name) {
-    return '_' + name.replace(/\./g, '_');
+    return '_' + _.trim(name).replace(/\./g, '_');
   }
 
   _initProp(object, property, initValue) {
@@ -677,9 +677,10 @@ export default class extends Runner {
         } else if (model.columns[column].type === 'Number' ||
                    model.columns[column].type === 'Integer') {
           summary[column] = {
+            vals: summary[column],
             n: summary[column].length,
-            min: _.min(summary[column]),
-            max: _.max(summary[column])
+            min: _.min(_.without(summary[column], undefined)),
+            max: _.max(_.without(summary[column], undefined))
           };
         } else {
           summary[column] = _.sortBy(_.uniq(summary[column]));
@@ -687,16 +688,18 @@ export default class extends Runner {
       }
       if (/^\_age.*\_bp$/.test(column)) {
         summary[column] = {
+          vals: summary[column],
           n: summary[column].length,
-          min: _.min(summary[column]),
-          max: _.max(summary[column])
+          min: _.min(_.without(summary[column], undefined)),
+          max: _.max(_.without(summary[column], undefined))
         };
       }
     });
   }
 
   _inheritParentSummaries(table, prop, parentProp, fromTable, fromProp, model) {
-    if (this.json[table][prop] && this.json[table][prop][parentProp] && this.json[fromTable][fromProp]) {
+    if (this.json[table] && this.json[table][prop] && this.json[table][prop][parentProp] &&
+        this.json[fromTable] && this.json[fromTable][fromProp]) {
       this._initProp(this.json[table][prop][parentProp], 'summary', {});
       this._initProp(this.json[table][prop][parentProp].summary, fromTable, {});
       _.keys(this.json[fromTable][fromProp]).forEach((fromParentProp) => {
@@ -717,16 +720,15 @@ export default class extends Runner {
         if (model.columns[column].type === 'Number' ||
             model.columns[column].type === 'Integer') {
           if (!_.has(toSummary, column)) {
-            toSummary[column] = {
-              n: fromSummary[column].n,
-              min: fromSummary[column].min,
-              max: fromSummary[column].max
-            };
+            toSummary[column] = _.cloneDeep(fromSummary[column]);
           } else {
-            toSummary[column].n += fromSummary[column].n;
-            toSummary[column].min = _.min(fromSummary[column].min, toSummary[column].min);
-            toSummary[column].max = _.max(fromSummary[column].max, toSummary[column].max);
+            toSummary[column].vals = toSummary[column].vals.concat(fromSummary[column].vals);
+            toSummary[column].n =   _.sum([toSummary[column].n, fromSummary[column].n]);
+            toSummary[column].min = _.min(_.without([toSummary[column].min, fromSummary[column].min], undefined));
+            toSummary[column].max = _.max(_.without([toSummary[column].max, fromSummary[column].max], undefined));
           }
+          if (toSummary[column].min === undefined)
+            console.log(column, fromSummary[column].min, toSummary[column].min);
         } else {
           this._initProp(toSummary, column, []);
           toSummary[column] = _.sortBy(_.uniq(toSummary[column].concat(fromSummary[column])));
@@ -734,16 +736,15 @@ export default class extends Runner {
       }
       if (/^\_age.*\_bp$/.test(column)) {
         if (!_.has(toSummary, column)) {
-          toSummary[column] = {
-            n: fromSummary[column].n,
-            min: fromSummary[column].min,
-            max: fromSummary[column].max
-          };
+          toSummary[column] = _.cloneDeep(fromSummary[column]);
         } else {
-          toSummary[column].n += fromSummary[column].n;
-          toSummary[column].min = _.min(fromSummary[column].min, toSummary[column].min);
-          toSummary[column].max = _.max(fromSummary[column].max, toSummary[column].max);
+          toSummary[column].vals = toSummary[column].vals.concat(fromSummary[column].vals);
+          toSummary[column].n =   _.sum([toSummary[column].n, fromSummary[column].n]);
+          toSummary[column].min = _.min(_.without([toSummary[column].min, fromSummary[column].min], undefined));
+          toSummary[column].max = _.max(_.without([toSummary[column].max, fromSummary[column].max], undefined));
         }
+        if (toSummary[column].min === undefined)
+          console.log(column, fromSummary[column], toSummary[column]);
       }
       if (/^\_n\_/.test(column)) {
         this._initProp(toSummary, column, 0);

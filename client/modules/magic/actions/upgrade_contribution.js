@@ -1026,6 +1026,22 @@ export default class extends Runner {
               jsonValueNew = "" + Math.max(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
               tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
             }
+
+            // Add the normal direction polarity flag.
+            if (jsonColumnOld === 'normal_inc' ||
+              jsonColumnOld === 'normal_dec' ||
+              jsonColumnOld === 'normal_k' ||
+              jsonColumnOld === 'normal_n' ||
+              jsonColumnOld === 'normal_alpha95')
+              tableRowsNew[jsonTableNew][0].dir_polarity = 'n';
+
+            // Add the reversed direction polarity flag.
+            if (jsonColumnOld === 'reversed_inc' ||
+              jsonColumnOld === 'reversed_dec' ||
+              jsonColumnOld === 'reversed_k' ||
+              jsonColumnOld === 'reversed_n' ||
+              jsonColumnOld === 'reversed_alpha95')
+              tableRowsNew[jsonTableNew][0].dir_polarity = 'r';
           }
 
           // Normalize lists for easier comparison in merging by sorting them.
@@ -1048,21 +1064,6 @@ export default class extends Runner {
             tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
           }
 
-          // Add the normal direction polarity flag.
-          if (jsonColumnOld === 'normal_inc' ||
-              jsonColumnOld === 'normal_dec' ||
-              jsonColumnOld === 'normal_k' ||
-              jsonColumnOld === 'normal_n' ||
-              jsonColumnOld === 'normal_alpha95')
-            tableRowsNew[jsonTableNew][0].dir_polarity = 'n';
-
-          // Add the reversed direction polarity flag.
-          if (jsonColumnOld === 'reversed_inc' ||
-              jsonColumnOld === 'reversed_dec' ||
-              jsonColumnOld === 'reversed_k' ||
-              jsonColumnOld === 'reversed_n' ||
-              jsonColumnOld === 'reversed_alpha95')
-            tableRowsNew[jsonTableNew][0].dir_polarity = 'r';
         }
 
       }

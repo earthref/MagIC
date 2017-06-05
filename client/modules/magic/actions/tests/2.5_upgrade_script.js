@@ -10,19 +10,20 @@ import SummarizeContribution from '../summarize_contribution';
 
 //var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/2.5 Contributions Test - Citations/';
 var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/2.5 Contributions/';
-var dirOut = 'client/modules/magic/actions/tests/output/upgraded1/';
+var dirOut = 'client/modules/magic/actions/tests/output/upgraded2/';
 if (!fs.existsSync(dirOut)) fs.mkdirSync(dirOut);
 
 describe('magic.actions.2_5_upgrade_script', () => {
 
   // Test upgrading.
-  const files = ['10308.txt'];
-  //const files = fs.readdirSync(dirIn);
-  if (files) for (var file of files.slice(0,500)) {
+  //const files = ['3476.txt'];
+  const files = fs.readdirSync(dirIn);
+  if (files) for (var file of files.slice(0,50000)) {
 
     describe('when upgrading ' + file, function(file) {
-      it('should process.', function (done) {
-        if (fs.existsSync(dirOut + '/' + file + '.indexes/' + file + '.contribution.json')) {
+      it('should process.', function (done) { setTimeout(() => {
+        //if (fs.existsSync(dirOut + '/' + file + '.indexes/' + file + '.contribution.json')) {
+        if (fs.existsSync(dirOut + '/' + file + '.summary.json')) {
           done();
         } else {
           this.timeout(0);
@@ -34,16 +35,16 @@ describe('magic.actions.2_5_upgrade_script', () => {
 
           parser.parsePromise({text: text}).then(() => {
             //console.log('Parser output', parser.json);
-            expect(parser.errors().length).to.equal(0);
+            try { expect(parser.errors().length).to.equal(0); } catch (err) { done(err); return }
 
             const upgrader = new UpgradeContribution({});
             upgrader.upgradePromise({json: parser.json}).then(() => {
-              expect(upgrader.errors().length).to.equal(0);
+              try { expect(upgrader.errors().length).to.equal(0); } catch (err) { done(err); return }
 
               const exporter = new ExportContribution({});
               fs.writeFileSync(dirOut+file+'.3.0.txt', exporter.toText(upgrader.json));
               fs.writeFileSync(dirOut+file+'.3.0.json', JSON.stringify(upgrader.json));
-              expect(exporter.errors().length).to.equal(0);
+              try { expect(exporter.errors().length).to.equal(0); } catch (err) { done(err); return }
 
               const summarizer = new SummarizeContribution({});
               summarizer.summarizePromise(upgrader.json).then(() => {
@@ -55,7 +56,7 @@ describe('magic.actions.2_5_upgrade_script', () => {
                   });
                 });
                 fs.writeFileSync(dirOut + '/' + file + '.indexes/' + file + '.contribution.json', JSON.stringify(summarizer.json.contribution));*/
-                expect(summarizer.errors().length).to.equal(0);
+                try { expect(summarizer.errors().length).to.equal(0); } catch (err) { done(err); return }
                 done();
               });
 
@@ -63,7 +64,7 @@ describe('magic.actions.2_5_upgrade_script', () => {
 
           });
         }
-      });
+      }, 4)});
     }.bind(null, file));
 
     //break;
