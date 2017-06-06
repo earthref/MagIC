@@ -349,6 +349,7 @@ export default function () {
       //console.log('getting', id);
       let c = Collections['magic.private.contributions'].findOne(id);
       //console.log('got', _.keys(c));
+      return c;
     }
   });
 
