@@ -242,7 +242,7 @@ export default class extends React.Component {
                 :
                 <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, position: 'relative'}}>
                   <a className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
-                  onClick={(e) => { this.downloadMongo(c._id); debugger; e.stopPropagation(); }}
+                  onClick={(e) => { this.downloadMongo(c._id); e.stopPropagation(); }}
                   >
                     <i className="ui file text outline icon"/> Download
                   </a>
