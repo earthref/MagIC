@@ -19,7 +19,7 @@ export default function () {
 
   Meteor.methods({
     'createImportSettingsTemplate': function (user, name, settings) {
-      console.log('create import', user, name, settings);
+      //console.log('create import', user, name, settings);
       return Collections['magic.import.settings.templates'].insert({
         _user: user,
         _name: name,
@@ -28,7 +28,7 @@ export default function () {
       }, (error) => { console.log('create import', error)});
     },
     'saveImportSettingsTemplate': function (user, ID, settings) {
-      console.log('save import', user, ID, settings);
+      //console.log('save import', user, ID, settings);
       Collections['magic.import.settings.templates'].update({
         _id: ID,
         _user: user
@@ -37,7 +37,7 @@ export default function () {
       }, (error) => { console.log('save import', error)});
     },
     'renameImportSettingsTemplate': function (user, ID, name) {
-      console.log('rename import', user, ID, name);
+      //console.log('rename import', user, ID, name);
       Collections['magic.import.settings.templates'].update({
         _id: ID,
         _user: user
@@ -46,7 +46,7 @@ export default function () {
       }, (error) => { console.log('rename import', error)});
     },
     'deleteImportSettingsTemplate': function (user, ID) {
-      console.log('delete import', user, ID);
+      //console.log('delete import', user, ID);
       Collections['magic.import.settings.templates'].remove({
         _id: ID,
         _user: user
@@ -104,7 +104,6 @@ export default function () {
       s.contribution._id = c._id;
       c._summary = s;
 
-
       /*let es = {};
        _.keys(c._summary.contribution, (k) => {
        if (k !== 'LAT' &&
@@ -113,7 +112,6 @@ export default function () {
        k !== 'VGP_LON')
        es[k] = c._summary.contribution[k];
        });*/
-
 
       Collections['magic.private.contributions'].insert(c, (error) => { console.log('insert', error)});
     },
@@ -268,7 +266,7 @@ export default function () {
           }
         }).then((resp) => {
 
-          console.log('updatePrevious es', resp.hits.hits);
+          //console.log('updatePrevious es', resp.hits.hits);
 
           resp.hits.hits.forEach((hit) => {
             c._summary.prev_version = hit._source.VERSION;
@@ -338,7 +336,7 @@ export default function () {
       Collections['magic.private.contributions'].update(id, c);
     },
     'deleteContribution': function(id, user) {
-      console.log('deleting', id, user);
+      //console.log('deleting', id, user);
       let nRemoved = Collections['magic.private.contributions'].remove({_id: id, _contributor: user});
       if (nRemoved < 1) {
         if (error) {
@@ -346,14 +344,19 @@ export default function () {
           //this.error(new Meteor.Error(e, 'hey!'));
         }
       }
+    },
+    'getContribution': function(id) {
+      //console.log('getting', id);
+      let c = Collections['magic.private.contributions'].findOne(id);
+      //console.log('got', _.keys(c));
     }
   });
 
 };
 
 function updateContribution(id, c) {
-  console.log('before update', id, c);
+  //console.log('before update', id, c);
   Collections['magic.private.contributions'].update(id, c);
-  console.log('after update', id, c);
+  //console.log('after update', id, c);
 
 }

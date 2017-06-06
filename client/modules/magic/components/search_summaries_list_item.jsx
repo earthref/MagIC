@@ -16,9 +16,9 @@ export default class extends React.Component {
     this.state = {
       loaded: false
     };
-    //Meteor.subscribe('magic.private.contributions.summaries', '', () => {
-    //  this.setState({loaded: true});
-    //});
+    Meteor.subscribe('magic.private.contributions.summaries', '', () => {
+      this.setState({loaded: true});
+    });
   }
 
   componentDidMount() {
@@ -187,17 +187,20 @@ export default class extends React.Component {
   }
 
   downloadMongo(mongo_id) {
-    let c = Collections['magic.private.contributions'].find({'_id': mongo_id}).fetch();
-    if (c && c.length >= 1) {
-      let id = '';
-      if (c[0] && c[0].contribution && c[0].contribution[0] && c[0].contribution[0].id)
-        id = c[0].contribution[0].id;
-      const exporter = new ExportContribution({});
-      let blob = new Blob([exporter.toText(c[0])], {type: "text/plain;charset=utf-8"});
-      saveAs(blob, 'MagIC_Contribution_' + id + '.txt');
-    } else {
-      alert('Failed to find contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-    }
+    //debugger;
+    Meteor.call('getContribution', mongo_id, (error, c) => {
+      //debugger;
+      if (!error && c) {
+        let id = '';
+        if (c && c.contribution && c.contribution[0] && c.contribution[0].id)
+          id = c.contribution[0].id;
+        const exporter = new ExportContribution({});
+        let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, 'MagIC_Contribution_' + id + '.txt');
+      } else {
+        alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+      }
+    }); //Collections['magic.private.contributions'].find({'_id': mongo_id}).fetch();
   }
 
   render() {
@@ -223,7 +226,7 @@ export default class extends React.Component {
                 </span>
               </div>
             <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
-              {c.FOLDER && c.FILE_NAME ?
+              {0 && c.FOLDER && c.FILE_NAME ?
                 <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
                   <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
                      href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
@@ -239,7 +242,7 @@ export default class extends React.Component {
                 :
                 <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, position: 'relative'}}>
                   <a className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
-                  onClick={() => { this.downloadMongo(c._id); return false; }}
+                  onClick={(e) => { this.downloadMongo(c._id); debugger; e.stopPropagation(); }}
                   >
                     <i className="ui file text outline icon"/> Download
                   </a>
