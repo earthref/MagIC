@@ -96,8 +96,7 @@ export default class extends React.Component {
     let n_ages = c.N_AGES || c.AVERAGE_NN || (c.AGES && c.AGES.split(':').length);
     let age_unit = c.AVERAGE_AGE_UNIT || c.AGE_UNIT;
     if (avg_ages || min_ages && max_ages) {
-      if (min_ages < 0 && max_ages < 0)
-        [min_ages, max_ages] = [-max_ages, -min_ages];
+      if (min_ages < 0 && max_ages < 0) { let min = min_ages; min_ages = -max_ages; max_ages = -min; }
       if (min_ages < 0)
         min_ages = -min_ages;
       if (max_ages < 0)
