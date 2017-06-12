@@ -1,6 +1,8 @@
 import React, { PropTypes } from 'react';
 import { Random } from 'meteor/random';
 
+//let GoogleMaps = GoogleMaps || {}, google = google || {};
+
 GoogleMaps.load({v: '3', key: 'AIzaSyBLZOmrD0zBidUXezxmNRHcpPp5cA45pUQ'});
 
 export default class GoogleMap extends React.Component {
@@ -102,10 +104,11 @@ export default class GoogleMap extends React.Component {
   }
 
   addObject(south, north, west, east, info) {
-    if (this.objects.length > 1000) return;
+    if (this.objects.length > 1000)
+      return;
     const minDim = 0.2;
-    if (north < south) [north, south] = [south, north];
-    if (east < west) [east, west] = [west, east];
+    if (north < south) { let s = south; south = north; north = s; }
+    if (east  < west ) { let e = east;  east  = west;  west  = e; }
     if (south + minDim < north && west + minDim < east) {
       let rect = this.addRectangle({
         south: south,
