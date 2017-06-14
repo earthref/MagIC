@@ -48,7 +48,7 @@ export default class MagICUploadContribution extends React.Component {
     this.state = this.initialState;
     if (Cookies.get('user_id')) {
       Tracker.autorun(function () {
-        Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'));
+        Meteor.subscribe('magic private contributions', '@' + Cookies.get('user_id'));
       });
     }
   }
