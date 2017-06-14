@@ -7,7 +7,8 @@ export const composer = ({context, isPoles, subscriptionName, elasticsearchQuery
   const subscriptionHandle = Meteor.subscribe(subscriptionName, elasticsearchQuery, elasticsearchFilters, elasticsearchSort, elasticsearchPageSize, elasticsearchPageNumber);
   let docs = null;
   if (subscriptionHandle.ready()) {
-    docs = Collections[subscriptionName].find({_page: elasticsearchPageNumber}, {sort: {_i: 1}}).fetch();
+    docs = Collections[subscriptionName].find({_page: elasticsearchPageNumber}, {sort: {_i: 1}}).fetch() || [];
+    console.log('search divided list ready', docs);
     onData(null, {isPoles, docs});
   } else {
     onData(null, {isPoles});
