@@ -9,8 +9,8 @@ import Promise from 'bluebird';
 import numeral from 'numeral';
 import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
-//import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
-import XLSX from 'xlsx-style';
+import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
+import XLSX from 'xlsx';
 import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
@@ -48,7 +48,7 @@ export default class MagICUploadContribution extends React.Component {
     this.state = this.initialState;
     if (Cookies.get('user_id')) {
       Tracker.autorun(function () {
-        Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'));
+        Meteor.subscribe('magic private contributions', '@' + Cookies.get('user_id'));
       });
     }
   }
