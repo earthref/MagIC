@@ -1,0 +1,45 @@
+  settings:
+    logo_route: images/logo.png
+    title:
+      Magnetics Information Consortium (MagIC)
+    header:
+      links:
+        - EarthRef.org: /
+        - MagIC: /MagIC
+        - ERDA: /ERDA
+    footer:
+      left:
+        Sponsored by <a href="nsf.gov">NSF</a>.
+      right:
+        Licensed under CC BY 4.0.
+    email: webmaster@earthref.org
+
+  assets:
+    MagIC Version 3.0:
+      tables:
+        samples:
+          columns:
+            - column: sample
+              name: Sample Name
+              validation: required()
+            - column: igsn
+              name: Sample IGSN
+              type: String
+
+  routes:
+    MagIC/search:
+      title: MagIC Search Interface
+      search_interface:
+        data_model: MagIC Version 3.0
+    MagIC/upload:
+      upload_tool:
+        formats:
+          - csv
+          - excel
+        validation: true
+
+  services:
+    s3_backup:
+      type: s3
+      key_id: AKIAIOSFODNN7EXAMPLE
+      bucket: es_backups

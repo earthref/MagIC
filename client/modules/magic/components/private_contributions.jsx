@@ -12,18 +12,11 @@ export default class extends React.Component {
 
   constructor(props) {
     super(props);
+    this.privateContributions = [];
     this.state = {
       loaded: false,
-      privateContributions: []
+      taps: 0
     };
-    if (Cookies.get('user_id'))
-      //Tracker.autorun(() => {
-        Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'), () => {
-          //console.log('subscription ready');
-          this.updateContributions();
-          this.setState({loaded: true});
-        });
-      //});
   }
 
   componentDidMount() {
@@ -39,10 +32,7 @@ export default class extends React.Component {
         $(this.refs['confirm delete input']).val("");
       }
     });
-  }
-
-  componentDidUpdate() {
-
+    this.updateContributions();
   }
 
   confirmActivate(id) {
@@ -80,41 +70,53 @@ export default class extends React.Component {
   }
 
   updateContributions() {
-    let contributions = Collections['magic.private.contributions'].find(
-      (Cookies.get('user_id') !== 'rminnett' ? {'_contributor': '@' + Cookies.get('user_id')} : {}),
-      {sort: {'_inserted': -1}}).fetch();
-    let privateContributions = contributions.map((c, i) => {
-      let privateContribution = {contribution: c, errors: []};
-      if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
-        if (!c.contribution._doiData || !c._summary || !c._summary.contribution || !c._summary.contribution.CITATION)
-          //this.updateDOI(i, c.contribution[0].doi);
-        privateContribution.doi = c.contribution[0].doi;
-      } else {
-        privateContribution.doi = '';
-      }
-      if (!c._doiData)
-        privateContribution.errors.push("The contribution requires a valid DOI prior to activation.");
-      return privateContribution;
-    });
-    this.setState({privateContributions: privateContributions});
+    if (!Cookies.get('user_id')) {
+      this.setState({loaded: true});
+    } else {
+      Meteor.call('getPrivateContributions', '@' + Cookies.get('user_id'), (error, contributions) => {
+        if (error) {
+          console.error(error);
+        } else {
+          this.privateContributions = contributions.map((c, i) => {
+            let privateContribution = {contribution: c, errors: []};
+            if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
+              //if (!c.contribution._doiData || !c._summary || !c._summary.contribution || !c._summary.contribution.CITATION)
+                //this.updateDOI(i, c.contribution[0].doi);
+              privateContribution.doi = c.contribution[0].doi;
+            } else {
+              privateContribution.doi = '';
+            }
+            if (!c._doiData)
+              privateContribution.errors.push("The contribution requires a valid DOI prior to activation.");
+            return privateContribution;
+          });
+          console.log('getPrivateContributions', this.privateContributions);
+          this.setState({loaded: true, taps: this.state.taps + 1});
+        }
+      });
+    }
+
   }
 
   updateDOI(i, doi) {
-    let privateContributions = this.state.privateContributions;
-    if (privateContributions[i] && privateContributions[i].contribution && privateContributions[i].contribution._doiData)
-      delete privateContributions[i].contribution._doiData;
-    this.setState({privateContributions: privateContributions});
+    if (this.privateContributions[i] && this.privateContributions[i].contribution && this.privateContributions[i].contribution._doiData)
+      delete this.privateContributions[i].contribution._doiData;
     $.ajax({
       type: "GET",
       dataType: "json",
       url: "//api.crossref.org/works/" + doi,
     }).done((doiData) => {
-      console.log('doi data', privateContributions[i], doiData);
-      if (privateContributions[i] && privateContributions[i].contribution && privateContributions[i].contribution._id &&
+      console.log('doi data', this.privateContributions[i], doiData);
+      if (this.privateContributions[i] && this.privateContributions[i].contribution && this.privateContributions[i].contribution._id &&
           doiData && doiData.status === 'ok') {
-        Meteor.call('updateDOI', privateContributions[i].contribution._id, doiData.message,
-          (error) => {
+        Meteor.call('updateDOI', this.privateContributions[i].contribution._id, doiData.message,
+          (error, c) => {
+            console.log('updateDOI', i, c, this.privateContributions);
+            //privateContributions[i] = c;
+            //this.setState({privateContributions: privateContributions, taps: this.state.taps+1});
             this.updateContributions();
+            // 10.1073/pnas.1615797114
+            // 10.5636/jgg.23.1
           }
         );
       }
@@ -122,7 +124,7 @@ export default class extends React.Component {
   }
 
   render() {
-    console.log('privateContributions', this.state.privateContributions, Cookies.get('user_id'));
+    console.log('privateContributions', this.privateContributions, Cookies.get('user_id'));
     if (!Cookies.get('user_id')) return (
       <div className="private-contributions">
         <div className="ui top attached segment">
@@ -181,7 +183,7 @@ export default class extends React.Component {
                 <div className="title">Upload</div>
                 <div className="subtitle">Import data into your private workspace.</div>
               </IconButton>
-              {this.state.privateContributions.map((c,i) => {
+              {this.privateContributions.map((c,i) => {
                 return (
                   <div className="item" key={i}>
                     {Cookies.get('mail_id') == '5730' ?
@@ -205,7 +207,7 @@ export default class extends React.Component {
                           </div>
                           <input type="text" default="None" value={c.doi} readOnly={c.contribution._activated }
                                  onChange={(e) => {
-                                   let privateContributions = this.state.privateContributions;
+                                   let privateContributions = this.privateContributions;
                                    privateContributions[i].doi = e.target.value;
                                    this.setState({privateContributions: privateContributions});
                                    this.updateDOI(i, e.target.value);
@@ -213,7 +215,7 @@ export default class extends React.Component {
                         </div>
                       </div>
                       {!c.contribution._activated ?
-                        <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c.contribution._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
+                        <div className={portals['MagIC'].color + ' ui icon button' + (c.errors.length || c.contribution._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
                              onClick={(e) => {
                                this.confirmActivate(c.contribution._id);
                              }}
@@ -221,13 +223,13 @@ export default class extends React.Component {
                           <i className="checkmark icon"/>
                           Activate
                         </div> :
-                        <div className="ui green disabled button" style={{margin: '0 0 0 0.5em'}}>
+                        <div className="ui green disabled icon button" style={{margin: '0 0 0 0.5em'}}>
                           <i className="checkmark icon"/>
                           Activated
                         </div>
                       }
                       {!c.contribution._activated ?
-                        <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
+                        <div className={portals['MagIC'].color + ' ui basic icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
                         onClick={(e) => {
                           this.confirmDelete(c.contribution._id);
                         }}

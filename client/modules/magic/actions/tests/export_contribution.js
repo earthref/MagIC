@@ -1,7 +1,7 @@
 const {describe, it} = global;
 import {expect} from 'chai';
-import JSZip from 'xlsx-style/node_modules/jszip';
-import XLSX from 'xlsx-style';
+import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip';
+import XLSX from 'xlsx';
 import ExportContribution from '../export_contribution';
 import {default as contribution_3 } from './files/contributions/3.0.js';
 //import {default as contribution3552 } from './files/contributions/3552.js';

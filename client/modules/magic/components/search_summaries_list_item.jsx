@@ -2,6 +2,7 @@ import _ from 'lodash';
 import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
+import Cookies from 'js-cookie';
 import GoogleStaticMap from '../../common/components/google_static_map';
 import saveAs from 'save-as';
 //import XLSX from 'xlsx-style';
@@ -16,9 +17,9 @@ export default class extends React.Component {
     this.state = {
       loaded: false
     };
-    //Meteor.subscribe('magic.private.contributions.summaries', '', () => {
-    //  this.setState({loaded: true});
-    //});
+    Meteor.subscribe('magic.private.contributions.summaries', '', () => {
+      this.setState({loaded: true});
+    });
   }
 
   componentDidMount() {
@@ -96,8 +97,7 @@ export default class extends React.Component {
     let n_ages = c.N_AGES || c.AVERAGE_NN || (c.AGES && c.AGES.split(':').length);
     let age_unit = c.AVERAGE_AGE_UNIT || c.AGE_UNIT;
     if (avg_ages || min_ages && max_ages) {
-      if (min_ages < 0 && max_ages < 0)
-        [min_ages, max_ages] = [-max_ages, -min_ages];
+      if (min_ages < 0 && max_ages < 0) { let min = min_ages; min_ages = -max_ages; max_ages = -min; }
       if (min_ages < 0)
         min_ages = -min_ages;
       if (max_ages < 0)
@@ -187,182 +187,196 @@ export default class extends React.Component {
   }
 
   downloadMongo(mongo_id) {
-    let c = Collections['magic.private.contributions'].find({'_id': mongo_id}).fetch();
-    if (c && c.length >= 1) {
-      let id = '';
-      if (c[0] && c[0].contribution && c[0].contribution[0] && c[0].contribution[0].id)
-        id = c[0].contribution[0].id;
-      const exporter = new ExportContribution({});
-      let blob = new Blob([exporter.toText(c[0])], {type: "text/plain;charset=utf-8"});
-      saveAs(blob, 'MagIC_Contribution_' + id + '.txt');
-    } else {
-      alert('Failed to find contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-    }
+    //debugger;
+    Meteor.call('getPrivateContribution', mongo_id, (error, c) => {
+      //debugger;
+      if (!error && c) {
+        let id = '';
+        if (c && c.contribution && c.contribution[0] && c.contribution[0].id)
+          id = c.contribution[0].id;
+        const exporter = new ExportContribution({});
+        let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, 'MagIC_Contribution_' + id + '.txt');
+      } else {
+        alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+      }
+    }); //Collections['magic.private.contributions'].find({'_id': mongo_id}).fetch();
   }
+
+
 
   render() {
     const c = this.props.doc;
     console.log('summary', c.INSERTED, moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll'), this.props);
     return (
-      <div ref="accordion" className="ui accordion magic-contribution">
-        <div className="title search_summaries_list_item" style={{paddingLeft:'1em'}}>
-          <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
-          <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
-            <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
-                <span style={{fontSize:'small', fontWeight:'bold'}}>
-                  {c.CITATION ? c.CITATION + ' v. ' + (c.VERSION || '') : c.TITLE}
-                </span>
-                <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
-                      dangerouslySetInnerHTML={{
-                        __html: (c.CITATION && c.TITLE ? c.TITLE :
-                        (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, ''))
-                      }}>
-                </span>
-                <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                  {moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll')} by <b>{c.CONTRIBUTOR}</b>
-                </span>
-              </div>
-            <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
-              {c.FOLDER && c.FILE_NAME ?
-                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                  <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
-                     href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                     (c.FOLDER === 'zmab' ?
-                         `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
-                         :
-                         `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
-                     )}
-                  >
-                    <i className="ui file text outline icon"/> Download
-                  </a>
+      <div>
+        {0 && c.CONTRIBUTOR_ID == Cookies.get('mail_id') && c.INSERTED ?
+          <a className={'ui purple fluid compact button'} style={{marginTop: '0.25em', paddingTop: '0.5em', paddingBottom: '0.5em'}}
+             onClick={(e) => {  }}
+          >
+            Update
+          </a>
+        : undefined}
+        <div ref="accordion" className="ui accordion magic-contribution">
+          <div className="title search_summaries_list_item" style={{paddingLeft:'1em'}}>
+            <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
+            <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
+              <div className="row" style={{display:'flex', padding:'0 1em 0.5em'}}>
+                  <span style={{fontSize:'small', fontWeight:'bold'}}>
+                    {c.CITATION ? c.CITATION + ' v. ' + (c.VERSION || '') : c.TITLE}
+                  </span>
+                  <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}
+                        dangerouslySetInnerHTML={{
+                          __html: (c.CITATION && c.TITLE ? c.TITLE :
+                          (c.REFERENCE_HTML || '').replace(/^.*?>.*?>/g, '').replace(/<i.*$/g, ''))
+                        }}>
+                  </span>
+                  <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
+                    {moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll')} by <b>{c.CONTRIBUTOR}</b>
+                  </span>
                 </div>
-                :
-                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, position: 'relative'}}>
-                  <a className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
-                  onClick={() => { this.downloadMongo(c._id); return false; }}
-                  >
-                    <i className="ui file text outline icon"/> Download
-                  </a>
-                </div>
-              }
-              <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
-                {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi/' + c.DOI}>{'earthref.org/MagIC/doi/' + c.DOI}</a><br/></span> : undefined)}
-                {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
-              </div>
-              <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
-                {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
-                {(c.N_SITES        ? <a onClick={this.showData.bind(this)}>{c.N_SITES        + ' Site'        + (c.N_SITES        > 1 ? 's' : '')}<br/></a> : undefined)}
-                {(c.N_SAMPLES      ? <a onClick={this.showData.bind(this)}>{c.N_SAMPLES      + ' Sample'      + (c.N_SAMPLES      > 1 ? 's' : '')}<br/></a> : undefined)}
-                {(c.N_SPECIMENS    ? <a onClick={this.showData.bind(this)}>{c.N_SPECIMENS    + ' Specimen'    + (c.N_SPECIMENS    > 1 ? 's' : '')}<br/></a> : undefined)}
-                {(c.N_EXPERIMENTS  ? <a onClick={this.showData.bind(this)}>{c.N_EXPERIMENTS  + ' Experiment'  + (c.N_EXPERIMENTS  > 1 ? 's' : '')}<br/></a> : undefined)}
-                {(c.N_MEASUREMENTS ? <a onClick={this.showData.bind(this)}>{c.N_MEASUREMENTS + ' Measurement' + (c.N_MEASUREMENTS > 1 ? 's' : '')}     </a> : undefined)}
-              </div>
-              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <div className="ui image">
-                  {(c.RANDOM_PLOT_NAME ?
-                    <img className="ui bordered image"
-                    src={'//static.earthref.org/imcache/' +
-                      (/_TY:_(aniso|eq)/.test(c.RANDOM_PLOT_NAME) ? 'Crop(geometry:292x292+111+104)' : 'Set(gravity:Center)|Crop(geometry:360x360+10+0)') +
-                      '|Resize(geometry:100x100)/images/MAGIC/static_plots/' +
-                      c.MAGIC_CONTRIBUTION_ID + '/' + c.RANDOM_PLOT_NAME}
-                      style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
-                    />
+              <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                {c.FOLDER && c.FILE_NAME ?
+                  <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                    <a className={'ui basic tiny fluid compact icon header button' + (c.FOLDER && c.FILE_NAME ? '' : ' disabled')} style={{padding:'1.25em 0', height:'100px'}}
+                       href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                       (c.FOLDER === 'zmab' ?
+                           `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt`
+                           :
+                           `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`
+                       )}
+                    >
+                      <i className="ui file text outline icon"/> Download
+                    </a>
+                  </div>
                   :
-                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
-                  )}
+                  <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, position: 'relative'}}>
+                    <a className={'ui basic tiny fluid compact icon header button'} style={{padding:'1.25em 0', height:'100px'}}
+                    onClick={(e) => { this.downloadMongo(c._id); e.stopPropagation(); }}
+                    >
+                      <i className="ui file text outline icon"/> Download
+                    </a>
+                  </div>
+                }
+                <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                  {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
+                  {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi/' + c.DOI}>{'earthref.org/MagIC/doi/' + c.DOI}</a><br/></span> : undefined)}
+                  {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
                 </div>
-              </div>
-              {!this.props.isPoles && <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-                <a className="ui tiny image" href="#" onClick={this.showMap.bind(this)}>
-                  {this.renderMapThumbnail(c)}
-                </a>
-              </div>}
-              {!c.SVW_ER_LO_PMAG_RESULT_ID && this.renderGeo(c)}
-              {!c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {((c.CLASS || c.GEOLOGIC_CLASSES) ? <span><b>Class:</b><br/>{(c.CLASS || c.GEOLOGIC_CLASSES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
-                {((c.TYPE || c.GEOLOGIC_TYPES) ? <span><b>Type:</b><br/>{(c.TYPE || c.GEOLOGIC_TYPES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
-                {((c.LITHOLOGY || c.LITHOLOGIES) ? <span><b>Lithology:</b><br/>{(c.LITHOLOGY || c.LITHOLOGIES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
-              </div>}
-              {c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {this.renderPole(c)}
-              </div>}
-              <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {this.renderAge(c)}
-              </div>
-              <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {(c.METHOD_CODES || c.MAGIC_METHOD_CODES ?
-                  <span><b>Method Codes:</b><br/>
-                    <span dangerouslySetInnerHTML={{__html:
-                    (c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').slice(0,5).join('<br/>') +
-                    ((c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').length > 5 ? ' ...' : '')}} />
-                  </span> : undefined)}
-              </div>
-              <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-                {(c.ER_CITATION_NAMES && _.without(c.ER_CITATION_NAMES.replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 0 ?
-                  <span><b>Citations:</b><br/>
+                <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
+                  {(c.N_LOCATIONS    ? <a onClick={this.showData.bind(this)}>{c.N_LOCATIONS    + ' Location'    + (c.N_LOCATIONS    > 1 ? 's' : '')}<br/></a> : undefined)}
+                  {(c.N_SITES        ? <a onClick={this.showData.bind(this)}>{c.N_SITES        + ' Site'        + (c.N_SITES        > 1 ? 's' : '')}<br/></a> : undefined)}
+                  {(c.N_SAMPLES      ? <a onClick={this.showData.bind(this)}>{c.N_SAMPLES      + ' Sample'      + (c.N_SAMPLES      > 1 ? 's' : '')}<br/></a> : undefined)}
+                  {(c.N_SPECIMENS    ? <a onClick={this.showData.bind(this)}>{c.N_SPECIMENS    + ' Specimen'    + (c.N_SPECIMENS    > 1 ? 's' : '')}<br/></a> : undefined)}
+                  {(c.N_EXPERIMENTS  ? <a onClick={this.showData.bind(this)}>{c.N_EXPERIMENTS  + ' Experiment'  + (c.N_EXPERIMENTS  > 1 ? 's' : '')}<br/></a> : undefined)}
+                  {(c.N_MEASUREMENTS ? <a onClick={this.showData.bind(this)}>{c.N_MEASUREMENTS + ' Measurement' + (c.N_MEASUREMENTS > 1 ? 's' : '')}     </a> : undefined)}
+                </div>
+                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                  <div className="ui image">
+                    {(c.RANDOM_PLOT_NAME ?
+                      <img className="ui bordered image"
+                      src={'//static.earthref.org/imcache/' +
+                        (/_TY:_(aniso|eq)/.test(c.RANDOM_PLOT_NAME) ? 'Crop(geometry:292x292+111+104)' : 'Set(gravity:Center)|Crop(geometry:360x360+10+0)') +
+                        '|Resize(geometry:100x100)/images/MAGIC/static_plots/' +
+                        c.MAGIC_CONTRIBUTION_ID + '/' + c.RANDOM_PLOT_NAME}
+                        style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
+                      />
+                    :
+                      <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
+                    )}
+                  </div>
+                </div>
+                {!this.props.isPoles && <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
+                  <a className="ui tiny image" href="#" onClick={this.showMap.bind(this)}>
+                    {this.renderMapThumbnail(c)}
+                  </a>
+                </div>}
+                {!c.SVW_ER_LO_PMAG_RESULT_ID && this.renderGeo(c)}
+                {!c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                  {((c.CLASS || c.GEOLOGIC_CLASSES) ? <span><b>Class:</b><br/>{(c.CLASS || c.GEOLOGIC_CLASSES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                  {((c.TYPE || c.GEOLOGIC_TYPES) ? <span><b>Type:</b><br/>{(c.TYPE || c.GEOLOGIC_TYPES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                  {((c.LITHOLOGY || c.LITHOLOGIES) ? <span><b>Lithology:</b><br/>{(c.LITHOLOGY || c.LITHOLOGIES).replace(/(^:|:$)/g, '').split(':').join(', ')}<br/></span> : undefined)}
+                </div>}
+                {c.SVW_ER_LO_PMAG_RESULT_ID && <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                  {this.renderPole(c)}
+                </div>}
+                <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                  {this.renderAge(c)}
+                </div>
+                <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                  {(c.METHOD_CODES || c.MAGIC_METHOD_CODES ?
+                    <span><b>Method Codes:</b><br/>
                       <span dangerouslySetInnerHTML={{__html:
-                      _.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
-                      (_.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
+                      (c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').slice(0,5).join('<br/>') +
+                      ((c.METHOD_CODES || c.MAGIC_METHOD_CODES || '').replace(/(^:|:$)/g, '').split(':').length > 5 ? ' ...' : '')}} />
                     </span> : undefined)}
+                </div>
+                <div style={{minWidth: 150, maxWidth: 150, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+                  {(c.ER_CITATION_NAMES && _.without(c.ER_CITATION_NAMES.replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 0 ?
+                    <span><b>Citations:</b><br/>
+                        <span dangerouslySetInnerHTML={{__html:
+                        _.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').slice(0,5).join('<br/>') +
+                        (_.without((c.ER_CITATION_NAMES || '').replace(/(^:|:$)/g, '').split(':'), 'This Study', 'this study', 'This study').length > 5 ? ' ...' : '')}} />
+                      </span> : undefined)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <div className="content" style={{fontSize:'small'}}>
-          <div dangerouslySetInnerHTML={{__html: (c.REFERENCE_HTML || '').replace(/<u> INCOMPLETE REFERENCE !<\/u>/g, '')}} />
-          <div dangerouslySetInnerHTML={{__html: c.ABSTRACT}} />
-          {c.REFERENCE_KEYWORDS ?
-            <div dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + c.REFERENCE_KEYWORDS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />
+          <div className="content" style={{fontSize:'small'}}>
+            <div dangerouslySetInnerHTML={{__html: (c.REFERENCE_HTML || '').replace(/<u> INCOMPLETE REFERENCE !<\/u>/g, '')}} />
+            <div dangerouslySetInnerHTML={{__html: c.ABSTRACT}} />
+            {c.REFERENCE_KEYWORDS ?
+              <div dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + c.REFERENCE_KEYWORDS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />
+              : undefined}
+            {c.REFERENCE_TAGS ?
+              <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + c.REFERENCE_TAGS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />
+              : undefined}
+            {c.version_history ?
+              <table className="ui very basic small compact table" style={{maxWidth:700}}>
+                <thead>
+                <tr>
+                  <th>Version</th>
+                  <th>Data Model</th>
+                  <th>Uploaded</th>
+                  <th>Contribution Link</th>
+                  <th>Download</th>
+                </tr>
+                </thead>
+                <tbody>
+                {c.version_history.map((v, i) => {
+                  return (
+                    <tr key={i}>
+                      <td>{v.version}</td>
+                      <td>{v.magic_version}</td>
+                      <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
+                      <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
+                      <td>
+                        <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
+                           href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
+                             (v.folder === 'zmab' ?
+                                 `/projects/earthref/archive/bgfiles/${v.folder}/${v.file_name}.txt`
+                                 :
+                                 `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${v.folder}/${v.file_name}`
+                             )
+                           }
+                        >
+                          <i className="ui file text outline icon"/> Download
+                        </a>
+                      </td>
+                    </tr>
+                  );
+                })}
+                </tbody>
+              </table>
             : undefined}
-          {c.REFERENCE_TAGS ?
-            <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + c.REFERENCE_TAGS.replace(/(^:|:$)/g, '').split(':').join(', ')}} />
-            : undefined}
-          {c.version_history ?
-            <table className="ui very basic small compact table" style={{maxWidth:700}}>
-              <thead>
-              <tr>
-                <th>Version</th>
-                <th>Data Model</th>
-                <th>Uploaded</th>
-                <th>Contribution Link</th>
-                <th>Download</th>
-              </tr>
-              </thead>
-              <tbody>
-              {c.version_history.map((v, i) => {
-                return (
-                  <tr key={i}>
-                    <td>{v.version}</td>
-                    <td>{v.magic_version}</td>
-                    <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
-                    <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
-                    <td>
-                      <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
-                         href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
-                           (v.folder === 'zmab' ?
-                               `/projects/earthref/archive/bgfiles/${v.folder}/${v.file_name}.txt`
-                               :
-                               `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${v.folder}/${v.file_name}`
-                           )
-                         }
-                      >
-                        <i className="ui file text outline icon"/> Download
-                      </a>
-                    </td>
-                  </tr>
-                );
-              })}
-              </tbody>
-            </table>
-          : undefined}
-        </div>
-        <div ref="map modal" className="ui fullscreen modal">
-          <i className="close icon"></i>
-          <div className="header">
-            {c.citation} Map
           </div>
-          <img className="ui bordered image" src="/MagIC/map.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', width:'100%', height:'calc(100vh - 10em)'}}/>
+          <div ref="map modal" className="ui fullscreen modal">
+            <i className="close icon"></i>
+            <div className="header">
+              {c.citation} Map
+            </div>
+            <img className="ui bordered image" src="/MagIC/map.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', width:'100%', height:'calc(100vh - 10em)'}}/>
+          </div>
         </div>
       </div>
     );

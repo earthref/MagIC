@@ -22,6 +22,8 @@ export default class extends React.Component {
         {React.Children.map(this.props.children, (child, i) => {
           if (child.props.className === 'title')
             child = React.cloneElement(child, { className: 'ui header ' + this.portalColor(), style: this.styles.header});
+          if (child.props.className === 'small title')
+            child = React.cloneElement(child, { className: 'ui small header ' + this.portalColor(), style: this.styles.header});
           if (child.props.className.indexOf('statistic') !== -1)
             child = React.cloneElement(child, { className: child.props.className + ' ' + this.portalColor()});
           if (child.props.className === 'subtitle')
