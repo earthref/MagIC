@@ -3,7 +3,6 @@ import React from 'react';
 import moment from 'moment';
 import {Meteor} from 'meteor/meteor';
 import Cookies from 'js-cookie';
-import isSafari from 'is-safari';
 import Navigation from './navigation.jsx';
 import {portals} from '../../common/configs/portals';
 
@@ -21,22 +20,6 @@ export default class extends React.Component {
       this.setState({deployedDate: moment(dtUTC).local().format('MMM D, Y')})
     });
     $(this.refs['sidebar menu']).sidebar({context:$(this.refs['layout']), transition:'overlay'});
-    /*if (!localStorage.getItem("modal 2016-10-29 beta"))
-      $(this.refs['beta modal']).modal({
-        closable: false,
-        onApprove: ($modal) => {
-          localStorage.setItem("modal 2016-10-29 beta", true);
-          $modal.modal('close');
-        }
-      }).modal('show');*/
-    /*if (isSafari && !localStorage.getItem("modal 2017-01-25 safari"))
-     $(this.refs['safari modal']).modal({
-       closable: false,
-       onApprove: ($modal) => {
-         localStorage.setItem("modal 2017-01-25 safari", true);
-         $modal.modal('close');
-       }
-     }).modal('show');*/
   }
 
   componentDidUpdate() {
