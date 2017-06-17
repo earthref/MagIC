@@ -548,23 +548,87 @@ describe('magic.actions.upgrade_contribution', () => {
             magic_version: '3.0'
           }],
           locations: [{
-            location: 'loc_A',
+            age_high: '84',
+            age_low: '71',
+            age_unit: 'Ma',
+            citations: 'This study',
+            conglomerate_test: 'ND',
+            contact_test: 'ND',
+            continent_ocean: 'Europe',
             country: 'Italy',
-            lat_s: '5',
-            lat_n: '6',
-            result_type: 'i',
-            pole_inc: '1.2',
-            pole_polarity: 'n',
-            description: 'A'
-          },{
-            location: 'loc_A',
+            description: 'Underlies Maastrichtian limestones. Superseded study. AF 22. 5-30mT, thermal 300-400C. Data included in RESULTNO 1464. Superseded study.',
+            dir_alpha95: '7.4',
+            dir_dec: '173.6',
+            dir_inc: '-31.2',
+            dir_k: '36',
+            dir_n_samples: '74',
+            dir_n_sites: '12',
+            dir_tilt_correction: '0',
+            external_database_ids: 'GPMDB[1463]',
+            fold_test: 'ND',
+            geologic_classes: ' Intrusive:Extrusive ',
+            geological_province_sections: 'Hyblean Plateau Volcanics',
+            lat_n: '37.2',
+            lat_s: '36.8',
+            lithologies: ' Extrusives:Intrusives ',
+            location: 'Hyblean Plateau',
+            location_alternatives: ' Hyblean Plateau Cretaceous Volcanics, Comb. : Hyblean Plateau Miocene Volcanics : Hyblean Plateau Pliocene Volcanics:Hyblean Plateau Cretaceous Volcanics ',
+            location_type: 'Outcrop',
+            lon_e: '14.9',
+            lon_w: '14.7',
+            method_codes: ' DE-DI : LT-AF-Z : LT-T-Z:LP-DC3 ',
+            pole_dm: '8.3',
+            pole_dp: '4.6',
+            pole_lat: '69.3',
+            pole_lon: '212.3',
+            pole_reversed_perc: '100',
+            region: 'Sicily',
+            result_name: 'Hyblean Plateau Cretaceous Volcanics :1463',
+            result_type: 'a',
+            reversal_test: 'ND',
+            rock_magnetic_test: 'ND',
+            terranes: 'Sicily'
+          }, {
+            age_high: '84',
+            age_low: '71',
+            age_unit: 'Ma',
+            citations: 'This study',
+            conglomerate_test: 'ND',
+            contact_test: 'ND',
+            continent_ocean: 'Europe',
             country: 'Italy',
-            lat_s: '5',
-            lat_n: '6',
-            result_type: 'i',
-            pole_inc: '1.3',
-            pole_polarity: 'r',
-            description: 'B'
+            description: 'Underlies Maastrichtian limestones. Superseded study. Combined Result. AF and thermal cleaning. Combined RESULTNO 1463, 2367, 2674, 2698. .',
+            dir_alpha95: '4.3',
+            dir_dec: '167.3',
+            dir_inc: '-27.6',
+            dir_k: '22',
+            dir_n_samples: '203',
+            dir_n_sites: '52',
+            dir_tilt_correction: '0',
+            external_database_ids: 'GPMDB[1464]',
+            fold_test: 'ND',
+            geologic_classes: ' Intrusive:Extrusive ',
+            geological_province_sections: 'Hyblean Plateau Volcanics',
+            lat_n: '37.2',
+            lat_s: '36.8',
+            lithologies: ' Extrusives:Intrusives ',
+            location: 'Hyblean Plateau',
+            location_alternatives: ' Hyblean Plateau Cretaceous Volcanics, Comb. : Hyblean Plateau Miocene Volcanics : Hyblean Plateau Pliocene Volcanics:Hyblean Plateau Cretaceous Volcanics ',
+            location_type: 'Outcrop',
+            lon_e: '14.9',
+            lon_w: '14.7',
+            method_codes: ' DE-DI : LT-AF-Z : LT-T-Z:LP-DC3 ',
+            pole_dm: '4.7',
+            pole_dp: '2.6',
+            pole_lat: '65.2',
+            pole_lon: '225.1',
+            pole_reversed_perc: '100',
+            region: 'Sicily',
+            result_name: 'Hyblean Plateau Cretaceous Volcanics, Comb. :1464',
+            result_type: 'a',
+            reversal_test: 'ND',
+            rock_magnetic_test: 'ND',
+            terranes: 'Sicily'
           }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);
@@ -1262,10 +1326,10 @@ describe('magic.actions.upgrade_contribution', () => {
             magic_version: '2.5'
           }],
           er_locations: [{
-            location_begin_lat: 10,
-            location_end_lat: -10,
-            location_begin_lon: 10,
-            location_end_lon: 5
+            location_begin_lat: '10',
+            location_end_lat: '-10',
+            location_begin_lon: '10',
+            location_end_lon: '5'
           }]
         };
         const jsonNew = {
@@ -1273,10 +1337,10 @@ describe('magic.actions.upgrade_contribution', () => {
             magic_version: '3.0'
           }],
           locations: [{
-            lat_s: -10,
-            lat_n: 10,
-            lon_w: 5,
-            lon_e: 10
+            lat_s: '-10',
+            lat_n: '10',
+            lon_w: '5',
+            lon_e: '10'
           }]
         };
         return upgradeContributionJSONTest(jsonOld, jsonNew);

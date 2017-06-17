@@ -35,15 +35,15 @@ export default class extends Runner {
     if(!json || !json['contribution']) {
       isGuessed = true;
       version = this._guessVersion();
-      if (version != this.lastGetVersionResult)
+      if (version !== this.lastGetVersionResult)
         this._appendWarning('Failed to find the "contribution" table.');
-      if (version != undefined && version != this.lastGetVersionResult)
+      if (version !== undefined && version !== this.lastGetVersionResult)
         this._appendWarning(`Guessed that the contribution is using MagIC Data Model version ${version}.`);
     }
     if (json['contribution']) {
       if (json['contribution'].length !== 1) {
         version = undefined;
-        if (version != this.lastGetVersionResult)
+        if (version !== this.lastGetVersionResult)
           this._appendError('The "contribution" table does not have exactly one row.');
       }
       else {
@@ -54,9 +54,9 @@ export default class extends Runner {
         else {
           isGuessed = true;
           version = this._guessVersion();
-          if (version != this.lastGetVersionResult)
+          if (version !== this.lastGetVersionResult)
             this._appendWarning('The "contribution" table does not include the "magic_version" column.');
-          if (version != undefined && version != this.lastGetVersionResult)
+          if (version !== undefined && version !== this.lastGetVersionResult)
             this._appendWarning(`Guessed that the contribution is using MagIC Data Model version ${version}.`);
         }
       }
@@ -66,14 +66,14 @@ export default class extends Runner {
     if (_.indexOf(versions, version) === -1) {
       const strVersions = versions.map((str) => { return `"${str}"`; }).join(", ");
       version = undefined;
-      if (version != this.lastGetVersionResult)
+      if (version !== this.lastGetVersionResult)
         this._appendError(`MagIC Data Model version ${version} is invalid. Expected one of: ${strVersions}.`);
     }
 
     // Warn if the contribution appears to be using a different version now.
-    if (this.lastGetVersionResult != '' &&
+    if (this.lastGetVersionResult !== '' &&
         version !== undefined &&
-        version != this.lastGetVersionResult)
+        version !== this.lastGetVersionResult)
       this._appendWarning(`The contribution now appears to be using MagIC Data Model version ${version}.`);
 
     // Don't keep reporting version errors and warnings next time this is run.

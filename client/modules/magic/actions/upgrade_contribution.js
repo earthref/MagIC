@@ -275,7 +275,8 @@ export default class extends Runner {
                   delete stratigraphicRow['reversed_k'];
                   delete stratigraphicRow['reversed_n'];
                   delete stratigraphicRow['reversed_alpha95'];
-                  if (stratigraphicRow['tilt_correction'] === undefined) // non stratigraphic correction may be provided
+                  if (stratigraphicRow['tilt_correction'] === undefined || // non stratigraphic correction may be provided
+                      hasTiltCorrected)
                     stratigraphicRow['tilt_correction'] = '100';
                   resultsNew.push(stratigraphicRow);
                 }
@@ -900,9 +901,9 @@ export default class extends Runner {
           let dict = [];
 
           if (jsonRowOld['external_database_names'])
-            jsonRowOld['external_database_names'].replace(/(^:|:$)/g,'').split(/:/);
+            dbNames = jsonRowOld['external_database_names'].replace(/(^:|:$)/g,'').split(/:/);
           if (jsonRowOld['external_database_ids'])
-            jsonRowOld['external_database_ids'].replace(/(^:|:$)/g,'').split(/:/);
+            dbIDs = jsonRowOld['external_database_ids'].replace(/(^:|:$)/g,'').split(/:/);
 
           for (let dbIdx in dbNames) {
             if (dbIDs.length <= dbIdx)
@@ -1160,8 +1161,6 @@ export default class extends Runner {
   // Merge rows that can be combined because they are orthogonal (null or identical in each column).
   _mergePromise() {
 
-    //console.log('merging', this.json);
-
     // For each table in the contribution:
     const rowsTotal = _.reduce(this.json, (rowsTotal, table) => {
       return rowsTotal + (table.rows ? table.rows.length : table.length);
@@ -1245,9 +1244,8 @@ export default class extends Runner {
 
       // If the merge didn't mutate any of the existing values in the current row, except possibly the description:
       if (_.isMatchWith(rowMerged, rowToMerge, (val1, val2, key) => {
-          return (key === 'description' || _.isMatch(val1, val2));
+          return (key === 'description' || val1 === val2);
         })) {
-
           // If the descriptions are not the same, remove white space from one, add a semicolon if it ends in an
           // alphanumeric character, and join them together in the merged row.
           if (rowMerged.description && rowToMerge.description && rowMerged.description !== rowToMerge.description) {
