@@ -4,10 +4,13 @@ node_modules
 # Scripts
 .scripts/elasticsearch/.*
 
+# Babel Distribution Files
+.dist
+
 # Settings
 settings.json
 
 # JetBrains
-.idea/
+.idea
 
 earthref.ssl.key
