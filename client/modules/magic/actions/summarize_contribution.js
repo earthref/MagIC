@@ -13,6 +13,7 @@ export default class extends Runner {
     super({runnerState});
   }
 
+  // Return a promise for creating the summary in the json property
   summarizePromise(contribution) {
 
     if (!contribution) {
@@ -753,757 +754,497 @@ export default class extends Runner {
     });
   };
 
-  /*countProps(object, property) {
-    if (!_.has(object, property))
-      object['n_' + property] = _.keys(object[property]).length;
-  }
+  summarize(contribution) {
 
+    let summary = {contribution: {}};
 
-    {
-      site: {
-        _siteName1: {
-          value: "siteName1"
-        },
-        _siteName2: {
-          value: "siteName2"
+    if (contribution.measurements) {
+      summary.experiments = summary.experiments || {};
+      summary.specimens   = summary.specimens   || {};
+      contribution.measurements.rows.map((measurementRow) => {
+
+        // Increment the number of measurements for this contribution.
+        if (!summary.contribution.N_MEASUREMENTS)
+          summary.contribution.N_MEASUREMENTS = 0;
+        summary.contribution.N_MEASUREMENTS += 1;
+
+        const experimentColumnIdx = contribution.measurements.columns.indexOf('experiment');
+        let experimentName = measurementRow[experimentColumnIdx];
+        if (experimentName !== undefined && _.isString(experimentName) && experimentName !== '') {
+          experimentName = experimentName.replace(/\./g, '_');
+          if (!summary.experiments[experimentName])
+            summary.experiments[experimentName] = {};
+
+          // Increment the number of measurements for this experiment.
+          if (!summary.experiments[experimentName].N_MEASUREMENTS)
+            summary.experiments[experimentName].N_MEASUREMENTS = 0;
+          summary.experiments[experimentName].N_MEASUREMENTS += 1;
+
+          // Add the experiment name to the list for this contribution.
+          if (!summary.contribution.EXPERIMENT_NAMES)
+            summary.contribution.EXPERIMENT_NAMES = {};
+          summary.contribution.EXPERIMENT_NAMES[experimentName] = true;
+
+          const specimenColumnIdx = contribution.measurements.columns.indexOf('specimen');
+          let specimenName = measurementRow[specimenColumnIdx];
+          if (specimenName !== undefined && _.isString(specimenName) && specimenName !== '') {
+            specimenName = specimenName.replace(/\./g, '_');
+            summary.experiments[experimentName].ER_SPECIMEN_NAME = specimenName;
+            if (!summary.specimens[specimenName])
+              summary.specimens[specimenName] = {};
+
+            // Increment the number of measurements for this specimen.
+            if (!summary.specimens[specimenName].N_MEASUREMENTS)
+              summary.specimens[specimenName].N_MEASUREMENTS = 0;
+            summary.specimens[specimenName].N_MEASUREMENTS += 1;
+
+            // Add the experiment name to the list for this specimen.
+            if (!summary.specimens[specimenName].EXPERIMENT_NAMES)
+              summary.specimens[specimenName].EXPERIMENT_NAMES = {};
+            summary.specimens[specimenName].EXPERIMENT_NAMES[experimentName] = true;
+          }
+
         }
-      },
-      location: {
-        _locationName1: {
-          value: "locationName1"
-        }
-      }
-      dir_inc: [
-        {
-          n: 10
-        }
-      ]
-    }
 
-    {
-      site: ["siteName1", "siteName2"],
-      location: ["location"]
-    }
-
-  objectValuesToArrays(object) {
-    if (object !== undefined)
-      _.keys(object).forEach((prop) => {
-        if (object[prop])
-          object[prop] = _.keys(object[prop])
       });
+
+      // Convert the list of experiment names into the number of experiments for each specimen.
+      _.keys(summary.specimens).map((specimenName) => {
+        if (summary.specimens[specimenName].EXPERIMENT_NAMES) {
+          summary.specimens[specimenName].EXPERIMENT_NAMES = _.keys(summary.specimens[specimenName].EXPERIMENT_NAMES).join(':');
+          summary.specimens[specimenName].N_EXPERIMENTS = summary.specimens[specimenName].EXPERIMENT_NAMES.split(':').length;
+        }
+      });
+    }
+
+    if (contribution.specimens) {
+      summary.specimens = summary.specimens || {};
+      summary.samples   = summary.samples   || {};
+      contribution.specimens.map((specimenRow) => {
+
+        // Increment the number of specimen results for this contribution.
+        if (!summary.contribution.N_SPECIMEN_RESULTS)
+          summary.contribution.N_SPECIMEN_RESULTS = 0;
+        summary.contribution.N_SPECIMEN_RESULTS += 1;
+
+        _.keys(specimenRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.specimens.columns[column] && models[_.last(versions)].tables.specimens.columns[column].type === 'List')
+            specimenRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+          if (_.trim(specimenRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(specimenRow[column])] = true
+        });
+
+        let specimenName = specimenRow.specimen;
+        if (specimenName !== undefined && _.isString(specimenName) && specimenName !== '') {
+          specimenName = specimenName.replace(/\./g, '_');
+          if (!summary.specimens[specimenName])
+            summary.specimens[specimenName] = {};
+
+          // Add the specimen name to the list for this contribution.
+          if (!summary.contribution.ER_SPECIMEN_NAMES)
+            summary.contribution.ER_SPECIMEN_NAMES = {};
+          summary.contribution.ER_SPECIMEN_NAMES[specimenName] = true;
+
+        }
+
+        let sampleName = specimenRow.sample;
+        if (sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
+          sampleName = sampleName.replace(/\./g, '_');
+          if (!summary.samples[sampleName])
+            summary.samples[sampleName] = {};
+        }
+
+        // If this specimen belongs to a sample:
+        if (specimenName !== undefined && specimenName !== '' &&
+          sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
+          summary.specimens[specimenName].ER_SAMPLE_NAME = sampleName;
+
+          // Increment the number of specimen results for this sample.
+          if (!summary.samples[sampleName].N_SPECIMEN_RESULTS)
+            summary.samples[sampleName].N_SPECIMEN_RESULTS = 0;
+          summary.samples[sampleName].N_SPECIMEN_RESULTS += 1;
+
+          // Add the specimen name to the list for this sample.
+          if (!summary.samples[sampleName].ER_SPECIMEN_NAMES)
+            summary.samples[sampleName].ER_SPECIMEN_NAMES = {};
+          summary.samples[sampleName].ER_SPECIMEN_NAMES[specimenName] = true;
+
+        }
+
+      });
+
+      // Convert the list of specimen names into the number of specimens for each sample.
+      _.keys(summary.samples).map((sampleName) => {
+        if (summary.samples[sampleName].ER_SPECIMEN_NAMES) {
+          summary.samples[sampleName].ER_SPECIMEN_NAMES = _.keys(summary.samples[sampleName].ER_SPECIMEN_NAMES).join(':');
+          summary.samples[sampleName].N_SPECIMENS = summary.samples[sampleName].ER_SPECIMEN_NAMES.split(':').length;
+          summary.samples[sampleName].N_EXPERIMENTS = 0;
+          summary.samples[sampleName].N_MEASUREMENTS = 0;
+          summary.samples[sampleName].ER_SPECIMEN_NAMES.split(':').map((specimenName) => {
+            summary.samples[sampleName].N_EXPERIMENTS += summary.specimens[specimenName].N_EXPERIMENTS;
+            summary.samples[sampleName].N_MEASUREMENTS += summary.specimens[specimenName].N_MEASUREMENTS;
+          });
+        }
+      });
+
+    }
+
+    if (contribution.samples) {
+      summary.samples = summary.samples || {};
+      summary.sites   = summary.sites   || {};
+      contribution.samples.map((sampleRow) => {
+
+        // Increment the number of sample results for this contribution.
+        if (!summary.contribution.N_SAMPLE_RESULTS)
+          summary.contribution.N_SAMPLE_RESULTS = 0;
+        summary.contribution.N_SAMPLE_RESULTS += 1;
+
+        _.keys(sampleRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.samples.columns[column].type === 'List')
+            sampleRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+          if (_.trim(sampleRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(sampleRow[column])] = true
+        });
+
+        let sampleName = sampleRow.sample;
+        if (sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
+          sampleName = sampleName.replace(/\./g, '_');
+          if (!summary.samples[sampleName])
+            summary.samples[sampleName] = {};
+
+          // Add the sample name to the list for this contribution.
+          if (!summary.contribution.ER_SAMPLE_NAMES)
+            summary.contribution.ER_SAMPLE_NAMES = {};
+          summary.contribution.ER_SAMPLE_NAMES[sampleName] = true;
+        }
+
+        let siteName = sampleRow.site;
+        if (siteName !== undefined && _.isString(siteName) && siteName !== '') {
+          siteName = siteName.replace(/\./g, '_');
+          if (!summary.sites[siteName])
+            summary.sites[siteName] = {};
+        }
+
+        // If this sample belongs to a site:
+        if (sampleName !== undefined && sampleName !== '' &&
+          siteName !== undefined && _.isString(siteName) && siteName !== '') {
+          summary.samples[sampleName].ER_SITE_NAME = siteName;
+
+          // Increment the number of sample results for this site.
+          if (!summary.sites[siteName].N_SAMPLE_RESULTS)
+            summary.sites[siteName].N_SAMPLE_RESULTS = 0;
+          summary.sites[siteName].N_SAMPLE_RESULTS += 1;
+
+          // Add the sample name to the list for this site.
+          if (!summary.sites[siteName].ER_SAMPLE_NAMES)
+            summary.sites[siteName].ER_SAMPLE_NAMES = {};
+          summary.sites[siteName].ER_SAMPLE_NAMES[sampleName] = true;
+
+        }
+
+      });
+
+      // Convert the list of sample names into the number of samples for each site.
+      _.keys(summary.sites).map((siteName) => {
+        if (summary.sites[siteName].ER_SAMPLE_NAMES) {
+          summary.sites[siteName].ER_SAMPLE_NAMES = _.keys(summary.sites[siteName].ER_SAMPLE_NAMES).join(':');
+          summary.sites[siteName].N_SAMPLES = summary.sites[siteName].ER_SAMPLE_NAMES.split(':').length;
+          summary.sites[siteName].N_SPECIMENS = 0;
+          summary.sites[siteName].N_SPECIMEN_RESULTS = 0;
+          summary.sites[siteName].N_EXPERIMENTS = 0;
+          summary.sites[siteName].N_MEASUREMENTS = 0;
+          summary.sites[siteName].ER_SAMPLE_NAMES.split(':').map((sampleName) => {
+            summary.sites[siteName].N_SPECIMENS += summary.samples[sampleName].N_SPECIMENS;
+            summary.sites[siteName].N_SPECIMEN_RESULTS += summary.samples[sampleName].N_SPECIMEN_RESULTS;
+            summary.sites[siteName].N_EXPERIMENTS += summary.samples[sampleName].N_EXPERIMENTS;
+            summary.sites[siteName].N_MEASUREMENTS += summary.samples[sampleName].N_MEASUREMENTS;
+          });
+        }
+      });
+    }
+
+    if (contribution.sites) {
+      summary.sites     = summary.sites     || {};
+      summary.locations = summary.locations || {};
+      contribution.sites.map((siteRow) => {
+
+        // Increment the number of sites results for this contribution.
+        if (!summary.contribution.N_SITE_RESULTS)
+          summary.contribution.N_SITE_RESULTS = 0;
+        summary.contribution.N_SITE_RESULTS += 1;
+
+        _.keys(siteRow).map((column) => {
+          if (!summary.contribution[column.toUpperCase()])
+            summary.contribution[column.toUpperCase()] = {};
+          if (models[_.last(versions)].tables.sites.columns[column] && models[_.last(versions)].tables.sites.columns[column].type === 'List')
+            siteRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          else
+          if (_.trim(siteRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(siteRow[column])] = true
+        });
+
+        let siteName = siteRow.site;
+        if (siteName !== undefined && _.isString(siteName) && siteName !== '') {
+          siteName = siteName.replace(/\./g, '_');
+          if (!summary.sites[siteName])
+            summary.sites[siteName] = {};
+
+          // Add the site name to the list for this contribution.
+          if (!summary.contribution.ER_SITE_NAMES)
+            summary.contribution.ER_SITE_NAMES = {};
+          summary.contribution.ER_SITE_NAMES[siteName] = true;
+        }
+
+        let locationName = siteRow.location;
+        if (locationName !== undefined && _.isString(locationName) && locationName !== '') {
+          locationName = locationName.replace(/\./g, '_');
+          if (!summary.locations[locationName])
+            summary.locations[locationName] = {};
+        }
+
+        // If this site belongs to a location:
+        if (siteName !== undefined && siteName !== '' &&
+          locationName !== undefined && _.isString(locationName) && locationName !== '') {
+          summary.sites[siteName].ER_SITE_NAME = siteName;
+
+          // Increment the number of site results for this location.
+          if (!summary.locations[locationName].N_SITE_RESULTS)
+            summary.locations[locationName].N_SITE_RESULTS = 0;
+          summary.locations[locationName].N_SITE_RESULTS += 1;
+
+          // Add the site name to the list for this location.
+          if (!summary.locations[locationName].ER_SITE_NAMES)
+            summary.locations[locationName].ER_SITE_NAMES = {};
+          summary.locations[locationName].ER_SITE_NAMES[siteName] = true;
+
+        }
+
+      });
+
+      // Convert the list of site names into the number of sites for each location.
+      _.keys(summary.locations).map((locationName) => {
+        if (summary.locations[locationName].ER_SITE_NAMES) {
+          summary.locations[locationName].ER_SITE_NAMES = _.keys(summary.locations[locationName].ER_SITE_NAMES).join(':');
+          summary.locations[locationName].N_SITES = summary.locations[locationName].ER_SITE_NAMES.split(':').length;
+          summary.locations[locationName].N_SAMPLES = 0;
+          summary.locations[locationName].N_SAMPLE_RESULTS = 0;
+          summary.locations[locationName].N_SPECIMENS = 0;
+          summary.locations[locationName].N_SPECIMEN_RESULTS = 0;
+          summary.locations[locationName].N_EXPERIMENTS = 0;
+          summary.locations[locationName].N_MEASUREMENTS = 0;
+          summary.locations[locationName].ER_SITE_NAMES.split(':').map((siteName) => {
+            summary.locations[locationName].N_SAMPLES += summary.sites[siteName].N_SAMPLES;
+            summary.locations[locationName].N_SAMPLE_RESULTS += summary.sites[siteName].N_SAMPLE_RESULTS;
+            summary.locations[locationName].N_SPECIMENS += summary.sites[siteName].N_SPECIMENS;
+            summary.locations[locationName].N_SPECIMEN_RESULTS += summary.sites[siteName].N_SPECIMEN_RESULTS;
+            summary.locations[locationName].N_EXPERIMENTS += summary.sites[siteName].N_EXPERIMENTS;
+            summary.locations[locationName].N_MEASUREMENTS += summary.sites[siteName].N_MEASUREMENTS;
+          });
+        }
+      });
+    }
+
+
+    if (contribution.locations) {
+      summary.locations    = summary.locations    || {};
+      summary.contribution = summary.contribution || {};
+      contribution.locations.map((locationRow) => {
+
+        // Increment the number of location results for this contribution.
+        if (!summary.contribution.N_LOCATION_RESULTS)
+          summary.contribution.N_LOCATION_RESULTS = 0;
+        summary.contribution.N_LOCATION_RESULTS += 1;
+
+        _.keys(locationRow).map((column) => {
+          if (models[_.last(versions)].tables.locations.columns[column] && models[_.last(versions)].tables.locations.columns[column].type === 'List') {
+            if (!summary.contribution[column.toUpperCase()])
+              summary.contribution[column.toUpperCase()] = {};
+            locationRow[column].split(':').map((val) => {
+              if (_.trim(val) !== '')
+                summary.contribution[column.toUpperCase()][_.trim(val)] = true
+            });
+          } else {
+            if (!summary.contribution[column.toUpperCase()])
+              summary.contribution[column.toUpperCase()] = {};
+            if (_.trim(locationRow[column]) !== '')
+              summary.contribution[column.toUpperCase()][_.trim(locationRow[column])] = true
+          }
+        });
+
+        let locationName = locationRow.location;
+        if (locationName !== undefined && _.isString(locationName) && locationName !== '') {
+          locationName = locationName.replace(/\./g, '_');
+          if (!summary.locations[locationName])
+            summary.locations[locationName] = {};
+
+          // Add the location name to the list for this contribution.
+          if (!summary.contribution.ER_LOCATION_NAMES)
+            summary.contribution.ER_LOCATION_NAMES = {};
+          summary.contribution.ER_LOCATION_NAMES[locationName] = true;
+        }
+
+      });
+
+    }
+
+    if (summary.contribution) {
+      _.keys(summary.contribution).map((column) => {
+        if (column.slice(0,2) != 'N_')
+          summary.contribution[column] = _.keys(summary.contribution[column]).join(':');
+      });
+
+      /*if (column === 'LAT' ||
+       column === 'LON'
+       ) {
+       summary.contribution[column + 'S'] = summary.contribution[column];
+       delete summary.contribution[column];
+       }*/
+
+      if (summary.contribution.ER_LOCATION_NAMES) {
+        summary.contribution.N_LOCATIONS = summary.contribution.ER_LOCATION_NAMES.split(':').length;
+      }
+      if (summary.contribution.ER_SITE_NAMES) {
+        summary.contribution.N_SITES = summary.contribution.ER_SITE_NAMES.split(':').length;
+        delete summary.contribution.ER_SITE_NAMES;
+      }
+      if (summary.contribution.ER_SAMPLE_NAMES) {
+        summary.contribution.N_SAMPLES = summary.contribution.ER_SAMPLE_NAMES.split(':').length;
+        delete summary.contribution.ER_SAMPLE_NAMES;
+      }
+      if (summary.contribution.ER_SPECIMEN_NAMES) {
+        summary.contribution.N_SPECIMENS = summary.contribution.ER_SPECIMEN_NAMES.split(':').length;
+        delete summary.contribution.ER_SPECIMEN_NAMES;
+      }
+      if (summary.contribution.EXPERIMENT_NAMES) {
+        summary.contribution.N_EXPERIMENTS = summary.contribution.EXPERIMENT_NAMES.split(':').length;
+        delete summary.contribution.EXPERIMENT_NAMES;
+      }
+    }
+
+    if (contribution.criteria) {
+      summary.criteria = summary.criteria || {};
+      contribution.criteria.map((criteriaRow) => {
+
+        let criterionName = criteriaRow.criterion;
+        if (criterionName !== undefined && _.isString(criterionName) && criterionName !== '') {
+          criterionName = criterionName.replace(/\./g, '_');
+          if (!summary.criteria[criterionName])
+            summary.criteria[criterionName] = {};
+        }
+
+      });
+    }
+
+    if (contribution.ages) {
+      summary.ages = summary.ages || {};
+      contribution.ages.map((agesRow) => {
+
+        if (agesRow.specimen !== undefined && _.isString(agesRow.specimen) && agesRow.specimen !== '') {
+          let specimenName = agesRow.specimen.replace(/\./g, '_');
+          if (!summary.specimens[specimenName])
+            summary.specimens[specimenName] = {};
+
+          // Increment the number of ages for this specimen.
+          if (!summary.specimens[specimenName].N_AGES)
+            summary.specimens[specimenName].N_AGES = 0;
+          summary.specimens[specimenName].N_AGES += 1;
+
+          // Increment the number of specimen ages.
+          if (!summary.ages.N_SPECIMEN_AGES)
+            summary.ages.N_SPECIMEN_AGES = 0;
+          summary.ages.N_SPECIMEN_AGES += 1;
+        }
+
+        else if (agesRow.sample !== undefined && _.isString(agesRow.sample) && agesRow.sample !== '') {
+          let sampleName = agesRow.sample.replace(/\./g, '_');
+          if (!summary.samples[sampleName])
+            summary.samples[sampleName] = {};
+
+          // Increment the number of ages for this sample.
+          if (!summary.samples[sampleName].N_AGES)
+            summary.samples[sampleName].N_AGES = 0;
+          summary.samples[sampleName].N_AGES += 1;
+
+          // Increment the number of sample ages.
+          if (!summary.ages.N_SAMPLE_AGES)
+            summary.ages.N_SAMPLE_AGES = 0;
+          summary.ages.N_SAMPLE_AGES += 1;
+        }
+
+        else if (agesRow.site !== undefined && _.isString(agesRow.site) && agesRow.site !== '') {
+          let siteName = agesRow.site.replace(/\./g, '_');
+          if (!summary.sites[siteName])
+            summary.sites[siteName] = {};
+
+          // Increment the number of ages for this site.
+          if (!summary.sites[siteName].N_AGES)
+            summary.sites[siteName].N_AGES = 0;
+          summary.sites[siteName].N_AGES += 1;
+
+          // Increment the number of site ages.
+          if (!summary.ages.N_SITE_AGES)
+            summary.ages.N_SITE_AGES = 0;
+          summary.ages.N_SITE_AGES += 1;
+        }
+
+        else if (agesRow.location !== undefined && _.isString(agesRow.location) && agesRow.location !== '') {
+          let locationName = agesRow.location.replace(/\./g, '_');
+          if (!summary.locations[locationName])
+            summary.locations[locationName] = {};
+
+          // Increment the number of ages for this location.
+          if (!summary.locations[locationName].N_AGES)
+            summary.locations[locationName].N_AGES = 0;
+          summary.locations[locationName].N_AGES += 1;
+
+          // Increment the number of location ages.
+          if (!summary.ages.N_LOCATION_AGES)
+            summary.ages.N_LOCATION_AGES = 0;
+          summary.ages.N_LOCATION_AGES += 1;
+        }
+
+      });
+    }
+
+    /*if (contribution.locations) {
+     summary.locations = {};
+     if (contribution.sites       ) summary.location[].n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
+     if (contribution.samples     ) summary.location[].n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
+     if (contribution.specimens   ) summary.location[].n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
+     if (contribution.measurements) summary.location[].n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
+     }
+     if (contribution.locations   ) summary.contribution.n_locations   = this.countUniqueValues(contribution.locations   , 'location'  );
+     if (contribution.sites       ) summary.contribution.n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
+     if (contribution.samples     ) summary.contribution.n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
+     if (contribution.specimens   ) summary.contribution.n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
+     if (contribution.measurements) summary.contribution.n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
+     if (contribution.ages        ) summary.contribution.n_ages        = contribution.ages.length;
+     if (contribution.criteria    ) summary.contribution.n_criteria    = contribution.criteria.length;
+     if (contribution.images      ) summary.contribution.n_images      = contribution.images.length;
+     */
+    console.log(contribution, summary);
+
+    return summary;
+
   }
 
   countUniqueValues(collection, property, filterProperty, filterValue) {
     return _.keys(_.reduce(collection, (values, item) => values[item[property]] = true, {})).length;
-  }*/
+  }
 
-
-  /*summarize(contribution) {
-
-   let summary = {};
-   this._initProp(summary, 'contribution', {});
-
-   if (contribution.contribution) {
-   contribution.contribution.forEach((row) => {
-   this._copyRowProps(row, summary.contribution, models[_.last(versions)].tables.contribution);
-   });
-   }
-
-   if (summary.contribution.doi) {
-   let doiData = $.ajax({
-   type: "GET",
-   dataType: "json",
-   async: false,
-   url: "//api.crossref.org/works/" + summary.contribution.doi,
-   }).responseText;
-
-   console.log('doi data', doiData);
-   if (doiData && doiData.status === 'ok') {
-
-   }
-   }
-
-   if (contribution.locations) {
-   this._initProp(summary, 'locations', {});
-   contribution.locations.forEach((row) => {
-   let name = row.location;
-   if (name !== undefined && _.isString(name) && name !== '') {
-   let prop = this._nameToProp(name);
-   this._initProp(summary.locations, prop, {location: name});
-   }
-   });
-   }
-
-   if (contribution.sites) {
-   this._initProp(summary, 'sites', {});
-   this._initProp(summary, 'locations', {});
-   contribution.sites.forEach((row) => {
-   let name = row.site;
-   if (name !== undefined && _.isString(name) && name !== '') {
-   let prop = this._nameToProp(name);
-   this._initProp(summary.sites, prop, {site: name});
-   let parent = row.location;
-   if (parent !== undefined && _.isString(parent) && parent !== '') {
-   let parentProp = this._nameToProp(parent);
-   summary.sites[prop].location = parent;
-   }
-   }
-   });
-   }
-
-   if (contribution.samples) {
-   this._initProp(summary, 'samples', {});
-   this._initProp(summary, 'sites', {});
-   contribution.samples.forEach((row) => {
-   let name = row.sample;
-   if (name !== undefined && _.isString(name) && name !== '') {
-   let prop = this._nameToProp(name);
-   this._initProp(summary.samples, prop, {sample: name});
-   let parent = row.site;
-   if (parent !== undefined && _.isString(parent) && parent !== '') {
-   let parentProp = this._nameToProp(parent);
-   summary.samples[prop].site = parent;
-   if (summary.sites[parentProp] && summary.sites[parentProp].location)
-   summary.samples[prop].location = summary.sites[parentProp].location;
-   }
-   }
-   });
-   }
-
-   if (contribution.specimens) {
-   this._initProp(summary, 'specimens', {});
-   this._initProp(summary, 'samples', {});
-   contribution.specimens.forEach((row) => {
-   let name = row.specimen;
-   if (name !== undefined && _.isString(name) && name !== '') {
-   let prop = this._nameToProp(name);
-   this._initProp(summary.specimens, prop, {specimen: name});
-   let parent = row.sample;
-   if (parent !== undefined && _.isString(parent) && parent !== '') {
-   let parentProp = this._nameToProp(parent);
-   summary.specimens[prop].sample = parent;
-   if (summary.samples[parentProp] && summary.samples[parentProp].site)
-   summary.specimens[prop].site = summary.samples[parentProp].site;
-   if (summary.samples[parentProp] && summary.samples[parentProp].location)
-   summary.specimens[prop].location = summary.samples[parentProp].location;
-   }
-   }
-   });
-   }
-
-   if (0 && contribution.locations) {
-   this._initProp(summary, 'locations', {});
-   this._initProp(summary.contribution, 'locations', {location: []});
-   contribution.locations.forEach((row) => {
-   let name = row.location;
-   if (name !== undefined && _.isString(name) && name !== '') {
-   let prop = this._nameToProp(name);
-   this._initProp(summary.locations, prop, {location: name});
-   summary.contribution.locations.location.push(name);
-   }
-   });
-   summary.contribution.locations.location = _.sortBy(_.uniq(summary.contribution.locations.location));
-   }
-
-   if (0 && contribution.sites) {
-   this._initProp(summary, 'sites', {});
-   this._initProp(summary.contribution, 'sites', {location: [], site: []});
-   this._initProp(summary, 'locations', {});
-   contribution.sites.forEach((row) => {
-   let name = row.site;
-   if (name !== undefined && _.isString(name) && name !== '') {
-   let prop = this._nameToProp(name);
-   this._initProp(summary.sites, prop, {site: name});
-   summary.contribution.sites.site.push(name);
-   let parent = row.location;
-   if (parent !== undefined && _.isString(parent) && parent !== '') {
-   let parentProp = this._nameToProp(parent);
-   aummary.sites[prop].location = parent;
-   this._initProp(summary.locations, parentProp, {location: parent});
-   this._initProp(summary.locations[parentProp], 'sites', {site: []});
-   summary.locations[parentProp].sites.site.push(name);
-
-   summary.contribution.sites.location = parent;
-   }
-   }
-   });
-   summary.contribution.sites.site = _.sortBy(_.uniq(summary.contribution.sites.site));
-   }
-
-   if (0 && contribution.measurements) {
-   this._initProp(summary, 'experiments', {});
-   this._initProp(summary, 'specimens'  , {});
-   let tableModel = models[_.last(versions)].tables.measurements;
-   contribution.measurements.rows.forEach((measurementRow) => {
-
-   // Increment the number of measurements for this contribution.
-   this._initProp(summary.contribution, 'n_measurements', 0);
-   summary.contribution.n_measurements += 1;
-
-   const experimentColumnIdx = contribution.measurements.columns.indexOf('experiment');
-   let experimentName = measurementRow[experimentColumnIdx];
-   if (experimentName !== undefined && _.isString(experimentName) && experimentName !== '') {
-   experimentName = experimentName.replace(/\./g, '_');
-   this._initProp(summary.experiments, experimentName, {experiment: measurementRow[experimentColumnIdx]});
-
-   // Increment the number of measurements for this experiment.
-   this._initProp(summary.experiments[experimentName], 'n_measurements', 0);
-   summary.experiments[experimentName].n_measurements += 1;
-
-   // Add the experiment name to the list for this contribution.
-   this._initProp(summary.contribution, 'experiments', {});
-   summary.contribution.experiments[experimentName] = true;
-
-   this._initProp(summary.experiments[experimentName], 'measurements', {});
-   contribution.measurements.columns.forEach((column, columnIdx) => {
-   if (measurementRow[columnIdx] !== undefined &&
-   measurementRow[columnIdx] !== null &&
-   _.trim(measurementRow[columnIdx]) !== '') {
-   if (tableModel.columns[column] && tableModel.columns[column].type === 'List') {
-   this._initProp(summary.experiments[experimentName].measurements, column, {});
-   measurementRow[columnIdx].split(':').forEach((val) => {
-   if (_.trim(val) !== '')
-   summary.experiments[experimentName].measurements[column][_.trim(val)] = true
-   });
-   } else if (tableModel.columns[column] && tableModel.columns[column].type === 'Number') {
-   this._initProp(summary.experiments[experimentName].measurements, column, []);
-   summary.experiments[experimentName].measurements[column].push(parseFloat(measurementRow[columnIdx]))
-   } else if (tableModel.columns[column] && tableModel.columns[column].type === 'Integer') {
-   this._initProp(summary.experiments[experimentName].measurements, column, []);
-   summary.experiments[experimentName].measurements[column].push(parseInt(measurementRow[columnIdx]))
-   } else {
-   this._initProp(summary.experiments[experimentName].measurements, column, {});
-   summary.experiments[experimentName].measurements[column][_.trim(measurementRow[columnIdx])] = true
-   }
-   }
-   });
-
-   /*const specimenColumnIdx = contribution.measurements.columns.indexOf('specimen');
-   let specimenName = measurementRow[specimenColumnIdx];
-   if (specimenName !== undefined && _.isString(specimenName) && specimenName !== '') {
-   specimenName = specimenName.replace(/\./g, '_');
-   summary.experiments[experimentName].specimen = specimenName;
-   if (!summary.specimens[specimenName])
-   summary.specimens[specimenName] = {specimen: measurementRow[specimenColumnIdx]};
-
-   // Increment the number of measurements for this specimen.
-   if (!summary.specimens[specimenName].n_measurements)
-   summary.specimens[specimenName].n_measurements = 0;
-   summary.specimens[specimenName].n_measurements += 1;
-
-   // Add the experiment name to the list for this specimen.
-   if (!summary.specimens[specimenName].experiments)
-   summary.specimens[specimenName].experiments = {};
-   summary.specimens[specimenName].experiments[experimentName] = true;
-   }
-
-   }
-
-   });
-
-   _.keys(summary.experiments).forEach((experimentName) => {
-   if (summary.experiments[experimentName].measurements) {
-   let experimentMeasurements = summary.experiments[experimentName].measurements;
-   _.keys(experimentMeasurements).forEach((column) => {
-   if (tableModel.columns[column] &&
-   tableModel.columns[column].type === 'Number' || tableModel.columns[column].type === 'Integer') {
-   experimentMeasurements[column] = {
-   n: experimentMeasurements[column].length,
-   min: _.min(experimentMeasurements[column]),
-   max: _.max(experimentMeasurements[column])
-   };
-   } else {
-   experimentMeasurements[column] = _.keys(experimentMeasurements[column]);
-   }
-   });
-   }
-   });
-
-   // Convert the list of experiment names into the number of experiments for each specimen.
-   _.keys(summary.specimens).forEach((specimenName) => {
-   if (summary.specimens[specimenName].experiments) {
-   summary.specimens[specimenName].experiments = _.keys(summary.specimens[specimenName].experiments);
-   summary.specimens[specimenName].n_experiments = summary.specimens[specimenName].experiments.length;
-   }
-   });
-   }
-
-   if (0 && contribution.specimens) {
-   summary.specimens = summary.specimens || {};
-   summary.samples   = summary.samples   || {};
-   contribution.specimens.map((specimenRow) => {
-
-   // Increment the number of specimen results for this contribution.
-   if (!summary.contribution.n_specimen_results)
-   summary.contribution.n_specimen_results = 0;
-   summary.contribution.n_specimen_results += 1;
-
-   _.keys(specimenRow).map((column) => {
-   if (!summary.contribution[column])
-   summary.contribution[column] = {};
-   if (models[_.last(versions)].tables.specimens.columns[column] && models[_.last(versions)].tables.specimens.columns[column].type === 'List')
-   specimenRow[column].split(':').map((val) => {
-   if (_.trim(val) !== '')
-   summary.contribution[column][_.trim(val)] = true
-   });
-   else
-   if (_.trim(specimenRow[column]) !== '')
-   summary.contribution[column][_.trim(specimenRow[column])] = true
-   });
-
-   let specimenName = specimenRow.specimen;
-   if (specimenName !== undefined && _.isString(specimenName) && specimenName !== '') {
-   specimenName = specimenName.replace(/\./g, '_');
-   if (!summary.specimens[specimenName])
-   summary.specimens[specimenName] = {};
-
-   // Add the specimen name to the list for this contribution.
-   if (!summary.contribution.specimens)
-   summary.contribution.specimens = {};
-   summary.contribution.specimens[specimenName] = true;
-
-   }
-
-   let sampleName = specimenRow.sample;
-   if (sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
-   sampleName = sampleName.replace(/\./g, '_');
-   if (!summary.samples[sampleName])
-   summary.samples[sampleName] = {};
-   }
-
-   // If this specimen belongs to a sample:
-   if (specimenName !== undefined && specimenName !== '' &&
-   sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
-   summary.specimens[specimenName].sample = sampleName;
-
-   // Increment the number of specimen results for this sample.
-   if (!summary.samples[sampleName].n_specimen_results)
-   summary.samples[sampleName].n_specimen_results = 0;
-   summary.samples[sampleName].n_specimen_results += 1;
-
-   // Add the specimen name to the list for this sample.
-   if (!summary.samples[sampleName].specimens)
-   summary.samples[sampleName].specimens = {};
-   summary.samples[sampleName].specimens[specimenName] = true;
-
-   }
-
-   });
-
-   // Convert the list of specimen names into the number of specimens for each sample.
-   _.keys(summary.samples).map((sampleName) => {
-   if (summary.samples[sampleName].specimens) {
-   summary.samples[sampleName].specimens = _.keys(summary.samples[sampleName].specimens);
-   summary.samples[sampleName].n_specimens = summary.samples[sampleName].specimens.length;
-   summary.samples[sampleName].n_experiments = 0;
-   summary.samples[sampleName].n_measurements = 0;
-   summary.samples[sampleName].specimens.map((specimenName) => {
-   summary.samples[sampleName].n_experiments += summary.specimens[specimenName].n_experiments;
-   summary.samples[sampleName].n_measurements += summary.specimens[specimenName].n_measurements;
-   });
-   }
-   });
-
-   }
-
-   if (0 && contribution.samples) {
-   summary.samples = summary.samples || {};
-   summary.sites   = summary.sites   || {};
-   contribution.samples.map((sampleRow) => {
-
-   // Increment the number of sample results for this contribution.
-   if (!summary.contribution.n_sample_results)
-   summary.contribution.n_sample_results = 0;
-   summary.contribution.n_sample_results += 1;
-
-   _.keys(sampleRow).map((column) => {
-   if (!summary.contribution[column])
-   summary.contribution[column] = {};
-   if (models[_.last(versions)].tables.samples.columns[column] && models[_.last(versions)].tables.samples.columns[column].type === 'List')
-   sampleRow[column].split(':').map((val) => {
-   if (_.trim(val) !== '')
-   summary.contribution[column][_.trim(val)] = true
-   });
-   else
-   if (_.trim(sampleRow[column]) !== '')
-   summary.contribution[column][_.trim(sampleRow[column])] = true
-   });
-
-   let sampleName = sampleRow.sample;
-   if (sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
-   sampleName = sampleName.replace(/\./g, '_');
-   if (!summary.samples[sampleName])
-   summary.samples[sampleName] = {};
-
-   // Add the sample name to the list for this contribution.
-   if (!summary.contribution.samples)
-   summary.contribution.samples = {};
-   summary.contribution.samples[sampleName] = true;
-   }
-
-   let siteName = sampleRow.site;
-   if (siteName !== undefined && _.isString(siteName) && siteName !== '') {
-   siteName = siteName.replace(/\./g, '_');
-   if (!summary.sites[siteName])
-   summary.sites[siteName] = {};
-   }
-
-   // If this sample belongs to a site:
-   if (sampleName !== undefined && sampleName !== '' &&
-   siteName !== undefined && _.isString(siteName) && siteName !== '') {
-   summary.samples[sampleName].site = siteName;
-
-   // Increment the number of sample results for this site.
-   if (!summary.sites[siteName].n_sample_results)
-   summary.sites[siteName].n_sample_results = 0;
-   summary.sites[siteName].n_sample_results += 1;
-
-   // Add the sample name to the list for this site.
-   if (!summary.sites[siteName].samples)
-   summary.sites[siteName].samples = {};
-   summary.sites[siteName].samples[sampleName] = true;
-
-   }
-
-   });
-
-   // Convert the list of sample names into the number of samples for each site.
-   _.keys(summary.sites).map((siteName) => {
-   if (summary.sites[siteName].samples) {
-   summary.sites[siteName].samples = _.keys(summary.sites[siteName].samples);
-   summary.sites[siteName].n_samples = summary.sites[siteName].samples.length;
-   summary.sites[siteName].n_specimens = 0;
-   summary.sites[siteName].n_specimen_results = 0;
-   summary.sites[siteName].n_experiments = 0;
-   summary.sites[siteName].n_measurements = 0;
-   summary.sites[siteName].samples.map((sampleName) => {
-   summary.sites[siteName].n_specimens += summary.samples[sampleName].n_specimens;
-   summary.sites[siteName].n_specimen_results += summary.samples[sampleName].n_specimen_results;
-   summary.sites[siteName].n_experiments += summary.samples[sampleName].n_experiments;
-   summary.sites[siteName].n_measurements += summary.samples[sampleName].n_measurements;
-   });
-   }
-   });
-   }
-
-   if (0 && contribution.sites) {
-   summary.sites     = summary.sites     || {};
-   summary.locations = summary.locations || {};
-   contribution.sites.map((siteRow) => {
-
-   // Increment the number of sites results for this contribution.
-   if (!summary.contribution.n_site_results)
-   summary.contribution.n_site_results = 0;
-   summary.contribution.n_site_results += 1;
-
-   _.keys(siteRow).map((column) => {
-   if (!summary.contribution[column])
-   summary.contribution[column] = {};
-   if (models[_.last(versions)].tables.sites.columns[column] && models[_.last(versions)].tables.sites.columns[column].type === 'List')
-   siteRow[column].split(':').map((val) => {
-   if (_.trim(val) !== '')
-   summary.contribution[column][_.trim(val)] = true
-   });
-   else
-   if (_.trim(siteRow[column]) !== '')
-   summary.contribution[column][_.trim(siteRow[column])] = true
-   });
-
-   let siteName = siteRow.site;
-   if (siteName !== undefined && _.isString(siteName) && siteName !== '') {
-   siteName = siteName.replace(/\./g, '_');
-   if (!summary.sites[siteName])
-   summary.sites[siteName] = {};
-
-   // Add the site name to the list for this contribution.
-   if (!summary.contribution.sites)
-   summary.contribution.sites = {};
-   summary.contribution.sites[siteName] = true;
-   }
-
-   let locationName = siteRow.location;
-   if (locationName !== undefined && _.isString(locationName) && locationName !== '') {
-   locationName = locationName.replace(/\./g, '_');
-   if (!summary.locations[locationName])
-   summary.locations[locationName] = {};
-   }
-
-   // If this site belongs to a location:
-   if (siteName !== undefined && siteName !== '' &&
-   locationName !== undefined && _.isString(locationName) && locationName !== '') {
-   summary.sites[siteName].site = siteName;
-
-   // Increment the number of site results for this location.
-   if (!summary.locations[locationName].n_site_results)
-   summary.locations[locationName].n_site_results = 0;
-   summary.locations[locationName].n_site_results += 1;
-
-   // Add the site name to the list for this location.
-   if (!summary.locations[locationName].sites)
-   summary.locations[locationName].sites = {};
-   summary.locations[locationName].sites[siteName] = true;
-
-   }
-
-   });
-
-   // Convert the list of site names into the number of sites for each location.
-   _.keys(summary.locations).map((locationName) => {
-   if (summary.locations[locationName].sites) {
-   summary.locations[locationName].sites = _.keys(summary.locations[locationName].sites);
-   summary.locations[locationName].n_sites = summary.locations[locationName].length;
-   summary.locations[locationName].n_samples = 0;
-   summary.locations[locationName].n_sample_results = 0;
-   summary.locations[locationName].n_specimens = 0;
-   summary.locations[locationName].n_specimen_results = 0;
-   summary.locations[locationName].n_experiments = 0;
-   summary.locations[locationName].n_measurements = 0;
-   summary.locations[locationName].sites.map((siteName) => {
-   summary.locations[locationName].n_samples += summary.sites[siteName].n_samples;
-   summary.locations[locationName].n_sample_results += summary.sites[siteName].n_sample_results;
-   summary.locations[locationName].n_specimens += summary.sites[siteName].n_specimens;
-   summary.locations[locationName].n_specimen_results += summary.sites[siteName].n_specimen_results;
-   summary.locations[locationName].n_experiments += summary.sites[siteName].n_experiments;
-   summary.locations[locationName].n_measurements += summary.sites[siteName].n_measurements;
-   });
-   }
-   });
-   }
-
-
-   if (0 && contribution.locations) {
-   summary.locations    = summary.locations    || {};
-   summary.contribution = summary.contribution || {};
-   contribution.locations.map((locationRow) => {
-
-   // Increment the number of location results for this contribution.
-   if (!summary.contribution.n_location_results)
-   summary.contribution.n_location_results = 0;
-   summary.contribution.n_location_results += 1;
-
-   _.keys(locationRow).map((column) => {
-   if (models[_.last(versions)].tables.locations.columns[column] && models[_.last(versions)].tables.locations.columns[column].type === 'List') {
-   if (!summary.contribution[column])
-   summary.contribution[column] = {};
-   locationRow[column].split(':').map((val) => {
-   if (_.trim(val) !== '')
-   summary.contribution[column][_.trim(val)] = true
-   });
-   } else {
-   if (!summary.contribution[column])
-   summary.contribution[column] = {};
-   if (_.trim(locationRow[column]) !== '')
-   summary.contribution[column][_.trim(locationRow[column])] = true
-   }
-   });
-
-   let locationName = locationRow.location;
-   if (locationName !== undefined && _.isString(locationName) && locationName !== '') {
-   locationName = locationName.replace(/\./g, '_');
-   if (!summary.locations[locationName])
-   summary.locations[locationName] = {};
-
-   // Add the location name to the list for this contribution.
-   if (!summary.contribution.locations)
-   summary.contribution.locations = {};
-   summary.contribution.locations[locationName] = true;
-   }
-
-   });
-
-   }
-
-   if (0 && summary.contribution) {
-   _.keys(summary.contribution).map((column) => {
-   if (column.slice(0,2) != 'n_')
-   summary.contribution[column] = _.keys(summary.contribution[column]);
-   });
-
-   /*if (column === 'LAT' ||
-   column === 'LON'
-   ) {
-   summary.contribution[column + 'S'] = summary.contribution[column];
-   delete summary.contribution[column];
-   }
-
-   if (summary.contribution.locations) {
-   summary.contribution.n_locations = summary.contribution.locations.length;
-   }
-   if (summary.contribution.sites) {
-   summary.contribution.n_sites = summary.contribution.sites.length;
-   delete summary.contribution.sites;
-   }
-   if (summary.contribution.samples) {
-   summary.contribution.n_samples = summary.contribution.samples.length;
-   delete summary.contribution.samples;
-   }
-   if (summary.contribution.specimens) {
-   summary.contribution.n_specimens = summary.contribution.specimens.length;
-   delete summary.contribution.specimens;
-   }
-   if (summary.contribution.experiments) {
-   summary.contribution.n_experiments = summary.contribution.experiments.length;
-   delete summary.contribution.experiments;
-   }
-   }
-
-   if (0 && contribution.criteria) {
-   summary.criteria = summary.criteria || {};
-   contribution.criteria.map((criteriaRow) => {
-
-   let criterionName = criteriaRow.criterion;
-   if (criterionName !== undefined && _.isString(criterionName) && criterionName !== '') {
-   criterionName = criterionName.replace(/\./g, '_');
-   if (!summary.criteria[criterionName])
-   summary.criteria[criterionName] = {};
-   }
-
-   });
-   }
-
-   if (0 && contribution.ages) {
-   summary.ages = summary.ages || {};
-   contribution.ages.map((agesRow) => {
-
-   if (agesRow.specimen !== undefined && _.isString(agesRow.specimen) && agesRow.specimen !== '') {
-   let specimenName = agesRow.specimen.replace(/\./g, '_');
-   if (!summary.specimens[specimenName])
-   summary.specimens[specimenName] = {};
-
-   // Increment the number of ages for this specimen.
-   if (!summary.specimens[specimenName].n_ages)
-   summary.specimens[specimenName].n_ages = 0;
-   summary.specimens[specimenName].n_ages += 1;
-
-   // Increment the number of specimen ages.
-   if (!summary.ages.n_specimen_ages)
-   summary.ages.n_specimen_ages = 0;
-   summary.ages.n_specimen_ages += 1;
-   }
-
-   else if (agesRow.sample !== undefined && _.isString(agesRow.sample) && agesRow.sample !== '') {
-   let sampleName = agesRow.sample.replace(/\./g, '_');
-   if (!summary.samples[sampleName])
-   summary.samples[sampleName] = {};
-
-   // Increment the number of ages for this sample.
-   if (!summary.samples[sampleName].n_ages)
-   summary.samples[sampleName].n_ages = 0;
-   summary.samples[sampleName].n_ages += 1;
-
-   // Increment the number of sample ages.
-   if (!summary.ages.n_sample_ages)
-   summary.ages.n_sample_ages = 0;
-   summary.ages.n_sample_ages += 1;
-   }
-
-   else if (agesRow.site !== undefined && _.isString(agesRow.site) && agesRow.site !== '') {
-   let siteName = agesRow.site.replace(/\./g, '_');
-   if (!summary.sites[siteName])
-   summary.sites[siteName] = {};
-
-   // Increment the number of ages for this site.
-   if (!summary.sites[siteName].n_ages)
-   summary.sites[siteName].n_ages = 0;
-   summary.sites[siteName].n_ages += 1;
-
-   // Increment the number of site ages.
-   if (!summary.ages.n_site_ages)
-   summary.ages.n_site_ages = 0;
-   summary.ages.n_site_ages += 1;
-   }
-
-   else if (agesRow.location !== undefined && _.isString(agesRow.location) && agesRow.location !== '') {
-   let locationName = agesRow.location.replace(/\./g, '_');
-   if (!summary.locations[locationName])
-   summary.locations[locationName] = {};
-
-   // Increment the number of ages for this location.
-   if (!summary.locations[locationName].n_ages)
-   summary.locations[locationName].n_ages = 0;
-   summary.locations[locationName].n_ages += 1;
-
-   // Increment the number of location ages.
-   if (!summary.ages.n_locations_ages)
-   summary.ages.n_locations_ages = 0;
-   summary.ages.n_locations_ages += 1;
-   }
-
-   });
-   }
-
-   /*if (contribution.locations) {
-   summary.locations = {};
-
-   if (contribution.sites       ) summary.location[].n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
-   if (contribution.samples     ) summary.location[].n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
-   if (contribution.specimens   ) summary.location[].n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
-   if (contribution.measurements) summary.location[].n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
-   }
-
-   //this.countProps(summary.contribution.locations   );
-   //this.countProps(summary.contribution.sites       );
-   //this.countProps(summary.contribution.samples     );
-   //this.countProps(summary.contribution.specimens   );
-   //this.countProps(summary.contribution.experiments );
-
-
-   //this.objectValuesToArrays(summary.contribution.locations   );
-   //this.objectValuesToArrays(summary.contribution.sites       );
-   //this.objectValuesToArrays(summary.contribution.samples     );
-   //this.objectValuesToArrays(summary.contribution.specimens   );
-   //this.objectValuesToArrays(summary.contribution.experiments );
-
-   //if (contribution.ages        ) summary.contribution.n_ages        = contribution.ages.length;
-   //if (contribution.criteria    ) summary.contribution.n_criteria    = contribution.criteria.length;
-   //if (contribution.images      ) summary.contribution.n_images      = contribution.images.length;
-
-   //console.log(contribution, summary);
-
-
-
-   return summary;
-
-   }
-   */
-
-  /*
-   contribution: { // to be indexed in a contributions index in ElasticSearch
-
-   n_locations: 10,
-   locations: {
-   location: [ an array of location names ],
-
-   },
-   n_sites: 25,
-   sites: {
-
-   }
-   },
-   locations: { // each to be indexed in a locations index in ElasticSearch
-   'location name 1': {
-   location: 'location name 1',
-   n_sites: 5,
-   sites: {
-   site: [ an array of site names in this location ]
-   },
-   n_samples: 15,
-   samples: {
-   sample: [ an array of sample names in this location ]
-   }
-   }
-   ...
-   }
-   ...
-   experiments: {
-   'experiment name 1': {
-   experiment: 'experiment name 1',
-   n_measurements: 50,
-   measurements: {
-
-   }
-   }
-   }
-
-   */
 }

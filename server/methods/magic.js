@@ -9,6 +9,7 @@ import moment from 'moment';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
+import {HTTP} from 'meteor/http';
 
 //console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
@@ -70,7 +71,7 @@ export default function () {
       c.contribution[0].contributor = user;
       c.contribution[0].magic_version = '3.0';
       c.contribution[0].version = 'PRIVATE';
-      c.contribution[0].timestamp = moment().toISOString();
+      c.contribution[0].timestamp = moment().utc().toISOString();
       c._contributor = user;
       c._inserted = c.contribution[0].timestamp;
       c._name = name;
@@ -114,7 +115,7 @@ export default function () {
       s.contribution.TITLE = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       s.contribution.VERSION = 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
@@ -137,6 +138,7 @@ export default function () {
       let c = Collections['magic.private.contributions'].findOne(id);
       c._es_id = uuid.v4();
       c._activated = true;
+      c.contribution[0].timestamp = moment().utc().toISOString();
       await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
 
       let summary = _.pick(c._summary.contribution, [
@@ -298,6 +300,46 @@ export default function () {
         {sort: {'_inserted': -1}}
       ).fetch();
       return contributions;
+    },
+    'getUnactivatedContributions': function(dummy) {
+      const contributions = Collections['magic.private.contributions'].find(
+        {_activated: false},
+        {sort: {'_inserted': -1}}
+      ).fetch();
+      return contributions;
+    },
+    'getERDAContribution': function(url) {
+      this.unblock();
+      const response = HTTP.call('GET',url);
+      return response.content;
+    },
+    async insertIntoPrivate(contributor, user, mailid, c, s, v) {
+
+      let id = Collections['magic.private.contributions'].findOne('next_id');
+      if (id && id.next_id) {
+        c.contribution[0].id = id.next_id;
+        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
+      }
+
+      c._id = uuid.v4();
+
+      s.contribution.VERSION = v || 'PRIVATE'
+      s.contribution.CONTRIBUTOR_ID = mailid;
+      s.contribution.CONTRIBUTOR = contributor;
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.UPLOAD = 0;
+      c._summary = s;
+
+      c.contribution[0].contributor = user;
+      c.contribution[0].magic_version = '3.0';
+      c.contribution[0].version = s.contribution.VERSION;
+      c.contribution[0].timestamp = moment().utc().toISOString();
+      c._contributor = user;
+      c._inserted = c.contribution[0].timestamp;
+      c._name = s.contribution.TITLE;
+      c._activated = false;
+
+      Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
     }
   });
 

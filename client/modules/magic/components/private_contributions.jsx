@@ -90,7 +90,7 @@ export default class extends React.Component {
               privateContribution.errors.push("The contribution requires a valid DOI prior to activation.");
             return privateContribution;
           });
-          console.log('getPrivateContributions', this.privateContributions);
+          //console.log('getPrivateContributions', this.privateContributions);
           this.setState({loaded: true, taps: this.state.taps + 1});
         }
       });
@@ -111,7 +111,7 @@ export default class extends React.Component {
           doiData && doiData.status === 'ok') {
         Meteor.call('updateDOI', this.privateContributions[i].contribution._id, doiData.message,
           (error, c) => {
-            console.log('updateDOI', i, c, this.privateContributions);
+            //console.log('updateDOI', i, c, this.privateContributions);
             //privateContributions[i] = c;
             //this.setState({privateContributions: privateContributions, taps: this.state.taps+1});
             this.updateContributions();
