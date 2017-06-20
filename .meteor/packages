@@ -23,3 +23,4 @@ dynamic-import@0.1.0
 kadira:flow-router-ssr
 standard-minifier-js
 less
+http
