@@ -13,8 +13,10 @@ export default class extends React.Component {
         >
           {portal.substring(0,1)}
         </a>
-        <h1 className="home-title">{portals[portal].title}</h1>
-        <h4 className="home-subtitle">{portals[portal].subtitle}</h4>
+        <a href={`/${portal}/`}>
+          <h1 className="home-title">{portals[portal].title}</h1>
+          <h4 className="home-subtitle">{portals[portal].subtitle}</h4>
+        </a>
         <div className="ui divider"></div>
         {this.props.children}
       </div>
