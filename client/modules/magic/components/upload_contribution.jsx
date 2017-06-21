@@ -350,6 +350,7 @@ export default class MagICUploadContribution extends React.Component {
               else       this.setState({uploaded: true, uploading: false});
             }
           );
+          window.location.href = '/MagIC/private';
         this.setState({
           uploading: true
         });
