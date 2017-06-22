@@ -384,7 +384,7 @@ export default class extends React.Component {
                   return (
                     <tr key={i}>
                       <td>{v.version}</td>
-                      <td>{v.magic_version}</td>
+                      <td>{parseFloat(v.magic_version).toFixed(1)}</td>
                       <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
                       <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
                       <td>
