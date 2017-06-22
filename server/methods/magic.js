@@ -139,7 +139,7 @@ export default function () {
       c._es_id = uuid.v4();
       c._activated = true;
       c.contribution[0].timestamp = moment().utc().toISOString();
-      await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
+      c.contribution[0].version = c.contribution[0].version === 'PRIVATE' || _.trim(c.contribution[0].version) === '' ? '1' : c.contribution[0].version;
 
       let summary = _.pick(c._summary.contribution, [
         "AGE_UNIT",
@@ -181,7 +181,8 @@ export default function () {
       ]);
       summary.UPLOAD = 1;
       summary.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      summary.MONGO_ID = id;
+      summary.VERSION = summary.VERSION === 'PRIVATE' || _.trim(summary.VERSION) === '' ? "1" : summary.VERSION;
+      summary.version_history = summary.version_history || [];
       summary.version_history.unshift({
         "contributor": summary.CONTRIBUTOR,
         "upload": 1,
@@ -191,6 +192,7 @@ export default function () {
         "activated": moment().utc()
       });
 
+      await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
       await esClient.index({
         index: 'magic_v5', type: 'contributions_summaries',
         id: id,
