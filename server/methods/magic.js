@@ -54,6 +54,14 @@ export default function () {
         _user: user
       }, (error) => { console.log('delete import', error)});
     },
+    'getImportSettingsTemplates': function (user) {
+      return Collections['magic.import.settings.templates'].find(
+        {_user: user},
+        {sort: {'_inserted': -1}}).fetch();
+    },
+    'getImportSettingsTemplate': function (ID) {
+      return Collections['magic.import.settings.templates'].findOne(ID);
+    },
     'insertContribution': function (contributor, user, mailid, name, c, s) {
       //check(id, Integer);
       //check(name, String);
@@ -295,22 +303,19 @@ export default function () {
       }
     },
     'getPrivateContribution': function(id) {
-      const contributions = Collections['magic.private.contributions'].findOne(id);
-      return contributions;
+      return Collections['magic.private.contributions'].findOne(id);
     },
     'getPrivateContributions': function(contributor) {
-      const contributions = Collections['magic.private.contributions'].find(
+      return Collections['magic.private.contributions'].find(
         {_contributor: contributor},
         {sort: {'_inserted': -1}}
       ).fetch();
-      return contributions;
     },
     'getUnactivatedContributions': function(contributor) {
-      const contributions = Collections['magic.private.contributions'].find(
+      return Collections['magic.private.contributions'].find(
         {_contributor: contributor, _activated: false},
         {sort: {'_inserted': -1}}
       ).fetch();
-      return contributions;
     },
     'getERDAContribution': function(url) {
       this.unblock();
