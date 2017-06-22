@@ -9,6 +9,7 @@ import moment from 'moment';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
+import {HTTP} from 'meteor/http';
 
 //console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
@@ -53,6 +54,14 @@ export default function () {
         _user: user
       }, (error) => { console.log('delete import', error)});
     },
+    'getImportSettingsTemplates': function (user) {
+      return Collections['magic.import.settings.templates'].find(
+        {_user: user},
+        {sort: {'_inserted': -1}}).fetch();
+    },
+    'getImportSettingsTemplate': function (ID) {
+      return Collections['magic.import.settings.templates'].findOne(ID);
+    },
     'insertContribution': function (contributor, user, mailid, name, c, s) {
       //check(id, Integer);
       //check(name, String);
@@ -70,7 +79,7 @@ export default function () {
       c.contribution[0].contributor = user;
       c.contribution[0].magic_version = '3.0';
       c.contribution[0].version = 'PRIVATE';
-      c.contribution[0].timestamp = moment().toISOString();
+      c.contribution[0].timestamp = moment().utc().toISOString();
       c._contributor = user;
       c._inserted = c.contribution[0].timestamp;
       c._name = name;
@@ -114,8 +123,8 @@ export default function () {
       s.contribution.TITLE = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.VERSION = 'PRIVATE';
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.VERSION = s.contribution.VERSION || 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
       c._summary = s;
@@ -137,7 +146,8 @@ export default function () {
       let c = Collections['magic.private.contributions'].findOne(id);
       c._es_id = uuid.v4();
       c._activated = true;
-      await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
+      c.contribution[0].timestamp = moment().utc().toISOString();
+      c.contribution[0].version = c.contribution[0].version === 'PRIVATE' || _.trim(c.contribution[0].version) === '' ? '1' : c.contribution[0].version;
 
       let summary = _.pick(c._summary.contribution, [
         "AGE_UNIT",
@@ -174,21 +184,25 @@ export default function () {
         "MAGIC_CONTRIBUTION_ID",
         "JOURNAL",
         "REFERENCE_HTML",
+        "DOI",
         "VERSION",
         "version_history"
       ]);
       summary.UPLOAD = 1;
       summary.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      summary.MONGO_ID = id;
+      summary.VERSION = summary.VERSION === 'PRIVATE' || _.trim(summary.VERSION) === '' ? "1" : summary.VERSION;
+      summary.version_history = summary.version_history || [];
       summary.version_history.unshift({
         "contributor": summary.CONTRIBUTOR,
         "upload": 1,
+        "mongo_id": id,
         "contribution_id": summary.MAGIC_CONTRIBUTION_ID,
         "version": summary.VERSION,
         "magic_version": 3,
         "activated": moment().utc()
       });
 
+      await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
       await esClient.index({
         index: 'magic_v5', type: 'contributions_summaries',
         id: id,
@@ -289,15 +303,52 @@ export default function () {
       }
     },
     'getPrivateContribution': function(id) {
-      const contributions = Collections['magic.private.contributions'].findOne(id);
-      return contributions;
+      return Collections['magic.private.contributions'].findOne(id);
     },
     'getPrivateContributions': function(contributor) {
-      const contributions = Collections['magic.private.contributions'].find(
+      return Collections['magic.private.contributions'].find(
         {_contributor: contributor},
         {sort: {'_inserted': -1}}
       ).fetch();
-      return contributions;
+    },
+    'getUnactivatedContributions': function(contributor) {
+      return Collections['magic.private.contributions'].find(
+        {_contributor: contributor, _activated: false},
+        {sort: {'_inserted': -1}}
+      ).fetch();
+    },
+    'getERDAContribution': function(url) {
+      this.unblock();
+      const response = HTTP.call('GET',url);
+      return response.content;
+    },
+    async insertIntoPrivate(contributor, user, mailid, c, s, v) {
+
+      let id = Collections['magic.private.contributions'].findOne('next_id');
+      if (id && id.next_id) {
+        c.contribution[0].id = id.next_id;
+        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
+      }
+
+      c._id = uuid.v4();
+
+      s.contribution.VERSION = v || 'PRIVATE';
+      s.contribution.CONTRIBUTOR_ID = mailid;
+      s.contribution.CONTRIBUTOR = contributor;
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.UPLOAD = 0;
+      c._summary = s;
+
+      c.contribution[0].contributor = user;
+      c.contribution[0].magic_version = '3.0';
+      c.contribution[0].version = s.contribution.VERSION;
+      c.contribution[0].timestamp = moment().utc().toISOString();
+      c._contributor = user;
+      c._inserted = c.contribution[0].timestamp;
+      c._name = s.contribution.TITLE;
+      c._activated = false;
+
+      Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
     }
   });
 

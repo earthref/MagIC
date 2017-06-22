@@ -502,14 +502,14 @@ export default class extends Runner {
         else {
           for (let jsonRowsIdx in jsonToExport[tableName]) {
             for (let colNameIdx in orderedListOfColumnsAddedToHeader) {
-              let colName = orderedListOfColumnsAddedToHeader[colNameIdx];
+              let columnName = orderedListOfColumnsAddedToHeader[colNameIdx];
               let numberOfColumns = orderedListOfColumnsAddedToHeader.length;
-              let dataToAdd = jsonToExport[tableName][jsonRowsIdx][colName] || '';
+              let dataToAdd = jsonToExport[tableName][jsonRowsIdx][columnName] || '';
 
               if (colNameIdx > 0 && colNameIdx < numberOfColumns)//no delimiter needed for the first column or at the end of the row
                 text += '\t';
 
-              text += this.handleSpecialCases(dataToAdd, tableName, colName);
+              text += this.handleSpecialCases(dataToAdd, tableName, columnName);
 
               if (colNameIdx == numberOfColumns - 1)
                 text += '\n';
@@ -525,84 +525,25 @@ export default class extends Runner {
     return text;
   }
 
-  handleSpecialCases(dataToManipulate, tableName, columnName) {
-    if (dataToManipulate == '') return dataToManipulate;
+  handleSpecialCases(value, tableName, columnName) {
+    let type = magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type;
 
-    let manipulatedData = '';
+    if (type === 'Dictionary' && _.isPlainObject(value))
+      value = _.keys(value).map(key => `${this.escapeColons(key)}[${this.escapeColons(value[key])}]`).join(':');
 
-    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Dictionary')
-    //if(columnName == 'external_database_ids')
-    {
+    else if (type === 'Matrix' && _.isArray(value))
+      value = value.map(row => row.map(col => this.escapeColons(col)).join(':')).join(';');
 
-      //handles data of this form: {'GEOMAGIA50':'1435', 'CALS7K.2':23, 'ARCHEO00':null, 'TRANS':''}
-      //and translates it into this form: GEOMAGIA50[1435]:CALS7K.2[23]:ARCHEO00[]:TRANS[]
-      let propertyNames = Object.getOwnPropertyNames(dataToManipulate);
-      let numberOfElements = propertyNames.length;
-      let numberOfElementsProcessed = 0; //this counter is necessary because the loop index below is given some strange numbers from propertyNames i.e. they are not sequential
-      for (let propertyIdx in propertyNames) {
-        let propertyName = propertyNames[propertyIdx];
-        let propertyValue = dataToManipulate[propertyName];
-        if (propertyValue == null) {
-          propertyValue = '';
-        }
-        manipulatedData = manipulatedData + `${propertyName}[${propertyValue}]`;
-        numberOfElementsProcessed++;
+    else if (type === 'List' && _.isArray(value))
+      value = value.map(item => this.escapeColons(item)).join(':');
 
-        //we do not want a colon in front of the first
-        if (//propertyIdx < 1 ||
-        numberOfElementsProcessed < numberOfElements)
-          manipulatedData = manipulatedData + ':';
+    return value;
+  }
 
-        //     console.log(`data ${manipulatedData}   ${propertyIdx + 1}    ${numberOfElements}`);
-      }
-      return manipulatedData;
-    }
-
-    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'Matrix' && Array.isArray(dataToManipulate))
-    //if(columnName == 'rotation_sequence')
-    {
-      //this handles data of this nature: rotation_sequence: [[1.4,5.2,-.3],[0,-2.1,0.12345]]
-      //and converts it to the TSV representation: 1.4:5.2:-0.3;0:-2.1:0.12345
-      let numberOfSubArrays = dataToManipulate.length;
-      for (let nestedArrayIdx in dataToManipulate) {
-        //console.log(dataToManipulate, tableName, columnName, nestedArrayIdx, dataToManipulate[nestedArrayIdx]);
-        manipulatedData = manipulatedData + dataToManipulate[nestedArrayIdx].join(':');
-
-        //Each array worth of data is separated by a semi colon in the TSV
-        if (nestedArrayIdx + 1 < numberOfSubArrays) manipulatedData = manipulatedData + ';';
-      }
-      return manipulatedData;
-    }
-
-    if (magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type === 'List' && Array.isArray(dataToManipulate))
-    //if( columnName == 'er_citation_names' ||
-    //  columnName == 'magic_method_codes'||
-    //  columnName == 'method_codes' ||
-    //  columnName == 'citations')
-    {
-      //console.log(dataToManipulate, typeof(dataToManipulate));
-      if (typeof(dataToManipulate) === 'string') dataToManipulate = [dataToManipulate];
-      manipulatedData = ':' + dataToManipulate.map(v => (v.match(/:/) ? '"' + v + '"' : v)).join(':') + ':';
-
-
-      //if colons are present in the data, we need to escape the string with quotes so the data is not confused to be a
-      //multi segment piece of data
-      //manipulatedData = ':';
-      //for(let dataIdx in dataToManipulate)
-      //{
-      //  if(dataToManipulate[dataIdx].match(/:/))
-      //  {
-      //    dataToManipulate[dataIdx] = '"'+dataToManipulate[dataIdx]+'"'
-      //  }
-      //
-      //  manipulatedData = manipulatedData + dataToManipulate[dataIdx] + ':';//multi segment data is separated by colons
-      //  //console.log(`manipulated data: ${manipulatedData}`);
-      //}
-
-      return manipulatedData;
-    }
-
-    return dataToManipulate;//if not a special case, return the same string that was passed in
+  escapeColons(value) {
+    value = _.trim(value);
+    if (value.indexOf(':') >= 0) value = `"${value}"`;
+    return value;
   }
 
   testValidityOfTablesAndColumns(jsonToTranslate){

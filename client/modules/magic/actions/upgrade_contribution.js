@@ -34,7 +34,6 @@ export default class extends Runner {
     super.reset();
     this.validator.reset();
     this.initialize();
-    console.log('upgrade reset');
   }
 
   initialize() {
@@ -159,7 +158,7 @@ export default class extends Runner {
       }
 
       let rowProgressCounter = 0;
-      return Promise.each(tables, jsonTableOld => {
+      return Promise.each(tables, (jsonTableOld) => {
 
         //console.log('mapping_table', jsonTableOld, rowProgressCounter, this.versionOld, '\n', this.jsonOld);
 
@@ -206,39 +205,52 @@ export default class extends Runner {
             this.jsonOld['er_expeditions'] = expeditionsNew;
           }
 
-          // Split tilt stratigraphic/corrected/uncorrected directions.
           if (jsonTableOld === 'pmag_results') {
-            let resultsNew = [];
-            for (let resultRowIdx in this.jsonOld['pmag_results']) {
-              let resultsRow = this.jsonOld['pmag_results'][resultRowIdx];
+            let resultsNew;
+
+            // Split tilt stratigraphic/corrected/uncorrected/normal/reversed directions.
+            resultsNew = [];
+            this.jsonOld['pmag_results'].forEach((resultsRow) => {
               let hasStratigraphic = (
-                resultsRow['average_inc'    ] ||
-                resultsRow['average_dec'    ] ||
-                resultsRow['average_sigma'  ] ||
+                resultsRow['average_inc'] ||
+                resultsRow['average_dec'] ||
+                resultsRow['average_sigma'] ||
                 resultsRow['average_alpha95'] ||
-                resultsRow['average_n'      ] ||
-                resultsRow['average_nn'     ] ||
-                resultsRow['average_k'      ] ||
-                resultsRow['average_r'      ]
+                resultsRow['average_n'] ||
+                resultsRow['average_nn'] ||
+                resultsRow['average_k'] ||
+                resultsRow['average_r']
               );
               let hasTiltCorrected = (
-                resultsRow['tilt_inc_corr'    ] ||
-                resultsRow['tilt_dec_corr'    ] ||
-                resultsRow['tilt_k_corr'      ] ||
+                resultsRow['tilt_inc_corr'] ||
+                resultsRow['tilt_dec_corr'] ||
+                resultsRow['tilt_k_corr'] ||
                 resultsRow['tilt_alpha95_corr'] ||
-                resultsRow['tilt_k_ratio'     ] ||
-                resultsRow['tilt_n'           ] ||
-                resultsRow['tilt_correction'  ]
+                resultsRow['tilt_k_ratio']
               );
               let hasTiltUncorrected = (
-                resultsRow['tilt_inc_uncorr'    ] ||
-                resultsRow['tilt_dec_uncorr'    ] ||
-                resultsRow['tilt_k_uncorr'      ] ||
+                resultsRow['tilt_inc_uncorr'] ||
+                resultsRow['tilt_dec_uncorr'] ||
+                resultsRow['tilt_k_uncorr'] ||
                 resultsRow['tilt_alpha95_uncorr']
+              );
+              let hasNormal = (
+                resultsRow['normal_inc'] ||
+                resultsRow['normal_dec'] ||
+                resultsRow['normal_k'] ||
+                resultsRow['normal_n'] ||
+                resultsRow['normal_alpha95']
+              );
+              let hasReversed = (
+                resultsRow['reversed_inc'] ||
+                resultsRow['reversed_dec'] ||
+                resultsRow['reversed_k'] ||
+                resultsRow['reversed_n'] ||
+                resultsRow['reversed_alpha95']
               );
 
               // If the pmag_results row contains directional data, make sure it's not mixed with other directions.
-              if (hasStratigraphic || hasTiltCorrected || hasTiltUncorrected) {
+              if (hasStratigraphic || hasTiltCorrected || hasTiltUncorrected || hasNormal || hasReversed) {
 
                 // Create the stratigraphic row.
                 if (hasStratigraphic) {
@@ -247,13 +259,25 @@ export default class extends Runner {
                   delete stratigraphicRow['tilt_dec_corr'];
                   delete stratigraphicRow['tilt_k_corr'];
                   delete stratigraphicRow['tilt_alpha95_corr'];
-                  delete stratigraphicRow['tilt_k_ratio'];
-                  delete stratigraphicRow['tilt_n'];
                   delete stratigraphicRow['tilt_inc_uncorr'];
                   delete stratigraphicRow['tilt_dec_uncorr'];
                   delete stratigraphicRow['tilt_k_uncorr'];
                   delete stratigraphicRow['tilt_alpha95_uncorr'];
-                  stratigraphicRow['tilt_correction'] = '100';
+                  delete stratigraphicRow['tilt_k_ratio'];
+                  delete stratigraphicRow['tilt_n'];
+                  delete stratigraphicRow['normal_inc'];
+                  delete stratigraphicRow['normal_dec'];
+                  delete stratigraphicRow['normal_k'];
+                  delete stratigraphicRow['normal_n'];
+                  delete stratigraphicRow['normal_alpha95'];
+                  delete stratigraphicRow['reversed_inc'];
+                  delete stratigraphicRow['reversed_dec'];
+                  delete stratigraphicRow['reversed_k'];
+                  delete stratigraphicRow['reversed_n'];
+                  delete stratigraphicRow['reversed_alpha95'];
+                  if (stratigraphicRow['tilt_correction'] === undefined || // non stratigraphic correction may be provided
+                      hasTiltCorrected)
+                    stratigraphicRow['tilt_correction'] = '100';
                   resultsNew.push(stratigraphicRow);
                 }
 
@@ -272,6 +296,16 @@ export default class extends Runner {
                   delete tiltCorrectedRow['tilt_dec_uncorr'];
                   delete tiltCorrectedRow['tilt_k_uncorr'];
                   delete tiltCorrectedRow['tilt_alpha95_uncorr'];
+                  delete tiltCorrectedRow['normal_inc'];
+                  delete tiltCorrectedRow['normal_dec'];
+                  delete tiltCorrectedRow['normal_k'];
+                  delete tiltCorrectedRow['normal_n'];
+                  delete tiltCorrectedRow['normal_alpha95'];
+                  delete tiltCorrectedRow['reversed_inc'];
+                  delete tiltCorrectedRow['reversed_dec'];
+                  delete tiltCorrectedRow['reversed_k'];
+                  delete tiltCorrectedRow['reversed_n'];
+                  delete tiltCorrectedRow['reversed_alpha95'];
                   if (tiltCorrectedRow['tilt_correction'] === undefined)
                     tiltCorrectedRow['tilt_correction'] = '-3'; // tilt correction is unknown
                   resultsNew.push(tiltCorrectedRow);
@@ -293,16 +327,83 @@ export default class extends Runner {
                   delete tiltUncorrectedRow['tilt_k_corr'];
                   delete tiltUncorrectedRow['tilt_alpha95_corr'];
                   delete tiltUncorrectedRow['tilt_k_ratio'];
-                  delete tiltUncorrectedRow['tilt_n'];
+                  delete tiltUncorrectedRow['normal_inc'];
+                  delete tiltUncorrectedRow['normal_dec'];
+                  delete tiltUncorrectedRow['normal_k'];
+                  delete tiltUncorrectedRow['normal_n'];
+                  delete tiltUncorrectedRow['normal_alpha95'];
+                  delete tiltUncorrectedRow['reversed_inc'];
+                  delete tiltUncorrectedRow['reversed_dec'];
+                  delete tiltUncorrectedRow['reversed_k'];
+                  delete tiltUncorrectedRow['reversed_n'];
+                  delete tiltUncorrectedRow['reversed_alpha95'];
                   tiltUncorrectedRow['tilt_correction'] = '0';
                   resultsNew.push(tiltUncorrectedRow);
+                }
+
+                // Create the normal row.
+                if (hasNormal) {
+                  let normalRow = _.cloneDeep(resultsRow);
+                  delete normalRow['average_inc'];
+                  delete normalRow['average_dec'];
+                  delete normalRow['average_sigma'];
+                  delete normalRow['average_alpha95'];
+                  delete normalRow['average_n'];
+                  delete normalRow['average_nn'];
+                  delete normalRow['average_k'];
+                  delete normalRow['average_r'];
+                  delete normalRow['tilt_inc_corr'];
+                  delete normalRow['tilt_dec_corr'];
+                  delete normalRow['tilt_k_corr'];
+                  delete normalRow['tilt_alpha95_corr'];
+                  delete normalRow['tilt_k_ratio'];
+                  delete normalRow['tilt_inc_uncorr'];
+                  delete normalRow['tilt_dec_uncorr'];
+                  delete normalRow['tilt_k_uncorr'];
+                  delete normalRow['tilt_alpha95_uncorr'];
+                  delete normalRow['tilt_n'];
+                  delete normalRow['reversed_inc'];
+                  delete normalRow['reversed_dec'];
+                  delete normalRow['reversed_k'];
+                  delete normalRow['reversed_n'];
+                  delete normalRow['reversed_alpha95'];
+                  resultsNew.push(normalRow);
+                }
+
+                // Create the reversed row.
+                if (hasReversed) {
+                  let reversedRow = _.cloneDeep(resultsRow);
+                  delete reversedRow['average_inc'];
+                  delete reversedRow['average_dec'];
+                  delete reversedRow['average_sigma'];
+                  delete reversedRow['average_alpha95'];
+                  delete reversedRow['average_n'];
+                  delete reversedRow['average_nn'];
+                  delete reversedRow['average_k'];
+                  delete reversedRow['average_r'];
+                  delete reversedRow['tilt_inc_corr'];
+                  delete reversedRow['tilt_dec_corr'];
+                  delete reversedRow['tilt_k_corr'];
+                  delete reversedRow['tilt_alpha95_corr'];
+                  delete reversedRow['tilt_k_ratio'];
+                  delete reversedRow['tilt_inc_uncorr'];
+                  delete reversedRow['tilt_dec_uncorr'];
+                  delete reversedRow['tilt_k_uncorr'];
+                  delete reversedRow['tilt_alpha95_uncorr'];
+                  delete reversedRow['tilt_n'];
+                  delete reversedRow['normal_inc'];
+                  delete reversedRow['normal_dec'];
+                  delete reversedRow['normal_k'];
+                  delete reversedRow['normal_n'];
+                  delete reversedRow['normal_alpha95'];
+                  resultsNew.push(reversedRow);
                 }
 
               } else {
                 resultsNew.push(_.cloneDeep(resultsRow));
               }
-            }
-            this.jsonOld['pmag_results'] = resultsNew;
+            });
+            this.jsonOld['pmag_results'] = _.cloneDeep(resultsNew);
           }
 
         }
@@ -369,15 +470,16 @@ export default class extends Runner {
             this.jsonNew[newMeasurementsTableName].rows = this.jsonOld['magic_measurements'].rows.map((row) => {
 
               // Convert dates into ISO 8601 timestamps.
-              if (this.versionNew === '3.0' && dateIdx >= 0) {
+              if (this.versionNew === '3.0' && dateIdx >= 0 && _.trim(row[dateIdx]) !== '') {
                 let f = "YYYY:MM:DD:hh:mm:ss.SSS";
                 let tz = 'UTC';
                 if (tzIdx >= 0) tz = row[tzIdx];
-                if (tz === 'CDT') tz = 'CST6CDT';
-                if (tz === 'PDT') tz = 'PST8PDT';
+                if (tz === 'CDT'   ) tz = 'CST6CDT';
+                if (tz === 'PDT'   ) tz = 'PST8PDT';
+                if (tz === 'JER'   ) tz = 'Asia/Jerusalem';
                 if (tz === '+8 GMT') tz = 'PRC';
-                if (tz === '0') tz = 'UTC';
-                if (tz === 'SAN') tz = 'US/Pacific';
+                if (tz === '0'     ) tz = 'UTC';
+                if (tz === 'SAN'   ) tz = 'US/Pacific';
                 row[dateIdx] = moment.tz(row[dateIdx], f, tz).tz('UTC').format();
               }
 
@@ -481,9 +583,11 @@ export default class extends Runner {
           joinTable = 'sites';
         else if (jsonRowOld['er_location_names']!= null && !jsonRowOld['er_location_names'].match(/.+:.+/))
           joinTable = 'locations';
-        else
-          this._appendWarning(`Row ${(parseInt(jsonRowOldIdx)+1)} in table "${jsonTableOld}" was deleted in ` +
+        else {
+          this._appendWarning(`Row ${(parseInt(jsonRowOldIdx) + 1)} in table "${jsonTableOld}" was deleted in ` +
             `MagIC Data Model version ${this.versionNew} since it is a contribution-level result.`);
+          return;
+        }
       }
 
       // Record the type of relative intensity normalization and remove the associated method code.
@@ -544,7 +648,7 @@ export default class extends Runner {
         this.syntheticSpecimenNames[jsonRowOld['er_specimen_name']]) {
         if (jsonRowOld['er_specimen_alternatives']) {
           let alternatives = jsonRowOld['er_specimen_alternatives'].replace(/(^:|:$)/g,'').split(/:/);
-          alternatives.append(jsonRowOld['er_specimen_name']);
+          alternatives.push(jsonRowOld['er_specimen_name']);
           jsonRowOld['er_specimen_alternatives'] = _.uniq(alternatives).join(':');
         } else {
           jsonRowOld['er_specimen_alternatives'] = jsonRowOld['er_specimen_name'];
@@ -792,11 +896,20 @@ export default class extends Runner {
 
         // Combine external_database_names/ids into a dictionary.
         if (jsonColumnOld === 'external_database_names') {
-          let dbNames = jsonRowOld['external_database_names'].replace(/(^:|:$)/g,'').split(/:/);
-          let dbIDs = jsonRowOld['external_database_ids'].replace(/(^:|:$)/g,'').split(/:/);
+          let dbNames = [];
+          let dbIDs = [];
           let dict = [];
+
+          if (jsonRowOld['external_database_names'])
+            dbNames = jsonRowOld['external_database_names'].replace(/(^:|:$)/g,'').split(/:/);
+          if (jsonRowOld['external_database_ids'])
+            dbIDs = jsonRowOld['external_database_ids'].replace(/(^:|:$)/g,'').split(/:/);
+
           for (let dbIdx in dbNames) {
-            dict.push(dbNames[dbIdx] + '[' + dbIDs[dbIdx] + ']');
+            if (dbIDs.length <= dbIdx)
+              dict.push(dbNames[dbIdx] + '[]');
+            else
+              dict.push(dbNames[dbIdx] + '[' + dbIDs[dbIdx] + ']');
           }
           jsonRowOld['external_database_names'] = dict.join(':');
         }
@@ -876,6 +989,9 @@ export default class extends Runner {
 
         if (!joinTable || joinTable === jsonTableNew) {
 
+          if (!tableRowsNew[jsonTableNew])
+            tableRowsNew[jsonTableNew] = [{}];
+
           // Handle special cases when upgrading from 2.5 to 3.0 columns using the presence or absence of data in groups.
           if (this.versionNew === '3.0') {
 
@@ -900,7 +1016,7 @@ export default class extends Runner {
             if ((jsonColumnNew === 'lat_s' || jsonColumnNew === 'lon_w') &&
                 tableRowsNew[jsonTableNew] &&
                 tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
-              jsonValueNew = Math.min(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
+              jsonValueNew = "" + Math.min(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
               tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
             }
 
@@ -908,10 +1024,25 @@ export default class extends Runner {
             if ((jsonColumnNew === 'lat_n' || jsonColumnNew === 'lon_e') &&
                 tableRowsNew[jsonTableNew] &&
                 tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined) {
-              jsonValueNew = Math.max(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
+              jsonValueNew = "" + Math.max(jsonValueNew, tableRowsNew[jsonTableNew][0][jsonColumnNew]);
               tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
             }
 
+            // Add the normal direction polarity flag.
+            if (jsonColumnOld === 'normal_inc' ||
+              jsonColumnOld === 'normal_dec' ||
+              jsonColumnOld === 'normal_k' ||
+              jsonColumnOld === 'normal_n' ||
+              jsonColumnOld === 'normal_alpha95')
+              tableRowsNew[jsonTableNew][0].dir_polarity = 'n';
+
+            // Add the reversed direction polarity flag.
+            if (jsonColumnOld === 'reversed_inc' ||
+              jsonColumnOld === 'reversed_dec' ||
+              jsonColumnOld === 'reversed_k' ||
+              jsonColumnOld === 'reversed_n' ||
+              jsonColumnOld === 'reversed_alpha95')
+              tableRowsNew[jsonTableNew][0].dir_polarity = 'r';
           }
 
           // Normalize lists for easier comparison in merging by sorting them.
@@ -922,15 +1053,13 @@ export default class extends Runner {
           }
 
           // Add the column value to the new JSON.
-          if (!tableRowsNew[jsonTableNew])
-            tableRowsNew[jsonTableNew] = [{}];
           if (tableRowsNew[jsonTableNew][0][jsonColumnNew] !== undefined &&
               tableRowsNew[jsonTableNew][0][jsonColumnNew] !== jsonValueNew &&
               this.collisionErrors[`${jsonTableOld}.${jsonColumnOld}`] != `${jsonTableNew}.${jsonColumnNew}`) {
             this._appendError(`MagIC Data Model version ${this.versionOld} column "${jsonColumnOld}" in table ` +
               `"${jsonTableOld}" is about to map value "${jsonValueNew}" into version ${this.versionNew} ` +
               `table "${jsonTableNew}", but column "${jsonColumnNew}" already contains the value ` +
-              `"${tableRowsNew[jsonTableNew][0][jsonColumnNew]}".`);
+              `"${tableRowsNew[jsonTableNew][0][jsonColumnNew]}". ${joinTable}`);
             this.collisionErrors[`${jsonTableOld}.${jsonColumnOld}`] = `${jsonTableNew}.${jsonColumnNew}`;
           } else {
             tableRowsNew[jsonTableNew][0][jsonColumnNew] = jsonValueNew;
@@ -1032,8 +1161,6 @@ export default class extends Runner {
   // Merge rows that can be combined because they are orthogonal (null or identical in each column).
   _mergePromise() {
 
-    //console.log('merging', this.json);
-
     // For each table in the contribution:
     const rowsTotal = _.reduce(this.json, (rowsTotal, table) => {
       return rowsTotal + (table.rows ? table.rows.length : table.length);
@@ -1115,15 +1242,20 @@ export default class extends Runner {
       // Merge the candidate row to test merging with the current row.
       _.merge(rowMerged, this.json[table][rowCandidateIdx]);
 
-      // If the merge didn't mutate any of the existing values in the current row:
-      //console.log('data preserved?', rowMerged, 'from', rowToMerge);
-      if (_.isMatch(rowMerged, rowToMerge)) {
+      // If the merge didn't mutate any of the existing values in the current row, except possibly the description:
+      if (_.isMatchWith(rowMerged, rowToMerge, (val1, val2, key) => {
+          return (key === 'description' || val1 === val2);
+        })) {
+          // If the descriptions are not the same, remove white space from one, add a semicolon if it ends in an
+          // alphanumeric character, and join them together in the merged row.
+          if (rowMerged.description && rowToMerge.description && rowMerged.description !== rowToMerge.description) {
+            rowToMerge.description = rowToMerge.description.replace(/\s*$/g, '');
+            let sep = /\w$/.test(rowToMerge.description) ? ';' : '';
+            rowMerged.description = `${rowToMerge.description}${sep} ${rowMerged.description}`;
+          }
 
-        // Replace the current row with the merged row.
-        //console.log('yes, merged row', rowCandidateIdx, ':', rowToMerge, 'into', rowMerged);
-        this.json[table][rowCandidateIdx] = rowMerged;
-        didMerge = true;
-
+          this.json[table][rowCandidateIdx] = rowMerged;
+          didMerge = true;
       }
     }
 

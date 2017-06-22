@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 import GoogleStaticMap from '../../common/components/google_static_map';
 import saveAs from 'save-as';
 //import XLSX from 'xlsx-style';
+import ParseContribution from '../actions/parse_contribution';
 import ExportContribution from '../actions/export_contribution';
 import {Collections} from '/lib/collections';
 
@@ -207,14 +208,50 @@ export default class extends React.Component {
 
   render() {
     const c = this.props.doc;
-    console.log('summary', c.INSERTED, moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll'), this.props);
     return (
       <div>
-        {0 && c.CONTRIBUTOR_ID == Cookies.get('mail_id') && c.INSERTED ?
+        {Cookies.get('mail_id') && (c.CONTRIBUTOR_ID === "6382" || c.CONTRIBUTOR_ID == Cookies.get('mail_id')) && c.UPLOAD == "1" ?
           <a className={'ui purple fluid compact button'} style={{marginTop: '0.25em', paddingTop: '0.5em', paddingBottom: '0.5em'}}
-             onClick={(e) => {  }}
+             onClick={(e) => {
+              console.log(c);
+              if (c.FOLDER && c.FILE_NAME) {
+                let url = 'https://earthref.org/cgi-bin/z-download.cgi?h=html-header&file_path=' + (c.FOLDER === 'zmab' ?
+                      `/projects/earthref/archive/bgfiles/${c.FOLDER}/${c.FILE_NAME}.txt` :
+                      `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${c.FOLDER}/${c.FILE_NAME}`);
+                Meteor.call('getERDAContribution', url, (error, data) => {
+                  let parser = new ParseContribution({});
+                  if (error) console.error(error);
+                  parser.parsePromise({text: data}).then(() => {
+                    Meteor.call('insertIntoPrivate',
+                        Cookies.get('name'),
+                        '@' + Cookies.get('user_id'),
+                        Cookies.get('mail_id'),
+                        parser.json,
+                        {contribution: _.cloneDeep(c)},
+                        "" + (parseInt(c.VERSION) + 1), (error) => {
+                      if (error) console.error(error);
+                      window.location.href = '/MagIC/private';
+                    });
+                  });
+                });
+              } else {
+                Meteor.call('getPrivateContribution', c._id, (error, data) => {
+                  Meteor.call('insertIntoPrivate',
+                      Cookies.get('name'),
+                      '@' + Cookies.get('user_id'),
+                      Cookies.get('mail_id'),
+                      data,
+                      {contribution: _.cloneDeep(c)},
+                      "" + (parseInt(c.VERSION) + 1), (error) => {
+                    if (error) console.error(error);
+                    window.location.href = '/MagIC/private';
+                  });
+                });
+              }
+
+             }}
           >
-            Update
+            Update {c.CITATION + ' v. ' + (c.VERSION || '')}
           </a>
         : undefined}
         <div ref="accordion" className="ui accordion magic-contribution">
@@ -232,7 +269,7 @@ export default class extends React.Component {
                         }}>
                   </span>
                   <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                    {moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll')} by <b>{c.CONTRIBUTOR}</b>
+                    {moment.utc(c.INSERTED, "DD-MMM-YY HH:mm:ss").local().format('LL')} by <b>{c.CONTRIBUTOR}</b>
                   </span>
                 </div>
               <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
@@ -260,7 +297,7 @@ export default class extends React.Component {
                 }
                 <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
                   {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>Contribution Link:</b><br/><a href={'https://earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}>{'earthref.org/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</a><br/></span> : undefined)}
-                  {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'https://earthref.org/MagIC/doi/' + c.DOI}>{'earthref.org/MagIC/doi/' + c.DOI}</a><br/></span> : undefined)}
+                  {((c.DOI) ? <span><b>Publication Link:</b><br/><a href={'http://dx.doi.org/' + c.DOI}>{c.DOI}</a><br/></span> : undefined)}
                   {((c.MAGIC_CONTRIBUTION_ID) ? <span><b>EarthRef Data DOI:</b><br/>{'10.7288/V4/MagIC/' + c.MAGIC_CONTRIBUTION_ID}</span> : undefined)}
                 </div>
                 <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
@@ -273,12 +310,12 @@ export default class extends React.Component {
                 </div>
                 <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
                   <div className="ui image">
-                    {(c.RANDOM_PLOT_NAME ?
+                    {(c.RANDOM_PLOT_NAME && c.SVW_MAGIC_CONTRIBUTION_ID ?
                       <img className="ui bordered image"
                       src={'//static.earthref.org/imcache/' +
                         (/_TY:_(aniso|eq)/.test(c.RANDOM_PLOT_NAME) ? 'Crop(geometry:292x292+111+104)' : 'Set(gravity:Center)|Crop(geometry:360x360+10+0)') +
                         '|Resize(geometry:100x100)/images/MAGIC/static_plots/' +
-                        c.MAGIC_CONTRIBUTION_ID + '/' + c.RANDOM_PLOT_NAME}
+                        c.SVW_MAGIC_CONTRIBUTION_ID + '/' + c.RANDOM_PLOT_NAME}
                         style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
                       />
                     :
@@ -347,11 +384,12 @@ export default class extends React.Component {
                   return (
                     <tr key={i}>
                       <td>{v.version}</td>
-                      <td>{v.magic_version}</td>
-                      <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
+                      <td>{parseFloat(v.magic_version).toFixed(1)}</td>
+                      <td>{moment(v.activated).local().format('LL')} by <b>{v.contributor}</b></td>
                       <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
                       <td>
-                        <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
+                        {v.folder && v.file_name ?
+                          <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
                            href={'//earthref.org/cgi-bin/z-download.cgi?file_path=' +
                              (v.folder === 'zmab' ?
                                  `/projects/earthref/archive/bgfiles/${v.folder}/${v.file_name}.txt`
@@ -359,9 +397,16 @@ export default class extends React.Component {
                                  `/projects/earthref/local/oracle/earthref/magic/uploads/${c.CONTRIBUTOR_ID}/${v.folder}/${v.file_name}`
                              )
                            }
-                        >
-                          <i className="ui file text outline icon"/> Download
-                        </a>
+                          >
+                            <i className="ui file text outline icon"/> Download
+                          </a>
+                        :
+                          <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
+                             onClick={(e) => { this.downloadMongo(v.mongo_id); e.stopPropagation(); }}
+                          >
+                            <i className="ui file text outline icon"/> Download
+                          </a>
+                        }
                       </td>
                     </tr>
                   );

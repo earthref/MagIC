@@ -1,15 +1,758 @@
 import _ from 'lodash';
+import $ from 'jquery';
 import Promise from 'bluebird';
 import Runner from '../../common/actions/runner.js';
 
-import { default as versions } from '../../../../lib/modules/magic/magic_versions';
-import { default as models   } from '../../../../lib/modules/magic/data_models';
+import {default as versions} from '../../../../lib/modules/magic/magic_versions';
+import {default as models  } from '../../../../lib/modules/magic/data_models';
+import {default as cvs     } from '../../../../lib/modules/er/controlled_vocabularies';
 
 export default class extends Runner {
 
   constructor({runnerState}) {
     super({runnerState});
   }
+
+  // Return a promise for creating the summary in the json property
+  summarizePromise(contribution) {
+
+    if (!contribution) {
+      this._appendError(`Invalid contribution.`);
+      return Promise.resolve();
+    }
+
+    this.contribution = contribution;
+    this.json = {};
+    this._initProp(this.json, 'contribution', { summary: {}});
+
+    return this._crossRef()
+      .then(this._summarizeTables.bind(this))
+      .then(this._inheritParentTables.bind(this))
+      .then(this._adoptChildTables.bind(this))
+      .then(this._aggregateTables.bind(this));
+
+  }
+
+  _crossRef() {
+
+    //console.log(this.contribution.er_citations);
+
+    return new Promise((resolve) => {
+      resolve();
+      /*try {
+        let doi = this.contribution.contribution[0].doi;
+        //console.log(doi);
+        $.ajax({
+          type: "GET",
+          dataType: "json",
+          url: "http://api.crossref.org/works/" + doi,
+        }).done((doiData) => {
+          //console.log('doi data', doiData);
+        }).fail(() => {
+          //this._appendError(`Failed to retrieve CrossRef data for DOI "${doi}".`);
+        }).always(resolve);
+      } catch(e) {
+        resolve();
+      }*/
+    });
+
+  }
+
+  _summarizeTables() {
+
+    let sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
+      return models[_.last(versions)].tables[table].position;
+    });
+
+    return Promise.each(sortedTables, (table, tableIdx) => {
+
+      return new Promise((resolve) => {
+
+        let model = models[_.last(versions)].tables[table];
+
+        if (this.contribution[table]) {
+          if (table === 'contribution') {
+            this.contribution.contribution.forEach((row) => {
+              this._copyRowProps(row, this.json.contribution, model);
+            });
+          } else if (table === 'measurements') {
+            this._initProp(this.json, 'experiments', {});
+            const experimentColumnIdx = this.contribution.measurements.columns.indexOf('experiment');
+            const specimenColumnIdx = this.contribution.measurements.columns.indexOf('specimen');
+            this.contribution.measurements.rows.forEach((row) => {
+              if (row[experimentColumnIdx]) {
+                let name = row[experimentColumnIdx];
+                let prop = this._nameToProp(name);
+                let parent = row[specimenColumnIdx];
+                let parentProp = this._nameToProp(parent);
+                this._initProp(this.json.experiments, prop, {});
+                this._initProp(this.json.experiments[prop], parentProp, {
+                  columns: this.contribution.measurements.columns,
+                  rows: [],
+                  summary: {
+                    experiments: {_n_measurements: 0}
+                  }
+                });
+                this.json.experiments[prop][parentProp].rows.push(row);
+                let rowObject = _.zipObject(this.contribution.measurements.columns, row);
+                this._summarizeRowProps(rowObject, this.json.experiments[prop][parentProp].summary.experiments, model);
+                this.json.experiments[prop][parentProp].summary.experiments._n_measurements += 1;
+              }
+            });
+            _.keys(this.json.experiments).forEach((prop) => {
+              _.keys(this.json.experiments[prop]).forEach((parentProp) => {
+                this._consolidateSummary(this.json.experiments[prop][parentProp].summary.experiments, model);
+              });
+            });
+          } else if (table === 'ages' || table === 'images') {
+            this.contribution[table].forEach((row) => {
+              let name = '';
+              let prop;
+              let parentProp;
+              let joinTable;
+              if (_.trim(row.location) !== '' && _.trim(row.site) === '') {
+                prop = this._nameToProp(row.location);
+                if (this.json.locations[prop] &&
+                    _.keys(this.json.locations[prop]).length > 0) {
+                  joinTable = 'locations';
+                  name = row.location;
+                  parentProp = _.keys(this.json.locations[prop])[0]
+                }
+              } else if (_.trim(row.site) !== '' && _.trim(row.sample) === '') {
+                prop = this._nameToProp(row.site);
+                if (this.json.sites[prop] &&
+                  _.keys(this.json.sites[prop]).length > 0) {
+                  joinTable = 'sites';
+                  name = row.site;
+                  parentProp = _.keys(this.json.sites[prop])[0]
+                }
+              } else if (_.trim(row.sample) !== '' && _.trim(row.specimen) === '') {
+                prop = this._nameToProp(row.sample);
+                if (this.json.samples[prop] &&
+                  _.keys(this.json.samples[prop]).length > 0) {
+                  joinTable = 'samples';
+                  name = row.sample;
+                  parentProp = _.keys(this.json.samples[prop])[0]
+                }
+              } else if (_.trim(row.specimen) !== '') {
+                prop = this._nameToProp(row.specimen);
+                if (this.json.specimens[prop] &&
+                  _.keys(this.json.specimens[prop]).length > 0) {
+                  joinTable = 'specimens';
+                  name = row.specimen;
+                  parentProp = _.keys(this.json.specimens[prop])[0]
+                }
+              }
+
+              // If the age or image has join target, add it to the table summary.
+              if (name !== '') {
+                this._initProp(this.json[joinTable][prop][parentProp], table, []);
+                this._initProp(this.json[joinTable][prop][parentProp].summary, table, {_n: 0});
+                this.json[joinTable][prop][parentProp][table].push(row);
+                this._summarizeRowProps(row, this.json[joinTable][prop][parentProp].summary[table], model);
+                this.json[joinTable][prop][parentProp].summary[table]._n += 1;
+              }
+            });
+
+            // Search for ages or images and consolidate the summaries.
+            _.keys(this.json).forEach((joinTable) => {
+              _.keys(this.json[joinTable]).forEach((prop) => {
+                _.keys(this.json[joinTable][prop]).forEach((parentProp) => {
+                  if (this.json[joinTable][prop][parentProp].summary &&
+                    this.json[joinTable][prop][parentProp].summary[table])
+                    this._consolidateSummary(this.json[joinTable][prop][parentProp].summary[table], model);
+                });
+              });
+            });
+          } else if (table === 'criteria') {
+            this.contribution[table].forEach((row) => {
+
+            });
+          } else {
+            let nameColumn = table.replace(/s$/, '');
+            let parentColumn = sortedTables[tableIdx-1].replace(/s$/, '');
+            this._initProp(this.json, table, {});
+            this.contribution[table].forEach((row) => {
+              let name = row[nameColumn] || '';
+              let prop = this._nameToProp(name);
+              let parent = row[parentColumn] || '';
+              let parentProp = this._nameToProp(parent);
+              this._initProp(this.json[table], prop, {});
+              this._initProp(this.json[table][prop], parentProp, {
+                rows: [],
+                summary: {
+                  [table]: {_n_results: 0}
+                }
+              });
+              this.json[table][prop][parentProp].rows.push(row);
+              this._summarizeRowProps(row, this.json[table][prop][parentProp].summary[table], model);
+              this.json[table][prop][parentProp].summary[table]._n_results += 1;
+            });
+            _.keys(this.json[table]).forEach((prop) => {
+              _.keys(this.json[table][prop]).forEach((parentProp) => {
+                this._consolidateSummary(this.json[table][prop][parentProp].summary[table], model);
+              });
+            });
+          }
+        }
+        resolve();
+      }).delay();
+    });
+
+  }
+
+  _inheritParentTables() {
+
+    let sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
+      return models[_.last(versions)].tables[table].position;
+    });
+
+    return Promise.each(sortedTables, (table) => {
+
+      return new Promise((resolve) => {
+
+        let model = models[_.last(versions)].tables[table];
+        let contributionSummary = _.omitBy(this.json.contribution, (value, key) => /(^__|summary)/.test(key));
+
+        if (table === 'contribution') {
+
+        } else if (table === 'measurements') {
+          _.keys(this.json.experiments).forEach((experimentProp) => {
+            _.keys(this.json.experiments[experimentProp]).forEach((specimenProp) => {
+              this._inheritParentSummaries(
+                'experiments', experimentProp, specimenProp,
+                'specimens', specimenProp,
+                models[_.last(versions)].tables.specimens
+              );
+              if (this.json.specimens) _.keys(this.json.specimens[specimenProp]).forEach((sampleProp) => {
+                this._inheritParentSummaries(
+                  'experiments', experimentProp, specimenProp,
+                  'samples', sampleProp,
+                  models[_.last(versions)].tables.samples
+                );
+                if (this.json.samples) _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+                  this._inheritParentSummaries(
+                    'experiments', experimentProp, specimenProp,
+                    'sites', siteProp,
+                    models[_.last(versions)].tables.sites
+                  );
+                  if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                    this._inheritParentSummaries(
+                      'experiments', experimentProp, specimenProp,
+                      'locations', locationProp,
+                      models[_.last(versions)].tables.locations
+                    );
+                  });
+                });
+              });
+              this.json.experiments[experimentProp][specimenProp].summary.contribution = contributionSummary;
+            });
+          });
+        } else if (table === 'ages' || table === 'images' || table === 'criteria') {
+
+        } else if (table === 'specimens') {
+          _.keys(this.json.specimens).forEach((specimenProp) => {
+            _.keys(this.json.specimens[specimenProp]).forEach((sampleProp) => {
+              this._inheritParentSummaries(
+                'specimens', specimenProp, sampleProp,
+                'samples', sampleProp,
+                models[_.last(versions)].tables.samples
+              );
+              if (this.json.samples) _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+                this._inheritParentSummaries(
+                  'specimens', specimenProp, sampleProp,
+                  'sites', siteProp,
+                  models[_.last(versions)].tables.sites
+                );
+                if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                  this._inheritParentSummaries(
+                    'specimens', specimenProp, sampleProp,
+                    'locations', locationProp,
+                    models[_.last(versions)].tables.locations
+                  );
+                });
+              });
+              this.json.specimens[specimenProp][sampleProp].summary.contribution = contributionSummary;
+            });
+          });
+        } else if (table === 'samples') {
+          _.keys(this.json.samples).forEach((sampleProp) => {
+            _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+              this._inheritParentSummaries(
+                'samples', sampleProp, siteProp,
+                'sites', siteProp,
+                models[_.last(versions)].tables.sites
+              );
+              if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                this._inheritParentSummaries(
+                  'samples', sampleProp, siteProp,
+                  'locations', locationProp,
+                  models[_.last(versions)].tables.locations
+                );
+              });
+              this.json.samples[sampleProp][siteProp].summary.contribution = contributionSummary;
+            });
+          });
+        } else if (table === 'sites') {
+          _.keys(this.json.sites).forEach((siteProp) => {
+            _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+              this._inheritParentSummaries(
+                'sites', siteProp, locationProp,
+                'locations', locationProp,
+                models[_.last(versions)].tables.locations
+              );
+              this.json.sites[siteProp][locationProp].summary.contribution = contributionSummary;
+            });
+          });
+        } else if (table === 'locations') {
+          _.keys(this.json.locations).forEach((locationProp) => {
+            _.keys(this.json.locations[locationProp]).forEach((prop) => {
+              this.json.locations[locationProp][prop].summary.contribution = contributionSummary;
+            });
+          });
+        }
+
+        resolve();
+      }).delay();
+    });
+
+  }
+
+  _adoptChildTables() {
+
+    let sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
+      return models[_.last(versions)].tables[table].position;
+    });
+
+    return Promise.each(sortedTables, (table) => {
+
+      return new Promise((resolve) => {
+
+        let model = models[_.last(versions)].tables[table];
+
+        if (table === 'locations') {
+          this._initProp(this.json.contribution.summary, table, {});
+          _.keys(this.json.locations).forEach((locationProp) => {
+            _.keys(this.json.locations[locationProp]).forEach((prop) => {
+              this._aggregateProps(
+                this.json[table][locationProp][prop].summary[table],
+                this.json.contribution.summary[table],
+                model
+              );
+            });
+          });
+        }
+        if (table === 'sites') {
+          this._initProp(this.json.contribution.summary, table, {});
+          _.keys(this.json.sites).forEach((siteProp) => {
+            _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+              this._aggregateProps(
+                this.json[table][siteProp][locationProp].summary[table],
+                this.json.contribution.summary[table],
+                model
+              );
+              if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                this._initProp(this.json.locations[locationProp][prop].summary, table, {});
+                this._aggregateProps(
+                  this.json[table][siteProp][locationProp].summary[table],
+                  this.json.locations[locationProp][prop].summary[table],
+                  model
+                );
+              });
+            });
+          });
+        }
+        if (table === 'samples') {
+          this._initProp(this.json.contribution.summary, table, {});
+          _.keys(this.json.samples).forEach((sampleProp) => {
+            _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+              this._aggregateProps(
+                this.json[table][sampleProp][siteProp].summary[table],
+                this.json.contribution.summary[table],
+                model
+              );
+              if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                this._initProp(this.json.sites[siteProp][locationProp].summary, table, {});
+                this._aggregateProps(
+                  this.json[table][sampleProp][siteProp].summary[table],
+                  this.json.sites[siteProp][locationProp].summary[table],
+                  model
+                );
+                if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                  this._initProp(this.json.locations[locationProp][prop].summary, table, {});
+                  this._aggregateProps(
+                    this.json[table][sampleProp][siteProp].summary[table],
+                    this.json.locations[locationProp][prop].summary[table],
+                    model
+                  );
+                });
+              });
+            });
+          });
+        }
+        if (table === 'specimens') {
+          this._initProp(this.json.contribution.summary, table, {});
+          _.keys(this.json.specimens).forEach((specimenProp) => {
+            _.keys(this.json.specimens[specimenProp]).forEach((sampleProp) => {
+              this._aggregateProps(
+                this.json[table][specimenProp][sampleProp].summary[table],
+                this.json.contribution.summary[table],
+                model
+              );
+              if (this.json.samples) _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+                this._initProp(this.json.samples[sampleProp][siteProp].summary, table, {});
+                this._aggregateProps(
+                  this.json[table][specimenProp][sampleProp].summary[table],
+                  this.json.samples[sampleProp][siteProp].summary[table],
+                  model
+                );
+                if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                  this._initProp(this.json.sites[siteProp][locationProp].summary, table, {});
+                  this._aggregateProps(
+                    this.json[table][specimenProp][sampleProp].summary[table],
+                    this.json.sites[siteProp][locationProp].summary[table],
+                    model
+                  );
+                  if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                    this._initProp(this.json.locations[locationProp][prop].summary, table, {});
+                    this._aggregateProps(
+                      this.json[table][specimenProp][sampleProp].summary[table],
+                      this.json.locations[locationProp][prop].summary[table],
+                      model
+                    );
+                  });
+                });
+              });
+            });
+          });
+        }
+        if (table === 'measurements') {
+          this._initProp(this.json.contribution.summary, 'experiments', {});
+          _.keys(this.json.experiments).forEach((experimentProp) => {
+            _.keys(this.json.experiments[experimentProp]).forEach((specimenProp) => {
+              this._aggregateProps(
+                this.json.experiments[experimentProp][specimenProp].summary.experiments,
+                this.json.contribution.summary.experiments,
+                model
+              );
+              if (this.json.specimens) _.keys(this.json.specimens[specimenProp]).forEach((sampleProp) => {
+                this._initProp(this.json.specimens[specimenProp][sampleProp].summary, 'experiments', {});
+                this._aggregateProps(
+                  this.json.experiments[experimentProp][specimenProp].summary.experiments,
+                  this.json.specimens[specimenProp][sampleProp].summary.experiments,
+                  model
+                );
+                if (this.json.samples) _.keys(this.json.samples[sampleProp]).forEach((siteProp) => {
+                  this._initProp(this.json.samples[sampleProp][siteProp].summary, 'experiments', {});
+                  this._aggregateProps(
+                    this.json.experiments[experimentProp][specimenProp].summary.experiments,
+                    this.json.samples[sampleProp][siteProp].summary.experiments,
+                    model
+                  );
+                  if (this.json.sites) _.keys(this.json.sites[siteProp]).forEach((locationProp) => {
+                    this._initProp(this.json.sites[siteProp][locationProp].summary, 'experiments', {});
+                    this._aggregateProps(
+                      this.json.experiments[experimentProp][specimenProp].summary.experiments,
+                      this.json.sites[siteProp][locationProp].summary.experiments,
+                      model
+                    );
+                    if (this.json.locations) _.keys(this.json.locations[locationProp]).forEach((prop) => {
+                      this._initProp(this.json.locations[locationProp][prop].summary, 'experiments', {});
+                      this._aggregateProps(
+                        this.json.experiments[experimentProp][specimenProp].summary.experiments,
+                        this.json.locations[locationProp][prop].summary.experiments,
+                        model
+                      );
+                    });
+                  });
+                });
+              });
+            });
+          });
+        }
+        resolve();
+
+      }).delay();
+    });
+  }
+
+  _aggregateTables() {
+
+    let sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
+      return models[_.last(versions)].tables[table].position;
+    });
+
+    return Promise.each(sortedTables, (table) => {
+
+      return new Promise((resolve) => {
+
+        let model = models[_.last(versions)].tables[table];
+
+        if (table === 'contribution') {
+          this._initProp(this.json.contribution.summary, '_all', {});
+          _.keys(this.json.contribution.summary).forEach((summaryTable) => {
+            if (summaryTable !== '_all' && summaryTable !== 'contribution') {
+              this._aggregateProps(
+                this.json.contribution.summary[summaryTable],
+                this.json.contribution.summary._all,
+                models[_.last(versions)].tables[summaryTable === 'experiments' ? 'measurements' : summaryTable]
+              );
+            }
+          });
+        } else if (table === 'measurements') {
+          _.keys(this.json.experiments).forEach((experimentProp) => {
+            _.keys(this.json.experiments[experimentProp]).forEach((specimenProp) => {
+              this._initProp(this.json.experiments[experimentProp][specimenProp].summary, '_all', {});
+              _.keys(this.json.experiments[experimentProp][specimenProp].summary).forEach((summaryTable) => {
+                if (summaryTable !== '_all' && summaryTable !== 'contribution') {
+                  this._aggregateProps(
+                    this.json.experiments[experimentProp][specimenProp].summary[summaryTable],
+                    this.json.experiments[experimentProp][specimenProp].summary._all,
+                    models[_.last(versions)].tables[summaryTable === 'experiments' ? 'measurements' : summaryTable]
+                  );
+                }
+              });
+            });
+          });
+        } else if (table === 'ages' || table === 'images' || table === 'criteria') {
+
+        } else {
+          _.keys(this.json[table]).forEach((prop) => {
+            _.keys(this.json[table][prop]).forEach((parentProp) => {
+              this._initProp(this.json[table][prop][parentProp].summary, '_all', {});
+              _.keys(this.json[table][prop][parentProp].summary).forEach((summaryTable) => {
+                if (summaryTable !== '_all' && summaryTable !== 'contribution') {
+                  this._aggregateProps(
+                    this.json[table][prop][parentProp].summary[summaryTable],
+                    this.json[table][prop][parentProp].summary._all,
+                    models[_.last(versions)].tables[summaryTable === 'experiments' ? 'measurements' : summaryTable]
+                  );
+                }
+              });
+            });
+          });
+        }
+
+        resolve();
+
+      }).delay();
+    });
+  }
+
+  _nameToProp(name) {
+    return '_' + _.trim(name).replace(/\./g, '_');
+  }
+
+  _initProp(object, property, initValue) {
+    if (!_.has(object, property)) object[property] = initValue;
+  }
+
+  _copyRowProps(row, summary, model) {
+
+    if (!summary) {
+      this._appendError(`Invalid summary.`);
+      return;
+    }
+    if (!model || !model.columns) {
+      this._appendError(`Invalid data model.`);
+      return;
+    }
+
+    _.keys(row).forEach((column) => {
+      if (model.columns[column] && model.columns[column].type === 'List') {
+        this._initProp(summary, column, []);
+        row[column].split(':').forEach((val) => {
+          if (_.trim(val) !== '')
+            summary[column].push(_.trim(val));
+        });
+      } else if (model.columns[column] && model.columns[column].type === 'Number') {
+        summary[column] = parseFloat(row[column]);
+      } else if (model.columns[column] && model.columns[column].type === 'Integer') {
+        summary[column] = parseInt(row[column]);
+      } else if (model.columns[column] && model.columns[column].type === 'String') {
+        summary[column] = _.trim(row[column]);
+      } else if (model.columns[column] && model.columns[column].type === 'Timestamp') {
+        summary[column] = _.trim(row[column]);
+      } else if (model.columns[column]) {
+        this._appendError(`Unrecognized data model type "${model.columns[column].type}".`);
+      }else if (model.columns[column]) {
+        this._appendError(`Unrecognized data model column "${column}".`);
+      }
+    });
+  }
+
+  _summarizeRowProps(row, summary, model) {
+
+    if (!summary) {
+      this._appendError(`Invalid summary.`);
+      return;
+    }
+    if (!model || !model.columns) {
+      this._appendError(`Invalid data model.`);
+      return;
+    }
+
+    ['age', 'age_low', 'age_high'].forEach((column) => {
+      if (row.age_unit && row[column]) {
+        let age = parseFloat(row[column]);
+        let bpColumn = '_' + column + '_bp';
+        if (age !== undefined) {
+          this._initProp(summary, bpColumn, []);
+          if (row.age_unit === 'Ga'                ) summary[bpColumn].push(1000000000*age);
+          if (row.age_unit === 'Ma'                ) summary[bpColumn].push(1000000*age);
+          if (row.age_unit === 'Ka'                ) summary[bpColumn].push(1000*age - (age < 100 ? 1950 : 0));
+          if (row.age_unit === 'Years AD (+/-)'    ) summary[bpColumn].push(1950 - age);
+          if (row.age_unit === 'Years BP'          ) summary[bpColumn].push(age);
+          if (row.age_unit === 'Years Cal AD (+/-)') summary[bpColumn].push(1950 - age);
+          if (row.age_unit === 'Years Cal BP'      ) summary[bpColumn].push(age);
+        }
+      }
+    });
+
+    _.keys(row).forEach((column) => {
+      if (!model.columns[column]) {
+        this._appendError(`Unrecognized data model column "${column}".`);
+      } else {
+        if (model.columns[column].type === 'List') {
+          row[column].split(':').forEach((val) => {
+            if (_.trim(val) !== '') {
+              this._initProp(summary, column, []);
+              summary[column].push(_.trim(val));
+            }
+          });
+        } else if (model.columns[column].type === 'Number') {
+          if (!isNaN(parseFloat(row[column]))) {
+            this._initProp(summary, column, []);
+            summary[column].push(parseFloat(row[column]));
+          }
+        } else if (model.columns[column].type === 'Integer') {
+          if (!isNaN(parseInt(row[column]))) {
+            this._initProp(summary, column, []);
+            summary[column].push(parseInt(row[column]));
+          }
+        } else if (model.columns[column].type === 'String') {
+          if (_.trim(row[column]) !== '') {
+            this._initProp(summary, column, []);
+            let val;
+            if (model.columns[column].unit === 'Flag' && model.columns[column].validations) {
+              model.columns[column].validations.forEach((validation) => {
+                let match = validation.match(/cv\("(.*)"\)/);
+                if (val === undefined && match && match.length > 1 && cvs[match[1]] && cvs[match[1]].items) {
+                  cvs[match[1]].items.forEach((cvItem) => {
+                    if (val === undefined && cvItem.item && cvItem.item.toLowerCase() === _.trim(row[column]).toLowerCase())
+                      val = cvItem.label;
+                  });
+                }
+              });
+            }
+            summary[column].push(val !== undefined ? val : _.trim(row[column]));
+          }
+        } else if (model.columns[column].type === 'Timestamp') {
+          if (_.trim(row[column]) !== '') {
+            this._initProp(summary, column, []);
+            summary[column].push(_.trim(row[column]));
+          }
+        } else if (model.columns[column].type === 'Dictionary') {
+          row[column].split(':').forEach((val) => {
+            let match = val.match(/\s*([^[].+)\[(.+)\]\s*/);
+            if (match && match.length > 2) {
+              this._initProp(summary, column, []);
+              summary[column].push({key: match[1], value: match[2]});
+            }
+          });
+        } else if (model.columns[column].type === 'Matrix') {
+          this._initProp(summary, column, []);
+          summary[column].push(row[column].split(';').map((row) => row.split(':').map((val) => parseFloat(val))));
+        } else {
+          this._appendError(`Unrecognized data model type "${model.columns[column].type}".`);
+        }
+      }
+    });
+  }
+
+  _consolidateSummary(summary, model) {
+    _.keys(summary).forEach((column) => {
+      if (model.columns[column]) {
+        if (model.columns[column].type === 'List') {
+          summary[column] = _.sortBy(_.uniq(summary[column]));
+        } else if (model.columns[column].type === 'Number' ||
+                   model.columns[column].type === 'Integer') {
+          summary[column] = {
+            vals: summary[column],
+            n: summary[column].length,
+            min: _.min(_.without(summary[column], undefined)),
+            max: _.max(_.without(summary[column], undefined))
+          };
+        } else {
+          summary[column] = _.sortBy(_.uniq(summary[column]));
+        }
+      }
+      if (/^\_age.*\_bp$/.test(column)) {
+        summary[column] = {
+          vals: summary[column],
+          n: summary[column].length,
+          min: _.min(_.without(summary[column], undefined)),
+          max: _.max(_.without(summary[column], undefined))
+        };
+      }
+    });
+  }
+
+  _inheritParentSummaries(table, prop, parentProp, fromTable, fromProp, model) {
+    if (this.json[table] && this.json[table][prop] && this.json[table][prop][parentProp] &&
+        this.json[fromTable] && this.json[fromTable][fromProp]) {
+      this._initProp(this.json[table][prop][parentProp], 'summary', {});
+      this._initProp(this.json[table][prop][parentProp].summary, fromTable, {});
+      _.keys(this.json[fromTable][fromProp]).forEach((fromParentProp) => {
+        if (this.json[fromTable][fromProp][fromParentProp].summary &&
+            this.json[fromTable][fromProp][fromParentProp].summary[fromTable])
+          this._aggregateProps(
+            this.json[fromTable][fromProp][fromParentProp].summary[fromTable],
+            this.json[table][prop][parentProp].summary[fromTable],
+            model
+          );
+      });
+    }
+  }
+  
+  _aggregateProps(fromSummary, toSummary, model) {
+    _.keys(fromSummary).forEach((column) => {
+      if (model.columns[column]) {
+        if (model.columns[column].type === 'Number' ||
+            model.columns[column].type === 'Integer') {
+          if (!_.has(toSummary, column)) {
+            toSummary[column] = _.cloneDeep(fromSummary[column]);
+          } else {
+            toSummary[column].vals = toSummary[column].vals.concat(fromSummary[column].vals);
+            toSummary[column].n =   _.sum([toSummary[column].n, fromSummary[column].n]);
+            toSummary[column].min = _.min(_.without([toSummary[column].min, fromSummary[column].min], undefined));
+            toSummary[column].max = _.max(_.without([toSummary[column].max, fromSummary[column].max], undefined));
+          }
+          if (toSummary[column].min === undefined)
+            console.log(column, fromSummary[column].min, toSummary[column].min);
+        } else {
+          this._initProp(toSummary, column, []);
+          toSummary[column] = _.sortBy(_.uniq(toSummary[column].concat(fromSummary[column])));
+        }
+      }
+      if (/^\_age.*\_bp$/.test(column)) {
+        if (!_.has(toSummary, column)) {
+          toSummary[column] = _.cloneDeep(fromSummary[column]);
+        } else {
+          toSummary[column].vals = toSummary[column].vals.concat(fromSummary[column].vals);
+          toSummary[column].n =   _.sum([toSummary[column].n, fromSummary[column].n]);
+          toSummary[column].min = _.min(_.without([toSummary[column].min, fromSummary[column].min], undefined));
+          toSummary[column].max = _.max(_.without([toSummary[column].max, fromSummary[column].max], undefined));
+        }
+        if (toSummary[column].min === undefined)
+          console.log(column, fromSummary[column], toSummary[column]);
+      }
+      if (/^\_n\_/.test(column)) {
+        this._initProp(toSummary, column, 0);
+        toSummary[column] += fromSummary[column];
+      }
+    });
+  };
 
   summarize(contribution) {
 
@@ -93,8 +836,8 @@ export default class extends Runner {
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
           else
-            if (_.trim(specimenRow[column]) !== '')
-              summary.contribution[column.toUpperCase()][_.trim(specimenRow[column])] = true
+          if (_.trim(specimenRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(specimenRow[column])] = true
         });
 
         let specimenName = specimenRow.specimen;
@@ -119,7 +862,7 @@ export default class extends Runner {
 
         // If this specimen belongs to a sample:
         if (specimenName !== undefined && specimenName !== '' &&
-            sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
+          sampleName !== undefined && _.isString(sampleName) && sampleName !== '') {
           summary.specimens[specimenName].ER_SAMPLE_NAME = sampleName;
 
           // Increment the number of specimen results for this sample.
@@ -171,8 +914,8 @@ export default class extends Runner {
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
           else
-            if (_.trim(sampleRow[column]) !== '')
-              summary.contribution[column.toUpperCase()][_.trim(sampleRow[column])] = true
+          if (_.trim(sampleRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(sampleRow[column])] = true
         });
 
         let sampleName = sampleRow.sample;
@@ -196,7 +939,7 @@ export default class extends Runner {
 
         // If this sample belongs to a site:
         if (sampleName !== undefined && sampleName !== '' &&
-            siteName !== undefined && _.isString(siteName) && siteName !== '') {
+          siteName !== undefined && _.isString(siteName) && siteName !== '') {
           summary.samples[sampleName].ER_SITE_NAME = siteName;
 
           // Increment the number of sample results for this site.
@@ -231,7 +974,7 @@ export default class extends Runner {
         }
       });
     }
-    
+
     if (contribution.sites) {
       summary.sites     = summary.sites     || {};
       summary.locations = summary.locations || {};
@@ -251,8 +994,8 @@ export default class extends Runner {
                 summary.contribution[column.toUpperCase()][_.trim(val)] = true
             });
           else
-            if (_.trim(siteRow[column]) !== '')
-              summary.contribution[column.toUpperCase()][_.trim(siteRow[column])] = true
+          if (_.trim(siteRow[column]) !== '')
+            summary.contribution[column.toUpperCase()][_.trim(siteRow[column])] = true
         });
 
         let siteName = siteRow.site;
@@ -276,7 +1019,7 @@ export default class extends Runner {
 
         // If this site belongs to a location:
         if (siteName !== undefined && siteName !== '' &&
-            locationName !== undefined && _.isString(locationName) && locationName !== '') {
+          locationName !== undefined && _.isString(locationName) && locationName !== '') {
           summary.sites[siteName].ER_SITE_NAME = siteName;
 
           // Increment the number of site results for this location.
@@ -366,11 +1109,11 @@ export default class extends Runner {
       });
 
       /*if (column === 'LAT' ||
-          column === 'LON'
-      ) {
-        summary.contribution[column + 'S'] = summary.contribution[column];
-        delete summary.contribution[column];
-      }*/
+       column === 'LON'
+       ) {
+       summary.contribution[column + 'S'] = summary.contribution[column];
+       delete summary.contribution[column];
+       }*/
 
       if (summary.contribution.ER_LOCATION_NAMES) {
         summary.contribution.N_LOCATIONS = summary.contribution.ER_LOCATION_NAMES.split(':').length;
@@ -479,23 +1222,21 @@ export default class extends Runner {
     }
 
     /*if (contribution.locations) {
-      summary.locations = {};
-
-      if (contribution.sites       ) summary.location[].n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
-      if (contribution.samples     ) summary.location[].n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
-      if (contribution.specimens   ) summary.location[].n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
-      if (contribution.measurements) summary.location[].n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
-    }
-
-    if (contribution.locations   ) summary.contribution.n_locations   = this.countUniqueValues(contribution.locations   , 'location'  );
-    if (contribution.sites       ) summary.contribution.n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
-    if (contribution.samples     ) summary.contribution.n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
-    if (contribution.specimens   ) summary.contribution.n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
-    if (contribution.measurements) summary.contribution.n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
-    if (contribution.ages        ) summary.contribution.n_ages        = contribution.ages.length;
-    if (contribution.criteria    ) summary.contribution.n_criteria    = contribution.criteria.length;
-    if (contribution.images      ) summary.contribution.n_images      = contribution.images.length;
-*/
+     summary.locations = {};
+     if (contribution.sites       ) summary.location[].n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
+     if (contribution.samples     ) summary.location[].n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
+     if (contribution.specimens   ) summary.location[].n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
+     if (contribution.measurements) summary.location[].n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
+     }
+     if (contribution.locations   ) summary.contribution.n_locations   = this.countUniqueValues(contribution.locations   , 'location'  );
+     if (contribution.sites       ) summary.contribution.n_sites       = this.countUniqueValues(contribution.sites       , 'site'      );
+     if (contribution.samples     ) summary.contribution.n_samples     = this.countUniqueValues(contribution.samples     , 'sample'    );
+     if (contribution.specimens   ) summary.contribution.n_specimens   = this.countUniqueValues(contribution.specimens   , 'specimen'  );
+     if (contribution.measurements) summary.contribution.n_experiments = this.countUniqueValues(contribution.measurements, 'experiment');
+     if (contribution.ages        ) summary.contribution.n_ages        = contribution.ages.length;
+     if (contribution.criteria    ) summary.contribution.n_criteria    = contribution.criteria.length;
+     if (contribution.images      ) summary.contribution.n_images      = contribution.images.length;
+     */
     console.log(contribution, summary);
 
     return summary;
@@ -505,4 +1246,5 @@ export default class extends Runner {
   countUniqueValues(collection, property, filterProperty, filterValue) {
     return _.keys(_.reduce(collection, (values, item) => values[item[property]] = true, {})).length;
   }
+
 }

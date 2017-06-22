@@ -107,12 +107,12 @@ describe('magic.actions.export_contribution', () => {
         '>>>>>>>>>>\n' +
         'tab delimited\tsites\n' +
         'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
-        'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
+        'si2\tlo1\t\tcode2:code1\t\ta\n' +
+        'si1\tlo1\tKiln\t\t10.1023/A1\t\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\n' +
         'specimen\tsample\tigsn\tcitations\tdip\n' +
-        'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
+        'sp1\tsa1\tigsn1\t"10.1023/A:1":This study\t1.2\n' +
         'sp2\tsa1\tigsn2\t\t1.3\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tmeasurements\n' +
@@ -190,15 +190,15 @@ describe('magic.actions.export_contribution', () => {
         'Site Name\tLocation Name\tSite Name Alternatives\tMethod Codes\tCitation Names\tDescription\n' +
         'String\tString\tList\tList\tList\tString\n' +
         'site\tlocation\tsite_alternatives\tmethod_codes\tcitations\tdescription\n' +
-        'si2\tlo1\t\t:code2:code1:\t\ta\n' +
-        'si1\tlo1\tKiln\t\t:10.1023/A1:\t\n' +
+        'si2\tlo1\t\tcode2:code1\t\ta\n' +
+        'si1\tlo1\tKiln\t\t10.1023/A1\t\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
         'Names\t\tSpecimen\tResult\tOrientation\n' +
         'Specimen Name\tSample Name\tSpecimen IGSN\tCitation Names\tDip\n' +
         'String\tString\tString\tList\tNumber in Degrees\n' +
         'specimen\tsample\tigsn\tcitations\tdip\n' +
-        'sp1\tsa1\tigsn1\t:"10.1023/A:1":This study:\t1.2\n' +
+        'sp1\tsa1\tigsn1\t"10.1023/A:1":This study\t1.2\n' +
         'sp2\tsa1\tigsn2\t\t1.3\n';
       exportContributionToExtendedTextJSONTest(json1, text1);
       const json2 = {
