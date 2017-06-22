@@ -54,7 +54,7 @@ export default class extends React.Component {
     $(this.refs['confirm delete']).modal('setting', {
       onApprove: ($modal) => {
         console.log("delete?", $(this.refs['confirm delete input']).val());
-        if ($(this.refs['confirm delete input']).val() === 'DELETE') {
+        if ($(this.refs['confirm delete input']).val() === 'delete') {
           console.log("deleting");
           Meteor.call('deleteContribution', id, '@' + Cookies.get('user_id'),
             (error) => {
@@ -276,7 +276,7 @@ export default class extends React.Component {
               Warning! Deleting this contribution is irreversible.
             </div>
             <div className="ui basic segment">
-              Please type "DELETE" below if this is your intention:
+              Please type "delete" below if this is your intention:
             </div>
             <div className="ui fluid large error input">
               <input ref="confirm delete input" defaultValue={''}/>
