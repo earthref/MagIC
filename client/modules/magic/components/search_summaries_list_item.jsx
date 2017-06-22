@@ -269,7 +269,7 @@ export default class extends React.Component {
                         }}>
                   </span>
                   <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                    {moment(c.INSERTED, "DD-MMM-YY HH:mm:ss").format('ll')} by <b>{c.CONTRIBUTOR}</b>
+                    {moment.utc(c.INSERTED, "DD-MMM-YY HH:mm:ss").local().format('LL')} by <b>{c.CONTRIBUTOR}</b>
                   </span>
                 </div>
               <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
@@ -385,7 +385,7 @@ export default class extends React.Component {
                     <tr key={i}>
                       <td>{v.version}</td>
                       <td>{parseFloat(v.magic_version).toFixed(1)}</td>
-                      <td>{moment(v.activated).calendar()} by <b>{v.contributor}</b></td>
+                      <td>{moment(v.activated).local().format('LL')} by <b>{v.contributor}</b></td>
                       <td><a href={'https://earthref.org/MagIC/' + v.contribution_id}>{'earthref.org/MagIC/' + v.contribution_id}</a></td>
                       <td>
                         {v.folder && v.file_name ?
