@@ -176,6 +176,7 @@ export default function () {
         "MAGIC_CONTRIBUTION_ID",
         "JOURNAL",
         "REFERENCE_HTML",
+        "DOI",
         "VERSION",
         "version_history"
       ]);
