@@ -116,7 +116,7 @@ export default function () {
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.VERSION = 'PRIVATE';
+      s.contribution.VERSION = s.contribution.VERSION || 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
       c._summary = s;
@@ -303,9 +303,9 @@ export default function () {
       ).fetch();
       return contributions;
     },
-    'getUnactivatedContributions': function(dummy) {
+    'getUnactivatedContributions': function(contributor) {
       const contributions = Collections['magic.private.contributions'].find(
-        {_activated: false},
+        {_contributor: contributor, _activated: false},
         {sort: {'_inserted': -1}}
       ).fetch();
       return contributions;
@@ -325,7 +325,7 @@ export default function () {
 
       c._id = uuid.v4();
 
-      s.contribution.VERSION = v || 'PRIVATE'
+      s.contribution.VERSION = v || 'PRIVATE';
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");

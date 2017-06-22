@@ -11,7 +11,6 @@ import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx';
-import {Collections} from '/lib/collections';
 import {default as versions} from '../../../../lib/modules/magic/magic_versions';
 import {default as models} from '../../../../lib/modules/magic/data_models';
 import SummarizeContribution from '../actions/summarize_contribution';
@@ -42,10 +41,12 @@ export default class MagICUploadContribution extends React.Component {
       _mailid: Cookies.get('mail_id'),
       uploading: false,
       uploaded: false,
-      uploadError: undefined
+      uploadError: undefined,
+      privateContributionsLoaded: undefined,
     };
     this.summarizer = new SummarizeContribution({});
     this.state = this.initialState;
+    this.privateContributions = [];
     if (Cookies.get('user_id')) {
       Tracker.autorun(function () {
         Meteor.subscribe('magic private contributions', '@' + Cookies.get('user_id'));
@@ -103,16 +104,34 @@ export default class MagICUploadContribution extends React.Component {
     $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
     $(this.refs['private contributions']).not('.ui-dropdown').addClass('ui-dropdown').dropdown({
       onChange: (value, text, $choice) => {
-        let old = (value === '' ? {} : Collections['magic.private.contributions'].findOne(value));
-        console.log('private contribution as changed', value, text, $choice, old);
-        this.setState({
-          _id: value, 
-          _existing_contribution: (value === '' ? undefined : old),
-          _existing_summary: (value === '' ? undefined : this.summarizer.summarize(old))
-      }, () => this.reviewUpload());
+        if (value === '') {
+          this.setState({
+            _id: value,
+            _existing_contribution: undefined,
+            _existing_summary: undefined
+          }, () => this.reviewUpload());
+        } else {
+          Meteor.call('getPrivateContribution', value, (error, c) => {
+            this.setState({
+              _id: value,
+              _existing_contribution: c,
+              _existing_summary: this.summarizer.summarize(c)
+            }, () => this.reviewUpload());
+          });
+        }
       }
     });
     $(this.refs['private contributions']).dropdown('refresh');
+
+    if (this.state.privateContributionsLoaded === undefined) {
+      console.log('getting private contributions');
+      Meteor.call('getUnactivatedContributions', '@' + Cookies.get('user_id'), (error, contributions) => {
+        this.privateContributions = contributions;
+        console.log('private contributions', contributions);
+        this.setState({privateContributionsLoaded: true});
+      });
+      this.setState({privateContributionsLoaded: false});
+    }
   }
 
   reviewImport() {
@@ -121,7 +140,7 @@ export default class MagICUploadContribution extends React.Component {
 
   reviewUpload() {
     this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
-    console.log('before merging', this.state._existing_contribution, this.contribution);
+    //console.log('before merging', this.state._existing_contribution, this.contribution);
     for (let file of this.files) {
       if (file.imported) file.imported.map((data) => {
         if (data.table && data.columns && data.rows) {
@@ -162,7 +181,7 @@ export default class MagICUploadContribution extends React.Component {
       });
     }
     this.summary = this.summarizer.summarize(this.contribution);
-    console.log('after merging', this.contribution, this.summary);
+    //console.log('after merging', this.contribution, this.summary);
 
     let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
     this.setState({
@@ -245,7 +264,7 @@ export default class MagICUploadContribution extends React.Component {
             if (line != '') return line.split('\t');
           });
           _.pull(this.files[i].data[j], undefined);
-          console.log('parsed table', this.files[i].tableNames[j], this.files[i].data[j]);
+          //console.log('parsed table', this.files[i].tableNames[j], this.files[i].data[j]);
         });
       } else {
         this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
@@ -333,11 +352,11 @@ export default class MagICUploadContribution extends React.Component {
       });
   } else {
         this.contribution._activated = false;
-        console.log('upload', this.contribution, this.state._id);
+        //console.log('upload', this.contribution, this.state._id);
         if (this.state._id !== '')
           Meteor.call('updateContribution', this.state._id, this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
             (error) => {
-              console.log('updated contribution', this.state._id, error);
+              //console.log('updated contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
               else       this.setState({uploaded: true, uploading: false});
             }
@@ -345,7 +364,7 @@ export default class MagICUploadContribution extends React.Component {
         else
           Meteor.call('insertContribution', this.state._contributor, this.state._userid, this.state._mailid, this.state._name, this.contribution, this.summary,
             (error) => {
-              console.log('inserted contribution', this.state._id, error);
+              //console.log('inserted contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
               else       this.setState({uploaded: true, uploading: false});
             }
@@ -421,7 +440,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
-    console.log('renderDataImporter', this.files[i].format, data);
+    //console.log('renderDataImporter', this.files[i].format, data);
     return (
       <DataImporter
         portal="MagIC"
@@ -559,9 +578,6 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   render() {
-    //const privateContributions = Collections['magic.private.contributions'].find({_contributor: '@' + Cookies.get('user_id'), _activated: false}, {'_inserted': -1}).fetch();
-    //console.log('privateContributions', privateContributions, Cookies.get('user_id'));
-
     const step = this.state.visibleStep;
     if (!this.state._contributor) return (
       <div>
@@ -932,12 +948,18 @@ export default class MagICUploadContribution extends React.Component {
                           <div data-value="" className="item">
                             A New Private Contribution
                           </div>
-                          {Collections['magic.private.contributions'].find({_contributor: '@' + Cookies.get('user_id'), _activated: false}, {'_inserted': -1}).fetch().map((c, i) =>
-                            <div key={i} data-value={c._id} className="item">
-                              <span className="description">{moment(c._inserted).calendar()}</span>
-                              <span className="text">{c._name}</span>
+                          {this.state.privateContributionsLoaded === true ?
+                            this.privateContributions.map((c, i) =>
+                              <div key={i} data-value={c._id} className="item">
+                                <span className="description">{moment(c._inserted).calendar()}</span>
+                                <span className="text">{c._name}</span>
+                              </div>
+                            )
+                          :
+                            <div data-value="loading" className="disabled item">
+                            Loading Your Private Contributions ...
                             </div>
-                          )}
+                          }
                         </div>
                       </div>
                     </div>

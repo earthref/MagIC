@@ -96,7 +96,7 @@ export default class DataImporter extends React.Component {
           templateName,
           this.state.settings,
           (error, templateID) => {
-            console.log('created import settings template', error, templateID, templateName);
+            //console.log('created import settings template', error, templateID, templateName);
             this.setState({hasChanged: false, templateID: templateID, templateName: templateName});
           }
         );
@@ -109,7 +109,7 @@ export default class DataImporter extends React.Component {
           this.state.templateID,
           this.state.settings,
           (error) => {
-            console.log('saved import settings template', error);
+            //console.log('saved import settings template', error);
             this.setState({hasChanged: false});
           }
         );
@@ -122,7 +122,7 @@ export default class DataImporter extends React.Component {
           '@' + Cookies.get('user_id'),
           templateID,
           (error) => {
-            console.log('deleted import settings template', error);
+            //console.log('deleted import settings template', error);
             this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
             if (templateID === this.state.templateID)
               this.setState({templateID: undefined, templateName: undefined});
@@ -139,7 +139,7 @@ export default class DataImporter extends React.Component {
           templateID,
           templateName,
           (error) => {
-            console.log('renamed import settings template', error, templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value);
+            //console.log('renamed import settings template', error, templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value);
             this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
             if (templateID === this.state.templateID)
               this.setState({templateName: this.refs['rename import settings template name'].value});
@@ -155,7 +155,7 @@ export default class DataImporter extends React.Component {
 
     // Copy the props data to the state input data.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
-    console.log('in', nextProps.data, nextState.in, newState.in);
+    //console.log('in', nextProps.data, nextState.in, newState.in);
 
     // Validate the number of header rows.
     const nHeaderRows = newState.settings.nHeaderRows;
@@ -290,13 +290,13 @@ export default class DataImporter extends React.Component {
       newState.errors.data.push(newState.settings.tableName ? 'Skipping table "' + newState.settings.tableName + '".' : 'Skipping this table.');
 
     // Update the state instead of the component if necessary.
-    console.log('changed?', newState, nextState);
+    //console.log('changed?', newState, nextState);
     if (nextState.isLoaded && !_.isEqual(newState.settings, nextState.settings)) {
-      console.log('settings changed!');
+      //console.log('settings changed!');
       newState.hasChanged = true;
     }
     if (!_.isEqual(newState, nextState)) {
-      console.log('state changed!');
+      //console.log('state changed!');
       this.setState(newState);
     }
 
@@ -304,7 +304,7 @@ export default class DataImporter extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
 
-    console.log('updated');
+    //console.log('updated');
 
     $(this.refs['errors accordion']).not('.ui-accordion').addClass('ui-accordion').accordion();
     $(this.refs['table column headers']).find('.ui.checkbox:not(.ui-checkbox)').addClass('ui-checkbox').checkbox({
@@ -415,7 +415,7 @@ export default class DataImporter extends React.Component {
 
   renderOptions() {
     const templates = Collections['magic.import.settings.templates'].find({}, {sort: {'_inserted': -1}}).fetch();
-    console.log('templates collection', templates);
+    //console.log('templates collection', templates);
     return (
       <div>
         <div style={{display:'flex'}}>
@@ -617,7 +617,7 @@ export default class DataImporter extends React.Component {
     const nRows = Math.max(0, this.state.nRows - this.state.excludeRowIdxs.length - this.state.nHeaderRowsInt);
     const nCols = Math.max(0, this.state.inColumnNames.length - this.state.excludeColumnIdxs.length);
     const tableTooltip = 'Click to ' + (this.state.settings.excludeTable ? 'include' : 'exclude') + ' this table.';
-    console.log('renderTable');
+    //console.log('renderTable');
     return (
       <div style={{marginTop:'1em'}}>
         <FixedTable className="ui compact celled striped definition single line table">
