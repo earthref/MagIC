@@ -186,6 +186,7 @@ export default function () {
       summary.version_history.unshift({
         "contributor": summary.CONTRIBUTOR,
         "upload": 1,
+        "mongo_id": id,
         "contribution_id": summary.MAGIC_CONTRIBUTION_ID,
         "version": summary.VERSION,
         "magic_version": 3,

@@ -402,7 +402,7 @@ export default class extends React.Component {
                           </a>
                         :
                           <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
-                             onClick={(e) => { this.downloadMongo(v.contribution_id); e.stopPropagation(); }}
+                             onClick={(e) => { this.downloadMongo(v.mongo_id); e.stopPropagation(); }}
                           >
                             <i className="ui file text outline icon"/> Download
                           </a>
