@@ -347,6 +347,7 @@ export default function () {
       c._inserted = c.contribution[0].timestamp;
       c._name = s.contribution.TITLE;
       c._activated = false;
+      c._doiData = c._doiData || {};
 
       Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
     }
