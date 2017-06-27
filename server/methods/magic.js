@@ -337,6 +337,7 @@ export default function () {
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       s.contribution.UPLOAD = 0;
+      s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       c._summary = s;
 
       c.contribution[0].contributor = user;
