@@ -967,7 +967,7 @@ export default class MagICUploadContribution extends React.Component {
                     <div>
                       <div className={"ui labeled fluid input" + (this.state._name.length > 0 ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
                         <div className={"ui label" + (this.state._name.length > 0 ? '' : ' red')}>
-                          Temporary Private Contribution Name
+                          Private Contribution Name
                         </div>
                         <input ref="contribution name" type="text" default="None" value={this.state._name}
                                onChange={(e) => {
