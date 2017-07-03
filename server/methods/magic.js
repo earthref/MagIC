@@ -25,7 +25,7 @@ export default function () {
       return Collections['magic.import.settings.templates'].insert({
         _user: user,
         _name: name,
-        _inserted: moment().toISOString(),
+        _inserted: moment().utc().toISOString(),
         settings: settings
       }, (error) => { console.log('create import', error)});
     },
@@ -97,7 +97,7 @@ export default function () {
       s.contribution.TITLE = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       s.contribution.VERSION = 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
@@ -199,7 +199,7 @@ export default function () {
         "contribution_id": summary.MAGIC_CONTRIBUTION_ID,
         "version": summary.VERSION,
         "magic_version": 3,
-        "activated": moment().utc()
+        "activated": moment().utc().toISOString()
       });
 
       await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
@@ -337,6 +337,7 @@ export default function () {
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       s.contribution.UPLOAD = 0;
+      s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       c._summary = s;
 
       c.contribution[0].contributor = user;
@@ -347,6 +348,7 @@ export default function () {
       c._inserted = c.contribution[0].timestamp;
       c._name = s.contribution.TITLE;
       c._activated = false;
+      c._doiData = c._doiData || {};
 
       Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
     }

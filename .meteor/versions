@@ -45,6 +45,7 @@ less@2.7.9
 livedata@1.0.18
 localstorage@1.1.0
 logging@1.1.17
+mdg:meteor-apm-agent@3.0.0
 meteor@1.6.1
 meteor-base@1.1.0
 meteorhacks:fast-render@2.14.0
@@ -75,6 +76,7 @@ modules@0.9.1
 modules-runtime@0.8.0
 mongo@1.1.18
 mongo-id@1.0.6
+mongo-livedata@1.0.12
 msavin:jetsetter@2.0.0
 msavin:mongol@2.0.1
 npm-mongo@2.2.24
