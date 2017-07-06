@@ -192,6 +192,29 @@ export default function () {
       summary.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       summary.VERSION = summary.VERSION === 'PRIVATE' || _.trim(summary.VERSION) === '' ? "1" : summary.VERSION;
       summary.version_history = summary.version_history || [];
+
+      for (let i = 0; i <= summary.version_history.length; i++) {
+        if (summary.version_history[i] && summary.version_history[i].contribution_id) {
+          esClient.search({
+            index: 'magic_v5', type: 'contributions_summaries',
+            body: {
+              "query": {
+                "term": {
+                  "MAGIC_CONTRIBUTION_ID": summary.version_history[i].contribution_id
+                }
+              }
+            }
+          }, Meteor.bindEnvironment((err, resp) => {
+            if (resp.hits.hits.length > 0) {
+              esClient.update({
+                index: 'magic_v5', type: 'contributions_summaries', id: resp.hits.hits[0]._id,
+                body: {doc: {"UPLOAD": 2}}
+              });
+            }
+          }));
+        }
+      }
+
       summary.version_history.unshift({
         "contributor": summary.CONTRIBUTOR,
         "upload": 1,
