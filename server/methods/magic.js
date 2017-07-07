@@ -355,6 +355,10 @@ export default function () {
 
       c._id = uuid.v4();
 
+      let year = s.contribution.CITATION.match(/\(\d\d\d\d\)/);
+      if (year && year.length >= 2)
+        s.contribution.YEAR = s.contribution.YEAR || year[1];
+
       s.contribution.VERSION = v || 'PRIVATE';
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.CONTRIBUTOR = contributor;
