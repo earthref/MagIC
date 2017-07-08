@@ -199,6 +199,7 @@ export default class extends React.Component {
                     </div>
                     : undefined
                     }
+                    <div>Private Contribution: <b>{c.contribution._name}</b></div>
                     <div style={{display: 'flex', flexFlow: 'row wrap', marginTop: '0.5em', marginBottom: '0.5em'}}>
                       <div style={{flex: '1 1 auto'}}>
                         <div className={"ui labeled fluid input" + (c.contribution._activated || c.doi && c.contribution._doiData ? '' : ' error')}>

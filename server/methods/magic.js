@@ -118,16 +118,16 @@ export default function () {
 
       c._id = id;
 
-      s = s || c._summary || {};
+      s = s || {};
       s.contribution = s.contribution || {};
-      s.contribution.TITLE = c._name;
+      //s.contribution.NAME = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.VERSION = s.contribution.VERSION || 'PRIVATE';
+      s.contribution.VERSION = s.contribution.VERSION || c._summary.contribution.VERSION || 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
-      c._summary = s;
+      _.merge(c._summary, s);
 
       //if (c.measurements && c.measurements.rows && c.measurements.columns) {
       //  let i = 0;
@@ -192,6 +192,29 @@ export default function () {
       summary.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       summary.VERSION = summary.VERSION === 'PRIVATE' || _.trim(summary.VERSION) === '' ? "1" : summary.VERSION;
       summary.version_history = summary.version_history || [];
+
+      for (let i = 0; i <= summary.version_history.length; i++) {
+        if (summary.version_history[i] && summary.version_history[i].contribution_id) {
+          esClient.search({
+            index: 'magic_v5', type: 'contributions_summaries',
+            body: {
+              "query": {
+                "term": {
+                  "MAGIC_CONTRIBUTION_ID": summary.version_history[i].contribution_id
+                }
+              }
+            }
+          }, Meteor.bindEnvironment((err, resp) => {
+            if (resp.hits.hits.length > 0) {
+              esClient.update({
+                index: 'magic_v5', type: 'contributions_summaries', id: resp.hits.hits[0]._id,
+                body: {doc: {"UPLOAD": 2}}
+              });
+            }
+          }));
+        }
+      }
+
       summary.version_history.unshift({
         "contributor": summary.CONTRIBUTOR,
         "upload": 1,
@@ -245,7 +268,7 @@ export default function () {
       }
       if (c._summary.contribution.YEAR)
         c._summary.contribution.CITATION += ' (' + c._summary.contribution.YEAR + ')';
-      c._name = c._summary.contribution.CITATION;
+      //c._name = c._summary.contribution.CITATION;
 
       c._summary.contribution.REFERENCE_HTML = '<b>' +
         doiData.author.map((a) => a.family + ', ' + a.given).join(', ') +
@@ -332,12 +355,20 @@ export default function () {
 
       c._id = uuid.v4();
 
+      let year = s.contribution.CITATION.match(/\(\d\d\d\d\)/);
+      if (year && year.length >= 2)
+        s.contribution.YEAR = s.contribution.YEAR || year[1];
+
       s.contribution.VERSION = v || 'PRIVATE';
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.UPLOAD = 0;
+      s.contribution.UPLOAD = "0";
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
+      s.contribution._id = c._id;
+
+      delete s.contribution.FOLDER;
+      delete s.contribution.FILE_NAME;
       c._summary = s;
 
       c.contribution[0].contributor = user;
@@ -346,7 +377,7 @@ export default function () {
       c.contribution[0].timestamp = moment().utc().toISOString();
       c._contributor = user;
       c._inserted = c.contribution[0].timestamp;
-      c._name = s.contribution.TITLE;
+      c._name = "Update to " + s.contribution.CITATION;
       c._activated = false;
       c._doiData = c._doiData || {};
 

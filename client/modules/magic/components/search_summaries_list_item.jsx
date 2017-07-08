@@ -197,7 +197,7 @@ export default class extends React.Component {
           id = c.contribution[0].id;
         const exporter = new ExportContribution({});
         let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
-        saveAs(blob, 'MagIC_Contribution_' + id + '.txt');
+        saveAs(blob, 'magic_contribution_' + id + '.txt');
       } else {
         alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
       }
