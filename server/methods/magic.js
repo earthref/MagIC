@@ -118,16 +118,16 @@ export default function () {
 
       c._id = id;
 
-      s = s || c._summary || {};
+      s = s || {};
       s.contribution = s.contribution || {};
-      s.contribution.TITLE = c._name;
+      //s.contribution.NAME = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.VERSION = s.contribution.VERSION || 'PRIVATE';
+      s.contribution.VERSION = s.contribution.VERSION || c._summary.contribution.VERSION || 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
-      c._summary = s;
+      _.merge(c._summary, s);
 
       //if (c.measurements && c.measurements.rows && c.measurements.columns) {
       //  let i = 0;
@@ -268,7 +268,7 @@ export default function () {
       }
       if (c._summary.contribution.YEAR)
         c._summary.contribution.CITATION += ' (' + c._summary.contribution.YEAR + ')';
-      c._name = c._summary.contribution.CITATION;
+      //c._name = c._summary.contribution.CITATION;
 
       c._summary.contribution.REFERENCE_HTML = '<b>' +
         doiData.author.map((a) => a.family + ', ' + a.given).join(', ') +
@@ -363,8 +363,12 @@ export default function () {
       s.contribution.CONTRIBUTOR_ID = mailid;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.UPLOAD = 0;
+      s.contribution.UPLOAD = "0";
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
+      s.contribution._id = c._id;
+
+      delete s.contribution.FOLDER;
+      delete s.contribution.FILE_NAME;
       c._summary = s;
 
       c.contribution[0].contributor = user;
@@ -373,7 +377,7 @@ export default function () {
       c.contribution[0].timestamp = moment().utc().toISOString();
       c._contributor = user;
       c._inserted = c.contribution[0].timestamp;
-      c._name = s.contribution.TITLE;
+      c._name = "Update to " + s.contribution.CITATION;
       c._activated = false;
       c._doiData = c._doiData || {};
 
