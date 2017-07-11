@@ -493,8 +493,8 @@ export default class MagICUploadContribution extends React.Component {
         <thead>
         <tr>
           <th>Table</th>
-          <th>N Rows</th>
-          <th colSpan={2}>Assignment</th>
+          <th>Data Rows</th>
+          <th colSpan={2}>Unique Names</th>
         </tr>
         </thead>
         <tbody>
