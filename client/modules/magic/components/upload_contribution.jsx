@@ -366,10 +366,9 @@ export default class MagICUploadContribution extends React.Component {
             (error) => {
               //console.log('inserted contribution', this.state._id, error);
               if (error) this.setState({uploadError: error, uploading: false});
-              else       this.setState({uploaded: true, uploading: false});
+              else       window.location.href = '/MagIC/private';
             }
           );
-          window.location.href = '/MagIC/private';
         this.setState({
           uploading: true
         });
