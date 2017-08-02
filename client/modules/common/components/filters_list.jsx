@@ -1,5 +1,4 @@
 import React, { PropTypes } from 'react';
-import {maxFilterBuckets} from '../../../../lib/collections/index';
 
 export default class FilterList extends React.Component {
 

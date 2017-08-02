@@ -2,7 +2,7 @@ const {describe, it} = global;
 import _ from 'lodash';
 import {expect} from 'chai';
 import Promise from 'bluebird';
-import ValidateContribution from '../validate_contribution';
+import ValidateContribution from '/client/modules/magic/actions/validate_contribution';
 import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
@@ -20,9 +20,9 @@ describe('magic.actions.validate_contribution', () => {
     it('should reject when the "contribution" table does not have exactly one row.', () => {
       const json = {
         contribution: [{
-          magic_version: '2.2'
+          data_model_version: '2.2'
         }, {
-          magic_version: '2.3'
+          data_model_version: '2.3'
         }]
       };
       return getContributionVersionErrorTest(json,
@@ -32,7 +32,7 @@ describe('magic.actions.validate_contribution', () => {
     it('should reject if the data model version is invalid.', () => {
       const json = {
         contribution: [{
-          magic_version: '0.1'
+          data_model_version: '0.1'
         }]
       };
       return getContributionVersionErrorTest(json,
@@ -47,7 +47,7 @@ describe('magic.actions.validate_contribution', () => {
     it('should get the data model version', () => {
       const json = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }]
       };
       return getContributionVersionTest(json, '3.0');

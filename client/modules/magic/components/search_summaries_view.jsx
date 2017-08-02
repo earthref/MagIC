@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import React from 'react';
-import InfiniteScrollerWithCount from '../../common/containers/infinite_scroller_with_count';
-import SearchDividedList from '../../common/containers/search_divided_list';
-import Summary from './search_summaries_list_item';
+import InfiniteScrollerWithCount from '/client/modules/common/containers/infinite_scroller_with_count';
+import SearchDividedList from '/client/modules/common/containers/search_divided_list';
+import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
 
 export default class extends React.Component {
 

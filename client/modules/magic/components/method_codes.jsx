@@ -1,8 +1,8 @@
 import _ from  'lodash';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '../../common/configs/portals';
-import {default as methodCodes} from '../../../../lib/modules/magic/method_codes';
+import {portals} from '/lib/configs/portals';
+import {default as methodCodes} from '/lib/modules/magic/method_codes';
 
 export default class extends React.Component {
 

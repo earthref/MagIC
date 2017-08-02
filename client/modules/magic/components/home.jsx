@@ -1,7 +1,9 @@
 import React from 'react';
-import IconButton from '../../common/components/icon_button.jsx';
-import SearchDividedList from '../../common/containers/search_divided_list';
-import Summary from './search_summaries_list_item';
+
+import IconButton from '/client/modules/common/components/icon_button';
+import SearchDividedList from '/client/modules/common/containers/search_divided_list';
+import Summary from '/client/modules/magic/components/search_summaries_list_item';
+import {levels} from '/lib/modules/magic/search_levels';
 
 export default class extends React.Component {
 

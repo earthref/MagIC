@@ -2,9 +2,9 @@ const {describe, it} = global;
 import {expect} from 'chai';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import ParseContribution from '../parse_contribution';
-import UpgradeContribution from '../upgrade_contribution';
-import ValidateContribution from '../validate_contribution';
+import ParseContribution from '/client/modules/magic/actions/parse_contribution';
+import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribution';
+import ValidateContribution from '/client/modules/magic/actions/validate_contribution';
 import {default as contribution10507} from './files/contributions/10507';
 
 describe('magic.actions.upgrade_contribution', () => {
@@ -15,7 +15,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should reject if the table name is invalid.', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         not_er_locations: [{
           region: 'California'
@@ -28,7 +28,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should reject if the column name is invalid.', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -41,7 +41,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should report one error if the same two columns are invalid.', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.4'
+          data_model_version: '2.4'
         }],
         er_locations: [{
           not_region: 'California'
@@ -59,7 +59,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should report two errors if two different columns are invalid.', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.4'
+          data_model_version: '2.4'
         }],
         er_locations: [{
           not_region: 'California'
@@ -77,7 +77,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should report one error if two different relative intensity normalizations are used', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_sites: [{
           er_site_name: 'site_1'
@@ -91,7 +91,7 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_sites: [{
           er_site_name: 'site_1'
@@ -113,7 +113,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should report one error if several different relative intensity normalizations are used', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_sites: [{
           er_site_name: 'site_1'
@@ -141,13 +141,13 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should keep numbers as strings', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5',
+          data_model_version: '2.5',
           id: '66'
         }]
       };
       const jsonNew = {
         contribution: [{
-          magic_version: '3.0',
+          data_model_version: '3.0',
           id:'66'
         }]
       };
@@ -158,7 +158,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should update table and column names', () => {
       const jsonOld1 = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_specimens: [{
           er_specimen_name: '1'
@@ -166,7 +166,7 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew1 = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         specimens: [{
           specimen: '1'
@@ -174,7 +174,7 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonOld2 = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         rmag_susceptibility: [{
           susceptibility_loss_tangent: '1',
@@ -183,7 +183,7 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew2 = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         specimens: [{
           susc_loss_tangent: '1',
@@ -200,7 +200,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should warn about deleted columns', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_sites: [{
           site_definition: '1'
@@ -213,7 +213,7 @@ describe('magic.actions.upgrade_contribution', () => {
     it('should sort numeric merge keys', () => {
       const jsonOld = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_samples: [{
           er_sample_name: '9'
@@ -223,7 +223,7 @@ describe('magic.actions.upgrade_contribution', () => {
       };
       const jsonNew = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         samples: [{
           sample: '9'
@@ -263,7 +263,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should warn about deleted results', () => {
         const jsonOld1 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_results: [{
             // These commented out columns would be empty for a contribution level result:
@@ -276,7 +276,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonOld2 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           rmag_results: [{
             critical_temp: '1'
@@ -315,7 +315,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should assign the same column into different tables based on the level', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             er_sample_name: '1'
@@ -338,7 +338,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             sample: '1',
@@ -363,7 +363,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should merge orthogonal data from different tables', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_specimens: [{
             er_specimen_name: 'specimen_A',
@@ -376,7 +376,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{ // texture from er_specimens and result_type from pmag_results are orthogonal
             specimen: 'specimen_A',
@@ -389,7 +389,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should merge the same column value from different tables', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'site_A',
@@ -403,7 +403,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{ // lat from er_sites and pmag_results are identical
             site: 'site_A',
@@ -417,7 +417,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should split rows to avoid a collision.', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_locations: [{
             er_location_name: 'loc_A',
@@ -434,7 +434,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           locations: [{
             location: 'loc_A',
@@ -460,7 +460,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should share some metadata between results.', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_locations: [{
             er_location_name: 'Hyblean Plateau',
@@ -545,7 +545,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           locations: [{
             age_high: '84',
@@ -639,7 +639,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should keep different column values separate from different tables', () => {
         const jsonOld1 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'site_A',
@@ -655,7 +655,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew1 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{ // method_codes are different, so these rows can't be combined
             site: 'site_A',
@@ -670,7 +670,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonOld2 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             er_sample_name: 'sample_A',
@@ -685,7 +685,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew2 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{ // citations are different, so these rows can't be combined
             sample: 'sample_A',
@@ -699,7 +699,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonOld3 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'site_A',
@@ -713,7 +713,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew3 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{ // lat values are different, so these rows can't be combined
             site: 'site_A',
@@ -734,7 +734,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should merge rows even if lists are in a different order', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             er_sample_name: 'sample_A',
@@ -750,7 +750,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             sample: 'sample_A',
@@ -766,7 +766,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should merge rows when changing tables', () => {
         const jsonOld1 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'Site 1'
@@ -782,7 +782,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew1 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'Site 1',
@@ -795,7 +795,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonOld2 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'Site 1',
@@ -812,7 +812,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew2 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'Site 1',
@@ -835,7 +835,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should merge expeditions with locations', () => {
         const jsonOld1 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_locations: [{
             er_location_name: 'loc_1'
@@ -848,7 +848,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew1 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           locations: [{
             location: 'loc_1',
@@ -858,7 +858,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonOld2 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_locations: [{
             er_location_name: 'loc_1'
@@ -879,7 +879,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew2 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           locations: [{
             location: 'loc_1',
@@ -907,7 +907,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should assign a tilt correction for tilt corrected/uncorrected directions', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             er_sample_name: 'sample_A'
@@ -928,7 +928,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             sample: 'sample_A',
@@ -962,7 +962,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should insert the default sample orientation quality of "g" only if there is an orientation', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             sample_azimuth: 1,
@@ -977,7 +977,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             orientation_quality: 'g', // insert default "good" flag because of er_samples.sample_azimuth
@@ -999,7 +999,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should preserve sample orientation quality regardless of whether there were orientation data', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             sample_orientation_flag: 'b'
@@ -1007,7 +1007,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             orientation_quality: 'b' // preserve the orientation flag regardless of whether there were orientation data
@@ -1019,7 +1019,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should not insert a default orientation flag without orientation data', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             sample_cooling_rate: 1
@@ -1027,7 +1027,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             cooling_rate: 1 // no orientation flag because there are no orientation data
@@ -1039,7 +1039,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should insert a default result quality', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_sites: [{
             er_site_name: 'A'
@@ -1050,7 +1050,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'A',
@@ -1067,7 +1067,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should insert a default result type', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_results: [{
             er_sample_names: 'A'
@@ -1075,7 +1075,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             sample: 'A',
@@ -1088,7 +1088,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should insert specimen direction default values', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_specimens: [{
             specimen_inc: 1,
@@ -1101,7 +1101,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             dir_inc: 1,
@@ -1123,7 +1123,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should insert specimen intensity default values', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_specimens: [{
             specimen_int: 1,
@@ -1133,7 +1133,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             int_abs: 1,
@@ -1153,7 +1153,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should separate results with mixtures of tilt corrected/uncorrected directions', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             er_sample_name: 'sample_A',
@@ -1170,7 +1170,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             sample: 'sample_A',
@@ -1207,7 +1207,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should convert a wide pmag_criteria table into a tall criteria table', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_criteria: [{
             pmag_criteria_code: 'DE-SITE',
@@ -1218,7 +1218,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           criteria: [{ // this row first because of sorting on criterion, table_column
             description: 'Criteria for selection of site direction',
@@ -1240,7 +1240,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should convert a good/bad intensity scatter into a true/false', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_specimens: [{
             specimen_scat: 'g',
@@ -1252,7 +1252,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             int_scat: 't',
@@ -1268,7 +1268,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should convert the specimen direction type into a method code', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_specimens: [{
             specimen_inc: 1,
@@ -1292,7 +1292,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             dir_inc: 1,
@@ -1323,7 +1323,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should assign the minimum location lat and lon to the correct columns', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_locations: [{
             location_begin_lat: '10',
@@ -1334,7 +1334,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           locations: [{
             lat_s: '-10',
@@ -1349,7 +1349,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should prefer measurement specimen names over synthetic names', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           magic_measurements: {
             columns: ['er_specimen_name', 'er_synthetic_name'],
@@ -1362,7 +1362,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           measurements: {
             columns: ['specimen'],
@@ -1379,7 +1379,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should map measurement synthetic names into specimen names', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           magic_measurements: {
             columns: ['er_synthetic_name'],
@@ -1390,7 +1390,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           measurements: {
             columns: ['specimen'],
@@ -1405,7 +1405,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should handle measurements as an array', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           magic_measurements: {
             columns: ['measurement_date', 'measurement_time_zone'],
@@ -1416,7 +1416,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           measurements: {
             columns: ['timestamp'],
@@ -1431,7 +1431,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should combine external_database_names/ids into a dictionary', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_sites: [{
             er_site_name: 'A',
@@ -1442,7 +1442,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'A',
@@ -1456,7 +1456,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should use method codes to map normalized relative intensities', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_results: [{
             er_site_names: 'site_1',
@@ -1468,7 +1468,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'site_1',
@@ -1484,7 +1484,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should add a geoid method code', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'site_1',
@@ -1493,7 +1493,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'site_1',
@@ -1506,7 +1506,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should rename method codes', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'site_1',
@@ -1515,7 +1515,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'site_1',
@@ -1528,7 +1528,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should favor synthetic name over specimen name', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             er_sample_name: 'sample1'
@@ -1550,7 +1550,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             sample: 'sample1',
@@ -1571,7 +1571,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should combine pole confidence ellipse parameters', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_results: [{
             er_location_names: 'location1',
@@ -1585,7 +1585,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           locations: [{
             location: 'location1',
@@ -1599,7 +1599,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should combine the anisotropy tensor elements', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           rmag_anisotropy: [{
             er_specimen_name: 'specimen1',
@@ -1613,7 +1613,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             specimen: 'specimen1',
@@ -1627,7 +1627,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should combine the anisotropy eigenparameters', () => {
         const jsonOld1 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           rmag_results: [{
             er_specimen_names: 'specimen1',
@@ -1644,7 +1644,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew1 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             specimen: 'specimen1',
@@ -1653,7 +1653,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonOld2 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           rmag_results: [{
             er_specimen_names: 'specimen1',
@@ -1664,7 +1664,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew2 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             specimen: 'specimen1',
@@ -1680,7 +1680,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should adopt inferred ages up to the sites table', () => {
         const jsonOld1 = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_sites: [{
             er_site_name: 'site1'
@@ -1705,7 +1705,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew1 = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'site1',
@@ -1729,7 +1729,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should repeat metadata', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_specimens: [{
             er_specimen_name: 'specimen1',
@@ -1745,7 +1745,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           specimens: [{
             specimen: 'specimen1',
@@ -1765,7 +1765,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should combine descriptions without repetition', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           pmag_results: [{
             er_site_names: 'site1',
@@ -1779,7 +1779,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           sites: [{
             site: 'site1',
@@ -1797,7 +1797,7 @@ describe('magic.actions.upgrade_contribution', () => {
       it('should convert dates into ISO 8601 timestamps', () => {
         const jsonOld = {
           contribution: [{
-            magic_version: '2.5'
+            data_model_version: '2.5'
           }],
           er_samples: [{
             sample_date: '2008:07:01:08:46:00.00',
@@ -1810,7 +1810,7 @@ describe('magic.actions.upgrade_contribution', () => {
         };
         const jsonNew = {
           contribution: [{
-            magic_version: '3.0'
+            data_model_version: '3.0'
           }],
           samples: [{
             timestamp: '2008-07-01T15:46:00Z'
@@ -1825,7 +1825,7 @@ describe('magic.actions.upgrade_contribution', () => {
       /*it('should create a rotation matrix', () => {
        const jsonOld = {
        contribution: [{
-       magic_version: '2.5'
+       data_model_version: '2.5'
        }],
        er_specimens: [{
        er_specimen_name: 'specimen1'
@@ -1841,7 +1841,7 @@ describe('magic.actions.upgrade_contribution', () => {
        };
        const jsonNew = {
        contribution: [{
-       magic_version: '3.0'
+       data_model_version: '3.0'
        }],
        specimens: [{
        specimen: 'synthetic1',
@@ -1854,7 +1854,7 @@ describe('magic.actions.upgrade_contribution', () => {
        it('should warn about parsing an empty string', () => {
        const jsonOld = {
        contribution: [{
-       magic_version: '2.5'
+       data_model_version: '2.5'
        }],
        er_specimens: [{
        er_specimen_name: 'sp1'
@@ -1909,7 +1909,7 @@ describe('magic.actions.upgrade_contribution', () => {
 
     it('should handle multiple columns', () => {
       const newModel = {
-        'magic_version': '3.0',
+        'data_model_version': '3.0',
         'tables': {
           'contribution': {
             'label': 'Contribution',

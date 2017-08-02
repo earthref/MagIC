@@ -1,9 +1,9 @@
 import _ from  'lodash';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '../../common/configs/portals';
-import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
-import {default as svs} from '../../../../lib/modules/er/suggested_vocabularies';
+import {portals} from '/lib/configs/portals';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
+import {svs} from '/lib/modules/er/suggested_vocabularies';
 
 export default class extends React.Component {
 

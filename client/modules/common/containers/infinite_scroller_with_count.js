@@ -1,19 +1,28 @@
 import React from 'react';
-import InfiniteScroller from '../components/infinite_scroller';
-import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
+import InfiniteScroller from '/client/modules/common/components/infinite_scroller';
+import {compose} from 'react-komposer';
 
-export const composer = ({context, countSubscriptionName, elasticsearchQuery, elasticsearchFilters}, onData) => {
-  const {Meteor, Collections} = context();
-  const subscriptionHandle = Meteor.subscribe(countSubscriptionName, elasticsearchQuery, elasticsearchFilters);
-  let count = null;
-  if (subscriptionHandle.ready()) {
-    const doc = Collections[countSubscriptionName].findOne();
-    count = (doc && doc.count) || null;
-  }
-  onData(null, {count});
+export const composer = ({es}, onData) => {
+  onData(null, {});
+  //console.log('esCount', es);
+  Meteor.call('esCount', es, (error, result) => {
+    if (error) {
+      console.error('esCount', error);
+      onData(null, {error: error});
+    } else {
+      //console.log('esCount', es, result);
+      onData(null, {count: result});
+    }
+  });
 };
 
-export default composeAll(
-  composeWithTracker(composer),
-  useDeps()
+export default compose(
+  composer,
+  {
+    propsToWatch: ['es'],
+    shouldSubscribe(currentProps, nextProps) {
+      //console.log('esCount - shouldSubscribe', currentProps, nextProps);
+      return !_.isEqual(currentProps.es, nextProps.es);
+    }
+  }
 )(InfiniteScroller);

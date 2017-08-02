@@ -1,5 +1,5 @@
 import React from 'react';
-import DataImporter from '../../common/components/data_importer';
+import DataImporter from '/client/modules/common/components/data_importer';
 import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
 
 export const composer = ({

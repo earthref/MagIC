@@ -11,12 +11,11 @@ import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx';
-import {default as versions} from '../../../../lib/modules/magic/magic_versions';
-import {default as models} from '../../../../lib/modules/magic/data_models';
-import SummarizeContribution from '../actions/summarize_contribution';
-//import ExportContribution from '../actions/export_contribution';
-import DataImporter from '../../common/components/data_importer.jsx';
-import IconButton from '../../common/components/icon_button.jsx';
+import {versions, models} from '/lib/modules/magic/data_models';
+import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution';
+//import ExportContribution from '/client/modules/magic/actions/export_contribution';
+import DataImporter from '/client/modules/common/components/data_importer';
+import IconButton from '/client/modules/common/components/icon_button';
 
 export default class MagICUploadContribution extends React.Component {
 

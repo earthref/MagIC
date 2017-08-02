@@ -1,8 +1,8 @@
 import {Picker} from 'meteor/meteorhacks:picker';
-import {default as cvs} from '../lib/modules/er/controlled_vocabularies';
-import {default as svs} from '../lib/modules/er/suggested_vocabularies';
-import {default as method_codes} from '../lib/modules/magic/method_codes';
-import {default as models} from '../lib/modules/magic/data_models';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
+import {svs} from '/lib/modules/er/suggested_vocabularies';
+import {method_codes} from '/lib/modules/magic/method_codes';
+import {models} from '/lib/modules/magic/data_models';
 delete models['3.0']['criteria_map'];
 
 Picker.route('/vocabularies/controlled.json', function(params, request, response, next) {

@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import Runner from '../../common/actions/runner.js';
+import Runner from '/client/modules/common/actions/runner';
 
-import { default as versions } from '../../../../lib/modules/magic/magic_versions';
-import { default as models   } from '../../../../lib/modules/magic/data_models';
+import {versions, models} from '/lib/modules/magic/data_models';
 
 export default class extends Runner {
 
@@ -47,15 +46,15 @@ export default class extends Runner {
           this._appendError('The "contribution" table does not have exactly one row.');
       }
       else {
-        if (json['contribution'][0]['magic_version']) {
+        if (json['contribution'][0]['data_model_version']) {
           isGuessed = false;
-          version = json['contribution'][0]['magic_version'];
+          version = json['contribution'][0]['data_model_version'];
         }
         else {
           isGuessed = true;
           version = this._guessVersion();
           if (version !== this.lastGetVersionResult)
-            this._appendWarning('The "contribution" table does not include the "magic_version" column.');
+            this._appendWarning('The "contribution" table does not include the "data_model_version" column.');
           if (version !== undefined && version !== this.lastGetVersionResult)
             this._appendWarning(`Guessed that the contribution is using MagIC Data Model version ${version}.`);
         }

@@ -2,25 +2,25 @@ import _ from  'lodash';
 import React from 'react';
 import {mount} from 'react-mounter';
 
-import Layout from '../common/components/layout.jsx';
-import Home from '../common/components/home.jsx';
+import Layout from '/client/modules/common/components/layout';
+import Home from '/client/modules/common/components/home';
 
-import {default as magicVersions} from '../../../lib/modules/magic/magic_versions.js';
-import MagICHome from './components/home.jsx';
-import MagICSearch from './components/search.jsx';
-import MagICDataModel from './components/data_model.jsx';
-import MagICMethodCodes from './components/method_codes.jsx';
-import MagICPrivateContributions from './components/private_contributions.jsx';
-import MagICUpgradeContribution from './components/upgrade_contribution.jsx';
-import MagICUploadContribution from './components/upload_contribution.jsx';
-import MagICValidateContribution from './components/validate_contribution.jsx';
+import {versions} from '/lib/modules/magic/data_models';
+import MagICHome from '/client/modules/magic/components/home';
+import MagICSearch from '/client/modules/magic/components/search';
+import MagICDataModel from '/client/modules/magic/components/data_model';
+import MagICMethodCodes from '/client/modules/magic/components/method_codes';
+import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
+import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
+import MagICUploadContribution from '/client/modules/magic/components/upload_contribution';
+import MagICValidateContribution from '/client/modules/magic/components/validate_contribution';
 
 export default function (injectDeps, {FlowRouter}) {
 
   const mounter = ({content = () => null}) => (content());
   const mounterWithContext = injectDeps(mounter);
 
-  var magicRoutes = FlowRouter.group({
+  let magicRoutes = FlowRouter.group({
     prefix: '/MagIC',
     name: 'MagIC',
     triggersEnter: [function(context, redirect) {
@@ -96,7 +96,7 @@ export default function (injectDeps, {FlowRouter}) {
   });
 
   magicRoutes.route(`/data-model`, {
-    action() { FlowRouter.go(`/MagIC/data-models/${magicVersions.slice(-1)[0]}`); }
+    action() { FlowRouter.go(`/MagIC/data-models/${_.last(versions)}`); }
   });
   magicRoutes.route(`/data-models/:v`, {
     name: 'magicDataModel',

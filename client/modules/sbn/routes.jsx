@@ -2,8 +2,8 @@ import _ from  'lodash';
 import React from 'react';
 import {mount} from 'react-mounter';
 
-import Layout from '../common/components/layout.jsx';
-import Home from '../common/components/home.jsx';
+import Layout from '/client/modules/common/components/layout';
+import Home from '/client/modules/common/components/home';
 
 export default function (injectDeps, {FlowRouter}) {
 

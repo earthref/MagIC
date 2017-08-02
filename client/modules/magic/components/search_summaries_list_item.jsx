@@ -3,13 +3,10 @@ import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
 import Cookies from 'js-cookie';
-import GoogleStaticMap from '../../common/components/google_static_map';
-import saveAs from 'save-as';
-//import XLSX from 'xlsx-style';
-import ParseContribution from '../actions/parse_contribution';
-import ExportContribution from '../actions/export_contribution';
-import {Collections} from '/lib/collections';
 
+import GoogleStaticMap from '/client/modules/common/components/google_static_map';
+import Clamp from '/client/modules/common/components/clamp';
+import ParseContribution from '/client/modules/magic/actions/parse_contribution';
 
 export default class extends React.Component {
 

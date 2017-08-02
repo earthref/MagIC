@@ -1,5 +1,5 @@
 import React from 'react';
-import {portals} from '../configs/portals.js';
+import {portals} from '/lib/configs/portals';
 
 export default class extends React.Component {
 

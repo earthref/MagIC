@@ -1,5 +1,5 @@
 import React from 'react';
-import GoogleMap from '../components/google_map';
+import GoogleMap from '/client/modules/common/components/google_map';
 import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
 
 export const composer = ({context, subscriptionName, elasticsearchQuery, elasticsearchFilters, elasticsearchSort, elasticsearchPageSize, elasticsearchPageNumber, minimongoSort}, onData) => {

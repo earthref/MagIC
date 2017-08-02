@@ -1,5 +1,5 @@
 import React from 'react';
-import {portals, portalsOrder} from '../configs/portals.js';
+import PropTypes from 'prop-types';
 
 export default class extends React.Component {
 

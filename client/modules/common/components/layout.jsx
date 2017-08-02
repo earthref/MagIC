@@ -3,8 +3,8 @@ import React from 'react';
 import moment from 'moment';
 import {Meteor} from 'meteor/meteor';
 import Cookies from 'js-cookie';
-import Navigation from './navigation.jsx';
-import {portals} from '../../common/configs/portals';
+import Navigation from '/client/modules/common/components/navigation';
+import {portals} from '/lib/configs/portals';
 
 export default class extends React.Component {
 

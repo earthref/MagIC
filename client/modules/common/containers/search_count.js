@@ -1,7 +1,6 @@
 import React from 'react';
-import Count from '../components/count';
+import Count from '/client/modules/common/components/count';
 import {compose} from 'react-komposer';
-import {Collections} from '/lib/collections';
 
 export const composer = ({subscriptionName, elasticsearchQuery, elasticsearchFilters}, onData) => {
   const subscriptionHandle = Meteor.subscribe(subscriptionName, elasticsearchQuery, elasticsearchFilters);
