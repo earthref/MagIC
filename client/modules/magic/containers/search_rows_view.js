@@ -1,19 +1,18 @@
 import React from 'react';
-import FiltersList from '/client/modules/common/components/filters_list';
+import SearchRowsView from '/client/modules/magic/components/search_rows_view';
 import {compose} from 'react-komposer';
 
 export const composer = ({es}, onData) => {
-  //onData(null, {error: undefined, filters: []});
-  Meteor.call('esBuckets', es, (error, result) => {
+  onData(null, {error: undefined, count: undefined});
+  Meteor.call('esCount', es, (error, result) => {
     try {
       if (error) {
-        console.error('esBuckets', error);
+        console.error('search_rows_view', error);
         onData(null, {error: error});
       } else {
-        onData(null, {filters: result});
+        onData(null, {count: result});
       }
-    } catch (error) {
-    }
+    } catch (error) {}
   });
 };
 
@@ -25,4 +24,4 @@ export default compose(
       return !_.isEqual(currentProps.es, nextProps.es);
     }
   }
-)(FiltersList);
+)(SearchRowsView);

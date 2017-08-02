@@ -8,7 +8,7 @@ export default class FilterList extends React.Component {
       activeFilters: this.propsActiveFiltersTostateActiveFilters(props.activeFilters),
       showAll: false
     };
-    console.log(props.name, props.activeFilters, this.state.activeFilters);
+    //console.log(props.name, props.activeFilters, this.state.activeFilters);
     this.styles = {
       b: {fontWeight: 'bold'},
       flex: {display: 'flex', marginBottom: '0.25em'},
@@ -54,7 +54,7 @@ export default class FilterList extends React.Component {
   renderActiveFilters() {
     return (
       <div>
-        {this.props.filters.slice(0, maxFilterBuckets).map((filter) => {
+        {this.props.filters.slice(0, this.props.maxBuckets).map((filter) => {
           if (filter.key in this.state.activeFilters)
             return this.renderFilter(filter, true);
         })}
@@ -67,7 +67,7 @@ export default class FilterList extends React.Component {
     let i = 0;
     return (
       <div>
-        {this.props.filters.slice(0, maxFilterBuckets).map((filter) => {
+        {this.props.filters.slice(0, this.props.maxBuckets).map((filter) => {
           if (!(filter.key in this.state.activeFilters) && i < nToShow) {
             i += 1;
             return this.renderFilter(filter, false);
@@ -84,7 +84,7 @@ export default class FilterList extends React.Component {
     return (
       <div>
         <div ref="overflow" style={{display: 'none'}}>
-          {this.props.filters.slice(0, maxFilterBuckets).map((filter) => {
+          {this.props.filters.slice(0, this.props.maxBuckets).map((filter) => {
             if (!(filter.key in this.state.activeFilters)) {
               hasOverflow = (i >= nToShow);
               i += 1;
@@ -139,7 +139,7 @@ export default class FilterList extends React.Component {
             <div className="ui circular small basic label">
               {_.size(this.state.activeFilters)}
               {' of '}
-              {_.size(this.props.filters) <= maxFilterBuckets ? _.size(this.props.filters) : maxFilterBuckets + '+'}
+              {_.size(this.props.filters) <= this.props.maxBuckets ? _.size(this.props.filters) : this.props.maxBuckets + '+'}
             </div>
           </div>
           {this.renderActiveFilters()}

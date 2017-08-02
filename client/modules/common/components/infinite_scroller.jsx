@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 export default class InfiniteScroller extends React.Component {
 
@@ -15,24 +16,23 @@ export default class InfiniteScroller extends React.Component {
 
   componentDidMount() {
     this.timeoutScroll = setInterval(this.onScroll, 500);
-    //window.addEventListener("resize", this.onScroll);
   }
 
   componentWillUnmount() {
-    //window.removeEventListener("resize", this.onScroll);
     clearInterval(this.timeoutScroll);
   }
 
   componentWillUpdate(nextProps, nextState) {
-    if (!_.isEqual(this.props, nextProps)) {
-      console.log('resetting infinite scroller');
-      this.setState({nPages: 1});
+    if (!_.isEqual(
+        _.extend({}, this.props, {style: null}),
+        _.extend({}, nextProps , {style: null}))) {
+      this.setState({nPages: 0});
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    //if (!_.isEqual(prevProps, this.props))
-    //  this.onScroll();
+    if (prevState.nPages === 0)
+      this.setState({nPages: 1});
   }
 
   _onScroll() {
@@ -56,16 +56,15 @@ export default class InfiniteScroller extends React.Component {
   }
 
   render() {
-    const pageNumberPropName = this.props.pageNumberPropName || 'page';
     return (
       <div ref="scroller" style={this.props.style} onScroll={this.onScroll}>
         <div ref="content">
           {_.times(this.state.nPages, (iPage) => {
-            //console.log('infinite scroller', this.state.nPages);//, this.props.children);
+            //console.log('infinite scroller', iPage, this.state.nPages);//, this.props.children);
             return (
               <div key={iPage} style={{position: 'relative'}}>
                 {React.Children.map(this.props.children, (child) =>
-                 React.cloneElement(child, {[pageNumberPropName]: iPage+1})
+                 React.cloneElement(child, { pageNumber: iPage+1, pageSize: this.props.pageSize })
                  )}
               </div>
             );

@@ -2,42 +2,26 @@ import React from 'react';
 import Count from '/client/modules/common/components/count';
 import {compose} from 'react-komposer';
 
-export const composer = ({subscriptionName, elasticsearchQuery, elasticsearchFilters}, onData) => {
-  const subscriptionHandle = Meteor.subscribe(subscriptionName, elasticsearchQuery, elasticsearchFilters);
-  if (subscriptionHandle.ready()) {
-    const doc = Collections[subscriptionName].findOne();
-    if (doc !== undefined) {
-      const count = doc.count;
-      onData(null, {count});
-    } else {
-      onData();
-    }
-  } else {
-    onData();
-  }
+export const composer = ({es}, onData) => {
+  onData(null, {error: undefined, count: undefined});
+  Meteor.call('esCount', es, (error, result) => {
+    try {
+      if (error) {
+        console.error('esCount', error);
+        onData(null, {error: error});
+      } else {
+        onData(null, {count: result});
+      }
+    } catch (error) {}
+  });
 };
 
-function composeWithTracker(reactiveMapper) {
-  return (props, onData, env) => {
-    let trackerCleanup = null;
-    const handler = Tracker.nonreactive(() => {
-      return Tracker.autorun(() => {
-        trackerCleanup = reactiveMapper(props, onData, env);
-      });
-    });
-
-    return () => {
-      if(typeof trackerCleanup === 'function') trackerCleanup();
-      return handler.stop();
-    };
-  };
-}
-
 export default compose(
-  composeWithTracker(composer),
+  composer,
   {
-    loadingHandler: () => (
-      <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i>
-    )
+    propsToWatch: ['es'],
+    shouldSubscribe(currentProps, nextProps) {
+      return !_.isEqual(currentProps.es, nextProps.es);
+    }
   }
 )(Count);

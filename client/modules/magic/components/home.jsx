@@ -179,14 +179,11 @@ export default class extends React.Component {
           Recent Contributions
         </h2>
         <SearchDividedList
-          subscriptionName="magic.pages.contributions.summaries"
-          elasticsearchQuery={{}}
-          elasticsearchFilters={{}}
-          elasticsearchSort={[{'INSERTED': 'desc'}]}
-          elasticsearchPageSize={5}
-          minimongoSort={{'_inserted': -1}}
+          es={levels[0].views[0].es}
+          pageSize={5}
+          pageNumber={1}
         >
-          <Summary/>
+          <Summary table="contribution"/>
         </SearchDividedList>
       </div>
     );
