@@ -1,3 +1,6 @@
+import {Tracker}  from 'meteor/tracker';
+//import {Mongo} from 'meteor/mongo';
+
 import _ from 'lodash';
 import moment from 'moment';
 import filesize from 'filesize';
@@ -5,17 +8,16 @@ import React from 'react';
 import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import Promise from 'bluebird';
-//import {Mongo} from 'meteor/mongo';
 import numeral from 'numeral';
-import {Tracker}  from 'meteor/tracker';
 import Dropzone from 'react-dropzone';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx';
-import {versions, models} from '/lib/modules/magic/data_models';
-import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution';
-//import ExportContribution from '/client/modules/magic/actions/export_contribution';
-import DataImporter from '/client/modules/common/components/data_importer';
-import IconButton from '/client/modules/common/components/icon_button';
+
+import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution.js';
+//import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
+import DataImporter from '/client/modules/common/components/data_importer.jsx';
+import IconButton from '/client/modules/common/components/icon_button.jsx';
+import {versions, models} from '/lib/modules/magic/data_models.js';
 
 export default class MagICUploadContribution extends React.Component {
 
@@ -583,7 +585,7 @@ export default class MagICUploadContribution extends React.Component {
           <div className="ui center aligned two column relaxed grid">
             <div className="column">
               <IconButton
-                className="borderless card" href="" portal="MagIC"
+                className="borderless card" portal="MagIC"
                 onClick={() => location.href = '//earthref.org/log-in/?next_url=' + window.location.href}
               >
                 <i className="icons">
@@ -598,7 +600,7 @@ export default class MagICUploadContribution extends React.Component {
             </div>
             <div className="column">
               <IconButton
-                className="borderless card" href="" portal="MagIC"
+                className="borderless card" portal="MagIC"
                 onClick={() => location.href = '//earthref.org/register/'}
               >
                 <i className="icons">
@@ -722,7 +724,7 @@ export default class MagICUploadContribution extends React.Component {
               </h4>
               <div className="ui five stackable cards">
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom left"
+                  className="borderless card" portal="MagIC" position="bottom left"
                   tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleMagICv3.bind(this)}
@@ -734,7 +736,7 @@ export default class MagICUploadContribution extends React.Component {
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom left"
+                  className="borderless card" portal="MagIC" position="bottom left"
                   tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleTabDelimitedSites.bind(this)}
@@ -746,7 +748,7 @@ export default class MagICUploadContribution extends React.Component {
                   <div className="subtitle">Sites Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom center"
+                  className="borderless card" portal="MagIC" position="bottom center"
                   tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleTabDelimitedSpecimens.bind(this)}
@@ -758,7 +760,7 @@ export default class MagICUploadContribution extends React.Component {
                   <div className="subtitle">Specimens Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom right"
+                  className="borderless card" portal="MagIC" position="bottom right"
                   tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleMagICExcel.bind(this)}
@@ -770,7 +772,7 @@ export default class MagICUploadContribution extends React.Component {
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" href="" portal="MagIC" position="bottom right"
+                  className="borderless card" portal="MagIC" position="bottom right"
                     tooltip={'Click to upload this example dataset into your private ' +
                   'workspace. You can always delete it later.'}
                   onClick={this.uploadExampleExcel.bind(this)}

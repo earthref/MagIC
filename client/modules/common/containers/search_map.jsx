@@ -1,6 +1,6 @@
 import React from 'react';
 import GoogleMap from '/client/modules/common/components/google_map';
-import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
+import {compose} from 'react-komposer';
 
 export const composer = ({context, subscriptionName, elasticsearchQuery, elasticsearchFilters, elasticsearchSort, elasticsearchPageSize, elasticsearchPageNumber, minimongoSort}, onData) => {
   const {Meteor, Collections} = context();
@@ -14,11 +14,13 @@ export const composer = ({context, subscriptionName, elasticsearchQuery, elastic
   }
 };
 
-export default composeAll(
-  composeWithTracker(composer, () => (
-    <div className="ui active inverted dimmer" style={{minHeight: '100px'}}>
-      <div className="ui text loader">Loading</div>
-    </div>
-  )),
-  useDeps()
+export default compose(
+  composer,
+  {
+    loadingHandler: () => (
+      <div className="ui active inverted dimmer" style={{minHeight: '100px'}}>
+        <div className="ui text loader">Loading</div>
+      </div>
+    )
+  }
 )(GoogleMap);

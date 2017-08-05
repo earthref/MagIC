@@ -1,5 +1,6 @@
-import _ from 'lodash';
 import {Meteor} from 'meteor/meteor';
+
+import _ from 'lodash';
 import elasticsearch from 'elasticsearch';
 
 const esClient = new elasticsearch.Client({

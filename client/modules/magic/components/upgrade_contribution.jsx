@@ -7,13 +7,14 @@ import Dropzone from 'react-dropzone';
 import saveAs from 'save-as';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx';
-import {versions, models} from '/lib/modules/magic/data_models';
-import ParseContribution from '/client/modules/magic/actions/parse_contribution';
-import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribution';
-import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution';
-import ValidateContribution from '/client/modules/magic/actions/validate_contribution';
-import ExportContribution from '/client/modules/magic/actions/export_contribution';
-import IconButton from '/client/modules/common/components/icon_button';
+
+import ParseContribution from '/client/modules/magic/actions/parse_contribution.js';
+import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribution.js';
+import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution.js';
+import ValidateContribution from '/client/modules/magic/actions/validate_contribution.js';
+import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
+import IconButton from '/client/modules/common/components/icon_button.jsx';
+import {versions, models} from '/lib/modules/magic/data_models.js';
 
 export default class extends React.Component {
 

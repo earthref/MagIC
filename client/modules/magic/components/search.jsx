@@ -1,12 +1,13 @@
 import _ from 'lodash';
 import React from 'react';
 import Cookies from 'js-cookie';
-import Count from '/client/modules/common/containers/search_count';
-import FiltersList from '/client/modules/common/containers/search_filters_list';
-import SearchLevel from '/client/modules/common/components/search_level';
-import {portals} from '/lib/configs/portals';
-import {versions, models} from '/lib/modules/magic/data_models';
-import {levels} from '/lib/modules/magic/search_levels';
+
+import Count from '/client/modules/common/containers/search_count.jsx';
+import FiltersList from '/client/modules/common/containers/search_filters_list.jsx';
+import SearchLevel from '/client/modules/common/components/search_level.jsx';
+import {portals} from '/lib/configs/portals.js';
+import {versions, models} from '/lib/modules/magic/data_models.js';
+import {levels} from '/lib/modules/magic/search_levels.js';
 
 let model = models[_.last(versions)];
 let sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
@@ -17,12 +18,12 @@ let filters = [
   //{type: 'bbox'     , name: ''                                                                                 , title: 'Geospatial Boundary'},
   //{type: 'histogram', name: 'magic.filters.contributions.reference_year', term: 'reference_year'               , title: 'Publication Year'   },
   //{type: 'string'   , name: 'magic.filters.contributions.external_db'   , term: 'summary.', title: 'External DB'        },
-  {type: 'string'   , name: 'contribution._contributor.raw', title: 'Contributor'   , term: 'summary.contribution._contributor.raw', aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw', size: 101}}}, maxBuckets: 100},
-  {type: 'string'   , name: '_all.location_type'           , title: 'Location Type' , term: 'summary._all.location_type.raw'       , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'       , size: 101}}}, maxBuckets: 100},
-  {type: 'string'   , name: '_all.geologic_type'           , title: 'Geologic Type' , term: 'summary._all.geologic_types.raw'      , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'      , size: 101}}}, maxBuckets: 100},
-  {type: 'string'   , name: '_all.geologic_class'          , title: 'Geologic Class', term: 'summary._all.geologic_classes.raw'    , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'    , size: 101}}}, maxBuckets: 100},
-  {type: 'string'   , name: '_all.lithology'               , title: 'Lithology'     , term: 'summary._all.lithologies.raw'         , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'         , size: 101}}}, maxBuckets: 100},
-  {type: 'string'   , name: '_all.method_codes'            , title: 'Method Code'   , term: 'summary._all.method_codes.raw'        , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'        , size: 101}}}, maxBuckets: 100}
+  {type: 'string'   , name: 'contribution._contributor.raw', title: 'Contributor'   , term: 'summary.contribution._contributor.raw', aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw', size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: '_all.location_type'           , title: 'Location Type' , term: 'summary._all.location_type.raw'       , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'       , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: '_all.geologic_type'           , title: 'Geologic Type' , term: 'summary._all.geologic_types.raw'      , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'      , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: '_all.geologic_class'          , title: 'Geologic Class', term: 'summary._all.geologic_classes.raw'    , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'    , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: '_all.lithology'               , title: 'Lithology'     , term: 'summary._all.lithologies.raw'         , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'         , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: '_all.method_codes'            , title: 'Method Code'   , term: 'summary._all.method_codes.raw'        , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'        , size: 1001}}}, maxBuckets: 1000}
 ];
 let filterNames = {};
 //sortedTables.forEach((table) => {
@@ -41,7 +42,7 @@ let filterNames = {};
 //  });
 //});
 
-export default class extends React.Component {
+class Search extends React.Component {
 
   constructor(props) {
     super(props);
@@ -115,7 +116,7 @@ export default class extends React.Component {
   }
 
   onWindowResize() {
-    const windowHeight = $(window).height() - (this.props.bottomOffset || 0);
+    const windowHeight = $(window).height() - 60; // to allow for the footer
     if (windowHeight !== this.windowHeight) {
       this.windowHeight = windowHeight;
       const height = windowHeight - $(this.refs['settings']).offset().top + 20;
@@ -522,7 +523,7 @@ export default class extends React.Component {
     );
   }
 
-
-
 }
+
+export default Search;
 

@@ -1,71 +1,24 @@
-import _ from  'lodash';
 import React from 'react';
-import {mount} from 'react-mounter';
+import {Switch, Route, Redirect} from 'react-router-dom';
 
-import {portals} from '/lib/configs/portals';
-const rePortals = _.without(_.keys(portals), 'EarthRef.org').join('|');
+import Page from '/client/modules/common/components/page.jsx';
+import Error from '/client/modules/common/components/error.jsx';
+import Vocabularies from '/client/modules/er/components/vocabularies.jsx';
 
-import Layout from '/client/modules/common/components/layout';
-import Home from '/client/modules/common/components/home';
-import Vocabularies from '/client/modules/er/components/vocabularies';
+const Routes = () => (
+  <Switch>
+    <Redirect exact from="/vocabularies" to="/vocabularies/controlled"/>
+    <Route exact path="/vocabularies/:v(controlled|suggested)" render={({match, location}) =>
+      <Page portal="EarthRef.org" title="Browse the EarthRef Vocabularies:">
+        <Vocabularies vocabularies={match.params.v} search={location.search}/>
+      </Page>
+    }/>
+    <Route render={() =>
+      <Page portal="EarthRef.org">
+        <Error title="Error 404: Sorry, this page is missing!"/>
+      </Page>
+    }/>
+  </Switch>
+);
 
-export default function (injectDeps, {FlowRouter}) {
-
-  const mounter = ({content = () => null}) => (content());
-  const mounterWithContext = injectDeps(mounter);
-
-  FlowRouter.route(`/`, {
-    action() { FlowRouter.go('/MagIC'); }
-  });
-  /*FlowRouter.route(`/`, {
-    name: 'erHome',
-    action({}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="EarthRef.org">
-            <Home portal="EarthRef.org">
-              <div>
-                EarthRef Home.
-              </div>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });*/
-
-  FlowRouter.route(`/vocabularies`, {
-    action() { FlowRouter.go('/vocabularies/controlled'); }
-  });
-  FlowRouter.route(`/vocabularies/:v(controlled|suggested)`, {
-    name: 'erVocabularies',
-    action({v}, {q}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="EarthRef.org">
-            <Home portal="EarthRef.org">
-              <h3>
-                Browse the EarthRef Vocabularies:
-              </h3>
-              <Vocabularies vocabularies={v} search={q}/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  FlowRouter.notFound = {
-    name: '404',
-    action({}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="404">
-            <div>Error 404.</div>
-          </Layout>
-        )
-      });
-    }
-  };
-
-}
+export default Routes;

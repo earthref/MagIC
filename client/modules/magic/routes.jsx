@@ -1,192 +1,73 @@
 import _ from  'lodash';
 import React from 'react';
-import {mount} from 'react-mounter';
+import {Route, Switch, Redirect} from 'react-router-dom';
 
-import Layout from '/client/modules/common/components/layout';
-import Home from '/client/modules/common/components/home';
+import {versions} from '/lib/modules/magic/data_models.js';
+import Page from '/client/modules/common/components/page.jsx';
+import MagICHome from '/client/modules/magic/components/home.jsx';
+import MagICSearch from '/client/modules/magic/components/search.jsx';
+import MagICDataModel from '/client/modules/magic/components/data_model.jsx';
+import MagICMethodCodes from '/client/modules/magic/components/method_codes.jsx';
+import MagICPrivateContributions from '/client/modules/magic/components/private_contributions.jsx';
+import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution.jsx';
+import MagICUploadContribution from '/client/modules/magic/components/upload_contribution.jsx';
+import MagICValidateContribution from '/client/modules/magic/components/validate_contribution.jsx';
+import Error from '/client/modules/common/components/error.jsx';
 
-import {versions} from '/lib/modules/magic/data_models';
-import MagICHome from '/client/modules/magic/components/home';
-import MagICSearch from '/client/modules/magic/components/search';
-import MagICDataModel from '/client/modules/magic/components/data_model';
-import MagICMethodCodes from '/client/modules/magic/components/method_codes';
-import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
-import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
-import MagICUploadContribution from '/client/modules/magic/components/upload_contribution';
-import MagICValidateContribution from '/client/modules/magic/components/validate_contribution';
+const Routes = ({match}) => (
+  <Switch>
+    <Route exact path="/MagIC" render={() =>
+      <Page portal="MagIC">
+        <MagICHome/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/search" render={({location}) =>
+      <Page fullWidth portal="MagIC">
+        <MagICSearch search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/private" render={({location}) =>
+      <Page fullWidth portal="MagIC">
+        <MagICSearch search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/shared" render={({location}) =>
+      <Page fullWidth portal="MagIC">
+        <MagICSearch search={location.search || ""}/>
+      </Page>
+    }/>
+    <Redirect exact from="/MagIC/data-models" to={`/MagIC/data-models/${_.last(versions)}`}/>
+    <Route exact path="/MagIC/data-models/:v" render={({match, location}) =>
+      <Page portal="MagIC" title="Browse the current and recent MagIC Data Models:">
+        <MagICDataModel version={match.params.v} search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/method-codes" render={({location}) =>
+      <Page portal="MagIC" title="Browse the MagIC Method Codes:">
+        <MagICMethodCodes search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/upgrade" render={() =>
+      <Page portal="MagIC" title="Upgrade an outdated MagIC contribution to the latest MagIC data model version:">
+        <MagICUpgradeContribution/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/upload" render={() =>
+      <Page portal="MagIC" title="Upload data into your private workspace:">
+        <MagICUploadContribution/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/validate" render={() =>
+      <Page portal="MagIC" title="Validate a MagIC contribution:">
+        <MagICValidateContribution/>
+      </Page>
+    }/>
+    <Route render={() =>
+      <Page portal="MagIC">
+        <Error title="Error 404: Sorry, this page is missing!"/>
+      </Page>
+    }/>
+  </Switch>
+);
 
-export default function (injectDeps, {FlowRouter}) {
-
-  const mounter = ({content = () => null}) => (content());
-  const mounterWithContext = injectDeps(mounter);
-
-  let magicRoutes = FlowRouter.group({
-    prefix: '/MagIC',
-    name: 'MagIC',
-    triggersEnter: [function(context, redirect) {
-      //console.log('running MagIC group triggers', context, redirect);
-    }]
-  });
-
-  magicRoutes.route(`/`, {
-    name: 'magicHome',
-    action({}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <MagICHome/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/search`, {
-    name: 'magicSearch',
-    action(params, queryParams) {
-      console.log('magic search', params, queryParams);
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC" fullWidth={true}>
-            <Home portal="MagIC">
-              <MagICSearch search={queryParams.q || ''} bottomOffset={60}/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/private`, {
-    name: 'magicSearch',
-    action({q}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Manage your contributions:
-              </h3>
-              <MagICPrivateContributions search={q}/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/shared`, {
-    name: 'magicSearch',
-    action({q}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Manage your collaborators' contributions:
-              </h3>
-              <MagICSearch view="shared" search={q}/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/data-model`, {
-    action() { FlowRouter.go(`/MagIC/data-models/${_.last(versions)}`); }
-  });
-  magicRoutes.route(`/data-models/:v`, {
-    name: 'magicDataModel',
-    action({v}, {q}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Browse the current and recent MagIC Data Models:
-              </h3>
-              <MagICDataModel version={v} search={q}/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/method-codes`, {
-    name: 'magicMethodCodes',
-    action({q}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Browse the MagIC Method Codes:
-              </h3>
-              <MagICMethodCodes search={q}/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/upgrade`, {
-    name: 'magicUpgrade',
-    action({}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Upgrade an outdated MagIC contribution to the&nbsp;
-                <a className="purple" href="data-model" target="_blank">latest MagIC data model version</a>:
-              </h3>
-              <MagICUpgradeContribution/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/upload`, {
-    name: 'magicUpload',
-    action({}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Upload data into your private workspace:
-              </h3>
-              <MagICUploadContribution/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-  magicRoutes.route(`/validate`, {
-    name: 'magicValidate',
-    action({}) {
-      mount(mounterWithContext, {
-        content: () => (
-          <Layout portal="MagIC">
-            <Home portal="MagIC">
-              <h3>
-                Validate a MagIC contribution:
-              </h3>
-              <MagICValidateContribution/>
-            </Home>
-          </Layout>
-        )
-      });
-    }
-  });
-
-}
+export default Routes;

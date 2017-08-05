@@ -175,7 +175,7 @@ export default class extends React.Component {
             </div>
             :
             <div className="ui divided list" style={{margin: '0'}}>
-              <IconButton className="card" href="/MagIC/upload" portal="MagIC">
+              <IconButton className="card" link="/MagIC/upload" portal="MagIC">
                 <i className="large icons">
                   <i className="table icon"/>
                   <i className="corner add icon"/>

@@ -1,12 +1,17 @@
+import {Meteor} from 'meteor/meteor';
+
+import _ from 'lodash';
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
 import moment from 'moment';
-import {Meteor} from 'meteor/meteor';
 import Cookies from 'js-cookie';
-import Navigation from '/client/modules/common/components/navigation';
+
 import {portals} from '/lib/configs/portals';
 
-export default class extends React.Component {
+import Navigation from '/client/modules/common/components/navigation.jsx';
+
+class Layout extends React.Component {
 
   constructor(props) {
     super(props);
@@ -35,7 +40,7 @@ export default class extends React.Component {
     return (
       <div ref="layout" className="layout">
         <div ref="sidebar menu" className="ui vertical inverted left sidebar menu">
-          <Navigation location="sidebar" portal={portal}/>
+          <Navigation position="sidebar" portal={portal}/>
         </div>
         <div className="pusher">
           <div className={'ui main layout-content' + (fullWidth ? ' full-width' : ' container')}>
@@ -84,7 +89,7 @@ export default class extends React.Component {
           </a>
           <div className={'ui' + (fullWidth ? '' : ' container')}>
             <div className="left menu top-menu-navigation">
-              <Navigation location="top" portal={portal}/>
+              <Navigation position="top" portal={portal}/>
             </div>
           </div>
         </div>
@@ -156,3 +161,11 @@ export default class extends React.Component {
    );
   }
 }
+
+Layout.propTypes = {
+  portal:    PropTypes.oneOf(_.keys(portals)).isRequired,
+  fullWidth: PropTypes.bool
+};
+
+
+export default Layout;

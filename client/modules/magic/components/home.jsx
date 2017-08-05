@@ -1,9 +1,9 @@
 import React from 'react';
 
-import IconButton from '/client/modules/common/components/icon_button';
-import SearchDividedList from '/client/modules/common/containers/search_divided_list';
-import Summary from '/client/modules/magic/components/search_summaries_list_item';
-import {levels} from '/lib/modules/magic/search_levels';
+import IconButton from '/client/modules/common/components/icon_button.jsx';
+import SearchDividedList from '/client/modules/common/containers/search_divided_list.jsx';
+import Summary from '/client/modules/magic/components/search_summaries_list_item.jsx';
+import {levels} from '/lib/modules/magic/search_levels.js';
 
 export default class extends React.Component {
 
@@ -18,83 +18,9 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui small icon floating message" style={{display:'none'}}>
-          <i className="purple users icon"></i>
-          <div className="content">
-            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2017/">MagIC 2017
-            Workshop: Earth's Magnetic Field from the Beginning</a>
-            MagIC hosted a workshop on
-            January 24th-27th, 2017 at SIO in La Jolla, CA.
-          </div>
-        </div>
-        <div className="ui header" style={{display:'none'}}>
-          <div className="ui column padded grid">
-            <div className="ten wide column">
-              <div className="ui piled segment items">
-                <a className="item" href="/MagIC/upgrade/">
-                  <div className="ui bordered images image" style={{marginBottom:'1em'}}>
-                    <video className="image" autoPlay loop width="500" height="350">
-                      <source src="/MagIC/upgrade.webm" type="video/webm"></source>
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                  <div className="content" style={{textAlign:'left', margin:'auto'}}>
-                    <div className="header">Upgrade</div>
-                    <div className="extra">
-                      Convert a<br/>
-                      dataset<br/>
-                      to the latest<br/>
-                      data model.
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
-            <div className="six wide column" style={{display:'none'}}>
-              <div className="ui header">
-                Recent Activity
-              </div>
-              <div className="ui divided relaxed feed items">
-                <a className="item">
-                  <div className="ui tiny image">
-                    <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)'}}/>
-                  </div>
-                  <div className="content">
-                    <h5 className="ui header">Selkin, P.A., Gee, J.S. and Tauxe, L. (2007).</h5>
-                    <div className="description" style={{fontWeight:'normal'}}>
-                      Nonlinear thermoremanence acquisition and implications for paleointensity data. EPSL.
-                    </div>
-                  </div>
-                </a>
-                <a className="event item">
-                  <div className="content">
-                    <div className="summary">
-                      Guillaume St-Onge, PhD
-                      <div className="date">5 days ago</div>
-                    </div>
-                    <div className="extra text" style={{fontWeight:'normal'}}>
-                      Postdoctoral fellowship in paleomagnetism at the Institut des sciences de la mer de Rimouski (ISMER)
-                    </div>
-                  </div>
-                </a>
-                <a className="event item">
-                  <div className="content">
-                    <div className="summary">
-                      Guillaume St-Onge, PhD
-                      <div className="date">5 days ago</div>
-                    </div>
-                    <div className="extra text" style={{fontWeight:'normal'}}>
-                      Postdoctoral fellowship in paleomagnetism at the Institut des sciences de la mer de Rimouski (ISMER)
-                    </div>
-                  </div>
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
         <div className="ui hidden divider"></div>
         <div className="ui four cards">
-          <IconButton className="card" href="/MagIC/search" portal="MagIC">
+          <IconButton className="card" link="/MagIC/search" portal="MagIC">
             <i className="large icons">
               <i className="database icon"/>
               <i className="corner search icon"/>
@@ -102,7 +28,7 @@ export default class extends React.Component {
             <div className="title">Search</div>
             <div className="subtitle">Browse, combine, and save datasets.</div>
           </IconButton>
-          <IconButton className="card" href="/MagIC/upgrade" portal="MagIC">
+          <IconButton className="card" link="/MagIC/upgrade" portal="MagIC">
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner arrow up icon"/>
@@ -110,7 +36,7 @@ export default class extends React.Component {
             <div className="title">Upgrade</div>
             <div className="subtitle">Convert a dataset to the latest data model.</div>
           </IconButton>
-          <IconButton className="card" href="/MagIC/upload" portal="MagIC">
+          <IconButton className="card" link="/MagIC/upload" portal="MagIC">
             <i className="large icons">
               <i className="table icon"/>
               <i className="corner add icon"/>
@@ -118,7 +44,7 @@ export default class extends React.Component {
             <div className="title">Upload</div>
             <div className="subtitle">Import data into your private workspace.</div>
           </IconButton>
-          <IconButton className="disabled card" href="/MagIC/validate" portal="MagIC" style={{display:'none'}}>
+          <IconButton className="disabled card" link="/MagIC/validate" portal="MagIC" style={{display:'none'}}>
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner help icon"/>
@@ -126,7 +52,7 @@ export default class extends React.Component {
             <div className="title">Validate</div>
             <div className="subtitle">Confirm your dataset is ready.</div>
           </IconButton>
-          <IconButton className="card" href="/MagIC/private" portal="MagIC">
+          <IconButton className="card" link="/MagIC/private" portal="MagIC">
             <i className="large icons">
               <i className="file text outline icon"/>
               <i className="corner checkmark icon"/>
@@ -139,21 +65,21 @@ export default class extends React.Component {
           MagIC Resources
         </h2>
         <div className="ui five cards">
-          <IconButton className="borderless card" href="/MagIC/data-models/3.0" portal="MagIC">
+          <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
             <i className="small icons">
               <i className="sitemap icon"/>
               <i className="corner table icon"/>
             </i>
             <div className="small title">Data<br/>Model</div>
           </IconButton>
-          <IconButton className="borderless card" href="/MagIC/method-codes" portal="MagIC">
+          <IconButton className="borderless card" link="/MagIC/method-codes" portal="MagIC">
             <i className="small icons">
               <i className="lab icon"/>
               <i className="corner write icon"/>
             </i>
             <div className="small title">Method<br/>Codes</div>
           </IconButton>
-          <IconButton className="borderless card" href="/vocabularies" portal="MagIC">
+          <IconButton className="borderless card" link="/vocabularies" portal="MagIC">
             <i className="small icons">
               <i className="list icon"/>
               <i className="corner lock icon"/>

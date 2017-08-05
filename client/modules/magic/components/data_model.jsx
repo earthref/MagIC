@@ -2,12 +2,13 @@ import _ from  'lodash';
 import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '/lib/configs/portals';
-import {versions, models} from '/lib/modules/magic/data_models';
-import Upgrader from '/client/modules/magic/actions/upgrade_contribution';
-import DataModelColumn from '/client/modules/magic/components/data_model_column';
 
-export default class extends React.Component {
+import Upgrader from '/client/modules/magic/actions/upgrade_contribution.js';
+import DataModelColumn from '/client/modules/magic/components/data_model_column.jsx';
+import {portals} from '/lib/configs/portals.js';
+import {versions, models} from '/lib/modules/magic/data_models.js';
+
+class DataModel extends React.Component {
 
   constructor(props) {
     super(props);
@@ -407,3 +408,4 @@ export default class extends React.Component {
 
 }
 
+export default DataModel;

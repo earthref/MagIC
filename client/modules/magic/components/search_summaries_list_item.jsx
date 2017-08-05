@@ -2,13 +2,14 @@ import _ from 'lodash';
 import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
+import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 
-import GoogleStaticMap from '/client/modules/common/components/google_static_map';
-import Clamp from '/client/modules/common/components/clamp';
-import ParseContribution from '/client/modules/magic/actions/parse_contribution';
+import Clamp from '/client/modules/common/components/clamp.jsx';
+import ParseContribution from '/client/modules/magic/actions/parse_contribution.js';
+import GoogleStaticMap from '/client/modules/common/components/google_static_map.jsx';
 
-export default class extends React.Component {
+class SearchSummariesListItem extends React.Component {
 
   constructor(props) {
     super(props);
@@ -22,7 +23,6 @@ export default class extends React.Component {
 
   componentDidMount() {
     $(this.refs['accordion']).accordion({exclusive: false, selector: { trigger: '.accordion-trigger'} });
-    //$(this.refs['accordion']).find(".clamp").each(function() { console.log(this); $clamp(this, {clamp: 2, useNativeClamp: false}); });
   }
 
   showData() {
@@ -77,7 +77,7 @@ export default class extends React.Component {
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
         {id ?
         <a className={'ui basic tiny fluid compact icon header purple button'} style={{padding:'20px 0', height:'100px'}}
-           href={`//earthref.org/cgi-bin/z-download.cgi?file_path=/projects/earthref/archive/bgfiles/zmab/magic_contribution_${id}.txt`}>
+           href={`//earthref.org/cgi-bin/z-download.cgi?file_path=/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}>
           <i className="ui file text outline icon"/> Download
         </a> : undefined}
       </div>
@@ -808,3 +808,10 @@ export default class extends React.Component {
 
 }
 
+SearchSummariesListItem.propTypes = {
+  table: PropTypes.oneOf(['contribution', 'locations', 'sites', 'samples', 'specimens', 'experiments']).isRequired,
+  item:  PropTypes.object
+};
+
+
+export default SearchSummariesListItem;

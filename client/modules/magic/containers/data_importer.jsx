@@ -1,12 +1,8 @@
 import React from 'react';
 import DataImporter from '/client/modules/common/components/data_importer';
-import {useDeps, composeWithTracker, composeAll} from 'mantra-core';
+import {compose} from 'react-komposer';
 
-export const composer = ({
-  context,
-  subscriptionName,
-  user_id
-}, onData) => {
+export const composer = ({context, subscriptionName, user_id}, onData) => {
   const {Meteor, Collections} = context();
   const subscriptionHandle = Meteor.subscribe(subscriptionName, user_id);
   let docs = null;
@@ -18,11 +14,13 @@ export const composer = ({
   }
 };
 
-export default composeAll(
-  composeWithTracker(composer, () => (
-    <div className="ui active inverted dimmer" style={{minHeight: '500px'}}>
-      <div className="ui text loader">Loading</div>
-    </div>
-  )),
-  useDeps()
+export default compose(
+  composer,
+  {
+    loadingHandler: () => (
+      <div className="ui active inverted dimmer" style={{minHeight: '500px'}}>
+        <div className="ui text loader">Loading</div>
+      </div>
+    )
+  }
 )(DataImporter);

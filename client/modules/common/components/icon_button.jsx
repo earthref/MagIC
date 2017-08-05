@@ -1,7 +1,11 @@
+import _ from 'lodash';
 import React from 'react';
-import {portals} from '/lib/configs/portals';
+import PropTypes from 'prop-types';
+import { Link } from 'react-router-dom';
 
-export default class extends React.Component {
+import { portals } from '/lib/configs/portals.js';
+
+class IconButton extends React.Component {
 
   constructor(props) {
     super(props);
@@ -12,8 +16,7 @@ export default class extends React.Component {
   }
 
   portalColor() {
-    const portal = this.props.portal || 'EarthRef.org';
-    return portals[portal] && portals[portal].color || 'green';
+    return portals[this.props.portal].color || 'green';
   }
 
   renderChildren () {
@@ -35,21 +38,46 @@ export default class extends React.Component {
   }
 
   render() {
-    let {className, portal, tooltip, position, ...props} = this.props;
+    let {portal, className, href, link, tooltip, position, ...props} = this.props;
     className = 'ui icon header basic fluid button ' + this.portalColor() + ' ' +
       className + ' er-icon-button';
-    return (
+
+    if (this.props.href) return (
       <div className={className} {...props}>
-      {(this.props.href ?
-        <a href={this.props.href} data-tooltip={tooltip} data-position={position}>
-          {this.renderChildren()}
+        <a href={this.props.href}>
+          <div data-tooltip={tooltip} data-position={position}>
+            {this.renderChildren()}
+          </div>
         </a>
-      :
+      </div>
+    );
+    else if (this.props.link) return (
+      <div className={className} {...props}>
+        <Link to={this.props.link}>
+          <div data-tooltip={tooltip} data-position={position}>
+            {this.renderChildren()}
+          </div>
+        </Link>
+      </div>
+    );
+    else return (
+      <div className={className} {...props}>
         <div data-tooltip={tooltip} data-position={position}>
           {this.renderChildren()}
         </div>
-      )}
-      </div>);
+      </div>
+    );
   }
 
 }
+
+IconButton.propTypes = {
+  portal:    PropTypes.oneOf(_.keys(portals)).isRequired,
+  className: PropTypes.string,
+  href:      PropTypes.string,
+  link:      PropTypes.string,
+  tooltip:   PropTypes.string,
+  position:  PropTypes.string
+};
+
+export default IconButton;
