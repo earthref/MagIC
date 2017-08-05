@@ -1,8 +1,8 @@
 import React from 'react';
 import {BrowserRouter as Router, Switch, Route, Redirect} from 'react-router-dom';
 
-import EarthRefRoutes from '/client/modules/er/routes.jsx';
-import MagICRoutes from '/client/modules/magic/routes.jsx';
+import EarthRefRoutes from '/client/modules/er/routes';
+import MagICRoutes from '/client/modules/magic/routes';
 
 const supportsHistory = 'pushState' in window.history;
 

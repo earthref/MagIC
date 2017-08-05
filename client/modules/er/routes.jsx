@@ -1,9 +1,9 @@
 import React from 'react';
 import {Switch, Route, Redirect} from 'react-router-dom';
 
-import Page from '/client/modules/common/components/page.jsx';
-import Error from '/client/modules/common/components/error.jsx';
-import Vocabularies from '/client/modules/er/components/vocabularies.jsx';
+import Page from '/client/modules/common/components/page';
+import Error from '/client/modules/common/components/error';
+import Vocabularies from '/client/modules/er/components/vocabularies';
 
 const Routes = () => (
   <Switch>

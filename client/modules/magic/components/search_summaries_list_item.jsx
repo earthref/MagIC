@@ -5,9 +5,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 
-import Clamp from '/client/modules/common/components/clamp.jsx';
+import Clamp from '/client/modules/common/components/clamp';
 import ParseContribution from '/client/modules/magic/actions/parse_contribution.js';
-import GoogleStaticMap from '/client/modules/common/components/google_static_map.jsx';
+import GoogleStaticMap from '/client/modules/common/components/google_static_map';
 
 class SearchSummariesListItem extends React.Component {
 

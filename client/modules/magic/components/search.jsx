@@ -2,9 +2,9 @@ import _ from 'lodash';
 import React from 'react';
 import Cookies from 'js-cookie';
 
-import Count from '/client/modules/common/containers/search_count.jsx';
-import FiltersList from '/client/modules/common/containers/search_filters_list.jsx';
-import SearchLevel from '/client/modules/common/components/search_level.jsx';
+import Count from '/client/modules/common/containers/search_count';
+import FiltersList from '/client/modules/common/containers/search_filters_list';
+import SearchLevel from '/client/modules/common/components/search_level';
 import {portals} from '/lib/configs/portals.js';
 import {versions, models} from '/lib/modules/magic/data_models.js';
 import {levels} from '/lib/modules/magic/search_levels.js';

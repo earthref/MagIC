@@ -13,7 +13,7 @@ import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribut
 import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution.js';
 import ValidateContribution from '/client/modules/magic/actions/validate_contribution.js';
 import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
-import IconButton from '/client/modules/common/components/icon_button.jsx';
+import IconButton from '/client/modules/common/components/icon_button';
 import {versions, models} from '/lib/modules/magic/data_models.js';
 
 export default class extends React.Component {

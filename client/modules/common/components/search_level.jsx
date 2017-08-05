@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import React from 'react';
+
 import Count from '/client/modules/common/containers/search_count';
 import SearchSummariesView from '/client/modules/magic/components/search_summaries_view';
 import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
-import {portals} from '/lib/configs/portals';
+import {portals} from '/lib/configs/portals.js';
 
 export default class extends React.Component {
 

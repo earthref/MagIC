@@ -15,8 +15,8 @@ import XLSX from 'xlsx';
 
 import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution.js';
 //import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
-import DataImporter from '/client/modules/common/components/data_importer.jsx';
-import IconButton from '/client/modules/common/components/icon_button.jsx';
+import DataImporter from '/client/modules/common/components/data_importer';
+import IconButton from '/client/modules/common/components/icon_button';
 import {versions, models} from '/lib/modules/magic/data_models.js';
 
 export default class MagICUploadContribution extends React.Component {

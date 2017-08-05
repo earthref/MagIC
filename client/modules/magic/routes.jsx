@@ -3,16 +3,16 @@ import React from 'react';
 import {Route, Switch, Redirect} from 'react-router-dom';
 
 import {versions} from '/lib/modules/magic/data_models.js';
-import Page from '/client/modules/common/components/page.jsx';
-import MagICHome from '/client/modules/magic/components/home.jsx';
-import MagICSearch from '/client/modules/magic/components/search.jsx';
-import MagICDataModel from '/client/modules/magic/components/data_model.jsx';
-import MagICMethodCodes from '/client/modules/magic/components/method_codes.jsx';
-import MagICPrivateContributions from '/client/modules/magic/components/private_contributions.jsx';
-import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution.jsx';
-import MagICUploadContribution from '/client/modules/magic/components/upload_contribution.jsx';
-import MagICValidateContribution from '/client/modules/magic/components/validate_contribution.jsx';
-import Error from '/client/modules/common/components/error.jsx';
+import Page from '/client/modules/common/components/page';
+import MagICHome from '/client/modules/magic/components/home';
+import MagICSearch from '/client/modules/magic/components/search';
+import MagICDataModel from '/client/modules/magic/components/data_model';
+import MagICMethodCodes from '/client/modules/magic/components/method_codes';
+import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
+import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
+import MagICUploadContribution from '/client/modules/magic/components/upload_contribution';
+import MagICValidateContribution from '/client/modules/magic/components/validate_contribution';
+import Error from '/client/modules/common/components/error';
 
 const Routes = ({match}) => (
   <Switch>

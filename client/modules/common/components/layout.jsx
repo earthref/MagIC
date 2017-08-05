@@ -9,7 +9,7 @@ import Cookies from 'js-cookie';
 
 import {portals} from '/lib/configs/portals';
 
-import Navigation from '/client/modules/common/components/navigation.jsx';
+import Navigation from '/client/modules/common/components/navigation';
 
 class Layout extends React.Component {
 

@@ -1,6 +1,7 @@
 import React from 'react';
-import DividedList from '/client/modules/common/components/divided_list';
 import {compose} from 'react-komposer';
+
+import DividedList from '/client/modules/common/components/divided_list';
 
 export const composer = ({es, pageSize, pageNumber}, onData) => {
   onData(null, { items: undefined });

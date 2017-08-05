@@ -1,6 +1,7 @@
 import React from 'react';
-import InfiniteScroller from '/client/modules/common/components/infinite_scroller';
 import {compose} from 'react-komposer';
+
+import InfiniteScroller from '/client/modules/common/components/infinite_scroller';
 
 export const composer = ({es}, onData) => {
   onData(null, {});

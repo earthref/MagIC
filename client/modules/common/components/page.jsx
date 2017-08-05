@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 
-import Layout from '/client/modules/common/components/layout.jsx';
+import Layout from '/client/modules/common/components/layout';
 import {portals} from '/lib/configs/portals';
 
 class Page extends React.Component {
