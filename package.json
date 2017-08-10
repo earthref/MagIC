@@ -69,6 +69,6 @@
     }
   },
   "scripts": {
-    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.10/semantic.css"
+    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.13/semantic.css"
   }
 }

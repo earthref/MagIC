@@ -112,3 +112,7 @@
   left: 50% !important;
 }
 
+
+body ::-webkit-scrollbar {
+  height: 10px;
+}
