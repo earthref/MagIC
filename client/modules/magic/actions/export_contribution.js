@@ -2,11 +2,10 @@ import _ from 'lodash';
 import jQuery from 'jquery';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip'; // not used, but makes xlsx-style happy
 import XLSX from 'xlsx';
-import Runner from '../../common/actions/runner.js';
-import ValidateContribution from './validate_contribution';
+import Runner from '/client/modules/common/actions/runner';
+import ValidateContribution from '/client/modules/magic/actions/validate_contribution';
 
-import { default as magicVersions   } from '../../../../lib/modules/magic/magic_versions';
-import { default as magicDataModels } from '../../../../lib/modules/magic/data_models';
+import {versions, models} from '/lib/modules/magic/data_models';
 
 export default class extends Runner {
 
@@ -14,8 +13,8 @@ export default class extends Runner {
     super({runnerState});
     runnerState = this.runnerState;
     this.validator = new ValidateContribution({runnerState});
-    this.version;
-    this.model;
+    this.version = undefined;
+    this.model = undefined;
   }
 
   // Convert a JSON contribution to a MagIC Text Format string.
@@ -28,7 +27,7 @@ export default class extends Runner {
     if (!this.version) return json;
 
     // Retrieve the data model
-    this.model = magicDataModels[this.version];
+    this.model = models[this.version];
     this.orderedModel = this.createOrderedModel();
 
     this.testValidityOfTablesAndColumns(json);
@@ -48,7 +47,7 @@ export default class extends Runner {
     if (!this.version) return json;
 
     // Retrieve the data model
-    this.model = magicDataModels[this.version];
+    this.model = models[this.version];
     this.orderedModel = this.createOrderedModel();
 
     this.testValidityOfTablesAndColumns(json);
@@ -64,7 +63,7 @@ export default class extends Runner {
     let { version } = this.validator.getVersion(jsonToExport);
     this.version = version;
 
-    this.model = magicDataModels[this.version];
+    this.model = models[this.version];
     this.orderedModel = this.createOrderedModel();
 
     // Create an empty workbook.
@@ -526,7 +525,7 @@ export default class extends Runner {
   }
 
   handleSpecialCases(value, tableName, columnName) {
-    let type = magicDataModels[_.last(magicVersions)].tables[tableName].columns[columnName].type;
+    let type = models[_.last(versions)].tables[tableName].columns[columnName].type;
 
     if (type === 'Dictionary' && _.isPlainObject(value))
       value = _.keys(value).map(key => `${this.escapeColons(key)}[${this.escapeColons(value[key])}]`).join(':');

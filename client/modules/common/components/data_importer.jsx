@@ -1,13 +1,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import FixedTable from './fixed_table.jsx';
+import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import {Tracker}  from 'meteor/tracker';
-import {portals} from '../configs/portals.js';
-import {default as versions} from '../../../../lib/modules/magic/magic_versions';
-import {default as models} from '../../../../lib/modules/magic/data_models';
-let dataModels = {MagIC: models[_.last(versions)]};
+
+import FixedTable from '/client/modules/common/components/fixed_table';
+import {portals} from '/lib/configs/portals';
 
 export default class DataImporter extends React.Component {
 
@@ -174,7 +173,7 @@ export default class DataImporter extends React.Component {
     newState.settings.tableName = _.trim(String(newState.settings.tableName));
     if (newState.settings.tableName === '')
       newState.errors.tableName.push('"Table Name" must be selected.');
-    else if (_.indexOf(_.keys(dataModels[nextProps.portal].tables), newState.settings.tableName) === -1)
+    else if (_.indexOf(_.keys(this.props.dataModel.tables), newState.settings.tableName) === -1)
       newState.errors.tableName.push('Table name "' + newState.settings.tableName + '" is not recognized.');
 
     // Update the input column names list.
@@ -213,7 +212,7 @@ export default class DataImporter extends React.Component {
       // If the output column name isn't empty, check that it's valid for the selected table.
       if (outColumnName !== undefined &&
         _.indexOf(
-          _.keys(dataModels[nextProps.portal].tables[newState.settings.tableName].columns),
+          _.keys(this.props.dataModel.tables[newState.settings.tableName].columns),
           outColumnName
         ) === -1) {
         newState.errors.columnNames.push('Selected column name "' + outColumnName +
@@ -223,8 +222,8 @@ export default class DataImporter extends React.Component {
       // If the output column name is empty, see if the input column name is valid for the selected table.
       if (outColumnName === undefined) {
         let modelColumnByName, modelColumnByLabel;
-        for (let columnName in dataModels[nextProps.portal].tables[newState.settings.tableName].columns) {
-          const columnLabel = dataModels[nextProps.portal].tables[newState.settings.tableName].columns[columnName].label;
+        for (let columnName in this.props.dataModel.tables[newState.settings.tableName].columns) {
+          const columnLabel = this.props.dataModel.tables[newState.settings.tableName].columns[columnName].label;
           if (newState.inColumnNames[i] && (
               newState.inColumnNames[i].toLowerCase() === columnName ||
               newState.inColumnNames[i].toLowerCase() === columnLabel.toLowerCase()))
@@ -410,7 +409,7 @@ export default class DataImporter extends React.Component {
 
   columnIsDownloadOnly(i) {
     let outColumnName = (i < this.state.outColumnNames.length ? this.state.outColumnNames[i] : undefined);
-    let dataModelTable = this.state.settings.tableName && dataModels[this.props.portal].tables[this.state.settings.tableName];
+    let dataModelTable = this.state.settings.tableName && this.props.dataModel.tables[this.state.settings.tableName];
     let dataModelColumn = dataModelTable && dataModelTable.columns[outColumnName];
     let validations = dataModelColumn && dataModelColumn.validations;
     return validations && /downloadOnly\(\)/.test(validations);
@@ -509,10 +508,10 @@ export default class DataImporter extends React.Component {
                   <span className="text">{this.state.settings.tableName || 'Select One'}</span>
                 </div>
                 <div className="menu">
-                  {(_.keys(dataModels[this.props.portal].tables).map((table, i) => {
+                  {(_.keys(this.props.dataModel.tables).map((table, i) => {
                     return (
                       <div key={i} data-value={table} className="item">
-                        {dataModels[this.props.portal].tables[table].label}
+                        {this.props.dataModel.tables[table].label}
                       </div>
                     );
                   }))}
@@ -590,8 +589,8 @@ export default class DataImporter extends React.Component {
         :
         <div className="menu">
           {_.sortBy(
-            _.keys(dataModels[this.props.portal].tables[this.state.settings.tableName].columns),
-            (columnName) => dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].position
+            _.keys(this.props.dataModel.tables[this.state.settings.tableName].columns),
+            (columnName) => this.props.dataModel.tables[this.state.settings.tableName].columns[columnName].position
           ).map((columnName, i) => {
             return (menuLoaded || this.state.outColumnNames[columnIdx] === columnName ?
                 <div className="item" key={i} data-value={columnName} data-column-idx={columnIdx}>
@@ -599,7 +598,7 @@ export default class DataImporter extends React.Component {
                     {columnName}
                   </span>
                   <span className="text">
-                    {dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].label}
+                    {this.props.dataModel.tables[this.state.settings.tableName].columns[columnName].label}
                   </span>
                 </div> : undefined
             );
@@ -662,7 +661,7 @@ export default class DataImporter extends React.Component {
                       (!this.state.settings.excludeTable && (this.state.errors.tableName.length > 0 ||
                       outColumnName === undefined ||
                       this.state.outColumnNameCounts[outColumnName] > 1 ||
-                      dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
+                      this.props.dataModel.tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
                         ' error' : '')
                     }
                     style={{display: 'table-cell', width: 'initial'}}
@@ -687,7 +686,7 @@ export default class DataImporter extends React.Component {
                 this.state.errors.tableName.length > 0 || outColumnName === undefined ?
                   undefined
                   :
-                  dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName]
+                  this.props.dataModel.tables[this.state.settings.tableName].columns[outColumnName]
               );
               return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ?
                   (modelColumn === undefined ?
@@ -877,3 +876,7 @@ export default class DataImporter extends React.Component {
   }
 
 }
+
+DataImporter.propTypes = {
+  dataModel: PropTypes.object.isRequired
+};

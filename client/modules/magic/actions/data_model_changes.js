@@ -1,10 +1,7 @@
 import _ from  'lodash';
-import Runner from '../../common/actions/runner';
+import Runner from '/client/modules/common/actions/runner';
 
-import {default as magicVersions} from '../../../../lib/modules/magic/magic_versions';
-import {default as magicDataModels} from '../../../../lib/modules/magic/data_models';
-
-/*This class makes a lists of changes from the "previous" model to the "current" model*/
+/*This class makes lists of changes from the "previous" model to the "current" model*/
 export default class extends Runner {
 
   constructor({LocalState}) {
@@ -32,7 +29,7 @@ export default class extends Runner {
     }
 
     let dataModel = model;
-    this.dataModelVersionNumber = dataModel.magic_version;
+    this.dataModelVersionNumber = dataModel.data_model_version;
 
     console.log('Outlining changes for data model: ' + this.dataModelVersionNumber);
     for(let currentTableName in dataModel.tables)
@@ -132,10 +129,10 @@ export default class extends Runner {
       throw "the model argument has no tables, can not proceed.";
     }
 
-    if(!hasOwnProperty.call(model, 'magic_version'))
+    if(!hasOwnProperty.call(model, 'data_model_version'))
     {
-      this._appendError(`has no "magic_version" property`);
-      throw "the model argument ${model} has no magic_version property, can not proceed.";
+      this._appendError(`has no "data_model_version" property`);
+      throw "the model argument ${model} has no data_model_version property, can not proceed.";
     }
   }
 }

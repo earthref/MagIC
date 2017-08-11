@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import Runner from '../../common/actions/runner';
+import Runner from '/client/modules/common/actions/runner';
 
 export default class extends Runner {
 

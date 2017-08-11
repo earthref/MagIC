@@ -1,0 +1,72 @@
+//@import '../../../lib/semantic-ui/themes/default/globals/site.variables.import.less';
+//@import '../../../lib/semantic-ui/themes/default/modules/sidebar.variables.import.less';
+
+#react-root {
+  height: 100% !important;
+}
+
+#react-root > .layout.pushable {
+  transform: none !important;
+  overflow-y: scroll !important;
+}
+
+#react-root > .layout.pushable > .ui.sidebar,
+#react-root > .layout.pushable > .fixed,
+#react-root > .layout.pushable > .pusher:after {
+  //position: fixed !important;
+}
+
+.top-menu, .footer {
+  background: #F8F8F8 !important;
+}
+
+.right-menu {
+  width: auto !important;
+  left: auto !important;
+  right: 0 !important;
+  border-bottom-color: transparent !important;
+}
+
+.search-earthref input.prompt {
+  border: none !important;
+  margin-top: -1px;
+  margin-bottom: -2px;
+}
+
+//.layout-content, .footer > .ui.container {
+//  padding-left:  @relativeLarge !important;
+//  padding-right: @relativeLarge !important;
+//}
+
+.layout-content {
+  padding-top: 4em !important;
+  padding-bottom: 4em !important;
+}
+
+.layout-content.full-width {
+  padding-left: 2em !important;
+  padding-right: 2em !important;
+}
+
+//@media only screen and (max-width: @largestTabletScreen) {
+//  .top-menu-navigation {
+//    display: none !important;
+//  }
+//}
+
+//@media only screen and (min-width: @computerBreakpoint) {
+//  .sidebar-button {
+//    display: none !important;
+//  }
+//}
+
+#react-root > .layout.pushable > .footer {
+  margin-top: -47px;
+//  position: relative;
+}
+
+#react-root > .layout.pushable > .footer .segment {
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
+}
+

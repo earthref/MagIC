@@ -16,7 +16,7 @@ describe('magic.actions.export_contribution', () => {
     it('should reject if the column name is invalid.', () => {
       const invalidColumn = {
         contribution: [{
-          magic_version: '2.5', 
+          data_model_version: '2.5',
           author: 'Geoff'
         }],
         er_locations: [{
@@ -30,7 +30,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report one error if the same two columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -46,7 +46,7 @@ describe('magic.actions.export_contribution', () => {
     it('should report two errors if two different columns are invalid.', () => {
       const invalidColumns = {
         contribution: [{
-          magic_version: '2.5'
+          data_model_version: '2.5'
         }],
         er_locations: [{
           not_region: 'California'
@@ -65,7 +65,7 @@ describe('magic.actions.export_contribution', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         specimens: [{
           dip:       1.2,
@@ -102,7 +102,7 @@ describe('magic.actions.export_contribution', () => {
       };
       const text1 =
         'tab delimited\tcontribution\n' +
-        'magic_version\n' +
+        'data_model_version\n' +
         '3.0\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tsites\n' +
@@ -123,7 +123,7 @@ describe('magic.actions.export_contribution', () => {
       exportContributionToTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
-          magic_version: '3.0',
+          data_model_version: '3.0',
           id: '1234',
           contributor: '@magic'
         }],
@@ -136,7 +136,7 @@ describe('magic.actions.export_contribution', () => {
       };
       const text2 =
         'tab delimited\tcontribution\n' +
-        'id\tcontributor\tmagic_version\n' +
+        'id\tcontributor\tdata_model_version\n' +
         '1234\t@magic\t3.0\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\n' +
@@ -151,7 +151,7 @@ describe('magic.actions.export_contribution', () => {
     it('should keep export tables and columns in the order defined in the data model', () => {
       const json1 = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         specimens: [{
           dip:       1.2,
@@ -179,10 +179,10 @@ describe('magic.actions.export_contribution', () => {
       };
       const text1 =
         'tab delimited\tcontribution\t4 headers\n' +
-        'Contribution\n' +  // Group Name              (columns[column_name].group)
-        'MagIC Version\n' + // Column Name             (columns[column_name].label)
-        'String\n' +        // Column Type and/or Unit (columns[column_name].type and .unit depending upon logic)
-        'magic_version\n' +
+        'Contribution\n' +       // Group Name              (columns[column_name].group)
+        'Data Model Version\n' + // Column Name             (columns[column_name].label)
+        'String\n' +             // Column Type and/or Unit (columns[column_name].type and .unit depending upon logic)
+        'data_model_version\n' +
         '3.0\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tsites\t4 headers\n' +
@@ -203,7 +203,7 @@ describe('magic.actions.export_contribution', () => {
       exportContributionToExtendedTextJSONTest(json1, text1);
       const json2 = {
         contribution: [{
-          magic_version: '3.0',
+          data_model_version: '3.0',
           id: '1234',
           contributor: '@magic'
         }],
@@ -218,10 +218,10 @@ describe('magic.actions.export_contribution', () => {
       };
       const text2 =
         'tab delimited\tcontribution\t4 headers\n' +
-        'Contribution\t\t\n' +                            // Group Name
-        'Contribution ID\tContributor\tMagIC Version\n' + // Column Name
-        'Integer\tString\tString\n' +                    // Column Type and/or Unit
-        'id\tcontributor\tmagic_version\n' +
+        'Contribution\t\t\n' +                                 // Group Name
+        'Contribution ID\tContributor\tData Model Version\n' + // Column Name
+        'Integer\tString\tString\n' +                          // Column Type and/or Unit
+        'id\tcontributor\tdata_model_version\n' +
         '1234\t@magic\t3.0\n' +
         '>>>>>>>>>>\n' +
         'tab delimited\tspecimens\t4 headers\n' +
@@ -239,7 +239,7 @@ describe('magic.actions.export_contribution', () => {
     it('should export EXCEL tables and columns in the order defined in the data model', () => {
       const json1 = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         specimens: [{
           dip:       1.2,

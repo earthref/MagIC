@@ -2,11 +2,10 @@ import _ from 'lodash';
 import jQuery from 'jquery';
 import moment from 'moment-timezone';
 import Promise from 'bluebird';
-import Runner from '../../common/actions/runner';
-import ValidateContribution from './validate_contribution';
 
-import {default as versions} from '../../../../lib/modules/magic/magic_versions';
-import {default as models} from '../../../../lib/modules/magic/data_models';
+import Runner from '/client/modules/common/actions/runner';
+import ValidateContribution from '/client/modules/magic/actions/validate_contribution';
+import {versions, models} from '/lib/modules/magic/data_models';
 
 // This class upgrades the json data from its current model to the newest model if a newer model is available.
 export default class extends Runner {
@@ -99,12 +98,6 @@ export default class extends Runner {
       this.modelOld = models[this.versionOld];
       this.modelNew = models[this.versionNew];
       this.upgradeMap = this.getUpgradeMap(this.modelNew);
-
-      // RCJM: using this for a quick sanity check of the upgrade map
-      /*for (let t in this.upgradeMap)
-       for (let c in this.upgradeMap[t])
-       if (this.upgradeMap[t][c].length > 1 && t != 'pmag_results' && t != 'rmag_results')
-       console.log(t, c, this.upgradeMap[t][c]);*/
 
       const rowsTotal = _.reduce(this.jsonOld, (rowsTotal, table) => {
         return rowsTotal + (table.rows ? table.rows.length : table.length);
@@ -543,7 +536,7 @@ export default class extends Runner {
         // Update the data model version.
         if (!this.jsonNew['contribution'])
           this.jsonNew['contribution'] = [{}];
-        this.jsonNew['contribution'][0]['magic_version'] = this.versionNew;
+        this.jsonNew['contribution'][0]['data_model_version'] = this.versionNew;
 
         //console.log('done with mapping', this.versionOld, 'to', this.versionNew);
         this.json = this.jsonNew;

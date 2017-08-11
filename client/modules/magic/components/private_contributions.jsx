@@ -3,10 +3,10 @@ import React from 'react';
 import saveAs from 'save-as';
 import Cookies from 'js-cookie';
 import {Tracker}  from 'meteor/tracker';
-import {portals} from '../../common/configs/portals';
+import {portals} from '/lib/configs/portals';
 import {Collections} from '/lib/collections';
-import Summary from './search_summaries_list_item';
-import IconButton from '../../common/components/icon_button.jsx';
+import Summary from '/client/modules/magic/components/search_summaries_list_item';
+import IconButton from '/client/modules/common/components/icon_button';
 
 export default class extends React.Component {
 
@@ -175,7 +175,7 @@ export default class extends React.Component {
             </div>
             :
             <div className="ui divided list" style={{margin: '0'}}>
-              <IconButton className="card" href="/MagIC/upload" portal="MagIC">
+              <IconButton className="card" link="/MagIC/upload" portal="MagIC">
                 <i className="large icons">
                   <i className="table icon"/>
                   <i className="corner add icon"/>

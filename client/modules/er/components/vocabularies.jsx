@@ -1,9 +1,11 @@
 import _ from  'lodash';
 import React from 'react';
+import {Link} from 'react-router-dom';
 import saveAs from 'save-as';
-import {portals} from '../../common/configs/portals';
-import {default as cvs} from '../../../../lib/modules/er/controlled_vocabularies';
-import {default as svs} from '../../../../lib/modules/er/suggested_vocabularies';
+
+import {portals} from '/lib/configs/portals';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
+import {svs} from '/lib/modules/er/suggested_vocabularies';
 
 export default class extends React.Component {
 
@@ -141,12 +143,12 @@ export default class extends React.Component {
     return (
       <div className="vocabularies">
         <div className="ui top attached tabular menu">
-          <a className={(this.props.vocabularies === 'controlled' ? 'active ' : '') + 'item'} href={'controlled'}>
+          <Link className={(this.props.vocabularies === 'controlled' ? 'active ' : '') + 'item'} to={'controlled'}>
             Controlled Vocabularies
-          </a>
-          <a className={(this.props.vocabularies === 'suggested' ? 'active ' : '') + 'item'} href={'suggested'}>
+          </Link>
+          <Link className={(this.props.vocabularies === 'suggested' ? 'active ' : '') + 'item'} to={'suggested'}>
             Suggested Vocabularies
-          </a>
+          </Link>
           <div className="right menu" style={{display:'none'}}>
             <div className="active item">
               <div className="ui search">

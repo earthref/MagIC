@@ -2,7 +2,7 @@ const {describe, it} = global;
 import _ from 'lodash';
 import {expect} from 'chai';
 import Promise from 'bluebird';
-import ParseContribution from '../parse_contribution';
+import ParseContribution from '/client/modules/magic/actions/parse_contribution';
 import {default as contribution3552 } from './files/contributions/3552.js';
 import {default as contribution8054 } from './files/contributions/8054.js';
 import {default as contribution10507} from './files/contributions/10507.js';
@@ -69,14 +69,14 @@ describe('magic.actions.parse_contribution', () => {
 
     it('should keep numbers as strings', () => {
       const text = `tab\tcontribution
-                    magic_version
+                    data_model_version
                     3.0
                     >>>>>>>>>>>
                     tab\ttable
                     col1\tcol2
                     str1\t1.2`;
       const json = {
-        contribution: [{ magic_version: '3.0' }],
+        contribution: [{ data_model_version: '3.0' }],
         table: [{
           col1: 'str1',
           col2: '1.2'
@@ -87,7 +87,7 @@ describe('magic.actions.parse_contribution', () => {
 
     it('should keep measurements as a table', () => {
       const text = `tab\tcontribution
-                    magic_version
+                    data_model_version
                     3.0
                     >>>>>>>>>>>
                     tab\tMAGIC_measurements
@@ -99,7 +99,7 @@ describe('magic.actions.parse_contribution', () => {
                     col1\tcol2
                     str1\t1.2`;
       const json = {
-        contribution: [{ magic_version: '3.0' }],
+        contribution: [{ data_model_version: '3.0' }],
         magic_measurements: {
           columns: ['col1', 'col2'],
           rows: [
@@ -119,17 +119,17 @@ describe('magic.actions.parse_contribution', () => {
 
     it('should eliminate blank lines and leading/trailing spaces', () => {
       const texts = [
-        '\ntab\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
-        'tab delimited \tcontribution\nmagic_version\tdoi\n\n\n3.0\t1.2',
-        ' tab\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
-        'tab any_non_tab_string\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
-        'tab any_non_tab_string\tcontribution\nmagic_version\tdoi\n3.0\t1.2',
-        'tab\t  contribution\nmagic_version\tdoi\n3.0\t1.2',
-        'tab\tcontribution\nmagic_version  \tdoi\n  3.0\t1.2  '
+        '\ntab\tcontribution\ndata_model_version\tdoi\n3.0\t1.2',
+        'tab delimited \tcontribution\ndata_model_version\tdoi\n\n\n3.0\t1.2',
+        ' tab\tcontribution\ndata_model_version\tdoi\n3.0\t1.2',
+        'tab any_non_tab_string\tcontribution\ndata_model_version\tdoi\n3.0\t1.2',
+        'tab any_non_tab_string\tcontribution\ndata_model_version\tdoi\n3.0\t1.2',
+        'tab\t  contribution\ndata_model_version\tdoi\n3.0\t1.2',
+        'tab\tcontribution\ndata_model_version  \tdoi\n  3.0\t1.2  '
       ];
       const json = {
         contribution: [{
-          magic_version: '3.0',
+          data_model_version: '3.0',
           doi: '1.2'
         }]
       };
@@ -141,18 +141,18 @@ describe('magic.actions.parse_contribution', () => {
     it('should handle empty columns', () => {
       const texts = [
         `tab\tcontribution
-         \tmagic_version\tdoi
+         \tdata_model_version\tdoi
          \t3.0\t1.2`,
         `tab\tcontribution
-         magic_version\t\tdoi
+         data_model_version\t\tdoi
          3.0\t\t1.2`,
         `tab\tcontribution
-         magic_version\tdoi\tempty_column
+         data_model_version\tdoi\tempty_column
          3.0\t1.2\t`
       ];
       const json = {
         contribution: [{
-          magic_version: '3.0',
+          data_model_version: '3.0',
           doi: '1.2'
         }]
       };
@@ -162,12 +162,12 @@ describe('magic.actions.parse_contribution', () => {
     });
 
     it('should combine rows', () => {
-      const partial1 = 'tab\tcontribution\nmagic_version\n3.0';
+      const partial1 = 'tab\tcontribution\ndata_model_version\n3.0';
       const partial2 = 'tab\ttable\ncol1\tcol2\nstr1\t1.2';
       const partial3 = 'tab\ttable\ncol1\tcol2\nstr2\t1.0';
       const json = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         table: [{
           col1: 'str1',
@@ -181,11 +181,11 @@ describe('magic.actions.parse_contribution', () => {
     });
 
     it('should combine tables', () => {
-      const partial1 = 'tab\tcontribution\nmagic_version\n3.0';
+      const partial1 = 'tab\tcontribution\ndata_model_version\n3.0';
       const partial2 = 'tab\ttable2\ncol1\tcol2\nstr2\t1.0';
       const json = {
         contribution: [{
-          magic_version: '3.0'
+          data_model_version: '3.0'
         }],
         table2: [{
           col1: 'str2',

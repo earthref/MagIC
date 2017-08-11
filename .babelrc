@@ -5,6 +5,7 @@
     "stage-3"
   ],
   "plugins": [
+    "babel-root-slash-import",
     "transform-runtime",
     "transform-object-rest-spread"
   ],
