@@ -67,7 +67,7 @@ class SearchSummariesListItem extends React.Component {
       if (item.summary._all.specimen) title += ' ⇒ ' + item.summary._all.specimen[0];
       if (item.summary._all.experiment) title += ' ⇒ <b>' + item.summary._all.experiment[0] + '</b>';
     }
-    return <div dangerouslySetInnerHTML={{__html: title}}></div>;
+    return <div dangerouslySetInnerHTML={{__html: title}}/>;
   }
 
   renderDownloadButton(item) {
@@ -76,10 +76,13 @@ class SearchSummariesListItem extends React.Component {
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
         {id ?
-        <a className={'ui basic tiny fluid compact icon header purple button'} style={{padding:'20px 0', height:'100px'}}
-           href={`//earthref.org/cgi-bin/z-download.cgi?file_path=/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}>
-          <i className="ui file text outline icon"/> Download
-        </a> : undefined}
+          <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
+            <input type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
+            <input type="hidden" name="file_name" value={`magic_contribution_${id}.txt`}/>
+            <button type="submit" className={'ui basic tiny fluid compact icon header purple button'} style={{padding:'20px 0', height:'100px'}}>
+              <i className="ui file text outline icon"/> Download
+            </button>
+          </form> : undefined}
       </div>
     );
   }
@@ -127,7 +130,7 @@ class SearchSummariesListItem extends React.Component {
       labels.push('Measurement' + (count !== 1 ? 's' : ''));
     }
     return (
-      <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small'}}>
+      <div style={{minWidth: 135, maxWidth: 135, marginRight: '1em', marginBottom: 5, fontSize:'small', lineHeight:1}}>
         <table><tbody>
           {counts.map((count, i) => {
             return (
@@ -170,25 +173,46 @@ class SearchSummariesListItem extends React.Component {
 
     let paths = [];
 
-    if (item.summary._all && item.summary._all._geo_envelope)
-      item.summary._all._geo_envelope.forEach(envelope => {
-        paths.push({
-          lat_s: envelope.coordinates[0][1],
-          lat_n: envelope.coordinates[1][1],
-          lon_w: envelope.coordinates[0][0],
-          lon_e: envelope.coordinates[1][0]
-        });
-      });
+    let tableSummary = item.summary[this.props.table];
+    let allSummary   = item.summary._all;
 
-    if (item.summary._all && item.summary._all._geo_point)
-      item.summary._all._geo_point.forEach(point => {
-        paths.push({
-          lat_s: point.coordinates[1],
-          lat_n: point.coordinates[1],
-          lon_w: point.coordinates[0],
-          lon_e: point.coordinates[0]
+    if (tableSummary && (tableSummary._geo_envelope || tableSummary._geo_point)) {
+      if (tableSummary._geo_envelope) tableSummary._geo_envelope.forEach(envelope => {
+          paths.push({
+            lat_s: envelope.coordinates[0][1],
+            lat_n: envelope.coordinates[1][1],
+            lon_w: envelope.coordinates[0][0],
+            lon_e: envelope.coordinates[1][0]
+          });
         });
-      });
+
+      if (tableSummary._geo_point) tableSummary._geo_point.forEach(point => {
+          paths.push({
+            lat_s: point.coordinates[1],
+            lat_n: point.coordinates[1],
+            lon_w: point.coordinates[0],
+            lon_e: point.coordinates[0]
+          });
+        });
+    } else if (allSummary) {
+      if (allSummary._geo_envelope) allSummary._geo_envelope.forEach(envelope => {
+          paths.push({
+            lat_s: envelope.coordinates[0][1],
+            lat_n: envelope.coordinates[1][1],
+            lon_w: envelope.coordinates[0][0],
+            lon_e: envelope.coordinates[1][0]
+          });
+        });
+
+      if (allSummary._geo_point) allSummary._geo_point.forEach(point => {
+          paths.push({
+            lat_s: point.coordinates[1],
+            lat_n: point.coordinates[1],
+            lon_w: point.coordinates[0],
+            lon_e: point.coordinates[0]
+          });
+        });
+    }
 
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
@@ -207,30 +231,39 @@ class SearchSummariesListItem extends React.Component {
 
   renderAge(item) {
 
-    if (!item.summary._all || !item.summary._all._age_range_ybp) return (
+    let tableSummary = item.summary[this.props.table];
+    let allSummary   = item.summary._all;
+
+    if (!(tableSummary && tableSummary._age_range_ybp) && !(allSummary && allSummary._age_range_ybp)) return (
       <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
       </div>
     );
 
-    let min_ages = item.summary._all._age_range_ybp.range.gte,
-        max_ages = item.summary._all._age_range_ybp.range.lte,
-        n_ages   = item.summary._all._age_range_ybp.n;
+    let min_ages = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.gte || allSummary._age_range_ybp.range.gte,
+        max_ages = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.lte || allSummary._age_range_ybp.range.lte,
+        n_ages   = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.n         || allSummary._age_range_ybp.n;
+
+    //if (max_ages >= 1e9) {
+    //  max_ages = numeral(max_ages/1e9).format('0[.]0[00]') + ' Ga'
+    //  max_ages = numeral(max_ages/1e9).format('0[.]0[00]') + ' Ga'
+    //}
+
     min_ages = min_ages < 0 ?
       numeral(min_ages)
-        .format('0[.]0') + ' YBP'
+        .format('0[.]0[00]') + ' YBP'
       :
       numeral(min_ages)
-        .format('0[.]0 a')
+        .format('0[.]0[00] a')
         .replace(/b$/, 'Ga')
         .replace(/m$/, 'Ma')
         .replace(/k$/, 'ka')
         .replace(/(\d)\s*$/, '$1 YBP');
     max_ages = max_ages < 0 ?
       numeral(max_ages)
-        .format('0[.]0') + ' YBP'
+        .format('0[.]0[00]') + ' YBP'
       :
       numeral(max_ages)
-        .format('0[.]0 a')
+        .format('0[.]0[00] a')
         .replace(/b$/, 'Ga')
         .replace(/m$/, 'Ma')
         .replace(/k$/, 'ka')
@@ -245,9 +278,9 @@ class SearchSummariesListItem extends React.Component {
           </span>
           :
           <span>
-            <b>Min. Age:</b><br/>
+            <b>Min Age:</b><br/>
             {min_ages}<br/>
-            <b>Max. Age:</b><br/>
+            <b>Max Age:</b><br/>
             {max_ages}<br/>
             {n_ages ? <span><b>N: </b>{n_ages}</span> : undefined}
           </span>
@@ -258,39 +291,42 @@ class SearchSummariesListItem extends React.Component {
 
   renderInt(item) {
 
-    if (!item.summary._all || !item.summary._all.int_abs) return (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+    let tableSummary = item.summary[this.props.table];
+    let allSummary   = item.summary._all;
+
+    if (!(tableSummary && tableSummary.int_abs) && !(allSummary && allSummary.int_abs)) return (
+      <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
       </div>
     );
 
-    let min_ints = item.summary._all.int_abs.range.gte,
-      max_ints = item.summary._all.int_abs.range.lte,
-      n_ints   = item.summary._all.int_abs.n;
+    let min_ints = tableSummary && tableSummary.int_abs && tableSummary.int_abs.range.gte || allSummary.int_abs.range.gte,
+        max_ints = tableSummary && tableSummary.int_abs && tableSummary.int_abs.range.lte || allSummary.int_abs.range.lte,
+        n_ints   = tableSummary && tableSummary.int_abs && tableSummary.int_abs.n         || allSummary.int_abs.n;
     min_ints = numeral(min_ints*1e9)
-      .format('0[.]000 a')
+      .format('0[.]0[00] a')
       .replace(/b$/, 'T')
       .replace(/m$/, 'mT')
       .replace(/k$/, 'µT')
       .replace(/(\d)\s*$/, '$1 nT');
     max_ints = numeral(max_ints*1e9)
-      .format('0[.]000 a')
+      .format('0[.]0[00] a')
       .replace(/b$/, 'T')
       .replace(/m$/, 'mT')
       .replace(/k$/, 'µT')
       .replace(/(\d)\s*$/, '$1 nT');
     return (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
         {min_ints === max_ints ?
           <span>
-            <b>Abs. Int.:</b><br/>
+            <b>Int:</b><br/>
             {min_ints}<br/>
             {n_ints ? <span><b>N: </b>{n_ints}</span> : undefined}
           </span>
           :
           <span>
-            <b>Min. Abs. Int.:</b><br/>
+            <b>Min Int:</b><br/>
             {min_ints}<br/>
-            <b>Max. Abs. Int.:</b><br/>
+            <b>Max Int:</b><br/>
             {max_ints}<br/>
             {n_ints ? <span><b>N: </b>{n_ints}</span> : undefined}
           </span>
@@ -403,8 +439,8 @@ class SearchSummariesListItem extends React.Component {
     const item = this.props.item;
     return (
       <div>
-        <div ref="accordion" className="ui accordion search-summaries-list-item">
-          <div className="title" style={{paddingLeft:'1em'}}>
+        <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active ? ' active' : '')}>
+          <div className={'title' + (this.props.active ? ' active' : '')} style={{paddingLeft:'1em'}}>
             <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
             <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
               <div className="row accordion-trigger" style={{display:'flex', padding:'0 1em 0.5em'}}>
@@ -436,7 +472,7 @@ class SearchSummariesListItem extends React.Component {
               </div>
             </div>
           </div>
-          <div className="content" style={{fontSize:'small'}}>
+          <div className={'content' + (this.props.active ? ' active' : '')} style={{fontSize:'small'}}>
             <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.html}} />
             <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.abstract_html}} />
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && item.summary.contribution._reference.keywords.join &&
@@ -447,14 +483,14 @@ class SearchSummariesListItem extends React.Component {
             <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags.join(', ')}} />}
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && !item.summary.contribution._reference.tags.join &&
             <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
-            {item.summary.contribution && item.summary.contribution._history &&
+            {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
             <table className="ui very basic small compact table" style={{maxWidth:700}}>
               <thead>
               <tr>
                 <th>Version</th>
                 <th>Data Model</th>
                 <th>Uploaded</th>
-                <th>Contribution Link</th>
+                <th>MagIC Contribution Link</th>
                 <th>Download</th>
               </tr>
               </thead>
@@ -465,13 +501,15 @@ class SearchSummariesListItem extends React.Component {
                     <td>{v.version}</td>
                     <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
                     <td>{moment(v.timestamp).local().format('LL')} by <b>{v.contributor}</b></td>
-                    <td><a href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a></td>
+                    <td><a style={this.styles.a} href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a></td>
                     <td>
-                      <a className="ui basic tiny fluid icon compact button" style={{marginTop:'0'}}
-                         onClick={(e) => { }}
-                      >
-                        <i className="ui file text outline icon"/> Download
-                      </a>
+                      <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
+                        <input type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${v.id}.txt`}/>
+                        <input type="hidden" name="file_name" value={`magic_contribution_${v.id}.txt`}/>
+                        <button type="submit" className={'ui basic tiny fluid icon compact purple button' + (i > 0 ? ' disabled' : '')} style={{marginTop:'0'}}>
+                          <i className="ui file text outline icon"/> Download
+                        </button>
+                      </form>
                     </td>
                   </tr>
                 );

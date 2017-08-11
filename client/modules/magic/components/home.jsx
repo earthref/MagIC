@@ -2,7 +2,7 @@ import React from 'react';
 
 import IconButton from '/client/modules/common/components/icon_button';
 import SearchDividedList from '/client/modules/common/containers/search_divided_list';
-import Summary from '/client/modules/magic/components/search_summaries_list_item';
+import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
 import {levels} from '/lib/modules/magic/search_levels.js';
 
 export default class extends React.Component {
@@ -18,7 +18,7 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui hidden divider"></div>
+        <div className="ui hidden divider"/>
         <div className="ui four cards">
           <IconButton className="card" link="/MagIC/search" portal="MagIC">
             <i className="large icons">
@@ -108,8 +108,9 @@ export default class extends React.Component {
           es={levels[0].views[0].es}
           pageSize={5}
           pageNumber={1}
+          sort={[{'summary.contribution.timestamp': 'desc'}]}
         >
-          <Summary table="contribution"/>
+          <SearchSummaryListItem table="contribution"/>
         </SearchDividedList>
       </div>
     );

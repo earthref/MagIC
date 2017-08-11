@@ -15,6 +15,10 @@ var dateFormat = "year||year_month||date||date_time||date_time_no_millis||yyyy-M
 var dirOut = 'client/modules/magic/actions/tests/output/summaries3/';
 if (!fs.existsSync(dirOut)) fs.mkdirSync(dirOut);
 
+// TODO: Add summary.contribution._reference.timestamp for better sorting by publication date
+// TODO: Add min and max to all numeric
+// TODO: Recalculate ages with conversion without the 1950 offset
+
 describe('magic.actions.summarize', () => {
 
   it('should create a new index and mappings.', () => {
@@ -187,6 +191,13 @@ function columnsToMapping(model, isContribution) {
         }
       };
       mapping._age_sigma_y = {
+        properties: {
+          vals:  { enabled: false      },
+          n:     { type: 'integer'     },
+          range: { type: 'float_range' }
+        }
+      };
+      mapping._age_range_ybp = {
         properties: {
           vals:  { enabled: false      },
           n:     { type: 'integer'     },

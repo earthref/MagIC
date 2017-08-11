@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export default class FilterList extends React.Component {
+export default class SearchFiltersBuckets extends React.Component {
 
   constructor(props) {
     super(props);
@@ -13,7 +13,7 @@ export default class FilterList extends React.Component {
     this.styles = {
       b: {fontWeight: 'bold'},
       flex: {display: 'flex', marginBottom: '0.25em'},
-      flexGrow: {flexGrow: 1, marginRight: '0.5em'},
+      flexGrow: {flexGrow: 1, marginRight: '0.5em', whiteSpace: 'normal'},
       content: {paddingTop: 0},
       click: {cursor: 'pointer'}
     };
@@ -115,19 +115,28 @@ export default class FilterList extends React.Component {
            onClick={() => (active ? this.removeFilter(filter.key) : this.addFilter(filter.key))}>
         <div className="ui checkbox">
           <input type="checkbox" checked={active} onChange={() => {}}/>
-          <label></label>
+          <label/>
         </div>
         <div style={_.extend({}, this.styles.flexGrow, this.styles.click, (active ? this.styles.b : ''))}>
           {filter.key}
         </div>
-        <div className="ui circular small basic label">
-          {filter.doc_count}
+        <div>
+          <div className="ui circular small basic label" onMouseOver={(e) => $(e.target).popup({
+            html: `${filter.doc_count} have a "${filter.key}" <b>${this.props.title}</b>, of which ${filter.filtered_doc_count} ` +
+                  `also ${filter.filtered_doc_count === 1 ? 'matches' : 'match'} other filters.`,
+            position: 'bottom right',
+            variation: 'small'
+          }).popup('show')}>
+            {filter.filtered_doc_count + ' of ' + filter.doc_count}
+          </div>
         </div>
       </div>
     );
   }
 
   render() {
+    const nActiveBuckets = _.size(this.state.activeFilters);
+    const nBuckets = _.size(this.props.filters) <= this.props.maxBuckets ? _.size(this.props.filters) : this.props.maxBuckets + '+';
     return (
       <div ref="filter" className="ui small accordion">
         <div ref="title" className="title" style={{paddingBottom: 0}}>
@@ -137,10 +146,14 @@ export default class FilterList extends React.Component {
             <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
               {this.props.title}
             </div>
-            <div className="ui circular small basic label">
-              {_.size(this.state.activeFilters)}
-              {' of '}
-              {_.size(this.props.filters) <= this.props.maxBuckets ? _.size(this.props.filters) : this.props.maxBuckets + '+'}
+            <div>
+              <div className="ui circular small basic label" onMouseOver={(e) => $(e.target).popup({
+                html: `${nActiveBuckets} of the ${nBuckets} <b>${this.props.title}</b> filters ${nActiveBuckets === 1 ? 'is' : 'are'} active.`,
+                position: 'bottom right',
+                variation: 'small'
+              }).popup('show')}>
+                {nActiveBuckets + ' of ' + nBuckets}
+              </div>
             </div>
           </div>
           {this.renderActiveFilters()}
@@ -154,7 +167,7 @@ export default class FilterList extends React.Component {
   }
 }
 
-FilterList.propTypes = {
+SearchFiltersBuckets.propTypes = {
   activeFilters: PropTypes.array,
   filters:       PropTypes.array.isRequired,
   title:         PropTypes.string.isRequired,

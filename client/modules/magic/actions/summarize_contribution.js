@@ -934,7 +934,7 @@ export default class extends Runner {
           let age_ybp;
           if (row.age_unit === 'Ga'                ) age_ybp = 1000000000*age;
           if (row.age_unit === 'Ma'                ) age_ybp = 1000000*age;
-          if (row.age_unit === 'Ka'                ) age_ybp = 1000*age - (age < 100 ? 1950 : 0);
+          if (row.age_unit === 'Ka'                ) age_ybp = 1000*age;
           if (row.age_unit === 'Years AD (+/-)'    ) age_ybp = 1950 - age;
           if (row.age_unit === 'Years BP'          ) age_ybp = age;
           if (row.age_unit === 'Years Cal AD (+/-)') age_ybp = 1950 - age;

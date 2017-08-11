@@ -58,7 +58,13 @@
   box-shadow: none !important;
 }
 
+// Add right floated label option
 .ui.right.floated.label {
+  float: right !important;
+}
+
+// Add right floated table option
+.ui.right.floated.table {
   float: right !important;
 }
 
@@ -104,14 +110,14 @@
   border-color: rgba(0, 0, 0, 0.5) transparent transparent !important;
 }
 
-.ui.right.floated.table {
-  float: right;
-}
-
 .ui.grid > .column + .divider, .ui.grid > .row > .column + .divider {
   left: 50% !important;
 }
 
+// Dropdown menu items should be the same font size as the dropdown element
+.ui.dropdown .menu > .item {
+  font-size: 1em !important;
+}
 
 body ::-webkit-scrollbar {
   height: 10px;

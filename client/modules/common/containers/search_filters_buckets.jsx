@@ -1,9 +1,8 @@
 import React from 'react';
-import FiltersList from '/client/modules/common/components/filters_list';
+import SearchFiltersBuckets from '/client/modules/common/components/search_filters_buckets';
 import {compose} from 'react-komposer';
 
 export const composer = ({es}, onData) => {
-  //onData(null, {error: undefined, filters: []});
   Meteor.call('esBuckets', es, (error, result) => {
     try {
       if (error) {
@@ -25,4 +24,4 @@ export default compose(
       return !_.isEqual(currentProps.es, nextProps.es);
     }
   }
-)(FiltersList);
+)(SearchFiltersBuckets);

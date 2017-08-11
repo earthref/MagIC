@@ -11,7 +11,6 @@ export default class extends React.Component {
     this.state = {
     };
     this.styles = {
-      //scroller: {overflowY: 'scroll', background: 'white', padding: '1em', transition: 'all 0.5s ease', borderRadius: '0', boxShadow: 'none'}
       scroller: {overflowY: 'scroll', background: 'white', padding: '1em', borderRadius: '0', boxShadow: 'none'}
     }
   }
@@ -21,14 +20,10 @@ export default class extends React.Component {
       <InfiniteScrollerWithCount
         style={_.extend({}, this.styles.scroller, this.props.style)}
         es={this.props.es}
-        pageSize={5}
+        pageSize={this.props.pageSize || 5}
       >
-        <SearchDividedList
-          es={this.props.es}
-        >
-          <SearchSummaryListItem
-            table={this.props.es.type}
-          />
+        <SearchDividedList es={this.props.es}>
+          <SearchSummaryListItem table={this.props.es.type}/>
         </SearchDividedList>
       </InfiniteScrollerWithCount>
     );

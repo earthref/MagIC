@@ -8,7 +8,7 @@ export const composer = ({es, pageSize, pageNumber}, onData) => {
   Meteor.call('esPage', es, pageSize, pageNumber, (error, results) => {
     try {
       if (error) {
-        console.error('search_divided_list', error);
+        console.error('SearchDividedList', error);
         onData(null, {error: error});
       } else {
         onData(null, {items: results });

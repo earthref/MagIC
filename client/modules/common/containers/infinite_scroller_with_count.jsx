@@ -4,11 +4,10 @@ import {compose} from 'react-komposer';
 import InfiniteScroller from '/client/modules/common/components/infinite_scroller';
 
 export const composer = ({es}, onData) => {
-  onData(null, {});
-  //console.log('esCount', es);
+  // No onData() call here so that the component doesn't clear and then re-render all pages.
   Meteor.call('esCount', es, (error, result) => {
     if (error) {
-      console.error('esCount', error);
+      console.error('InfiniteScrollerWithCount', error);
       onData(null, {error: error});
     } else {
       //console.log('esCount', es, result);
@@ -22,7 +21,6 @@ export default compose(
   {
     propsToWatch: ['es'],
     shouldSubscribe(currentProps, nextProps) {
-      //console.log('esCount - shouldSubscribe', currentProps, nextProps);
       return !_.isEqual(currentProps.es, nextProps.es);
     }
   }
