@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import SearchRows from '/client/modules/magic/containers/search_rows';
 
-import {versions, models} from '/lib/modules/magic/data_models';
+import {versions, models} from '/lib/configs/magic/data_models';
 
 export default class extends React.Component {
 

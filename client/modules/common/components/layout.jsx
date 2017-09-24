@@ -106,7 +106,7 @@ class Layout extends React.Component {
           }
         </div>
         <div className="ui bottom fixed small menu footer">
-          <div className="ui container" style={(fullWidth ? {width:'calc(100% - 4em)'} : {})}>
+          <div className="ui container" style={{width:'calc(100% - 4em)'}}>
             <div className="left menu">
               <div className="ui vertical segment">
                 <div>

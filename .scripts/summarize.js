@@ -4,12 +4,12 @@ import {expect} from 'chai';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import ParseContribution from '/client/modules/magic/actions/parse_contribution';
-import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribution';
-import ExportContribution from '/client/modules/magic/actions/export_contribution';
-import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution';
+import ParseContribution from '/lib/modules/magic/parse_contribution';
+import UpgradeContribution from '/lib/modules/magic/upgrade_contribution';
+import ExportContribution from '/lib/modules/magic/export_contribution';
+import SummarizeContribution from '/lib/modules/magic/summarize_contribution';
 
-import {versions, models} from '/lib/modules/magic/data_models';
+import {versions, models} from '/lib/configs/magic/data_models';
 
 const esClient = new elasticsearch.Client({
   //log: 'trace',
@@ -19,7 +19,7 @@ const esClient = new elasticsearch.Client({
 });
 
 //var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/2.5 Contributions Test - Citations/';
-var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/3.0 Contributions 3/';
+var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/3.0 Contributions 5/';
 var dirOut = 'client/modules/magic/actions/tests/output/summaries5/';
 var indexName = 'magic_v2';
 if (!fs.existsSync(dirOut)) fs.mkdirSync(dirOut);

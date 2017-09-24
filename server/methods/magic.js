@@ -11,6 +11,8 @@ import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
 import {HTTP} from 'meteor/http';
 
+import SummarizeContribution from '/lib/modules/magic/summarize_contribution';
+
 //console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
   //log: 'trace',
@@ -55,29 +57,32 @@ export default function () {
       }, (error) => { console.log('delete import', error)});
     },
     'getImportSettingsTemplates': function (user) {
-      return Collections['magic.import.settings.templates'].find(
+      console.log('getImportSettingsTemplates', user);
+      let templates = Collections['magic.import.settings.templates'].find(
         {_user: user},
         {sort: {'_inserted': -1}}).fetch();
+      console.log('getImportSettingsTemplates', user, templates);
+      return templates;
     },
     'getImportSettingsTemplate': function (ID) {
       return Collections['magic.import.settings.templates'].findOne(ID);
     },
-    'insertContribution': function (contributor, user, mailid, name, c, s) {
+    async insertContribution(contributor, user, c, name) {
       //check(id, Integer);
       //check(name, String);
       //check(data, Object);
 
-      if (c.contribution && c.contribution.length > 0) {
+      /*if (c.contribution && c.contribution.length > 0) {
         c.contribution = c.contribution.splice(0,1);
         delete c.contribution[0].version;
         delete c.contribution[0].id;
-        delete c.contribution[0].magic_version;
+        delete c.contribution[0].data_model_version;
         delete c.contribution[0].timestamp;
       } else {
         c.contribution = [{}];
       }
       c.contribution[0].contributor = user;
-      c.contribution[0].magic_version = '3.0';
+      c.contribution[0].data_model_version = '3.0';
       c.contribution[0].version = 'PRIVATE';
       c.contribution[0].timestamp = moment().utc().toISOString();
       c._contributor = user;
@@ -112,7 +117,34 @@ export default function () {
        es[k] = c._summary.contribution[k];
        });*/
 
-      Collections['magic.private.contributions'].insert(c, (error) => { console.log('insert', error)});
+      let metadata = {
+        _is_activated: 'false',
+        _is_latest: 'true',
+        _contributor: contributor,
+        _name: name
+      };
+
+      let id = Collections['magic.private.contributions'].findOne('next_id');
+      if (id && id.next_id) {
+        c.contribution[0].id = id.next_id;
+        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
+      }
+
+      c.contribution[0].contributor = user;
+      c.contribution[0].data_model_version = '3.0';
+      c.contribution[0].version = 'PRIVATE';
+      c.contribution[0].timestamp = moment().utc().toISOString();
+
+      const summarizer = new SummarizeContribution({});
+      await summarizer.summarizePromise(c, metadata);
+
+      c._summary = summarizer.json;
+      c._contributor = user;
+      c._inserted = c.contribution[0].timestamp;
+      c._name = name;
+      c._activated = false;
+
+      await Collections['magic.private.contributions'].rawCollection().insert(c, (error) => { console.log('insert', error)});
     },
     'updateContribution': function (id, contributor, user, mailid, name, c, s) {
 
@@ -141,6 +173,32 @@ export default function () {
       //}
 
       Collections['magic.private.contributions'].update(id, c, (error) => { console.log('update', error, id, _.keys(c))});
+    },
+    async createPrivateUpdate(contributor, user, c, version) {
+
+      let metadata = {
+        _is_activated: 'false',
+        _is_latest: 'true',
+        _contributor: contributor,
+        _name: 'Update'
+      };
+
+      let id = Collections['magic.private.contributions'].findOne('next_id');
+      if (id && id.next_id) {
+        c.contribution[0].id = id.next_id;
+        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
+      }
+
+      c.contribution[0].contributor = user;
+      c.contribution[0].data_model_version = '3.0';
+      c.contribution[0].version = version;
+      c.contribution[0].timestamp = moment().utc().toISOString();
+
+      const summarizer = new SummarizeContribution({});
+      await summarizer.summarizePromise(c, metadata);
+      c._summary = summarizer.json;
+
+      Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
     },
     async activateContribution(id) {
       let c = Collections['magic.private.contributions'].findOne(id);
@@ -344,44 +402,6 @@ export default function () {
       this.unblock();
       const response = HTTP.call('GET',url);
       return response.content;
-    },
-    async insertIntoPrivate(contributor, user, mailid, c, s, v) {
-
-      let id = Collections['magic.private.contributions'].findOne('next_id');
-      if (id && id.next_id) {
-        c.contribution[0].id = id.next_id;
-        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
-      }
-
-      c._id = uuid.v4();
-
-      let year = s.contribution.CITATION.match(/\(\d\d\d\d\)/);
-      if (year && year.length >= 2)
-        s.contribution.YEAR = s.contribution.YEAR || year[1];
-
-      s.contribution.VERSION = v || 'PRIVATE';
-      s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.CONTRIBUTOR = contributor;
-      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.UPLOAD = "0";
-      s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
-      s.contribution._id = c._id;
-
-      delete s.contribution.FOLDER;
-      delete s.contribution.FILE_NAME;
-      c._summary = s;
-
-      c.contribution[0].contributor = user;
-      c.contribution[0].magic_version = '3.0';
-      c.contribution[0].version = s.contribution.VERSION;
-      c.contribution[0].timestamp = moment().utc().toISOString();
-      c._contributor = user;
-      c._inserted = c.contribution[0].timestamp;
-      c._name = "Update to " + s.contribution.CITATION;
-      c._activated = false;
-      c._doiData = c._doiData || {};
-
-      Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
     }
   });
 

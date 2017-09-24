@@ -5,9 +5,9 @@ import _ from 'lodash';
 import uuid from 'uuid';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import ParseContribution from '/client/modules/magic/actions/parse_contribution';
-import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribution';
-import ExportContribution from '/client/modules/magic/actions/export_contribution';
+import ParseContribution from '/lib/modules/magic/parse_contribution';
+import UpgradeContribution from '/lib/modules/magic/upgrade_contribution';
+import ExportContribution from '/lib/modules/magic/export_contribution';
 
 const esClient = new elasticsearch.Client({
   //log: 'trace',

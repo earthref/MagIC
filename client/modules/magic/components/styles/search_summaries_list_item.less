@@ -1,3 +1,7 @@
+.search-summaries-list-item {
+  text-align: left;
+}
+
 .search-summaries-list-item.ui.accordion .title:not(.active) .flex_row {
   max-height: 105px;
   overflow: hidden;
@@ -7,10 +11,18 @@
   cursor: auto;
 }
 
-.search-summaries-list-item.ui.accordion .title:not(.active) .accordion-trigger {
-  cursor: s-resize;
+.search-summaries-list-item.ui.accordion .title .accordion-trigger {
+  cursor: pointer;
 }
 
-.search-summaries-list-item.ui.accordion .title.active .accordion-trigger {
-  cursor: n-resize;
+.search-summaries-list-item.ui.accordion .accordion-button {
+  display: none;
+  width: 10em;
+  height: 1.5em;
+  padding: 0.25em;
+  position: relative;
+  margin: 1em auto -2.5em;
+  z-index: 1;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
 }

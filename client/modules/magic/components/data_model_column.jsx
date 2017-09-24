@@ -1,9 +1,9 @@
 import _ from  'lodash';
 import React from 'react';
-import {versions, models} from '/lib/modules/magic/data_models';
+import {versions, models} from '/lib/configs/magic/data_models';
 import {cvs} from '/lib/modules/er/controlled_vocabularies';
 import {svs} from '/lib/modules/er/suggested_vocabularies';
-import {codes} from '/lib/modules/magic/method_codes';
+import {codes} from '/lib/configs/magic/method_codes';
 
 export default class extends React.Component {
 

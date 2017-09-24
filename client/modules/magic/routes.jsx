@@ -3,7 +3,7 @@ import React from 'react';
 import {Route, Switch, Redirect} from 'react-router-dom';
 import {Helmet} from 'react-helmet';
 
-import {versions} from '/lib/modules/magic/data_models.js';
+import {versions} from '/lib/configs/magic/data_models.js';
 import Page from '/client/modules/common/components/page';
 import MagICHome from '/client/modules/magic/components/home';
 import MagICSearch from '/client/modules/magic/components/search';
@@ -38,23 +38,15 @@ const Routes = ({match}) => (
         <Helmet>
           <title>MagIC Search | EarthRef.org</title>
         </Helmet>
-        <MagICSearch search={location.search || ""}/>
+        <MagICSearch search={location.search && location.search.substring(1) || ""}/>
       </Page>
     }/>
     <Route exact path="/MagIC/private" render={({location}) =>
-      <Page fullWidth portal="MagIC">
+      <Page portal="MagIC" title="Manage your contributions:">
         <Helmet>
           <title>MagIC Private Workspace | EarthRef.org</title>
         </Helmet>
-        <MagICSearch search={location.search || ""}/>
-      </Page>
-    }/>
-    <Route exact path="/MagIC/shared" render={({location}) =>
-      <Page fullWidth portal="MagIC">
-        <Helmet>
-          <title>MagIC Shared Workspace | EarthRef.org</title>
-        </Helmet>
-        <MagICSearch search={location.search || ""}/>
+        <MagICPrivateContributions/>
       </Page>
     }/>
     <Redirect exact from="/MagIC/data-models" to={`/MagIC/data-models/${_.last(versions)}`}/>
@@ -63,7 +55,7 @@ const Routes = ({match}) => (
         <Helmet>
           <title>MagIC Data Models | EarthRef.org</title>
         </Helmet>
-        <MagICDataModel version={match.params.v} search={location.search || ""}/>
+        <MagICDataModel version={match.params.v} search={location.search && location.search.substring(1) || ""}/>
       </Page>
     }/>
     <Route exact path="/MagIC/method-codes" render={({location}) =>
