@@ -3,7 +3,7 @@ import React from 'react';
 import saveAs from 'save-as';
 
 import {portals} from '/lib/configs/portals.js';
-import {methodCodes} from '/lib/modules/magic/method_codes.js';
+import {methodCodes} from '/lib/configs/magic/method_codes.js';
 
 export default class extends React.Component {
 

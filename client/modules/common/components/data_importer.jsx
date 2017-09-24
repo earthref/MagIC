@@ -40,7 +40,11 @@ export default class DataImporter extends React.Component {
         excludeColumnNames: [],
         excludeTable: false
       },
-      importTemplatesTaps: 0
+      importTemplatesTaps: 0,
+      creatingTemplate: false,
+      savingTemplate: false,
+      deletingTemplate: false,
+      renamingTemplate: false
     };
     this.state = this.initialState;
     this.importTemplates = [];
@@ -58,32 +62,65 @@ export default class DataImporter extends React.Component {
       $(this.refs['table name dropdown']).dropdown('set selected', _.trim(this.props.tableName));
     this.setState({in: (!Array.isArray(this.props.data) ? [] : this.props.data)});
     $(this.refs['import settings template dropdown']).dropdown({
-      onChange: (value, text, $choice) => {
-        Meteor.call('getImportSettingsTemplate', value, (error, template) => {
-          console.log('getImportSettingsTemplate', value, template);
-          if (template && template.settings) {
-            console.log('loading template', template);
-            let outColumnNames = this.state.inColumnNames.map((inColumnName, i) => {
-              return template.settings.columnMap[inColumnName];
-            });
-            let excludeColumnIdxs = [];
-            if (template.settings.excludeColumnNames)
-              template.settings.excludeColumnNames.forEach((inColumnName) => {
-                let idx = this.state.inColumnNames.indexOf(inColumnName);
-                if (idx >= 0) excludeColumnIdxs.push(idx);
-              });
+      onShow: ($modal) => {
+        if (!this.state.templatesReady)
+          Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+            this.importTemplates = templates;
             this.setState({
-              isLoaded: false,
-              hasChanged: false,
-              templateID: template._id,
-              templateName: template._name,
-              excludeColumnIdxs: excludeColumnIdxs,
-              settings: template.settings,
-              outColumnNames: outColumnNames
+              templatesReady: true,
+              importTemplatesTaps: this.state.importTemplateTaps + 1
             });
-            $(this.refs['table name dropdown']).dropdown('set selected', template.settings.tableName);
-          }
-        });
+          });
+      },
+      onChange: (value, text, $choice) => {
+        if (value === '') {
+          this.setState({
+            isLoaded: false,
+            hasChanged: false,
+            templateID: undefined,
+            templateName: undefined,
+            excludeColumnIdxs: [],
+            settings: {
+              tableName: '',
+              nHeaderRows: '1',
+              columnMap: {},
+              excludeColumnNames: [],
+              excludeTable: false
+            },
+            outColumnNames: []
+          });
+          $(this.refs['table column headers']).find('.ui-checkbox').checkbox("set checked");
+          $(this.refs['import settings template dropdown']).dropdown('restore placeholder text');
+          $(this.refs['table name dropdown']).dropdown('restore placeholder text');
+        } else {
+          Meteor.call('getImportSettingsTemplate', value, (error, template) => {
+            if (template && template.settings) {
+              let outColumnNames = this.state.inColumnNames.map((inColumnName, i) => {
+                return template.settings.columnMap[inColumnName];
+              });
+              $(this.refs['table column headers']).find('.ui-checkbox').checkbox("set checked");
+              let excludeColumnIdxs = [];
+              if (template.settings.excludeColumnNames)
+                template.settings.excludeColumnNames.forEach((inColumnName) => {
+                  let idx = this.state.inColumnNames.indexOf(inColumnName);
+                  if (idx >= 0) {
+                    excludeColumnIdxs.push(idx);
+                    $(this.refs['table column headers']).find('.ui-checkbox[data-column-idx="' + idx + '"]').checkbox("set unchecked");
+                  }
+                });
+              $(this.refs['table name dropdown']).dropdown('set selected', template.settings.tableName);
+              this.setState({
+                isLoaded: false,
+                hasChanged: false,
+                templateID: template._id,
+                templateName: template._name,
+                excludeColumnIdxs: excludeColumnIdxs,
+                settings: template.settings,
+                outColumnNames: outColumnNames
+              });
+            }
+          });
+        }
       }
     });
     $(this.refs['create import settings template']).modal({
@@ -94,55 +131,101 @@ export default class DataImporter extends React.Component {
           templateName,
           this.state.settings,
           (error, templateID) => {
-            //console.log('created import settings template', error, templateID, templateName);
-            this.setState({hasChanged: false, templateID: templateID, templateName: templateName});
+            if (error) console.error('create import settings template', templateID, templateName, error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              this.setState({
+                creatingTemplate: false,
+                templatesReady: true,
+                hasChanged: false,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+                templateID: templateID, templateName: templateName
+              });
+              $(this.refs['create import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({creatingTemplate: true, templatesReady: false});
+        return false;
       }
     });
     $(this.refs['save import settings template']).modal({
       onApprove: ($modal) => {
+        localStorage.removeItem('Import Templates');
         Meteor.call('saveImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           this.state.templateID,
           this.state.settings,
           (error) => {
-            //console.log('saved import settings template', error);
-            this.setState({hasChanged: false});
+            if (error) console.error('saved import settings template', error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              this.setState({
+                savingTemplate: false,
+                templatesReady: true,
+                hasChanged: false,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+              });
+              $(this.refs['save import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({savingTemplate: true, templatesReady: false});
+        return false;
       }
     });
     $(this.refs['delete import settings template']).modal({
       onApprove: ($modal) => {
         const templateID = this.refs['delete import settings template ID'].value;
+        localStorage.removeItem('Import Templates');
         Meteor.call('deleteImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           templateID,
           (error) => {
-            //console.log('deleted import settings template', error);
-            this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
-            if (templateID === this.state.templateID)
-              this.setState({templateID: undefined, templateName: undefined});
+            if (error) console.error('delete import settings template', error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              if (templateID === this.state.templateID)
+                this.setState({templateID: undefined, templateName: undefined});
+              this.setState({
+                deletingTemplate: false,
+                templatesReady: true,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+              });
+              $(this.refs['delete import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({deletingTemplate: true, templatesReady: false});
+        return false;
       }
     });
     $(this.refs['rename import settings template']).modal({
       onApprove: ($modal) => {
         const templateName = this.refs['rename import settings template name'].value;
         const templateID = this.refs['rename import settings template ID'].value;
+        localStorage.removeItem('Import Templates');
         Meteor.call('renameImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           templateID,
           templateName,
           (error) => {
-            //console.log('renamed import settings template', error, templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value);
-            this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
-            if (templateID === this.state.templateID)
-              this.setState({templateName: this.refs['rename import settings template name'].value});
+            if (error) console.error('rename import settings template', templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value, error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              if (templateID === this.state.templateID)
+                this.setState({templateName: this.refs['rename import settings template name'].value});
+              this.setState({
+                renamingTemplate: false,
+                templatesReady: true,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+              });
+              $(this.refs['rename import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({renamingTemplate: true, templatesReady: false});
+        return false;
       }
     });
   }
@@ -298,6 +381,7 @@ export default class DataImporter extends React.Component {
       this.setState(newState);
     }
 
+
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -382,9 +466,10 @@ export default class DataImporter extends React.Component {
       }
       else if (readyState.nErrors === 0 && this.props.onReady) {
         let columns = [];
-        for (let columnIdx in this.state.outColumnNames)
+        for (let columnIdx in this.state.outColumnNames) {
           if (this.state.excludeColumnIdxs.indexOf(columnIdx) === -1)
             columns.push(this.state.outColumnNames[columnIdx]);
+        }
         let rows = [];
         for (let rowIdx in this.state.in) {
           if (rowIdx >= this.state.nHeaderRowsInt && this.state.excludeRowIdxs.indexOf(rowIdx) === -1)
@@ -395,11 +480,6 @@ export default class DataImporter extends React.Component {
       else if (this.props.onNotReady)
         this.props.onNotReady();
     }
-
-    Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
-      this.importTemplates = templates;
-      this.setState({templatesReady: true, importTemplatesTaps: this.state.importTemplateTaps + 1});
-    });
   }
 
   portalColor() {
@@ -430,6 +510,9 @@ export default class DataImporter extends React.Component {
                   <span className="text">{this.state.templateName || 'Select One to Load Settings'}</span>
                 </div>
                 <div className="menu">
+                  <div data-value="" data-text="Clear Import Settings" className="item">
+                    <span className="text">Clear Import Settings</span>
+                  </div>
                   {this.state.templatesReady ?
                       this.importTemplates.length ? this.importTemplates.map((template, i) =>
                         <div key={i} data-value={template._id} data-text={template._name} className="item">
@@ -472,16 +555,18 @@ export default class DataImporter extends React.Component {
                   }
                 </div>
               </div>
-              <div ref="import template save" className={'ui icon button' + (this.state.templateID && this.state.hasChanged ? '' : ' disabled')}
-                   style={{flex:'0 0 auto'}}
+              {this.state.templateID &&
+              <div ref="import template save"
+                   className={'ui icon button' + (this.state.hasChanged ? '' : ' disabled')}
+                   style={{flex: '0 0 auto'}}
                    onClick={(e) => {
                      $(this.refs['save import settings template']).modal('show');
                    }}
               >
                 <i className="save icon"/>
                 Save Changes
-              </div>
-              <div ref="import template save" className="ui icon button"
+              </div>}
+              <div ref="import template create" className="ui icon button"
                    style={{flex:'0 0 auto', borderLeft: '1px solid rgba(34, 36, 38, 0.15)'}}
                    onClick={(e) => {
                      this.refs['create import settings template name'].value = '';
@@ -504,7 +589,7 @@ export default class DataImporter extends React.Component {
               <div ref="table name dropdown"
                    className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? ' error' : '')}>
                 <i className="dropdown icon"/>
-                <div className="text">
+                <div className="default text">
                   <span className="text">{this.state.settings.tableName || 'Select One'}</span>
                 </div>
                 <div className="menu">
@@ -624,7 +709,10 @@ export default class DataImporter extends React.Component {
           <thead>
           <tr ref="table column headers">
             <th style={{pointerEvents: 'auto'}}>
-              <div className="ui fitted toggle left floated checkbox" data-position="bottom left" data-tooltip={tableTooltip}>
+              <div className="ui fitted toggle left floated checkbox"
+                   data-column-idx={-1}
+                   data-position="bottom left"
+                   data-tooltip={tableTooltip}>
                 <input type="checkbox" defaultChecked={!this.state.settings.excludeTable} data-column-idx={-1}/>
               </div>
             </th>
@@ -637,6 +725,7 @@ export default class DataImporter extends React.Component {
                 <th key={i}>
                   <div className={'ui fitted toggle right floated checkbox' + (downloadOnly || this.state.settings.excludeTable ? ' disabled' : '')}
                        data-position="bottom right"
+                       data-column-idx={i}
                        data-tooltip={tooltip}>
                     <input type="checkbox" defaultChecked={!downloadOnly && !excluded} data-column-idx={i}/>
                   </div>
@@ -650,7 +739,7 @@ export default class DataImporter extends React.Component {
           </thead>
           <tbody ref="table body">
           <tr ref="table column names">
-            <td className="collapsing right aligned">Column</td>
+            <td className="collapsing right aligned">Name</td>
             {(this.state.outColumnNames.map((outColumnName, i) => {
               return (
                 <td key={i}
@@ -675,6 +764,27 @@ export default class DataImporter extends React.Component {
                   </div>
                   {this.renderColumnHeaderDropdownMenu(i)}
                 </td>
+              );
+            }))}
+          </tr>
+          <tr ref="table column">
+            <td className="collapsing right aligned">Column</td>
+            {(this.state.inColumnNames.map((columnName, i) => {
+              const outColumnName = this.state.outColumnNames[i];
+              const modelColumn = (
+                this.state.errors.tableName.length > 0 || outColumnName === undefined ?
+                  undefined
+                  :
+                  this.props.dataModel.tables[this.state.settings.tableName].columns[outColumnName]
+              );
+              return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ?
+                  (modelColumn === undefined ?
+                      <td key={i} className="error"></td>
+                      :
+                      <td key={i}>{outColumnName}</td>
+                  )
+                  :
+                  <td key={i} className="disabled"></td>
               );
             }))}
           </tr>

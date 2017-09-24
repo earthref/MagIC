@@ -3,10 +3,10 @@ import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
 
-import Upgrader from '/client/modules/magic/actions/upgrade_contribution.js';
+import Upgrader from '/lib/modules/magic/upgrade_contribution.js';
 import DataModelColumn from '/client/modules/magic/components/data_model_column';
 import {portals} from '/lib/configs/portals.js';
-import {versions, models} from '/lib/modules/magic/data_models.js';
+import {versions, models} from '/lib/configs/magic/data_models.js';
 
 class DataModel extends React.Component {
 

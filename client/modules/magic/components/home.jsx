@@ -3,7 +3,7 @@ import React from 'react';
 import IconButton from '/client/modules/common/components/icon_button';
 import SearchDividedList from '/client/modules/common/containers/search_divided_list';
 import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
-import {levels} from '/lib/modules/magic/search_levels.js';
+import {levels} from '/lib/configs/magic/search_levels.js';
 
 export default class extends React.Component {
 
@@ -105,10 +105,9 @@ export default class extends React.Component {
           Recent Contributions
         </h2>
         <SearchDividedList
-          es={levels[0].views[0].es}
+          es={_.extend({}, levels[0].views[0].es, { sort: [{'summary.contribution.timestamp': 'desc'}]})}
           pageSize={5}
           pageNumber={1}
-          sort={[{'summary.contribution.timestamp': 'desc'}]}
         >
           <SearchSummaryListItem table="contribution"/>
         </SearchDividedList>

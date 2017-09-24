@@ -8,13 +8,13 @@ import saveAs from 'save-as';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx';
 
-import ParseContribution from '/client/modules/magic/actions/parse_contribution.js';
-import UpgradeContribution from '/client/modules/magic/actions/upgrade_contribution.js';
-import SummarizeContribution from '/client/modules/magic/actions/summarize_contribution.js';
-import ValidateContribution from '/client/modules/magic/actions/validate_contribution.js';
-import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
+import ParseContribution from '/lib/modules/magic/parse_contribution.js';
+import UpgradeContribution from '/lib/modules/magic/upgrade_contribution.js';
+import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
+import ValidateContribution from '/lib/modules/magic/validate_contribution.js';
+import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import IconButton from '/client/modules/common/components/icon_button';
-import {versions, models} from '/lib/modules/magic/data_models.js';
+import {versions, models} from '/lib/configs/magic/data_models.js';
 
 export default class extends React.Component {
 

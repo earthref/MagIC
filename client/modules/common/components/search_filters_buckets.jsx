@@ -53,9 +53,10 @@ export default class SearchFiltersBuckets extends React.Component {
   }
 
   renderActiveFilters() {
+    let filters = _.filter(this.props.filters, (o) => o.filtered_doc_count > 0);
     return (
       <div>
-        {this.props.filters.slice(0, this.props.maxBuckets).map((filter) => {
+        {filters.slice(0, this.props.maxBuckets).map((filter) => {
           if (filter.key in this.state.activeFilters)
             return this.renderFilter(filter, true);
         })}
@@ -66,9 +67,10 @@ export default class SearchFiltersBuckets extends React.Component {
   renderInactiveFilters() {
     const nToShow = this.props.show || 10;
     let i = 0;
+    let filters = _.filter(this.props.filters, (o) => o.filtered_doc_count > 0);
     return (
       <div>
-        {this.props.filters.slice(0, this.props.maxBuckets).map((filter) => {
+        {filters.slice(0, this.props.maxBuckets).map((filter) => {
           if (!(filter.key in this.state.activeFilters) && i < nToShow) {
             i += 1;
             return this.renderFilter(filter, false);
@@ -82,10 +84,11 @@ export default class SearchFiltersBuckets extends React.Component {
     const nToShow = this.props.show || 10;
     let i = 0;
     let hasOverflow = false;
+    let filters = _.filter(this.props.filters, (o) => o.filtered_doc_count > 0);
     return (
       <div>
         <div ref="overflow" style={{display: 'none'}}>
-          {this.props.filters.slice(0, this.props.maxBuckets).map((filter) => {
+          {filters.slice(0, this.props.maxBuckets).map((filter) => {
             if (!(filter.key in this.state.activeFilters)) {
               hasOverflow = (i >= nToShow);
               i += 1;
@@ -122,12 +125,13 @@ export default class SearchFiltersBuckets extends React.Component {
         </div>
         <div>
           <div className="ui circular small basic label" onMouseOver={(e) => $(e.target).popup({
-            html: `${filter.doc_count} have a "${filter.key}" <b>${this.props.title}</b>, of which ${filter.filtered_doc_count} ` +
-                  `also ${filter.filtered_doc_count === 1 ? 'matches' : 'match'} other filters.`,
+            html: `${filter.filtered_doc_count} ${filter.filtered_doc_count === 1 ? 'has' : 'have'} a ` +
+                  `<b>${this.props.title} "${filter.key}" ${filter.filtered_doc_count === 1 ? 'value' : 'values'}</b> ` +
+                  `and ${filter.filtered_doc_count === 1 ? 'matches' : 'match'} the current search and filters.`,
             position: 'bottom right',
             variation: 'small'
           }).popup('show')}>
-            {filter.filtered_doc_count + ' of ' + filter.doc_count}
+            {filter.filtered_doc_count}
           </div>
         </div>
       </div>
@@ -135,8 +139,6 @@ export default class SearchFiltersBuckets extends React.Component {
   }
 
   render() {
-    const nActiveBuckets = _.size(this.state.activeFilters);
-    const nBuckets = _.size(this.props.filters) <= this.props.maxBuckets ? _.size(this.props.filters) : this.props.maxBuckets + '+';
     return (
       <div ref="filter" className="ui small accordion">
         <div ref="title" className="title" style={{paddingBottom: 0}}>
@@ -145,15 +147,6 @@ export default class SearchFiltersBuckets extends React.Component {
             <i className="dropdown icon"/>
             <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
               {this.props.title}
-            </div>
-            <div>
-              <div className="ui circular small basic label" onMouseOver={(e) => $(e.target).popup({
-                html: `${nActiveBuckets} of the ${nBuckets} <b>${this.props.title}</b> filters ${nActiveBuckets === 1 ? 'is' : 'are'} active.`,
-                position: 'bottom right',
-                variation: 'small'
-              }).popup('show')}>
-                {nActiveBuckets + ' of ' + nBuckets}
-              </div>
             </div>
           </div>
           {this.renderActiveFilters()}

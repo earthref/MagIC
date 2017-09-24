@@ -4,10 +4,13 @@ import moment from 'moment';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
+import saveAs from 'save-as';
 
 import Clamp from '/client/modules/common/components/clamp';
-import ParseContribution from '/client/modules/magic/actions/parse_contribution.js';
+import ParseContribution from '/lib/modules/magic/parse_contribution.js';
+import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import GoogleStaticMap from '/client/modules/common/components/google_static_map';
+import {index} from '/lib/configs/magic/search_levels.js';
 
 class SearchSummariesListItem extends React.Component {
 
@@ -22,7 +25,10 @@ class SearchSummariesListItem extends React.Component {
   }
 
   componentDidMount() {
-    $(this.refs['accordion']).accordion({exclusive: false, selector: { trigger: '.accordion-trigger'} });
+    $(this.refs['accordion']).accordion({
+      exclusive: false,
+      selector: { trigger: '.accordion-trigger'}
+    });
   }
 
   showData() {
@@ -39,28 +45,28 @@ class SearchSummariesListItem extends React.Component {
   
   renderTitle(item) {
     let title = '';
-    if (this.props.table === 'contribution' && item.summary.contribution) {
+    if (this.props.table === 'contribution' && item.summary && item.summary.contribution && item.summary.contribution._reference) {
       title = item.summary.contribution._reference.title;
     }
-    if (this.props.table === 'locations' && item.summary._all) {
+    if (this.props.table === 'locations' && item.summary && item.summary._all) {
       if (item.summary._all.location) title += ' ⇒ <b>' + item.summary._all.location[0] + '</b>';
     }
-    if (this.props.table === 'sites' && item.summary._all) {
+    if (this.props.table === 'sites' && item.summary && item.summary._all) {
       if (item.summary._all.location) title += ' ⇒ ' + item.summary._all.location[0];
       if (item.summary._all.site) title += ' ⇒ <b>' + item.summary._all.site[0] + '</b>';
     }
-    if (this.props.table === 'samples' && item.summary._all) {
+    if (this.props.table === 'samples' && item.summary && item.summary._all) {
       if (item.summary._all.location) title += ' ⇒ ' + item.summary._all.location[0];
       if (item.summary._all.site) title += ' ⇒ ' + item.summary._all.site[0];
       if (item.summary._all.sample) title += ' ⇒ <b>' + item.summary._all.sample[0] + '</b>';
     }
-    if (this.props.table === 'specimens' && item.summary._all) {
+    if (this.props.table === 'specimens' && item.summary && item.summary._all) {
       if (item.summary._all.location) title += ' ⇒ ' + item.summary._all.location[0];
       if (item.summary._all.site) title += ' ⇒ ' + item.summary._all.site[0];
       if (item.summary._all.sample) title += ' ⇒ ' + item.summary._all.sample[0];
       if (item.summary._all.specimen) title += ' ⇒ <b>' + item.summary._all.specimen[0] + '</b>';
     }
-    if (this.props.table === 'experiments' && item.summary._all) {
+    if (this.props.table === 'experiments' && item.summary && item.summary._all) {
       if (item.summary._all.location) title += ' ⇒ ' + item.summary._all.location[0];
       if (item.summary._all.site) title += ' ⇒ ' + item.summary._all.site[0];
       if (item.summary._all.sample) title += ' ⇒ ' + item.summary._all.sample[0];
@@ -72,42 +78,79 @@ class SearchSummariesListItem extends React.Component {
 
   renderDownloadButton(item) {
     if (this.props.table !== 'contribution') return undefined;
-    let id = item.summary.contribution && item.summary.contribution.id;
+    let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id ?
-          <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
-            <input type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
-            <input type="hidden" name="file_name" value={`magic_contribution_${id}.txt`}/>
-            <button type="submit" className={'ui basic tiny fluid compact icon header purple button'} style={{padding:'20px 0', height:'100px'}}>
-              <i className="ui file text outline icon"/> Download
-            </button>
-          </form> : undefined}
+        {id && id < 16282 &&
+        <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
+          <input type="hidden" name="file_path"
+                 value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
+          <input type="hidden" name="file_name" value={`magic_contribution_${id}.txt`}/>
+          <button type="submit" className="ui basic tiny fluid compact icon header purple button"
+                  style={{padding: '20px 0', height: '100px'}}>
+            <i className="ui file text outline icon"/> Download
+          </button>
+        </form>}
+        {id && id >= 16282 &&
+        <button type="submit" className="ui basic tiny fluid compact icon header purple button"
+                style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
+          Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
+            if (!error && c) {
+              const exporter = new ExportContribution({});
+              //debugger;
+              let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+              saveAs(blob, 'magic_contribution_' + id + '.txt');
+            } else {
+              alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+            }
+          }.bind(this, id));
+        }.bind(this, id)}>
+          <i className="ui file text outline icon"/> Download
+        </button>}
+        {!id &&
+        <button className="ui basic tiny fluid compact icon header purple disabled button" style={{padding:'20px 0', height:'100px'}}>
+          <i className="ui file text outline icon"/> Download
+        </button>}
       </div>
     );
   }
 
   renderLinks(item) {
     if (this.props.table !== 'contribution') return undefined;
-    let id = item.summary.contribution&& item.summary.contribution.id;
-    let doi = item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.doi;
+    let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
+    let id            = item.summary && item.summary.contribution && item.summary.contribution.id;
+    let doi           = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.doi;
     return (
       <div style={{minWidth: 175, maxWidth: 175, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-        {id  ?
-          <span>
-            <b>MagIC Contribution Link:</b>
-            <p><a style={this.styles.a} href={'https://earthref.org/MagIC/' + id} target="_blank">{'earthref.org/MagIC/' + id}</a></p>
-          </span> : undefined}
-        {doi ?
-          <span>
-            <b>Publication DOI Link:</b>
-            <p><a style={this.styles.a} href={'http://dx.doi.org/' + doi} target="_blank">{doi}</a></p>
-          </span> : undefined}
-        {id  ?
-          <span>
-            <b>EarthRef Data DOI Link:</b>
-            <p><a style={this.styles.a} href={'http://dx.doi.org/10.7288/V4/MAGIC/' + id} target="_blank">{'10.7288/V4/MAGIC/' + id}</a></p>
-          </span> : undefined}
+        {id &&
+        <span>
+          <b>MagIC Contribution Link:</b>
+          <p>{_is_activated ?
+            <a style={this.styles.a} href={'https://earthref.org/MagIC/' + id} target="_blank">{'earthref.org/MagIC/' + id}</a> :
+            <span>{'earthref.org/MagIC/' + id}</span>
+          }</p>
+        </span>}
+        {id && id >= 16281 &&
+        <span>
+          <b>EarthRef Data DOI Link:</b>
+          <p>{_is_activated ?
+            <span>Queued For Creation</span> :
+            <span>Created Upon Activation</span>
+          }</p>
+        </span>}
+        {id && id < 16281 &&
+        <span>
+          <b>EarthRef Data DOI Link:</b>
+          <p>{_is_activated ?
+            <a style={this.styles.a} href={'http://dx.doi.org/10.7288/V4/MAGIC/' + id} target="_blank">{'10.7288/V4/MAGIC/' + id}</a> :
+            <span>Created Upon Activation</span>
+          }</p>
+        </span>}
+        {doi &&
+        <span>
+          <b>Publication DOI Link:</b>
+          <Clamp lines={1}><a style={this.styles.a} href={'http://dx.doi.org/' + doi} target="_blank">{doi}</a></Clamp>
+        </span>}
       </div>
     );
   }
@@ -118,13 +161,13 @@ class SearchSummariesListItem extends React.Component {
     ['Location', 'Site', 'Sample', 'Specimen', 'Experiment'].forEach(label => {
       let level = label.toLowerCase() + 's';
       let name = label.toLowerCase();
-      if (item.summary._all && item.summary._all[name] && item.summary._all[name].length) {
+      if (item.summary && item.summary._all && item.summary._all[name] && item.summary._all[name].length) {
         let count = item.summary._all[name].length;
         counts.push(count);
         labels.push(label + (count !== 1 ? 's' : ''));
       }
     });
-    if (item.summary._all && item.summary._all._n_measurements) {
+    if (item.summary && item.summary._all && item.summary._all._n_measurements) {
       let count = item.summary._all._n_measurements;
       counts.push(count);
       labels.push('Measurement' + (count !== 1 ? 's' : ''));
@@ -173,8 +216,8 @@ class SearchSummariesListItem extends React.Component {
 
     let paths = [];
 
-    let tableSummary = item.summary[this.props.table];
-    let allSummary   = item.summary._all;
+    let tableSummary = item.summary && item.summary[this.props.table];
+    let allSummary   = item.summary && item.summary._all;
 
     if (tableSummary && (tableSummary._geo_envelope || tableSummary._geo_point)) {
       if (tableSummary._geo_envelope) tableSummary._geo_envelope.forEach(envelope => {
@@ -231,68 +274,55 @@ class SearchSummariesListItem extends React.Component {
 
   renderAge(item) {
 
-    let tableSummary = item.summary[this.props.table];
-    let allSummary   = item.summary._all;
+    let tableSummary = item.summary && item.summary[this.props.table];
+    let allSummary   = item.summary && item.summary._all;
 
     if (!(tableSummary && tableSummary._age_range_ybp) && !(allSummary && allSummary._age_range_ybp)) return (
-      <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
       </div>
     );
 
-    let min_ages = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.gte || allSummary._age_range_ybp.range.gte,
-        max_ages = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.lte || allSummary._age_range_ybp.range.lte,
-        n_ages   = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.n         || allSummary._age_range_ybp.n;
+    let min_ages  = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.gte || allSummary._age_range_ybp.range.gte,
+        max_ages  = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.lte || allSummary._age_range_ybp.range.lte,
+        n_ages    = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.n         || allSummary._age_range_ybp.n,
+        age_range;
 
-    //if (max_ages >= 1e9) {
-    //  max_ages = numeral(max_ages/1e9).format('0[.]0[00]') + ' Ga'
-    //  max_ages = numeral(max_ages/1e9).format('0[.]0[00]') + ' Ga'
-    //}
+    if (max_ages >= 1e9) {
+      max_ages = numeral(max_ages/1e9).format('0[.]0[00]');
+      min_ages = min_ages < 1e5 ? '0' : numeral(min_ages/1e9).format('0[.]0[00]');
+      age_range = max_ages === min_ages ? `${max_ages} Ga` : `${min_ages} - ${max_ages} Ga`;
+    }
+    else if (max_ages >= 1e6) {
+      max_ages = numeral(max_ages/1e6).format('0[.]0[00]');
+      min_ages = min_ages < 1e3 ? '0' : numeral(min_ages/1e6).format('0[.]0[00]');
+      age_range = max_ages === min_ages ? `${max_ages} Ma` : `${min_ages} - ${max_ages} Ma`;
+    }
+    else if (max_ages >= 1e3) {
+      max_ages = numeral(max_ages/1e3).format('0[.]0[00]');
+      min_ages = min_ages < 1e1 ? '0' : numeral(min_ages/1e3).format('0[.]0[00]');
+      age_range = max_ages === min_ages ? `${max_ages} Ma` : `${min_ages} - ${max_ages} ka`;
+    }
+    else {
+      let max_ages_unit = max_ages >= 1949.5 ? 'BC' : 'AD';
+      let min_ages_unit = min_ages >= 1949.5 ? 'BC' : 'AD';
+      max_ages = max_ages >= 1949.5 ? numeral(max_ages - 1949).format('0[.]0[00]') : numeral(1950 - max_ages).format('0[.]0[00]');
+      min_ages = min_ages >= 1949.5 ? numeral(min_ages - 1949).format('0[.]0[00]') : numeral(1950 - min_ages).format('0[.]0[00]');
+      age_range = age_range || max_ages_unit === min_ages_unit && max_ages === min_ages && `${max_ages} ${max_ages_unit}`;
+      age_range = age_range || max_ages_unit === min_ages_unit && max_ages !== min_ages && `${max_ages} - ${min_ages} ${max_ages_unit}`;
+      age_range = age_range || max_ages_unit !== min_ages_unit                          && `${max_ages} ${max_ages_unit} - ${min_ages} ${min_ages_unit}`;
+    }
 
-    min_ages = min_ages < 0 ?
-      numeral(min_ages)
-        .format('0[.]0[00]') + ' YBP'
-      :
-      numeral(min_ages)
-        .format('0[.]0[00] a')
-        .replace(/b$/, 'Ga')
-        .replace(/m$/, 'Ma')
-        .replace(/k$/, 'ka')
-        .replace(/(\d)\s*$/, '$1 YBP');
-    max_ages = max_ages < 0 ?
-      numeral(max_ages)
-        .format('0[.]0[00]') + ' YBP'
-      :
-      numeral(max_ages)
-        .format('0[.]0[00] a')
-        .replace(/b$/, 'Ga')
-        .replace(/m$/, 'Ma')
-        .replace(/k$/, 'ka')
-        .replace(/(\d)\s*$/, '$1 YBP');
     return (
-      <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
-        {min_ages === max_ages ?
-          <span>
-            <b>Age:</b><br/>
-            {min_ages}<br/>
-            {n_ages ? <span><b>N: </b>{n_ages}</span> : undefined}
-          </span>
-          :
-          <span>
-            <b>Min Age:</b><br/>
-            {min_ages}<br/>
-            <b>Max Age:</b><br/>
-            {max_ages}<br/>
-            {n_ages ? <span><b>N: </b>{n_ages}</span> : undefined}
-          </span>
-        }
+      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <b>Age:</b><br/>{age_range}
       </div>
     );
   }
 
   renderInt(item) {
 
-    let tableSummary = item.summary[this.props.table];
-    let allSummary   = item.summary._all;
+    let tableSummary = item.summary && item.summary[this.props.table];
+    let allSummary   = item.summary && item.summary._all;
 
     if (!(tableSummary && tableSummary.int_abs) && !(allSummary && allSummary.int_abs)) return (
       <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
@@ -360,12 +390,12 @@ class SearchSummariesListItem extends React.Component {
   renderGeo(item) {
     let geologic = ['plate_blocks', 'terranes', 'geological_province_sections', 'tectonic_settings'];
     geologic = _.reduce(geologic, (list, column) => {
-      if (item.summary._all && item.summary._all[column]) list.push(...item.summary._all[column]);
+      if (item.summary && item.summary._all && item.summary._all[column]) list.push(...item.summary._all[column]);
       return list;
     }, []);
     let geographic = ['continent_ocean', 'country', 'ocean_sea', 'region', 'village_city', 'location', 'location_type', 'location_alternatives'];
     geographic = _.reduce(geographic, (list, column) => {
-      if (item.summary._all && item.summary._all[column]) list.push(...item.summary._all[column]);
+      if (item.summary && item.summary._all && item.summary._all[column]) list.push(...item.summary._all[column]);
       return list;
     }, []);
     return (
@@ -385,9 +415,9 @@ class SearchSummariesListItem extends React.Component {
   }
 
   renderGeology(item) {
-    let geologic_classes = item.summary._all && item.summary._all.geologic_classes;
-    let geologic_types   = item.summary._all && item.summary._all.geologic_types;
-    let lithologies      = item.summary._all && item.summary._all.lithologies;
+    let geologic_classes = item.summary && item.summary._all && item.summary._all.geologic_classes;
+    let geologic_types   = item.summary && item.summary._all && item.summary._all.geologic_types;
+    let lithologies      = item.summary && item.summary._all && item.summary._all.lithologies;
     let nDefined = _.without([geologic_classes, geologic_types, lithologies], undefined).length;
     let clampLines = (nDefined === 3 ? 1 : (nDefined === 2 ? 2 : 5));
     return (
@@ -436,18 +466,38 @@ class SearchSummariesListItem extends React.Component {
   }
 
   render() {
+    return this.props.item ? this.renderItem() : this.renderDoc();
+  }
+
+  renderItem() {
     const item = this.props.item;
     return (
       <div>
-        <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active ? ' active' : '')}>
-          <div className={'title' + (this.props.active ? ' active' : '')} style={{paddingLeft:'1em'}}>
+        <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active && !this.props.collapsed ? ' active' : '')} onMouseOver={(e) => {
+          clearTimeout(this.hideAccordionButtonTimeout);
+          this.showAccordionButtonTimeout = setTimeout(() => {
+            if ($(this.refs['accordion title']).hasClass('active')) {
+              $(this.refs['close accordion button']).show();
+              $(this.refs['open accordion button']).hide();
+            } else {
+              $(this.refs['open accordion button']).show();
+              $(this.refs['close accordion button']).hide();
+            }
+          }, 500);
+        }} onMouseLeave={(e) => {
+          clearTimeout(this.showAccordionButtonTimeout);
+          this.hideAccordionButtonTimeout = setTimeout(() => {
+            $(this.refs['open accordion button']).hide();
+            $(this.refs['close accordion button']).hide();
+          }, 500);
+        }}>
+          <div ref="accordion title" className={'title' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{padding:'0 0 0 1em'}}>
             <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
             <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
               <div className="row accordion-trigger" style={{display:'flex', padding:'0 1em 0.5em'}}>
                 <span style={{fontSize:'small', fontWeight:'bold'}}>
                   {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation || 'Unknown'}
-                  &nbsp;v.&nbsp;
-                  {item.summary.contribution && item.summary.contribution.version || '?'}
+                  {item.summary.contribution && item.summary.contribution.version && <span>&nbsp;v.&nbsp;{item.summary.contribution.version}</span>}
                 </span>
                 <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}>
                   {this.renderTitle(item)}
@@ -472,50 +522,102 @@ class SearchSummariesListItem extends React.Component {
               </div>
             </div>
           </div>
-          <div className={'content' + (this.props.active ? ' active' : '')} style={{fontSize:'small'}}>
+          <div className={'content' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{fontSize: 'small', paddingBottom: 0}}>
             <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.html}} />
-            <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.abstract_html}} />
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.abstract_html}} />
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && item.summary.contribution._reference.keywords.join &&
-            <div dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords.join(', ')}} />}
+
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords.join(', ')}} />}
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && !item.summary.contribution._reference.keywords.join &&
-            <div dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords}} />}
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords}} />}
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && item.summary.contribution._reference.tags.join &&
-            <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags.join(', ')}} />}
+
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags.join(', ')}} />}
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && !item.summary.contribution._reference.tags.join &&
-            <div dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
+            {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
+
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Citation Count: </b>' + item.summary.contribution._reference.n_citations + ' (Source: <a target="_blank" href="https://www.crossref.org">Crossref</a>)'}} />}
+
             {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
-            <table className="ui very basic small compact table" style={{maxWidth:700}}>
+            <table className="ui very basic compact collapsing table">
               <thead>
               <tr>
-                <th>Version</th>
-                <th>Data Model</th>
-                <th>Uploaded</th>
-                <th>MagIC Contribution Link</th>
-                <th>Download</th>
+                <th style={{whiteSpace: 'nowrap'}}>Download</th>
+                <th style={{whiteSpace: 'nowrap'}}>MagIC Contribution Link</th>
+                <th style={{whiteSpace: 'nowrap'}}>Version</th>
+                <th style={{whiteSpace: 'nowrap'}}>Data Model</th>
+                <th style={{whiteSpace: 'nowrap'}}>Date</th>
+                <th style={{whiteSpace: 'nowrap'}}>Contributor</th>
+                {_.find(item.summary.contribution._history, 'description') && <th style={{whiteSpace: 'nowrap'}}>Description</th>}
               </tr>
               </thead>
               <tbody>
               {item.summary.contribution && item.summary.contribution._history.map((v, i) => {
                 return (
                   <tr key={i}>
-                    <td>{v.version}</td>
-                    <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
-                    <td>{moment(v.timestamp).local().format('LL')} by <b>{v.contributor}</b></td>
-                    <td><a style={this.styles.a} href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a></td>
-                    <td>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      {v.id && v.id < 16282 &&
                       <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
                         <input type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${v.id}.txt`}/>
                         <input type="hidden" name="file_name" value={`magic_contribution_${v.id}.txt`}/>
-                        <button type="submit" className={'ui basic tiny fluid icon compact purple button' + (i > 0 ? ' disabled' : '')} style={{marginTop:'0'}}>
+                        <button type="submit" className={'ui basic tiny fluid icon compact purple button'} style={{marginTop:'0'}}>
                           <i className="ui file text outline icon"/> Download
                         </button>
-                      </form>
+                      </form>}
+                      {v.id && v.id >= 16282 &&
+                      <button type="submit" className="ui basic tiny fluid compact icon purple button"
+                              style={{marginTop:'0'}} onClick={function(id, e) {
+                        Meteor.call('esGetContribution', {index, id}, function(id, error, c) {
+                          if (!error && c) {
+                            const exporter = new ExportContribution({});
+                            //debugger;
+                            let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+                            saveAs(blob, 'magic_contribution_' + id + '.txt');
+                          } else {
+                            alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                          }
+                        }.bind(this, id));
+                      }.bind(this, v.id)}>
+                        <i className="ui file text outline icon"/> Download
+                      </button>}
+                      {!v.id &&
+                      <button className="ui basic tiny fluid compact icon purple disabled button"
+                              style={{marginTop:'0'}}>
+                        <i className="ui file text outline icon"/> Download
+                      </button>}
                     </td>
+                    <td>
+                      {(item.summary.contribution._is_activated === "true" || i > 0) &&
+                      <a style={this.styles.a}
+                         href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a>}
+                      {(item.summary.contribution._is_activated !== "true" && i == 0) &&
+                      <span>{'earthref.org/MagIC/' + v.id}</span>}
+                    </td>
+                    <td>{v.version}</td>
+                    <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
+                    <td>{moment(v.timestamp).local().format('LL')}</td>
+                    <td>{v.contributor}</td>
+                    {_.find(item.summary.contribution._history, 'description') && <td>{v.description}</td>}
                   </tr>
                 );
               })}
               </tbody>
             </table>}
+          </div>
+          <div ref="open accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
+            $(this.refs['accordion']).accordion('open', 0);
+            $(this.refs['close accordion button']).show();
+            $(this.refs['open accordion button']).hide();
+          }}>
+            <i className="caret down icon"></i>
+          </div>
+          <div ref="close accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
+            $(this.refs['accordion']).accordion('close', 0);
+            $(this.refs['open accordion button']).show();
+            $(this.refs['close accordion button']).hide();
+          }}>
+            <i className="caret up icon"></i>
           </div>
           <div ref="map modal" className="ui fullscreen modal">
             <i className="close icon"></i>
@@ -529,8 +631,8 @@ class SearchSummariesListItem extends React.Component {
     );
   }
 
-  render2() {
-    const c = this.props.doc;
+  renderDoc() {
+    const item = this.props.doc;
     return (
       <div>
         {Cookies.get('mail_id') && (item.CONTRIBUTOR_ID === "6382" || item.CONTRIBUTOR_ID == Cookies.get('mail_id')) && item.UPLOAD == "1" ?
@@ -545,12 +647,10 @@ class SearchSummariesListItem extends React.Component {
                   let parser = new ParseContribution({});
                   if (error) console.error(error);
                   parser.parsePromise({text: data}).then(() => {
-                    Meteor.call('insertIntoPrivate',
+                    Meteor.call('createPrivateUpdate',
                         Cookies.get('name'),
                         '@' + Cookies.get('user_id'),
-                        Cookies.get('mail_id'),
                         parser.json,
-                        {contribution: _.cloneDeep(item)},
                         "" + (parseInt(item.VERSION) + 1), (error) => {
                       if (error) console.error(error);
                       window.location.href = '/MagIC/private';
@@ -559,7 +659,7 @@ class SearchSummariesListItem extends React.Component {
                 });
               } else {
                 Meteor.call('getPrivateContribution', item._id, (error, data) => {
-                  Meteor.call('insertIntoPrivate',
+                  Meteor.call('createPrivateUpdate',
                       Cookies.get('name'),
                       '@' + Cookies.get('user_id'),
                       Cookies.get('mail_id'),

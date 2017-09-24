@@ -11,7 +11,7 @@ export default class extends React.Component {
     this.state = {
     };
     this.styles = {
-      scroller: {overflowY: 'scroll', background: 'white', padding: '1em', borderRadius: '0', boxShadow: 'none'}
+      scroller: {overflowY: 'scroll', background: 'white', padding: '0 1em', borderRadius: '0', boxShadow: 'none'}
     }
   }
 

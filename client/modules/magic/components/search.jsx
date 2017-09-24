@@ -10,8 +10,8 @@ import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
 import {portals} from '/lib/configs/portals.js';
-import {versions, models} from '/lib/modules/magic/data_models.js';
-import {levels, index} from '/lib/modules/magic/search_levels.js';
+import {versions, models} from '/lib/configs/magic/data_models.js';
+import {levels, index} from '/lib/configs/magic/search_levels.js';
 
 const model = models[_.last(versions)];
 const sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
@@ -19,16 +19,17 @@ const sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) =
 });
 
 let filters = [
-  {type: 'string'   , name: 'summary._all.external_database_ids', title: 'External Database'       , term: 'summary._all.external_database_ids.key.raw', aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw', size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary.contribution._contributor' , title: 'Contributor'             , term: 'summary.contribution._contributor.raw'     , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'     , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.location_type'        , title: 'Location Type'           , term: 'summary._all.location_type.raw'            , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'            , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.geologic_type'        , title: 'Geologic Type'           , term: 'summary._all.geologic_types.raw'           , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'           , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.geologic_class'       , title: 'Geologic Class'          , term: 'summary._all.geologic_classes.raw'         , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'         , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.lithology'            , title: 'Lithology'               , term: 'summary._all.lithologies.raw'              , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'              , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.method_codes'         , title: 'Method Code'             , term: 'summary._all.method_codes.raw'             , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'             , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.scientists'           , title: 'Research Scientist Name' , term: 'summary._all.scientists.raw'               , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'               , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.analysts'             , title: 'Analyst Name'            , term: 'summary._all.analysts.raw'                 , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                 , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.software_packages'    , title: 'Software Package'        , term: 'summary._all.software_packages.raw'        , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'        , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary.contribution._reference.authors._name', title: 'Author'                  , term: 'summary.contribution._reference.authors._name.raw', aggs: {buckets: {terms: {field: 'summary.contribution._reference.authors._name.raw', size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.external_database_ids'           , title: 'External Database'       , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary.contribution._contributor'            , title: 'Contributor'             , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.location_type'                   , title: 'Location Type'           , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.geologic_type'                   , title: 'Geologic Type'           , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.geologic_class'                  , title: 'Geologic Class'          , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.lithology'                       , title: 'Lithology'               , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.method_codes'                    , title: 'Method Code'             , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 1001}}}, maxBuckets: 1000},
+  //{type: 'string'   , name: 'summary._all.scientists'                      , title: 'Research Scientist Name' , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 1001}}}, maxBuckets: 1000},
+  //{type: 'string'   , name: 'summary._all.analysts'                        , title: 'Analyst Name'            , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 1001}}}, maxBuckets: 1000},
+  {type: 'string'   , name: 'summary._all.software_packages'               , title: 'Software Package'        , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 1001}}}, maxBuckets: 1000},
 ];
 let filterNames = {};
 //sortedTables.forEach((table) => {
@@ -164,18 +165,20 @@ class Search extends React.Component {
   }
 
   onWindowResize() {
-    const windowHeight = $(window).height() - 60; // to allow for the footer
-    if (windowHeight !== this.windowHeight) {
-      this.windowHeight = windowHeight;
-      const height = windowHeight - $(this.refs['filters']).offset().top + 20;
-      this.setState({height: height});
-    }
-    const windowWidth = $(window).width();
-    if (windowWidth !== this.windowWidth) {
-      this.windowWidth = windowWidth;
-      const width = windowWidth - $(this.refs['filters']).outerWidth() - 2*$(this.refs['filters']).offset().left - 10;
-      this.setState({width: width});
-    }
+    try {
+      const windowHeight = $(window).height() - 60; // to allow for the footer
+      if (windowHeight !== this.windowHeight) {
+        this.windowHeight = windowHeight;
+        const height = windowHeight - $(this.refs['filters']).offset().top + 20;
+        this.setState({height: height});
+      }
+      const windowWidth = $(window).width();
+      if (windowWidth !== this.windowWidth) {
+        this.windowWidth = windowWidth;
+        const width = windowWidth - $(this.refs['filters']).outerWidth() - 2 * $(this.refs['filters']).offset().left - 10;
+        this.setState({width: width});
+      }
+    } catch(e) {}
   }
 
   getSearchQueries() {
@@ -249,30 +252,30 @@ class Search extends React.Component {
 
     if (_.isNumber(this.state.age_min) && _.isNumber(this.state.age_max))
       activeFilters.push({ range: { 'summary._all._age_range_ybp.range': {
-        gte: _.find(ageUnits, {name: this.state.age_min_unit}).from(this.state.age_min),
-        lte: _.find(ageUnits, {name: this.state.age_max_unit}).from(this.state.age_max)
+        gte: _.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min),
+        lte: _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max)
       }}});
     else if (_.isNumber(this.state.age_min))
       activeFilters.push({ range: { 'summary._all._age_range_ybp.range': {
-        gte: _.find(ageUnits, {name: this.state.age_min_unit}).from(this.state.age_min)
+        gte: _.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min)
       }}});
     else if (_.isNumber(this.state.age_max))
       activeFilters.push({ range: { 'summary._all._age_range_ybp.range': {
-        lte: _.find(ageUnits, {name: this.state.age_max_unit}).from(this.state.age_max)
+        lte: _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max)
       }}});
 
     if (_.isNumber(this.state.int_min) && _.isNumber(this.state.int_max))
       activeFilters.push({ range: { 'summary._all.int_abs.range': {
-        gte: _.find(intUnits, {name: this.state.int_unit}).from(this.state.int_min),
-        lte: _.find(intUnits, {name: this.state.int_unit}).from(this.state.int_max)
+        gte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min),
+        lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
       }}});
     else if (_.isNumber(this.state.int_min))
       activeFilters.push({ range: { 'summary._all.int_abs.range': {
-        gte: _.find(intUnits, {name: this.state.int_unit}).from(this.state.int_min)
+        gte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min)
       }}});
     else if (_.isNumber(this.state.int_max))
       activeFilters.push({ range: { 'summary._all.int_abs.range': {
-        lte: _.find(intUnits, {name: this.state.int_unit}).from(this.state.int_max)
+        lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
       }}});
 
     console.log('activeFilters', activeFilters);
@@ -280,8 +283,9 @@ class Search extends React.Component {
   }
 
   clearActiveFilters() {
+    $(this.refs.filters).find('input').val('');
     this.setState({
-      activeFilters: [],
+      activeFilters: {},
       lat_min: undefined,
       lat_max: undefined,
       lon_min: undefined,
@@ -358,7 +362,7 @@ class Search extends React.Component {
                   es={{ index: index, type: 'contribution', queries: searchQueries, filters: activeFilters }}
                   singular="contribution"
                   plural="contributions"
-                /></b> in their entirety based on the search paramteres. The option to download subsets of the contributions based on the filter settings is coming soon.</p>
+                /></b> in their entirety based on the search parameters. The option to download subsets of the contributions based on the filter settings is coming soon.</p>
                 <p>Note, this may take several minutes to prepare and initiate the download. The file will appear in your browser's download folder.</p>
               </div>
               <form className="actions" action="//earthref.org/cgi-bin/z-download.cgi" method="post">
@@ -485,7 +489,7 @@ class Search extends React.Component {
                             )}
                           </div>
                         </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className="ui label" style={{borderRadius:0, margin:0, borderLeft:'1px solid #dddede'}}>to</div>
                         <div className={'ui input' + (this.state.age_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
                           <input type="text" placeholder={_.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).max}
@@ -604,10 +608,6 @@ class Search extends React.Component {
     let activeView =
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
-    let es = _.extend({}, activeView.es, {
-      queries: searchQueries,
-      filters: activeFilters
-    });
     return (
       <div ref="tabs" className="ui top attached tabular small menu search-tab-menu">
         {levels[this.state.levelNumber].views.map((view) =>
@@ -618,7 +618,10 @@ class Search extends React.Component {
           >
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <Count es={es}/>
+              <Count es={_.extend({}, view.es, {
+                queries: searchQueries,
+                filters: activeFilters
+              })}/>
             </div>
           </div>
         )}
@@ -659,41 +662,41 @@ class Search extends React.Component {
       height: (this.state.height ? this.state.height - $(this.refs['tabs']).outerHeight() : '100%'),
       width: (this.state.height ? this.state.width : '100%')
     };
-    let view =
+    let activeView =
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
-    let es = _.extend({}, view.es, {
+    let es = _.extend({}, activeView.es, {
       queries: searchQueries,
       filters: activeFilters,
       sort:    searchQueries.length > 0 && this.state.sortDefault ? searchSortOption.sort : _.find(sortOptions, {name: this.state.sort}).sort
     });
-    if (view.name === 'Summaries') return (
+    if (activeView.name === 'Summaries') return (
       <SearchSummariesView
-        key={view.name}
+        key={activeView.name}
         style={viewStyle}
         es={es}
         pageSize={5}
       />
     );
-    if (view.name === 'Rows') return (
+    if (activeView.name === 'Rows') return (
       <SearchRowsView
-        key={view.name}
+        key={activeView.name}
         style={viewStyle}
         es={es}
-        table={view.es.type === 'experiments' ? 'measurements' : view.es.type}
+        table={activeView.es.type === 'experiments' ? 'measurements' : activeView.es.type}
         pageSize={20}
       />
     );
-    if (view.name === 'Map') return (
+    if (activeView.name === 'Map') return (
       <SearchMapView
-        key={view.name}
+        key={activeView.name}
         style={viewStyle}
         es={es}
       />
     );
-    if (view.name === 'Images' || view.name === 'Plots') return (
+    if (activeView.name === 'Images' || activeView.name === 'Plots') return (
       <SearchImagesView
-        key={view.name}
+        key={activeView.name}
         style={viewStyle}
         es={es}
       />
