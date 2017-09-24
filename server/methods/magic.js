@@ -9,6 +9,9 @@ import moment from 'moment';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
+import {HTTP} from 'meteor/http';
+
+import SummarizeContribution from '/lib/modules/magic/summarize_contribution';
 
 //console.log('es', Meteor.settings.elasticsearch.url);
 const esClient = new elasticsearch.Client({
@@ -24,7 +27,7 @@ export default function () {
       return Collections['magic.import.settings.templates'].insert({
         _user: user,
         _name: name,
-        _inserted: moment().toISOString(),
+        _inserted: moment().utc().toISOString(),
         settings: settings
       }, (error) => { console.log('create import', error)});
     },
@@ -53,24 +56,35 @@ export default function () {
         _user: user
       }, (error) => { console.log('delete import', error)});
     },
-    'insertContribution': function (contributor, user, mailid, name, c, s) {
+    'getImportSettingsTemplates': function (user) {
+      console.log('getImportSettingsTemplates', user);
+      let templates = Collections['magic.import.settings.templates'].find(
+        {_user: user},
+        {sort: {'_inserted': -1}}).fetch();
+      console.log('getImportSettingsTemplates', user, templates);
+      return templates;
+    },
+    'getImportSettingsTemplate': function (ID) {
+      return Collections['magic.import.settings.templates'].findOne(ID);
+    },
+    async insertContribution(contributor, user, c, name) {
       //check(id, Integer);
       //check(name, String);
       //check(data, Object);
 
-      if (c.contribution && c.contribution.length > 0) {
+      /*if (c.contribution && c.contribution.length > 0) {
         c.contribution = c.contribution.splice(0,1);
         delete c.contribution[0].version;
         delete c.contribution[0].id;
-        delete c.contribution[0].magic_version;
+        delete c.contribution[0].data_model_version;
         delete c.contribution[0].timestamp;
       } else {
         c.contribution = [{}];
       }
       c.contribution[0].contributor = user;
-      c.contribution[0].magic_version = '3.0';
+      c.contribution[0].data_model_version = '3.0';
       c.contribution[0].version = 'PRIVATE';
-      c.contribution[0].timestamp = moment().toISOString();
+      c.contribution[0].timestamp = moment().utc().toISOString();
       c._contributor = user;
       c._inserted = c.contribution[0].timestamp;
       c._name = name;
@@ -88,7 +102,7 @@ export default function () {
       s.contribution.TITLE = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
       s.contribution.VERSION = 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
@@ -103,22 +117,49 @@ export default function () {
        es[k] = c._summary.contribution[k];
        });*/
 
-      Collections['magic.private.contributions'].insert(c, (error) => { console.log('insert', error)});
+      let metadata = {
+        _is_activated: 'false',
+        _is_latest: 'true',
+        _contributor: contributor,
+        _name: name
+      };
+
+      let id = Collections['magic.private.contributions'].findOne('next_id');
+      if (id && id.next_id) {
+        c.contribution[0].id = id.next_id;
+        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
+      }
+
+      c.contribution[0].contributor = user;
+      c.contribution[0].data_model_version = '3.0';
+      c.contribution[0].version = 'PRIVATE';
+      c.contribution[0].timestamp = moment().utc().toISOString();
+
+      const summarizer = new SummarizeContribution({});
+      await summarizer.summarizePromise(c, metadata);
+
+      c._summary = summarizer.json;
+      c._contributor = user;
+      c._inserted = c.contribution[0].timestamp;
+      c._name = name;
+      c._activated = false;
+
+      await Collections['magic.private.contributions'].rawCollection().insert(c, (error) => { console.log('insert', error)});
     },
     'updateContribution': function (id, contributor, user, mailid, name, c, s) {
 
       c._id = id;
 
-      s = s || c._summary || {};
+      s = s || {};
       s.contribution = s.contribution || {};
-      s.contribution.TITLE = c._name;
+      //s.contribution.NAME = c._name;
       s.contribution.CONTRIBUTOR = contributor;
       s.contribution.CONTRIBUTOR_ID = mailid;
-      s.contribution.INSERTED = moment().format("DD-MMM-YY HH:mm:ss");
-      s.contribution.VERSION = 'PRIVATE';
+      s.contribution.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
+      s.contribution.VERSION = s.contribution.VERSION || c._summary.contribution.VERSION || 'PRIVATE';
       s.contribution.MAGIC_CONTRIBUTION_ID = c.contribution[0].id;
       s.contribution._id = c._id;
-      c._summary = s;
+      _.merge(c._summary, s);
 
       //if (c.measurements && c.measurements.rows && c.measurements.columns) {
       //  let i = 0;
@@ -133,11 +174,38 @@ export default function () {
 
       Collections['magic.private.contributions'].update(id, c, (error) => { console.log('update', error, id, _.keys(c))});
     },
+    async createPrivateUpdate(contributor, user, c, version) {
+
+      let metadata = {
+        _is_activated: 'false',
+        _is_latest: 'true',
+        _contributor: contributor,
+        _name: 'Update'
+      };
+
+      let id = Collections['magic.private.contributions'].findOne('next_id');
+      if (id && id.next_id) {
+        c.contribution[0].id = id.next_id;
+        Collections['magic.private.contributions'].update('next_id', {next_id: id.next_id + 1});
+      }
+
+      c.contribution[0].contributor = user;
+      c.contribution[0].data_model_version = '3.0';
+      c.contribution[0].version = version;
+      c.contribution[0].timestamp = moment().utc().toISOString();
+
+      const summarizer = new SummarizeContribution({});
+      await summarizer.summarizePromise(c, metadata);
+      c._summary = summarizer.json;
+
+      Collections['magic.private.contributions'].insert(c, (error) => { if (error) console.log('insert', error)});
+    },
     async activateContribution(id) {
       let c = Collections['magic.private.contributions'].findOne(id);
       c._es_id = uuid.v4();
       c._activated = true;
-      await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
+      c.contribution[0].timestamp = moment().utc().toISOString();
+      c.contribution[0].version = c.contribution[0].version === 'PRIVATE' || _.trim(c.contribution[0].version) === '' ? '1' : c.contribution[0].version;
 
       let summary = _.pick(c._summary.contribution, [
         "AGE_UNIT",
@@ -174,21 +242,48 @@ export default function () {
         "MAGIC_CONTRIBUTION_ID",
         "JOURNAL",
         "REFERENCE_HTML",
+        "DOI",
         "VERSION",
         "version_history"
       ]);
       summary.UPLOAD = 1;
       summary.INSERTED = moment().utc().format("DD-MMM-YY HH:mm:ss");
-      summary.MONGO_ID = id;
+      summary.VERSION = summary.VERSION === 'PRIVATE' || _.trim(summary.VERSION) === '' ? "1" : summary.VERSION;
+      summary.version_history = summary.version_history || [];
+
+      for (let i = 0; i <= summary.version_history.length; i++) {
+        if (summary.version_history[i] && summary.version_history[i].contribution_id) {
+          esClient.search({
+            index: 'magic_v5', type: 'contributions_summaries',
+            body: {
+              "query": {
+                "term": {
+                  "MAGIC_CONTRIBUTION_ID": summary.version_history[i].contribution_id
+                }
+              }
+            }
+          }, Meteor.bindEnvironment((err, resp) => {
+            if (resp.hits.hits.length > 0) {
+              esClient.update({
+                index: 'magic_v5', type: 'contributions_summaries', id: resp.hits.hits[0]._id,
+                body: {doc: {"UPLOAD": 2}}
+              });
+            }
+          }));
+        }
+      }
+
       summary.version_history.unshift({
         "contributor": summary.CONTRIBUTOR,
         "upload": 1,
+        "mongo_id": id,
         "contribution_id": summary.MAGIC_CONTRIBUTION_ID,
         "version": summary.VERSION,
         "magic_version": 3,
-        "activated": moment().utc()
+        "activated": moment().utc().toISOString()
       });
 
+      await Collections['magic.private.contributions'].update(id, c, (error) => { console.log('activate', error)});
       await esClient.index({
         index: 'magic_v5', type: 'contributions_summaries',
         id: id,
@@ -231,7 +326,7 @@ export default function () {
       }
       if (c._summary.contribution.YEAR)
         c._summary.contribution.CITATION += ' (' + c._summary.contribution.YEAR + ')';
-      c._name = c._summary.contribution.CITATION;
+      //c._name = c._summary.contribution.CITATION;
 
       c._summary.contribution.REFERENCE_HTML = '<b>' +
         doiData.author.map((a) => a.family + ', ' + a.given).join(', ') +
@@ -289,15 +384,24 @@ export default function () {
       }
     },
     'getPrivateContribution': function(id) {
-      const contributions = Collections['magic.private.contributions'].findOne(id);
-      return contributions;
+      return Collections['magic.private.contributions'].findOne(id);
     },
     'getPrivateContributions': function(contributor) {
-      const contributions = Collections['magic.private.contributions'].find(
+      return Collections['magic.private.contributions'].find(
         {_contributor: contributor},
         {sort: {'_inserted': -1}}
       ).fetch();
-      return contributions;
+    },
+    'getUnactivatedContributions': function(contributor) {
+      return Collections['magic.private.contributions'].find(
+        {_contributor: contributor, _activated: false},
+        {sort: {'_inserted': -1}}
+      ).fetch();
+    },
+    'getERDAContribution': function(url) {
+      this.unblock();
+      const response = HTTP.call('GET',url);
+      return response.content;
     }
   });
 

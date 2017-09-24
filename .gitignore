@@ -4,15 +4,13 @@ node_modules
 # Scripts
 .scripts/elasticsearch/.*
 
+# Babel Distribution Files
+.dist
+
 # Settings
 settings.json
 
 # JetBrains
-.idea/
-client/modules/magic/actions/tests/files/data_models/temp3.0.js
-client/modules/magic/actions/tests/files/data_models/tempForUpgradeMapOutput.js
-client/modules/magic/actions/tests/temp2.2.js
-client/modules/magic/actions/tests/temp2.3.js
-client/modules/magic/actions/tests/tmpUpgradeMap
-client/modules/magic/actions/tests/files/data_models/temp2.5.js
+.idea
+
 earthref.ssl.key

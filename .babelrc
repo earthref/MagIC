@@ -1,14 +1,18 @@
 {
   "presets": [
-    "es2017",
-    "react"
+    "es2015",
+    "react",
+    "stage-3"
   ],
   "plugins": [
-    "react-require",
-    "transform-runtime"
+    "babel-root-slash-import",
+    "transform-runtime",
+    "transform-object-rest-spread"
   ],
   "ignore": [
     "*.es5.js",
-    "/client/lib/semantic-ui/*"
+    "/client/lib/modules/magic/data_modes/*",
+    "/client/lib/semantic-ui/*",
+    ".scripts/mocha_boot.js"
   ]
 }

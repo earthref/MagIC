@@ -1,14 +1,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
-import FixedTable from './fixed_table.jsx';
+import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
-import {Collections} from '/lib/collections';
 import {Tracker}  from 'meteor/tracker';
-import {portals} from '../configs/portals.js';
-import {default as versions} from '../../../../lib/modules/magic/magic_versions';
-import {default as models} from '../../../../lib/modules/magic/data_models';
-let dataModels = {MagIC: models[_.last(versions)]};
+
+import FixedTable from '/client/modules/common/components/fixed_table';
+import {portals} from '/lib/configs/portals';
 
 export default class DataImporter extends React.Component {
 
@@ -42,14 +40,14 @@ export default class DataImporter extends React.Component {
         excludeColumnNames: [],
         excludeTable: false
       },
-      importTemplatesTaps: 0
+      importTemplatesTaps: 0,
+      creatingTemplate: false,
+      savingTemplate: false,
+      deletingTemplate: false,
+      renamingTemplate: false
     };
     this.state = this.initialState;
-    if (Cookies.get('user_id')) {
-      Meteor.subscribe('magic.import.settings.templates.subscription', '@' + Cookies.get('user_id'),
-        () => this.setState({templatesReady: true})
-      );
-    }
+    this.importTemplates = [];
   }
 
   componentDidMount() {
@@ -64,28 +62,65 @@ export default class DataImporter extends React.Component {
       $(this.refs['table name dropdown']).dropdown('set selected', _.trim(this.props.tableName));
     this.setState({in: (!Array.isArray(this.props.data) ? [] : this.props.data)});
     $(this.refs['import settings template dropdown']).dropdown({
-      onChange: (value, text, $choice) => {
-        let template = Collections['magic.import.settings.templates'].findOne(value);
-        console.log('loading template', template);
-        let outColumnNames = this.state.inColumnNames.map((inColumnName, i) => {
-          return template.settings.columnMap[inColumnName];
-        });
-        let excludeColumnIdxs = [];
-        if (template.settings.excludeColumnNames)
-          template.settings.excludeColumnNames.forEach((inColumnName) => {
-            let idx = this.state.inColumnNames.indexOf(inColumnName);
-            if (idx >= 0) excludeColumnIdxs.push(idx);
+      onShow: ($modal) => {
+        if (!this.state.templatesReady)
+          Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+            this.importTemplates = templates;
+            this.setState({
+              templatesReady: true,
+              importTemplatesTaps: this.state.importTemplateTaps + 1
+            });
           });
-        this.setState({
-          isLoaded: false,
-          hasChanged: false,
-          templateID: template._id,
-          templateName: template._name,
-          excludeColumnIdxs: excludeColumnIdxs,
-          settings: template.settings,
-          outColumnNames: outColumnNames
-        });
-        $(this.refs['table name dropdown']).dropdown('set selected', template.settings.tableName);
+      },
+      onChange: (value, text, $choice) => {
+        if (value === '') {
+          this.setState({
+            isLoaded: false,
+            hasChanged: false,
+            templateID: undefined,
+            templateName: undefined,
+            excludeColumnIdxs: [],
+            settings: {
+              tableName: '',
+              nHeaderRows: '1',
+              columnMap: {},
+              excludeColumnNames: [],
+              excludeTable: false
+            },
+            outColumnNames: []
+          });
+          $(this.refs['table column headers']).find('.ui-checkbox').checkbox("set checked");
+          $(this.refs['import settings template dropdown']).dropdown('restore placeholder text');
+          $(this.refs['table name dropdown']).dropdown('restore placeholder text');
+        } else {
+          Meteor.call('getImportSettingsTemplate', value, (error, template) => {
+            if (template && template.settings) {
+              let outColumnNames = this.state.inColumnNames.map((inColumnName, i) => {
+                return template.settings.columnMap[inColumnName];
+              });
+              $(this.refs['table column headers']).find('.ui-checkbox').checkbox("set checked");
+              let excludeColumnIdxs = [];
+              if (template.settings.excludeColumnNames)
+                template.settings.excludeColumnNames.forEach((inColumnName) => {
+                  let idx = this.state.inColumnNames.indexOf(inColumnName);
+                  if (idx >= 0) {
+                    excludeColumnIdxs.push(idx);
+                    $(this.refs['table column headers']).find('.ui-checkbox[data-column-idx="' + idx + '"]').checkbox("set unchecked");
+                  }
+                });
+              $(this.refs['table name dropdown']).dropdown('set selected', template.settings.tableName);
+              this.setState({
+                isLoaded: false,
+                hasChanged: false,
+                templateID: template._id,
+                templateName: template._name,
+                excludeColumnIdxs: excludeColumnIdxs,
+                settings: template.settings,
+                outColumnNames: outColumnNames
+              });
+            }
+          });
+        }
       }
     });
     $(this.refs['create import settings template']).modal({
@@ -96,55 +131,101 @@ export default class DataImporter extends React.Component {
           templateName,
           this.state.settings,
           (error, templateID) => {
-            console.log('created import settings template', error, templateID, templateName);
-            this.setState({hasChanged: false, templateID: templateID, templateName: templateName});
+            if (error) console.error('create import settings template', templateID, templateName, error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              this.setState({
+                creatingTemplate: false,
+                templatesReady: true,
+                hasChanged: false,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+                templateID: templateID, templateName: templateName
+              });
+              $(this.refs['create import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({creatingTemplate: true, templatesReady: false});
+        return false;
       }
     });
     $(this.refs['save import settings template']).modal({
       onApprove: ($modal) => {
+        localStorage.removeItem('Import Templates');
         Meteor.call('saveImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           this.state.templateID,
           this.state.settings,
           (error) => {
-            console.log('saved import settings template', error);
-            this.setState({hasChanged: false});
+            if (error) console.error('saved import settings template', error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              this.setState({
+                savingTemplate: false,
+                templatesReady: true,
+                hasChanged: false,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+              });
+              $(this.refs['save import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({savingTemplate: true, templatesReady: false});
+        return false;
       }
     });
     $(this.refs['delete import settings template']).modal({
       onApprove: ($modal) => {
         const templateID = this.refs['delete import settings template ID'].value;
+        localStorage.removeItem('Import Templates');
         Meteor.call('deleteImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           templateID,
           (error) => {
-            console.log('deleted import settings template', error);
-            this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
-            if (templateID === this.state.templateID)
-              this.setState({templateID: undefined, templateName: undefined});
+            if (error) console.error('delete import settings template', error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              if (templateID === this.state.templateID)
+                this.setState({templateID: undefined, templateName: undefined});
+              this.setState({
+                deletingTemplate: false,
+                templatesReady: true,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+              });
+              $(this.refs['delete import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({deletingTemplate: true, templatesReady: false});
+        return false;
       }
     });
     $(this.refs['rename import settings template']).modal({
       onApprove: ($modal) => {
         const templateName = this.refs['rename import settings template name'].value;
         const templateID = this.refs['rename import settings template ID'].value;
+        localStorage.removeItem('Import Templates');
         Meteor.call('renameImportSettingsTemplate',
           '@' + Cookies.get('user_id'),
           templateID,
           templateName,
           (error) => {
-            console.log('renamed import settings template', error, templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value);
-            this.setState({importTemplatesTaps: this.state.importTemplateTaps + 1});
-            if (templateID === this.state.templateID)
-              this.setState({templateName: this.refs['rename import settings template name'].value});
+            if (error) console.error('rename import settings template', templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value, error);
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+              this.importTemplates = templates;
+              if (templateID === this.state.templateID)
+                this.setState({templateName: this.refs['rename import settings template name'].value});
+              this.setState({
+                renamingTemplate: false,
+                templatesReady: true,
+                importTemplatesTaps: this.state.importTemplateTaps + 1,
+              });
+              $(this.refs['rename import settings template']).modal("hide");
+            });
           }
         );
+        this.setState({renamingTemplate: true, templatesReady: false});
+        return false;
       }
     });
   }
@@ -155,7 +236,7 @@ export default class DataImporter extends React.Component {
 
     // Copy the props data to the state input data.
     newState.in = (!Array.isArray(nextProps.data) ? [] : nextProps.data);
-    console.log('in', nextProps.data, nextState.in, newState.in);
+    //console.log('in', nextProps.data, nextState.in, newState.in);
 
     // Validate the number of header rows.
     const nHeaderRows = newState.settings.nHeaderRows;
@@ -175,7 +256,7 @@ export default class DataImporter extends React.Component {
     newState.settings.tableName = _.trim(String(newState.settings.tableName));
     if (newState.settings.tableName === '')
       newState.errors.tableName.push('"Table Name" must be selected.');
-    else if (_.indexOf(_.keys(dataModels[nextProps.portal].tables), newState.settings.tableName) === -1)
+    else if (_.indexOf(_.keys(this.props.dataModel.tables), newState.settings.tableName) === -1)
       newState.errors.tableName.push('Table name "' + newState.settings.tableName + '" is not recognized.');
 
     // Update the input column names list.
@@ -214,7 +295,7 @@ export default class DataImporter extends React.Component {
       // If the output column name isn't empty, check that it's valid for the selected table.
       if (outColumnName !== undefined &&
         _.indexOf(
-          _.keys(dataModels[nextProps.portal].tables[newState.settings.tableName].columns),
+          _.keys(this.props.dataModel.tables[newState.settings.tableName].columns),
           outColumnName
         ) === -1) {
         newState.errors.columnNames.push('Selected column name "' + outColumnName +
@@ -224,8 +305,8 @@ export default class DataImporter extends React.Component {
       // If the output column name is empty, see if the input column name is valid for the selected table.
       if (outColumnName === undefined) {
         let modelColumnByName, modelColumnByLabel;
-        for (let columnName in dataModels[nextProps.portal].tables[newState.settings.tableName].columns) {
-          const columnLabel = dataModels[nextProps.portal].tables[newState.settings.tableName].columns[columnName].label;
+        for (let columnName in this.props.dataModel.tables[newState.settings.tableName].columns) {
+          const columnLabel = this.props.dataModel.tables[newState.settings.tableName].columns[columnName].label;
           if (newState.inColumnNames[i] && (
               newState.inColumnNames[i].toLowerCase() === columnName ||
               newState.inColumnNames[i].toLowerCase() === columnLabel.toLowerCase()))
@@ -290,21 +371,22 @@ export default class DataImporter extends React.Component {
       newState.errors.data.push(newState.settings.tableName ? 'Skipping table "' + newState.settings.tableName + '".' : 'Skipping this table.');
 
     // Update the state instead of the component if necessary.
-    console.log('changed?', newState, nextState);
+    //console.log('changed?', newState, nextState);
     if (nextState.isLoaded && !_.isEqual(newState.settings, nextState.settings)) {
-      console.log('settings changed!');
+      //console.log('settings changed!');
       newState.hasChanged = true;
     }
     if (!_.isEqual(newState, nextState)) {
-      console.log('state changed!');
+      //console.log('state changed!');
       this.setState(newState);
     }
+
 
   }
 
   componentDidUpdate(prevProps, prevState) {
 
-    console.log('updated');
+    //console.log('updated');
 
     $(this.refs['errors accordion']).not('.ui-accordion').addClass('ui-accordion').accordion();
     $(this.refs['table column headers']).find('.ui.checkbox:not(.ui-checkbox)').addClass('ui-checkbox').checkbox({
@@ -384,9 +466,10 @@ export default class DataImporter extends React.Component {
       }
       else if (readyState.nErrors === 0 && this.props.onReady) {
         let columns = [];
-        for (let columnIdx in this.state.outColumnNames)
+        for (let columnIdx in this.state.outColumnNames) {
           if (this.state.excludeColumnIdxs.indexOf(columnIdx) === -1)
             columns.push(this.state.outColumnNames[columnIdx]);
+        }
         let rows = [];
         for (let rowIdx in this.state.in) {
           if (rowIdx >= this.state.nHeaderRowsInt && this.state.excludeRowIdxs.indexOf(rowIdx) === -1)
@@ -397,7 +480,6 @@ export default class DataImporter extends React.Component {
       else if (this.props.onNotReady)
         this.props.onNotReady();
     }
-
   }
 
   portalColor() {
@@ -407,15 +489,13 @@ export default class DataImporter extends React.Component {
 
   columnIsDownloadOnly(i) {
     let outColumnName = (i < this.state.outColumnNames.length ? this.state.outColumnNames[i] : undefined);
-    let dataModelTable = this.state.settings.tableName && dataModels[this.props.portal].tables[this.state.settings.tableName];
+    let dataModelTable = this.state.settings.tableName && this.props.dataModel.tables[this.state.settings.tableName];
     let dataModelColumn = dataModelTable && dataModelTable.columns[outColumnName];
     let validations = dataModelColumn && dataModelColumn.validations;
     return validations && /downloadOnly\(\)/.test(validations);
   }
 
   renderOptions() {
-    const templates = Collections['magic.import.settings.templates'].find({}, {sort: {'_inserted': -1}}).fetch();
-    console.log('templates collection', templates);
     return (
       <div>
         <div style={{display:'flex'}}>
@@ -430,8 +510,11 @@ export default class DataImporter extends React.Component {
                   <span className="text">{this.state.templateName || 'Select One to Load Settings'}</span>
                 </div>
                 <div className="menu">
+                  <div data-value="" data-text="Clear Import Settings" className="item">
+                    <span className="text">Clear Import Settings</span>
+                  </div>
                   {this.state.templatesReady ?
-                      templates.length ? templates.map((template, i) =>
+                      this.importTemplates.length ? this.importTemplates.map((template, i) =>
                         <div key={i} data-value={template._id} data-text={template._name} className="item">
                           <div className="ui icon compact mini right floated negative button" style={{margin:'-0.5em'}}
                             onClick={(e) => {
@@ -463,7 +546,7 @@ export default class DataImporter extends React.Component {
                       )
                     :
                       <div className="item">
-                        There are currently no templates in your private workspace. Please save a template to reuse it in future uploads.
+                        There are currently no templates in your private workspace. Please create a new template to reuse it in future uploads.
                       </div>
                   :
                     <div className="item">
@@ -472,16 +555,18 @@ export default class DataImporter extends React.Component {
                   }
                 </div>
               </div>
-              <div ref="import template save" className={'ui icon button' + (this.state.templateID && this.state.hasChanged ? '' : ' disabled')}
-                   style={{flex:'0 0 auto'}}
+              {this.state.templateID &&
+              <div ref="import template save"
+                   className={'ui icon button' + (this.state.hasChanged ? '' : ' disabled')}
+                   style={{flex: '0 0 auto'}}
                    onClick={(e) => {
                      $(this.refs['save import settings template']).modal('show');
                    }}
               >
                 <i className="save icon"/>
                 Save Changes
-              </div>
-              <div ref="import template save" className="ui icon button"
+              </div>}
+              <div ref="import template create" className="ui icon button"
                    style={{flex:'0 0 auto', borderLeft: '1px solid rgba(34, 36, 38, 0.15)'}}
                    onClick={(e) => {
                      this.refs['create import settings template name'].value = '';
@@ -504,14 +589,14 @@ export default class DataImporter extends React.Component {
               <div ref="table name dropdown"
                    className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? ' error' : '')}>
                 <i className="dropdown icon"/>
-                <div className="text">
+                <div className="default text">
                   <span className="text">{this.state.settings.tableName || 'Select One'}</span>
                 </div>
                 <div className="menu">
-                  {(_.keys(dataModels[this.props.portal].tables).map((table, i) => {
+                  {(_.keys(this.props.dataModel.tables).map((table, i) => {
                     return (
                       <div key={i} data-value={table} className="item">
-                        {dataModels[this.props.portal].tables[table].label}
+                        {this.props.dataModel.tables[table].label}
                       </div>
                     );
                   }))}
@@ -589,8 +674,8 @@ export default class DataImporter extends React.Component {
         :
         <div className="menu">
           {_.sortBy(
-            _.keys(dataModels[this.props.portal].tables[this.state.settings.tableName].columns),
-            (columnName) => dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].position
+            _.keys(this.props.dataModel.tables[this.state.settings.tableName].columns),
+            (columnName) => this.props.dataModel.tables[this.state.settings.tableName].columns[columnName].position
           ).map((columnName, i) => {
             return (menuLoaded || this.state.outColumnNames[columnIdx] === columnName ?
                 <div className="item" key={i} data-value={columnName} data-column-idx={columnIdx}>
@@ -598,7 +683,7 @@ export default class DataImporter extends React.Component {
                     {columnName}
                   </span>
                   <span className="text">
-                    {dataModels[this.props.portal].tables[this.state.settings.tableName].columns[columnName].label}
+                    {this.props.dataModel.tables[this.state.settings.tableName].columns[columnName].label}
                   </span>
                 </div> : undefined
             );
@@ -617,14 +702,17 @@ export default class DataImporter extends React.Component {
     const nRows = Math.max(0, this.state.nRows - this.state.excludeRowIdxs.length - this.state.nHeaderRowsInt);
     const nCols = Math.max(0, this.state.inColumnNames.length - this.state.excludeColumnIdxs.length);
     const tableTooltip = 'Click to ' + (this.state.settings.excludeTable ? 'include' : 'exclude') + ' this table.';
-    console.log('renderTable');
+    //console.log('renderTable');
     return (
       <div style={{marginTop:'1em'}}>
         <FixedTable className="ui compact celled striped definition single line table">
           <thead>
           <tr ref="table column headers">
             <th style={{pointerEvents: 'auto'}}>
-              <div className="ui fitted toggle left floated checkbox" data-position="bottom left" data-tooltip={tableTooltip}>
+              <div className="ui fitted toggle left floated checkbox"
+                   data-column-idx={-1}
+                   data-position="bottom left"
+                   data-tooltip={tableTooltip}>
                 <input type="checkbox" defaultChecked={!this.state.settings.excludeTable} data-column-idx={-1}/>
               </div>
             </th>
@@ -637,6 +725,7 @@ export default class DataImporter extends React.Component {
                 <th key={i}>
                   <div className={'ui fitted toggle right floated checkbox' + (downloadOnly || this.state.settings.excludeTable ? ' disabled' : '')}
                        data-position="bottom right"
+                       data-column-idx={i}
                        data-tooltip={tooltip}>
                     <input type="checkbox" defaultChecked={!downloadOnly && !excluded} data-column-idx={i}/>
                   </div>
@@ -650,7 +739,7 @@ export default class DataImporter extends React.Component {
           </thead>
           <tbody ref="table body">
           <tr ref="table column names">
-            <td className="collapsing right aligned">Column</td>
+            <td className="collapsing right aligned">Name</td>
             {(this.state.outColumnNames.map((outColumnName, i) => {
               return (
                 <td key={i}
@@ -661,7 +750,7 @@ export default class DataImporter extends React.Component {
                       (!this.state.settings.excludeTable && (this.state.errors.tableName.length > 0 ||
                       outColumnName === undefined ||
                       this.state.outColumnNameCounts[outColumnName] > 1 ||
-                      dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
+                      this.props.dataModel.tables[this.state.settings.tableName].columns[outColumnName] === undefined) ?
                         ' error' : '')
                     }
                     style={{display: 'table-cell', width: 'initial'}}
@@ -678,6 +767,27 @@ export default class DataImporter extends React.Component {
               );
             }))}
           </tr>
+          <tr ref="table column">
+            <td className="collapsing right aligned">Column</td>
+            {(this.state.inColumnNames.map((columnName, i) => {
+              const outColumnName = this.state.outColumnNames[i];
+              const modelColumn = (
+                this.state.errors.tableName.length > 0 || outColumnName === undefined ?
+                  undefined
+                  :
+                  this.props.dataModel.tables[this.state.settings.tableName].columns[outColumnName]
+              );
+              return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ?
+                  (modelColumn === undefined ?
+                      <td key={i} className="error"></td>
+                      :
+                      <td key={i}>{outColumnName}</td>
+                  )
+                  :
+                  <td key={i} className="disabled"></td>
+              );
+            }))}
+          </tr>
           <tr ref="table column units">
             <td className="collapsing right aligned">Units</td>
             {(this.state.inColumnNames.map((columnName, i) => {
@@ -686,7 +796,7 @@ export default class DataImporter extends React.Component {
                 this.state.errors.tableName.length > 0 || outColumnName === undefined ?
                   undefined
                   :
-                  dataModels[this.props.portal].tables[this.state.settings.tableName].columns[outColumnName]
+                  this.props.dataModel.tables[this.state.settings.tableName].columns[outColumnName]
               );
               return (this.state.excludeColumnIdxs.indexOf(i) === -1 && !this.state.settings.excludeTable ?
                   (modelColumn === undefined ?
@@ -876,3 +986,7 @@ export default class DataImporter extends React.Component {
   }
 
 }
+
+DataImporter.propTypes = {
+  dataModel: PropTypes.object.isRequired
+};
