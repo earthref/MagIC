@@ -278,7 +278,7 @@ class SearchSummariesListItem extends React.Component {
     let allSummary   = item.summary && item.summary._all;
 
     if (!(tableSummary && tableSummary._age_range_ybp) && !(allSummary && allSummary._age_range_ybp)) return (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
       </div>
     );
 
@@ -300,7 +300,7 @@ class SearchSummariesListItem extends React.Component {
     else if (max_ages >= 1e3) {
       max_ages = numeral(max_ages/1e3).format('0[.]0[00]');
       min_ages = min_ages < 1e1 ? '0' : numeral(min_ages/1e3).format('0[.]0[00]');
-      age_range = max_ages === min_ages ? `${max_ages} Ma` : `${min_ages} - ${max_ages} ka`;
+      age_range = max_ages === min_ages ? `${max_ages} ka` : `${min_ages} - ${max_ages} ka`;
     }
     else {
       let max_ages_unit = max_ages >= 1949.5 ? 'BC' : 'AD';
@@ -313,7 +313,7 @@ class SearchSummariesListItem extends React.Component {
     }
 
     return (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
         <b>Age:</b><br/>{age_range}
       </div>
     );
@@ -537,7 +537,7 @@ class SearchSummariesListItem extends React.Component {
             <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
 
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Citation Count: </b>' + item.summary.contribution._reference.n_citations + ' (Source: <a target="_blank" href="https://www.crossref.org">Crossref</a>)'}} />}
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org" style="color: #792f91">Crossref</a> Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
 
             {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
             <table className="ui very basic compact collapsing table">

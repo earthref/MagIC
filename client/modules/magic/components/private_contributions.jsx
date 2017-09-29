@@ -82,20 +82,7 @@ export default class extends React.Component {
         if (error) {
           console.error(error);
         } else {
-          this.privateContributions = contributions/*t.map((c, i) => {
-            let privateContribution = {contribution: c, errors: []};
-            if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
-              //if (!c.contribution._doiData || !c._summary || !c._summary.contribution || !c._summary.contribution.CITATION)
-                //this.updateDOI(i, c.contribution[0].doi);
-              privateContribution.doi = c.contribution[0].doi;
-            } else {
-              privateContribution.doi = '';
-            }
-            if (!(c && c.contribution && c.contribution._summary && c.contribution._summary.contribution.summary.contribution.reference))
-              privateContribution.errors.push("The contribution requires a valid DOI prior to activation.");
-            return privateContribution;
-          });*/
-          //console.log('getPrivateContributions', this.privateContributions);
+          this.privateContributions = contributions;
           this.setState({loaded: true, taps: this.state.taps + 1});
         }
       });
@@ -306,7 +293,7 @@ export default class extends React.Component {
                         Delete
                       </div>
                       }
-                      {c.summary.contribution._is_activated === "true" &&
+                      {c.summary.contribution._is_activated === "true" && '@' + Cookies.get('user_id') === "@rminnett" && 
                       <div className={portals['MagIC'].color + ' ui basic small button'} style={{margin: '0 0 0 0.5em'}}
                            onClick={(e) => {
                              console.log('deactivating');
