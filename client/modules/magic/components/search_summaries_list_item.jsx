@@ -300,7 +300,7 @@ class SearchSummariesListItem extends React.Component {
     else if (max_ages >= 1e3) {
       max_ages = numeral(max_ages/1e3).format('0[.]0[00]');
       min_ages = min_ages < 1e1 ? '0' : numeral(min_ages/1e3).format('0[.]0[00]');
-      age_range = max_ages === min_ages ? `${max_ages} Ma` : `${min_ages} - ${max_ages} ka`;
+      age_range = max_ages === min_ages ? `${max_ages} ka` : `${min_ages} - ${max_ages} ka`;
     }
     else {
       let max_ages_unit = max_ages >= 1949.5 ? 'BC' : 'AD';
