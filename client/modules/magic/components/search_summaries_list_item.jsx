@@ -313,7 +313,7 @@ class SearchSummariesListItem extends React.Component {
     }
 
     return (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 100, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
         <b>Age:</b><br/>{age_range}
       </div>
     );
