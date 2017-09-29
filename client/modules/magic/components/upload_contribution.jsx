@@ -423,10 +423,11 @@ export default class MagICUploadContribution extends React.Component {
           _contributor: this.state._contributor,
           id: this.state._id,
           contribution: this.contribution,
-          summary: this.summary
+          summary: this.summary.contribution.summary
         }, (error) => {
           console.log('updated contribution', this.state._id, error);
-          if (this.state._id && this.contribution && this.contribution.contribution && this.contribution.contribution.length > 0 &&
+          if (error) this.setState({uploadError: error, uploading: false});
+          else if (this.state._id && this.contribution && this.contribution.contribution && this.contribution.contribution.length > 0 &&
               (this.contribution.contribution[0].reference || this.contribution.contribution[0].description)) {
             Meteor.call('esUpdateContributionReference', {
               index: index,
@@ -438,7 +439,15 @@ export default class MagICUploadContribution extends React.Component {
             }, (error) => {
               console.log('updated contribution reference', error);
               if (error) this.setState({uploadError: error, uploading: false});
-              else this.setState({uploaded: true, uploading: false});
+              else Meteor.call('esUpdatePrivateSummaries', {
+                index: index,
+                id: this.state._id,
+                contributor: this.state._userid
+              }, (error) => {
+                console.log('updated contribution summaries', error);
+                if (error) this.setState({uploadError: error, uploading: false});
+                else this.setState({uploaded: true, uploading: false});
+              });
             });
           } else {
             if (error) this.setState({uploadError: error, uploading: false});
@@ -455,7 +464,8 @@ export default class MagICUploadContribution extends React.Component {
           summary: this.summary
         }, (error, id) => {
           console.log('created contribution', id, error, this.contribution);
-          if (id && this.contribution && this.contribution.contribution && this.contribution.contribution.length > 0 &&
+          if (error) this.setState({uploadError: error, uploading: false});
+          else if (id && this.contribution && this.contribution.contribution && this.contribution.contribution.length > 0 &&
               (this.contribution.contribution[0].reference || this.contribution.contribution[0].description)) {
             Meteor.call('esUpdateContributionReference', {
               index: index,
@@ -467,7 +477,15 @@ export default class MagICUploadContribution extends React.Component {
             }, (error) => {
               console.log('updated contribution reference', error);
               if (error) this.setState({uploadError: error, uploading: false});
-              else this.setState({uploaded: true, uploading: false});
+              else Meteor.call('esUpdatePrivateSummaries', {
+                index: index,
+                id: id,
+                contributor: this.state._userid
+              }, (error) => {
+                console.log('updated contribution summaries', error);
+                if (error) this.setState({uploadError: error, uploading: false});
+                else this.setState({uploaded: true, uploading: false});
+              });
             });
           } else {
             if (error) this.setState({uploadError: error, uploading: false});
