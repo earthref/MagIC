@@ -4,20 +4,20 @@
 # 'meteor add' and 'meteor remove' will edit this file for you,
 # but you can also edit it by hand.
 
-meteor-base             # Packages every Meteor app needs to have
-mongo                   # The database Meteor supports right now
+meteor-base@1.1.0             # Packages every Meteor app needs to have
+mongo@1.2.2                   # The database Meteor supports right now
 blaze-html-templates    # Compile .html files into Meteor Blaze views
-reactive-var            # Reactive variable for tracker
-jquery                  # Helpful client-side library
-tracker                 # Meteor's client-side reactive programming library
-standard-minifier-js    # JS minifier run for production mode
-es5-shim                # ECMAScript 5 compatibility for older browsers.
-ecmascript              # Enable ECMAScript2015+ syntax in app code
-session                 # Client-side reactive dictionary for your app
-reactive-dict
-dynamic-import
-less
-http
+reactive-var@1.0.11            # Reactive variable for tracker
+jquery@1.11.10                  # Helpful client-side library
+tracker@1.1.3                 # Meteor's client-side reactive programming library
+standard-minifier-js@2.1.2    # JS minifier run for production mode
+es5-shim@4.6.15                # ECMAScript 5 compatibility for older browsers.
+ecmascript@0.8.2              # Enable ECMAScript2015+ syntax in app code
+session@1.1.7                 # Client-side reactive dictionary for your app
+reactive-dict@1.1.9
+dynamic-import@0.1.3
+less@2.7.9
+http@1.2.12
 mdg:meteor-apm-agent    # For Meteor Application Performance Monitoring (formerly Kadira) on Galaxy
 
 dburles:google-maps
