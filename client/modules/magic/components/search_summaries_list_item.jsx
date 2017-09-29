@@ -537,7 +537,7 @@ class SearchSummariesListItem extends React.Component {
             <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
             {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
 
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Citation Count: </b>' + item.summary.contribution._reference.n_citations + ' (Source: <a target="_blank" href="https://www.crossref.org">Crossref</a>)'}} />}
+            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org">Crossref </a>Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
 
             {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
             <table className="ui very basic compact collapsing table">
