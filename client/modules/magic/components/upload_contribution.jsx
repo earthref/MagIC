@@ -451,7 +451,15 @@ export default class MagICUploadContribution extends React.Component {
             });
           } else {
             if (error) this.setState({uploadError: error, uploading: false});
-            else this.setState({uploaded: true, uploading: false});
+            else Meteor.call('esUpdatePrivateSummaries', {
+              index: index,
+              id: this.state._id,
+              contributor: this.state._userid
+            }, (error) => {
+              console.log('updated contribution summaries', error);
+              if (error) this.setState({uploadError: error, uploading: false});
+              else this.setState({uploaded: true, uploading: false});
+            });
           }
         });
       } else {
@@ -489,7 +497,15 @@ export default class MagICUploadContribution extends React.Component {
             });
           } else {
             if (error) this.setState({uploadError: error, uploading: false});
-            else this.setState({uploaded: true, uploading: false});
+            else Meteor.call('esUpdatePrivateSummaries', {
+              index: index,
+              id: id,
+              contributor: this.state._userid
+            }, (error) => {
+              console.log('updated contribution summaries', error);
+              if (error) this.setState({uploadError: error, uploading: false});
+              else this.setState({uploaded: true, uploading: false});
+            });
           }
         });
       }
