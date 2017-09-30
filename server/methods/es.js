@@ -282,20 +282,25 @@ export default function () {
 
       try {
 
+        let contributionRow = {
+          "contributor": contributor,
+          "id": id,
+          "version": null,
+          "timestamp": moment().utc().toISOString(),
+          "data_model_version": _.last(versions)
+        };
+
         contribution = contribution || {};
         contribution.contribution =
           contribution.contribution &&
           contribution.contribution.length &&
           contribution.contribution.length === 1 &&
-          contribution.contribution || [{
-          "id": id,
-          "version": null
-        }];
-        contribution.contribution[0] = _.merge(contribution.contribution[0], {
-          "contributor": contributor,
-          "timestamp": moment().utc().toISOString(),
-          "data_model_version": _.last(versions)
-        });
+          contribution.contribution || [{}];
+        contribution.contribution[0] = _.merge(contribution.contribution[0], contributionRow);
+
+        summary = summary || {};
+        summary.contribution = summary.contribution || {};
+        summary.contribution = _.merge(summary.contribution, contributionRow);
 
         await esClient.update({
           "index": index,
