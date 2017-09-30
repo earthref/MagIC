@@ -456,7 +456,7 @@ class SearchSummariesListItem extends React.Component {
   renderCitations(item) {
     return (
       <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', whiteSpace: 'normal'}}>
-        {item.summary._all && item.summary._all.citations && _.without(item.summary._all.citations, 'this study', 'This study', 'This Study').length > 0 ?
+        {item.summary._all && item.summary._all.citations && _.without(item.summary._all.citations, 'this study', 'This study', 'This Study', 'This study').length > 0 ?
           <span>
             <b>Citations:</b>
             <Clamp lines={5}><span>{item.summary._all.citations.join(', ')}</span></Clamp>
