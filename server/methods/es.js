@@ -622,7 +622,7 @@ export default function () {
       this.unblock();
 
       let doi = _.toUpper(_.trim(reference));
-      let _reference = null;
+      let _reference = {};
       let _history = [{
         "id": id,
         "version": null,

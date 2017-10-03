@@ -104,6 +104,7 @@ export default class extends React.Component {
 
   updateReference(i) {
     this.privateContributions[i].updatingReference = true;
+    this.privateContributions[i].summary.contribution._reference = {};
     this.setState({taps: this.state.taps + 1});
     Meteor.call("esUpdateContributionReference", {
       index: index,
@@ -203,6 +204,7 @@ export default class extends React.Component {
               <div className="subtitle">Import data into your private workspace.</div>
             </IconButton>
             {this.privateContributions.map((c,i) => {
+              let noReference = _.isEmpty(c.reference) || _.isEmpty(c.summary.contribution._reference);
               return (
                 <div className="item" key={i} style={{marginBottom: "1.5em"}}>
                   <div className={portals['MagIC'].color + " ui top attached inverted segment"} style={{padding: '0.5em'}}>
@@ -237,8 +239,8 @@ export default class extends React.Component {
                   <div className="ui attached secondary segment" style={{padding: '0.5em'}}>
                     <div style={{display: 'flex', flexFlow: 'row wrap'}}>
                       <div style={{flex: '1 1 auto'}}>
-                        <div className={"ui labeled fluid small icon input" + (c.updatingReference ? " loading" : "") + (c.summary.contribution._is_activated === "true" || c.summary.contribution._reference ? '' : ' error')}>
-                          <div className={"ui label" + (c.summary.contribution._is_activated === "true" || c.summary.contribution._reference ? '' : ' red')} style={{position: "relative"}}>
+                        <div className={"ui labeled fluid small icon input" + (c.updatingReference ? " loading" : "") + (c.summary.contribution._is_activated == "true" || !noReference ? '' : ' error')}>
+                          <div className={"ui label" + (c.summary.contribution._is_activated === "true" || !noReference ? '' : ' red')} style={{position: "relative"}}>
                             DOI
                           </div>
                           <input type="text" default="None" placeholder="The study's DOI (required)" value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
@@ -273,7 +275,7 @@ export default class extends React.Component {
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" ?
-                        <div className={"ui small button " + (!c.summary.contribution._reference ? "disabled red" : portals['MagIC'].color)} style={{margin: '0 0 0 0.5em'}}
+                        <div className={"ui small button " + (noReference ? "disabled red" : portals['MagIC'].color)} style={{margin: '0 0 0 0.5em'}}
                              onClick={(e) => {
                                this.confirmActivate(c.summary.contribution.id);
                              }}
