@@ -212,9 +212,9 @@ export default function () {
             }]
           }
         });
-        if (!_.isNumber(next_id.hits.hits[0]._source.summary.contribution.id))
+        if (!isNaN(_.parseInt(next_id.hits.hits[0]._source.summary.contribution.id)))
           throw 'Failed to retrieve new contribution ID.';
-        next_id = next_id.hits.hits[0]._source.summary.contribution.id + 1;
+        next_id = _.parseInt(next_id.hits.hits[0]._source.summary.contribution.id) + 1;
 
         let body = {
           "summary": {
@@ -284,7 +284,7 @@ export default function () {
 
         let contributionRow = {
           "contributor": contributor,
-          "id": id,
+          "id": _.parseInt(id),
           "version": null,
           "timestamp": moment().utc().toISOString(),
           "data_model_version": _.last(versions)
@@ -622,9 +622,9 @@ export default function () {
       this.unblock();
 
       let doi = _.toUpper(_.trim(reference));
-      let _reference = null;
+      let _reference = {};
       let _history = [{
-        "id": id,
+        "id": _.parseInt(id),
         "version": null,
         "contributor": _contributor,
         "timestamp": moment().utc().toISOString(),

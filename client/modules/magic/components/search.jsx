@@ -87,6 +87,7 @@ class Search extends React.Component {
     super(props);
     this.state = {
       search: this.props.search || '',
+      searchInput: this.props.search || '',
       levelNumber: 0,
       view: '',
       sort: 'Recently Contributed First',
@@ -111,20 +112,20 @@ class Search extends React.Component {
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
       table: {width: '100%'},
-      input: {borderColor: '#888888', borderLeft: 'none', borderRight: 'none'},
+      input: {borderColor: '#888888', borderLeft: 'none', borderRight: 'none', flex: '1'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
       segment: {padding: '0'},
       searchButton: {marginLeft: '-1px'},
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
-      searchInput: {padding: '1em', paddingBottom: 0},
+      searchInput: {padding: '1em', paddingBottom: 0, flex: 1},
       filters: {whiteSpace: 'nowrap', overflowY: 'scroll', border: 'none', flex: 1 },
       filter: {margin: '1em 0 .5em'},
       filterHeader: {margin: '0'},
       filterBuckets: {paddingLeft: '0.5em', position: 'relative'}
     };
-    this.handleSearch = _.debounce((value) => {
-      this.setState({search: value});
+    this.updateSearchInput = _.debounce((value) => {
+      this.setState({searchInput: value});
     }, 500);
 
     this.handleNumericInput = _.debounce((input, value, min, max) => {
@@ -328,27 +329,37 @@ class Search extends React.Component {
             </div> : undefined}
         </div>
         <div className="ui bottom attached secondary segment" style={this.styles.segment}>
-          <div className="ui labeled fluid action input" style={this.styles.searchInput}>
-            <div className={portals['MagIC'].color + ' ui label'}>
-              <i className="search icon"/>
-              Search MagIC
+          <div style={{display: 'flex', width: '100%'}}>
+            <div className="ui labeled fluid action input" style={this.styles.searchInput}>
+              <div className={portals['MagIC'].color + ' ui label'}>
+                <i className="search icon"/>
+                Search MagIC
+              </div>
+              <input
+                ref="search"
+                className="prompt"
+                type="text"
+                defaultValue={this.props.search || ''}
+                placeholder={'e.g. metamorphic "field intensity" -precambrian'}
+                style={this.styles.input}
+                onChange={(e) => this.updateSearchInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && this.setState({search: e.target.value})}
+              />
+              <div className={'ui basic black button' + (this.state.searchInput === this.state.search ? ' disabled' : '')}
+                   onClick={(e) => this.setState({search: this.state.searchInput})}
+              >
+                <i className="search icon"/>
+                Search
+              </div>
+              <div className={'ui basic black button' + (_.isEmpty(this.state.search + this.state.searchInput) ? ' disabled' : '')}
+                   style={this.styles.searchButton}
+                   onClick={(e) => { this.refs.search.val(''); this.setState({search: "", searchInput: ""}); }}
+              >
+                <i className="remove circle icon"/>
+                Clear
+              </div>
             </div>
-            <input
-              ref="search"
-              className="prompt"
-              type="text"
-              defaultValue={this.props.search || ''}
-              placeholder={'e.g. metamorphic "field intensity" -precambrian'}
-              style={this.styles.input}
-              onChange={(e) => { this.handleSearch(e.target.value); }}
-            />
-            <div className={'ui basic black button' + (searchQueries.length > 0 ? '' : ' disabled')}
-                 onClick={(e) => { $(this.refs.search).val(''); this.handleSearch(''); }}
-            >
-              <i className="remove circle icon"/>
-              Clear Search
-            </div>
-            <div className={portals['MagIC'].color + ' ui basic button'} style={this.styles.searchButton}
+            <div className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
                  onClick={(e) => this.showDownloadModal(searchQueries, activeFilters) }>
               <i className="download icon"/>
               Download Results
