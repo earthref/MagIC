@@ -64,7 +64,7 @@ export default class extends React.Component {
         <h2 className="ui horizontal divider header">
           MagIC Resources
         </h2>
-        <div className="ui five cards">
+        <div className="ui six cards">
           <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
             <i className="small icons">
               <i className="sitemap icon"/>
@@ -99,6 +99,13 @@ export default class extends React.Component {
               <i className="corner write icon"/>
             </i>
             <div className="small title">Data Management<br/>Plan Tool</div>
+          </IconButton>
+          <IconButton className="borderless card" href="https://github.com/earthref/MagIC/issues" portal="MagIC">
+            <i className="small icons">
+              <i className="mail outline icon"/>
+              <i className="corner bug icon"/>
+            </i>
+            <div className="small title">Report a Problem<br/>on GitHub</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
