@@ -205,15 +205,17 @@ export default function () {
             "size": 1,
             "_source": "summary.contribution.id",
             "query": {
-              "match_all": {}
+              "exists": {
+                "field": "summary.contribution.id"
+              }
             },
             "sort": [{
               "summary.contribution.id": "desc"
             }]
           }
         });
-        if (!isNaN(_.parseInt(next_id.hits.hits[0]._source.summary.contribution.id)))
-          throw 'Failed to retrieve new contribution ID.';
+        if (isNaN(_.parseInt(next_id.hits.hits[0]._source.summary.contribution.id)))
+          throw new Error('Failed to retrieve new contribution ID.');
         next_id = _.parseInt(next_id.hits.hits[0]._source.summary.contribution.id) + 1;
 
         let body = {
