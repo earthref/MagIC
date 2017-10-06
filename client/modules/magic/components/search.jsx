@@ -353,7 +353,7 @@ class Search extends React.Component {
               </div>
               <div className={'ui basic black button' + (_.isEmpty(this.state.search + this.state.searchInput) ? ' disabled' : '')}
                    style={this.styles.searchButton}
-                   onClick={(e) => { this.refs.search.val(''); this.setState({search: "", searchInput: ""}); }}
+                   onClick={(e) => { this.refs['search'].value = ''; this.setState({search: "", searchInput: ""}); }}
               >
                 <i className="remove circle icon"/>
                 Clear
