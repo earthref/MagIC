@@ -1059,13 +1059,13 @@ export default class MagICUploadContribution extends React.Component {
                               {(fileFormat === 'tsv' && this.files[i].data ?
                                   <div>
                                     <div className="ui divider"/>
-                                    {this.renderDataImporter(i, 1, this.files[i].data)}
+                                    {this.renderDataImporter(i, 0, this.files[i].data)}
                                   </div> : undefined
                               )}
                               {(fileFormat === 'csv' && this.files[i].data ?
                                   <div>
                                     <div className="ui divider"/>
-                                    {this.renderDataImporter(i, 1, this.files[i].data)}
+                                    {this.renderDataImporter(i, 0, this.files[i].data)}
                                   </div> : undefined
                               )}
                               {(fileFormat === 'xls' && this.files[i].workbook && this.files[i].data && this.files[i].tableNames ?
