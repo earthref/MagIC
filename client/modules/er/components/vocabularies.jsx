@@ -174,8 +174,9 @@ export default class extends React.Component {
           </div>
           <div className="ui equal width grid">
             <div className="right aligned column">
+              <a href="" onClick={this.downloadJSON.bind(this)}>
               <i className="download icon"/>
-              Download as <a href="" onClick={this.downloadJSON.bind(this)}>.json</a>.
+              Download as .json</a>.
             </div>
           </div>
           <div ref="accordion" className="ui styled fluid accordion">
