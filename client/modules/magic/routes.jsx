@@ -9,6 +9,7 @@ import MagICHome from '/client/modules/magic/components/home';
 import MagICSearch from '/client/modules/magic/components/search';
 import MagICDataModel from '/client/modules/magic/components/data_model';
 import MagICMethodCodes from '/client/modules/magic/components/method_codes';
+import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
 import MagICAbout from '/client/modules/magic/components/about';
 import MagICGrandChallenges from '/client/modules/magic/components/grand_challenges';
 import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';

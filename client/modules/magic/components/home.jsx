@@ -108,7 +108,6 @@ export default class extends React.Component {
           </IconButton>
           <IconButton className="borderless card" href="https://github.com/earthref/MagIC/issues" portal="MagIC">
             <i className="small icons">
-              <i className="corner github icon"/>
               <i className="bug icon"/>
             </i>
             <div className="small title">Report a Problem<br/>on GitHub</div>
