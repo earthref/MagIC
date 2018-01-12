@@ -18,7 +18,6 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui hidden divider"/>
         <div className="ui four cards">
           <IconButton className="card" link="/MagIC/search" portal="MagIC">
             <i className="large icons">
