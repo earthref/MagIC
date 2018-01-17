@@ -20,7 +20,7 @@ export default class extends React.Component {
   }
 
   componentDidMount() {
-    console.log('search_rows_view did mount');
+    console.log('SearchRowsView did mount');
     this.timeoutScroll = setInterval(this.onScroll, 500);
   }
 
