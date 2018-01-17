@@ -5,6 +5,7 @@ import {Helmet} from 'react-helmet';
 
 import {versions} from '/lib/configs/magic/data_models.js';
 import Page from '/client/modules/common/components/page';
+import MagICMenu from '/client/modules/magic/components/menu';
 import MagICHome from '/client/modules/magic/components/home';
 import MagICSearch from '/client/modules/magic/components/search';
 import MagICDataModel from '/client/modules/magic/components/data_model';
@@ -20,7 +21,7 @@ import Error from '/client/modules/common/components/error';
 const Routes = ({match}) => (
   <Switch>
     <Route exact path="/MagIC" render={() =>
-      <Page portal="MagIC">
+      <Page portal="MagIC" menu={<MagICMenu/>}>
         <Helmet>
           <title>MagIC Home | EarthRef.org</title>
         </Helmet>

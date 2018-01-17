@@ -1,48 +1,6 @@
-import _ from  'lodash';
 import React from 'react';
-import saveAs from 'save-as';
-
-import {portals} from '/lib/configs/portals.js';
-import {methodCodes} from '/lib/configs/magic/method_codes.js';
 
 export default class extends React.Component {
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      search: "",
-      loaded: false,
-      updating: false
-    };
-  }
-
-  componentDidMount() {
-    $(this.refs['accordion']).accordion({exclusive: false});
-    setTimeout(() => { this.setState({loaded: true}); }, 1);
-  }
-
-  componentDidUpdate() {
-    this.search(this.refs['search'].value);
-    $(this.refs['loading']).removeClass('active');
-    this.setState({updating: false});
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (nextState.updating ||
-        nextState.search != this.state.search ||
-        nextState.loaded != this.state.loaded) {
-      return true;
-    }
-    if (nextProps.version !== this.props.version) {
-      $(this.refs['loading']).addClass('active');
-      setTimeout(() => { this.setState({updating: true}); }, 1);
-    }
-    return false;
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({search: nextProps.search});
-  }
 
   render() {
     return (
