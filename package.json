@@ -70,6 +70,7 @@
     }
   },
   "scripts": {
+    "build-meteor": "meteor --settings settings.json",
     "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.13/semantic.css"
   }
 }
