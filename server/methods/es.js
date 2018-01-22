@@ -1,6 +1,7 @@
 import {Meteor} from 'meteor/meteor';
 
 import _ from "lodash";
+import uuid from "uuid";
 import moment from "moment";
 import Promise from "bluebird";
 import elasticsearch from "elasticsearch";
@@ -31,16 +32,16 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           },
           aggs : aggs
         };
 
+        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
 
@@ -83,18 +84,18 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           }
         };
+        
+        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
-
         if (_.trim(countField) !== "") search.aggs = { count: { sum: { field: countField }}};
 
         let resp = await esClient.search({
@@ -126,15 +127,16 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           },
           "sort": sort
         };
+        
+        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
@@ -166,15 +168,16 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           },
           aggs : {buckets: {terms: {field: "summary.contribution.id", size:1e6}}}
         };
+
+        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
@@ -230,6 +233,7 @@ export default function () {
               "_name": name,
               "_is_activated": "false",
               "_is_latest": "true",
+              "_private_key": uuid.v4(),
               "_history": [{
                 "id": next_id,
                 "version": null,
@@ -410,6 +414,7 @@ export default function () {
           "index": index,
           "type": "contribution",
           "body": {
+            "size": 100,
             "_source": {
               "excludes": ["*.vals", "*._geo_shape"],
               "includes": ["summary.contribution.*", "summary._all.*"]

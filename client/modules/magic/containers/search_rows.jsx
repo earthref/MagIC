@@ -21,49 +21,53 @@ export const composer = ({es, pageSize, pageNumber}, onData) => {
       'summary._all.experiment'
     ]
   };
-  //console.log('esPage rows', pageNumber, es);
   Meteor.call('esPage', _.extend({}, es, {source}), pageSize, pageNumber, (error, results) => {
     try {
       if (error) {
-        console.error('esPage rows', error);
+        console.error(error);
         onData(null, { error });
       } else {
         let rows = [];
         let titles = [];
         results.forEach(doc => {
+          let s = doc.summary;
           rows.push(doc.columns ? doc.rows.map(row => _.zipObject(doc.columns, row)) : doc.rows);
-          let title = '<b>' + doc.summary.contribution._reference.citation +
-            ' v. ' + doc.summary.contribution.version + '</b>';
-          //if (es.type === 'locations' && doc.summary._all) {
-          //  if (doc.summary._all.location) title += ' ⇒ <b>' + doc.summary._all.location[0] + '</b>';
+          let citation = s && s.contribution && s.contribution._reference && s.contribution._reference.citation || "Unknown";
+          let version = s && s.contribution && s.contribution.version || "Unknown";
+          let title = '<b>' + citation +' v. ' + version + '</b>';
+          //if (es.type === 'locations' && s._all) {
+          //  if (s._all.location) title += ' ⇒ <b>' + s._all.location[0] + '</b>';
           //}
-          if (es.type === 'sites' && doc.summary._all) {
-            if (doc.summary._all.location) title += ' ⇒ ' + doc.summary._all.location[0];
-            //if (doc.summary._all.site) title += ' ⇒ <b>' + doc.summary._all.site[0] + '</b>';
+          if (es.type === 'sites' && s._all) {
+            if (s._all.location) title += ' ⇒ ' + s._all.location[0];
+            //if (s._all.site) title += ' ⇒ <b>' + s._all.site[0] + '</b>';
           }
-          if (es.type === 'samples' && doc.summary._all) {
-            if (doc.summary._all.location) title += ' ⇒ ' + doc.summary._all.location[0];
-            if (doc.summary._all.site) title += ' ⇒ ' + doc.summary._all.site[0];
-            //if (doc.summary._all.sample) title += ' ⇒ <b>' + doc.summary._all.sample[0] + '</b>';
+          if (es.type === 'samples' && s._all) {
+            if (s._all.location) title += ' ⇒ ' + s._all.location[0];
+            if (s._all.site) title += ' ⇒ ' + s._all.site[0];
+            //if (s._all.sample) title += ' ⇒ <b>' + s._all.sample[0] + '</b>';
           }
-          if (es.type === 'specimens' && doc.summary._all) {
-            if (doc.summary._all.location) title += ' ⇒ ' + doc.summary._all.location[0];
-            if (doc.summary._all.site) title += ' ⇒ ' + doc.summary._all.site[0];
-            if (doc.summary._all.sample) title += ' ⇒ ' + doc.summary._all.sample[0];
-            //if (doc.summary._all.specimen) title += ' ⇒ <b>' + doc.summary._all.specimen[0] + '</b>';
+          if (es.type === 'specimens' && s._all) {
+            if (s._all.location) title += ' ⇒ ' + s._all.location[0];
+            if (s._all.site) title += ' ⇒ ' + s._all.site[0];
+            if (s._all.sample) title += ' ⇒ ' + s._all.sample[0];
+            //if (s._all.specimen) title += ' ⇒ <b>' + s._all.specimen[0] + '</b>';
           }
-          if (es.type === 'experiments' && doc.summary._all) {
-            if (doc.summary._all.location) title += ' ⇒ ' + doc.summary._all.location[0];
-            if (doc.summary._all.site) title += ' ⇒ ' + doc.summary._all.site[0];
-            if (doc.summary._all.sample) title += ' ⇒ ' + doc.summary._all.sample[0];
-            if (doc.summary._all.specimen) title += ' ⇒ ' + doc.summary._all.specimen[0];
-            if (doc.summary._all.experiment) title += ' ⇒ <b>' + doc.summary._all.experiment[0] + '</b>';
+          if (es.type === 'experiments' && s._all) {
+            if (s._all.location) title += ' ⇒ ' + s._all.location[0];
+            if (s._all.site) title += ' ⇒ ' + s._all.site[0];
+            if (s._all.sample) title += ' ⇒ ' + s._all.sample[0];
+            if (s._all.specimen) title += ' ⇒ ' + s._all.specimen[0];
+            if (s._all.experiment) title += ' ⇒ <b>' + s._all.experiment[0] + '</b>';
           }
           titles.push(title);
         });
         onData(null, { rows, titles });
       }
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+      onData(null, { error });
+    }
   });
 };
 
@@ -75,7 +79,7 @@ export default compose(
       let changed = !_.isEqual(currentProps.es, nextProps.es) ||
         !_.isEqual(currentProps.pageSize, nextProps.pageSize) ||
         !_.isEqual(currentProps.pageNumber, nextProps.pageNumber);
-      if (changed) console.log('search_rows - shouldSubscribe changed', currentProps.pageNumber, currentProps, nextProps);
+      if (changed) console.log('SearchRows - shouldSubscribe changed', currentProps.pageNumber, currentProps, nextProps);
       return changed;
     }
   }
