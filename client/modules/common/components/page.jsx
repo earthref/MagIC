@@ -22,10 +22,9 @@ class Page extends React.Component {
           <h4 className="page-subtitle">{portals[portal].subtitle}</h4>
         </Link>
         <div className="ui divider"/>
-        {this.props.title ?
-          <h3>{this.props.title}</h3>
-          : undefined
-        }
+        {this.props.menu || undefined}
+        {this.props.menu && <div className="ui divider"/>}
+        {this.props.title && <h3>{this.props.title}</h3>}
         {this.props.children}
       </Layout>
     )
@@ -36,7 +35,8 @@ class Page extends React.Component {
 Page.propTypes = {
   portal:    PropTypes.oneOf(_.keys(portals)).isRequired,
   title:     PropTypes.string,
-  fullWidth: PropTypes.bool
+  fullWidth: PropTypes.bool,
+  menu:      PropTypes.node
 };
 
 export default Page;

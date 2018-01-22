@@ -5,11 +5,14 @@ import {Helmet} from 'react-helmet';
 
 import {versions} from '/lib/configs/magic/data_models.js';
 import Page from '/client/modules/common/components/page';
+import MagICMenu from '/client/modules/magic/components/menu';
 import MagICHome from '/client/modules/magic/components/home';
 import MagICSearch from '/client/modules/magic/components/search';
 import MagICDataModel from '/client/modules/magic/components/data_model';
 import MagICMethodCodes from '/client/modules/magic/components/method_codes';
 import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
+import MagICAbout from '/client/modules/magic/components/about';
+import MagICGrandChallenges from '/client/modules/magic/components/grand_challenges';
 import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
 import MagICUploadContribution from '/client/modules/magic/components/upload_contribution';
 import MagICValidateContribution from '/client/modules/magic/components/validate_contribution';
@@ -18,7 +21,7 @@ import Error from '/client/modules/common/components/error';
 const Routes = ({match}) => (
   <Switch>
     <Route exact path="/MagIC" render={() =>
-      <Page portal="MagIC">
+      <Page portal="MagIC" menu={<MagICMenu/>}>
         <Helmet>
           <title>MagIC Home | EarthRef.org</title>
         </Helmet>
@@ -72,6 +75,22 @@ const Routes = ({match}) => (
           <title>MagIC Method Codes | EarthRef.org</title>
         </Helmet>
         <MagICMethodCodes search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/about" render={({location}) =>
+      <Page portal="MagIC" title="">
+        <Helmet>
+          <title>About MagIC | EarthRef.org</title>
+        </Helmet>
+        <MagICAbout search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/grand-challenges" render={({location}) =>
+      <Page portal="MagIC" title="">
+        <Helmet>
+          <title>MagIC Grand Challenges | EarthRef.org</title>
+        </Helmet>
+        <MagICGrandChallenges search={location.search || ""}/>
       </Page>
     }/>
     <Route exact path="/MagIC/upgrade" render={() =>

@@ -18,7 +18,6 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <div className="ui hidden divider"/>
         <div className="ui four cards">
           <IconButton className="card" link="/MagIC/search" portal="MagIC">
             <i className="large icons">
@@ -64,7 +63,7 @@ export default class extends React.Component {
         <h2 className="ui horizontal divider header">
           MagIC Resources
         </h2>
-        <div className="ui six cards">
+        <div className="ui eight cards">
           <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
             <i className="small icons">
               <i className="sitemap icon"/>
@@ -100,12 +99,23 @@ export default class extends React.Component {
             </i>
             <div className="small title">Data Management<br/>Plan Tool</div>
           </IconButton>
+          <IconButton className="borderless card" href="/MagIC/about" portal="MagIC">
+            <i className="small icons">
+              <i className="info icon"/>
+            </i>
+            <div className="small title">About MagIC</div>
+          </IconButton>
           <IconButton className="borderless card" href="https://github.com/earthref/MagIC/issues" portal="MagIC">
             <i className="small icons">
-              <i className="mail outline icon"/>
-              <i className="corner bug icon"/>
+              <i className="bug icon"/>
             </i>
             <div className="small title">Report a Problem<br/>on GitHub</div>
+          </IconButton>
+          <IconButton className="borderless card" href="/MagIC/grand-challenges" portal="MagIC">
+            <i className="small icons">
+              <i className="unhide icon"/>
+            </i>
+            <div className="small title">Grand Challenges</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
