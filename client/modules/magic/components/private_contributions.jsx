@@ -233,7 +233,7 @@ export default class extends React.Component {
                           }.bind(this, i)}/>}
                         </div>
                       </div>
-                      {c.summary.contribution._is_activated !== "false" &&
+                      {c.summary.contribution._is_activated !== "true" &&
                       <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
                            onClick={(e) => {
                              this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
