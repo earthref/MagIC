@@ -2,13 +2,13 @@ import _ from  'lodash';
 import moment from 'moment';
 import React from 'react';
 import saveAs from 'save-as';
-import {portals} from '../../common/configs/portals';
-import {default as versions} from '../../../../lib/modules/magic/magic_versions';
-import {default as models} from '../../../../lib/modules/magic/data_models';
-import Upgrader from '../actions/upgrade_contribution';
-import DataModelColumn from './data_model_column';
 
-export default class extends React.Component {
+import Upgrader from '/lib/modules/magic/upgrade_contribution.js';
+import DataModelColumn from '/client/modules/magic/components/data_model_column';
+import {portals} from '/lib/configs/portals.js';
+import {versions, models} from '/lib/configs/magic/data_models.js';
+
+class DataModel extends React.Component {
 
   constructor(props) {
     super(props);
@@ -287,8 +287,9 @@ export default class extends React.Component {
               )}
             </div>
             <div className="right aligned six wide column">
+              <a href="" onClick={this.downloadJSON.bind(this)}>
               <i className="download icon"/>
-              Download as <a href="" onClick={this.downloadJSON.bind(this)}>.json</a>.
+              Download as .json</a>.
             </div>
           </div>
           <div ref="accordion" className="ui styled fluid accordion">
@@ -408,3 +409,4 @@ export default class extends React.Component {
 
 }
 
+export default DataModel;

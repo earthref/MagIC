@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import React from 'react';
-import SearchMap from '../../common/containers/search_map';
+import SearchMap from '/client/modules/common/containers/search_map';
 
 export default class extends React.Component {
 

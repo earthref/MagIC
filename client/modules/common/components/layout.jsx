@@ -1,30 +1,30 @@
+import {Meteor} from 'meteor/meteor';
+
+import _ from 'lodash';
 import $ from 'jquery';
 import React from 'react';
+import PropTypes from 'prop-types';
+import moment from 'moment';
 import Cookies from 'js-cookie';
-import isSafari from 'is-safari';
-import Navigation from './navigation.jsx';
-import {portals} from '../../common/configs/portals';
 
-export default class extends React.Component {
+import {portals} from '/lib/configs/portals';
+
+import Navigation from '/client/modules/common/components/navigation';
+
+class Layout extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      deployedDate: undefined
+    };
+  }
 
   componentDidMount() {
+    Meteor.call('getDeploymentDateTimeUTC', (dtUTC) => {
+      this.setState({deployedDate: moment(dtUTC).local().format('MMM D, Y')})
+    });
     $(this.refs['sidebar menu']).sidebar({context:$(this.refs['layout']), transition:'overlay'});
-    /*if (!localStorage.getItem("modal 2016-10-29 beta"))
-      $(this.refs['beta modal']).modal({
-        closable: false,
-        onApprove: ($modal) => {
-          localStorage.setItem("modal 2016-10-29 beta", true);
-          $modal.modal('close');
-        }
-      }).modal('show');*/
-    /*if (isSafari && !localStorage.getItem("modal 2017-01-25 safari"))
-     $(this.refs['safari modal']).modal({
-       closable: false,
-       onApprove: ($modal) => {
-         localStorage.setItem("modal 2017-01-25 safari", true);
-         $modal.modal('close');
-       }
-     }).modal('show');*/
   }
 
   componentDidUpdate() {
@@ -40,7 +40,7 @@ export default class extends React.Component {
     return (
       <div ref="layout" className="layout">
         <div ref="sidebar menu" className="ui vertical inverted left sidebar menu">
-          <Navigation location="sidebar" portal={portal}/>
+          <Navigation position="sidebar" portal={portal}/>
         </div>
         <div className="pusher">
           <div className={'ui main layout-content' + (fullWidth ? ' full-width' : ' container')}>
@@ -89,7 +89,7 @@ export default class extends React.Component {
           </a>
           <div className={'ui' + (fullWidth ? '' : ' container')}>
             <div className="left menu top-menu-navigation">
-              <Navigation location="top" portal={portal}/>
+              <Navigation position="top" portal={portal}/>
             </div>
           </div>
         </div>
@@ -106,11 +106,12 @@ export default class extends React.Component {
           }
         </div>
         <div className="ui bottom fixed small menu footer">
-          <div className="ui container" style={(fullWidth ? {width:'calc(100% - 4em)'} : {})}>
+          <div className="ui container" style={{width:'calc(100% - 4em)'}}>
             <div className="left menu">
               <div className="ui vertical segment">
                 <div>
                   Sponsored by <a href="https://www.nsf.gov" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>NSF</a>.
+                  {this.state.deployedDate ? ' Updated on ' + this.state.deployedDate + '.' : undefined}
                 </div>
                 <div>
                   Supported by <a href="https://scripps.ucsd.edu/" className={'ui header ' + portals[portal].color} style={{fontSize: '1rem'}}>UCSD-SIO</a>
@@ -160,3 +161,11 @@ export default class extends React.Component {
    );
   }
 }
+
+Layout.propTypes = {
+  portal:    PropTypes.oneOf(_.keys(portals)).isRequired,
+  fullWidth: PropTypes.bool
+};
+
+
+export default Layout;

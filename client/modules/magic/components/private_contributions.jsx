@@ -1,136 +1,162 @@
-import _ from  'lodash';
-import React from 'react';
-import saveAs from 'save-as';
-import Cookies from 'js-cookie';
-import {Tracker}  from 'meteor/tracker';
-import {portals} from '../../common/configs/portals';
-import {Collections} from '/lib/collections';
-import Summary from './search_summaries_list_item';
-import IconButton from '../../common/components/icon_button.jsx';
+import _ from  "lodash";
+import React from "react";
+import saveAs from "save-as";
+import Cookies from "js-cookie";
+import {Tracker}  from "meteor/tracker";
+import {portals} from "/lib/configs/portals";
+import {Collections} from "/lib/collections";
+
+import DividedList from "/client/modules/common/components/divided_list";
+import SearchSummaryListItem from "/client/modules/magic/components/search_summaries_list_item";
+import IconButton from "/client/modules/common/components/icon_button";
+import {index} from "/lib/configs/magic/search_levels.js";
 
 export default class extends React.Component {
 
   constructor(props) {
     super(props);
+    this.privateContributions = [];
     this.state = {
       loaded: false,
-      privateContributions: []
+      taps: 0
     };
-    if (Cookies.get('user_id'))
-      //Tracker.autorun(() => {
-        Meteor.subscribe('magic.private.contributions.summaries', '@' + Cookies.get('user_id'), () => {
-          //console.log('subscription ready');
-          this.updateContributions();
-          this.setState({loaded: true});
-        });
-      //});
   }
 
   componentDidMount() {
-    $(this.refs['failed to delete']).modal({
+    $(this.refs["failed to delete"]).modal({
       closable: false
     });
-    $(this.refs['confirm activate']).modal({
+    $(this.refs["confirm activate"]).modal({
       closable: false
     });
-    $(this.refs['confirm delete']).modal({
+    $(this.refs["confirm delete"]).modal({
       closable: false,
       onHide: ($modal) => {
-        $(this.refs['confirm delete input']).val("");
+        $(this.refs["confirm delete input"]).val("");
       }
     });
-  }
-
-  componentDidUpdate() {
-
+    this.updateContributions();
   }
 
   confirmActivate(id) {
-    $(this.refs['confirm activate']).modal('setting', {
+    $(this.refs["confirm activate"]).modal("setting", {
       onApprove: ($modal) => {
-        Meteor.call('activateContribution', id,
+        Meteor.call("esActivateContribution", {index: index, id: id},
           (error) => {
             if (error)
-              $(this.refs['failed to activate']).modal('show');
+              $(this.refs["failed to activate"]).modal("show");
             else
               this.updateContributions();
           }
         );
       }
-    }).modal('show');
+    }).modal("show");
   }
 
   confirmDelete(id) {
-    $(this.refs['confirm delete']).modal('setting', {
+    $(this.refs["confirm delete"]).modal("setting", {
       onApprove: ($modal) => {
-        console.log("delete?", $(this.refs['confirm delete input']).val());
-        if ($(this.refs['confirm delete input']).val() === 'DELETE') {
-          console.log("deleting");
-          Meteor.call('deleteContribution', id, '@' + Cookies.get('user_id'),
-            (error) => {
-              if (error)
-                $(this.refs['failed to delete']).modal('show');
-              else
-                this.updateContributions();
-            }
-          );
-        } else return false;
-      }
-    }).modal('show');
-  }
-
-  updateContributions() {
-    let contributions = Collections['magic.private.contributions'].find(
-      (Cookies.get('user_id') !== 'rminnett' ? {'_contributor': '@' + Cookies.get('user_id')} : {}),
-      {sort: {'_inserted': -1}}).fetch();
-    let privateContributions = contributions.map((c, i) => {
-      let privateContribution = {contribution: c, errors: []};
-      if (c && c.contribution && c.contribution[0] && c.contribution[0].doi) {
-        if (!c.contribution._doiData || !c._summary || !c._summary.contribution || !c._summary.contribution.CITATION)
-          //this.updateDOI(i, c.contribution[0].doi);
-        privateContribution.doi = c.contribution[0].doi;
-      } else {
-        privateContribution.doi = '';
-      }
-      if (!c._doiData)
-        privateContribution.errors.push("The contribution requires a valid DOI prior to activation.");
-      return privateContribution;
-    });
-    this.setState({privateContributions: privateContributions});
-  }
-
-  updateDOI(i, doi) {
-    let privateContributions = this.state.privateContributions;
-    if (privateContributions[i] && privateContributions[i].contribution && privateContributions[i].contribution._doiData)
-      delete privateContributions[i].contribution._doiData;
-    this.setState({privateContributions: privateContributions});
-    $.ajax({
-      type: "GET",
-      dataType: "json",
-      url: "//api.crossref.org/works/" + doi,
-    }).done((doiData) => {
-      console.log('doi data', privateContributions[i], doiData);
-      if (privateContributions[i] && privateContributions[i].contribution && privateContributions[i].contribution._id &&
-          doiData && doiData.status === 'ok') {
-        Meteor.call('updateDOI', privateContributions[i].contribution._id, doiData.message,
+        this.privateContributions = _.reject(this.privateContributions, {summary: {contribution: {id: id}}});
+        this.setState({taps: this.state.taps + 1});
+        Meteor.call("esDeletePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id")},
           (error) => {
-            this.updateContributions();
+            if (error)
+              $(this.refs["failed to delete"]).modal("show");
+            else
+              this.updateContributions();
           }
         );
       }
+    }).modal("show");
+  }
+
+  showShareLink(id, private_key) {
+    $(this.refs["share link"]).val(`https://earthref.org/MagIC/${id}/${private_key}`);
+    $(this.refs["share"]).modal("show");
+  }
+
+  updateContributions() {
+    if (!Cookies.get("user_id")) {
+      this.setState({loaded: true});
+    } else {
+      Meteor.call("esGetPrivateContributionSummaries", {
+        index: index,
+        contributor: "@" + Cookies.get("user_id"),
+        includeActivated: true
+      }, (error, contributions) => {
+        if (error) {
+          console.error(error);
+        } else {
+          this.privateContributions = contributions;
+          this.setState({loaded: true, taps: this.state.taps + 1});
+        }
+      });
+    }
+
+  }
+
+  updateName(i) {
+    this.privateContributions[i].updatingName = true;
+    this.setState({taps: this.state.taps + 1});
+    Meteor.call("esUpdateContributionName", {
+      index: index,
+      id: this.privateContributions[i].summary.contribution.id,
+      name: this.privateContributions[i].name
+    }, (error, c) => {
+      this.updateContributions();
     });
   }
 
+  updateReference(i) {
+    this.privateContributions[i].updatingReference = true;
+    this.privateContributions[i].summary.contribution._reference = {};
+    this.setState({taps: this.state.taps + 1});
+    Meteor.call("esUpdateContributionReference", {
+      index: index,
+      contributor: "@" + Cookies.get("user_id"),
+      _contributor: Cookies.get("name"),
+      id: this.privateContributions[i].summary.contribution.id,
+      reference: this.privateContributions[i].reference,
+      description: this.privateContributions[i].summary.contribution.description,
+    }, (error, c) => {
+      this.updateContributions();
+    });
+  }
+
+  updateDescription(i) {
+    this.privateContributions[i].updatingDescription = true;
+    this.setState({taps: this.state.taps + 1});
+    Meteor.call("esUpdateContributionDescription", {
+      index: index,
+      id: this.privateContributions[i].summary.contribution.id,
+      description: this.privateContributions[i].description
+    }, (error, c) => {
+      this.updateContributions();
+    });
+  }
+
+  renderOffline() {
+    return (
+      <div ref="segment" className="ui warning message">
+        <div className="header">
+          Sorry for the inconvenience!
+        </div>
+        <br/>
+        The <b>MagIC Private Workspace</b> is temporarily disabled until <b>4 September, 2017</b> while we make improvements to the system.
+      </div>
+    );
+  }
+
   render() {
-    console.log('privateContributions', this.state.privateContributions, Cookies.get('user_id'));
-    if (!Cookies.get('user_id')) return (
-      <div className="private-contributions">
+    console.log("privateContributions", this.privateContributions, Cookies.get("user_id"));
+    if (!Cookies.get("user_id")) return (
+      <div>
         <div className="ui top attached segment">
           <div className="ui center aligned two column relaxed grid">
             <div className="column">
               <IconButton
                 className="borderless card" href="" portal="MagIC"
-                onClick={() => location.href = '//earthref.org/log-out/?next_url=/log-in%3Fnext_url=' + window.location.href}
+                onClick={() => location.href = "//earthref.org/log-out/?next_url=/log-in%3Fnext_url=" + window.location.href}
               >
                 <i className="icons">
                   <i className="user icon"/>
@@ -145,7 +171,7 @@ export default class extends React.Component {
             <div className="column">
               <IconButton
                 className="borderless card" href="" portal="MagIC"
-                onClick={() => location.href = '//earthref.org/register/'}
+                onClick={() => location.href = "//earthref.org/register/"}
               >
                 <i className="icons">
                   <i className="user icon"/>
@@ -166,87 +192,174 @@ export default class extends React.Component {
     );
     else return (
       <div>
-        <div ref="segment" className="ui segment" style={{minHeight: '8em'}}>
-          {!this.state.loaded ?
-            <div ref="loading" className="ui inverted active dimmer">
+        {!this.state.loaded ?
+          <div className="ui segment" style={{minHeight: "8em"}}>
+            <div className="ui inverted active dimmer">
               <div className="ui text loader">Loading</div>
             </div>
-            :
-            <div className="ui divided list" style={{margin: '0'}}>
-              <IconButton className="card" href="/MagIC/upload" portal="MagIC">
-                <i className="large icons">
-                  <i className="table icon"/>
-                  <i className="corner add icon"/>
-                </i>
-                <div className="title">Upload</div>
-                <div className="subtitle">Import data into your private workspace.</div>
-              </IconButton>
-              {this.state.privateContributions.map((c,i) => {
-                return (
-                  <div className="item" key={i}>
-                    {Cookies.get('mail_id') == '5730' ?
-                    <div>
-                      <textarea defaultValue={
-                        (c.contribution._summary ? JSON.stringify(c.contribution._summary.contribution, null, '  ') : '')
-                      } style={{width: '100%', height: '50px'}}/>
-                      <button
-                        onClick={() => this.updateES(c.contribution)}
-                      >
-                        Update
-                      </button>
-                    </div>
-                    : undefined
-                    }
-                    <div style={{display: 'flex', flexFlow: 'row wrap', marginTop: '0.5em', marginBottom: '0.5em'}}>
-                      <div style={{flex: '1 1 auto'}}>
-                        <div className={"ui labeled fluid input" + (c.contribution._activated || c.doi && c.contribution._doiData ? '' : ' error')}>
-                          <div className={"ui label" + (c.contribution._activated || c.doi && c.contribution._doiData ? '' : ' red')}>
-                            DOI
+          </div>
+          :
+          <div className="ui list" style={{margin: "0"}}>
+            <IconButton className="card" link="/MagIC/upload" portal="MagIC" style={{marginBottom: "1.5em"}}>
+              <i className="large icons">
+                <i className="table icon"/>
+                <i className="corner add icon"/>
+              </i>
+              <div className="title">Upload</div>
+              <div className="subtitle">Import data into your private workspace.</div>
+            </IconButton>
+            {this.privateContributions.map((c,i) => {
+              let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
+              //console.log("ref", c, noReference);
+              return (
+                <div className="item" key={i} style={{marginBottom: "1.5em"}}>
+                  <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}}>
+                    <div style={{display: "flex", flexFlow: "row wrap"}}>
+                      <div style={{flex: "1 1 auto"}}>
+                        <div className={"ui labeled fluid small icon input" + (c.updatingName ? " loading" : "")}>
+                          <div className="ui label">
+                            Private Contribution Name
                           </div>
-                          <input type="text" default="None" value={c.doi} readOnly={c.contribution._activated }
+                          <input type="text" default="None" placeholder="A name to help you remember which contribution you are working on" value={c.name !== undefined ? c.name : c.summary.contribution._name} readOnly={c.updatingName}
                                  onChange={(e) => {
-                                   let privateContributions = this.state.privateContributions;
-                                   privateContributions[i].doi = e.target.value;
-                                   this.setState({privateContributions: privateContributions});
-                                   this.updateDOI(i, e.target.value);
-                           }}/>
+                                   this.privateContributions[i].name = e.target.value;
+                                   this.setState({taps: this.state.taps + 1});
+                                 }}
+                                 onKeyPress={function(i, e) {
+                                   if (e.key === "Enter") this.updateName(i);
+                                 }.bind(this, i)}/>
+                          {c.name !== undefined && <i className="red save link icon" onClick={function(i, e) {
+                            this.updateName(i);
+                          }.bind(this, i)}/>}
                         </div>
                       </div>
-                      {!c.contribution._activated ?
-                        <div className={portals['MagIC'].color + ' ui basic button' + (c.errors.length || c.contribution._activated ? ' disabled' : '')} style={{margin: '0 0 0 0.5em'}}
+                      {c.summary.contribution._is_activated !== "true" &&
+                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
+                           onClick={(e) => {
+                             this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
+                           }}
+                      >
+                        Share
+                      </div>}
+                      <div className="ui small button disabled" style={{margin: "0 0 0 0.5em"}}
+                           onClick={(e) => {
+                             this.uploadTo(c.summary.contribution.id);
+                           }}
+                      >
+                        Add Data to This Study
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ui attached secondary segment" style={{padding: "0.5em"}}>
+                    <div style={{display: "flex", flexFlow: "row wrap"}}>
+                      <div style={{flex: "1 1 auto"}}>
+                        <div className={"ui labeled fluid small icon input" + (c.updatingReference ? " loading" : "") + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
+                          <div className={"ui label" + (c.summary.contribution._is_activated === "true" || hasReference ? "" : " red")} style={{position: "relative"}}>
+                            DOI
+                          </div>
+                          <input type="text" default="None" placeholder="The study's DOI (required)" value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
+                                 onChange={(e) => {
+                                   this.privateContributions[i].reference = e.target.value;
+                                   this.setState({taps: this.state.taps + 1});
+                                 }}
+                                 onKeyPress={function(i, e) {
+                                   if (e.key === "Enter") this.updateReference(i);
+                                 }.bind(this, i)}/>
+                          {c.reference !== undefined && <i className="red save link icon" onClick={function(i, e) {
+                            this.updateReference(i);
+                          }.bind(this, i)}/>}
+                        </div>
+                      </div>
+                      <div style={{flex: "1 1 auto", margin: "0 0 0 0.5em"}}>
+                        <div className={"ui labeled fluid small icon input" + (c.updatingDescription ? " loading" : "")}>
+                          <div className="ui label">
+                            Description
+                          </div>
+                          <input type="text" default="None" placeholder="Describe the changes being made in this version" value={c.description !== undefined ? c.description : c.summary.contribution.description} readOnly={c.updatingDescription || c.summary.contribution._is_activated === "true"}
+                                 onChange={(e) => {
+                                   this.privateContributions[i].description = e.target.value;
+                                   this.setState({taps: this.state.taps + 1});
+                                 }}
+                                 onKeyPress={function(i, e) {
+                                   if (e.key === "Enter") this.updateDescription(i);
+                                 }.bind(this, i)}/>
+                          {c.description !== undefined && <i className="red save link icon" onClick={function(i, e) {
+                            this.updateDescription(i);
+                          }.bind(this, i)}/>}
+                        </div>
+                      </div>
+                      {c.summary.contribution._is_activated !== "true" ?
+                        <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
                              onClick={(e) => {
-                               this.confirmActivate(c.contribution._id);
+                               this.confirmActivate(c.summary.contribution.id);
                              }}
                         >
-                          <i className="checkmark icon"/>
                           Activate
                         </div> :
-                        <div className="ui green disabled button" style={{margin: '0 0 0 0.5em'}}>
-                          <i className="checkmark icon"/>
+                        <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
                           Activated
                         </div>
                       }
-                      {!c.contribution._activated ?
-                        <div className={portals['MagIC'].color + ' ui icon button delete-contribution'} style={{margin: '0 0 0 0.5em'}}
-                        onClick={(e) => {
-                          this.confirmDelete(c.contribution._id);
-                        }}
+                      {c.summary.contribution._is_activated !== "true" &&
+                      <div className={portals["MagIC"].color + " ui basic small button delete-contribution"} style={{margin: "0 0 0 0.5em"}}
+                           onClick={(e) => {
+                             this.confirmDelete(c.summary.contribution.id);
+                           }}
                       >
-                        <i className="close icon"/>
                         Delete
-                      </div> :undefined}
+                      </div>
+                      }
+                      {c.summary.contribution._is_activated === "true" && "@" + Cookies.get("user_id") === "@rminnett" && 
+                      <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                           onClick={(e) => {
+                             console.log("deactivating");
+                             Meteor.call("esDeactivateContribution", {index: index, id: c.summary.contribution.id},
+                               (error) => { console.log("deactivated"); this.updateContributions(); }
+                             );
+                           }}
+                      >
+                        Deactivate
+                      </div>
+                      }
                     </div>
-                    {c.contribution._summary && c.contribution._summary.contribution ?
-                      <Summary doc={c.contribution._summary.contribution}/> : undefined
-                    }
                   </div>
-                );
-              })}
-            </div>
-          }
-        </div>
+                  <div className="ui bottom attached segment" style={{padding: "1px 1em 0"}}>
+                    <DividedList items={[c]}>
+                      <SearchSummaryListItem table="contribution" collapsed/>
+                    </DividedList>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        }
         <div ref="no-match-message" className="ui hidden error bottom attached message">
           None of your contributions match your search. Please edit the search string.
+        </div>
+        <div ref="share" className="ui modal">
+          <div className="ui icon header">
+            <i className="add user icon"></i>
+            Share Your Private Contribution
+          </div>
+          <div className="content">
+            <div className="ui fluid action input">
+              <input ref="share link" type="text" readOnly={true}/>
+              <button className="ui icon button" onClick={(e) => {
+                var $temp = $("<input>");
+                $("body").append($temp);
+                $temp.val(this.refs["share link"].value).select();
+                document.execCommand("copy");
+                $temp.remove();
+              }}>
+                <i className="copy icon"></i>&nbsp;Copy
+              </button>
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui black deny button">
+              OK
+            </div>
+          </div>
         </div>
         <div ref="failed to delete" className="ui basic modal">
           <div className="ui icon header">
@@ -259,7 +372,7 @@ export default class extends React.Component {
           <div className="actions">
             <div ref="failed to delete button" className="ui red basic cancel inverted button">
               <i className="remove icon"></i>
-              Ok
+              OK
             </div>
           </div>
         </div>
@@ -271,13 +384,7 @@ export default class extends React.Component {
           <div className="content">
             <div className="ui icon error message">
               <i className="warning sign icon"></i>
-              Warning! Deleting this contribution is irreversible.
-            </div>
-            <div className="ui basic segment">
-              Please type "DELETE" below if this is your intention:
-            </div>
-            <div className="ui fluid large error input">
-              <input ref="confirm delete input" defaultValue={''}/>
+              Warning! You cannot undo this delete.
             </div>
           </div>
           <div className="actions">
