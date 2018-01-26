@@ -45,10 +45,9 @@ export default class extends React.Component {
           <br/>
           <b>Anthony Koppers</b> - <a href="mailto:akoppers@ceoas.oregonstate.edu"><font color="purple">akoppers@ceoas.oregonstate.edu</font></a> - Professor, College of Earth, Ocean and Atmospheric Sciences , Oregon State University.<br/> 
           Research interests: hotspots, tectonics, mantle geodynamics and plumes, <sup>40</sup>Ar/<sup>39</sup>Ar geochronology, online data 
-          curation (<a href="https://earthref.org"><font color="purple">earthref.org</font></a>, <a href="https://earthref.org/MagIC"><font color="purple">MagIC</font></a>), Sr-Nd-Pb isotope geochemistry.  <Link style={{color: 'purple'}} to={'http://ceoas.oregonstate.edu/profile/koppers/'}>Website</Link><br/>
-            Other affiliations: IODP, co-director of the OSU Marine and Geology Repository.<br/>
+          curation (<a href="https://earthref.org"><font color="purple">earthref.org</font></a>, <a href="https://earthref.org/MagIC"><font color="purple">MagIC</font></a>), isotope geochemistry.  <Link style={{color: 'purple'}} to={'http://ceoas.oregonstate.edu/profile/koppers/'}>Website</Link><br/>
           <br/>
-          <b>Lisa Tauxe</b> - <a href="mailto:ltauxe@ucsd.edu"><font color="purple">ltauxe@ucsd.edu</font></a> - Professor, Geoscience Research Group, Scripps Institution of Oceanography, UC San Diego.<br/> 
+          <b>Lisa Tauxe</b> - <a href="mailto:ltauxe@ucsd.edu"><font color="purple">ltauxe@ucsd.edu</font></a> - Professor, Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego.<br/> 
           Research interests: paleomagnetism, rock magnetism, magnetostratigraphy, paleointensity, archaeomagnetism, ancient geomagnetic field. <Link style={{color: 'purple'}} to={'http://scrippsscholars.ucsd.edu/ltauxe'}>Website</Link>
 		</p>
       </div>
