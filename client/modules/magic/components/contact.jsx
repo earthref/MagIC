@@ -35,8 +35,8 @@ export default class extends React.Component {
           Lori Jonestrask joined the MagIC team in 2014 and has worked closely with Lisa Tauxe and others in maintaining and adding features to the PmagPy software suite.   
         </p>
         <p>
-          <b>GitHub</b> - Problems can also be reported directly to the <a href='https://github.com/earthref/MagIC/issues'><font color='purple'>MagIC GitHub</font></a> site. 
-          Nick Jarboe and Rupert Minnett will be notified of any new issues that are opened.
+          <b>GitHub</b> - Problems can also be reported directly by creating a new issue on the <a href='https://github.com/earthref/MagIC/issues'><font color='purple'>MagIC GitHub</font></a> site. 
+          Nick Jarboe and Rupert Minnett will be automatically notified when a new issue is submitted.
         </p>
         <p>
           <h3>Principal Investigators</h3>

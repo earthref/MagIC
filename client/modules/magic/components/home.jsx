@@ -85,7 +85,7 @@ export default class extends React.Component {
             </i>
             <div className="small title">Vocabulary<br/>Lists</div>
           </IconButton>
-          <IconButton className="borderless card" href="https://github.com/PmagPy/PmagPy" portal="MagIC">
+          <IconButton className="borderless card" href="https://earthref.org/PmagPy/cookbook/" portal="MagIC">
             <i className="small icons">
               <i className="bar chart icon"/>
               <i className="corner calculator icon"/>
