@@ -99,17 +99,17 @@ export default class extends React.Component {
             </i>
             <div className="small title">Data Management<br/>Plan Tool</div>
           </IconButton>
-          <IconButton className="borderless card" href="/MagIC/about" portal="MagIC">
-            <i className="small icons">
-              <i className="info icon"/>
-            </i>
-            <div className="small title">About MagIC</div>
-          </IconButton>
           <IconButton className="borderless card" href="https://github.com/earthref/MagIC/issues" portal="MagIC">
             <i className="small icons">
               <i className="bug icon"/>
             </i>
             <div className="small title">Report a Problem<br/>on GitHub</div>
+          </IconButton>
+          <IconButton className="borderless card" href="/MagIC/jupyter-notebooks" portal="MagIC">
+            <i className="small icons">
+              <i className="code icon"/>
+            </i>
+            <div className="small title">Jupyter Notebooks</div>
           </IconButton>
           <IconButton className="borderless card" href="/MagIC/grand-challenges" portal="MagIC">
             <i className="small icons">
