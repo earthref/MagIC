@@ -11,7 +11,7 @@ export default class extends React.Component {
         Data can be uploaded to a private workspace before the associated paper is published and this private version can be shared with co-authors, journal editors, and reviews via a URL. 
         The search system currently has over a dozen filters and the data is available for download in the MagIC file format. This file format can be used natively in the paleomagnetic software suite PmagPy and other programs.
         </p>
-        <p>MagIC is supported by many people and orgianizations. The core group supported by NSF MagIC grants are:<br/>
+        <p>MagIC is supported by many people and organizations. The core group supported by NSF MagIC grants are:<br/>
         <ul>
          <li><a href="http://earthref.org/erml/126">Cathy Constable</a></li>
          <li><a href="http://earthref.org/erml/629">Lisa Tauxe</a></li>
@@ -35,7 +35,7 @@ export default class extends React.Component {
           <li> The Geomagnetic and Thermal History of the Earth </li>
           <li> True Polar Wander and Plumes </li>
           <li> Understanding Interactions Between Magnetic Field and Climate </li>
-          <li> Biogeomagnetis </li>
+          <li> Biogeomagnetism </li>
           <li> Environmental Magnetism, Dust and Rainfall </li>
           <li> Magnetism at High Pressures and in Extraterrestrial Bodies </li>
         </ul>
