@@ -54,10 +54,10 @@ export default class extends React.Component {
         </p>
         <p> <a href='https://github.com/PmagPy/2016_Tauxe-et-al_PmagPy_Notebooks'><font color='purple'>Tauxe el al. (2016) PmagPy Example Notebooks</font></a>
             <br/>
-            Python Jupyter Notebooks from the 2016 G-Cubed <Link style={{color: 'purple'}} to={'http://dx.doi.org/10.1002/2016GC006307'}>paper</Link> describing 
-            PmagPy. Includes a <Link style={{color: 'purple'}} to={'https://github.com/PmagPy/2016_Tauxe-et-al_PmagPy_Notebooks/blob/master/Example_PmagPy_Notebook.ipynb'}>notebook</Link> for 
+            Python Jupyter Notebooks from the 2016 G-Cubed <a href='http://dx.doi.org/10.1002/2016GC006307'><font color='purple'>paper</font></a> describing 
+            PmagPy. Includes a <a href='https://github.com/PmagPy/2016_Tauxe-et-al_PmagPy_Notebooks/blob/master/Example_PmagPy_Notebook.ipynb'><font color='purple'>notebook</font></a> for 
             taking two data sets from the MagIC database and conducting a variety of analyses on them including a fold test, a common mean test and the calculation of a combined paleomagnetic pole. 
-            This collection also includes a variety of shorter code <Link style={{color: 'purple'}} to={'https://github.com/PmagPy/2016_Tauxe-et-al_PmagPy_Notebooks/blob/master/Additional_PmagPy_Examples.ipynb'}>examples</Link> that 
+            This collection also includes a variety of shorter code <a href='https://github.com/PmagPy/2016_Tauxe-et-al_PmagPy_Notebooks/blob/master/Additional_PmagPy_Examples.ipynb'><font color='purple'>examples</font></a> that 
             put PmagPy functions to use within the notebook environment.
         </p>
         <p> <a href='https://github.com/PmagPy/2017_MagIC_Workshop_PmagPy_Tutorial'><font color='purple'>2017 MagIC Workshop PmagPy Tutorial</font></a><br/>
