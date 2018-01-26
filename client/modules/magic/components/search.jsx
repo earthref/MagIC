@@ -48,10 +48,11 @@ let filterNames = {};
 //  });
 //});
 const searchTerms = {
-  "id":     'summary.contribution._history.id',
-  "doi":    'summary.contribution._reference.doi.raw',
-  "author": 'summary.contribution._reference.authors.family.raw',
-  "orcid":  'summary.contribution._reference.authors._orcid.raw',
+  "id":          'summary.contribution._history.id',
+  "private_key": 'summary.contribution._private_key',
+  "doi":         'summary.contribution._reference.doi.raw',
+  "author":      'summary.contribution._reference.authors.family.raw',
+  "orcid":       'summary.contribution._reference.authors._orcid.raw',
 };
 const searchSortOption = { name: 'Most Relevant First', sort: [{'_score': 'desc'}] };
 const sortOptions = [

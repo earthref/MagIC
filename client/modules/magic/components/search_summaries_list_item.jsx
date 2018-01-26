@@ -81,7 +81,7 @@ class SearchSummariesListItem extends React.Component {
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id && id < 16282 &&
+        {id && id != 11909 && id < 16282 &&
         <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
           <input type="hidden" name="file_path"
                  value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
@@ -91,7 +91,7 @@ class SearchSummariesListItem extends React.Component {
             <i className="ui file text outline icon"/> Download
           </button>
         </form>}
-        {id && id >= 16282 &&
+        {id && (id == 11909 || id >= 16282) &&
         <button type="submit" className="ui basic tiny fluid compact icon header purple button"
                 style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
           Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
@@ -130,7 +130,7 @@ class SearchSummariesListItem extends React.Component {
             <span>{'earthref.org/MagIC/' + id}</span>
           }</p>
         </span>}
-        {id && id >= 16281 &&
+        {id && (id == 11909 || id >= 16281) &&
         <span>
           <b>EarthRef Data DOI Link:</b>
           <p>{_is_activated ?
@@ -138,7 +138,7 @@ class SearchSummariesListItem extends React.Component {
             <span>Created Upon Activation</span>
           }</p>
         </span>}
-        {id && id < 16281 &&
+        {id && id != 11909 && id < 16281 &&
         <span>
           <b>EarthRef Data DOI Link:</b>
           <p>{_is_activated ?

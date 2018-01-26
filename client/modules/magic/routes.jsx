@@ -36,6 +36,14 @@ const Routes = ({match}) => (
         <MagICHome/>
       </Page>
     }/>
+    <Route exact path="/MagIC/:id(\d+)/:private_key([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})" render={({match, location}) =>
+      <Page fullWidth portal="MagIC">
+        <Helmet>
+          <title>MagIC Search | EarthRef.org</title>
+        </Helmet>
+        <MagICSearch search={`id:"${match.params.id}" private_key:"${match.params.private_key}" ` + location.search || ""}/>
+      </Page>
+    }/>
     <Route exact path="/MagIC/about" render={({location}) =>
       <Page portal="MagIC" title="About MagIC">
         <Helmet>

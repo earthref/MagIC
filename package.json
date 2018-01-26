@@ -70,6 +70,9 @@
     }
   },
   "scripts": {
+    "test": "set TEST_WATCH=1 && set TEST_CLIENT=0 && meteor test --driver-package=meteortesting:mocha --port 3010",
+    "debug": "meteor run --inspect --settings settings.json",
+    "build-meteor": "meteor run --settings settings.json",
     "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.13/semantic.css"
   }
 }
