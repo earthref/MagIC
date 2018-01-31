@@ -18,7 +18,7 @@ How to go from a formatted text file or Excel file of data and upload it into th
         </p>
         <p>
          <b>Tutorial Pages</b><br/>
-            Comming soon.
+            Coming soon.
         </p>
       </div>
     );
