@@ -20,6 +20,10 @@ How to go from a formatted text file or Excel file of data and upload it into th
          <b>Tutorial Pages</b><br/>
             Coming soon.
         </p>
+        <p>
+         <b>Other Help Pages</b><br/>
+         <Link style={{color: 'purple'}} to={'/MagIC/help/text-file-format'}>The MagIC file format</Link><br/> 
+        </p>
       </div>
     );
   }
