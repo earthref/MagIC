@@ -5,8 +5,6 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <p><b>Grand Challenges</b></p>
-        <p>MagIC contributes to research on the following grand challenges:</p>
         <p> 
 <ol>
 <li><b>The Geomagnetic and Thermal History of the Earth:</b> Paleomagnetic studies provide a unique means of viewing Earth’s temporal evolution and thermal history. Very ancient paleomagnetic records combined with studies of Earth’s deep interior may give rare information about the timing of formation and growth of the inner core, throwing light on the energy budget for the geodynamo and also confirming persistent dipolar structure in the early magnetic field. Other challenging problems include the assembly and interpretation of diverse paleomagnetic data to describe the full spectrum of geomagnetic field behavior, including geomagnetic reversals and how they are initiated. Interpretation of this behavior will require understanding both laboratory paleomagnetic data and synthesizing insights obtained from numerical geodynamo simulations  and mineral physics via links to entities like the CIG geodynamo working group and the CSEDI program for Cooperative Studies of Earth’s Deep Interior.

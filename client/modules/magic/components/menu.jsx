@@ -12,6 +12,18 @@ export default class extends React.Component {
         <Link className={"vertically fitted item"} to={"/MagIC/about"} style={{minHeight:'1.5em'}}>
           About
         </Link>
+        <Link className={"vertically fitted item"} to={"/MagIC/contact"} style={{minHeight:'1.5em'}}>
+         Contact 
+        </Link>
+        <Link className={"vertically fitted item"} to={"/MagIC/help"} style={{minHeight:'1.5em'}}>
+          Help
+        </Link>
+        <Link className={"vertically fitted item"} to={"/MagIC/workshops"} style={{minHeight:'1.5em'}}>
+          Workshops
+        </Link>
+        <Link className={"vertically fitted item"} to={"/MagIC/links"} style={{minHeight:'1.5em'}}>
+          Links
+        </Link>
       </div>
     );
   }

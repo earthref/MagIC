@@ -6,15 +6,24 @@ import {Helmet} from 'react-helmet';
 import {versions} from '/lib/configs/magic/data_models.js';
 import Page from '/client/modules/common/components/page';
 import MagICMenu from '/client/modules/magic/components/menu';
+
 import MagICHome from '/client/modules/magic/components/home';
-import MagICSearch from '/client/modules/magic/components/search';
-import MagICDataModel from '/client/modules/magic/components/data_model';
-import MagICMethodCodes from '/client/modules/magic/components/method_codes';
-import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
 import MagICAbout from '/client/modules/magic/components/about';
-import MagICGrandChallenges from '/client/modules/magic/components/grand_challenges';
+import MagICContact from '/client/modules/magic/components/contact';
+import MagICHelp from '/client/modules/magic/components/help';
+import MagICHelpTextFileFormat from '/client/modules/magic/components/help/text_file_format';
+import MagICWorkshops from '/client/modules/magic/components/workshops';
+import MagICLinks from '/client/modules/magic/components/links';
+
+import MagICSearch from '/client/modules/magic/components/search';
 import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
 import MagICUploadContribution from '/client/modules/magic/components/upload_contribution';
+import MagICPrivateContributions from '/client/modules/magic/components/private_contributions';
+import MagICDataModel from '/client/modules/magic/components/data_model';
+import MagICMethodCodes from '/client/modules/magic/components/method_codes';
+import MagICJupyterNotebooks from '/client/modules/magic/components/jupyter_notebooks';
+import MagICGrandChallenges from '/client/modules/magic/components/grand_challenges';
+
 import MagICValidateContribution from '/client/modules/magic/components/validate_contribution';
 import Error from '/client/modules/common/components/error';
 
@@ -36,6 +45,62 @@ const Routes = ({match}) => (
         <MagICSearch search={`id:"${match.params.id}" private_key:"${match.params.private_key}" ` + location.search || ""}/>
       </Page>
     }/>
+    <Route exact path="/MagIC/about" render={({location}) =>
+      <Page portal="MagIC" title="About MagIC">
+        <Helmet>
+          <title>About MagIC | EarthRef.org</title>
+        </Helmet>
+        <MagICAbout search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/contact" render={({location}) =>
+      <Page portal="MagIC" title="Contact Information">
+        <Helmet>
+          <title>Contact MagIC | EarthRef.org</title>
+        </Helmet>
+        <MagICContact search={location.search || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/help" render={({location}) =>
+      <Page portal="MagIC" title="MagIC Help">
+        <Helmet>
+          <title>MagIC Help | EarthRef.org</title>
+        </Helmet>
+        <MagICHelp/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/help/text-file-format" render={({location}) =>
+      <Page portal="MagIC" title="The MagIC Text File Format">
+        <Helmet>
+          <title>MagIC Help - MagIC Text File Format</title>
+        </Helmet>
+        <MagICHelpTextFileFormat/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/workshops" render={({location}) =>
+      <Page portal="MagIC" title="MagIC Workshops">
+        <Helmet>
+          <title>MagIC Workshops | EarthRef.org</title>
+        </Helmet>
+        <MagICWorkshops/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/links" render={({location}) =>
+      <Page portal="MagIC" title="Links to Outside Resources">
+        <Helmet>
+          <title>Links to Outside Resources | EarthRef.org</title>
+        </Helmet>
+        <MagICLinks/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/validate" render={() =>
+      <Page portal="MagIC" title="Validate a MagIC contribution:">
+        <Helmet>
+          <title>MagIC Validator | EarthRef.org</title>
+        </Helmet>
+        <MagICValidateContribution/>
+      </Page>
+    }/>
     <Route exact path="/MagIC/:id(\d+)" render={({match, location}) =>
       <Page fullWidth portal="MagIC">
         <Helmet>
@@ -50,6 +115,22 @@ const Routes = ({match}) => (
           <title>MagIC Search | EarthRef.org</title>
         </Helmet>
         <MagICSearch search={location.search && location.search.substring(1) || ""}/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/upgrade" render={() =>
+      <Page portal="MagIC" title="Upgrade an outdated MagIC contribution to the latest MagIC data model version:">
+        <Helmet>
+          <title>MagIC Upgrader | EarthRef.org</title>
+        </Helmet>
+        <MagICUpgradeContribution/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/upload" render={() =>
+      <Page portal="MagIC" title="Upload data into your private workspace:">
+        <Helmet>
+          <title>MagIC Uploader | EarthRef.org</title>
+        </Helmet>
+        <MagICUploadContribution/>
       </Page>
     }/>
     <Route exact path="/MagIC/private" render={({location}) =>
@@ -77,44 +158,20 @@ const Routes = ({match}) => (
         <MagICMethodCodes search={location.search || ""}/>
       </Page>
     }/>
-    <Route exact path="/MagIC/about" render={({location}) =>
-      <Page portal="MagIC" title="">
+    <Route exact path="/MagIC/jupyter-notebooks" render={({location}) =>
+      <Page portal="MagIC" title="Jupyter Notebooks">
         <Helmet>
-          <title>About MagIC | EarthRef.org</title>
+          <title>Jupyter Notebooks | EarthRef.org</title>
         </Helmet>
-        <MagICAbout search={location.search || ""}/>
+        <MagICJupyterNotebooks/>
       </Page>
     }/>
     <Route exact path="/MagIC/grand-challenges" render={({location}) =>
-      <Page portal="MagIC" title="">
+      <Page portal="MagIC" title="The MagIC Grand Challenges">
         <Helmet>
           <title>MagIC Grand Challenges | EarthRef.org</title>
         </Helmet>
-        <MagICGrandChallenges search={location.search || ""}/>
-      </Page>
-    }/>
-    <Route exact path="/MagIC/upgrade" render={() =>
-      <Page portal="MagIC" title="Upgrade an outdated MagIC contribution to the latest MagIC data model version:">
-        <Helmet>
-          <title>MagIC Upgrader | EarthRef.org</title>
-        </Helmet>
-        <MagICUpgradeContribution/>
-      </Page>
-    }/>
-    <Route exact path="/MagIC/upload" render={() =>
-      <Page portal="MagIC" title="Upload data into your private workspace:">
-        <Helmet>
-          <title>MagIC Uploader | EarthRef.org</title>
-        </Helmet>
-        <MagICUploadContribution/>
-      </Page>
-    }/>
-    <Route exact path="/MagIC/validate" render={() =>
-      <Page portal="MagIC" title="Validate a MagIC contribution:">
-        <Helmet>
-          <title>MagIC Validator | EarthRef.org</title>
-        </Helmet>
-        <MagICValidateContribution/>
+        <MagICGrandChallenges/>
       </Page>
     }/>
     <Route render={() =>
