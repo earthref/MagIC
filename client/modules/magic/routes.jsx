@@ -11,6 +11,7 @@ import MagICHome from '/client/modules/magic/components/home';
 import MagICAbout from '/client/modules/magic/components/about';
 import MagICContact from '/client/modules/magic/components/contact';
 import MagICHelp from '/client/modules/magic/components/help';
+import MagICHelpTextFileFormat from '/client/modules/magic/components/help/text_file_format';
 import MagICWorkshops from '/client/modules/magic/components/workshops';
 import MagICLinks from '/client/modules/magic/components/links';
 
@@ -65,7 +66,15 @@ const Routes = ({match}) => (
         <Helmet>
           <title>MagIC Help | EarthRef.org</title>
         </Helmet>
-        <MagICHelp search={location.search || ""}/>
+        <MagICHelp/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/help/text-file-format" render={({location}) =>
+      <Page portal="MagIC" title="The MagIC Text File Format">
+        <Helmet>
+          <title>MagIC Help - MagIC Text File Format</title>
+        </Helmet>
+        <MagICHelpTextFileFormat/>
       </Page>
     }/>
     <Route exact path="/MagIC/workshops" render={({location}) =>
@@ -73,7 +82,7 @@ const Routes = ({match}) => (
         <Helmet>
           <title>MagIC Workshops | EarthRef.org</title>
         </Helmet>
-        <MagICWorkshops search={location.search || ""}/>
+        <MagICWorkshops/>
       </Page>
     }/>
     <Route exact path="/MagIC/links" render={({location}) =>
@@ -81,7 +90,7 @@ const Routes = ({match}) => (
         <Helmet>
           <title>Links to Outside Resources | EarthRef.org</title>
         </Helmet>
-        <MagICLinks search={location.search || ""}/>
+        <MagICLinks/>
       </Page>
     }/>
     <Route exact path="/MagIC/validate" render={() =>
@@ -154,7 +163,7 @@ const Routes = ({match}) => (
         <Helmet>
           <title>Jupyter Notebooks | EarthRef.org</title>
         </Helmet>
-        <MagICJupyterNotebooks search={location.search || ""}/>
+        <MagICJupyterNotebooks/>
       </Page>
     }/>
     <Route exact path="/MagIC/grand-challenges" render={({location}) =>
@@ -162,7 +171,7 @@ const Routes = ({match}) => (
         <Helmet>
           <title>MagIC Grand Challenges | EarthRef.org</title>
         </Helmet>
-        <MagICGrandChallenges search={location.search || ""}/>
+        <MagICGrandChallenges/>
       </Page>
     }/>
     <Route render={() =>
