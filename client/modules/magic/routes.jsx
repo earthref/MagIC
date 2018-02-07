@@ -12,6 +12,8 @@ import MagICAbout from '/client/modules/magic/components/about';
 import MagICContact from '/client/modules/magic/components/contact';
 import MagICHelp from '/client/modules/magic/components/help';
 import MagICHelpTextFileFormat from '/client/modules/magic/components/help/text_file_format';
+import MagICHelpUploadingData from '/client/modules/magic/components/help/uploading_data';
+import MagICHelpCreateAccount from '/client/modules/magic/components/help/create_account';
 import MagICWorkshops from '/client/modules/magic/components/workshops';
 import MagICLinks from '/client/modules/magic/components/links';
 
@@ -75,6 +77,22 @@ const Routes = ({match}) => (
           <title>MagIC Help - MagIC Text File Format</title>
         </Helmet>
         <MagICHelpTextFileFormat/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/help/uploading-data" render={({location}) =>
+      <Page portal="MagIC" title="Uploading Data to MagIC" menu={<MagICMenu/>}>
+        <Helmet>
+          <title>MagIC Help - Uploading Data into MagIC</title>
+        </Helmet>
+        <MagICHelpUploadingData/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/help/create-account" render={({location}) =>
+      <Page portal="MagIC" title="Creating a MagIC Account" menu={<MagICMenu/>}>
+        <Helmet>
+          <title>MagIC Help - Creating a MagIC Account</title>
+        </Helmet>
+        <MagICHelpCreateAccount/>
       </Page>
     }/>
     <Route exact path="/MagIC/workshops" render={({location}) =>

@@ -94,6 +94,11 @@ class Layout extends React.Component {
           </div>
         </div>
         <div className="ui top fixed secondary pointing menu right-menu">
+          {(Cookies.get('mail_id') && Cookies.get('name')) && 
+            <a className="ui button item" href={'//earthref.org/log-out/?next_url=' + window.location.href}>
+              Logout
+            </a>
+          }
           {Cookies.get('mail_id') && Cookies.get('name') ?
             <a className="ui button item" href="//earthref.org/edit-profile/">
               <i className={'user icon ' + portals[portal].color}/>
