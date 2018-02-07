@@ -9,6 +9,7 @@ export default class extends React.Component {
       <div>
         <p>
          You can see a video demo of this content <a href='https://youtu.be/_Bb3YJKgwOA'><font color='purple'>here</font></a>
+        </p>
         <p>
          This tutorial assumes that your data has beem formatted into an Excel file with a separate worksheet for each data table or into tab or comma delimited files (one file for each table). You can determine what data goes in each table from the interactive on-line <Link style={{color: 'purple'}} to={'/MagIC/data-models/3.0'}>data model page</Link>. Please feel free to email Nick Jarboe (<a href='mailto:njarboe@ucsd.edu'><font color='purple'>njarboe@ucsd.edu</font></a>) with questions or comments.
         </p>
