@@ -1,9 +1,9 @@
 import {Meteor} from 'meteor/meteor';
+import {Promise } from 'meteor/promise';
 
 import _ from "lodash";
 import uuid from "uuid";
 import moment from "moment";
-import Promise from "bluebird";
 import elasticsearch from "elasticsearch";
 
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
@@ -72,6 +72,7 @@ export default function () {
     },
 
     async esCount({index, type, queries, filters, countField}) {
+      console.log("esCount", index, type, queries, filters, countField);
       this.unblock();
       try {
 
@@ -151,6 +152,66 @@ export default function () {
       } catch(error) {
         console.error("esPage", index, type, queries, filters, source, sort, pageSize, pageNumber, error.message);
         throw new Meteor.Error("esPage", error.message);
+      }
+    },
+    
+    async esScroll({index, type, queries, filters, source, sort}, pageSize) {
+      console.log("esScroll", index, type, queries, filters, sort);
+      this.unblock();
+      try {
+
+        let search = {
+          "size": pageSize,
+          "_source": source,
+          "query": {
+            "bool": {
+              "must": [],
+              "filter": [{
+                "term": {
+                  "summary.contribution._is_latest": "true"
+                }
+              }]
+            }
+          },
+          "sort": sort
+        };
+
+        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
+
+        if (_.isArray(queries)) search.query.bool.must.push(...queries);
+        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+
+        let resp = await esClient.search({
+          "index": index,
+          "scroll": '30s',
+          "type": type,
+          "body": search
+        });
+        return resp;
+
+      } catch(error) {
+        console.error("esScroll", index, type, queries, filters, source, sort, pageSize, error.message);
+        throw new Meteor.Error("esScroll", error.message);
+      }
+    },
+
+    async esScrollByID(scrollID) {
+      console.log("esScrollByID", scrollID);
+      this.unblock();
+      try {
+
+        let resp = await esClient.scroll({
+          "scrollId": scrollID,
+          "scroll": '30s'
+        });
+        return resp;
+
+      } catch(error) {
+        console.error("esScrollByID", scrollID);
+        throw new Meteor.Error("esScrollByID", error.message);
       }
     },
 

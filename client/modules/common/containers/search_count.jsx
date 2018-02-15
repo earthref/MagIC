@@ -1,6 +1,7 @@
 import React from 'react';
-import Count from '/client/modules/common/components/count';
 import {compose} from 'react-komposer';
+
+import Count from '/client/modules/common/components/count';
 
 export const composer = ({es}, onData) => {
   onData(null, {error: undefined, count: undefined});

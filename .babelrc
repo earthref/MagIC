@@ -1,14 +1,4 @@
 {
-  "presets": [
-    "es2015",
-    "react",
-    "stage-3"
-  ],
-  "plugins": [
-    "babel-root-slash-import",
-    "transform-runtime",
-    "transform-object-rest-spread"
-  ],
   "ignore": [
     "*.es5.js",
     "/client/lib/modules/magic/data_modes/*",
