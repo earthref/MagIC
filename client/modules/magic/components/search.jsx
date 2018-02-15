@@ -9,6 +9,7 @@ import SearchSummariesView from '/client/modules/magic/components/search_summari
 import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
+import SearchDownload from '/client/modules/magic/components/search_download';
 import {portals} from '/lib/configs/portals.js';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {levels, index} from '/lib/configs/magic/search_levels.js';
@@ -106,9 +107,7 @@ class Search extends React.Component {
       age_max_unit: undefined,
       int_min: undefined,
       int_max: undefined,
-      int_unit: undefined,
-      downloadIDs: [],
-      downloadReady: false,
+      int_unit: undefined
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
@@ -360,35 +359,11 @@ class Search extends React.Component {
                 Clear
               </div>
             </div>
-            <div className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
-                 onClick={(e) => this.showDownloadModal(searchQueries, activeFilters) }>
+            <SearchDownload className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
+                 queries={searchQueries} filters={activeFilters}>
               <i className="download icon"/>
               Download Results
-            </div>
-            <div ref="download modal" className="ui modal">
-              <div className="header">
-                Download Results
-              </div>
-              <div className="content">
-                <p>Download <b><Count
-                  es={{ index: index, type: 'contribution', queries: searchQueries, filters: activeFilters }}
-                  singular="contribution"
-                  plural="contributions"
-                /></b> in their entirety based on the search parameters. The option to download subsets of the contributions based on the filter settings is coming soon.</p>
-                <p>Note, this may take several minutes to prepare and initiate the download. The file will appear in your browser's download folder.</p>
-              </div>
-              <form className="actions" action="//earthref.org/cgi-bin/z-download.cgi" method="post">
-                {this.state.downloadIDs.map((id, i) =>
-                  <input key={i} type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
-                )}
-                <input type="hidden" name="file_name" value="magic_search_results.zip"/>
-                <input type="hidden" name="no_metadata" value="1"/>
-                <button type="submit" className={'ui approve button' + (this.state.downloadReady ? ' purple' : ' disabled')}>
-                  {this.state.downloadReady ? 'Download' : 'Calculating ...'}
-                </button>
-                <div className="ui cancel button">Cancel</div>
-              </form>
-            </div>
+            </SearchDownload>
           </div>
           <div ref="results" style={{display: 'flex', marginTop: '1em', height: this.state.height || '100%', width: this.state.width || '100%'}}>
             <div>
@@ -631,7 +606,9 @@ class Search extends React.Component {
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
               <Count es={_.extend({}, view.es, {
-                queries: searchQueries,
+                queries: view.name === 'Map' ? _.concat(searchQueries, {exists: 
+                  {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
+                }) : searchQueries,
                 filters: activeFilters
               })}/>
             </div>
@@ -703,7 +680,9 @@ class Search extends React.Component {
       <SearchMapView
         key={activeView.name}
         style={viewStyle}
-        es={es}
+        es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
+          {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
+        })})}
       />
     );
     if (activeView.name === 'Images' || activeView.name === 'Plots') return (
@@ -715,19 +694,8 @@ class Search extends React.Component {
     );
   }
 
-  showDownloadModal(searchQueries, activeFilters) {
-    Meteor.call('esContributionIDs', {index: index, queries: searchQueries, filters: activeFilters}, (error, result) => {
-      if (error) {
-        console.error('esContributionIDs', error);
-      } else {
-        this.setState({downloadReady: true, downloadIDs: result});
-      }
-    });
-    $(this.refs['download modal']).modal({
-      onApprove: () => {
-
-      }
-    }).modal('show');
+  updateDownloadCheckboxes(e) {
+    console.log(e.target == this.refs['download contributions checkbox']);
   }
 
 }
