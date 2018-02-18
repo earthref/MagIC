@@ -1,5 +1,7 @@
+import {Promise as BPromise} from 'bluebird';
+
 import {Meteor} from 'meteor/meteor';
-import {Promise } from 'meteor/promise';
+import {Promise} from 'meteor/promise';
 
 import _ from "lodash";
 import uuid from "uuid";
@@ -12,7 +14,9 @@ import {levels} from '/lib/configs/magic/search_levels.js';
 
 const esClient = new elasticsearch.Client({
   //log: "trace",
-  "host": Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || ""
+  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || "",
+  keepAlive: false,
+  requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
 export default function () {
@@ -441,11 +445,11 @@ export default function () {
             });
           });
         });
-        await Promise.map(_.chunk(bulkIndex, 2*100), (bulkIndexChunk, i, n) => {
+        await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
             console.log('starting chunk', i+1, 'of', n);
             esClient.bulk({ body: bulkIndexChunk }, (err, resp) => {
-              if (resp.errors) {
+              if (!resp || resp.errors) {
                 console.error('errors in chunk', i+1, 'of', n, JSON.stringify(resp));
                 resolve(false);
               } else {
@@ -454,7 +458,7 @@ export default function () {
               }
             });
           });
-        }, { concurrency: 3 }).then((results) => {
+        }, { concurrency: 5 }).then((results) => {
           if (!_.every(results, Boolean))
             throw new Meteor.Error("esUpdatePrivateSummaries", "Failed to upload private contribution.");
         });
