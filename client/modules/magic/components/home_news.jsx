@@ -14,7 +14,7 @@ export default class extends React.Component {
           {` MagIC at EGU`}
         </h3>
         <p>
-          {`Visit us at `}
+          {`Visit us at the `}
           <a href="https://www.egu2018.eu/" target="_blank"><b>EGU General Assembly 2018</b></a>
           {` where our poster `}
           <b>EGU2018-11767</b>
@@ -26,7 +26,11 @@ export default class extends React.Component {
           <b>Session EMRP3.5</b>
           {` `}
           <em>Geomagnetic field variations in ancient times: new paleo/archeomagnetic data 
-            and models to disclose fundamental properties of the Earth's magnetic field</em>.
+            and models to disclose fundamental properties of the Earth's magnetic field</em>
+          {` at poster `}
+          <b>119 Hall X2</b>
+          {` and we will be there `}
+          <b>Monday, 09 Apr 2018, 17:30-19:00</b>.
         </p>
         <div className="ui divider"></div>
         <h3>
@@ -57,9 +61,9 @@ export default class extends React.Component {
           {` including two eLightning talks where the new MagIC website and the `}
           <Link to="/MagIC/data-models/3.0"><b>3.0 Data Model</b></Link>
           {` were discussed. Thanks to those who attended  
-          and the fruitful discussions about the progress made on the MagIC website and updating the infrastructure and `}
+          and the fruitful discussions about the progress made on improving the MagIC website to make searching and contributing easier and updating `}
           <a href="https://earthref.org/PmagPy/cookbook/"><b>PmagPy</b></a>
-          {` to use the new database model.`}
+          {` to use the new data model.`}
         </p>
         <div className="ui divider"></div>
         <h3>
