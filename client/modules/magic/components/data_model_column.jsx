@@ -206,13 +206,13 @@ export default class extends React.Component {
     }) && !mc_validation && !ref_validation && !user_validation);
 
     let examples = model.examples;
-    if (cv_validation) {
+    if (!examples && cv_validation) {
       const reMatches = this.reValidationParam.exec(cv_validation);
       if (reMatches.length >= 2 && cvs[reMatches[1]])
         examples = this.formatVocabulariesSample(cvs[reMatches[1]]);
       else
         console.error(`Failed to use ${cv_validation} to populate examples`);
-    } else if (sv_validation) {
+    } else if (!examples && sv_validation) {
       const reMatches = this.reValidationParam.exec(sv_validation);
       if (reMatches.length >= 2 && svs[reMatches[1]])
         examples = this.formatVocabulariesSample(svs[reMatches[1]]);
