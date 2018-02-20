@@ -11,6 +11,11 @@ class Page extends React.Component {
     const {portal, fullWidth} = this.props;
     return (
       <Layout portal={portal} fullWidth={fullWidth}>
+        <style>{`
+          a, a:hover {
+            color: ${portals[portal].rgb};
+          }
+        `}</style>
         <Link
           className={'ui menu basic button page-logo ' + portals[portal].color}
           to={portals[portal].url}
@@ -21,9 +26,8 @@ class Page extends React.Component {
           <h1 className="page-title">{portals[portal].title}</h1>
           <h4 className="page-subtitle">{portals[portal].subtitle}</h4>
         </Link>
-        <div className="ui divider"/>
+        {!this.props.menu && <div className="ui divider"/>}
         {this.props.menu || undefined}
-        {this.props.menu && <div className="ui divider"/>}
         {this.props.title && <h3>{this.props.title}</h3>}
         {this.props.children}
       </Layout>
