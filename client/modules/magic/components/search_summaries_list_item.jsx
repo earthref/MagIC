@@ -73,7 +73,7 @@ class SearchSummariesListItem extends React.Component {
       if (item.summary._all.specimen) title += ' ⇒ ' + item.summary._all.specimen[0];
       if (item.summary._all.experiment) title += ' ⇒ <b>' + item.summary._all.experiment[0] + '</b>';
     }
-    return <div dangerouslySetInnerHTML={{__html: title}}/>;
+    return <div style={{whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden"}} dangerouslySetInnerHTML={{__html: title}}/>;
   }
 
   renderDownloadButton(item) {
@@ -430,10 +430,9 @@ class SearchSummariesListItem extends React.Component {
     let lithologies      = item.summary && item.summary._all && item.summary._all.lithologies;
     let nDefined = _.without([geologic_classes, geologic_types, lithologies], undefined).length;
     let clampLines = (nDefined === 3 ? 1 : (nDefined === 2 ? 2 : 5));
-    return 
-      geologic_classes && geologic_classes.length > 0 ||
-      geologic_types && geologic_types.length > 0 ||
-      lithologies && lithologies.length > 0 ?
+    return (geologic_classes && geologic_classes.length > 0) ||
+      (geologic_types && geologic_types.length > 0) ||
+      (lithologies && lithologies.length > 0) ?
     (
       <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', whiteSpace: 'normal'}}>
         {geologic_classes && geologic_classes.length > 0 ?
