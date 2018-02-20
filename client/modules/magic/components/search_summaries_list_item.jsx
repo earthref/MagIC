@@ -73,7 +73,7 @@ class SearchSummariesListItem extends React.Component {
       if (item.summary._all.specimen) title += ' ⇒ ' + item.summary._all.specimen[0];
       if (item.summary._all.experiment) title += ' ⇒ <b>' + item.summary._all.experiment[0] + '</b>';
     }
-    return <div dangerouslySetInnerHTML={{__html: title}}/>;
+    return <div style={{whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden"}} dangerouslySetInnerHTML={{__html: title}}/>;
   }
 
   renderDownloadButton(item) {
@@ -257,7 +257,7 @@ class SearchSummariesListItem extends React.Component {
         });
     }
 
-    return (
+    return paths.length > 0 ? (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
         {paths.length > 0 &&
           <a className="ui tiny image" href="#" onClick={this.showMap.bind(this)}>
@@ -267,6 +267,10 @@ class SearchSummariesListItem extends React.Component {
               paths={paths}
             />
           </a>}
+      </div>
+    ) : (
+      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Geospatial</b><br/>Data<br/><br/>
       </div>
     );
 
@@ -278,7 +282,8 @@ class SearchSummariesListItem extends React.Component {
     let allSummary   = item.summary && item.summary._all;
 
     if (!(tableSummary && tableSummary._age_range_ybp) && !(allSummary && allSummary._age_range_ybp)) return (
-      <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Age</b><br/>Data<br/><br/>
       </div>
     );
 
@@ -325,7 +330,8 @@ class SearchSummariesListItem extends React.Component {
     let allSummary   = item.summary && item.summary._all;
 
     if (!(tableSummary && tableSummary.int_abs) && !(allSummary && allSummary.int_abs)) return (
-      <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 75, maxWidth: 75, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Intensity</b><br/>Data<br/><br/>
       </div>
     );
 
@@ -398,7 +404,7 @@ class SearchSummariesListItem extends React.Component {
       if (item.summary && item.summary._all && item.summary._all[column]) list.push(...item.summary._all[column]);
       return list;
     }, []);
-    return (
+    return geologic.length > 0 || geographic.length > 0 ? (
       <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', whiteSpace: 'normal'}}>
         {geologic.length > 0 ?
           <span>
@@ -411,6 +417,10 @@ class SearchSummariesListItem extends React.Component {
             <Clamp lines={geologic.length > 0 ? 2 : 5}><span>{geographic.join(', ')}</span></Clamp>
           </span> : undefined}
       </div>
+    ) : (
+      <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Geographic</b><br/>Data<br/><br/>
+      </div>
     );
   }
 
@@ -420,7 +430,10 @@ class SearchSummariesListItem extends React.Component {
     let lithologies      = item.summary && item.summary._all && item.summary._all.lithologies;
     let nDefined = _.without([geologic_classes, geologic_types, lithologies], undefined).length;
     let clampLines = (nDefined === 3 ? 1 : (nDefined === 2 ? 2 : 5));
-    return (
+    return (geologic_classes && geologic_classes.length > 0) ||
+      (geologic_types && geologic_types.length > 0) ||
+      (lithologies && lithologies.length > 0) ?
+    (
       <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', whiteSpace: 'normal'}}>
         {geologic_classes && geologic_classes.length > 0 ?
           <span>
@@ -438,38 +451,44 @@ class SearchSummariesListItem extends React.Component {
             <Clamp lines={clampLines}><span>{lithologies.join(', ')}</span></Clamp>
           </span> : undefined}
       </div>
+    ) : (
+      <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Geologic</b><br/>Data<br/><br/>
+      </div>
     );
   }
 
   renderMethodCodes(item) {
-    return (
+    return item.summary._all && item.summary._all.method_codes && item.summary._all.method_codes.length > 0 ? (
       <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', whiteSpace: 'normal'}}>
-        {item.summary._all && item.summary._all.method_codes && item.summary._all.method_codes.length > 0 ?
-          <span>
-            <b>Method Codes:</b>
-            <Clamp lines={5}><span>{item.summary._all.method_codes.join(', ')}</span></Clamp>
-          </span> : undefined}
+        <span>
+          <b>Method Codes:</b>
+          <Clamp lines={5}><span>{item.summary._all.method_codes.join(', ')}</span></Clamp>
+        </span>
+      </div>
+    ) : (
+      <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Method<br/>Codes</b><br/><br/>
       </div>
     );
   }
 
   renderCitations(item) {
-    return (
+    return item.summary._all && item.summary._all.citations && _.without(item.summary._all.citations, 'this study', 'This study', 'This Study', 'This study').length > 0 ? (
       <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', whiteSpace: 'normal'}}>
-        {item.summary._all && item.summary._all.citations && _.without(item.summary._all.citations, 'this study', 'This study', 'This Study', 'This study').length > 0 ?
-          <span>
-            <b>Citations:</b>
-            <Clamp lines={5}><span>{item.summary._all.citations.join(', ')}</span></Clamp>
-          </span> : undefined}
+        <span>
+          <b>Citations:</b>
+          <Clamp lines={5}><span>{_.without(item.summary._all.citations, 'this study', 'This study', 'This Study', 'This study').join(', ')}</span></Clamp>
+        </span>
+      </div>
+    ) : (
+      <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Additional<br/>Citations</b><br/><br/>
       </div>
     );
   }
 
   render() {
-    return this.props.item ? this.renderItem() : this.renderDoc();
-  }
-
-  renderItem() {
     const item = this.props.item;
     return (
       <div>

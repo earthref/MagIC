@@ -1,5 +1,4 @@
 import React from 'react';
-
 import {Link} from 'react-router-dom';
 
 export default class extends React.Component {
@@ -17,8 +16,8 @@ export default class extends React.Component {
         <p>
          <b>2017 MagIC Workshop</b><br/>
          For a detailed description, schedule, and list of participants of the 2017 workshop, you can visit
-         its <a href='https://earthref.org/events/MAGIC/2017/'><font color='purple'>homepage</font></a>.<br/>
-         Videos of many of the talks can be found on our <a href='https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ'><font color='purple'>YouTube channel</font>.</a>
+         its <a href='https://earthref.org/events/MAGIC/2017/'>homepage</a>.<br/>
+         Videos of many of the talks can be found on our <a href='https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ'>YouTube channel</a>.
         </p>
       </div>
     );
