@@ -10,6 +10,7 @@ import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
 import SearchDownload from '/client/modules/magic/components/search_download';
+import SearchJSONLD from '/client/modules/magic/containers/search_jsonld';
 import {portals} from '/lib/configs/portals.js';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {levels, index} from '/lib/configs/magic/search_levels.js';
@@ -306,6 +307,7 @@ class Search extends React.Component {
     let activeFilters = this.getActiveFilters();
     return (
       <div className="magic-search">
+        {this.renderJSONLD(searchQueries)}
         <div className="ui top attached tabular menu level-tabs">
           {levels.map((level, i) =>
             <div key={i} className={(this.state.levelNumber === i ? 'active ' : '') + 'item'}
@@ -692,6 +694,22 @@ class Search extends React.Component {
         es={es}
       />
     );
+  }
+
+  renderJSONLD(searchQueries) {
+    let activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    let es = _.extend({}, activeView.es, {
+      queries: searchQueries
+    });
+    let queryTerms = [];
+    this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {
+      queryTerms.push(term);
+    });
+    if (_.includes(queryTerms, 'doi')) {
+      return <SearchJSONLD es={es}/>
+    }
   }
 
   updateDownloadCheckboxes(e) {
