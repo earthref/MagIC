@@ -220,7 +220,13 @@ class SearchSummariesListItem extends React.Component {
     let allSummary   = item.summary && item.summary._all;
 
     if (tableSummary && (tableSummary._geo_envelope || tableSummary._geo_point)) {
-      if (tableSummary._geo_envelope) tableSummary._geo_envelope.forEach(envelope => {
+      if (tableSummary._geo_envelope) 
+        _.sortedUniqBy(
+          _.sortBy(tableSummary._geo_envelope, 
+            x => _.flatten(x.coordinates).join('_')),
+          x => _.flatten(x.coordinates).join('_'))
+        .forEach(envelope => {
+          console.log("static map table envelope", envelope.coordinates);
           paths.push({
             lat_s: envelope.coordinates[0][1],
             lat_n: envelope.coordinates[1][1],
@@ -229,7 +235,13 @@ class SearchSummariesListItem extends React.Component {
           });
         });
 
-      if (tableSummary._geo_point) tableSummary._geo_point.forEach(point => {
+      if (tableSummary._geo_point) 
+        _.sortedUniqBy(
+          _.sortBy(tableSummary._geo_point, 
+            x => _.flatten(x.coordinates).join('_')),
+          x => _.flatten(x.coordinates).join('_'))
+        .forEach(point => {
+          console.log("static map table point", point.coordinates);
           paths.push({
             lat_s: point.coordinates[1],
             lat_n: point.coordinates[1],
@@ -238,7 +250,13 @@ class SearchSummariesListItem extends React.Component {
           });
         });
     } else if (allSummary) {
-      if (allSummary._geo_envelope) allSummary._geo_envelope.forEach(envelope => {
+      if (allSummary._geo_envelope) 
+        _.sortedUniqBy(
+          _.sortBy(allSummary._geo_envelope, 
+            x => _.flatten(x.coordinates).join('_')),
+          x => _.flatten(x.coordinates).join('_'))
+        .forEach(envelope => {
+          console.log("static map all envelope", envelope.coordinates);
           paths.push({
             lat_s: envelope.coordinates[0][1],
             lat_n: envelope.coordinates[1][1],
@@ -247,7 +265,13 @@ class SearchSummariesListItem extends React.Component {
           });
         });
 
-      if (allSummary._geo_point) allSummary._geo_point.forEach(point => {
+      if (allSummary._geo_point) 
+        _.sortedUniqBy(
+          _.sortBy(allSummary._geo_point, 
+            x => _.flatten(x.coordinates).join('_')), 
+          x => _.flatten(x.coordinates).join('_'))
+        .forEach(point => {
+          console.log("static map all point", point.coordinates);
           paths.push({
             lat_s: point.coordinates[1],
             lat_n: point.coordinates[1],
