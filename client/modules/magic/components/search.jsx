@@ -49,13 +49,16 @@ let filterNames = {};
 //    }
 //  });
 //});
+
 const searchTerms = {
-  "id":          'summary.contribution._history.id',
-  "private_key": 'summary.contribution._private_key',
-  "doi":         'summary.contribution._reference.doi.raw',
-  "author":      'summary.contribution._reference.authors.family.raw',
-  "orcid":       'summary.contribution._reference.authors._orcid.raw',
+  "id":          { field: 'summary.contribution._history.id', processor: x => x },
+  "private_key": { field: 'summary.contribution._private_key', processor: x => x },
+  "doi":         { field: 'summary.contribution._reference.doi.raw', processor: x => _.toUpper(_.trim(x)) },
+  "orcid":       { field: 'summary.contribution._reference.authors._orcid.raw', processor: x => x },
 };
+/*const searchMatches = {
+  "author":      'summary.contribution._reference.authors.family',
+};*/
 const searchSortOption = { name: 'Most Relevant First', sort: [{'_score': 'desc'}] };
 const sortOptions = [
   { name: 'Recently Contributed First'  , sort: [{'summary.contribution.timestamp': 'desc'}] },
@@ -189,7 +192,7 @@ class Search extends React.Component {
       queries.push(
         searchTerms[term] ? {
           term: {
-            [searchTerms[term]]: value
+            [searchTerms[term].field]: searchTerms[term].processor(value)
           }
         } : {
           wildcard: {
