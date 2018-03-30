@@ -117,7 +117,7 @@ export default function () {
     },
 
     async esPage({index, type, queries, filters, source, sort}, pageSize, pageNumber) {
-      console.log("esPage", pageNumber, index, type, queries, filters, sort);
+      console.log("esPage", pageSize, pageNumber, index, type, queries, filters, sort);
       this.unblock();
       try {
 
@@ -134,10 +134,11 @@ export default function () {
                 }
               }]
             }
-          },
-          "sort": sort
+          }
         };
         
+        if (sort) search.sort = sort;
+
         if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
@@ -176,9 +177,10 @@ export default function () {
                 }
               }]
             }
-          },
-          "sort": sort
+          }
         };
+        
+        if (sort) search.sort = sort;
 
         if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
           search.query.bool.filter.push({

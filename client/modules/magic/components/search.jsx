@@ -10,6 +10,7 @@ import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
 import SearchDownload from '/client/modules/magic/components/search_download';
+import SearchJSONLD from '/client/modules/magic/containers/search_jsonld';
 import {portals} from '/lib/configs/portals.js';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {levels, index} from '/lib/configs/magic/search_levels.js';
@@ -48,13 +49,16 @@ let filterNames = {};
 //    }
 //  });
 //});
+
 const searchTerms = {
-  "id":          'summary.contribution._history.id',
-  "private_key": 'summary.contribution._private_key',
-  "doi":         'summary.contribution._reference.doi.raw',
-  "author":      'summary.contribution._reference.authors.family.raw',
-  "orcid":       'summary.contribution._reference.authors._orcid.raw',
+  "id":          { field: 'summary.contribution._history.id', processor: x => x },
+  "private_key": { field: 'summary.contribution._private_key', processor: x => x },
+  "doi":         { field: 'summary.contribution._reference.doi.raw', processor: x => _.toUpper(_.trim(x)) },
+  "orcid":       { field: 'summary.contribution._reference.authors._orcid.raw', processor: x => x },
 };
+/*const searchMatches = {
+  "author":      'summary.contribution._reference.authors.family',
+};*/
 const searchSortOption = { name: 'Most Relevant First', sort: [{'_score': 'desc'}] };
 const sortOptions = [
   { name: 'Recently Contributed First'  , sort: [{'summary.contribution.timestamp': 'desc'}] },
@@ -188,7 +192,7 @@ class Search extends React.Component {
       queries.push(
         searchTerms[term] ? {
           term: {
-            [searchTerms[term]]: value
+            [searchTerms[term].field]: searchTerms[term].processor(value)
           }
         } : {
           wildcard: {
@@ -306,6 +310,7 @@ class Search extends React.Component {
     let activeFilters = this.getActiveFilters();
     return (
       <div className="magic-search">
+        {this.renderJSONLD(searchQueries)}
         <div className="ui top attached tabular menu level-tabs">
           {levels.map((level, i) =>
             <div key={i} className={(this.state.levelNumber === i ? 'active ' : '') + 'item'}
@@ -692,6 +697,22 @@ class Search extends React.Component {
         es={es}
       />
     );
+  }
+
+  renderJSONLD(searchQueries) {
+    let activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    let es = _.extend({}, activeView.es, {
+      queries: searchQueries
+    });
+    let queryTerms = [];
+    this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {
+      queryTerms.push(term);
+    });
+    if (_.includes(queryTerms, 'doi')) {
+      return <SearchJSONLD es={es}/>
+    }
   }
 
   updateDownloadCheckboxes(e) {

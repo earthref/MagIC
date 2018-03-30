@@ -47,6 +47,14 @@ const Routes = ({match}) => (
         <MagICSearch search={`id:"${match.params.id}" private_key:"${match.params.private_key}" ` + location.search || ""}/>
       </Page>
     }/>
+    <Route exact path="/MagIC/doi/:doi(.+)" render={({match, location}) =>
+      <Page fullWidth portal="MagIC" menu={<MagICMenu/>}>
+        <Helmet>
+          <title>MagIC Search | EarthRef.org</title>
+        </Helmet>
+        <MagICSearch search={`doi:"${match.params.doi}" ` + location.search || ""}/>
+      </Page>
+    }/>
     <Route exact path="/MagIC/about" render={({location}) =>
       <Page portal="MagIC" title="About MagIC" menu={<MagICMenu/>}>
         <Helmet>
@@ -127,13 +135,24 @@ const Routes = ({match}) => (
         <MagICSearch search={`id:"${match.params.id}" ` + location.search || ""}/>
       </Page>
     }/>
-    <Route exact path="/MagIC/search" render={({location}) =>
-      <Page fullWidth portal="MagIC" menu={<MagICMenu/>}>
-        <Helmet>
-          <title>MagIC Search | EarthRef.org</title>
-        </Helmet>
-        <MagICSearch search={location.search && location.search.substring(1) || ""}/>
-      </Page>
+    <Route exact path="/MagIC/search" render={({location}) => {
+      let redirectTo;
+      if (_.trim(location.hash) !== '') {
+        try {
+          let oldSearchState = JSON.parse(atob(location.hash.substr(1)));
+          if (oldSearchState && oldSearchState.p && oldSearchState.p.length >= 0)
+            redirectTo = "/MagIC/doi/" + oldSearchState.p[0];
+        } catch(e) { console.error(e); }
+      }
+      return (redirectTo ? <Redirect to={redirectTo}/> :
+        <Page fullWidth portal="MagIC" menu={<MagICMenu/>}>
+          <Helmet>
+            <title>MagIC Search | EarthRef.org</title>
+          </Helmet>
+          <MagICSearch search={location.search && location.search.substring(1) || ""} hash={location.hash || ""}/>
+        </Page>
+        );
+      }
     }/>
     <Route exact path="/MagIC/upgrade" render={() =>
       <Page portal="MagIC" title="Upgrade an outdated MagIC contribution to the latest MagIC data model version:" menu={<MagICMenu/>}>
