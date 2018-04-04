@@ -42,7 +42,8 @@ export default function () {
           aggs : aggs
         };
 
-        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+          console.log("no private key found in", queries);
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -94,10 +95,11 @@ export default function () {
           }
         };
         
-        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
+        }
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
@@ -139,10 +141,12 @@ export default function () {
         
         if (sort) search.sort = sort;
 
-        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
+          console.log("no private key found in", queries);
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
+        }
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
@@ -182,7 +186,7 @@ export default function () {
         
         if (sort) search.sort = sort;
 
-        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -241,7 +245,7 @@ export default function () {
           aggs : {buckets: {terms: {field: "summary.contribution.id", size:1e6}}}
         };
 
-        if (!_.find(_.map(queries, "term"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -288,56 +292,56 @@ export default function () {
           throw new Error('Failed to retrieve new contribution ID.');
         next_id = _.parseInt(next_id.hits.hits[0]._source.summary.contribution.id) + 1;
 
-        let body = {
-          "summary": {
-            "contribution": {
-              "id": next_id,
-              "version": null,
-              "contributor": contributor,
-              "timestamp": moment().utc().toISOString(),
-              "data_model_version": _.last(versions),
-              "_contributor": _contributor,
-              "_name": name,
-              "_is_activated": "false",
-              "_is_latest": "true",
-              "_private_key": uuid.v4(),
-              "_history": [{
-                "id": next_id,
-                "version": null,
-                "contributor": _contributor,
-                "timestamp": moment().utc().toISOString(),
-                "data_model_version": _.last(versions)
-              }]
-            }
-          },
-          "contribution": {}
-        };
-
-        if (contribution) {
-          if (summary && summary.contribution) {
-            body = _.merge(summary.contribution, body);
-          } else {
-            const summarizer = new SummarizeContribution({});
-            await summarizer.summarizePromise(contribution, body);
-            body = summarizer.json.contribution;
-          }
-          body.contribution = contribution;
-        }
-
-        body.contribution.contribution = [{
+        let timestamp = moment().utc().toISOString();
+        let contributionSummary = {
           "id": next_id,
           "version": null,
           "contributor": contributor,
-          "timestamp": moment().utc().toISOString(),
+          "timestamp": timestamp,
+          "data_model_version": _.last(versions),
+          "_contributor": _contributor,
+          "_name": name,
+          "_is_activated": "false",
+          "_is_latest": "true",
+          "_private_key": uuid.v4(),
+          "_history": [{
+            "id": next_id,
+            "version": null,
+            "contributor": _contributor,
+            "timestamp": timestamp,
+            "data_model_version": _.last(versions)
+          }]
+        };
+
+        summary = summary || {};
+        summary.contribution = summary.contribution || {};
+        summary.contribution = _.merge(summary.contribution, contributionSummary);
+
+        let contributionRow = {
+          "contributor": contributor,
+          "id": next_id,
+          "version": null,
+          "timestamp": timestamp,
           "data_model_version": _.last(versions)
-        }];
+        };
+
+        contribution = contribution || {};
+        contribution.contribution =
+          contribution.contribution &&
+          contribution.contribution.length &&
+          contribution.contribution.length === 1 &&
+          contribution.contribution || [{}];
+        contribution.contribution[0] = _.merge(contribution.contribution[0], contributionRow);
 
         // Create the new contribution and return the new contribution ID
         await esClient.index({
           "index": index,
           "type": "contribution",
           "id": next_id + "_0",
-          "body": body,
+          "body": {
+            "summary": summary,
+            "contribution": contribution
+          },
           "refresh": true
         });
 
@@ -358,7 +362,6 @@ export default function () {
         let contributionRow = {
           "contributor": contributor,
           "id": _.parseInt(id),
-          "version": null,
           "timestamp": moment().utc().toISOString(),
           "data_model_version": _.last(versions)
         };
@@ -390,6 +393,111 @@ export default function () {
       } catch(error) {
         console.error("esUpdatePrivateContribution", index, contributor, _contributor, id, error.message);
         throw new Meteor.Error("esUpdatePrivateContribution", error.message);
+      }
+    },
+
+    async esUpdatePrivatePreSummaries({index, contributor, id}) {
+      console.log("esUpdatePrivatePreSummaries", index, contributor, id);
+      this.unblock();
+
+      const summarizer = new SummarizeContribution({});
+
+      let contribution = {};
+      let summary = {};
+      try {
+        let resp = await esClient.search({
+          "index": index,
+          "type": "contribution",
+          "body": {
+            "_source": {
+              "includes": ["summary.contribution.*", "contribution.*", "criteria.*"]
+            },
+            "query": {
+              "bool": {
+                "filter": [{
+                  "term": {
+                    "summary.contribution.id": id
+                  }
+                }, {
+                  "term": {
+                    "summary.contribution.contributor.raw": contributor
+                  }
+                }, {
+                  "term": {
+                    "summary.contribution._is_activated": "false"
+                  }
+                }]
+              }
+            }
+          }
+        });
+        if (resp.hits.total > 0) {
+          if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+            resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+          contribution = resp.hits.hits[0]._source.contribution;
+          summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+        }
+
+        await summarizer.preSummarizePromise(contribution, {summary: summary});
+
+        let doc = { contribution: contribution, summary: summarizer.json.contribution.summary };
+        if (contribution.criteria) doc.criteria = contribution.criteria;
+      
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "doc": doc
+          }
+        });
+        console.log("esUpdatePrivatePreSummaries updated contribution doc", index, contributor, id + "_0");
+
+        let bulkIndex = [], rowIdx = 1;
+        _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
+          _.keys(summarizer.json[indexType]).forEach((name) => {
+            _.keys(summarizer.json[indexType][name]).forEach((parent) => {
+              bulkIndex.push(
+                { index: { _index: index, _type: indexType, _id: id + '_' + rowIdx } },
+                { summarizer: { indexType, name, parent }}
+              );
+              rowIdx += 1;
+            });
+          });
+        });
+
+        await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
+          return new Promise((resolve) => {
+            console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n);
+            esClient.bulk({ 
+              body: bulkIndexChunk.map(row => {
+                if (row && row.summarizer)
+                  row = summarizer.json[row.summarizer.indexType][row.summarizer.name][row.summarizer.parent];
+                  row.summary = row.summary || {};
+                  row.summary.contribution = summarizer.json.contribution.summary.contribution;
+                return row;
+              }) 
+            }, (err, resp) => {
+              if (!resp || resp.errors) {
+                console.error('esUpdatePrivatePreSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp));
+                resolve(false);
+              } else {
+                console.log('esUpdatePrivatePreSummaries finished chunk', i+1, 'of', n);
+                resolve(true);
+              }
+            });
+          });
+        }, { concurrency: 5 }).then((results) => {
+          if (!_.every(results, Boolean))
+            throw new Meteor.Error("esUpdatePrivatePreSummaries", "Failed to upload private contribution.");
+        });
+
+        console.log("esUpdatePrivatePreSummaries finished", index, contributor, id);
+
+      } catch(error) {
+        console.error("esUpdatePrivatePreSummaries", index, contributor, id, error.message);
+        throw new Meteor.Error("esUpdatePrivatePreSummaries", error.message);
       }
     },
 
@@ -428,12 +536,28 @@ export default function () {
             }
           }
         });
-        if (_.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-          resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-        contribution = resp.hits.hits[0]._source.contribution;
-        summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+        if (resp.hits.total > 0) {
+          if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+            resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+          contribution = resp.hits.hits[0]._source.contribution;
+          summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+        }
 
         await summarizer.summarizePromise(contribution, {summary: summary});
+
+        let doc = { contribution: contribution, summary: summarizer.json.contribution.summary };
+        if (contribution.criteria) doc.criteria = contribution.criteria;
+
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "doc": doc
+          }
+        });
+        console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
 
         let bulkIndex = [], rowIdx = 1;
         _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
@@ -441,21 +565,30 @@ export default function () {
             _.keys(summarizer.json[indexType][name]).forEach((parent) => {
               bulkIndex.push(
                 { index: { _index: index, _type: indexType, _id: id + '_' + rowIdx } },
-                summarizer.json[indexType][name][parent]
+                { summarizer: { indexType, name, parent }}
               );
               rowIdx += 1;
             });
           });
         });
+
         await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
-            console.log('starting chunk', i+1, 'of', n);
-            esClient.bulk({ body: bulkIndexChunk }, (err, resp) => {
+            console.log('esUpdatePrivateSummaries starting chunk', i+1, 'of', n);
+            esClient.bulk({ 
+              body: bulkIndexChunk.map(row => {
+                if (row && row.summarizer)
+                  row = summarizer.json[row.summarizer.indexType][row.summarizer.name][row.summarizer.parent];
+                  row.summary = row.summary || {};
+                  row.summary.contribution = summarizer.json.contribution.summary.contribution;
+                return row;
+              }) 
+            }, (err, resp) => {
               if (!resp || resp.errors) {
-                console.error('errors in chunk', i+1, 'of', n, JSON.stringify(resp));
+                console.error('esUpdatePrivateSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp));
                 resolve(false);
               } else {
-                console.log('finished chunk', i+1, 'of', n);
+                console.log('esUpdatePrivateSummaries finished chunk', i+1, 'of', n);
                 resolve(true);
               }
             });
@@ -464,6 +597,8 @@ export default function () {
           if (!_.every(results, Boolean))
             throw new Meteor.Error("esUpdatePrivateSummaries", "Failed to upload private contribution.");
         });
+
+        console.log("esUpdatePrivateSummaries finished", index, contributor, id);
 
       } catch(error) {
         console.error("esUpdatePrivateSummaries", index, contributor, id, error.message);
@@ -484,7 +619,7 @@ export default function () {
             "size": 100,
             "_source": {
               "excludes": ["*.vals", "*._geo_shape"],
-              "includes": ["summary.contribution.*", "summary._all.*"]
+              "includes": ["summary.contribution.*", "summary._all.*", "summary._incomplete_summary"]
             },
             "query": {
               "bool": {
@@ -506,6 +641,8 @@ export default function () {
               }
             },
             "sort": [{
+              "summary.contribution._is_activated": "asc"
+            }, {
               "summary.contribution.id": "desc"
             }]
           }
@@ -550,7 +687,7 @@ export default function () {
             }
           }
         });
-        return resp.hits.hits[0]._source;
+        return resp.hits.total > 0 && resp.hits.hits[0]._source;
 
       } catch(error) {
         console.error("esGetPrivateContributionSummary", index, id, contributor, error.message);
@@ -581,9 +718,9 @@ export default function () {
             }
           }
         });
-        if (_.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+        if (resp.hits.total > 0 && resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
           resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-        return resp.hits.hits[0]._source.contribution;
+        return resp.hits.total > 0 && resp.hits.hits[0]._source.contribution;
 
       } catch(error) {
         console.error("esGetContribution", index, id, error.message);

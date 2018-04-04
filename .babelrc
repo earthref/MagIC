@@ -1,7 +1,7 @@
 {
   "ignore": [
     "*.es5.js",
-    "/client/lib/modules/magic/data_modes/*",
+    "/client/lib/modules/magic/data_models/*",
     "/client/lib/semantic-ui/*",
     ".scripts/mocha_boot.js"
   ]

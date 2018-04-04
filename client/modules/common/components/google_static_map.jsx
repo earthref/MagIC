@@ -85,7 +85,7 @@ export default class GoogleStaticMap extends React.Component {
           p1.lon_w === p2.lon_w
         );
 
-        src_paths = _.shuffle(src_paths);
+        //src_paths = _.shuffle(src_paths);
 
         let min_dim = Math.max(2*padding + lat_max - lat_min, 2*padding + lon_max - lon_min)/Math.min(width, height);
 
