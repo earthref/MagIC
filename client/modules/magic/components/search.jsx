@@ -191,8 +191,8 @@ class Search extends React.Component {
     let search = this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {
       queries.push(
         searchTerms[term] ? {
-          term: {
-            [searchTerms[term].field]: searchTerms[term].processor(value)
+          terms: {
+          [searchTerms[term].field]: value.split(/\s*\|\|\s*/).map(x => searchTerms[term].processor(x))
           }
         } : {
           wildcard: {

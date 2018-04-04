@@ -161,7 +161,11 @@ class SearchSummariesListItem extends React.Component {
     ['Location', 'Site', 'Sample', 'Specimen', 'Experiment'].forEach(label => {
       let level = label.toLowerCase() + 's';
       let name = label.toLowerCase();
-      if (item.summary && item.summary._all && item.summary._all[name] && item.summary._all[name].length) {
+      if (item.summary && item.summary._all && item.summary._all['_n_' + level]) {
+        let count = item.summary._all['_n_' + level];
+        counts.push(count);
+        labels.push(label + (count !== 1 ? 's' : ''));
+      } else if (item.summary && item.summary._all && item.summary._all[name] && item.summary._all[name].length) {
         let count = item.summary._all[name].length;
         counts.push(count);
         labels.push(label + (count !== 1 ? 's' : ''));
@@ -188,6 +192,14 @@ class SearchSummariesListItem extends React.Component {
             );
           })}
         </tbody></table>
+      </div>
+    );
+  }
+
+  renderQueuedForIndex(item) {
+    return (
+      <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'left', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/><b>Queued for Indexing</b><br/>Data are available for<br/>downloading and in<br/>the "Rows" sub-tabs.
       </div>
     );
   }
@@ -226,7 +238,6 @@ class SearchSummariesListItem extends React.Component {
             x => _.flatten(x.coordinates).join('_')),
           x => _.flatten(x.coordinates).join('_'))
         .forEach(envelope => {
-          console.log("static map table envelope", envelope.coordinates);
           paths.push({
             lat_s: envelope.coordinates[0][1],
             lat_n: envelope.coordinates[1][1],
@@ -241,7 +252,6 @@ class SearchSummariesListItem extends React.Component {
             x => _.flatten(x.coordinates).join('_')),
           x => _.flatten(x.coordinates).join('_'))
         .forEach(point => {
-          console.log("static map table point", point.coordinates);
           paths.push({
             lat_s: point.coordinates[1],
             lat_n: point.coordinates[1],
@@ -256,7 +266,6 @@ class SearchSummariesListItem extends React.Component {
             x => _.flatten(x.coordinates).join('_')),
           x => _.flatten(x.coordinates).join('_'))
         .forEach(envelope => {
-          console.log("static map all envelope", envelope.coordinates);
           paths.push({
             lat_s: envelope.coordinates[0][1],
             lat_n: envelope.coordinates[1][1],
@@ -271,7 +280,6 @@ class SearchSummariesListItem extends React.Component {
             x => _.flatten(x.coordinates).join('_')), 
           x => _.flatten(x.coordinates).join('_'))
         .forEach(point => {
-          console.log("static map all point", point.coordinates);
           paths.push({
             lat_s: point.coordinates[1],
             lat_n: point.coordinates[1],
@@ -551,18 +559,27 @@ class SearchSummariesListItem extends React.Component {
                   <b>{item.summary.contribution && item.summary.contribution._contributor}</b>
                 </span>
               </div>
-              <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
-                {this.renderDownloadButton(item)}
-                {this.renderLinks(item)}
-                {this.renderCounts(item)}
-                {this.renderMapThumbnail(item)}
-                {this.renderGeo(item)}
-                {this.renderGeology(item)}
-                {this.renderAge(item)}
-                {this.renderInt(item)}
-                {this.renderMethodCodes(item)}
-                {this.renderCitations(item)}
+              {item.summary && item.summary._incomplete_summary !== "true" ? 
+                <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                  {this.renderDownloadButton(item)}
+                  {this.renderLinks(item)}
+                  {this.renderCounts(item)}
+                  {this.renderMapThumbnail(item)}
+                  {this.renderGeo(item)}
+                  {this.renderGeology(item)}
+                  {this.renderAge(item)}
+                  {this.renderInt(item)}
+                  {this.renderMethodCodes(item)}
+                  {this.renderCitations(item)}
+                </div>
+              :
+                <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                  {this.renderDownloadButton(item)}
+                  {this.renderLinks(item)}
+                  {this.renderCounts(item)}
+                  {this.renderQueuedForIndex(item)}
               </div>
+              }
             </div>
           </div>
           <div className={'content' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{fontSize: 'small', paddingBottom: 0}}>
