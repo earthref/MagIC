@@ -10,6 +10,7 @@ import Clamp from '/client/modules/common/components/clamp';
 import ParseContribution from '/lib/modules/magic/parse_contribution.js';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import GoogleStaticMap from '/client/modules/common/components/google_static_map';
+import GoogleMap from '/client/modules/common/components/google_map';
 import {index} from '/lib/configs/magic/search_levels.js';
 
 class SearchSummariesListItem extends React.Component {
@@ -17,7 +18,8 @@ class SearchSummariesListItem extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      loaded: false
+      loaded: false,
+      loadMap: false
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'}
@@ -38,9 +40,9 @@ class SearchSummariesListItem extends React.Component {
   }
 
   showMap(e) {
-    /*$(this.refs['map modal']).modal('show');
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();*/
+    this.setState({loadMap: true}, () => 
+      $(this.refs['map modal']).modal('show')
+    );
   }
   
   renderTitle(item) {
@@ -679,15 +681,21 @@ class SearchSummariesListItem extends React.Component {
           }}>
             <i className="caret up icon"></i>
           </div>
-          <div ref="map modal" className="ui fullscreen modal">
-            <i className="close icon"></i>
-            <div className="header">
-              {item.citation} Map
-            </div>
-            <img className="ui bordered image" src="/MagIC/map.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', width:'100%', height:'calc(100vh - 10em)'}}/>
-          </div>
+          {this.state.loadMap && this.renderMapModal(item)}
         </div>
       </div>
+    );
+  }
+
+  renderMapModal(item) {
+    return (
+      <div ref="map modal" className="ui fullscreen modal">
+      <i className="close icon"></i>
+      <div className="header">
+        {item.summary.contribution._reference.citation} Map
+      </div>
+      <GoogleMap style={{width:'100%', height:'calc(100vh - 10em)'}} docs={[item]}/>
+    </div>
     );
   }
 

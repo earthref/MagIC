@@ -722,7 +722,7 @@ class Search extends React.Component {
     });
     if (activeView.name === 'Summaries') return (
       <SearchSummariesView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={es}
         pageSize={5}
@@ -730,7 +730,7 @@ class Search extends React.Component {
     );
     if (activeView.name === 'Rows') return (
       <SearchRowsView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={es}
         table={activeView.es.type === 'experiments' ? 'measurements' : activeView.es.type}
@@ -739,7 +739,7 @@ class Search extends React.Component {
     );
     if (activeView.name === 'Map') return (
       <SearchMapView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
           {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
@@ -748,7 +748,7 @@ class Search extends React.Component {
     );
     if (activeView.name === 'Images' || activeView.name === 'Plots') return (
       <SearchImagesView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={es}
       />
