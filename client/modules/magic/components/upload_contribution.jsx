@@ -163,88 +163,6 @@ export default class MagICUploadContribution extends React.Component {
     this.setState({visibleStep: 2});
   }
 
-  reviewUpload() {
-    this.setState({
-      totalParseErrors: 0,
-      importProgressTaps: this.state.importProgressTaps + 1,
-      visibleStep: 3
-    });
-    if (this.summarizer === undefined) {
-      this.setState({
-        summarizing: true,
-        summarized: false
-      });
-      this.summarizer = new SummarizeContribution({});
-      console.log('before merging', this.state._existing_contribution, this.state._existing_summary);
-      this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (this.contribution[data.table]) delete this.contribution[data.table];
-          }
-        });
-      }
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (data.table === 'measurements') {
-              /* this.contribution.experiments = {};
-              let experimentColumnIdx = data.columns.indexOf('experiment');
-              data.rows.map((row, i) => {
-                this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
-                  columns: data.columns,
-                  rows: []
-                };
-                this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
-              }); */
-              if (this.contribution.measurements !== undefined) {
-                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
-              } else {
-                this.contribution.measurements = {
-                  columns: data.columns,
-                  rows: data.rows
-                }
-              }
-            } else {
-              this.contribution[data.table] = this.contribution[data.table] || [];
-              data.rows.map((row, i) =>
-                this.contribution[data.table].push(
-                  _.reduce(row, (json, column, j) => {
-                    json[data.columns[j]] = column;
-                    return json;
-                  }, {})
-                )
-              );
-            }
-          }
-        });
-      }
-      let contributionOverride = {
-        id: this.state._existing_summary.summary && 
-          this.state._existing_summary.summary.contribution && 
-          this.state._existing_summary.summary.contribution.id || null,
-        _contributor: this.state._contributor,
-        timestamp: moment().utc().toISOString(),
-        reference: this.state._existing_summary.summary && 
-          this.state._existing_summary.summary.contribution && 
-          this.state._existing_summary.summary.contribution.reference || null,
-        version: null
-      };
-      this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
-        this.summary = this.summarizer.json;
-        this.summarizer = undefined;
-        let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
-        this.setState({
-          totalParseErrors: totalParseErrors,
-          importProgressTaps: this.state.importProgressTaps + 1,
-          summarizing: false,
-          summarized: true
-        });
-        console.log('after merging', this.contribution, this.summary);
-      });
-    }
-  }
-
   readFiles(files) {
 
     // Sort the files by name.
@@ -412,6 +330,81 @@ export default class MagICUploadContribution extends React.Component {
     return data;
   }
 
+  reviewUpload() {
+    this.setState({
+      totalParseErrors: 0,
+      importProgressTaps: this.state.importProgressTaps + 1,
+      visibleStep: 3
+    });
+    if (this.summarizer === undefined) {
+      this.setState({
+        summarizing: true,
+        summarized: false
+      });
+      this.summarizer = new SummarizeContribution({});
+      console.log('before merging', this.state._existing_contribution, this.state._existing_summary);
+      this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
+      for (let file of this.files) {
+        if (file.imported) file.imported.map((data) => {
+          if (data.table && data.columns && data.rows) {
+            if (this.contribution[data.table]) delete this.contribution[data.table];
+          }
+        });
+      }
+      for (let file of this.files) {
+        if (file.imported) file.imported.map((data) => {
+          if (data.table && data.columns && data.rows) {
+            if (data.table === 'measurements') {
+              if (this.contribution.measurements !== undefined) {
+                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
+              } else {
+                this.contribution.measurements = {
+                  columns: data.columns,
+                  rows: data.rows
+                }
+              }
+            } else {
+              this.contribution[data.table] = this.contribution[data.table] || [];
+              data.rows.map((row, i) =>
+                this.contribution[data.table].push(
+                  _.reduce(row, (json, column, j) => {
+                    json[data.columns[j]] = column;
+                    return json;
+                  }, {})
+                )
+              );
+            }
+          }
+        });
+      }
+      let contributionOverride = {
+        id: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.id || null,
+        _contributor: this.state._contributor,
+        timestamp: moment().utc().toISOString(),
+        reference: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.reference || null,
+        version: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.version || null
+      };
+      this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
+        this.summary = this.summarizer.json;
+        this.summarizer = undefined;
+        let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
+        this.setState({
+          totalParseErrors: totalParseErrors,
+          importProgressTaps: this.state.importProgressTaps + 1,
+          summarizing: false,
+          summarized: true
+        });
+        console.log('after merging', this.contribution, this.summary);
+      });
+    }
+  }
+
   upload() {
     if (_.isEmpty(this.contribution) || _.isEmpty(this.summary)) {
       this.setState({
@@ -437,11 +430,21 @@ export default class MagICUploadContribution extends React.Component {
           console.log('updated contribution', this.state._id, error);
           if (error) { this.setState({uploadError: error, uploading: false});
           } else { 
-            this.setState({uploaded: true, uploading: false});
-            Meteor.call('esUpdatePrivateSummaries', {
+            Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
               id: this.state._id,
               contributor: this.state._userid
+            }, (error) => {
+              console.log('updated contribution pre-summaries', this.state._id, error);
+              if (error) { this.setState({uploadError: error, uploading: false});
+              } else { 
+                this.setState({uploaded: true, uploading: false});
+                Meteor.call('esUpdatePrivateSummaries', {
+                  index: index,
+                  id: this.state._id,
+                  contributor: this.state._userid
+                });
+              }
             });
           }
         });
@@ -457,12 +460,22 @@ export default class MagICUploadContribution extends React.Component {
         }, (error, id) => {
           console.log('created contribution', id, error);
           if (error) { this.setState({uploadError: error, uploading: false});
-          } else { 
-            this.setState({uploaded: true, uploading: false});
-            Meteor.call('esUpdatePrivateSummaries', {
+          } else {
+            Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
               id: id,
               contributor: this.state._userid
+            }, (error) => {
+              console.log('updated contribution pre-summaries', this.state._id, error);
+              if (error) { this.setState({uploadError: error, uploading: false});
+              } else { 
+                this.setState({uploaded: true, uploading: false});
+                Meteor.call('esUpdatePrivateSummaries', {
+                  index: index,
+                  id: id,
+                  contributor: this.state._userid
+                });
+              }
             });
           }
         });
@@ -530,6 +543,7 @@ export default class MagICUploadContribution extends React.Component {
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
     //console.log('renderDataImporter', this.files[i].format, data);
+    let dataSlice = data.slice(0, 1000);
     if (this.state.parsing) {
 
     }
@@ -538,11 +552,12 @@ export default class MagICUploadContribution extends React.Component {
         portal="MagIC"
         tableName={tableName}
         nHeaderRows={nHeaderRows}
-        data={data}
+        data={dataSlice}
+        nOverflowRows={data.length - dataSlice.length}
         dataModel={models[_.last(versions)]}
-        onReady={(t, c, r) => {
+        onReady={(table, columns, rowIdxs) => {
           this.files[i].imported = this.files[i].imported || [];
-          this.files[i].imported[j] = {table: t, columns: c, rows: r};
+          this.files[i].imported[j] = {table, columns, rows: rowIdxs && _.concat(_.values(_.pick(dataSlice, rowIdxs)), data.slice(1000))};
           this.files[i].importErrors = this.files[i].importErrors || [];
           this.files[i].importErrors[j] = [];
           this.files[i].nImportErrors = _.reduce(this.files[i].importErrors, (n, tableErrors) => n + tableErrors.length, 0)
@@ -1109,36 +1124,41 @@ export default class MagICUploadContribution extends React.Component {
                             Upload Details
                           </span>
                         </div>
-                        <div className="ui basic segment">
-                          <div className="ui small header">
-                            {this.state._name} Before Upload
-                          </div>
-                          <br/>
-                          {!_.isEmpty(this.state._existing_summary) ?
-                            <DividedList items={[this.state._existing_summary]}>
-                              <SearchSummaryListItem table="contribution" collapsed/>
-                            </DividedList>
-                            :
-                            <div>
-                              New Contribution
+                        {!_.isEmpty(this.state._existing_summary) ?
+                          <div>
+                            <div className="ui basic segment">
+                              <div className="ui small header">
+                                {this.state._name} Before Upload
+                              </div>
+                              <br/>
+                              <DividedList items={[this.state._existing_summary]}>
+                                <SearchSummaryListItem table="contribution" collapsed/>
+                              </DividedList>
                             </div>
-                          }
-                        </div>
-                        <div className="ui horizontal divider">
-                          <i className="circle arrow down icon"/>
-                        </div>
-                        <div className="ui basic segment">
-                          <div className="ui small header">
-                            {this.state._name} After Upload
+                            <div className="ui horizontal divider">
+                              <i className="circle arrow down icon"/>
+                            </div>
+                            <div className="ui basic segment">
+                              <div className="ui small header">
+                                {this.state._name} After Upload
+                              </div>
+                              <br/>
+                              <DividedList items={[this.summary.contribution]}>
+                                <SearchSummaryListItem table="contribution" collapsed/>
+                              </DividedList>
+                            </div>
                           </div>
-                          <br/>
-                          <DividedList items={[this.summary.contribution]}>
-                            <SearchSummaryListItem table="contribution" collapsed/>
-                          </DividedList>
-                        </div>
-                        {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
-                        <div/>
-                      </div>}
+                          :
+                          <div>
+                            <div className="ui basic segment">
+                              <DividedList items={[this.summary.contribution]}>
+                                <SearchSummaryListItem table="contribution" collapsed/>
+                              </DividedList>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
                     <br/>
                     {!this.state.uploaded &&
                       <div className={'ui fluid purple button' + (this.state._name.length > 0 && !this.state.summarizing && !this.state.uploading ? '' : ' disabled')}

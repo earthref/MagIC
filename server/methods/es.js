@@ -23,7 +23,8 @@ export default function () {
 
   Meteor.methods({
 
-    async esBuckets({index, type, queries, filters, aggs}) {
+    async esBuckets({index, type, queries, aggs}) {
+      console.log("esBuckets", index, type, queries, aggs);
       this.unblock();
       try {
 
@@ -43,32 +44,18 @@ export default function () {
         };
 
         if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
-          console.log("no private key found in", queries);
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
 
-        let unfilteredResp = await esClient.search({
+        let resp = await esClient.search({
           "index": index,
           "type": type,
           "body": search
         });
-
-        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
-
-        let filteredResp = await esClient.search({
-          "index": index,
-          "type": type,
-          "body": search
-        });
-
-        return _.reverse(_.sortBy(unfilteredResp.aggregations.buckets.buckets.map(filter => {
-          let filtered = _.find(filteredResp.aggregations.buckets.buckets, {key: filter.key});
-          filter.filtered_doc_count = filtered ? filtered.doc_count : 0;
-          return filter;
-        }), ["filtered_doc_count", "doc_count"]));
+        return _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"]));
 
       } catch(error) {
         console.error("esBuckets", index, type, queries, filters, error.message);
@@ -142,7 +129,6 @@ export default function () {
         if (sort) search.sort = sort;
 
         if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
-          console.log("no private key found in", queries);
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -362,7 +348,6 @@ export default function () {
         let contributionRow = {
           "contributor": contributor,
           "id": _.parseInt(id),
-          "timestamp": moment().utc().toISOString(),
           "data_model_version": _.last(versions)
         };
 
@@ -436,20 +421,19 @@ export default function () {
             resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
           contribution = resp.hits.hits[0]._source.contribution;
           summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+          summarizer.json.contribution.summary.contribution = resp.hits.hits[0]._source.summary.contribution;
         }
 
         await summarizer.preSummarizePromise(contribution, {summary: summary});
 
-        let doc = { contribution: contribution, summary: summarizer.json.contribution.summary };
-        if (contribution.criteria) doc.criteria = contribution.criteria;
-      
+        console.log("esUpdatePrivatePreSummaries updating contribution doc", index, contributor, id + "_0");
         await esClient.update({
           "index": index,
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
           "body": {
-            "doc": doc
+            "doc": { summary: summarizer.json.contribution.summary }
           }
         });
         console.log("esUpdatePrivatePreSummaries updated contribution doc", index, contributor, id + "_0");
@@ -545,16 +529,14 @@ export default function () {
 
         await summarizer.summarizePromise(contribution, {summary: summary});
 
-        let doc = { contribution: contribution, summary: summarizer.json.contribution.summary };
-        if (contribution.criteria) doc.criteria = contribution.criteria;
-
+        console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0");
         await esClient.update({
           "index": index,
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
           "body": {
-            "doc": doc
+            "doc": { summary: summarizer.json.contribution.summary }
           }
         });
         console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
@@ -828,27 +810,28 @@ export default function () {
     },
 
     // TODO: pass login token to authenticate changes
-    async esUpdateContributionReference({index, id, contributor, _contributor, reference, description}) {
-      console.log("esUpdateContributionReference", index, id, contributor, _contributor, reference, description);
+    async esUpdateContributionReference({index, id, contributor, _contributor, timestamp, reference, description}) {
+      console.log("esUpdateContributionReference", index, id, contributor, _contributor, timestamp, reference, description);
       this.unblock();
 
+      timestamp = timestamp || moment().utc().toISOString();
       let doi = _.toUpper(_.trim(reference));
       let _reference = {};
-      let _history = [{
-        "id": _.parseInt(id),
-        "version": null,
-        "contributor": _contributor,
-        "timestamp": moment().utc().toISOString(),
-        "data_model_version": _.last(versions),
-        "description": description
-      }];
-      let version = null;
 
       try {
         _reference = Meteor.call("getReferenceMetadata", doi);
       } catch(error) {
         console.error("esUpdateContributionReference", index, id, contributor, _contributor, reference, description, error.message);
       }
+
+      let _history = [{
+        "id": _.parseInt(id),
+        "version": null,
+        "contributor": _contributor,
+        "timestamp": timestamp || moment().utc().toISOString(),
+        "data_model_version": _.last(versions),
+        "description": description
+      }];
 
       try {
         let resp = await esClient.search({
@@ -878,18 +861,16 @@ export default function () {
           }
         });
         if (resp.hits.total > 0) {
-          version = parseInt(resp.hits.hits[0]._source.summary.contribution._history[0].version) + 1;
-          _history[0].version = version;
+          _history[0].version = parseInt(resp.hits.hits[0]._source.summary.contribution._history[0].version) + 1;
           _history.push(...resp.hits.hits[0]._source.summary.contribution._history);
         } else {
-          version = 1;
-          _history[0].version = version;
+          _history[0].version = 1;
         }
       } catch(error) {
-        version = 1;
-        _history[0].version = version;
+        _history[0].version = 1;
         console.error("esUpdateContributionReference", index, id, contributor, _contributor, reference, description, error.message);
       }
+      let version = _history[0].version;
 
       try {
         await esClient.update({
@@ -918,7 +899,7 @@ export default function () {
                 "contribution": {
                   "version": version,
                   "contributor": contributor,
-                  "timestamp": moment().utc().toISOString(),
+                  "timestamp": timestamp,
                   "data_model_version": _.last(versions),
                   "description": description,
                   "reference": doi,
@@ -930,7 +911,7 @@ export default function () {
                 "contribution": [{
                   "version": version,
                   "contributor": contributor,
-                  "timestamp": moment().utc().toISOString(),
+                  "timestamp": timestamp,
                   "data_model_version": _.last(versions),
                   "description": description,
                   "reference": doi
@@ -972,13 +953,14 @@ export default function () {
       this.unblock();
 
       let prev_id;
+      let contributionSummary;
       try {
         let resp = await esClient.search({
           "index": index,
           "type": "contribution",
           "body": {
             "_source": {
-              "includes": ["summary.contribution._history"]
+              "includes": ["summary.contribution"]
             },
             "query": {
               "bool": {
@@ -991,6 +973,8 @@ export default function () {
             }
           }
         });
+        if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary)
+          contributionSummary = resp.hits.hits[0]._source.summary.contribution;
         if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary.contribution._history.length > 1) {
           prev_id = resp.hits.hits[0]._source.summary.contribution._history[1].id;
           await esClient.updateByQuery({
@@ -1013,12 +997,14 @@ export default function () {
       }
 
       try {
-        await esClient.updateByQuery({
+        contributionSummary._is_activated = "true";
+        resp = await esClient.updateByQuery({
           "index": index,
           "refresh": true,
           "body": {
             "script": {
-              "inline": "ctx._source.summary.contribution._is_activated = \"true\""
+              "inline": "ctx._source.summary.contribution = params.contributionSummary",
+              "params": {contributionSummary}
             },
             "query": {
               "term": {
@@ -1027,6 +1013,7 @@ export default function () {
             }
           }
         });
+        console.log("esActivateContribution activated ", resp.updated, "of", resp.total);
       } catch(error) {
         console.error("esActivateContribution", index, id, error.message);
         throw new Meteor.Error("esActivateContribution", error.message);
