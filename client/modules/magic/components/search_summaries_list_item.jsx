@@ -132,7 +132,7 @@ class SearchSummariesListItem extends React.Component {
             <span>{'earthref.org/MagIC/' + id}</span>
           }</p>
         </span>}
-        {id && (id == 11909 || id >= 16281) &&
+        {id && (id > 16438) && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
         <span>
           <b>EarthRef Data DOI Link:</b>
           <p>{_is_activated ?
@@ -140,7 +140,7 @@ class SearchSummariesListItem extends React.Component {
             <span>Created Upon Activation</span>
           }</p>
         </span>}
-        {id && id != 11909 && id < 16281 &&
+        {id && (id <= 16438) && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
         <span>
           <b>EarthRef Data DOI Link:</b>
           <p>{_is_activated ?
