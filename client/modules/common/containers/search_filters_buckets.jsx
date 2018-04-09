@@ -3,7 +3,8 @@ import SearchFiltersBuckets from '/client/modules/common/components/search_filte
 import {compose} from 'react-komposer';
 
 export const composer = ({es}, onData) => {
-  Meteor.call('esBuckets', es, (error, result) => {
+  onData(null, { filters: undefined });
+  if (es) Meteor.call('esBuckets', es, (error, result) => {
     try {
       if (error) {
         console.error('esBuckets', error);

@@ -31,6 +31,7 @@ export default class SearchFiltersBuckets extends React.Component {
   toggleList() {
     $(this.refs['title']).toggleClass('active');
     $(this.refs['content']).slideToggle(250);
+    if (this.props.onClick) this.props.onClick();
   }
 
   toggleOverflow() {
@@ -53,7 +54,7 @@ export default class SearchFiltersBuckets extends React.Component {
   }
 
   renderActiveFilters() {
-    let filters = _.filter(this.props.filters, (o) => o.filtered_doc_count > 0);
+    let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
     return (
       <div>
         {filters.slice(0, this.props.maxBuckets).map((filter) => {
@@ -67,8 +68,12 @@ export default class SearchFiltersBuckets extends React.Component {
   renderInactiveFilters() {
     const nToShow = this.props.show || 10;
     let i = 0;
-    let filters = _.filter(this.props.filters, (o) => o.filtered_doc_count > 0);
-    return (
+    let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
+    return (this.props.filters === undefined ? 
+      <div style={{textAlign: "center"}}>
+        <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
+      </div>
+    :
       <div>
         {filters.slice(0, this.props.maxBuckets).map((filter) => {
           if (!(filter.key in this.state.activeFilters) && i < nToShow) {
@@ -84,7 +89,7 @@ export default class SearchFiltersBuckets extends React.Component {
     const nToShow = this.props.show || 10;
     let i = 0;
     let hasOverflow = false;
-    let filters = _.filter(this.props.filters, (o) => o.filtered_doc_count > 0);
+    let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
     return (
       <div>
         <div ref="overflow" style={{display: 'none'}}>
@@ -125,13 +130,13 @@ export default class SearchFiltersBuckets extends React.Component {
         </div>
         <div>
           <div className="ui circular small basic label" onMouseOver={(e) => $(e.target).popup({
-            html: `${filter.filtered_doc_count} ${filter.filtered_doc_count === 1 ? 'has' : 'have'} a ` +
-                  `<b>${this.props.title} "${filter.key}" ${filter.filtered_doc_count === 1 ? 'value' : 'values'}</b> ` +
-                  `and ${filter.filtered_doc_count === 1 ? 'matches' : 'match'} the current search and filters.`,
+            html: `${filter.doc_count} ${filter.doc_count === 1 ? 'has' : 'have'} a ` +
+                  `<b>${this.props.title} "${filter.key}" ${filter.doc_count === 1 ? 'value' : 'values'}</b> ` +
+                  `and ${filter.doc_count === 1 ? 'matches' : 'match'} the current search and filters.`,
             position: 'bottom right',
             variation: 'small'
           }).popup('show')}>
-            {filter.filtered_doc_count}
+            {filter.doc_count}
           </div>
         </div>
       </div>
@@ -162,7 +167,6 @@ export default class SearchFiltersBuckets extends React.Component {
 
 SearchFiltersBuckets.propTypes = {
   activeFilters: PropTypes.array,
-  filters:       PropTypes.array.isRequired,
   title:         PropTypes.string.isRequired,
   show:          PropTypes.number
 };

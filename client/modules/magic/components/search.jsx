@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import React from 'react';
 import {Link} from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -99,6 +100,7 @@ class Search extends React.Component {
       sort: 'Recently Contributed First',
       sortDefault: true,
       activeFilters: {},
+      openedFilters: {},
       height: undefined,
       width: undefined,
       lat_min: undefined,
@@ -111,7 +113,9 @@ class Search extends React.Component {
       age_max_unit: undefined,
       int_min: undefined,
       int_max: undefined,
-      int_unit: undefined
+      int_unit: undefined,
+      pub_yr_min: undefined,
+      pub_yr_max: undefined,
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
@@ -283,6 +287,20 @@ class Search extends React.Component {
         lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
       }}});
 
+    if (_.isNumber(this.state.pub_yr_min) && _.isNumber(this.state.pub_yr_max))
+      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+        gte: this.state.pub_yr_min,
+        lte: this.state.pub_yr_max
+      }}});
+    else if (_.isNumber(this.state.pub_yr_min))
+      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+        gte: this.state.pub_yr_min
+      }}});
+    else if (_.isNumber(this.state.pub_yr_max))
+      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+        lte: this.state.pub_yr_max
+      }}});
+
     console.log('activeFilters', activeFilters);
     return activeFilters;
   }
@@ -379,7 +397,7 @@ class Search extends React.Component {
                       Filters
                     </div>
                     <div className="right aligned item" style={{padding:'0 1em'}}>
-                      <div className={'ui small compact basic button' + (activeFilters.length > 0 ? '' : ' disabled')} style={{padding:'0.5em'}}
+                      <div className={'ui small compact button' + (activeFilters.length > 0 ? ' ' + portals['MagIC'].color : ' basic disabled')} style={{padding:'0.5em'}}
                            onClick={(e) => this.clearActiveFilters()}
                       >
                         <i className="remove circle icon"/>
@@ -390,10 +408,42 @@ class Search extends React.Component {
                 </div>
                 <div ref="filters" className="ui small basic attached segment" style={this.styles.filters}>
                   <div style={{marginTop: '-1em'}}>
+
                     <div style={this.styles.filter}>
                       <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
                         <i className="caret right icon"/>
                       </div>
+                      <div className="ui tiny header" style={this.styles.filterHeader}>
+                        Publication Year
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className={'ui input' + (this.state.pub_yr_min === null ? ' error' : '')}
+                            style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder={"-Infinity"}
+                                style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                                onChange={(e) => {
+                                  this.handleNumericInput('pub_yr_min', e.target.value, -Infinity, _.isNumber(this.state.pub_yr_max) ? this.state.pub_yr_max: moment().year());
+                                }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.pub_yr_max === null ? ' error' : '')}
+                            style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder={moment().year()}
+                                style={{borderTopLeftRadius:0, borderBottomLeftRadius:0}}
+                                onChange={(e) => {
+                                  this.handleNumericInput('pub_yr_max', e.target.value, _.isNumber(this.state.pub_yr_min) ? this.state.pub_yr_min: -Infinity, moment().year());
+                                }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={this.styles.filter}>
+                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
+                        <i className="caret right icon"/>
+                      </div>
+                      
                       <div className="ui tiny header" style={this.styles.filterHeader}>
                         Geospatial Boundary
                       </div>
@@ -519,7 +569,7 @@ class Search extends React.Component {
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.iut_unit || intUnitsDefault}).min}
+                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
                                  style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
                                  onChange={(e) => {
                                    this.handleNumericInput('int_min', e.target.value, 0, _.isNumber(this.state.int_max) ? this.state.int_max: Infinity);
@@ -529,7 +579,7 @@ class Search extends React.Component {
                         <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
                         <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.iut_unit || intUnitsDefault}).max}
+                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
                                  style={{borderRadius:0}}
                                  onChange={(e) => {
                                    this.handleNumericInput('int_max', e.target.value, _.isNumber(this.state.int_min) ? this.state.int_min: 0, Infinity);
@@ -559,11 +609,11 @@ class Search extends React.Component {
                             name={filter.name}
                             title={filter.title}
                             maxBuckets={filter.maxBuckets}
-                            es={{
+                            es={this.state.openedFilters[filter.name] && {
+                              index: index,
                               type: 'contribution',
                               queries: searchQueries,
-                              filters: activeFilters,
-                              aggs:    filter.aggs
+                              aggs: filter.aggs
                             }}
                             activeFilters={this.state.activeFilters[filter.name]}
                             onChange={(filters) => {
@@ -573,6 +623,12 @@ class Search extends React.Component {
                               else
                                 delete activeFilters[filter.name];
                               this.setState({activeFilters});
+                            }}
+                            onClick={() => {
+                              console.log('clicked');
+                              let openedFilters = this.state.openedFilters;
+                              openedFilters[filter.name] = true;
+                              this.setState({openedFilters});
                             }}
                           />
                         </div>

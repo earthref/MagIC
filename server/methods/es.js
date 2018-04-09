@@ -23,7 +23,8 @@ export default function () {
 
   Meteor.methods({
 
-    async esBuckets({index, type, queries, filters, aggs}) {
+    async esBuckets({index, type, queries, aggs}) {
+      console.log("esBuckets", index, type, queries, aggs);
       this.unblock();
       try {
 
@@ -43,32 +44,18 @@ export default function () {
         };
 
         if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
-          console.log("no private key found in", queries);
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
 
-        let unfilteredResp = await esClient.search({
+        let resp = await esClient.search({
           "index": index,
           "type": type,
           "body": search
         });
-
-        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
-
-        let filteredResp = await esClient.search({
-          "index": index,
-          "type": type,
-          "body": search
-        });
-
-        return _.reverse(_.sortBy(unfilteredResp.aggregations.buckets.buckets.map(filter => {
-          let filtered = _.find(filteredResp.aggregations.buckets.buckets, {key: filter.key});
-          filter.filtered_doc_count = filtered ? filtered.doc_count : 0;
-          return filter;
-        }), ["filtered_doc_count", "doc_count"]));
+        return _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"]));
 
       } catch(error) {
         console.error("esBuckets", index, type, queries, filters, error.message);
@@ -142,7 +129,6 @@ export default function () {
         if (sort) search.sort = sort;
 
         if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
-          console.log("no private key found in", queries);
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -435,6 +421,7 @@ export default function () {
             resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
           contribution = resp.hits.hits[0]._source.contribution;
           summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+          summarizer.json.contribution.summary.contribution = resp.hits.hits[0]._source.summary.contribution;
         }
 
         await summarizer.preSummarizePromise(contribution, {summary: summary});
