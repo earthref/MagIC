@@ -7,9 +7,10 @@ export const composer = ({es}, onData) => {
   Meteor.call('esCount', es, (error, result) => {
     try {
       if (error) {
-        console.error('search_rows_view', error);
+        console.error('SearchRowsView', error);
         onData(null, {error: error});
       } else {
+        console.log('SearchRowsView', result);
         onData(null, {count: result});
       }
     } catch (error) {}

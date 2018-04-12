@@ -131,13 +131,15 @@ export default class MagICUploadContribution extends React.Component {
             uploadError: undefined
           });
           Meteor.call('esGetContribution', {index: index, id: value}, (error, existing_contribution) => {
-            this.setState({_existing_contribution: existing_contribution});
+            console.log("got existing contribution:", existing_contribution);
+            this.setState({_existing_contribution: _.cloneDeep(existing_contribution)});
             Meteor.call('esGetPrivateContributionSummary', {
               index: index,
               contributor: this.state._userid,
               id: value
             }, (error, existing_summary) => {
-              this.setState({_existing_summary: existing_summary}, () =>
+              console.log("got existing summary:", existing_summary);
+              this.setState({_existing_summary: _.cloneDeep(existing_summary)}, () =>
                 this.reviewUpload()
               );
             });
@@ -159,82 +161,6 @@ export default class MagICUploadContribution extends React.Component {
 
   reviewImport() {
     this.setState({visibleStep: 2});
-  }
-
-  reviewUpload() {
-    this.setState({
-      totalParseErrors: 0,
-      importProgressTaps: this.state.importProgressTaps + 1,
-      visibleStep: 3
-    });
-    if (this.summarizer === undefined) {
-      this.setState({
-        summarizing: true,
-        summarized: false
-      });
-      this.summarizer = new SummarizeContribution({});
-      console.log('before merging', this.state._existing_contribution, this._existing_summary);
-      this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (this.contribution[data.table]) delete this.contribution[data.table];
-          }
-        });
-      }
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (data.table === 'measurements') {
-              /* this.contribution.experiments = {};
-              let experimentColumnIdx = data.columns.indexOf('experiment');
-              data.rows.map((row, i) => {
-                this.contribution.experiments[row[experimentColumnIdx]] = this.contribution.experiments[row[experimentColumnIdx]] || {
-                  columns: data.columns,
-                  rows: []
-                };
-                this.contribution.experiments[row[experimentColumnIdx]].rows.push(row);
-              }); */
-              if (this.contribution.measurements !== undefined) {
-                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
-              } else {
-                this.contribution.measurements = {
-                  columns: data.columns,
-                  rows: data.rows
-                }
-              }
-            } else {
-              this.contribution[data.table] = this.contribution[data.table] || [];
-              data.rows.map((row, i) =>
-                this.contribution[data.table].push(
-                  _.reduce(row, (json, column, j) => {
-                    json[data.columns[j]] = column;
-                    return json;
-                  }, {})
-                )
-              );
-            }
-          }
-        });
-      }
-      this.summarizer.summarizeContributionPromise(this.contribution, { summary: { contribution: {
-        id: null,
-        _contributor: this.state._contributor,
-        timestamp: moment().utc().toISOString(),
-        version: null
-      }}}).then(() => {
-        this.summary = this.summarizer.json;
-        this.summarizer = undefined;
-        let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
-        this.setState({
-          totalParseErrors: totalParseErrors,
-          importProgressTaps: this.state.importProgressTaps + 1,
-          summarizing: false,
-          summarized: true
-        });
-        console.log('after merging', this.contribution, this.summary);
-      });
-    }
   }
 
   readFiles(files) {
@@ -404,6 +330,81 @@ export default class MagICUploadContribution extends React.Component {
     return data;
   }
 
+  reviewUpload() {
+    this.setState({
+      totalParseErrors: 0,
+      importProgressTaps: this.state.importProgressTaps + 1,
+      visibleStep: 3
+    });
+    if (this.summarizer === undefined) {
+      this.setState({
+        summarizing: true,
+        summarized: false
+      });
+      this.summarizer = new SummarizeContribution({});
+      console.log('before merging', this.state._existing_contribution, this.state._existing_summary);
+      this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
+      for (let file of this.files) {
+        if (file.imported) file.imported.map((data) => {
+          if (data.table && data.columns && data.rows) {
+            if (this.contribution[data.table]) delete this.contribution[data.table];
+          }
+        });
+      }
+      for (let file of this.files) {
+        if (file.imported) file.imported.map((data) => {
+          if (data.table && data.columns && data.rows) {
+            if (data.table === 'measurements') {
+              if (this.contribution.measurements !== undefined) {
+                file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
+              } else {
+                this.contribution.measurements = {
+                  columns: data.columns,
+                  rows: data.rows
+                }
+              }
+            } else {
+              this.contribution[data.table] = this.contribution[data.table] || [];
+              data.rows.map((row, i) =>
+                this.contribution[data.table].push(
+                  _.reduce(row, (json, column, j) => {
+                    json[data.columns[j]] = column;
+                    return json;
+                  }, {})
+                )
+              );
+            }
+          }
+        });
+      }
+      let contributionOverride = {
+        id: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.id || null,
+        _contributor: this.state._contributor,
+        timestamp: moment().utc().toISOString(),
+        reference: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.reference || null,
+        version: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.version || null
+      };
+      this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
+        this.summary = this.summarizer.json;
+        this.summarizer = undefined;
+        let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
+        this.setState({
+          totalParseErrors: totalParseErrors,
+          importProgressTaps: this.state.importProgressTaps + 1,
+          summarizing: false,
+          summarized: true
+        });
+        console.log('after merging', this.contribution, this.summary);
+      });
+    }
+  }
+
   upload() {
     if (_.isEmpty(this.contribution) || _.isEmpty(this.summary)) {
       this.setState({
@@ -417,6 +418,7 @@ export default class MagICUploadContribution extends React.Component {
         uploading: true
       });
       if (this.state._id !== '') {
+        console.log('updating contribution', this.state._id);
         Meteor.call('esUpdatePrivateContribution', {
           index: index,
           contributor: this.state._userid,
@@ -426,85 +428,54 @@ export default class MagICUploadContribution extends React.Component {
           summary: this.summary.contribution.summary
         }, (error) => {
           console.log('updated contribution', this.state._id, error);
-          if (error) this.setState({uploadError: error, uploading: false});
-          else if (this.state._id && this.contribution && this.contribution.contribution && this.contribution.contribution.length > 0 &&
-              (this.contribution.contribution[0].reference || this.contribution.contribution[0].description)) {
-            Meteor.call('esUpdateContributionReference', {
-              index: index,
-              id: this.state._id,
-              contributor: this.state._userid,
-              _contributor: this.state._contributor,
-              reference: this.contribution.contribution[0].reference,
-              description: this.contribution.contribution[0].description
-            }, (error) => {
-              console.log('updated contribution reference', error);
-              if (error) this.setState({uploadError: error, uploading: false});
-              else Meteor.call('esUpdatePrivateSummaries', {
-                index: index,
-                id: this.state._id,
-                contributor: this.state._userid
-              }, (error) => {
-                console.log('updated contribution summaries', error);
-                if (error) this.setState({uploadError: error, uploading: false});
-                else this.setState({uploaded: true, uploading: false});
-              });
-            });
-          } else {
-            if (error) this.setState({uploadError: error, uploading: false});
-            else Meteor.call('esUpdatePrivateSummaries', {
+          if (error) { this.setState({uploadError: error, uploading: false});
+          } else { 
+            Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
               id: this.state._id,
               contributor: this.state._userid
             }, (error) => {
-              console.log('updated contribution summaries', error);
-              if (error) this.setState({uploadError: error, uploading: false});
-              else this.setState({uploaded: true, uploading: false});
+              console.log('updated contribution pre-summaries', this.state._id, error);
+              if (error) { this.setState({uploadError: error, uploading: false});
+              } else { 
+                this.setState({uploaded: true, uploading: false});
+                Meteor.call('esUpdatePrivateSummaries', {
+                  index: index,
+                  id: this.state._id,
+                  contributor: this.state._userid
+                });
+              }
             });
           }
         });
       } else {
+        console.log('creating contribution');
         Meteor.call('esCreatePrivateContribution', {
           index: index,
           contributor: this.state._userid,
           _contributor: this.state._contributor,
           name: this.state._name,
           contribution: this.contribution,
-          summary: this.summary
+          summary: this.summary.contribution.summary
         }, (error, id) => {
-          console.log('created contribution', id, error, this.contribution);
-          if (error) this.setState({uploadError: error, uploading: false});
-          else if (id && this.contribution && this.contribution.contribution && this.contribution.contribution.length > 0 &&
-              (this.contribution.contribution[0].reference || this.contribution.contribution[0].description)) {
-            Meteor.call('esUpdateContributionReference', {
-              index: index,
-              id: id,
-              contributor: this.state._userid,
-              _contributor: this.state._contributor,
-              reference: this.contribution.contribution[0].reference,
-              description: this.contribution.contribution[0].description
-            }, (error) => {
-              console.log('updated contribution reference', error);
-              if (error) this.setState({uploadError: error, uploading: false});
-              else Meteor.call('esUpdatePrivateSummaries', {
-                index: index,
-                id: id,
-                contributor: this.state._userid
-              }, (error) => {
-                console.log('updated contribution summaries', error);
-                if (error) this.setState({uploadError: error, uploading: false});
-                else this.setState({uploaded: true, uploading: false});
-              });
-            });
+          console.log('created contribution', id, error);
+          if (error) { this.setState({uploadError: error, uploading: false});
           } else {
-            if (error) this.setState({uploadError: error, uploading: false});
-            else Meteor.call('esUpdatePrivateSummaries', {
+            Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
               id: id,
               contributor: this.state._userid
             }, (error) => {
-              console.log('updated contribution summaries', error);
-              if (error) this.setState({uploadError: error, uploading: false});
-              else this.setState({uploaded: true, uploading: false});
+              console.log('updated contribution pre-summaries', this.state._id, error);
+              if (error) { this.setState({uploadError: error, uploading: false});
+              } else { 
+                this.setState({uploaded: true, uploading: false});
+                Meteor.call('esUpdatePrivateSummaries', {
+                  index: index,
+                  id: id,
+                  contributor: this.state._userid
+                });
+              }
             });
           }
         });
@@ -572,6 +543,7 @@ export default class MagICUploadContribution extends React.Component {
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
     //console.log('renderDataImporter', this.files[i].format, data);
+    let dataSlice = data.slice(0, 1000);
     if (this.state.parsing) {
 
     }
@@ -580,11 +552,12 @@ export default class MagICUploadContribution extends React.Component {
         portal="MagIC"
         tableName={tableName}
         nHeaderRows={nHeaderRows}
-        data={data}
+        data={dataSlice}
+        nOverflowRows={data.length - dataSlice.length}
         dataModel={models[_.last(versions)]}
-        onReady={(t, c, r) => {
+        onReady={(table, columns, rowIdxs) => {
           this.files[i].imported = this.files[i].imported || [];
-          this.files[i].imported[j] = {table: t, columns: c, rows: r};
+          this.files[i].imported[j] = {table, columns, rows: rowIdxs && _.concat(_.values(_.pick(dataSlice, rowIdxs)), data.slice(1000))};
           this.files[i].importErrors = this.files[i].importErrors || [];
           this.files[i].importErrors[j] = [];
           this.files[i].nImportErrors = _.reduce(this.files[i].importErrors, (n, tableErrors) => n + tableErrors.length, 0)
@@ -1151,40 +1124,41 @@ export default class MagICUploadContribution extends React.Component {
                             Upload Details
                           </span>
                         </div>
-                        <div className="ui basic segment">
-                          <div className="ui two column very relaxed stackable grid">
-                            <div className="center aligned column">
+                        {!_.isEmpty(this.state._existing_summary) ?
+                          <div>
+                            <div className="ui basic segment">
                               <div className="ui small header">
                                 {this.state._name} Before Upload
                               </div>
                               <br/>
-                              {!_.isEmpty(this.state._existing_summary) ?
-                                <DividedList items={[this.state._existing_summary]}>
-                                  <SearchSummaryListItem table="contribution"/>
-                                </DividedList>
-                                :
-                                <div>
-                                  New Contribution
-                                </div>
-                              }
+                              <DividedList items={[this.state._existing_summary]}>
+                                <SearchSummaryListItem table="contribution" collapsed/>
+                              </DividedList>
                             </div>
-                            <div className="ui vertical divider">
-                              <i className="circle arrow right icon"/>
+                            <div className="ui horizontal divider">
+                              <i className="circle arrow down icon"/>
                             </div>
-                            <div className="center aligned column">
+                            <div className="ui basic segment">
                               <div className="ui small header">
                                 {this.state._name} After Upload
                               </div>
                               <br/>
                               <DividedList items={[this.summary.contribution]}>
-                                <SearchSummaryListItem table="contribution"/>
+                                <SearchSummaryListItem table="contribution" collapsed/>
                               </DividedList>
                             </div>
                           </div>
-                        </div>
-                        {/* The ui segment thinks it's the last segment because of the wrapping <div> for React. */}
-                        <div/>
-                      </div>}
+                          :
+                          <div>
+                            <div className="ui basic segment">
+                              <DividedList items={[this.summary.contribution]}>
+                                <SearchSummaryListItem table="contribution" collapsed/>
+                              </DividedList>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    }
                     <br/>
                     {!this.state.uploaded &&
                       <div className={'ui fluid purple button' + (this.state._name.length > 0 && !this.state.summarizing && !this.state.uploading ? '' : ' disabled')}

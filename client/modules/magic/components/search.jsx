@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import React from 'react';
 import {Link} from 'react-router-dom';
 import Cookies from 'js-cookie';
@@ -9,6 +10,8 @@ import SearchSummariesView from '/client/modules/magic/components/search_summari
 import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
+import SearchDownload from '/client/modules/magic/components/search_download';
+import SearchJSONLD from '/client/modules/magic/containers/search_jsonld';
 import {portals} from '/lib/configs/portals.js';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {levels, index} from '/lib/configs/magic/search_levels.js';
@@ -47,12 +50,16 @@ let filterNames = {};
 //    }
 //  });
 //});
+
 const searchTerms = {
-  "id":     'summary.contribution._history.id',
-  "doi":    'summary.contribution._reference.doi.raw',
-  "author": 'summary.contribution._reference.authors.family.raw',
-  "orcid":  'summary.contribution._reference.authors._orcid.raw',
+  "id":          { field: 'summary.contribution._history.id', processor: x => x },
+  "private_key": { field: 'summary.contribution._private_key', processor: x => x },
+  "doi":         { field: 'summary.contribution._reference.doi.raw', processor: x => _.toUpper(_.trim(x)) },
+  "orcid":       { field: 'summary.contribution._reference.authors._orcid.raw', processor: x => x },
 };
+/*const searchMatches = {
+  "author":      'summary.contribution._reference.authors.family',
+};*/
 const searchSortOption = { name: 'Most Relevant First', sort: [{'_score': 'desc'}] };
 const sortOptions = [
   { name: 'Recently Contributed First'  , sort: [{'summary.contribution.timestamp': 'desc'}] },
@@ -93,6 +100,7 @@ class Search extends React.Component {
       sort: 'Recently Contributed First',
       sortDefault: true,
       activeFilters: {},
+      openedFilters: {},
       height: undefined,
       width: undefined,
       lat_min: undefined,
@@ -106,8 +114,8 @@ class Search extends React.Component {
       int_min: undefined,
       int_max: undefined,
       int_unit: undefined,
-      downloadIDs: [],
-      downloadReady: false,
+      pub_yr_min: undefined,
+      pub_yr_max: undefined,
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
@@ -187,8 +195,8 @@ class Search extends React.Component {
     let search = this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {
       queries.push(
         searchTerms[term] ? {
-          term: {
-            [searchTerms[term]]: value
+          terms: {
+          [searchTerms[term].field]: value.split(/\s*\|\|\s*/).map(x => searchTerms[term].processor(x))
           }
         } : {
           wildcard: {
@@ -279,6 +287,20 @@ class Search extends React.Component {
         lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
       }}});
 
+    if (_.isNumber(this.state.pub_yr_min) && _.isNumber(this.state.pub_yr_max))
+      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+        gte: this.state.pub_yr_min,
+        lte: this.state.pub_yr_max
+      }}});
+    else if (_.isNumber(this.state.pub_yr_min))
+      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+        gte: this.state.pub_yr_min
+      }}});
+    else if (_.isNumber(this.state.pub_yr_max))
+      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+        lte: this.state.pub_yr_max
+      }}});
+
     console.log('activeFilters', activeFilters);
     return activeFilters;
   }
@@ -306,6 +328,7 @@ class Search extends React.Component {
     let activeFilters = this.getActiveFilters();
     return (
       <div className="magic-search">
+        {this.renderJSONLD(searchQueries)}
         <div className="ui top attached tabular menu level-tabs">
           {levels.map((level, i) =>
             <div key={i} className={(this.state.levelNumber === i ? 'active ' : '') + 'item'}
@@ -359,35 +382,11 @@ class Search extends React.Component {
                 Clear
               </div>
             </div>
-            <div className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
-                 onClick={(e) => this.showDownloadModal(searchQueries, activeFilters) }>
+            <SearchDownload className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
+                 queries={searchQueries} filters={activeFilters}>
               <i className="download icon"/>
               Download Results
-            </div>
-            <div ref="download modal" className="ui modal">
-              <div className="header">
-                Download Results
-              </div>
-              <div className="content">
-                <p>Download <b><Count
-                  es={{ index: index, type: 'contribution', queries: searchQueries, filters: activeFilters }}
-                  singular="contribution"
-                  plural="contributions"
-                /></b> in their entirety based on the search parameters. The option to download subsets of the contributions based on the filter settings is coming soon.</p>
-                <p>Note, this may take several minutes to prepare and initiate the download. The file will appear in your browser's download folder.</p>
-              </div>
-              <form className="actions" action="//earthref.org/cgi-bin/z-download.cgi" method="post">
-                {this.state.downloadIDs.map((id, i) =>
-                  <input key={i} type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
-                )}
-                <input type="hidden" name="file_name" value="magic_search_results.zip"/>
-                <input type="hidden" name="no_metadata" value="1"/>
-                <button type="submit" className={'ui approve button' + (this.state.downloadReady ? ' purple' : ' disabled')}>
-                  {this.state.downloadReady ? 'Download' : 'Calculating ...'}
-                </button>
-                <div className="ui cancel button">Cancel</div>
-              </form>
-            </div>
+            </SearchDownload>
           </div>
           <div ref="results" style={{display: 'flex', marginTop: '1em', height: this.state.height || '100%', width: this.state.width || '100%'}}>
             <div>
@@ -398,7 +397,7 @@ class Search extends React.Component {
                       Filters
                     </div>
                     <div className="right aligned item" style={{padding:'0 1em'}}>
-                      <div className={'ui small compact basic button' + (activeFilters.length > 0 ? '' : ' disabled')} style={{padding:'0.5em'}}
+                      <div className={'ui small compact button' + (activeFilters.length > 0 ? ' ' + portals['MagIC'].color : ' basic disabled')} style={{padding:'0.5em'}}
                            onClick={(e) => this.clearActiveFilters()}
                       >
                         <i className="remove circle icon"/>
@@ -409,10 +408,42 @@ class Search extends React.Component {
                 </div>
                 <div ref="filters" className="ui small basic attached segment" style={this.styles.filters}>
                   <div style={{marginTop: '-1em'}}>
+
                     <div style={this.styles.filter}>
                       <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
                         <i className="caret right icon"/>
                       </div>
+                      <div className="ui tiny header" style={this.styles.filterHeader}>
+                        Publication Year
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className={'ui input' + (this.state.pub_yr_min === null ? ' error' : '')}
+                            style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder={"-Infinity"}
+                                style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                                onChange={(e) => {
+                                  this.handleNumericInput('pub_yr_min', e.target.value, -Infinity, _.isNumber(this.state.pub_yr_max) ? this.state.pub_yr_max: moment().year());
+                                }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.pub_yr_max === null ? ' error' : '')}
+                            style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder={moment().year()}
+                                style={{borderTopLeftRadius:0, borderBottomLeftRadius:0}}
+                                onChange={(e) => {
+                                  this.handleNumericInput('pub_yr_max', e.target.value, _.isNumber(this.state.pub_yr_min) ? this.state.pub_yr_min: -Infinity, moment().year());
+                                }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={this.styles.filter}>
+                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
+                        <i className="caret right icon"/>
+                      </div>
+                      
                       <div className="ui tiny header" style={this.styles.filterHeader}>
                         Geospatial Boundary
                       </div>
@@ -538,7 +569,7 @@ class Search extends React.Component {
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.iut_unit || intUnitsDefault}).min}
+                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
                                  style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
                                  onChange={(e) => {
                                    this.handleNumericInput('int_min', e.target.value, 0, _.isNumber(this.state.int_max) ? this.state.int_max: Infinity);
@@ -548,7 +579,7 @@ class Search extends React.Component {
                         <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
                         <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.iut_unit || intUnitsDefault}).max}
+                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
                                  style={{borderRadius:0}}
                                  onChange={(e) => {
                                    this.handleNumericInput('int_max', e.target.value, _.isNumber(this.state.int_min) ? this.state.int_min: 0, Infinity);
@@ -578,11 +609,11 @@ class Search extends React.Component {
                             name={filter.name}
                             title={filter.title}
                             maxBuckets={filter.maxBuckets}
-                            es={{
+                            es={this.state.openedFilters[filter.name] && {
+                              index: index,
                               type: 'contribution',
                               queries: searchQueries,
-                              filters: activeFilters,
-                              aggs:    filter.aggs
+                              aggs: filter.aggs
                             }}
                             activeFilters={this.state.activeFilters[filter.name]}
                             onChange={(filters) => {
@@ -592,6 +623,12 @@ class Search extends React.Component {
                               else
                                 delete activeFilters[filter.name];
                               this.setState({activeFilters});
+                            }}
+                            onClick={() => {
+                              console.log('clicked');
+                              let openedFilters = this.state.openedFilters;
+                              openedFilters[filter.name] = true;
+                              this.setState({openedFilters});
                             }}
                           />
                         </div>
@@ -630,7 +667,9 @@ class Search extends React.Component {
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
               <Count es={_.extend({}, view.es, {
-                queries: searchQueries,
+                queries: view.name === 'Map' ? _.concat(searchQueries, {exists: 
+                  {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
+                }) : searchQueries,
                 filters: activeFilters
               })}/>
             </div>
@@ -683,7 +722,7 @@ class Search extends React.Component {
     });
     if (activeView.name === 'Summaries') return (
       <SearchSummariesView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={es}
         pageSize={5}
@@ -691,7 +730,7 @@ class Search extends React.Component {
     );
     if (activeView.name === 'Rows') return (
       <SearchRowsView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={es}
         table={activeView.es.type === 'experiments' ? 'measurements' : activeView.es.type}
@@ -700,33 +739,40 @@ class Search extends React.Component {
     );
     if (activeView.name === 'Map') return (
       <SearchMapView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
-        es={es}
+        es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
+          {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
+        })})}
       />
     );
     if (activeView.name === 'Images' || activeView.name === 'Plots') return (
       <SearchImagesView
-        key={activeView.name}
+        key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={es}
       />
     );
   }
 
-  showDownloadModal(searchQueries, activeFilters) {
-    Meteor.call('esContributionIDs', {index: index, queries: searchQueries, filters: activeFilters}, (error, result) => {
-      if (error) {
-        console.error('esContributionIDs', error);
-      } else {
-        this.setState({downloadReady: true, downloadIDs: result});
-      }
+  renderJSONLD(searchQueries) {
+    let activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    let es = _.extend({}, activeView.es, {
+      queries: searchQueries
     });
-    $(this.refs['download modal']).modal({
-      onApprove: () => {
+    let queryTerms = [];
+    this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {
+      queryTerms.push(term);
+    });
+    if (_.includes(queryTerms, 'doi')) {
+      return <SearchJSONLD es={es}/>
+    }
+  }
 
-      }
-    }).modal('show');
+  updateDownloadCheckboxes(e) {
+    console.log(e.target == this.refs['download contributions checkbox']);
   }
 
 }

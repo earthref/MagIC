@@ -1,8 +1,11 @@
+import {Promise as BPromise} from 'bluebird';
+
 import {Meteor} from 'meteor/meteor';
+import {Promise} from 'meteor/promise';
 
 import _ from "lodash";
+import uuid from "uuid";
 import moment from "moment";
-import Promise from "bluebird";
 import elasticsearch from "elasticsearch";
 
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
@@ -11,14 +14,17 @@ import {levels} from '/lib/configs/magic/search_levels.js';
 
 const esClient = new elasticsearch.Client({
   //log: "trace",
-  "host": Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || ""
+  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || "",
+  keepAlive: false,
+  requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
 export default function () {
 
   Meteor.methods({
 
-    async esBuckets({index, type, queries, filters, aggs}) {
+    async esBuckets({index, type, queries, aggs}) {
+      console.log("esBuckets", index, type, queries, aggs);
       this.unblock();
       try {
 
@@ -31,38 +37,25 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           },
           aggs : aggs
         };
 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
 
-        let unfilteredResp = await esClient.search({
+        let resp = await esClient.search({
           "index": index,
           "type": type,
           "body": search
         });
-
-        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
-
-        let filteredResp = await esClient.search({
-          "index": index,
-          "type": type,
-          "body": search
-        });
-
-        return _.reverse(_.sortBy(unfilteredResp.aggregations.buckets.buckets.map(filter => {
-          let filtered = _.find(filteredResp.aggregations.buckets.buckets, {key: filter.key});
-          filter.filtered_doc_count = filtered ? filtered.doc_count : 0;
-          return filter;
-        }), ["filtered_doc_count", "doc_count"]));
+        return _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"]));
 
       } catch(error) {
         console.error("esBuckets", index, type, queries, filters, error.message);
@@ -71,6 +64,7 @@ export default function () {
     },
 
     async esCount({index, type, queries, filters, countField}) {
+      console.log("esCount", index, type, queries, filters, countField);
       this.unblock();
       try {
 
@@ -83,18 +77,19 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           }
         };
+        
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
+        }
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
-
         if (_.trim(countField) !== "") search.aggs = { count: { sum: { field: countField }}};
 
         let resp = await esClient.search({
@@ -111,7 +106,7 @@ export default function () {
     },
 
     async esPage({index, type, queries, filters, source, sort}, pageSize, pageNumber) {
-      console.log("esPage", pageNumber, index, type, queries, filters, sort);
+      console.log("esPage", pageSize, pageNumber, index, type, queries, filters, sort);
       this.unblock();
       try {
 
@@ -126,15 +121,18 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
-          },
-          "sort": sort
+          }
         };
+        
+        if (sort) search.sort = sort;
+
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
+        }
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
@@ -149,6 +147,67 @@ export default function () {
       } catch(error) {
         console.error("esPage", index, type, queries, filters, source, sort, pageSize, pageNumber, error.message);
         throw new Meteor.Error("esPage", error.message);
+      }
+    },
+    
+    async esScroll({index, type, queries, filters, source, sort}, pageSize) {
+      console.log("esScroll", index, type, queries, filters, sort);
+      this.unblock();
+      try {
+
+        let search = {
+          "size": pageSize,
+          "_source": source,
+          "query": {
+            "bool": {
+              "must": [],
+              "filter": [{
+                "term": {
+                  "summary.contribution._is_latest": "true"
+                }
+              }]
+            }
+          }
+        };
+        
+        if (sort) search.sort = sort;
+
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
+
+        if (_.isArray(queries)) search.query.bool.must.push(...queries);
+        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
+
+        let resp = await esClient.search({
+          "index": index,
+          "scroll": '30s',
+          "type": type,
+          "body": search
+        });
+        return resp;
+
+      } catch(error) {
+        console.error("esScroll", index, type, queries, filters, source, sort, pageSize, error.message);
+        throw new Meteor.Error("esScroll", error.message);
+      }
+    },
+
+    async esScrollByID(scrollID) {
+      console.log("esScrollByID", scrollID);
+      this.unblock();
+      try {
+
+        let resp = await esClient.scroll({
+          "scrollId": scrollID,
+          "scroll": '30s'
+        });
+        return resp;
+
+      } catch(error) {
+        console.error("esScrollByID", scrollID);
+        throw new Meteor.Error("esScrollByID", error.message);
       }
     },
 
@@ -166,15 +225,16 @@ export default function () {
                 "term": {
                   "summary.contribution._is_latest": "true"
                 }
-              }, {
-                "term": {
-                  "summary.contribution._is_activated": "true"
-                }
               }]
             }
           },
           aggs : {buckets: {terms: {field: "summary.contribution.id", size:1e6}}}
         };
+
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_activated": "true" }
+          });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
@@ -218,55 +278,56 @@ export default function () {
           throw new Error('Failed to retrieve new contribution ID.');
         next_id = _.parseInt(next_id.hits.hits[0]._source.summary.contribution.id) + 1;
 
-        let body = {
-          "summary": {
-            "contribution": {
-              "id": next_id,
-              "version": null,
-              "contributor": contributor,
-              "timestamp": moment().utc().toISOString(),
-              "data_model_version": _.last(versions),
-              "_contributor": _contributor,
-              "_name": name,
-              "_is_activated": "false",
-              "_is_latest": "true",
-              "_history": [{
-                "id": next_id,
-                "version": null,
-                "contributor": _contributor,
-                "timestamp": moment().utc().toISOString(),
-                "data_model_version": _.last(versions)
-              }]
-            }
-          },
-          "contribution": {}
-        };
-
-        if (contribution) {
-          if (summary && summary.contribution) {
-            body = _.merge(summary.contribution, body);
-          } else {
-            const summarizer = new SummarizeContribution({});
-            await summarizer.summarizePromise(contribution, body);
-            body = summarizer.json.contribution;
-          }
-          body.contribution = contribution;
-        }
-
-        body.contribution.contribution = [{
+        let timestamp = moment().utc().toISOString();
+        let contributionSummary = {
           "id": next_id,
           "version": null,
           "contributor": contributor,
-          "timestamp": moment().utc().toISOString(),
+          "timestamp": timestamp,
+          "data_model_version": _.last(versions),
+          "_contributor": _contributor,
+          "_name": name,
+          "_is_activated": "false",
+          "_is_latest": "true",
+          "_private_key": uuid.v4(),
+          "_history": [{
+            "id": next_id,
+            "version": null,
+            "contributor": _contributor,
+            "timestamp": timestamp,
+            "data_model_version": _.last(versions)
+          }]
+        };
+
+        summary = summary || {};
+        summary.contribution = summary.contribution || {};
+        summary.contribution = _.merge(summary.contribution, contributionSummary);
+
+        let contributionRow = {
+          "contributor": contributor,
+          "id": next_id,
+          "version": null,
+          "timestamp": timestamp,
           "data_model_version": _.last(versions)
-        }];
+        };
+
+        contribution = contribution || {};
+        contribution.contribution =
+          contribution.contribution &&
+          contribution.contribution.length &&
+          contribution.contribution.length === 1 &&
+          contribution.contribution || [{}];
+        contribution.contribution[0] = _.merge(contribution.contribution[0], contributionRow);
 
         // Create the new contribution and return the new contribution ID
         await esClient.index({
           "index": index,
           "type": "contribution",
           "id": next_id + "_0",
-          "body": body,
+          "body": {
+            "summary": summary,
+            "contribution": contribution
+          },
           "refresh": true
         });
 
@@ -287,8 +348,6 @@ export default function () {
         let contributionRow = {
           "contributor": contributor,
           "id": _.parseInt(id),
-          "version": null,
-          "timestamp": moment().utc().toISOString(),
           "data_model_version": _.last(versions)
         };
 
@@ -319,6 +378,110 @@ export default function () {
       } catch(error) {
         console.error("esUpdatePrivateContribution", index, contributor, _contributor, id, error.message);
         throw new Meteor.Error("esUpdatePrivateContribution", error.message);
+      }
+    },
+
+    async esUpdatePrivatePreSummaries({index, contributor, id}) {
+      console.log("esUpdatePrivatePreSummaries", index, contributor, id);
+      this.unblock();
+
+      const summarizer = new SummarizeContribution({});
+
+      let contribution = {};
+      let summary = {};
+      try {
+        let resp = await esClient.search({
+          "index": index,
+          "type": "contribution",
+          "body": {
+            "_source": {
+              "includes": ["summary.contribution.*", "contribution.*", "criteria.*"]
+            },
+            "query": {
+              "bool": {
+                "filter": [{
+                  "term": {
+                    "summary.contribution.id": id
+                  }
+                }, {
+                  "term": {
+                    "summary.contribution.contributor.raw": contributor
+                  }
+                }, {
+                  "term": {
+                    "summary.contribution._is_activated": "false"
+                  }
+                }]
+              }
+            }
+          }
+        });
+        if (resp.hits.total > 0) {
+          if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+            resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+          contribution = resp.hits.hits[0]._source.contribution;
+          summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+          summarizer.json.contribution.summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+        }
+
+        await summarizer.preSummarizePromise(contribution, {summary: summary});
+
+        console.log("esUpdatePrivatePreSummaries updating contribution doc", index, contributor, id + "_0");
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "doc": { summary: summarizer.json.contribution.summary }
+          }
+        });
+        console.log("esUpdatePrivatePreSummaries updated contribution doc", index, contributor, id + "_0");
+
+        let bulkIndex = [], rowIdx = 1;
+        _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
+          _.keys(summarizer.json[indexType]).forEach((name) => {
+            _.keys(summarizer.json[indexType][name]).forEach((parent) => {
+              bulkIndex.push(
+                { index: { _index: index, _type: indexType, _id: id + '_' + rowIdx } },
+                { summarizer: { indexType, name, parent }}
+              );
+              rowIdx += 1;
+            });
+          });
+        });
+
+        await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
+          return new Promise((resolve) => {
+            console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n);
+            esClient.bulk({ 
+              body: bulkIndexChunk.map(row => {
+                if (row && row.summarizer)
+                  row = summarizer.json[row.summarizer.indexType][row.summarizer.name][row.summarizer.parent];
+                  row.summary = row.summary || {};
+                  row.summary.contribution = summarizer.json.contribution.summary.contribution;
+                return row;
+              }) 
+            }, (err, resp) => {
+              if (!resp || resp.errors) {
+                console.error('esUpdatePrivatePreSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp));
+                resolve(false);
+              } else {
+                console.log('esUpdatePrivatePreSummaries finished chunk', i+1, 'of', n);
+                resolve(true);
+              }
+            });
+          });
+        }, { concurrency: 5 }).then((results) => {
+          if (!_.every(results, Boolean))
+            throw new Meteor.Error("esUpdatePrivatePreSummaries", "Failed to upload private contribution.");
+        });
+
+        console.log("esUpdatePrivatePreSummaries finished", index, contributor, id);
+
+      } catch(error) {
+        console.error("esUpdatePrivatePreSummaries", index, contributor, id, error.message);
+        throw new Meteor.Error("esUpdatePrivatePreSummaries", error.message);
       }
     },
 
@@ -357,12 +520,26 @@ export default function () {
             }
           }
         });
-        if (_.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-          resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-        contribution = resp.hits.hits[0]._source.contribution;
-        summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+        if (resp.hits.total > 0) {
+          if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+            resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+          contribution = resp.hits.hits[0]._source.contribution;
+          summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+        }
 
         await summarizer.summarizePromise(contribution, {summary: summary});
+
+        console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0");
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "doc": { summary: summarizer.json.contribution.summary }
+          }
+        });
+        console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
 
         let bulkIndex = [], rowIdx = 1;
         _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
@@ -370,29 +547,40 @@ export default function () {
             _.keys(summarizer.json[indexType][name]).forEach((parent) => {
               bulkIndex.push(
                 { index: { _index: index, _type: indexType, _id: id + '_' + rowIdx } },
-                summarizer.json[indexType][name][parent]
+                { summarizer: { indexType, name, parent }}
               );
               rowIdx += 1;
             });
           });
         });
-        await Promise.map(_.chunk(bulkIndex, 2*100), (bulkIndexChunk, i, n) => {
+
+        await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
-            console.log('starting chunk', i+1, 'of', n);
-            esClient.bulk({ body: bulkIndexChunk }, (err, resp) => {
-              if (resp.errors) {
-                console.error('errors in chunk', i+1, 'of', n, JSON.stringify(resp));
+            console.log('esUpdatePrivateSummaries starting chunk', i+1, 'of', n);
+            esClient.bulk({ 
+              body: bulkIndexChunk.map(row => {
+                if (row && row.summarizer)
+                  row = summarizer.json[row.summarizer.indexType][row.summarizer.name][row.summarizer.parent];
+                  row.summary = row.summary || {};
+                  row.summary.contribution = summarizer.json.contribution.summary.contribution;
+                return row;
+              }) 
+            }, (err, resp) => {
+              if (!resp || resp.errors) {
+                console.error('esUpdatePrivateSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp));
                 resolve(false);
               } else {
-                console.log('finished chunk', i+1, 'of', n);
+                console.log('esUpdatePrivateSummaries finished chunk', i+1, 'of', n);
                 resolve(true);
               }
             });
           });
-        }, { concurrency: 3 }).then((results) => {
+        }, { concurrency: 5 }).then((results) => {
           if (!_.every(results, Boolean))
             throw new Meteor.Error("esUpdatePrivateSummaries", "Failed to upload private contribution.");
         });
+
+        console.log("esUpdatePrivateSummaries finished", index, contributor, id);
 
       } catch(error) {
         console.error("esUpdatePrivateSummaries", index, contributor, id, error.message);
@@ -410,9 +598,10 @@ export default function () {
           "index": index,
           "type": "contribution",
           "body": {
+            "size": 100,
             "_source": {
               "excludes": ["*.vals", "*._geo_shape"],
-              "includes": ["summary.contribution.*", "summary._all.*"]
+              "includes": ["summary.contribution.*", "summary._all.*", "summary._incomplete_summary"]
             },
             "query": {
               "bool": {
@@ -434,6 +623,8 @@ export default function () {
               }
             },
             "sort": [{
+              "summary.contribution._is_activated": "asc"
+            }, {
               "summary.contribution.id": "desc"
             }]
           }
@@ -478,7 +669,7 @@ export default function () {
             }
           }
         });
-        return resp.hits.hits[0]._source;
+        return resp.hits.total > 0 && resp.hits.hits[0]._source;
 
       } catch(error) {
         console.error("esGetPrivateContributionSummary", index, id, contributor, error.message);
@@ -509,9 +700,9 @@ export default function () {
             }
           }
         });
-        if (_.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+        if (resp.hits.total > 0 && resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
           resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-        return resp.hits.hits[0]._source.contribution;
+        return resp.hits.total > 0 && resp.hits.hits[0]._source.contribution;
 
       } catch(error) {
         console.error("esGetContribution", index, id, error.message);
@@ -619,27 +810,28 @@ export default function () {
     },
 
     // TODO: pass login token to authenticate changes
-    async esUpdateContributionReference({index, id, contributor, _contributor, reference, description}) {
-      console.log("esUpdateContributionReference", index, id, contributor, _contributor, reference, description);
+    async esUpdateContributionReference({index, id, contributor, _contributor, timestamp, reference, description}) {
+      console.log("esUpdateContributionReference", index, id, contributor, _contributor, timestamp, reference, description);
       this.unblock();
 
+      timestamp = timestamp || moment().utc().toISOString();
       let doi = _.toUpper(_.trim(reference));
       let _reference = {};
-      let _history = [{
-        "id": _.parseInt(id),
-        "version": null,
-        "contributor": _contributor,
-        "timestamp": moment().utc().toISOString(),
-        "data_model_version": _.last(versions),
-        "description": description
-      }];
-      let version = null;
 
       try {
         _reference = Meteor.call("getReferenceMetadata", doi);
       } catch(error) {
         console.error("esUpdateContributionReference", index, id, contributor, _contributor, reference, description, error.message);
       }
+
+      let _history = [{
+        "id": _.parseInt(id),
+        "version": null,
+        "contributor": _contributor,
+        "timestamp": timestamp || moment().utc().toISOString(),
+        "data_model_version": _.last(versions),
+        "description": description
+      }];
 
       try {
         let resp = await esClient.search({
@@ -669,18 +861,16 @@ export default function () {
           }
         });
         if (resp.hits.total > 0) {
-          version = parseInt(resp.hits.hits[0]._source.summary.contribution._history[0].version) + 1;
-          _history[0].version = version;
+          _history[0].version = parseInt(resp.hits.hits[0]._source.summary.contribution._history[0].version) + 1;
           _history.push(...resp.hits.hits[0]._source.summary.contribution._history);
         } else {
-          version = 1;
-          _history[0].version = version;
+          _history[0].version = 1;
         }
       } catch(error) {
-        version = 1;
-        _history[0].version = version;
+        _history[0].version = 1;
         console.error("esUpdateContributionReference", index, id, contributor, _contributor, reference, description, error.message);
       }
+      let version = _history[0].version;
 
       try {
         await esClient.update({
@@ -709,7 +899,7 @@ export default function () {
                 "contribution": {
                   "version": version,
                   "contributor": contributor,
-                  "timestamp": moment().utc().toISOString(),
+                  "timestamp": timestamp,
                   "data_model_version": _.last(versions),
                   "description": description,
                   "reference": doi,
@@ -721,7 +911,7 @@ export default function () {
                 "contribution": [{
                   "version": version,
                   "contributor": contributor,
-                  "timestamp": moment().utc().toISOString(),
+                  "timestamp": timestamp,
                   "data_model_version": _.last(versions),
                   "description": description,
                   "reference": doi
@@ -763,13 +953,14 @@ export default function () {
       this.unblock();
 
       let prev_id;
+      let contributionSummary;
       try {
         let resp = await esClient.search({
           "index": index,
           "type": "contribution",
           "body": {
             "_source": {
-              "includes": ["summary.contribution._history"]
+              "includes": ["summary.contribution"]
             },
             "query": {
               "bool": {
@@ -782,6 +973,8 @@ export default function () {
             }
           }
         });
+        if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary)
+          contributionSummary = resp.hits.hits[0]._source.summary.contribution;
         if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary.contribution._history.length > 1) {
           prev_id = resp.hits.hits[0]._source.summary.contribution._history[1].id;
           await esClient.updateByQuery({
@@ -804,12 +997,14 @@ export default function () {
       }
 
       try {
-        await esClient.updateByQuery({
+        contributionSummary._is_activated = "true";
+        resp = await esClient.updateByQuery({
           "index": index,
           "refresh": true,
           "body": {
             "script": {
-              "inline": "ctx._source.summary.contribution._is_activated = \"true\""
+              "inline": "ctx._source.summary.contribution = params.contributionSummary",
+              "params": {contributionSummary}
             },
             "query": {
               "term": {
@@ -818,6 +1013,7 @@ export default function () {
             }
           }
         });
+        console.log("esActivateContribution activated ", resp.updated, "of", resp.total);
       } catch(error) {
         console.error("esActivateContribution", index, id, error.message);
         throw new Meteor.Error("esActivateContribution", error.message);

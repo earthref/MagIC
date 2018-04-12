@@ -247,7 +247,7 @@ export default class DataImporter extends React.Component {
       newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or an integer.');
     else if (nHeaderRows !== '' && Number.parseInt(nHeaderRows) < 0)
       newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or greater than or equal to 0.');
-    else if (nHeaderRows !== '' && Number.parseInt(nHeaderRows) > newState.in.length)
+    else if (nHeaderRows !== '' && Number.parseInt(nHeaderRows) > newState.in.length && newState.in.length > 0)
       newState.errors.nHeaderRows.push('"Number of Header Rows" must be empty (for no header) or less than or equal to ' + newState.in.length + ' (the number of rows in the dataset).');
     newState.nHeaderRowsInt = Math.max(0, (nHeaderRows === '' ? 0 : Number.parseInt(nHeaderRows)) || 0);
 
@@ -470,12 +470,12 @@ export default class DataImporter extends React.Component {
           if (this.state.excludeColumnIdxs.indexOf(columnIdx) === -1)
             columns.push(this.state.outColumnNames[columnIdx]);
         }
-        let rows = [];
+        let rowIdxs = [];
         for (let rowIdx in this.state.in) {
           if (rowIdx >= this.state.nHeaderRowsInt && this.state.excludeRowIdxs.indexOf(rowIdx) === -1)
-            rows.push(this.state.in[rowIdx]);
+            rowIdxs.push(rowIdx);
         }
-        this.props.onReady(this.state.settings.tableName, columns, rows);
+        this.props.onReady(this.state.settings.tableName, columns, rowIdxs);
       }
       else if (this.props.onNotReady)
         this.props.onNotReady();
@@ -884,7 +884,7 @@ export default class DataImporter extends React.Component {
           </div>
           <div className="right aligned column">
             Importing <div className={'ui horizontal label ' + this.portalColor()}>
-            {nRows}
+            {!this.state.settings.excludeTable && (nRows + (this.props.nOverflowRows || 0)) || 0}
           </div>{(nRows === 1 ? 'row' : 'rows')} with <div className={'ui horizontal label ' + this.portalColor()}>
             {nCols}
           </div>{(nCols === 1 ? 'column.' : 'columns.')}

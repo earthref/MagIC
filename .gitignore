@@ -1,5 +1,6 @@
 # Node
 node_modules
+npm-debug.log*
 
 # Scripts
 .scripts/elasticsearch/.*
@@ -14,3 +15,13 @@ settings.json
 .idea
 
 earthref.ssl.key
+
+# Mac System Files
+*.DS_Store
+
+# Jarboe extra files
+client/modules/magic/components/menuTemplate.jsx
+client/modules/magic/components/templateBasic.jsx
+client/modules/magic/components/templateResource.jsx
+client/modules/magic/components/faq.jsx
+

@@ -1,26 +1,36 @@
 import React from 'react';
-import GoogleMap from '/client/modules/common/components/google_map';
 import {compose} from 'react-komposer';
 
-export const composer = ({context, subscriptionName, elasticsearchQuery, elasticsearchFilters, elasticsearchSort, elasticsearchPageSize, elasticsearchPageNumber, minimongoSort}, onData) => {
-  const {Meteor, Collections} = context();
-  const subscriptionHandle = Meteor.subscribe(subscriptionName, elasticsearchQuery, elasticsearchFilters, elasticsearchSort, elasticsearchPageSize, elasticsearchPageNumber);
-  let docs = null;
-  if (subscriptionHandle.ready()) {
-    docs = Collections[subscriptionName].find({_page: elasticsearchPageNumber}, {sort: minimongoSort}).fetch();
-    onData(null, {docs});
-  } else {
-    onData(null, {docs});
-  }
+import GoogleMap from '/client/modules/common/components/google_map';
+
+export const composer = ({es}, onData) => {
+  let docs = [];
+  onData(null, { docs: [], nDocs: null });
+  Meteor.call('esScroll', es, 1000, function processResults(error, results) {
+    try {
+      if (error) {
+        console.error('SearchMap', error);
+        onData(null, {error: error});
+      } else {
+        docs.push(...results.hits.hits.map(hit => hit._source));
+        console.log('SearchMap', docs.length, results.hits.total);
+        onData(null, {docs: docs, nDocs: results.hits.total});
+        if (results.hits.total > docs.length)
+          Meteor.call('esScrollByID', results._scroll_id, processResults);
+      }
+    } catch (error) {
+      console.error(error);
+      onData(null, {error: error});
+    }
+  });
 };
 
 export default compose(
   composer,
   {
-    loadingHandler: () => (
-      <div className="ui active inverted dimmer" style={{minHeight: '100px'}}>
-        <div className="ui text loader">Loading</div>
-      </div>
-    )
+    propsToWatch: ['es'],
+    shouldSubscribe(currentProps, nextProps) {
+      return !_.isEqual(currentProps.es, nextProps.es);
+    }
   }
 )(GoogleMap);

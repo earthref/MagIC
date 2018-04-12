@@ -1,8 +1,11 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
+import {Grid} from 'semantic-ui-react';
 
 import IconButton from '/client/modules/common/components/icon_button';
 import SearchDividedList from '/client/modules/common/containers/search_divided_list';
 import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
+import News from '/client/modules/magic/components/home_news';
 import {levels} from '/lib/configs/magic/search_levels.js';
 
 export default class extends React.Component {
@@ -17,40 +20,23 @@ export default class extends React.Component {
 
   render() {
     return (
-      <div>
-        <div className="ui hidden divider"/>
-        <div className="ui four cards">
+      <Grid divided><Grid.Row><Grid.Column width={12}>
+        <div className="ui three cards">
           <IconButton className="card" link="/MagIC/search" portal="MagIC">
             <i className="large icons">
               <i className="database icon"/>
               <i className="corner search icon"/>
             </i>
-            <div className="title">Search</div>
+            <div className="title">Search Interface</div>
             <div className="subtitle">Browse, combine, and save datasets.</div>
-          </IconButton>
-          <IconButton className="card" link="/MagIC/upgrade" portal="MagIC">
-            <i className="large icons">
-              <i className="file text outline icon"/>
-              <i className="corner arrow up icon"/>
-            </i>
-            <div className="title">Upgrade</div>
-            <div className="subtitle">Convert a dataset to the latest data model.</div>
           </IconButton>
           <IconButton className="card" link="/MagIC/upload" portal="MagIC">
             <i className="large icons">
               <i className="table icon"/>
               <i className="corner add icon"/>
             </i>
-            <div className="title">Upload</div>
+            <div className="title">Upload Tool</div>
             <div className="subtitle">Import data into your private workspace.</div>
-          </IconButton>
-          <IconButton className="disabled card" link="/MagIC/validate" portal="MagIC" style={{display:'none'}}>
-            <i className="large icons">
-              <i className="file text outline icon"/>
-              <i className="corner help icon"/>
-            </i>
-            <div className="title">Validate</div>
-            <div className="subtitle">Confirm your dataset is ready.</div>
           </IconButton>
           <IconButton className="card" link="/MagIC/private" portal="MagIC">
             <i className="large icons">
@@ -58,65 +44,61 @@ export default class extends React.Component {
               <i className="corner checkmark icon"/>
             </i>
             <div className="title">Private Workspace</div>
-            <div className="subtitle">Manage your contributions.</div>
+            <div className="subtitle">Manage your contributions to MagIC.</div>
           </IconButton>
         </div>
-        <h2 className="ui horizontal divider header">
+        <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
           MagIC Resources
         </h2>
-        <div className="ui eight cards">
+        <div className="ui seven cards" style={{marginTop: 0}}>
           <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
-            <i className="small icons">
+            <i className="icons">
               <i className="sitemap icon"/>
               <i className="corner table icon"/>
             </i>
             <div className="small title">Data<br/>Model</div>
           </IconButton>
           <IconButton className="borderless card" link="/MagIC/method-codes" portal="MagIC">
-            <i className="small icons">
+            <i className="icons">
               <i className="lab icon"/>
               <i className="corner write icon"/>
             </i>
             <div className="small title">Method<br/>Codes</div>
           </IconButton>
           <IconButton className="borderless card" link="/vocabularies" portal="MagIC">
-            <i className="small icons">
+            <i className="icons">
               <i className="list icon"/>
               <i className="corner lock icon"/>
             </i>
             <div className="small title">Vocabulary<br/>Lists</div>
+          </IconButton>          
+          <IconButton className="borderless card" link="/MagIC/upgrade" portal="MagIC">
+            <i className="icons">
+              <i className="file text outline icon"/>
+              <i className="corner arrow up icon"/>
+            </i>
+            <div className="small title">Upgrade<br/>Tool</div>
           </IconButton>
-          <IconButton className="borderless card" href="https://github.com/PmagPy/PmagPy" portal="MagIC">
-            <i className="small icons">
+          <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
+            <i className="icons">
+              <i className="file text icon"/>
+              <i className="corner write icon"/>
+            </i>
+            <div className="small title">D.M.P.<br/>Tool</div>
+          </IconButton>
+          <IconButton className="borderless card" href="https://earthref.org/PmagPy/cookbook/" portal="MagIC">
+            <i className="icons">
               <i className="bar chart icon"/>
               <i className="corner calculator icon"/>
             </i>
             <div className="small title">PmagPy<br/>Software</div>
           </IconButton>
-          <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
-            <i className="small icons">
-              <i className="file text icon"/>
-              <i className="corner write icon"/>
+          <IconButton className="borderless card" link="/MagIC/jupyter-notebooks" portal="MagIC">
+            <i className="icons">
+              <i className="file outline icon"/>
+              <i className="corner code icon"/>
             </i>
-            <div className="small title">Data Management<br/>Plan Tool</div>
-          </IconButton>
-          <IconButton className="borderless card" href="/MagIC/about" portal="MagIC">
-            <i className="small icons">
-              <i className="info icon"/>
-            </i>
-            <div className="small title">About MagIC</div>
-          </IconButton>
-          <IconButton className="borderless card" href="https://github.com/earthref/MagIC/issues" portal="MagIC">
-            <i className="small icons">
-              <i className="bug icon"/>
-            </i>
-            <div className="small title">Report a Problem<br/>on GitHub</div>
-          </IconButton>
-          <IconButton className="borderless card" href="/MagIC/grand-challenges" portal="MagIC">
-            <i className="small icons">
-              <i className="unhide icon"/>
-            </i>
-            <div className="small title">Grand Challenges</div>
+            <div className="small title">Jupyter<br/>Notebooks</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
@@ -129,7 +111,13 @@ export default class extends React.Component {
         >
           <SearchSummaryListItem table="contribution"/>
         </SearchDividedList>
-      </div>
+        <IconButton className="small card" link="/MagIC/search" portal="MagIC" style={{margin:0}}>
+          <div className="small title">View More Contributions in the MagIC Search Interface</div>
+        </IconButton>
+      </Grid.Column>
+      <Grid.Column width={4}>
+        <News/>
+      </Grid.Column></Grid.Row></Grid>
     );
   }
 
