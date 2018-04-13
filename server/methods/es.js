@@ -421,7 +421,6 @@ export default function () {
             resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
           contribution = resp.hits.hits[0]._source.contribution;
           summary.contribution = resp.hits.hits[0]._source.summary.contribution;
-          summarizer.json.contribution.summary.contribution = resp.hits.hits[0]._source.summary.contribution;
         }
 
         await summarizer.preSummarizePromise(contribution, {summary: summary});

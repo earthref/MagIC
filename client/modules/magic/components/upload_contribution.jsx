@@ -391,16 +391,34 @@ export default class MagICUploadContribution extends React.Component {
           this.state._existing_summary.summary.contribution.version || null
       };
       this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
-        this.summary = this.summarizer.json;
-        this.summarizer = undefined;
-        let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
-        this.setState({
-          totalParseErrors: totalParseErrors,
-          importProgressTaps: this.state.importProgressTaps + 1,
-          summarizing: false,
-          summarized: true
-        });
-        console.log('after merging', this.contribution, this.summary);
+        if (this.summarizer.json.contribution && 
+            this.summarizer.json.contribution.summary && 
+            _.max(_.values(this.summarizer.json.contribution.summary._all)) < 5000
+        ) {
+          this.summarizer.summarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
+            this.summary = this.summarizer.json;
+            this.summarizer = undefined;
+            let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
+            this.setState({
+              totalParseErrors: totalParseErrors,
+              importProgressTaps: this.state.importProgressTaps + 1,
+              summarizing: false,
+              summarized: true
+            });
+            console.log('after merging', this.contribution, this.summary);
+          });
+        } else {
+          this.summary = this.summarizer.json;
+          this.summarizer = undefined;
+          let totalParseErrors = _.reduce(this.files, (n, file) => n + file.parseErrors.length, 0);
+          this.setState({
+            totalParseErrors: totalParseErrors,
+            importProgressTaps: this.state.importProgressTaps + 1,
+            summarizing: false,
+            summarized: true
+          });
+          console.log('after merging', this.contribution, this.summary);
+        }
       });
     }
   }
