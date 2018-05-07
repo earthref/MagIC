@@ -1,6 +1,6 @@
 import fs from "fs";
 import elasticsearch from "elasticsearch";
-import Promise from 'bluebird';
+import BPromise from 'bluebird';
 import request from 'request';
 
 const esClient = new elasticsearch.Client({
@@ -26,14 +26,15 @@ let index = "magic_v2";
               { "exists": { "field": "summary.contribution._reference.long_authors" }},
               { "exists": { "field": "summary.contribution._reference.title" }}
             ],
-            "filter": { "term": { "summary.contribution._is_latest": "true"}}
+            //"filter": { "term": { "summary.contribution._is_latest": "true"}}
+            "filter": { "term": { "summary.contribution.id": 16450}}
           }}
         }
       }).then((resp) => {
         console.log(resp.hits.total, resp.hits.hits);
         if (resp.hits.total > 0) {
 
-          Promise.map(resp.hits.hits, hit => {
+          BPromise.each(resp.hits.hits, hit => {
             return new Promise((resolve) => {
               let xml = `<?xml version="1.0"?>
 <database xmlns="http://www.crossref.org/schema/4.4.0"

@@ -472,6 +472,7 @@ export default class DataImporter extends React.Component {
         }
         let rowIdxs = [];
         for (let rowIdx in this.state.in) {
+          rowIdx = parseInt(rowIdx);
           if (rowIdx >= this.state.nHeaderRowsInt && this.state.excludeRowIdxs.indexOf(rowIdx) === -1)
             rowIdxs.push(rowIdx);
         }
