@@ -881,6 +881,16 @@ export default class DataImporter extends React.Component {
                   Preview Less Rows
                 </a> : undefined
             )}
+            {(this.state.maxDataRows < this.state.in.length ?
+                <a className={'ui horizontal label ' + this.portalColor()}
+                   onClick={(e) => this.setState({maxDataRows: this.state.in.length})}>
+                  <i className="plus icon"/>
+                  Show All Rows
+                </a> : 
+                <a className={'ui horizontal label ' + this.portalColor()}>
+                  All Rows Are Displayed 
+                </a>
+            )}
           </div>
           <div className="right aligned column">
             Importing <div className={'ui horizontal label ' + this.portalColor()}>
