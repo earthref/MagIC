@@ -87,7 +87,7 @@ Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which
           </Grid.Row>
         </Grid>
         <p>
-        Other people who have contributed greatly to the project:
+        Additional people who have contributed to the project:
         <ul>
          <li><a href="http://earthref.org/erml/7441">Nick Swanson-Hysell</a></li>
          <li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
@@ -96,19 +96,6 @@ Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which
         </ul>
         along with many others.
         </p>
-
-        <h3> Grand Challenges </h3>
-        <p>We provide resources for work on these and other scientific grand challenges:<br/>
-        <ul>
-          <li> The Geomagnetic and Thermal History of the Earth </li>
-          <li> True Polar Wander and Plumes </li>
-          <li> Understanding Interactions Between Magnetic Field and Climate </li>
-          <li> Biogeomagnetism </li>
-          <li> Environmental Magnetism, Dust and Rainfall </li>
-          <li> Magnetism at High Pressures and in Extraterrestrial Bodies </li>
-        </ul>
-        </p>
-        <p> Detailed <Link to="/MagIC/grand-challenges">descriptions</Link> of the Grand Challenges.  </p>
       </div>
     );
   }
