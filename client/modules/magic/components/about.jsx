@@ -22,13 +22,16 @@ Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which
             On-the-fly data validation and online spreadsheet editing are some additional features that will be possible by using these software technologies. 
             Uploading data into the archive with comprehensive indexing and completing complicated search queries to obtain unique datasets are an order of magnitude quicker than the old system. 
             Searches return row level data over all contributions and the user can choose to download the rows meeting the search criteria from only a subset of tables, if desired. The selected data is available to be downloaded as either single text file of various formats or an Excel spreadsheet. 
+            </p>
+            <p>
             For effective inclusion in online data aggregators and search engines, an XML sitemap has been added to the website and contributions are served with schema.org and JSON-LD compliant data descriptions for indexing by Google Search, EarthCube’s Project 418, the European Plate Observing System, and any other entities that wish to query MagIC. 
             The introduction of the MagIC Data Model 3.0 reduces the time needed to understand its structure and simplifies the process of using it to contribute data to MagIC. 
             The number of tables has decreased from 31 to 9 and is now organized in 6 hierarchical levels from the raw measurements up to the publication metadata. 
             This data model, along with method codes and vocabulary lists, can be browsed via the MagIC website, downloaded as JSON files for reuse, and can be easily updated by the MagIC team by request from the community via either email or reporting an issue at the MagIC GitHub repository.
           </p>
           <p>
-            MagIC is supported by many people and organizations. The core group supported by NSF grants:<br/>
+            <b>Support</b><br/>
+            MagIC is primarily funded through grants from the NSF to PI's at the University of California, San Diego and Oregon State University. MagIC's core group are:<br/>
           </p>
         <Grid columns={6}>
           <Grid.Row>
