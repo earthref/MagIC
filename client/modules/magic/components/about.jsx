@@ -17,13 +17,15 @@ Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which
           </p>
           <p>
            <b> Database Technologies and Features </b><br/>
-            MagIC has completed the transition from an Oracle backed, Perl based, server-oriented website to an Elasticsearch backed, Meteor based thick client website technology stack. On-the-fly data validation, column header suggestions, and online spreadsheet editing are some new features that will be possible by using these software technologies. 
+            MagIC has completed the transition from an Oracle backed, Perl based, server-oriented website to an Elasticsearch backed, Meteor based thick client website technology stack. 
+            This thick client system has enabled the creation of a sophisticated, app-like interface for uploading with active elements like column header suggestions, table rejection toggle switches, and "don't import this column" switchs. 
+            On-the-fly data validation and online spreadsheet editing are some additional features that will be possible by using these software technologies. 
             Uploading data into the archive with comprehensive indexing and completing complicated search queries to obtain unique datasets are an order of magnitude quicker than the old system. 
-            Searches return row level data over all contributions and the user can choose to download only those rows meeting the search criteria as a single text file or spreadsheet. 
+            Searches return row level data over all contributions and the user can choose to download the rows meeting the search criteria from only a subset of tables, if desired. The selected data is available to be downloaded as either single text file of various formats or an Excel spreadsheet. 
             For effective inclusion in online data aggregators and search engines, an XML sitemap has been added to the website and contributions are served with schema.org and JSON-LD compliant data descriptions for indexing by Google Search, EarthCube’s Project 418, the European Plate Observing System, and any other entities that wish to query MagIC. 
-            The introduction of the MagIC Data Model 3.0 reduces the time needed to understand its structure and simplifies the process of using it to contribute one’s data to MagIC. 
+            The introduction of the MagIC Data Model 3.0 reduces the time needed to understand its structure and simplifies the process of using it to contribute data to MagIC. 
             The number of tables has decreased from 31 to 9 and is now organized in 6 hierarchical levels from the raw measurements up to the publication metadata. 
-            This data model, along with method codes and vocabulary lists, can be browsed via the MagIC website, downloaded as JSON files for reuse, and can be easily updated by the MagIC team via email or a GitHub pull request.
+            This data model, along with method codes and vocabulary lists, can be browsed via the MagIC website, downloaded as JSON files for reuse, and can be easily updated by the MagIC team by request from the community via either email or reporting an issue at the MagIC GitHub repository.
           </p>
           <p>
             MagIC is supported by many people and organizations. The core group supported by NSF grants:<br/>
