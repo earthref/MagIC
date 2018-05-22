@@ -1,4 +1,5 @@
 import _ from  "lodash";
+import numeral from 'numeral';
 import React from "react";
 import saveAs from "save-as";
 import Cookies from "js-cookie";
@@ -18,6 +19,7 @@ export default class extends React.Component {
     this.privateContributions = [];
     this.state = {
       loaded: false,
+      validation: { errors: [], warnings: [] },
       taps: 0
     };
   }
@@ -36,6 +38,29 @@ export default class extends React.Component {
       }
     });
     this.updateContributions();
+  }
+
+  validate(id) {
+    $(this.refs["validate loading"]).height($(window).height() - 400).show();
+    $(this.refs["validate results"]).height($(window).height() - 400).hide();
+    $(this.refs["validate error"]).hide();
+    $(this.refs["validate"]).modal().modal("show");
+    Meteor.call("esValidatePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id")},
+    (error, validation) => {
+      if (error) {
+        $(this.refs["validate error"]).html(error.message);
+        $(this.refs["validate loading"]).hide();
+        $(this.refs["validate results"]).hide();
+        $(this.refs["validate error"]).show();
+      } else {
+        this.setState({validation}, () => {
+          $(this.refs["validate loading"]).hide();
+          $(this.refs["validate results"]).show();
+          $(this.refs["validate error"]).hide();
+        });
+      }
+    }
+  );
   }
 
   confirmActivate(id) {
@@ -148,6 +173,13 @@ export default class extends React.Component {
   }
 
   render() {
+
+    const nValidationWarnings = this.state.validation.warnings.length;
+    const strValidationWarnings = numeral(nValidationWarnings).format('0,0') + ' Validation Warning' + (nValidationWarnings === 1 ? '' : 's');
+
+    const nValidationErrors = this.state.validation.errors.length;
+    const strValidationErrors = numeral(nValidationErrors).format('0,0') + ' Validation Error' + (nValidationErrors === 1 ? '' : 's');
+
     console.log("privateContributions", this.privateContributions, Cookies.get("user_id"));
     if (!Cookies.get("user_id")) return (
       <div>
@@ -241,12 +273,12 @@ export default class extends React.Component {
                       >
                         Share
                       </div>}
-                      <div className="ui small button disabled" style={{margin: "0 0 0 0.5em"}}
+                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
                            onClick={(e) => {
-                             this.uploadTo(c.summary.contribution.id);
+                             this.validate(c.summary.contribution.id);
                            }}
                       >
-                        Add Data to This Study
+                        Validate
                       </div>
                     </div>
                   </div>
@@ -427,6 +459,73 @@ export default class extends React.Component {
               Activate
             </div>
             <div className="ui cancel button">Cancel</div>
+          </div>
+        </div>
+        <div ref="validate" className="ui modal">
+          <div className="ui icon header">
+            <i className="file text outline icon"></i>
+            Validate Your Private Contribution
+          </div>
+          <div className="content" style={{padding: 0}}>
+            <div ref="validate loading" className="ui basic segment">
+              <div className="ui active inverted dimmer" style={{height: "100%"}}>
+                <div className="ui text loader">Validating</div>
+              </div>
+            </div>
+            <div ref="validate results" className="ui basic segment" style={{overflowY: "scroll"}}>
+              {(nValidationErrors ?
+                <div className="extra" style={{marginBottom: '2em'}}>
+                  <table className="ui compact small inverted red table">
+                    <tbody>
+                      <tr>
+                        <td><i className="warning circle icon"></i><b>{strValidationErrors}</b></td>
+                      </tr>
+                      {this.state.validation.errors.map((error, j) => {
+                        return (
+                          <tr key={j} className="error">
+                            <td>{error.message}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              : undefined)}
+              {(nValidationWarnings ?
+                <div className="extra" style={{marginBottom: '2em'}}>
+                  <table className="ui compact small inverted yellow table">
+                    <tbody>
+                      <tr>
+                        <td><i className="warning sign icon"></i><b>{strValidationWarnings}</b></td>
+                      </tr>
+                      {this.state.validation.warnings.map((warning, j) => {
+                        return (
+                          <tr key={j} className="warning">
+                            <td>{warning.message}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              : undefined)}
+              {(nValidationErrors === 0 && nValidationWarnings == 0 ?
+                <div className="extra" style={{marginBottom: '2em'}}>
+                  <table className="ui compact small inverted green table">
+                    <tbody>
+                      <tr>
+                        <td><i className="check icon"></i><b>Validation passed successfully!</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              : undefined)}
+            </div>
+            <div ref="validate error" className="ui error message">
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui cancel button">Close</div>
           </div>
         </div>
       </div>
