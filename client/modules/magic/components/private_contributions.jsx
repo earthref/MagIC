@@ -40,7 +40,7 @@ export default class extends React.Component {
     this.updateContributions();
   }
 
-  validate(id) {
+  validate(id, activate) {
     $(this.refs["validate loading"]).height($(window).height() - 400).show();
     $(this.refs["validate results"]).height($(window).height() - 400).hide();
     $(this.refs["validate error"]).hide();
@@ -61,6 +61,10 @@ export default class extends React.Component {
       }
     }
   );
+  }
+
+  validateThenActivate(id) {
+    this.validate(id, true);
   }
 
   confirmActivate(id) {
@@ -266,20 +270,23 @@ export default class extends React.Component {
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" &&
-                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
-                           }}
-                      >
-                        Share
-                      </div>}
-                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             this.validate(c.summary.contribution.id);
-                           }}
-                      >
-                        Validate
-                      </div>
+                        <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
+                            onClick={(e) => {
+                              this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
+                            }}
+                        >
+                          Share
+                        </div>
+                      }
+                      {c.summary.contribution._is_activated !== "true" &&
+                        <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
+                            onClick={(e) => {
+                              this.confirmDelete(c.summary.contribution.id);
+                            }}
+                        >
+                          Delete Contribution
+                        </div>
+                      }
                     </div>
                   </div>
                   <div className="ui attached secondary segment" style={{padding: "0.5em"}}>
@@ -320,26 +327,28 @@ export default class extends React.Component {
                           }.bind(this, i)}/>}
                         </div>
                       </div>
-                      {c.summary.contribution._is_activated !== "true" ?
+                      {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
+                        <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                            onClick={(e) => {
+                              this.validate(c.summary.contribution.id);
+                            }}
+                        >
+                          Validate
+                        </div>
+                      }
+                      {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
                         <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
                              onClick={(e) => {
-                               this.confirmActivate(c.summary.contribution.id);
+                               this.activate(c.summary.contribution.id);
                              }}
                         >
                           Activate
-                        </div> :
+                        </div>
+                      }
+                      {c.summary.contribution._is_activated === "true" &&
                         <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
                           Activated
                         </div>
-                      }
-                      {c.summary.contribution._is_activated !== "true" &&
-                      <div className={portals["MagIC"].color + " ui basic small button delete-contribution"} style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             this.confirmDelete(c.summary.contribution.id);
-                           }}
-                      >
-                        Delete
-                      </div>
                       }
                       {c.summary.contribution._is_activated === "true" && "@" + Cookies.get("user_id") === "@rminnett" && 
                       <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
@@ -533,4 +542,3 @@ export default class extends React.Component {
   }
 
 }
-
