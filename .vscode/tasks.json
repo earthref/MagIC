@@ -6,7 +6,11 @@
         {
             "type": "npm",
             "script": "build-meteor",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         },
         {
             "type": "npm",
