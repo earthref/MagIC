@@ -363,6 +363,7 @@ export default function () {
         summary = summary || {};
         summary.contribution = summary.contribution || {};
         summary.contribution = _.merge(summary.contribution, contributionRow);
+        summary.contribution._is_valid = "false",
 
         await esClient.update({
           "index": index,
@@ -904,7 +905,8 @@ export default function () {
                   "description": description,
                   "reference": doi,
                   "_reference": _reference,
-                  "_history": _history
+                  "_history": _history,
+                  "_is_valid": "false"
                 }
               },
               "contribution": {
@@ -956,7 +958,23 @@ export default function () {
               
         await validator.validatePromise(resp.hits.hits[0]._source.contribution);
 
-        return validator.errorsAndWarnings();
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "doc": {
+              "summary": {
+                "contribution": {
+                  "_is_valid": _.keys(validator.validation.errors).length ? "false" : "true"
+                }
+              }
+            }
+          }
+        });
+
+        return validator.validation;
 
       } catch(error) {
         console.error("esValidatePrivateContribution", index, id, contributor, error.message);

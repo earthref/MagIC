@@ -1,16 +1,19 @@
 import _ from  "lodash";
 import numeral from 'numeral';
+import getRanges from 'get-ranges';
 import React from "react";
 import saveAs from "save-as";
 import Cookies from "js-cookie";
 import {Tracker}  from "meteor/tracker";
 import {portals} from "/lib/configs/portals";
 import {Collections} from "/lib/collections";
+import { Accordion, List } from 'semantic-ui-react'
 
 import DividedList from "/client/modules/common/components/divided_list";
 import SearchSummaryListItem from "/client/modules/magic/components/search_summaries_list_item";
 import IconButton from "/client/modules/common/components/icon_button";
 import {index} from "/lib/configs/magic/search_levels.js";
+import {versions, models} from '/lib/configs/magic/data_models';
 
 export default class extends React.Component {
 
@@ -178,10 +181,18 @@ export default class extends React.Component {
 
   render() {
 
-    const nValidationWarnings = this.state.validation.warnings.length;
+    const nValidationWarnings = _.reduce(_.keys(this.state.validation.warnings), (n, table) => 
+      n + _.reduce(_.keys(this.state.validation.warnings[table]), (nTable, column) =>
+        nTable + _.keys(this.state.validation.warnings[table][column]).length,
+      0),
+    0);
     const strValidationWarnings = numeral(nValidationWarnings).format('0,0') + ' Validation Warning' + (nValidationWarnings === 1 ? '' : 's');
 
-    const nValidationErrors = this.state.validation.errors.length;
+    const nValidationErrors = _.reduce(_.keys(this.state.validation.errors), (n, table) => 
+      n + _.reduce(_.keys(this.state.validation.errors[table]), (nTable, column) =>
+        nTable + _.keys(this.state.validation.errors[table][column]).length,
+      0),
+    0);
     const strValidationErrors = numeral(nValidationErrors).format('0,0') + ' Validation Error' + (nValidationErrors === 1 ? '' : 's');
 
     console.log("privateContributions", this.privateContributions, Cookies.get("user_id"));
@@ -489,33 +500,9 @@ export default class extends React.Component {
                       <tr>
                         <td><i className="warning circle icon"></i><b>{strValidationErrors}</b></td>
                       </tr>
-                      {this.state.validation.errors.map((error, j) => {
-                        return (
-                          <tr key={j} className="error">
-                            <td>{error.message}</td>
-                          </tr>
-                        );
-                      })}
                     </tbody>
                   </table>
-                </div>
-              : undefined)}
-              {(nValidationWarnings ?
-                <div className="extra" style={{marginBottom: '2em'}}>
-                  <table className="ui compact small inverted yellow table">
-                    <tbody>
-                      <tr>
-                        <td><i className="warning sign icon"></i><b>{strValidationWarnings}</b></td>
-                      </tr>
-                      {this.state.validation.warnings.map((warning, j) => {
-                        return (
-                          <tr key={j} className="warning">
-                            <td>{warning.message}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                  {this._renderValitationTables('Error', this.state.validation.errors)}  
                 </div>
               : undefined)}
               {(nValidationErrors === 0 && nValidationWarnings == 0 ?
@@ -538,6 +525,58 @@ export default class extends React.Component {
           </div>
         </div>
       </div>
+    );
+  }
+
+  _renderValitationTables(type, results) {
+    const model = models[_.last(versions)];
+
+    let panels = [];
+    _.sortBy(_.keys(model.tables), table => model.tables[table].position).forEach(table => {
+      const n = _.reduce(_.keys(results[table]), (n, column) => n + _.keys(results[table][column]).length, 0);
+      if (results[table]) panels.push({
+        title: `${model.tables[table].label} (${n} ${type}${n > 1 ? 's' : ''})`,
+        content: { 
+          key: table,
+          content: this._renderValitationColumns(type, results, table)
+        }
+      });
+    });
+    return (
+      <Accordion panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
+    );
+  }
+
+  _renderValitationColumns(type, results, table) {
+    const model = models[_.last(versions)];
+    let panels = [];
+    _.sortBy(_.keys(model.tables[table].columns), column => model.tables[table].columns[column].position).forEach(column => {
+      const n = _.keys(results[table][column]).length
+      if (results[table][column]) panels.push({
+        title: `${model.tables[table].columns[column].label} (${n} ${type}${n > 1 ? 's' : ''})`,
+        content: {
+          key: table + '_' + column,
+          content: this._renderValitationMessage(results, table, column)
+        }
+      });
+    });
+    return (
+      <Accordion.Accordion panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
+    );
+  }
+
+  _renderValitationMessage(results, table, column) {
+    return (
+      <List bulleted style={{ margin: '0 0 0 2.5em' }}>{
+        _.sortBy(_.keys(results[table][column]), message => -_.keys(results[table][column][message]).length).map(message => {
+          const rows = _.sortBy(_.keys(results[table][column][message]), row => parseFloat(row));
+          return (
+          <List.Item>
+            {message} {rows.length ? `(Row${rows.length > 1 ? 's' : ''}: ${getRanges(rows).join(', ')})` : ''}
+          </List.Item>
+          );
+        })
+      }</List>
     );
   }
 
