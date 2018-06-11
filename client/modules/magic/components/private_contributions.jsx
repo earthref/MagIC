@@ -1,15 +1,19 @@
 import _ from  "lodash";
+import numeral from 'numeral';
+import getRanges from 'get-ranges';
 import React from "react";
 import saveAs from "save-as";
 import Cookies from "js-cookie";
 import {Tracker}  from "meteor/tracker";
 import {portals} from "/lib/configs/portals";
 import {Collections} from "/lib/collections";
+import { Accordion, List } from 'semantic-ui-react'
 
 import DividedList from "/client/modules/common/components/divided_list";
 import SearchSummaryListItem from "/client/modules/magic/components/search_summaries_list_item";
 import IconButton from "/client/modules/common/components/icon_button";
 import {index} from "/lib/configs/magic/search_levels.js";
+import {versions, models} from '/lib/configs/magic/data_models';
 
 export default class extends React.Component {
 
@@ -18,6 +22,7 @@ export default class extends React.Component {
     this.privateContributions = [];
     this.state = {
       loaded: false,
+      validation: { errors: [], warnings: [] },
       taps: 0
     };
   }
@@ -36,6 +41,33 @@ export default class extends React.Component {
       }
     });
     this.updateContributions();
+  }
+
+  validate(id, activate) {
+    $(this.refs["validate loading"]).height($(window).height() - 400).show();
+    $(this.refs["validate results"]).height($(window).height() - 400).hide();
+    $(this.refs["validate error"]).hide();
+    $(this.refs["validate"]).modal().modal("show");
+    Meteor.call("esValidatePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id")},
+    (error, validation) => {
+      if (error) {
+        $(this.refs["validate error"]).html(error.message);
+        $(this.refs["validate loading"]).hide();
+        $(this.refs["validate results"]).hide();
+        $(this.refs["validate error"]).show();
+      } else {
+        this.setState({validation}, () => {
+          $(this.refs["validate loading"]).hide();
+          $(this.refs["validate results"]).show();
+          $(this.refs["validate error"]).hide();
+        });
+      }
+    }
+  );
+  }
+
+  validateThenActivate(id) {
+    this.validate(id, true);
   }
 
   confirmActivate(id) {
@@ -148,6 +180,21 @@ export default class extends React.Component {
   }
 
   render() {
+
+    const nValidationWarnings = _.reduce(_.keys(this.state.validation.warnings), (n, table) => 
+      n + _.reduce(_.keys(this.state.validation.warnings[table]), (nTable, column) =>
+        nTable + _.keys(this.state.validation.warnings[table][column]).length,
+      0),
+    0);
+    const strValidationWarnings = numeral(nValidationWarnings).format('0,0') + ' Validation Warning' + (nValidationWarnings === 1 ? '' : 's');
+
+    const nValidationErrors = _.reduce(_.keys(this.state.validation.errors), (n, table) => 
+      n + _.reduce(_.keys(this.state.validation.errors[table]), (nTable, column) =>
+        nTable + _.keys(this.state.validation.errors[table][column]).length,
+      0),
+    0);
+    const strValidationErrors = numeral(nValidationErrors).format('0,0') + ' Validation Error' + (nValidationErrors === 1 ? '' : 's');
+
     console.log("privateContributions", this.privateContributions, Cookies.get("user_id"));
     if (!Cookies.get("user_id")) return (
       <div>
@@ -234,20 +281,23 @@ export default class extends React.Component {
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" &&
-                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
-                           }}
-                      >
-                        Share
-                      </div>}
-                      <div className="ui small button disabled" style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             this.uploadTo(c.summary.contribution.id);
-                           }}
-                      >
-                        Add Data to This Study
-                      </div>
+                        <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
+                            onClick={(e) => {
+                              this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
+                            }}
+                        >
+                          Share
+                        </div>
+                      }
+                      {c.summary.contribution._is_activated !== "true" &&
+                        <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
+                            onClick={(e) => {
+                              this.confirmDelete(c.summary.contribution.id);
+                            }}
+                        >
+                          Delete Contribution
+                        </div>
+                      }
                     </div>
                   </div>
                   <div className="ui attached secondary segment" style={{padding: "0.5em"}}>
@@ -288,26 +338,28 @@ export default class extends React.Component {
                           }.bind(this, i)}/>}
                         </div>
                       </div>
-                      {c.summary.contribution._is_activated !== "true" ?
+                      {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
+                        <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                            onClick={(e) => {
+                              this.validate(c.summary.contribution.id);
+                            }}
+                        >
+                          Validate
+                        </div>
+                      }
+                      {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
                         <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
                              onClick={(e) => {
-                               this.confirmActivate(c.summary.contribution.id);
+                               this.activate(c.summary.contribution.id);
                              }}
                         >
                           Activate
-                        </div> :
+                        </div>
+                      }
+                      {c.summary.contribution._is_activated === "true" &&
                         <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
                           Activated
                         </div>
-                      }
-                      {c.summary.contribution._is_activated !== "true" &&
-                      <div className={portals["MagIC"].color + " ui basic small button delete-contribution"} style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             this.confirmDelete(c.summary.contribution.id);
-                           }}
-                      >
-                        Delete
-                      </div>
                       }
                       {c.summary.contribution._is_activated === "true" && "@" + Cookies.get("user_id") === "@rminnett" && 
                       <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
@@ -429,9 +481,103 @@ export default class extends React.Component {
             <div className="ui cancel button">Cancel</div>
           </div>
         </div>
+        <div ref="validate" className="ui modal">
+          <div className="ui icon header">
+            <i className="file text outline icon"></i>
+            Validate Your Private Contribution
+          </div>
+          <div className="content" style={{padding: 0}}>
+            <div ref="validate loading" className="ui basic segment">
+              <div className="ui active inverted dimmer" style={{height: "100%"}}>
+                <div className="ui text loader">Validating</div>
+              </div>
+            </div>
+            <div ref="validate results" className="ui basic segment" style={{overflowY: "scroll"}}>
+              {(nValidationErrors ?
+                <div className="extra" style={{marginBottom: '2em'}}>
+                  <table className="ui compact small inverted red table">
+                    <tbody>
+                      <tr>
+                        <td><i className="warning circle icon"></i><b>{strValidationErrors}</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  {this._renderValitationTables('Error', this.state.validation.errors)}  
+                </div>
+              : undefined)}
+              {(nValidationErrors === 0 && nValidationWarnings == 0 ?
+                <div className="extra" style={{marginBottom: '2em'}}>
+                  <table className="ui compact small inverted green table">
+                    <tbody>
+                      <tr>
+                        <td><i className="check icon"></i><b>Validation passed successfully!</b></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              : undefined)}
+            </div>
+            <div ref="validate error" className="ui error message">
+            </div>
+          </div>
+          <div className="actions">
+            <div className="ui cancel button">Close</div>
+          </div>
+        </div>
       </div>
     );
   }
 
-}
+  _renderValitationTables(type, results) {
+    const model = models[_.last(versions)];
 
+    let panels = [];
+    _.sortBy(_.keys(model.tables), table => model.tables[table].position).forEach(table => {
+      const n = _.reduce(_.keys(results[table]), (n, column) => n + _.keys(results[table][column]).length, 0);
+      if (results[table]) panels.push({
+        title: `${model.tables[table].label} (${n} ${type}${n > 1 ? 's' : ''})`,
+        content: { 
+          key: table,
+          content: this._renderValitationColumns(type, results, table)
+        }
+      });
+    });
+    return (
+      <Accordion panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
+    );
+  }
+
+  _renderValitationColumns(type, results, table) {
+    const model = models[_.last(versions)];
+    let panels = [];
+    _.sortBy(_.keys(model.tables[table].columns), column => model.tables[table].columns[column].position).forEach(column => {
+      const n = _.keys(results[table][column]).length
+      if (results[table][column]) panels.push({
+        title: `${model.tables[table].columns[column].label} (${n} ${type}${n > 1 ? 's' : ''})`,
+        content: {
+          key: table + '_' + column,
+          content: this._renderValitationMessage(results, table, column)
+        }
+      });
+    });
+    return (
+      <Accordion.Accordion panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
+    );
+  }
+
+  _renderValitationMessage(results, table, column) {
+    return (
+      <List bulleted style={{ margin: '0 0 0 2.5em' }}>{
+        _.sortBy(_.keys(results[table][column]), message => -_.keys(results[table][column][message]).length).map(message => {
+          const rows = _.sortBy(_.keys(results[table][column][message]), row => parseFloat(row));
+          return (
+          <List.Item>
+            {message} {rows.length ? `(Row${rows.length > 1 ? 's' : ''}: ${getRanges(rows).join(', ')})` : ''}
+          </List.Item>
+          );
+        })
+      }</List>
+    );
+  }
+
+}

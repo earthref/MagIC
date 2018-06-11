@@ -9,6 +9,7 @@ import moment from "moment";
 import elasticsearch from "elasticsearch";
 
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
+import ValidateContribution from '/lib/modules/magic/validate_contribution.js';
 import {versions} from '/lib/configs/magic/data_models';
 import {levels} from '/lib/configs/magic/search_levels.js';
 
@@ -362,6 +363,7 @@ export default function () {
         summary = summary || {};
         summary.contribution = summary.contribution || {};
         summary.contribution = _.merge(summary.contribution, contributionRow);
+        summary.contribution._is_valid = "false",
 
         await esClient.update({
           "index": index,
@@ -903,7 +905,8 @@ export default function () {
                   "description": description,
                   "reference": doi,
                   "_reference": _reference,
-                  "_history": _history
+                  "_history": _history,
+                  "_is_valid": "false"
                 }
               },
               "contribution": {
@@ -922,6 +925,60 @@ export default function () {
       } catch(error) {
         console.error("esUpdateContributionReference", index, id, contributor, _contributor, reference, description, error.message);
         throw new Meteor.Error("esUpdateContributionReference", error.message);
+      }
+    },
+
+    async esValidatePrivateContribution({index, id, contributor}) {
+      console.log("esValidatePrivateContribution", index, id, contributor);
+      this.unblock();
+      try {
+
+        const validator = new ValidateContribution({});
+
+        let resp = await esClient.search({
+          "index": index,
+          "type": "contribution",
+          "body": {
+            "_source": {
+              "includes": ["contribution.*"]
+            },
+            "query": {
+              "bool": {
+                "filter": [{
+                  "term": {
+                    "summary.contribution.id": id
+                  }
+                }]
+              }
+            }
+          }
+        });
+        if (resp.hits.total > 0 && resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+          resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+              
+        await validator.validatePromise(resp.hits.hits[0]._source.contribution);
+
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "doc": {
+              "summary": {
+                "contribution": {
+                  "_is_valid": _.keys(validator.validation.errors).length ? "false" : "true"
+                }
+              }
+            }
+          }
+        });
+
+        return validator.validation;
+
+      } catch(error) {
+        console.error("esValidatePrivateContribution", index, id, contributor, error.message);
+        throw new Meteor.Error("esValidatePrivateContribution", error.message);
       }
     },
 
