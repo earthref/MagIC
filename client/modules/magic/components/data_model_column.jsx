@@ -109,11 +109,10 @@ export default class extends React.Component {
     else if (validation == 'type("references")') {
       return (
         <span>
-          Suggested: this column could contain a value found
-          in the <a href={'/references/'}>EarthRef.org References</a> list.
-          If not, the reference will be added to
-          the <a href={'/references/'}>EarthRef.org References</a> list
-          when the contribution is activated (made public).
+            This DOI should be a valid DOI that is resolvable by doi.org. If you have
+            a data set associated with a paper that does not have a DOI (PhD thesis, 
+            master thesis, USGS report, etc), MagIC can store the paper in the ERDA
+            database (barring copyright issues) and mint a DOI for it.
         </span>
       );
     }
