@@ -62,6 +62,7 @@ export default class extends React.Component {
           $(this.refs["validate error"]).hide();
         });
       }
+      this.updateContributions();
     }
   );
   }
@@ -350,7 +351,7 @@ export default class extends React.Component {
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
                         <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
                              onClick={(e) => {
-                               this.activate(c.summary.contribution.id);
+                               this.confirmActivate(c.summary.contribution.id);
                              }}
                         >
                           Activate
@@ -505,7 +506,7 @@ export default class extends React.Component {
                   {this._renderValitationTables('Error', this.state.validation.errors)}  
                 </div>
               : undefined)}
-              {(nValidationErrors === 0 && nValidationWarnings == 0 ?
+              {(nValidationErrors === 0 && nValidationWarnings === 0 ?
                 <div className="extra" style={{marginBottom: '2em'}}>
                   <table className="ui compact small inverted green table">
                     <tbody>
