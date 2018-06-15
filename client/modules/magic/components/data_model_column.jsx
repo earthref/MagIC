@@ -109,8 +109,8 @@ export default class extends React.Component {
     else if (validation == 'type("references")') {
       return (
         <span>
-            This DOI should be a valid DOI that is resolvable by doi.org. If you have
-            a data set associated with a paper that does not have a DOI (PhD thesis, 
+            Validation: This DOI should be a valid DOI that is resolvable by doi.org. If you have
+            a data set associated with a paper that does not have a DOI (PhD thesis,
             master thesis, USGS report, etc), MagIC can store the paper in the ERDA
             database (barring copyright issues) and mint a DOI for it.
         </span>
