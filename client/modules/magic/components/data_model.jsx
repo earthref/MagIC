@@ -276,10 +276,15 @@ class DataModel extends React.Component {
             <div className="ui text loader">Loading</div>
           </div>
           <div className="ui grid">
-            <div className="ten wide column">
+            <div className="six wide column">
+              <span>
+              Click on table/column name to expand view.
+              </span>
+            </div>
+            <div className="four wide column">
               {(model.published_day ?
                 <span>
-                  Published by the <a href="/user/@magic/">MagIC Database Team</a> on {published}.
+                  Published on {published}.
                 </span> :
                 <span style={{color:'#912d2b !important'}}>
                   This data model has not been published yet and may change.
@@ -289,7 +294,7 @@ class DataModel extends React.Component {
             <div className="right aligned six wide column">
               <a href="" onClick={this.downloadJSON.bind(this)}>
               <i className="download icon"/>
-              Download as .json</a>.
+              Download as .json</a> | <a href="https://docs.google.com/spreadsheets/d/1ldYzO6WMyxfVT6gv3imKaZIVqvp97uPmWijT_ElpZnY">View/Comment via Google Sheet</a>
             </div>
           </div>
           <div ref="accordion" className="ui styled fluid accordion">

@@ -50,7 +50,7 @@ export default class extends React.Component {
         <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
           MagIC Resources
         </h2>
-        <div className="ui seven cards" style={{marginTop: 0}}>
+        <div className="ui eight cards" style={{marginTop: 0}}>
           <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
             <i className="icons">
               <i className="sitemap icon"/>
@@ -68,7 +68,7 @@ export default class extends React.Component {
           <IconButton className="borderless card" link="/vocabularies" portal="MagIC">
             <i className="icons">
               <i className="list icon"/>
-              <i className="corner lock icon"/>
+              <i className="corner info icon"/>
             </i>
             <div className="small title">Vocabulary<br/>Lists</div>
           </IconButton>          
@@ -92,6 +92,13 @@ export default class extends React.Component {
               <i className="corner calculator icon"/>
             </i>
             <div className="small title">PmagPy<br/>Software</div>
+          </IconButton>
+          <IconButton className="borderless card" href="https://earthref.org/MagIC/books/Tauxe/Essentials/" portal="MagIC">
+            <i className="icons">
+              <i className="book icon"/>
+              <i className="corner info icon"/>
+            </i>
+            <div className="small title">Paleomag <br/>Textbook</div>
           </IconButton>
           <IconButton className="borderless card" link="/MagIC/jupyter-notebooks" portal="MagIC">
             <i className="icons">
