@@ -11,14 +11,14 @@
     "autoprefixer": "^7.2.6",
     "html-loader": "^0.4.5",
     "jsdom": "9.12",
-    "less": "^2.7.3",
-    "mocha": "^3.5.3",
+    "less": "^3.8.1",
+    "mocha": "^5.2.0",
     "react-addons-test-utils": "^15.6.2"
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.44",
     "bluebird": "^3.5.1",
-    "elasticsearch": "^13.3.1",
+    "elasticsearch": "^15.1.1",
     "fibers": "^2.0.2",
     "filesize": "^3.6.1",
     "get-ranges": "^5.0.0",
