@@ -1,6 +1,7 @@
 import _ from  'lodash';
 import moment from 'moment';
 import React from 'react';
+import {Link} from 'react-router-dom';
 import saveAs from 'save-as';
 
 import Upgrader from '/lib/modules/magic/upgrade_contribution.js';
@@ -12,8 +13,9 @@ class DataModel extends React.Component {
 
   constructor(props) {
     super(props);
+    let search = 
     this.state = {
-      search: "",
+      search: props.search || "",
       loaded: false,
       updating: false
     };
@@ -241,7 +243,7 @@ class DataModel extends React.Component {
           {versions.slice().reverse().map((v,i) => {
             const classes = (v === version ? 'active ' : '') + 'item';
             return (
-              <a key={i} className={classes} href={`${v}`}>
+              <Link key={i} className={classes} to={`/MagIC/data-models/${v}`}>
                 {v}
                 {(v === version ?
                   <div
@@ -249,7 +251,7 @@ class DataModel extends React.Component {
                     className="ui circular small basic floating label data-model-count"
                   ></div>
                 : undefined)}
-              </a>
+              </Link>
             );
           })}
           <div className="right menu">
@@ -277,9 +279,9 @@ class DataModel extends React.Component {
           </div>
           <div className="ui grid">
             <div className="six wide column">
-              <span>
-              Click on table/column name to expand view.
-              </span>
+              <b>
+                Click on a table/group/column name:
+              </b>
             </div>
             <div className="four wide column">
               {(model.published_day ?

@@ -1,5 +1,6 @@
 import _ from  'lodash';
 import React from 'react';
+import queryString from 'query-string'
 import {Route, Switch, Redirect} from 'react-router-dom';
 import {Helmet} from 'react-helmet';
 
@@ -198,7 +199,7 @@ const Routes = ({match}) => (
         <Helmet>
           <title>MagIC Data Models | EarthRef.org</title>
         </Helmet>
-        <MagICDataModel version={match.params.v} search={location.search && location.search.substring(1) || ""}/>
+        <MagICDataModel version={match.params.v} search={queryString.parse(location.search).q || ""}/>
       </Page>
     }/>
 

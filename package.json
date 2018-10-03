@@ -32,6 +32,7 @@
     "moment-timezone": "^0.5.16",
     "numeral": "^2.0.6",
     "prop-types": "^15.6.1",
+    "query-string": "^6.1.0",
     "react": "^15.6.2",
     "react-debounce-input": "^3.2.0",
     "react-dom": "^15.6.2",
