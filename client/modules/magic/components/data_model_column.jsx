@@ -1,5 +1,6 @@
 import _ from  'lodash';
 import React from 'react';
+import {Link} from 'react-router-dom';
 import {versions, models} from '/lib/configs/magic/data_models';
 import {cvs} from '/lib/modules/er/controlled_vocabularies';
 import {svs} from '/lib/modules/er/suggested_vocabularies';
@@ -120,7 +121,7 @@ export default class extends React.Component {
       return (
         <span>
           Controlled: this column must contain a value found
-          in the <a href={'/MagIC/method-codes/'}>Method Codes</a> controlled vocabulary.
+          in the <Link to={'/MagIC/method-codes/'}>Method Codes</Link> controlled vocabulary.
         </span>
       );
     }
@@ -132,9 +133,9 @@ export default class extends React.Component {
       return (
         <span>
           Controlled: this column must contain a value found
-          in the <a href={'/vocabularies/' + _.kebabCase(cv) + '/'}>
+          in the <Link to={'/vocabularies/controlled/?q=' + _.kebabCase(cv)}>
             {cv_label}
-          </a> controlled vocabulary.
+          </Link> controlled vocabulary.
         </span>
       );
     }
@@ -146,9 +147,9 @@ export default class extends React.Component {
       return (
         <span>
           Suggested: this column could contain a value found
-          in the <a href={'/vocabularies/' + _.kebabCase(sv) + '/'}>
+          in the <Link to={'/vocabularies/controlled/?q=' + _.kebabCase(sv)}>
             {sv_label}
-          </a> suggested vocabulary. If not, the value will be added to the
+          </Link> suggested vocabulary. If not, the value will be added to the
           suggested vocabulary when the contribution is activated (made public).
         </span>
       );
@@ -361,9 +362,9 @@ export default class extends React.Component {
                     return (
                       <span key={l}>
                         {(l > 0 ? <br/> : undefined)}
-                        <a href={'../' + previous_version + '/?q=' + x.table + '.' + x.column}>
+                        <Link to={'/MagIC/data-models/' + previous_version + '/?q=' + x.table + '.' + x.column}>
                           {x.table}.{x.column}
-                        </a>
+                        </Link>
                       </span>
                     );
                   })}
