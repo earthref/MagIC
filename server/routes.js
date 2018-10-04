@@ -26,5 +26,5 @@ Picker.route('/MagIC/method-codes.json', function(params, request, response, nex
 Picker.route('/MagIC/data-models/3.0.json', function(params, request, response, next) {
   response.setHeader('Content-Type', "text/plain;charset=utf-8");
   response.statusCode = 200;
-  response.end(JSON.stringify(_.without(models['3.0'], 'criteria_map'), null, '\t'));
+  response.end(JSON.stringify(models['3.0'], null, '\t'));
 });

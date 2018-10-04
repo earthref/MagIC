@@ -120,6 +120,7 @@ class SearchSummariesListItem extends React.Component {
   renderLinks(item) {
     if (this.props.table !== 'contribution') return undefined;
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
+    let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
     let id            = item.summary && item.summary.contribution && item.summary.contribution.id;
     let doi           = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.doi;
     return (
@@ -132,19 +133,14 @@ class SearchSummariesListItem extends React.Component {
             <span>{'earthref.org/MagIC/' + id}</span>
           }</p>
         </span>}
-        {id && (id > 16438) && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
+        {id && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
         <span>
           <b>EarthRef Data DOI Link:</b>
           <p>{_is_activated ?
-            <span>Queued For Creation</span> :
-            <span>Created Upon Activation</span>
-          }</p>
-        </span>}
-        {id && (id <= 16438) && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
-        <span>
-          <b>EarthRef Data DOI Link:</b>
-          <p>{_is_activated ?
-            <a style={this.styles.a} href={'http://dx.doi.org/10.7288/V4/MAGIC/' + id} target="_blank">{'10.7288/V4/MAGIC/' + id}</a> :
+            (_has_data_doi ? 
+              <a style={this.styles.a} href={'http://dx.doi.org/10.7288/V4/MAGIC/' + id} target="_blank">{'10.7288/V4/MAGIC/' + id}</a> : 
+              <span>Queued For Creation</span>
+             ) :
             <span>Created Upon Activation</span>
           }</p>
         </span>}

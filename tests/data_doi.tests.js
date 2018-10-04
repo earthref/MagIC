@@ -17,6 +17,8 @@ let index = "magic_v2";
     it("should update data dois", function (done) { setTimeout(() => {
       this.timeout(0);
 
+      console.log(process.env.EZID_USER, process.env.EZID_PASS);
+
       esClient.search({
         index: index, type: "contribution", size: 1e4, 
         _source: ["summary.contribution.id", "summary.contribution._reference.title", "summary.contribution._reference.long_authors"],
@@ -24,14 +26,15 @@ let index = "magic_v2";
           "query": { "bool": { 
             "must": [
               { "exists": { "field": "summary.contribution._reference.long_authors" }},
-              { "exists": { "field": "summary.contribution._reference.title" }}
+              { "exists": { "field": "summary.contribution._reference.title" }},
+              { "term": { "summary.contribution._is_latest": "true"}}
             ],
-            //"filter": { "term": { "summary.contribution._is_latest": "true"}}
-            "filter": { "term": { "summary.contribution.id": 16450}}
+            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
+            //"filter": { "term": { "summary.contribution.id": 16450}}
           }}
         }
       }).then((resp) => {
-        console.log(resp.hits.total, resp.hits.hits);
+        console.log('Contributions without a data DOI:', resp.hits.total);
         if (resp.hits.total > 0) {
 
           BPromise.each(resp.hits.hits, hit => {
@@ -70,20 +73,57 @@ crossref: ${xml}`;
                 method: 'PUT',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MagIC/' + hit._source.summary.contribution.id,
                 auth: {
-                  user: process.env.EZID_USER,
-                  pass: process.env.EZID_PASS
+                  user: '
+                  pass: '
                 },
                 headers: {'content-type' : 'text/plain; charset=UTF-8'},
                 body: payload
               }, function (error, response, body) {
                 if (error) {
                   console.error(error);
-                } else if (/^error: /.test(body)) {
+                  resolve();
+                } else if (body === 'error: bad request - identifier already exists') {
+                  esClient.update({
+                    "index": hit._index,
+                    "type":hit._type,
+                    "id": hit._id,
+                    "refresh": true,
+                    "body": {
+                      "doc": {
+                        "summary": {
+                          "contribution": {
+                            "_has_data_doi": "true"
+                          }
+                        }
+                      }
+                    }
+                  }).then(() => {
+                    console.log(hit._id, 'already had a Data DOI minted');
+                    resolve();
+                  });
+                }  else if (/^error: /.test(body)) {
                   console.error(body);
+                  resolve();
                 } else {
-                  console.log(body);
+                  esClient.update({
+                    "index": hit._index,
+                    "type":hit._type,
+                    "id": hit._id,
+                    "refresh": true,
+                    "body": {
+                      "doc": {
+                        "summary": {
+                          "contribution": {
+                            "_has_data_doi": "true"
+                          }
+                        }
+                      }
+                    }
+                  }).then(() => {
+                    console.log(hit._id, 'now has a Data DOI');
+                    resolve();
+                  });
                 }
-                resolve();
               });
               
             });
