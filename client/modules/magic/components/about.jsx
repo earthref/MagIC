@@ -77,7 +77,7 @@ Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which
                 <img src="/MagIC/people/rminnett.jpg" />
               </div><br/>
               Rupert Minnett
-              <div className="sub header">Programmer via<br/>CEAOS, OSU</div>
+              <div className="sub header">Programmer via<br/>CEOAS, OSU</div>
             </a>
             </Grid.Column>
             <Grid.Column>
