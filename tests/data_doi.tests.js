@@ -21,15 +21,21 @@ let index = "magic_v2";
 
       esClient.search({
         index: index, type: "contribution", size: 1e4, 
-        _source: ["summary.contribution.id", "summary.contribution._reference.title", "summary.contribution._reference.long_authors"],
+        _source: [
+          "summary.contribution.id", 
+          "summary.contribution._reference.title", 
+          "summary.contribution._reference.long_authors", 
+          "summary.contribution._reference.year"
+        ],
         body: {
           "query": { "bool": { 
             "must": [
               { "exists": { "field": "summary.contribution._reference.long_authors" }},
               { "exists": { "field": "summary.contribution._reference.title" }},
-              { "term": { "summary.contribution._is_latest": "true"}}
+              { "exists": { "field": "summary.contribution._reference.year" }}
+              //{ "term": { "summary.contribution._is_latest": "true"}}
             ],
-            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
+            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
             //"filter": { "term": { "summary.contribution.id": 16450}}
           }}
         }
@@ -56,6 +62,8 @@ let index = "magic_v2";
   <publisher_item>
     <item_number item_number_type="MagIC Contribution ID">${hit._source.summary.contribution.id}</item_number>
   </publisher_item>
+  <publisher><publisher_name>Magnetics Information Consortium (MagIC)</publisher_name></publisher>
+  <publication_date><year>${hit._source.summary.contribution._reference.year}</year></publication_date>
   <doi_data>
     <doi></doi>
     <resource></resource>
@@ -63,14 +71,13 @@ let index = "magic_v2";
 </database>`;
               xml = xml.replace(/%/g, "%25").replace(/\s*\n\s*/g, "%0A").replace(/\r/g, "%0D").replace(/:/g, "%3A");
               let payload =
-`_crossref: no
-_profile: crossref
+`_profile: crossref
 _status: public
 _target: https://earthref.org/MagIC/${hit._source.summary.contribution.id}
 crossref: ${xml}`;
 
               request({
-                method: 'PUT',
+                method: 'POST',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MagIC/' + hit._source.summary.contribution.id,
                 auth: {
                   user: '
