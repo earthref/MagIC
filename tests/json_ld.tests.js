@@ -10,7 +10,7 @@ const esClient = new elasticsearch.Client({
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
-let index = "magic_v2";
+let index = "magic_v4";
 
   describe("magic.json_ld", () => {
 

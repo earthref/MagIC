@@ -6,6 +6,7 @@ import {Promise} from 'meteor/promise';
 import _ from "lodash";
 import uuid from "uuid";
 import moment from "moment";
+import sizeof from "object-sizeof";
 import elasticsearch from "elasticsearch";
 
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
@@ -30,6 +31,7 @@ export default function () {
       try {
 
         let search = {
+          "_source": false,
           "size": 0,
           "query": {
             "bool": {
@@ -59,7 +61,7 @@ export default function () {
         return _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"]));
 
       } catch(error) {
-        console.error("esBuckets", index, type, queries, filters, error.message);
+        console.error("esBuckets", index, type, queries, error.message);
         throw new Meteor.Error("esBuckets", error.message);
       }
     },
@@ -70,7 +72,6 @@ export default function () {
       try {
 
         let search = {
-          "size": 0,
           "query": {
             "bool": {
               "must": [],
@@ -93,12 +94,23 @@ export default function () {
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
         if (_.trim(countField) !== "") search.aggs = { count: { sum: { field: countField }}};
 
-        let resp = await esClient.search({
-          "index": index,
-          "type": type,
-          "body": search
-        });
-        return (_.trim(countField) !== "" ? resp.aggregations.count.value : resp.hits.total);
+        console.log("esCount search:", JSON.stringify(search));
+        let resp = _.trim(countField) !== "" ? 
+          await esClient.search({
+            "index": index,
+            "type": type,
+            "body": _.extend({}, search, { "_source": false, "size": 0 }),
+            "timeout": "60s"
+          }) :
+          await esClient.count({
+            "index": index,
+            "type": type,
+            "body": search
+          });
+        let count = _.trim(countField) !== "" ? resp.aggregations.count.value : resp.count;
+
+        console.log("esCount hits:", count);
+        return count;
 
       } catch(error) {
         console.error("esCount", index, type, queries, filters, countField, error.message);
@@ -138,11 +150,14 @@ export default function () {
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
+        console.log("esPage search:", JSON.stringify(search));
         let resp = await esClient.search({
           "index": index,
           "type": type,
-          "body": search
+          "body": search,
+          "timeout": "60s"
         });
+        console.log("esPage hits:", resp.hits.total);
         return resp.hits.hits.map(hit => hit._source);
 
       } catch(error) {
@@ -218,6 +233,7 @@ export default function () {
       try {
 
         let search = {
+          "_source": false,
           "size": 0,
           "query": {
             "bool": {
@@ -365,6 +381,7 @@ export default function () {
         summary.contribution = _.merge(summary.contribution, contributionRow);
         summary.contribution._is_valid = "false",
 
+        console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
         await esClient.update({
           "index": index,
           "type": "contribution",
@@ -373,7 +390,7 @@ export default function () {
           "body": {
             "doc": {
               "summary": summary,
-              "contribution": contribution
+              //"contribution": contribution
             }
           }
         });
@@ -763,6 +780,22 @@ export default function () {
         if (resp.hits.total > 0) {
           let _history = resp.hits.hits[0]._source.summary.contribution._history;
           _history[0].description = description;
+          resp = await esClient.updateByQuery({
+            "index": index,
+            "refresh": true,
+            "body": {
+              "script": {
+                "source": "ctx._source.summary.contribution._history = params.contributionSummary",
+                "params": {contributionSummary}
+              },
+              "query": {
+                "term": {
+                  "summary.contribution.id": id
+                }
+              }
+            }
+          });
+
           await esClient.update({
             "index": index,
             "type": "contribution",
@@ -1038,7 +1071,7 @@ export default function () {
             "refresh": true,
             "body": {
               "script": {
-                "inline": "ctx._source.summary.contribution._is_latest = \"false\""
+                "source": "ctx._source.summary.contribution._is_latest = \"false\""
               },
               "query": {
                 "term": {
@@ -1060,7 +1093,7 @@ export default function () {
           "refresh": true,
           "body": {
             "script": {
-              "inline": "ctx._source.summary.contribution = params.contributionSummary",
+              "source": "ctx._source.summary.contribution = params.contributionSummary",
               "params": {contributionSummary}
             },
             "query": {
@@ -1107,7 +1140,7 @@ export default function () {
             "index": index,
             "refresh": true,
             "body": {
-              "script": {
+              "source": {
                 "inline": "ctx._source.summary.contribution._is_latest = \"true\""
               },
               "query": {
@@ -1128,7 +1161,7 @@ export default function () {
           "refresh": true,
           "body": {
             "script": {
-              "inline": "ctx._source.summary.contribution._is_activated = \"false\""
+              "source": "ctx._source.summary.contribution._is_activated = \"false\""
             },
             "query": {
               "term": {

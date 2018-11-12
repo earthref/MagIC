@@ -21,7 +21,7 @@ const esClient = new elasticsearch.Client({
 //var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/2.5 Contributions Test - Citations/';
 var dirIn = 'D:/Google Drive/Cogense/Clients/Anthony Koppers/EarthRef/MagIC/Projects/Meteor/Upgrader/3.0 Contributions 5/';
 var dirOut = 'client/modules/magic/actions/tests/output/summaries5/';
-var indexName = 'magic_v2';
+var indexName = 'magic_v4';
 if (!fs.existsSync(dirOut)) fs.mkdirSync(dirOut);
 
 describe('magic.actions.summarize', () => {
