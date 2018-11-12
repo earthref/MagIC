@@ -83,7 +83,7 @@ class SearchSummariesListItem extends React.Component {
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id && id != 11909 && id < 16282 &&
+        {id && id != 11909 && (id == 16508 || id == 16526 || id < 16282) &&
         <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
           <input type="hidden" name="file_path"
                  value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
@@ -93,7 +93,7 @@ class SearchSummariesListItem extends React.Component {
             <i className="ui file text outline icon"/> Download
           </button>
         </form>}
-        {id && (id == 11909 || id >= 16282) &&
+        {id && id != 16508 && id != 16526 && (id == 11909 || id >= 16282) &&
         <button type="submit" className="ui basic tiny fluid compact icon header purple button"
                 style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
           Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
@@ -660,6 +660,51 @@ class SearchSummariesListItem extends React.Component {
                   </tr>
                 );
               })}
+              </tbody>
+            </table>}
+            {Cookies.get('user_id') == 'rminnett' && this.props.table === 'contribution' && item.summary.contribution &&
+            <table className="ui compact red table">
+              <thead>
+                <tr>
+                  <th style={{whiteSpace: 'nowrap'}}>Developer Tasks</th>
+                  <th style={{whiteSpace: 'nowrap'}}></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{whiteSpace: 'nowrap'}}>
+                    <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                      onClick={function(id, e) {
+                        console.log("esDeactivateContribution");
+                        Meteor.call("esDeactivateContribution", {index: index, id: id},
+                          (error) => { console.log("esDeactivateContribution done"); }
+                        );
+                      }.bind(this, item.summary.contribution.id)}
+                    >
+                      Deactivate
+                    </button>
+                  </td>
+                  <td>
+                    Deactivate the contribution (contribution and Data DOI links will be broken until activated again).
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{whiteSpace: 'nowrap'}}>
+                    <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                      onClick={function(id, e) {
+                        console.log("esUpdatePrivateSummaries");
+                        Meteor.call("esUpdatePrivateSummaries", {index: index, id: id, contributor: Cookies.get('user_id')},
+                          (error) => { console.log("esUpdatePrivateSummaries done"); }
+                        );
+                      }.bind(this, item.summary.contribution.id)}
+                    >
+                      Full Summary
+                    </button>
+                  </td>
+                  <td>
+                    Calculate the full contribution summary and submit it to Elasticsearch for indexing.
+                  </td>
+                </tr>
               </tbody>
             </table>}
           </div>
