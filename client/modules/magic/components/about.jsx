@@ -16,7 +16,7 @@ It is inherently domain-specific and directed by PIs who are both producers and 
 Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which integrates four independent cyber-initiatives rooted in various parts of the Earth, Ocean and Life sciences and education.
           </p>
           <p> 
-		   <b><center>MagIC Technologies and Its Surrounding Ecosystem</center></b> 	
+		   <b><center>MagIC Technologies and Surrounding Ecosystem</center></b> 	
            <br/>
            <img src="/MagIC/about/overview_diagram900.png" />
           </p>
