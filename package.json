@@ -16,7 +16,7 @@
     "react-addons-test-utils": "^15.6.2"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.44",
+    "@babel/runtime": "^7.2.0",
     "aws-sdk": "^2.337.0",
     "bluebird": "^3.5.1",
     "elasticsearch": "^15.1.1",
@@ -28,7 +28,7 @@
     "js-cookie": "^2.2.0",
     "jszip": "^3.1.5",
     "lodash": "^4.17.5",
-    "meteor-node-stubs": "^0.2.11",
+    "meteor-node-stubs": "^0.4.1",
     "moment": "^2.22.1",
     "moment-timezone": "^0.5.16",
     "numeral": "^2.0.6",
