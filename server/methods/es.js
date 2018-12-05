@@ -1087,6 +1087,7 @@ export default function () {
 
       try {
         contributionSummary._is_activated = "true";
+        contributionSummary.timestamp = moment().utc().toISOString();
         resp = await esClient.updateByQuery({
           "index": index,
           "refresh": true,

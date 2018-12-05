@@ -15,6 +15,11 @@ MagIC supports the international rock and paleomagnetic communities and endeavor
 It is inherently domain-specific and directed by PIs who are both producers and consumers of rock and paleomagnetic data. 
 Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which integrates four independent cyber-initiatives rooted in various parts of the Earth, Ocean and Life sciences and education.
           </p>
+          <p> 
+		   <b><center>MagIC Technologies and Surrounding Ecosystem</center></b> 	
+           <br/>
+           <img src="/MagIC/about/overview_diagram900.png" />
+          </p>
           <p>
            <b> Database Technologies and Features </b><br/>
             MagIC has completed the transition from an Oracle backed, Perl based, server-oriented website to an Elasticsearch backed, Meteor based thick client website technology stack. 
