@@ -10,6 +10,22 @@ export default class extends React.Component {
     return (
       <div style={{textAlign: "justify"}}>
         <h3>
+          <Image size="mini" src="/MagIC/agu.jpg" floated="left"/>
+          {` MagIC at AGU`}
+        </h3>
+        <p>
+          {`MagIC will host a data upload demonstration and help session as part of AGU’s `}
+          <a href="https://fallmeeting.agu.org/2018/fair-data-at-fall-meeting-2018/" target="_blank"><b>FAIR Data Help Desk</b></a>
+          {` at the 2018 AGU Fall Meeting on Thursday at 11:30am in the AGU Theatre space.`}
+          {` We will also have a `}
+          <a href="https://agu.confex.com/agu/fm18/prelim.cgi/Paper/423265" target="_blank"><b>poster</b></a>
+          {` in the Tuesday GPE General Contribution session and an `}
+          <a href="https://agu.confex.com/agu/fm18/prelim.cgi/Paper/426649" target="_blank"><b>eLightning talk</b></a>
+          {` on Wednesday at 8:40am.`}
+          {` We welcome your to come by any our presentations to discuss MagIC's current status and future improvements.`}
+        </p>
+        <div className="ui divider"></div>
+        <h3>
           <Image size="mini" src="/MagIC/egu.png" floated="left"/>
           {` MagIC at EGU`}
         </h3>
