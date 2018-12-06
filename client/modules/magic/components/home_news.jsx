@@ -22,7 +22,7 @@ export default class extends React.Component {
           {` in the Tuesday GPE General Contribution session and an `}
           <a href="https://agu.confex.com/agu/fm18/prelim.cgi/Paper/426649" target="_blank"><b>eLightning talk</b></a>
           {` on Wednesday at 8:40am.`}
-          {` We welcome your to come by any our presentations to discuss MagIC's current status and future improvements.`}
+          {` We welcome you to come by any our presentations to discuss MagIC's current status and future improvements.`}
         </p>
         <div className="ui divider"></div>
         <h3>
