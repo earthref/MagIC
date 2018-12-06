@@ -113,7 +113,7 @@ export default class extends React.Component {
         </h2>
         <SearchDividedList
           es={_.extend({}, levels[0].views[0].es, { sort: [{'summary.contribution.timestamp': 'desc'}]})}
-          pageSize={5}
+          pageSize={7}
           pageNumber={1}
         >
           <SearchSummaryListItem table="contribution"/>
