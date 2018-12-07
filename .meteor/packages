@@ -24,3 +24,4 @@ dburles:google-maps
 juliancwirko:postcss    # Replace standard-minifier-css for Autoprefixer support
 meteorhacks:picker
 underscore@1.0.10
+meteortesting:mocha
