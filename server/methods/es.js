@@ -390,7 +390,7 @@ export default function () {
           "body": {
             "doc": {
               "summary": summary,
-              //"contribution": contribution
+              "contribution": contribution
             }
           }
         });
