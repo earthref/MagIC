@@ -17,7 +17,7 @@ let index = "magic_v4";
     it("should update data dois", function (done) { setTimeout(() => {
       this.timeout(0);
 
-      console.log(process.env.EZID_USER, process.env.EZID_PASS);
+      //console.log(process.env.EZID_USER, process.env.EZID_PASS);
 
       esClient.search({
         index: index, type: "contribution", size: 1e4, 
@@ -32,11 +32,11 @@ let index = "magic_v4";
             "must": [
               { "exists": { "field": "summary.contribution._reference.long_authors" }},
               { "exists": { "field": "summary.contribution._reference.title" }},
-              { "exists": { "field": "summary.contribution._reference.year" }}
-              //{ "term": { "summary.contribution._is_latest": "true"}}
+              { "exists": { "field": "summary.contribution._reference.year" }},
+              { "term": { "summary.contribution._is_latest": "true"}}
             ],
-            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
-            //"filter": { "term": { "summary.contribution.id": 16450}}
+            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
+            //"filter": { "term": { "summary.contribution.id": 16550}}
           }}
         }
       }).then((resp) => {
@@ -76,14 +76,15 @@ _status: public
 _target: https://earthref.org/MagIC/${hit._source.summary.contribution.id}
 crossref: ${xml}`;
 
+              //console.log('PUT', 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id, payload);
               request({
-                method: 'POST',
-                uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MagIC/' + hit._source.summary.contribution.id,
+                method: 'PUT',
+                uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id,
                 auth: {
                   user: '
                   pass: '
                 },
-                headers: {'content-type' : 'text/plain; charset=UTF-8'},
+                headers: {'content-type': 'text/plain; charset=UTF-8'},
                 body: payload
               }, function (error, response, body) {
                 if (error) {
