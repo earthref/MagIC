@@ -30,7 +30,7 @@ export default class extends React.Component {
           {` MagIC at EGU`}
         </h3>
         <p>
-          {`Visit us at the `}
+          {`MagIC was part of the `}
           <a href="https://www.egu2018.eu/" target="_blank"><b>EGU General Assembly 2018</b></a>
           {` where our poster `}
           <b>EGU2018-11767</b>
@@ -38,15 +38,19 @@ export default class extends React.Component {
           <em>MagIC’s Migration to a Simplified Data Model and Updated Open Source 
             Technologies Improves Community Engagement, Website Responsiveness, and 
             Development Times</em>
-          {` is in `}
+          {` was in `}
           <b>Session EMRP3.5</b>
           {` `}
           <em>Geomagnetic field variations in ancient times: new paleo/archeomagnetic data 
             and models to disclose fundamental properties of the Earth's magnetic field</em>
-          {` at poster `}
-          <b>119 Hall X2</b>
-          {` and we will be there `}
-          <b>Monday, 09 Apr 2018, 17:30-19:00</b>.
+          {`. We met with representives of the `}
+          <a href="https:https://www.epos-ip.org/" target="_blank"><b>European Plate Observing System (EPOS)</b></a>
+          {` and other groups to discuss how best to interoperate with the evolving `}
+          <b>EPOS</b> 
+          {` project and how `}
+          {`MagIC can be a data store for European researchers who wish to share data via `}
+          <b>EPOS</b> 
+          {`.`}
         </p>
         <div className="ui divider"></div>
         <h3>
