@@ -785,28 +785,12 @@ export default function () {
             "refresh": true,
             "body": {
               "script": {
-                "source": "ctx._source.summary.contribution._history = params.contributionSummary",
-                "params": {contributionSummary}
+                "source": "ctx._source.summary.contribution._history = params._history",
+                "params": {_history}
               },
               "query": {
                 "term": {
                   "summary.contribution.id": id
-                }
-              }
-            }
-          });
-
-          await esClient.update({
-            "index": index,
-            "type": "contribution",
-            "id": id + "_0",
-            "refresh": true,
-            "body": {
-              "doc": {
-                "summary": {
-                  "contribution": {
-                    "_history": _history
-                  }
                 }
               }
             }
@@ -823,17 +807,12 @@ export default function () {
           "id": id + "_0",
           "refresh": true,
           "body": {
-            "doc": {
-              "summary": {
-                "contribution": {
-                  "description": description
-                }
-              },
-              "contribution": {
-                "contribution": {
-                  "description": description
-                }
-              }
+            "script": {
+              "source": `
+                ctx._source.summary.contribution.description = params.description; 
+                ctx._source.contribution.contribution[0].description = params.description;
+              `,
+              "params": {description}
             }
           }
         });
@@ -914,7 +893,7 @@ export default function () {
           "refresh": true,
           "body": {
             "script": {
-              "inline": `
+              "source": `
                 ctx._source.summary.contribution.version = null; 
                 ctx._source.summary.contribution._reference = null; 
                 ctx._source.summary.contribution._history = null;
@@ -922,6 +901,7 @@ export default function () {
             }
           }
         });
+        // TODO: change this to an update by script and only update the reference info:
         await esClient.update({
           "index": index,
           "type": "contribution",
@@ -944,6 +924,7 @@ export default function () {
               },
               "contribution": {
                 "contribution": [{
+                  "id": _.parseInt(id),
                   "version": version,
                   "contributor": contributor,
                   "timestamp": timestamp,
@@ -1140,8 +1121,8 @@ export default function () {
             "index": index,
             "refresh": true,
             "body": {
-              "source": {
-                "inline": "ctx._source.summary.contribution._is_latest = \"true\""
+              "script": {
+                "source": "ctx._source.summary.contribution._is_latest = \"true\""
               },
               "query": {
                 "term": {
