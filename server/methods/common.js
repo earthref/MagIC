@@ -26,11 +26,11 @@ export default function () {
       //console.log("getReferenceMetadata", attempt, `http://api.crossref.org/works/${doi}`);
       let resp = HTTP.call("GET", `http://api.crossref.org/works/${doi}`);
       if (!resp.statusCode || !resp.data || !resp.data.message) {
-        if (attemp < 3) {
-          return Meteor.call("getReferenceMetadata", doi, attemp + 1);
+        if (attempt < 3) {
+          return Meteor.call("getReferenceMetadata", doi, attempt + 1);
         } else {
-          console.error("getReferenceMetadata", `Failed to retried reference metadata for doi ${doi}`);
-          throw new Meteor.Error("getReferenceMetadata", `Failed to retried reference metadata for doi ${doi}`);
+          console.error("getReferenceMetadata", `Failed to retrieve reference metadata for doi ${doi}`);
+          throw new Meteor.Error("getReferenceMetadata", `Failed to retrieve reference metadata for doi ${doi}`);
         }
       } else {
         let d = resp.data.message;
