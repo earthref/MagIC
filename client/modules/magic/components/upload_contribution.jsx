@@ -242,14 +242,16 @@ export default class MagICUploadContribution extends React.Component {
           this.files[i].tableNames = [''];
           this.files[i].data = [[[]]];
           text.split(/\s*>+\s*\n/).map((table, j) => {
-            let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
-            this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
-            this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => {
-              line = line.replace(/\t+$/, '');
-              if (line !== '') return line.split('\t');
-            });
-            _.pull(this.files[i].data[j], undefined);
-            //console.log('parsed table', this.files[i].tableNames[j], this.files[i].data[j]);
+            if (_.trim(table) !== '') {
+              let tableName = table.match(/^tab( delimited)?\s*?\t(.+?)\s*?[\n\v\f\r\x85\u2028\u2029]+/);
+              this.files[i].tableNames[j] = (tableName && table.length >= 3 ? tableName[2] : '');
+              this.files[i].data[j] = table.split(/[\n\v\f\r\x85\u2028\u2029]+/).map((line, j) => {
+                line = line.replace(/\t+$/, '');
+                if (line !== '') return line.split('\t');
+              });
+              _.pull(this.files[i].data[j], undefined);
+              //console.log('parsed table', this.files[i].tableNames[j], this.files[i].data[j]);
+            }
           });
         } else {
           this.files[i].parseErrors.push("Failed to parse this file as a MagIC Text File.")
@@ -477,7 +479,8 @@ export default class MagICUploadContribution extends React.Component {
           summary: this.summary.contribution.summary
         }, (error, id) => {
           console.log('created contribution', id, error);
-          if (error) { this.setState({uploadError: error, uploading: false});
+          if (error) {
+            this.setState({uploadError: error, uploading: false});
           } else {
             Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
@@ -485,7 +488,8 @@ export default class MagICUploadContribution extends React.Component {
               contributor: this.state._userid
             }, (error) => {
               console.log('updated contribution pre-summaries', this.state._id, error);
-              if (error) { this.setState({uploadError: error, uploading: false});
+              if (error) {
+                this.setState({uploadError: error, uploading: false});
               } else { 
                 this.setState({uploaded: true, uploading: false});
                 Meteor.call('esUpdatePrivateSummaries', {

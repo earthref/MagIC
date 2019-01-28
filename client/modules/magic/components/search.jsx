@@ -766,7 +766,7 @@ class Search extends React.Component {
     this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {
       queryTerms.push(term);
     });
-    if (_.includes(queryTerms, 'doi')) {
+    if (_.includes(queryTerms, 'doi') || _.includes(queryTerms, 'id')) {
       return <SearchJSONLD es={es}/>
     }
   }

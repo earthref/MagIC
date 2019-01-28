@@ -23,7 +23,7 @@ Funded by NSF since 2003, MagIC forms a major part of https://earthref.org which
           <p>
            <b> Database Technologies and Features </b><br/>
             MagIC has completed the transition from an Oracle backed, Perl based, server-oriented website to an Elasticsearch backed, Meteor based thick client website technology stack. 
-            This thick client system has enabled the creation of a sophisticated, app-like interface for uploading with active elements like column header suggestions, table rejection toggle switches, and "don't import this column" switchs. 
+            This thick client system has enabled the creation of a sophisticated, app-like interface for uploading with active elements like column header suggestions, table rejection toggle switches, and "don't import this column" switches. 
             On-the-fly data validation and online spreadsheet editing are some additional features that will be possible by using these software technologies. 
             Uploading data into the archive with comprehensive indexing and completing complicated search queries to obtain unique datasets are an order of magnitude quicker than the old system. 
             Searches return row level data over all contributions and the user can choose to download the rows meeting the search criteria from only a subset of tables, if desired. The selected data is available to be downloaded as either single text file of various formats or an Excel spreadsheet. 
