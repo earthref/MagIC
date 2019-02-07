@@ -4,7 +4,7 @@ import {compose} from 'react-komposer';
 
 export const composer = ({ id }, onData) => {
   onData(null, { files: undefined });
-  Meteor.call('getPmagPyPlotFiles', id, Cookies.get('user_id'), function (error, files) {
+  Meteor.call('magicGetPmagPyPlotFiles', id, Cookies.get('user_id'), function (error, files) {
     if (error) {
       onData(null, { error });
     } else {

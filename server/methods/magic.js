@@ -2,7 +2,6 @@ import {Meteor} from 'meteor/meteor';
 import {HTTP} from 'meteor/http';
 
 import _ from 'lodash';
-//import s3 from 's3';
 import moment from 'moment';
 import request from 'request';
 
@@ -63,73 +62,35 @@ export default function () {
       return Collections['magic.import.settings.templates'].findOne(ID);
     },
 
-    async getPmagPyPlotFiles(cID, user, attempt = 0) {
+    async magicGetPmagPyPlotFiles(cID, user, attempt = 0) {
       this.unblock();
-      console.log("getPmagPyPlotFiles", attempt, `http://pmagpy.earthref.org/plots/${cID}`);
+      //console.log("magicGetPmagPyPlotFiles", attempt, `http://pmagpy.earthref.org/plots/${cID}`);
       
       try {
-        const resp = HTTP.call("GET", `http://pmagpy.earthref.org/plots/${cID}`);
-        if (resp && resp.statusCode && resp.statusCode === 200 && resp.content) {
-          let files = [];
-          let html = resp.content.toString();
-          const re = /href="(.*?\.png)"/gi;
-          let match = re.exec(html);
-          while (match !== null) {
-            files.push(match[1]);
-            match = re.exec(html);
-          }
-          return files;
-        }
-        else if (resp && resp.statusCode && resp.statusCode === 404) {
-          return [];
-        }
-        else if (attempt < 3) {
-          return Meteor.call("getPmagPyPlot", cID, file, user, attempt + 1);
-        } else {
-          console.error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
-          throw new Meteor.Error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
-        }
+        return await new Promise(resolve => {
+          Meteor.call("s3ListObjects", { bucket: "magic-plots", prefix: `${cID}/` }, (error, objects) => {
+            resolve(_.map(objects, 'Key'));
+          });
+        });
       } catch (e) {
-        if (e.response && e.response.statusCode && e.response.statusCode === 404) {
-          return [];
-        }
-        else if (attempt < 3) {
-          return Meteor.call("getPmagPyPlotFiles", cID, user, attempt + 1);
-        } else {
-          console.error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot files for contribution ${cID}`, e);
-          throw new Meteor.Error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot files for contribution ${cID}`);
-        }
+        console.error("magicGetPmagPyPlotFiles", `Failed to retrieve PmagPy plot files for contribution ${cID}`, e);
+        throw new Meteor.Error("magicGetPmagPyPlotFiles", `Failed to retrieve PmagPy plot files for contribution ${cID}`);
       }
     },
 
-    async getPmagPyPlot(cID, file, user, attempt = 0) {
+    async magicGetPmagPyPlot(file, user, attempt = 0) {
       this.unblock();
-      console.log("getPmagPyPlot", attempt, `http://pmagpy.earthref.org/plots/${cID}/${file}`);
+      //console.log("magicGetPmagPyPlot", attempt, file);
       
       try {
-        const resp = HTTP.call("GET", `http://pmagpy.earthref.org/plots/${cID}/${file}`, { npmRequestOptions: { encoding: null } });
-        if (resp && resp.statusCode && resp.statusCode === 200 && resp.headers && resp.content && resp.content.toString) {
-          return "data:" + resp.headers["content-type"] + ";base64," + resp.content.toString('base64');
-        }
-        else if (resp && resp.statusCode && resp.statusCode === 404) {
-          return "";
-        }
-        else if (attempt < 3) {
-          return Meteor.call("getPmagPyPlot", cID, file, user, attempt + 1);
-        } else {
-          console.error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
-          throw new Meteor.Error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
-        }
+        return await new Promise(resolve => {
+          Meteor.call("s3GetObjectBase64", { bucket: "magic-plots", key: file }, (error, base64) => {
+            resolve(base64);
+          });
+        });
       } catch (e) {
-        if (e.response && e.response.statusCode && e.response.statusCode === 404) {
-          return "";
-        }
-        else if (attempt < 3) {
-          return Meteor.call("getPmagPyPlot", cID, file, user, attempt + 1);
-        } else {
-          console.error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`, e);
-          throw new Meteor.Error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
-        }
+        console.error("magicGetPmagPyPlot", `Failed to retrieve PmagPy plot ${file}`, e);
+        throw new Meteor.Error("magicGetPmagPyPlot", `Failed to retrieve PmagPy plot ${file}`);
       }
     }
 

@@ -17,7 +17,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.2.0",
-    "aws-sdk": "^2.337.0",
+    "aws-sdk": "^2.397.0",
     "bluebird": "^3.5.1",
     "elasticsearch": "^15.1.1",
     "fibers": "^2.0.2",

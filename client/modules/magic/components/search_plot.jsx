@@ -3,8 +3,8 @@ import React from 'react';
 export default class extends React.Component {
 
   render() {
-    const { id, file, error, source, style } = this.props
-    console.log('plot render', id, file, error, source && source.length);
+    const { file, error, source, style } = this.props
+    console.log('plot render', file, error, source && source.length);
     if (error) {
       return (
         <div style={style}>
