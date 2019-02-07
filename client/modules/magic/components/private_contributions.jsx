@@ -296,7 +296,7 @@ export default class extends React.Component {
                               this.confirmDelete(c.summary.contribution.id);
                             }}
                         >
-                          Delete Contribution
+                          Delete
                         </div>
                       }
                     </div>
