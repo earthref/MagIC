@@ -12,6 +12,7 @@ import ParseContribution from '/lib/modules/magic/parse_contribution.js';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import GoogleStaticMap from '/client/modules/common/components/google_static_map';
 import GoogleMap from '/client/modules/common/components/google_map';
+import SearchPlotThumbnail from '/client/modules/magic/containers/search_plot_thumbnail';
 import {index} from '/lib/configs/magic/search_levels.js';
 
 class SearchSummariesListItem extends React.Component {
@@ -199,44 +200,6 @@ class SearchSummariesListItem extends React.Component {
     return (
       <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'left', overflow:'hidden', textOverflow:'ellipsis'}}>
         <br/><b>Queued for Indexing</b><br/>Data are available for<br/>downloading and in<br/>the "Rows" sub-tabs.
-      </div>
-    );
-  }
-
-  renderPlotThumbnail(item) {
-    
-    let cID = item && item.summary && item.summary.contribution && item.summary.contribution.id;
-    let src;
-
-    if (cID) {
-      Meteor.call('getPmagPyPlot', cID, Cookies.get('user_id'), function (error, response, body) {
-        if (error) {
-          console.error('get plots', error);
-        } else {
-          console.log('get plots', body);
-        }
-      });
-    }
-
-    return src ? (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        <div className="ui image">
-          {(item.RANDOM_PLOT_NAME && item.SVW_MAGIC_CONTRIBUTION_ID ?
-              <img className="ui bordered image"
-                   src={'//static.earthref.org/imcache/' +
-                   (/_TY:_(aniso|eq)/.test(item.RANDOM_PLOT_NAME) ? 'Crop(geometry:292x292+111+104)' : 'Set(gravity:Center)|Crop(geometry:360x360+10+0)') +
-                   '|Resize(geometry:100x100)/images/MAGIC/static_plots/' +
-                   item.SVW_MAGIC_CONTRIBUTION_ID + '/' + item.RANDOM_PLOT_NAME}
-                   style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px'}}
-              />
-              :
-              <img className="ui bordered image" src="/MagIC/plot.png" style={{border:'1px solid rgba(0, 0, 0, 0.1)', maxWidth:'100px', maxHeight:'100px', visibility:'hidden'}}/>
-          )}
-        </div>
-      </div>
-    ) : (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
-        <br/>No<br/><b>Plots</b><br/>Made<br/><br/>
       </div>
     );
   }
@@ -581,7 +544,7 @@ class SearchSummariesListItem extends React.Component {
                   {this.renderDownloadButton(item)}
                   {this.renderLinks(item)}
                   {this.renderCounts(item)}
-                  {this.renderPlotThumbnail(item)}
+                  <SearchPlotThumbnail id={item && item.summary && item.summary.contribution && item.summary.contribution.id}/>
                   {this.renderMapThumbnail(item)}
                   {this.renderGeo(item)}
                   {this.renderGeology(item)}

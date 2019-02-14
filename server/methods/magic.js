@@ -63,20 +63,73 @@ export default function () {
       return Collections['magic.import.settings.templates'].findOne(ID);
     },
 
-    async getPmagPyPlot(cID, user, attempt = 0) {
+    async getPmagPyPlotFiles(cID, user, attempt = 0) {
       this.unblock();
-      console.log("getPmagPyPlot", attempt, `http://pmagpy.earthref.org/plots/${cID}`);
-      let resp = HTTP.call("GET", `http://pmagpy.earthref.org/plots/${cID}`, { npmRequestOptions: { encoding: null } });
-      console.log(resp);
-      if (!resp.statusCode || !resp.data || !resp.data.message) {
-        if (attempt < 3) {
-          return Meteor.call("getPmagPyPlot", cID, user, attempt + 1);
-        } else {
-          console.error("getPmagPyPlot", `Failed to retrieve PmagPy plot for contribution ${cID}`);
-          throw new Meteor.Error("getPmagPyPlot", `Failed to retrieve PmagPy plot for contribution ${cID}`);
+      console.log("getPmagPyPlotFiles", attempt, `http://pmagpy.earthref.org/plots/${cID}`);
+      
+      try {
+        const resp = HTTP.call("GET", `http://pmagpy.earthref.org/plots/${cID}`);
+        if (resp && resp.statusCode && resp.statusCode === 200 && resp.content) {
+          let files = [];
+          let html = resp.content.toString();
+          const re = /href="(.*?\.png)"/gi;
+          let match = re.exec(html);
+          while (match !== null) {
+            files.push(match[1]);
+            match = re.exec(html);
+          }
+          return files;
         }
-      } else {
-        console.log(resp);
+        else if (resp && resp.statusCode && resp.statusCode === 404) {
+          return [];
+        }
+        else if (attempt < 3) {
+          return Meteor.call("getPmagPyPlot", cID, file, user, attempt + 1);
+        } else {
+          console.error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
+          throw new Meteor.Error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
+        }
+      } catch (e) {
+        if (e.response && e.response.statusCode && e.response.statusCode === 404) {
+          return [];
+        }
+        else if (attempt < 3) {
+          return Meteor.call("getPmagPyPlotFiles", cID, user, attempt + 1);
+        } else {
+          console.error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot files for contribution ${cID}`, e);
+          throw new Meteor.Error("getPmagPyPlotFiles", `Failed to retrieve PmagPy plot files for contribution ${cID}`);
+        }
+      }
+    },
+
+    async getPmagPyPlot(cID, file, user, attempt = 0) {
+      this.unblock();
+      console.log("getPmagPyPlot", attempt, `http://pmagpy.earthref.org/plots/${cID}/${file}`);
+      
+      try {
+        const resp = HTTP.call("GET", `http://pmagpy.earthref.org/plots/${cID}/${file}`, { npmRequestOptions: { encoding: null } });
+        if (resp && resp.statusCode && resp.statusCode === 200 && resp.headers && resp.content && resp.content.toString) {
+          return "data:" + resp.headers["content-type"] + ";base64," + resp.content.toString('base64');
+        }
+        else if (resp && resp.statusCode && resp.statusCode === 404) {
+          return "";
+        }
+        else if (attempt < 3) {
+          return Meteor.call("getPmagPyPlot", cID, file, user, attempt + 1);
+        } else {
+          console.error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
+          throw new Meteor.Error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
+        }
+      } catch (e) {
+        if (e.response && e.response.statusCode && e.response.statusCode === 404) {
+          return "";
+        }
+        else if (attempt < 3) {
+          return Meteor.call("getPmagPyPlot", cID, file, user, attempt + 1);
+        } else {
+          console.error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`, e);
+          throw new Meteor.Error("getPmagPyPlot", `Failed to retrieve PmagPy plot ${file} for contribution ${cID}`);
+        }
       }
     }
 
