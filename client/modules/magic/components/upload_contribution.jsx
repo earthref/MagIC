@@ -361,8 +361,8 @@ export default class MagICUploadContribution extends React.Component {
                 file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
               } else {
                 this.contribution.measurements = {
-                  columns: data.columns,
-                  rows: data.rows
+                  columns: _.without(data.columns, undefined),
+                  rows: data.rows.slice(0, 2).map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
                 }
               }
             } else {
