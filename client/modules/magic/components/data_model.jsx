@@ -218,17 +218,17 @@ class DataModel extends React.Component {
   downloadJSON() {
     const version = this.props.version;
     const model = models[version];
-    const published = (model.published_day ?
-      moment(model.published_day, 'YYYY:MM:DD').format('MMMM Do, YYYY') :
+    const updated = (model.updated_day ?
+      moment(model.updated_day, 'YYYY:MM:DD').format('MMMM Do, YYYY') :
       'unpublished');
     const blob = new Blob([JSON.stringify(model, null, '\t')], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, 'MagIC Data Model v' + version + ' - ' + published + '.json');
+    saveAs(blob, 'MagIC Data Model v' + version + ' - ' + updated + '.json');
   }
 
   render() {
     const version = this.props.version;
     const model = models[version];
-    const published = moment(model.published_day, 'YYYY:MM:DD').format('MMMM Do, YYYY');
+    const updated = moment(model.updated_day, 'YYYY:MM:DD').format('MMMM Do, YYYY');
     let previousVersion;
     if (_.indexOf(versions, version) > 0)
       previousVersion = versions[_.indexOf(versions, version)-1];
@@ -284,9 +284,9 @@ class DataModel extends React.Component {
               </b>
             </div>
             <div className="four wide column">
-              {(model.published_day ?
+              {(model.updated_day ?
                 <span>
-                  Published on {published}.
+                  Updated on {updated}.
                 </span> :
                 <span style={{color:'#912d2b !important'}}>
                   This data model has not been published yet and may change.

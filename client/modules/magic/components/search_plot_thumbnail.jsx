@@ -46,7 +46,7 @@ export default class extends React.Component {
               {files.length} PmagPy Plots
             </div>
             <div className="image content">
-              <SearchPlot style={{position: 'relative', minHeight: 'calc(100vh - 400px)'}} id={id} file={this.state.file || files[0]} />
+              <SearchPlot style={{position: 'relative', minHeight: 'calc(100vh - 400px)', maxHeight: 'calc(100vh - 400px)'}} id={id} file={this.state.file || files[0]} />
             </div>
               <div className="actions" style={{display: 'flex', overflowX: 'scroll', minHeight: 'calc(100px + 2rem)' }}>
                 {this.state.modal && files.slice(0, this.state.maxVisible).map((file, i) => 
