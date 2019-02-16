@@ -544,7 +544,14 @@ class SearchSummariesListItem extends React.Component {
                   {this.renderDownloadButton(item)}
                   {this.renderLinks(item)}
                   {this.renderCounts(item)}
-                  <SearchPlotThumbnail id={item && item.summary && item.summary.contribution && item.summary.contribution.id}/>
+                  <SearchPlotThumbnail 
+                    id={item && item.summary && item.summary.contribution && item.summary.contribution.id}
+                    citation={item && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation }
+                    location={item && item.summary && item.summary.locations && item.summary.locations.location && item.summary.locations.location[0] }
+                    site={item && item.summary && item.summary.sites && item.summary.sites.site && item.summary.sites.site[0] }
+                    sample={item && item.summary && item.summary.samples && item.summary.samples.sample && item.summary.samples.sample[0] }
+                    specimen={item && item.summary && item.summary.specimens && item.summary.specimens.specimen && item.summary.specimens.specimen[0] }
+                  />
                   {this.renderMapThumbnail(item)}
                   {this.renderGeo(item)}
                   {this.renderGeology(item)}
