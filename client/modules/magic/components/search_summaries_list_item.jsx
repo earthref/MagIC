@@ -149,7 +149,7 @@ class SearchSummariesListItem extends React.Component {
         {doi &&
         <span>
           <b>Publication DOI Link:</b>
-          <Clamp lines={1}><a style={this.styles.a} href={'http://dx.doi.org/' + doi} target="_blank">{doi}</a></Clamp>
+          <Clamp lines={1}><a style={this.styles.a} href={'https://dx.doi.org/' + doi} target="_blank">{doi}</a></Clamp>
         </span>}
       </div>
     );
