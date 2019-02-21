@@ -1,6 +1,24 @@
 import React from 'react';
 
+import {portals} from '/lib/configs/portals';
+
 export default class extends React.Component {
+
+  componentDidMount() {
+    this.forceImgContainerReflow();
+  }
+
+  componentDidUpdate() {
+    this.forceImgContainerReflow();
+  }
+
+  forceImgContainerReflow() {
+    try  {
+      if (this.refs['img container']) $(this.refs['img container']).hide().show(0);
+    } catch (e) {
+      // Ignore errors since this is a Chrome rendering patch
+    }
+  }
 
   render() {
     const { file, error, source, style, download } = this.props
@@ -14,24 +32,22 @@ export default class extends React.Component {
     }
     else if (source && source.length && source.length > 4 && source.substring && source.substring(0, 4) === "data") {
       return (download ?
-        <a download={file} href={source} style={style}>
-          <div className="ui fade reveal bordered image" style={{ width: '100%', textAlign: 'center' }}>
-            <div className="visible content">
-              <img style={style} src={source}/>
+        <div style={style}>
+          <div style={{display:'flex', flexDirection:'row', maxHeight:'100%', maxWidth:'100%', margin:'auto'}}>
+            <div ref="img container" style={{display:'flex', position:'relative'}}>
+              <img style={{maxHeight:'100%', maxWidth:'100%', margin:'auto', border:'.5px solid grey'}} src={source}/>
             </div>
-            <div className="hidden content" style={{ opacity: .5 }}>
-              <img style={style} src={source}/>
-              <div className="ui icon header" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <i className="download icon" />
-                <div className="content">
-                  Download
-                </div>
-              </div>
+            <div style={{minWidth:'200px', marginLeft:'1em'}}>
+              <a className={"ui basic button " + portals['MagIC'].color} download={file} href={source}>
+                <i className="download icon"/>
+                Download
+              </a>
             </div>
           </div>
-        </a>
+
+        </div>
       :
-        <img className="ui bordered image" style={style} src={source}/>
+        <img className="ui image" style={style} src={source}/>
       );
     }
     else {
