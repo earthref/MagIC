@@ -83,8 +83,9 @@ export default class extends React.Component {
     const samplesRe = new RegExp(`SA:_(.*?)_`);
     const specimensRe = new RegExp(`SP:_(.*?)_`);
     const typeRe = new RegExp(`_TY:_(.*?)_`);
-    files && _.forEach(files, file => {
-      try {
+    files && _.forEach(files, f => {
+      const file = f && f.full || f && f.thumbnail;
+      if (file) try {
         let level = 'Contribution';
         const locationsMatch = file.match(locationsRe);
         const sitesMatch = file.match(sitesRe);
@@ -103,19 +104,19 @@ export default class extends React.Component {
         ) {
           const typeMatch = file.match(typeRe);
           if (typeMatch && typeMatch.length >= 1) {
-            if (typeMatch[1] === 'eqarea') { levels[level]['Equal Area'].push(file); }
-            else if (typeMatch[1] === 'zijd') { levels[level]['Zijderveld'].push(file); }
-            else if (typeMatch[1] === 'arai') { levels[level]['Arai'].push(file); }
-            else if (typeMatch[1] === 'demag') { levels[level]['Demagnetization'].push(file); }
-            else if (typeMatch[1] === 'deremag') { levels[level]['Deremagnetization'].push(file); }
-            else if (typeMatch[1].substr(0,5) === 'aniso') { levels[level]['Anisotropy'].push(file); }
-            else if (typeMatch[1].substr(0,4) === 'POLE') { levels[level]['Pole Map'].push(file); }
-            else if (typeMatch[1].substr(0,3) === 'VGP') { levels[level]['VGP Map'].push(file); }
-            else { levels[level]['Other'].push(file); }
+            if (typeMatch[1] === 'eqarea') { levels[level]['Equal Area'].push(f); }
+            else if (typeMatch[1] === 'zijd') { levels[level]['Zijderveld'].push(f); }
+            else if (typeMatch[1] === 'arai') { levels[level]['Arai'].push(f); }
+            else if (typeMatch[1] === 'demag') { levels[level]['Demagnetization'].push(f); }
+            else if (typeMatch[1] === 'deremag') { levels[level]['Deremagnetization'].push(f); }
+            else if (typeMatch[1].substr(0,5) === 'aniso') { levels[level]['Anisotropy'].push(f); }
+            else if (typeMatch[1].substr(0,4) === 'POLE') { levels[level]['Pole Map'].push(f); }
+            else if (typeMatch[1].substr(0,3) === 'VGP') { levels[level]['VGP Map'].push(f); }
+            else { levels[level]['Other'].push(f); }
             levels[level].count++;
           } else {
-            console.error('No type found', file);
-            levels[level]['Other'].push(file);
+            console.error('No type found', f);
+            levels[level]['Other'].push(f);
             levels[level].count++;
           }
         }
@@ -129,10 +130,10 @@ export default class extends React.Component {
   render() {
     const { id, error, files, citation, location, site, sample, specimen } = this.props;
     const { level, type } = this.state;
-    const containerStyle = {position:'relative', minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, marginRight:'1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'.5px solid grey'};
-    const thumbnailStyle = {maxWidth: 100, maxHeight: 100, margin:'auto'};
-    const modalStyle = _.extend({}, containerStyle, {minHeight: 150, maxHeight: 150, minWidth: 150, maxWidth: 150, margin:'0 1em 1em 0'});
-    const modalThumbnailStyle = _.extend({}, thumbnailStyle, {maxWidth: 150, maxHeight: 150});
+    const containerStyle = {position:'relative', minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
+    const thumbnailStyle = {maxWidth: 100, maxHeight: 100, margin:'auto', padding:'10px'};
+    const modalStyle = _.extend({}, containerStyle, {minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, margin:'0 1rem 1rem 0'});
+    const modalThumbnailStyle = _.extend({}, thumbnailStyle, {maxWidth: 100, maxHeight: 100});
     const levels = this.filesToLevels();
 
     const activeLevel = 
@@ -166,9 +167,12 @@ export default class extends React.Component {
         <div style={containerStyle}>
           <a href="#" onClick={this.showPlots.bind(this)} style={{display: 'flex'}}>
             <SearchPlot style={thumbnailStyle} id={id}
-              file={this.state.file || (levels[activeLevel] && levels[activeLevel][activeType] && levels[activeLevel][activeType][0])}
+              file={
+                levels[activeLevel] && levels[activeLevel][activeType] && 
+                (levels[activeLevel][activeType][0].thumbnail || levels[activeLevel][activeType][0].full)
+              }
             />
-            <div className="ui top right attached small basic label" style={{ padding:'.5em', margin:'-.5px' }}>
+            <div className="ui top right attached small basic label" style={{ padding:'.5rem', margin:'-1px' }}>
               <span style={{ color: portals['MagIC'].color }}>
                 { count }
               </span>
@@ -179,7 +183,7 @@ export default class extends React.Component {
             <div className="header">
               { specimen || sample || site || location || citation } PmagPy Plots
             </div>
-            <div className="header actions" style={{ textAlign: 'left', padding: '.5em' }}>
+            <div className="header actions" style={{ textAlign: 'left', padding: '.5rem' }}>
               <div className="ui small basic compact buttons">
                 <div className="ui active button" style={{cursor: 'default'}}>
                   <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
@@ -198,7 +202,7 @@ export default class extends React.Component {
                     </span>
                     <div 
                       className={"ui horizontal label" + (level === activeLevel ? " basic" : "")}
-                      style={{ margin: '-1em -.75em -1em 0.75em', padding: '.2em .5em', minWidth: 0 }}
+                      style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0 }}
                     >
                       { levels[level].count }
                     </div>
@@ -206,41 +210,41 @@ export default class extends React.Component {
                 )}
               </div>
             </div>
-            <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5em', overflowY:'scroll', height:'calc(100vh - 275px)' }}>
-              {!this.state.file && this.state.modal && levels[activeLevel] && levels[activeLevel][activeType].slice(0, this.state.maxVisible).map((file, i) => 
+            <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 275px)' }}>
+              {!this.state.file && this.state.modal && levels[activeLevel] && levels[activeLevel][activeType].slice(0, this.state.maxVisible).map((f, i) => 
                 <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
-                  <a href="#" onClick={() => this.setState({ file })} style={{display:'flex', width:'150px', height:'150px'}}>
-                    <SearchPlot id={id} style={modalThumbnailStyle} file={file} />
+                  <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', width:'100px', height:'100px'}}>
+                    <SearchPlot id={id} style={modalThumbnailStyle} file={f.thumbnail || f.full}/>
                   </a>
                 </div>
               )}
               {!this.state.file && this.state.maxVisible && levels[activeLevel] && levels[activeLevel][activeType] && levels[activeLevel][activeType].length > this.state.maxVisible && 
-                <a style={{minWidth: 100, lineHeight: '1.25em', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
+                <a style={{minWidth: 100, lineHeight: '1.25rem', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
                   <br/>Load<br/>Plots<br/>
                   {this.state.maxVisible + 1} - {Math.min(levels[activeLevel] && levels[activeLevel][activeType].length, this.state.maxVisible + this.visibleIncrement)}
                   <br/>of {levels[activeLevel] && levels[activeLevel][activeType].length}
                 </a>
               }
               {this.state.file && 
-                <div style={{display:'flex', position:'absolute', top: 0, right: 0, bottom: 0, left: 0, padding:'2em 4em 2em'}}>
-                  <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} id={id} file={this.state.file} download={true}/>
-                  <a href="#" onClick={() => this.setState({file: undefined})} style={{position:'absolute', right:'1em', top:'1em', zIndex:1000}}>
+                <div style={{display:'flex', position:'absolute', top: 0, right: 0, bottom: 0, left: 0, padding:'2rem 4rem 2rem'}}>
+                  <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} id={id} file={this.state.file.full || this.state.file.thumbnail} download={true}/>
+                  <a href="#" onClick={() => this.setState({file: undefined})} style={{position:'absolute', right:'1rem', top:'1rem', zIndex:1000}}>
                     <i className="ui large close icon"/>
                   </a>
                   {this.prevFile &&
-                    <a href="#" onClick={() => this.setState({file: this.prevFile})} style={{position:'absolute', left:'1em', top:'50%', marginTop:'-.75em', zIndex:1000}}>
+                    <a href="#" onClick={() => this.setState({file: this.prevFile})} style={{position:'absolute', left:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
                       <i className="ui large left arrow icon"/>
                     </a>
                   }
                   {this.nextFile &&
-                    <a href="#" onClick={() => this.setState({file: this.nextFile})} style={{position:'absolute', right:'1em', top:'50%', marginTop:'-.75em', zIndex:1000}}>
+                    <a href="#" onClick={() => this.setState({file: this.nextFile})} style={{position:'absolute', right:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
                       <i className="ui large right arrow icon"/>
                     </a>
                   }
                 </div>
               }
             </div>
-            <div className="actions" style={{ textAlign: 'left', padding: '.5em' }}>
+            <div className="actions" style={{ textAlign: 'left', padding: '.5rem' }}>
               <div className="ui small basic compact buttons">
                 <div className="ui active button" style={{cursor: 'default'}}>
                   <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
@@ -259,7 +263,7 @@ export default class extends React.Component {
                     </span>
                     <div 
                       className={"ui horizontal label" + (type === activeType ? " basic" : "")}
-                      style={{ margin: '-1em -.75em -1em 0.75em', padding: '.2em .5em', minWidth: 0 }}
+                      style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0 }}
                     >
                       { levels[activeLevel][type].length }
                     </div>

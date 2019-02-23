@@ -35,7 +35,7 @@ export default class extends React.Component {
         <div style={style}>
           <div style={{display:'flex', flexDirection:'row', maxHeight:'100%', maxWidth:'100%', margin:'auto'}}>
             <div ref="img container" style={{display:'flex', position:'relative'}}>
-              <img style={{maxHeight:'100%', maxWidth:'100%', margin:'auto', border:'.5px solid grey'}} src={source}/>
+              <img style={{maxHeight:'100%', maxWidth:'100%', margin:'auto', border:'1px solid rgba(0,0,0,.1)'}} src={source} onLoad={this.forceImgContainerReflow.bind(this)}/>
             </div>
             <div style={{minWidth:'200px', marginLeft:'1em'}}>
               <a className={"ui basic button " + portals['MagIC'].color} download={file} href={source}>
