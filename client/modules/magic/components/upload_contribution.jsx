@@ -362,7 +362,7 @@ export default class MagICUploadContribution extends React.Component {
               } else {
                 this.contribution.measurements = {
                   columns: _.without(data.columns, undefined),
-                  rows: data.rows.slice(0, 2).map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
+                  rows: data.rows.map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
                 }
               }
             } else {
