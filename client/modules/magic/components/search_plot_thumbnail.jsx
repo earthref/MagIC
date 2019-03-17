@@ -131,9 +131,9 @@ export default class extends React.Component {
     const { id, error, files, citation, location, site, sample, specimen } = this.props;
     const { level, type } = this.state;
     const containerStyle = {position:'relative', minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
-    const thumbnailStyle = {maxWidth: 100, maxHeight: 100, margin:'auto', padding:'10px'};
-    const modalStyle = _.extend({}, containerStyle, {minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, margin:'0 1rem 1rem 0'});
-    const modalThumbnailStyle = _.extend({}, thumbnailStyle, {maxWidth: 100, maxHeight: 100});
+    const thumbnailContainerStyle = _.extend({}, containerStyle, {display: 'flex'});
+    const thumbnailStyle = {maxWidth: 80, maxHeight: 80, margin:'10px', objectFit:'contain'};
+    const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 1rem 0'});
     const levels = this.filesToLevels();
 
     const activeLevel = 
@@ -164,15 +164,15 @@ export default class extends React.Component {
     }
     else if (count) {
       return (
-        <div style={containerStyle}>
-          <a href="#" onClick={this.showPlots.bind(this)} style={{display: 'flex'}}>
+        <div style={thumbnailContainerStyle}>
+          <a href="#" onClick={this.showPlots.bind(this)} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
             <SearchPlot style={thumbnailStyle} id={id}
               file={
                 levels[activeLevel] && levels[activeLevel][activeType] && 
                 (levels[activeLevel][activeType][0].thumbnail || levels[activeLevel][activeType][0].full)
               }
             />
-            <div className="ui top right attached small basic label" style={{ padding:'.5rem', margin:'-1px' }}>
+            <div className="ui top right attached small basic label" style={{ padding:'.5rem', margin:'-1px', zIndex: 1000 }}>
               <span style={{ color: portals['MagIC'].color }}>
                 { count }
               </span>
@@ -213,8 +213,8 @@ export default class extends React.Component {
             <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 275px)' }}>
               {!this.state.file && this.state.modal && levels[activeLevel] && levels[activeLevel][activeType].slice(0, this.state.maxVisible).map((f, i) => 
                 <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
-                  <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', width:'100px', height:'100px'}}>
-                    <SearchPlot id={id} style={modalThumbnailStyle} file={f.thumbnail || f.full}/>
+                  <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
+                    <SearchPlot id={id} style={thumbnailStyle} file={f.thumbnail || f.full}/>
                   </a>
                 </div>
               )}
