@@ -9,10 +9,13 @@ import moment from "moment";
 import sizeof from "object-sizeof";
 import elasticsearch from "elasticsearch";
 
+import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
 import ValidateContribution from '/lib/modules/magic/validate_contribution.js';
 import {versions} from '/lib/configs/magic/data_models';
 import {levels} from '/lib/configs/magic/search_levels.js';
+import { s3UploadObject, s3DeleteKeys } from './s3';
+import { resolveTxt } from 'dns';
 
 const esClient = new elasticsearch.Client({
   //log: "trace",
@@ -426,10 +429,6 @@ export default function () {
                   "term": {
                     "summary.contribution.contributor.raw": contributor
                   }
-                }, {
-                  "term": {
-                    "summary.contribution._is_activated": "false"
-                  }
                 }]
               }
             }
@@ -528,10 +527,6 @@ export default function () {
                 }, {
                   "term": {
                     "summary.contribution.contributor.raw": contributor
-                  }
-                }, {
-                  "term": {
-                    "summary.contribution._is_activated": "false"
                   }
                 }]
               }
@@ -1089,6 +1084,87 @@ export default function () {
         console.error("esActivateContribution", index, id, error.message);
         throw new Meteor.Error("esActivateContribution", error.message);
       }
+
+      Meteor.call("esUploadActivatedContributionToS3", {index, id});
+    },
+
+    async esUploadActivatedContributionToS3({index, id}) {
+      console.log("esUploadActivatedContributionToS3", index, id);
+      this.unblock();
+
+      try {
+        let resp = await esClient.search({
+          "index": index,
+          "type": "contribution",
+          "body": {
+            "_source": {
+              "includes": ["contribution", "summary.contribution._is_latest", "summary.contribution._history"]
+            },
+            "query": {
+              "bool": {
+                "filter": [{
+                  "term": {
+                    "summary.contribution.id": id
+                  }
+                }]
+              }
+            }
+          }
+        });
+        const contribution = resp.hits.hits[0]._source.contribution;
+        const history = resp.hits.hits[0]._source.summary.contribution._history;
+        const isLatest = resp.hits.hits[0]._source.summary.contribution._is_latest;
+        const exporter = new ExportContribution({});
+        const contributionText = exporter.toText(contribution);
+        //console.log("esUploadActivatedContributionToS3", id, isLatest, contribution, contributionText);
+        if (isLatest === 'true') {
+          history.slice(1).forEach(v => {
+            try {
+              s3DeleteKeys({
+                bucket: 'magic-contributions',
+                keys: [`${v.id}/magic_contribution_${v.id}.txt`]
+              }).then(() => {
+                console.log("esUploadActivatedContributionToS3", `Deleted ${v.id}/magic_contribution_${v.id}.txt`);
+                s3DeleteKeys({
+                  bucket: 'magic-contributions',
+                  keys: [`${v.id}/`]
+                }).then(() => {
+                  console.log("esUploadActivatedContributionToS3", `Deleted ${v.id}/`);
+                });
+              });
+            } catch (e) {
+              console.log("esUploadActivatedContributionToS3", `Error deleting ${v.id}`, e);
+            }
+          });
+          try {
+            s3UploadObject({
+                bucket: 'magic-contributions',
+                key: `${id}/magic_contribution_${id}.txt`,
+                body: contributionText
+            }).then(() => {
+              console.log("esUploadActivatedContributionToS3", `Uploaded ${id}/magic_contribution_${id}.txt to magic-contributions`);
+            });
+          } catch (e) {
+            console.log("esUploadActivatedContributionToS3", `Error uploading latest ${v.id}`, e);
+          }
+        }
+        try {
+          s3UploadObject({
+            bucket: 'magic-activated-contributions',
+            key: `${id}/magic_contribution_${id}.txt`,
+            body: contributionText
+          }).then(() => {
+            console.log("esUploadActivatedContributionToS3", `Uploaded ${id}/magic_contribution_${id}.txt to magic-activated-contributions`);
+          });
+        } catch (e) {
+          console.log("esUploadActivatedContributionToS3", `Error uploading ${v.id}`, e);
+        }
+      } catch(error) {
+        console.error("esUploadActivatedContributionToS3", index, id, error);
+        throw new Meteor.Error("esUploadActivatedContributionToS3", error.message);
+      }
+      
+      console.error("esUploadActivatedContributionToS3 finished", id);
     },
 
     async esDeactivateContribution({index, id}) {
