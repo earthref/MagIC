@@ -1,9 +1,16 @@
 import _ from 'lodash';
 import React from 'react';
 
+import Clamp from '/client/modules/common/components/clamp';
 import SearchPlot from '/client/modules/magic/containers/search_plot';
 
 import {portals} from '/lib/configs/portals';
+
+const locationsRe = new RegExp(`LO:_(.*?)_`);
+const sitesRe = new RegExp(`SI:_(.*?)_`);
+const samplesRe = new RegExp(`SA:_(.*?)_`);
+const specimensRe = new RegExp(`SP:_(.*?)_`);
+const typeRe = new RegExp(`_TY:_(.*?)_`);
 
 export default class extends React.Component {
 
@@ -16,7 +23,7 @@ export default class extends React.Component {
       level: undefined,
       type: undefined
     };
-    this.visibleIncrement = 50;
+    this.visibleIncrement = 100;
     this.levels = [
       'Contribution',
       'Locations',
@@ -78,11 +85,6 @@ export default class extends React.Component {
     };
     const levels = {};
     this.levels.forEach(level => levels[level] =  _.cloneDeep(types));
-    const locationsRe = new RegExp(`LO:_(.*?)_`);
-    const sitesRe = new RegExp(`SI:_(.*?)_`);
-    const samplesRe = new RegExp(`SA:_(.*?)_`);
-    const specimensRe = new RegExp(`SP:_(.*?)_`);
-    const typeRe = new RegExp(`_TY:_(.*?)_`);
     files && _.forEach(files, f => {
       const file = f && f.full || f && f.thumbnail;
       if (file) try {
@@ -127,13 +129,25 @@ export default class extends React.Component {
     return levels;
   }
 
+  fileToRowName(file) {
+    const locationsMatch = file.match(locationsRe);
+    const sitesMatch = file.match(sitesRe);
+    const samplesMatch = file.match(samplesRe);
+    const specimensMatch = file.match(specimensRe);
+    if (specimensMatch && specimensMatch.length >= 1 && specimensMatch[1] !== '') { return specimensMatch[1]; }
+    else if (samplesMatch && samplesMatch.length >= 1 && samplesMatch[1] !== '') { return samplesMatch[1]; }
+    else if (sitesMatch && sitesMatch.length >= 1 && sitesMatch[1] !== '') { return sitesMatch[1]; }
+    else if (locationsMatch && locationsMatch.length >= 1 && locationsMatch[1] !== '') { return locationsMatch[1]; }
+    return 'Contribution';
+  }
+
   render() {
     const { id, error, files, citation, location, site, sample, specimen } = this.props;
     const { level, type } = this.state;
     const containerStyle = {position:'relative', minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
     const thumbnailContainerStyle = _.extend({}, containerStyle, {display: 'flex'});
     const thumbnailStyle = {maxWidth: 80, maxHeight: 80, margin:'10px', objectFit:'contain'};
-    const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 1rem 0'});
+    const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 2rem 0', overflow:'visible'});
     const levels = this.filesToLevels();
 
     const activeLevel = 
@@ -216,6 +230,9 @@ export default class extends React.Component {
                   <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
                     <SearchPlot id={id} style={thumbnailStyle} file={f.thumbnail || f.full}/>
                   </a>
+                  <div className="ui bottom attached mini label" style={{ width:'calc(100% + 2px)', margin: '1px -1px -1rem -1px', lineHeight: '1rem', padding: '0 .25rem', border:'1px solid rgba(0,0,0,.1)', whiteSpace:'nowrap', direction:'rtl' }}>
+                    <Clamp lines={1} >{this.fileToRowName(f.thumbnail || f.full)}</Clamp>
+                  </div>
                 </div>
               )}
               {!this.state.file && this.state.maxVisible && levels[activeLevel] && levels[activeLevel][activeType] && levels[activeLevel][activeType].length > this.state.maxVisible && 
