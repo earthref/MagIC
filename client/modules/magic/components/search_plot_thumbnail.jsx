@@ -6,11 +6,11 @@ import SearchPlot from '/client/modules/magic/containers/search_plot';
 
 import {portals} from '/lib/configs/portals';
 
-const locationsRe = new RegExp(`LO:_(.*?)_`);
-const sitesRe = new RegExp(`SI:_(.*?)_`);
-const samplesRe = new RegExp(`SA:_(.*?)_`);
-const specimensRe = new RegExp(`SP:_(.*?)_`);
-const typeRe = new RegExp(`_TY:_(.*?)_`);
+const locationsRe = new RegExp(`LO:_(.*?)_(SI:|CO:|TY:|\.png)`);
+const sitesRe = new RegExp(`SI:_(.*?)_(SA:|CO:|TY:|\.png)`);
+const samplesRe = new RegExp(`SA:_(.*?)_(SP:|CO:|TY:|\.png)v`);
+const specimensRe = new RegExp(`SP:_(.*?)_(CO:|TY:|\.png)`);
+const typeRe = new RegExp(`_TY:_(.*?)_(\.png)`);
 
 export default class extends React.Component {
 
