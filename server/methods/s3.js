@@ -12,10 +12,10 @@ export default function () {
 
   Meteor.methods({
 
-    async s3ListObjects({bucket, prefix}) {
+    async s3ListObjects({bucket, prefix, limit}) {
       this.unblock();
-      //console.log("s3ListObjects", bucket, prefix);
-      return s3ListObjects({bucket, prefix});
+      //console.log("s3ListObjects", bucket, prefix, limit);
+      return s3ListObjects({bucket, prefix, limit});
     },
 
     async s3GetObjectBase64({bucket, key}) {
@@ -40,7 +40,7 @@ async function s3UploadObject({bucket, key, body}) {
           resolve(data);
         }
       });
-    } catch (e) {
+    } catch (e) { 
       console.error("s3UploadObject", `Failed to upload ${bucket}/${key}`, e);
       throw new Meteor.Error("s3UploadObject", `Failed to upload ${bucket}/${key}`);
     }
@@ -48,11 +48,11 @@ async function s3UploadObject({bucket, key, body}) {
 }
 export { s3UploadObject };
 
-async function s3ListObjects({bucket, prefix}) {
+async function s3ListObjects({bucket, prefix, limit}) {
   let nextToken = undefined;
   let isTruncated = true;
   let objects = [];
-  while (isTruncated) {
+  while (isTruncated && (!limit || objects.length < limit)) {
     const data = await new Promise(resolve => {
       try {
         s3.listObjectsV2({ Bucket: bucket, Prefix: prefix, ContinuationToken: nextToken }, (error, data) => {
@@ -73,7 +73,7 @@ async function s3ListObjects({bucket, prefix}) {
     nextToken = data.NextContinuationToken;
     objects.push(...data.Contents);
   }
-  return objects;
+  return (limit && objects.slice(0, limit)) || objects;
 }
 export { s3ListObjects };
 

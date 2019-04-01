@@ -62,13 +62,13 @@ export default function () {
       return Collections['magic.import.settings.templates'].findOne(ID);
     },
 
-    async magicGetPmagPyPlotFiles(cID, user, attempt = 0) {
+    async magicGetPmagPyPlotFiles(cID, user, limit, attempt = 0) {
       this.unblock();
       //console.log("magicGetPmagPyPlotFiles", attempt, `http://pmagpy.earthref.org/plots/${cID}`);
       
       try {
         return await new Promise(resolve => {
-          Meteor.call("s3ListObjects", { bucket: "magic-plots", prefix: `${cID}/` }, (error, objects) => {
+          Meteor.call("s3ListObjects", { bucket: "magic-plots", prefix: `${cID}/`, limit }, (error, objects) => {
             resolve(_.map(objects, 'Key'));
           });
         });

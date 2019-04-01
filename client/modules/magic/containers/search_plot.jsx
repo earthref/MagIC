@@ -7,19 +7,23 @@ let plotCache = {};
 const cacheExpiration = 5*60*1000; // 5 minutes
 const cacheMax = 5000;
 
-export const composer = ({ file }, onData) => {
-  if (plotCache[file] && plotCache[file].timestamp >= Date.now() - cacheExpiration) {
-    onData(null, { source: plotCache[file].source })
+export const composer = ({ file, isPrivate }, onData) => {
+  if (!isPrivate) {
+    onData(null, { source: file });
   } else {
-    onData(null, { source: undefined });
-    Meteor.call('magicGetPmagPyPlot', file, Cookies.get('user_id'), function (error, source) {
-      if (source) {
-        plotCache[file] = { source, timestamp: Date.now() };
-        onData(null, { source });
-      } else {
-        onData(null, { error });
-      }
-    });
+    if (plotCache[file] && plotCache[file].timestamp >= Date.now() - cacheExpiration) {
+      onData(null, { source: plotCache[file].source })
+    } else {
+      onData(null, { source: undefined });
+      Meteor.call('magicGetPmagPyPlot', file, Cookies.get('user_id'), function (error, source) {
+        if (source) {
+          plotCache[file] = { source, timestamp: Date.now() };
+          onData(null, { source });
+        } else {
+          onData(null, { error });
+        }
+      });
+    }
   }
 
   // Remove expired cache entries
