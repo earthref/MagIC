@@ -1,9 +1,16 @@
 import _ from 'lodash';
 import React from 'react';
 
+import Clamp from '/client/modules/common/components/clamp';
 import SearchPlot from '/client/modules/magic/containers/search_plot';
 
 import {portals} from '/lib/configs/portals';
+
+const locationsRe = new RegExp(`LO:_(.*?)_(SI:|CO:|TY:|\.png)`);
+const sitesRe = new RegExp(`SI:_(.*?)_(SA:|CO:|TY:|\.png)`);
+const samplesRe = new RegExp(`SA:_(.*?)_(SP:|CO:|TY:|\.png)v`);
+const specimensRe = new RegExp(`SP:_(.*?)_(CO:|TY:|\.png)`);
+const typeRe = new RegExp(`_TY:_(.*?)_?(\.png)`);
 
 export default class extends React.Component {
 
@@ -12,10 +19,11 @@ export default class extends React.Component {
     this.state = {
       modal: false,
       file: undefined,
-      maxVisible: 10,
+      maxVisible: 0,
       level: undefined,
       type: undefined
     };
+    this.visibleIncrement = 50;
     this.levels = [
       'Contribution',
       'Locations',
@@ -23,21 +31,64 @@ export default class extends React.Component {
       'Samples',
       'Specimens',
       'Other'
-    ]
+    ];
+    this.cachedLevels = {};
+    this.fileIdx = undefined;
+    this.prevFile = undefined;
+    this.nextFile = undefined;
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+  }
+
+  componentDidMount(){
+    document.addEventListener("keydown", this.handleKeyDown);
+    const { activeFiles } = this.activeLevelTypeFiles();
+    if (!this.props.isPrivate && !this.state.file && this.state.modal && this.props.files && this.state.maxVisible < activeFiles.length)
+      _.defer(() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement }));
+  }
+  
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyDown);
+  }
+
+  componentDidUpdate() {
+    const { activeFiles } = this.activeLevelTypeFiles();
+    if (!this.props.isPrivate && !this.state.file && this.state.modal && this.props.files && this.state.maxVisible < activeFiles.length)
+      _.defer(() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement }));
+  }
+
+  handleKeyDown(e) {
+    const { file, maxVisible } = this.state
+    // left/right arrow keystroke should select next/previous plot
+    if ($(this.refs['plots modal']).modal('is active') && file && this.fileIdx >= 0) {
+      if (this.prevFile && e.keyCode === 37) {
+        const newMaxVisible = Math.max(maxVisible, Math.ceil(this.fileIdx/this.visibleIncrement)*this.visibleIncrement);
+        this.setState({ file: this.prevFile, maxVisible: (!isNaN(newMaxVisible) && newMaxVisible) || maxVisible });
+      } else if (this.nextFile && e.keyCode === 39) {
+        const newMaxVisible = Math.max(maxVisible, Math.ceil(this.fileIdx/this.visibleIncrement)*this.visibleIncrement);
+        this.setState({ file: this.nextFile, maxVisible: (!isNaN(newMaxVisible) && newMaxVisible) || maxVisible });
+      }
+    }
   }
 
   showPlots() {
-    $(this.refs['plots modal']).modal({ onVisible: () => this.setState({modal: true}) });
+    $(this.refs['plots modal']).modal({ observeChanges: true, onVisible: () => this.setState({modal: true, maxVisible: this.visibleIncrement}) });
     $(this.refs['plots modal']).modal('show');
   }
 
   filesToLevels() {
-    const { files, location, site, sample, specimen } = this.props;
+    const { id, files, location, site, sample, specimen } = this.props;
+    const key = JSON.stringify({ id, files, location, site, sample, specimen });
+    
+    if (!files) return [];
+        if (this.cachedLevels[key]) return this.cachedLevels[key];
+
     const cleanLocation = location && location.replace(':', '') || '';
     const cleanSite = site && site.replace(':', '') || '';
     const cleanSample = sample && sample.replace(':', '') || '';
     const cleanSpecimen = specimen && specimen.replace(':', '') || '';
     const types = {
+      'Pole Map': [],
+      'VGP Map': [],
       'Equal Area': [],
       'Zijderveld': [],
       'Arai': [],
@@ -47,15 +98,12 @@ export default class extends React.Component {
       'Other': [],
       count: 0
     };
+
     const levels = {};
     this.levels.forEach(level => levels[level] =  _.cloneDeep(types));
-    const locationsRe = new RegExp(`/LO:_(.*?)_`);
-    const sitesRe = new RegExp(`_SI:_(.*?)_`);
-    const samplesRe = new RegExp(`_SA:_(.*?)_`);
-    const specimensRe = new RegExp(`_SP:_(.*?)_`);
-    const typeRe = new RegExp(`_TY:_(.*?)_`);
-    files && _.forEach(files, file => {
-      try {
+    _.forEach(files, f => {
+      const file = f && f.full || f && f.thumbnail;
+      if (file) try {
         let level = 'Contribution';
         const locationsMatch = file.match(locationsRe);
         const sitesMatch = file.match(sitesRe);
@@ -74,33 +122,46 @@ export default class extends React.Component {
         ) {
           const typeMatch = file.match(typeRe);
           if (typeMatch && typeMatch.length >= 1) {
-            if (typeMatch[1] === 'eqarea') { levels[level]['Equal Area'].push(file); }
-            else if (typeMatch[1] === 'zijd') { levels[level]['Zijderveld'].push(file); }
-            else if (typeMatch[1] === 'arai') { levels[level]['Arai'].push(file); }
-            else if (typeMatch[1] === 'demag') { levels[level]['Demagnetization'].push(file); }
-            else if (typeMatch[1] === 'deremag') { levels[level]['Deremagnetization'].push(file); }
-            else if (typeMatch[1].substr(0,5) === 'aniso') { levels[level]['Anisotropy'].push(file); }
-            else { levels[level]['Other'].push(file); }
+            if (typeMatch[1] === 'eqarea') { levels[level]['Equal Area'].push(f); }
+            else if (typeMatch[1] === 'zijd') { levels[level]['Zijderveld'].push(f); }
+            else if (typeMatch[1] === 'arai') { levels[level]['Arai'].push(f); }
+            else if (typeMatch[1] === 'demag') { levels[level]['Demagnetization'].push(f); }
+            else if (typeMatch[1] === 'deremag') { levels[level]['Deremagnetization'].push(f); }
+            else if (typeMatch[1].substr(0,5) === 'aniso') { levels[level]['Anisotropy'].push(f); }
+            else if (typeMatch[1].substr(0,4) === 'POLE') { levels[level]['Pole Map'].push(f); }
+            else if (typeMatch[1].substr(0,3) === 'VGP') { levels[level]['VGP Map'].push(f); }
+            else { levels[level]['Other'].push(f); }
             levels[level].count++;
           } else {
-            console.error('No type found', file);
+            console.error('No type found', f);
+            levels[level]['Other'].push(f);
+            levels[level].count++;
           }
         }
       } catch (e) {
         console.error(e);
       }
     });
-    return levels;
+    this.cachedLevels[key] = _.cloneDeep(levels);
+    return this.cachedLevels[key];
   }
 
-  render() {
-    const { id, error, files, citation, location, site, sample, specimen } = this.props;
-    const { level, type } = this.state;
-    const containerStyle = {position: 'relative', minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'};
-    const modalStyle = {position: 'relative', minWidth: 100, marginRight: '1em', fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'};
-    const thumbnailStyle = {minHeight: 100, maxHeight: 100, marginLeft: 'auto'};
-    const levels = this.filesToLevels();
+  fileToRowName(file) {
+    const locationsMatch = file.match(locationsRe);
+    const sitesMatch = file.match(sitesRe);
+    const samplesMatch = file.match(samplesRe);
+    const specimensMatch = file.match(specimensRe);
+    if (specimensMatch && specimensMatch.length >= 1 && specimensMatch[1] !== '') { return specimensMatch[1]; }
+    else if (samplesMatch && samplesMatch.length >= 1 && samplesMatch[1] !== '') { return samplesMatch[1]; }
+    else if (sitesMatch && sitesMatch.length >= 1 && sitesMatch[1] !== '') { return sitesMatch[1]; }
+    else if (locationsMatch && locationsMatch.length >= 1 && locationsMatch[1] !== '') { return locationsMatch[1]; }
+    return 'Contribution';
+  }
 
+  activeLevelTypeFiles() {
+    const { location, site, sample, specimen } = this.props;
+    const { level, type } = this.state;
+    const levels = this.filesToLevels();
     const activeLevel = 
       (levels[level] && levels[level].count && level) ||
       (!location && !site && !sample && !specimen && levels['Contribution'] && levels['Contribution'].count && 'Contribution') ||
@@ -108,10 +169,31 @@ export default class extends React.Component {
       (!sample && !specimen && levels['Sites'] && levels['Sites'].count && 'Sites') ||
       (!specimen && levels['Samples'] && levels['Samples'].count && 'Samples') ||
       (levels['Specimens'] && levels['Specimens'].count && 'Specimens') ||
-      _.reduce(this.levels, (x, level) => x || (levels[level].count && level), '');
+      _.reduce(this.levels, (x, level) => x || (levels[level] && levels[level].count && level), '');
     const activeType = (levels[activeLevel] && levels[activeLevel][type] && levels[activeLevel][type].length && type) ||
       _.reduce(_.keys(levels[activeLevel]), (x, type) => x || (type !== 'count' && levels[activeLevel][type].length && type), '');
-    
+    const activeFiles = levels[activeLevel] && levels[activeLevel][activeType] || [];
+    return { activeLevel, activeType, activeFiles };
+  }
+
+  render() {
+    const { id, isPrivate, error, file, files, citation, location, site, sample, specimen } = this.props;
+    const { level, type } = this.state;
+
+    const containerStyle = {position:'relative', boxSizing:'content-box', minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
+    const thumbnailContainerStyle = _.extend({}, containerStyle, {display: 'flex'});
+    const thumbnailStyle = {maxWidth: 80, maxHeight: 80, margin:'10px', objectFit:'contain'};
+    const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 2rem 0', overflow:'visible'});
+
+    const levels = this.filesToLevels();
+    const { activeLevel, activeType, activeFiles } = this.activeLevelTypeFiles();
+
+    if (activeFiles.length) {
+      this.fileIdx  = _.indexOf(activeFiles, this.state.file);
+      this.prevFile = this.fileIdx > 0 && activeFiles[this.fileIdx - 1];
+      this.nextFile = this.fileIdx < activeFiles.length - 1 && activeFiles[this.fileIdx + 1];
+    }
+
     const count = _.reduce(_.keys(levels), (x, level) => x + levels[level].count, 0);
 
     if (error) {
@@ -123,12 +205,12 @@ export default class extends React.Component {
     }
     else if (count) {
       return (
-        <div style={containerStyle}>
-          <a href="#" onClick={this.showPlots.bind(this)}>
-            <SearchPlot style={thumbnailStyle} id={id}
-              file={this.state.file || (levels[activeLevel] && levels[activeLevel][activeType] && levels[activeLevel][activeType][0])}
+        <div style={thumbnailContainerStyle}>
+          <a href="#" onClick={this.showPlots.bind(this)} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
+            <SearchPlot style={thumbnailStyle} id={id} isPrivate={isPrivate}
+              file={file || activeFiles.length && (activeFiles[0].thumbnail || activeFiles.full)}
             />
-            <div className="ui top right attached small basic label" style={{ padding: '.5em' }}>
+            <div className="ui top right attached small basic label" style={{ padding:'.5rem', margin:'-1px', zIndex: 1000 }}>
               <span style={{ color: portals['MagIC'].color }}>
                 { count }
               </span>
@@ -148,17 +230,17 @@ export default class extends React.Component {
                 </div>
                 { this.levels.map((level, idx) => levels[level].count && 
                   <div
-                    className={"ui button" + (level === activeLevel ? " active" : "")}
+                    className={"ui button" + (level === activeLevel ? "" : " active")}
                     key={idx}
                     style={type === activeType ? {cursor: 'default'} : {}}
-                    onClick={() => this.setState({ level, file: undefined, maxVisible: 10 })}
+                    onClick={() => this.setState({ level, file: undefined, maxVisible: this.visibleIncrement })}
                   >
-                    <span style={{fontWeight: 'bold'}}>
+                    <span style={{fontWeight: 'bold', color: (level === activeLevel ? portals['MagIC'].color : 'inherit') }}>
                       { level }
                     </span>
                     <div 
-                      className={"ui horizontal label" + (level === activeLevel ? " basic" : "")}
-                      style={{ margin: '-1em -.75em -1em 0.75em', padding: '.2em .5em', minWidth: 0 }}
+                      className={"ui horizontal label" + (level === activeLevel ? "" : " basic")}
+                      style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (level === activeLevel ? portals['MagIC'].color : 'inherit') }}
                     >
                       { levels[level].count }
                     </div>
@@ -166,13 +248,47 @@ export default class extends React.Component {
                 )}
               </div>
             </div>
-            <div className="image content">
-              <SearchPlot
-                download
-                id={id} 
-                style={{position: 'relative', minHeight: 'calc(100vh - 500px)', maxHeight: 'calc(100vh - 500px)', margin: 'auto'}} 
-                file={this.state.file || (levels[activeLevel] && levels[activeLevel][activeType] && levels[activeLevel][activeType][0])}
-              />
+            <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 275px)' }}>
+              {!this.state.file && this.state.modal && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
+                <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
+                  <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
+                    <SearchPlot style={thumbnailStyle} id={id} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
+                  </a>
+                  <div className="ui bottom attached mini label" style={{ boxSizing:'border-box', zIndex: 1000, width:'calc(100% + 2px)', margin: '1px -1px -1rem -1px', lineHeight: '1rem', padding: '0 .25rem', border:'1px solid rgba(0,0,0,.1)', whiteSpace:'nowrap', direction:'rtl' }}>
+                    <Clamp lines={1} ><span>{this.fileToRowName(f.thumbnail || f.full)}</span></Clamp>
+                  </div>
+                </div>
+              )}
+              {isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
+                <a style={{minWidth: 100, lineHeight: '1.25rem', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
+                  <br/>Load<br/>Plots<br/>
+                  {this.state.maxVisible + 1} - {Math.min(activeFiles.length, this.state.maxVisible + this.visibleIncrement)}
+                  <br/>of {activeFiles.length}
+                </a>
+              }
+              {!isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
+                <div style={{width: 100, height: 100, display:'flex'}}>
+                  <i className="ui huge grey icon ellipsis horizontal" style={{margin:'auto'}}/>
+                </div>
+              }
+              {this.state.file && 
+                <div style={{display:'flex', position:'absolute', top: 0, right: 0, bottom: 0, left: 0, padding:'2rem 4rem 2rem'}}>
+                  <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} id={id} isPrivate={isPrivate} file={this.state.file.full || this.state.file.thumbnail} download={true}/>
+                  <a href="#" onClick={() => this.setState({file: undefined})} style={{position:'absolute', right:'1rem', top:'1rem', zIndex:1000}}>
+                    <i className="ui large close icon"/>
+                  </a>
+                  {this.prevFile &&
+                    <a href="#" onClick={() => this.setState({file: this.prevFile})} style={{position:'absolute', left:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
+                      <i className="ui large left arrow icon"/>
+                    </a>
+                  }
+                  {this.nextFile &&
+                    <a href="#" onClick={() => this.setState({file: this.nextFile})} style={{position:'absolute', right:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
+                      <i className="ui large right arrow icon"/>
+                    </a>
+                  }
+                </div>
+              }
             </div>
             <div className="actions" style={{ textAlign: 'left', padding: '.5rem' }}>
               <div className="ui small basic compact buttons">
@@ -183,17 +299,17 @@ export default class extends React.Component {
                 </div>
                 { _.keys(levels[activeLevel]).map((type, idx) => levels[activeLevel][type].length &&
                   <div 
-                    className={"ui button" + (type === activeType ? " active" : "")}
+                    className={"ui button" + (type === activeType ? "" : " active")}
                     key={idx}
                     style={type === activeType ? {cursor: 'default'} : {}}
-                    onClick={() => this.setState({ type, file: undefined, maxVisible: 10 })}
+                    onClick={() => this.setState({ type, file: undefined, maxVisible: this.visibleIncrement })}
                   >
-                    <span style={{fontWeight: 'bold'}}>
+                    <span style={{fontWeight: 'bold', color: (type === activeType ? portals['MagIC'].color : 'inherit')}}>
                       { type }
                     </span>
                     <div 
-                      className={"ui horizontal label" + (type === activeType ? " basic" : "")}
-                      style={{ margin: '-1em -.75em -1em 0.75em', padding: '.2em .5em', minWidth: 0 }}
+                      className={"ui horizontal label" + (type === activeType ? "" : " basic")}
+                      style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (type === activeType ? portals['MagIC'].color : 'inherit') }}
                     >
                       { levels[activeLevel][type].length }
                     </div>
@@ -201,26 +317,16 @@ export default class extends React.Component {
                 )}
               </div>
             </div>
-            <div className="actions" style={{display: 'flex', overflowX: 'scroll', minHeight: 'calc(100px + 2rem)' }}>
-              {this.state.modal && levels[activeLevel] && levels[activeLevel][activeType].slice(0, this.state.maxVisible).map((file, i) => 
-                <div key={i} style={modalStyle}>
-                  <a href="#" onClick={() => this.setState({ file })}>
-                    <SearchPlot
-                      style={_.extend({}, thumbnailStyle, (this.state.file && this.state.file === file) || (!this.state.file && i === 0) ? { borderWidth: 2, borderColor: portals['MagIC'].color } : {})}
-                      id={id}
-                      file={file}
-                    />
-                  </a>
-                </div>
-              )}
-              {levels[activeLevel] && levels[activeLevel][activeType] && levels[activeLevel] && levels[activeLevel][activeType].length > this.state.maxVisible && 
-                <a style={{minWidth: 100, lineHeight: '1.25em', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + 10 })}>
-                  <br/>Load<br/>Plots<br/>
-                  {this.state.maxVisible + 1} - {Math.min(levels[activeLevel] && levels[activeLevel][activeType].length, this.state.maxVisible + 10)}
-                  <br/>of {levels[activeLevel] && levels[activeLevel][activeType].length}
-                </a>
-              }
-            </div>
+          </div>
+        </div>
+      );
+    }
+    else if (file) {
+      return (
+        <div style={thumbnailContainerStyle}>
+          <SearchPlot style={thumbnailStyle} id={id} isPrivate={isPrivate} file={file}/>
+          <div className="ui top right attached small basic label" style={{ boxSizing:'border-box', padding:'1rem', margin:'-1px', zIndex: 1000 }}>
+            <div className="ui active mini loader"></div>
           </div>
         </div>
       );

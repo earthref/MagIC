@@ -99,7 +99,7 @@ class Clamp extends React.Component {
             this.container = node;
           },
           className: this.props.tagClass,
-          style: { width: '100%', wordWrap: 'break-word' },
+          style: { width: '100%', wordWrap: 'break-word', overflow: 'hidden' },
         },
         this.props.children,
       )

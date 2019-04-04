@@ -585,7 +585,7 @@ export default class DataImporter extends React.Component {
           <div className="column">
             <div className="ui labeled fluid action input">
               <div className={'ui basic label ' + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? 'red' : this.portalColor())}>
-                Table Name
+                Name of Table to Import
               </div>
               <div ref="table name dropdown"
                    className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? ' error' : '')}>

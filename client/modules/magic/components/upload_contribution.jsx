@@ -362,7 +362,7 @@ export default class MagICUploadContribution extends React.Component {
               } else {
                 this.contribution.measurements = {
                   columns: _.without(data.columns, undefined),
-                  rows: data.rows.slice(0, 2).map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
+                  rows: data.rows.map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
                 }
               }
             } else {
@@ -940,7 +940,7 @@ export default class MagICUploadContribution extends React.Component {
             </div>
             <div className="title"/>
             <div ref="import step message" className="content import-step-content">
-              <h3>Reading and parsing the {this.files.length === 1 ? ' file' : ' files'} for upload:</h3>
+              <h3>Reading and translating the {this.files.length === 1 ? ' file' : ' files'} for uploading:</h3>
               <div ref="files" className="ui divided items">
                 {step === 2 ? this.files.map((file, i) => {
                   const fileFormat = this.state.fileFormats[i];
@@ -1008,7 +1008,7 @@ export default class MagICUploadContribution extends React.Component {
                             : undefined)}
                           <div className="ui labeled fluid action input">
                             <div className="ui purple label">
-                              Parse As
+                              Import File Type
                             </div>
                             <div className="ui fluid selection dropdown format-dropdown">
                               <input name="format" type="hidden" value={fileFormat}/>

@@ -149,7 +149,7 @@ class SearchSummariesListItem extends React.Component {
         {doi &&
         <span>
           <b>Publication DOI Link:</b>
-          <Clamp lines={1}><a style={this.styles.a} href={'http://dx.doi.org/' + doi} target="_blank">{doi}</a></Clamp>
+          <Clamp lines={1}><a style={this.styles.a} href={'https://dx.doi.org/' + doi} target="_blank">{doi}</a></Clamp>
         </span>}
       </div>
     );
@@ -299,9 +299,9 @@ class SearchSummariesListItem extends React.Component {
       </div>
     );
 
-    let min_ages  = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.gte || allSummary._age_range_ybp.range.gte,
-        max_ages  = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.lte || allSummary._age_range_ybp.range.lte,
-        n_ages    = tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.n         || allSummary._age_range_ybp.n,
+    let min_ages  = (tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.gte) || (allSummary._age_range_ybp && allSummary._age_range_ybp.range.gte),
+        max_ages  = (tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.lte) || (allSummary._age_range_ybp && allSummary._age_range_ybp.range.lte),
+        n_ages    = (tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.n        ) || (allSummary._age_range_ybp && allSummary._age_range_ybp.n),
         age_range;
 
     if (max_ages >= 1e9) {
@@ -502,6 +502,7 @@ class SearchSummariesListItem extends React.Component {
 
   render() {
     const item = this.props.item;
+    try {
     return (
       <div>
         <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active && !this.props.collapsed ? ' active' : '')} onMouseOver={(e) => {
@@ -544,6 +545,7 @@ class SearchSummariesListItem extends React.Component {
                   {this.renderDownloadButton(item)}
                   {this.renderLinks(item)}
                   {this.renderCounts(item)}
+                  {this.renderMapThumbnail(item)}
                   <SearchPlotThumbnail 
                     id={item && item.summary && item.summary.contribution && item.summary.contribution.id}
                     citation={item && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation }
@@ -552,7 +554,6 @@ class SearchSummariesListItem extends React.Component {
                     sample={item && item.summary && item.summary.samples && item.summary.samples.sample && item.summary.samples.sample[0] }
                     specimen={item && item.summary && item.summary.specimens && item.summary.specimens.specimen && item.summary.specimens.specimen[0] }
                   />
-                  {this.renderMapThumbnail(item)}
                   {this.renderGeo(item)}
                   {this.renderGeology(item)}
                   {this.renderAge(item)}
@@ -661,32 +662,70 @@ class SearchSummariesListItem extends React.Component {
                 </tr>
               </thead>
               <tbody>
+                {item.summary.contribution._is_activated === 'true' &&
+                  <tr>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                        onClick={function(id, e) {
+                          console.log("esDeactivateContribution");
+                          Meteor.call("esDeactivateContribution", {index: index, id: id},
+                            (error) => { console.log("esDeactivateContribution done"); }
+                          );
+                        }.bind(this, item.summary.contribution.id)}
+                      >
+                        Deactivate
+                      </button>
+                    </td>
+                    <td>
+                      Deactivate the contribution (contribution and Data DOI links will be broken until activated again).
+                    </td>
+                  </tr>
+                }
+                {item.summary.contribution._is_activated !== 'true' &&
+                  <tr>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                        onClick={function(id, e) {
+                          console.log("esActivateContribution");
+                          Meteor.call("esActivateContribution", {index: index, id: id},
+                            (error) => { console.log("esActivateContribution done"); }
+                          );
+                        }.bind(this, item.summary.contribution.id)}
+                      >
+                        Force Activate
+                      </button>
+                    </td>
+                    <td>
+                      Activate the contribution even if not validated.
+                    </td>
+                  </tr>
+                }
                 <tr>
                   <td style={{whiteSpace: 'nowrap'}}>
                     <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                      onClick={function(id, e) {
-                        console.log("esDeactivateContribution");
-                        Meteor.call("esDeactivateContribution", {index: index, id: id},
-                          (error) => { console.log("esDeactivateContribution done"); }
+                      onClick={function(id, contributor, e) {
+                        console.log("esUpdatePrivatePreSummaries");
+                        Meteor.call("esUpdatePrivatePreSummaries", {index, id, contributor},
+                          (error) => { console.log("esUpdatePrivatePreSummaries done"); }
                         );
-                      }.bind(this, item.summary.contribution.id)}
+                      }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
                     >
-                      Deactivate
+                      Pre Summary
                     </button>
                   </td>
                   <td>
-                    Deactivate the contribution (contribution and Data DOI links will be broken until activated again).
+                    Calculate the contribution pre summary and submit it to Elasticsearch for indexing.
                   </td>
                 </tr>
                 <tr>
                   <td style={{whiteSpace: 'nowrap'}}>
                     <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                      onClick={function(id, e) {
+                      onClick={function(id, contributor, e) {
                         console.log("esUpdatePrivateSummaries");
-                        Meteor.call("esUpdatePrivateSummaries", {index: index, id: id, contributor: Cookies.get('user_id')},
+                        Meteor.call("esUpdatePrivateSummaries", {index, id, contributor},
                           (error) => { console.log("esUpdatePrivateSummaries done"); }
                         );
-                      }.bind(this, item.summary.contribution.id)}
+                      }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
                     >
                       Full Summary
                     </button>
@@ -695,6 +734,25 @@ class SearchSummariesListItem extends React.Component {
                     Calculate the full contribution summary and submit it to Elasticsearch for indexing.
                   </td>
                 </tr>
+                {item.summary.contribution && item.summary.contribution._history && item.summary.contribution._history.map((v, i) =>
+                  <tr key={i}>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                        onClick={function(id, e) {
+                          console.log("esUploadActivatedContributionToS3");
+                          Meteor.call("esUploadActivatedContributionToS3", {index, id},
+                            (error) => { console.log("esUploadActivatedContributionToS3 done"); }
+                          );
+                        }.bind(this,v.id)}
+                      >
+                        Upload {v.id} to S3
+                      </button>
+                    </td>
+                    <td>
+                      Upload the contribution text file to magic-contributions and/or magic-activated-contributions.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>}
           </div>
@@ -716,6 +774,9 @@ class SearchSummariesListItem extends React.Component {
         </div>
       </div>
     );
+    } catch(e) {
+      console.error(e);
+    }
   }
 
   renderMapModal(item) {
