@@ -19,8 +19,11 @@ export default class extends React.Component {
           How to go from a formatted text file or Excel file of data and upload it into the MagIC database. 
           This demo assumes that the data are correctly separated into tables or Excel worksheets according to the MagIC <Link to={"/MagIC/data-models/3.0"}>data model</Link>.<br/> 
            <br/>
+          Taking a journal article and its supplemental material and creating an Excel File for uploading the data into MagIC.
+	  An updated version of the Excel template file used in the video can be downloaded from <a href='https://njarboe.com/MagIC/Template3.0ForMagICUpload.xlsx'>Template3.0ForMagICUpload.xlsx</a>. 
+        </p>
+        <p>
           <a href="https://youtu.be/rCUUPp3qpmI">Creating an Excel File for MagIC Uploading: Part 1</a> - 2018/2/7 (28 min)<br/>
-          Taking a journal article and its supplemental material and creating an Excel File for uploading the data into MagIC. The template Excel file used in the video can be found <a href='https:earthref.org/ERDA'>here</a> soon. You can email Nick Jarboe (<a href='mailto:njarboe@ucsd.edu'>njarboe@ucsd.edu</a>) to send it to you until we have it linked to it online.<br/>
           <a href="https://youtu.be/Pwfx6UilbXM">Creating an Excel File for MagIC Uploading: Part 2</a> - 2018/2/7 (13 min)<br/>
           <a href="https://youtu.be/Ll3S8Mm1gSM">Creating an Excel File for MagIC Uploading: Part 3</a> - 2018/2/7 (18 min)<br/>
         </p>
