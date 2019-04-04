@@ -20,7 +20,7 @@ export default class extends React.Component {
           This demo assumes that the data are correctly separated into tables or Excel worksheets according to the MagIC <Link to={"/MagIC/data-models/3.0"}>data model</Link>.<br/> 
            <br/>
           Taking a journal article and its supplemental material and creating an Excel File for uploading the data into MagIC.
-	  An updated version of the Excel template file used in the video can be downloaded from <a href='https://njarboe.com/MagIC/Template3.0ForMagICUpload.xlsx'>Template3.0ForMagICUpload.xlsx</a>. 
+	  An updated version of the Excel template file used in the video can be downloaded from <a href='https://github.com/earthref/MagIC/blob/master/.public/MagIC/Template3.0ForMagICUpload.xlsx?raw=true'>Template3.0ForMagICUpload.xlsx</a>. 
         </p>
         <p>
           <a href="https://youtu.be/rCUUPp3qpmI">Creating an Excel File for MagIC Uploading: Part 1</a> - 2018/2/7 (28 min)<br/>
