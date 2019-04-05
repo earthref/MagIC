@@ -31,11 +31,11 @@ export default class DataImporter extends React.Component {
       templatesReady: false,
       templateID: undefined,
       templateName: undefined,
-      excludeColumnIdxs: this.props.excludeColumnIdxs || [],
-      outColumnNames:    this.props.outColumnNames || [],
+      excludeColumnIdxs: props.excludeColumnIdxs || [],
+      outColumnNames:    props.outColumnNames || [],
       settings: {
-        tableName:   this.props.tableName || '',
-        nHeaderRows: this.props.nHeaderRows || '1',
+        tableName:   props.tableName || '',
+        nHeaderRows: props.nHeaderRows || this.guessHeaderRows(props.data, props.dataModel && props.dataModel.tables || {}),
         columnMap: {},
         excludeColumnNames: [],
         excludeTable: false
@@ -82,7 +82,7 @@ export default class DataImporter extends React.Component {
             excludeColumnIdxs: [],
             settings: {
               tableName: '',
-              nHeaderRows: '1',
+              nHeaderRows: this.guessHeaderRows(this.props.data, this.props.dataModel && this.props.dataModel.tables || {}),
               columnMap: {},
               excludeColumnNames: [],
               excludeTable: false
@@ -481,6 +481,19 @@ export default class DataImporter extends React.Component {
       else if (this.props.onNotReady)
         this.props.onNotReady();
     }
+  }
+
+  guessHeaderRows(data, dataModelTables) {
+    let nHeaderRows;
+    const tableNames = _.keys(dataModelTables);
+    if (Array.isArray(data)) {
+      data.slice(0, 100).forEach((row, idx) => {
+        console.log('guessHeaderRows', row[0], tableNames);
+        if (!nHeaderRows && _.indexOf(tableNames, `${row[0].toLowerCase()}s`) >= 0)
+          nHeaderRows = `${idx+1}`;
+      })
+    }
+    return nHeaderRows || '1';
   }
 
   portalColor() {
