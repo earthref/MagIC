@@ -2,6 +2,7 @@ import _ from  "lodash";
 import numeral from 'numeral';
 import getRanges from 'get-ranges';
 import React from "react";
+import {Link} from 'react-router-dom';
 import saveAs from "save-as";
 import Cookies from "js-cookie";
 import {Tracker}  from "meteor/tracker";
@@ -248,14 +249,10 @@ export default class extends React.Component {
           </div>
           :
           <div className="ui list" style={{margin: "0"}}>
-            <IconButton className="card" link="/MagIC/upload" portal="MagIC" style={{marginBottom: "1.5em"}}>
-              <i className="large icons">
-                <i className="table icon"/>
-                <i className="corner add icon"/>
-              </i>
-              <div className="title">Upload</div>
-              <div className="subtitle">Import data into your private workspace.</div>
-            </IconButton>
+            <Link className={portals['MagIC'].color + ' ui compact icon button'} style={{float:'right', margin:'-3em 0 0', paddingTop: '0.5em', paddingBottom: '0.5em'}} to="/MagIC/upload">
+              <i className="add icon"/>
+              Upload Data Into Your Private Workspace
+            </Link>
             {this.privateContributions.map((c,i) => {
               let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
               //console.log("ref", c, noReference);
