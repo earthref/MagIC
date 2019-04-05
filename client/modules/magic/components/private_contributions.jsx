@@ -340,7 +340,7 @@ export default class extends React.Component {
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
-                        <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                        <div className={"ui red small button"} style={{margin: "0 0 0 0.5em"}}
                             onClick={(e) => {
                               this.validate(c.summary.contribution.id);
                             }}
