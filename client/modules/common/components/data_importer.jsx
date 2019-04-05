@@ -31,11 +31,11 @@ export default class DataImporter extends React.Component {
       templatesReady: false,
       templateID: undefined,
       templateName: undefined,
-      excludeColumnIdxs: this.props.excludeColumnIdxs || [],
-      outColumnNames:    this.props.outColumnNames || [],
+      excludeColumnIdxs: props.excludeColumnIdxs || [],
+      outColumnNames:    props.outColumnNames || [],
       settings: {
-        tableName:   this.props.tableName || '',
-        nHeaderRows: this.props.nHeaderRows || '1',
+        tableName:   props.tableName || '',
+        nHeaderRows: props.nHeaderRows || this.guessHeaderRows(props.data, props.dataModel && props.dataModel.tables || {}),
         columnMap: {},
         excludeColumnNames: [],
         excludeTable: false
@@ -82,7 +82,7 @@ export default class DataImporter extends React.Component {
             excludeColumnIdxs: [],
             settings: {
               tableName: '',
-              nHeaderRows: '1',
+              nHeaderRows: this.guessHeaderRows(this.props.data, this.props.dataModel && this.props.dataModel.tables || {}),
               columnMap: {},
               excludeColumnNames: [],
               excludeTable: false
@@ -483,6 +483,19 @@ export default class DataImporter extends React.Component {
     }
   }
 
+  guessHeaderRows(data, dataModelTables) {
+    let nHeaderRows;
+    const tableNames = _.keys(dataModelTables);
+    if (Array.isArray(data)) {
+      data.slice(0, 100).forEach((row, idx) => {
+        console.log('guessHeaderRows', row[0], tableNames);
+        if (!nHeaderRows && _.indexOf(tableNames, `${row[0].toLowerCase()}s`) >= 0)
+          nHeaderRows = `${idx+1}`;
+      })
+    }
+    return nHeaderRows || '1';
+  }
+
   portalColor() {
     const portal = this.props.portal || 'EarthRef.org';
     return portals[portal] && portals[portal].color || 'green';
@@ -499,16 +512,13 @@ export default class DataImporter extends React.Component {
   renderOptions() {
     return (
       <div>
-        <div style={{display:'flex'}}>
-          <div style={{flex:'1 1 auto'}}>
+        <div className="ui grid" style={{marginTop:0}}>
+          <div className="seven wide column">
             <div className="ui labeled fluid action input">
-              <div className="ui label" style={{whiteSpace:'nowrap', flex:'0 0 auto'}}>
-                Import Template
-              </div>
-              <div ref="import settings template dropdown" className="ui selection fluid dropdown button" style={{borderRadius:0, flex:'1 1 auto'}}>
+              <div ref="import settings template dropdown" className="ui selection fluid dropdown button" style={{borderTopRightRadius:0, borderBottomRightRadius:0, flex:'1 1 auto'}}>
                 <i className="dropdown icon"/>
                 <div className="default text">
-                  <span className="text">{this.state.templateName || 'Select One to Load Settings'}</span>
+                  <span className="text">{this.state.templateName || 'Select to Load Template'}</span>
                 </div>
                 <div className="menu">
                   <div data-value="" data-text="Clear Import Settings" className="item">
@@ -546,7 +556,7 @@ export default class DataImporter extends React.Component {
                         </div>
                       )
                     :
-                      <div className="item">
+                      <div className="disabled item">
                         There are currently no templates in your private workspace. Please create a new template to reuse it in future uploads.
                       </div>
                   :
@@ -558,34 +568,31 @@ export default class DataImporter extends React.Component {
               </div>
               {this.state.templateID &&
               <div ref="import template save"
-                   className={'ui icon button' + (this.state.hasChanged ? '' : ' disabled')}
-                   style={{flex: '0 0 auto'}}
-                   onClick={(e) => {
-                     $(this.refs['save import settings template']).modal('show');
-                   }}
+                  className={'ui icon button' + (this.state.hasChanged ? '' : ' disabled')}
+                  style={{flex: '0 0 auto'}}
+                  onClick={(e) => {
+                    $(this.refs['save import settings template']).modal('show');
+                  }}
               >
                 <i className="save icon"/>
                 Save Changes
               </div>}
               <div ref="import template create" className="ui icon button"
-                   style={{flex:'0 0 auto', borderLeft: '1px solid rgba(34, 36, 38, 0.15)'}}
-                   onClick={(e) => {
-                     this.refs['create import settings template name'].value = '';
-                     $(this.refs['create import settings template']).modal('show');
-                   }}
+                  style={{flex:'0 0 auto', borderLeft: '1px solid rgba(34, 36, 38, 0.15)'}}
+                  onClick={(e) => {
+                    this.refs['create import settings template name'].value = '';
+                    $(this.refs['create import settings template']).modal('show');
+                  }}
               >
-                <i className="star icon"/>
-                Create New
+                <i className="plus icon"/>
+                New
               </div>
             </div>
           </div>
-
-        </div>
-        <div className="ui two column stackable grid" style={{marginTop:0}}>
-          <div className="column">
+          <div className="five wide column">
             <div className="ui labeled fluid action input">
               <div className={'ui basic label ' + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? 'red' : this.portalColor())}>
-                Name of Table to Import
+                Table Name
               </div>
               <div ref="table name dropdown"
                    className={"ui selection fluid dropdown" + (this.state.settings.tableName === '' && !this.state.settings.excludeTable ? ' error' : '')}>
@@ -605,10 +612,10 @@ export default class DataImporter extends React.Component {
               </div>
             </div>
           </div>
-          <div className="column">
+          <div className="four wide column">
             <div className={"ui labeled fluid input" + (this.state.errors.nHeaderRows.length === 0 || this.state.settings.excludeTable ? '' : ' error')}>
               <div className={"ui label" + (this.state.errors.nHeaderRows.length === 0 || this.state.settings.excludeTable ? '' : ' red')}>
-                Number of Header Rows
+                # Header Rows
               </div>
               <input ref="header_row_input" type="text" default="None" value={this.state.settings.nHeaderRows}
                      onChange={(e) => {

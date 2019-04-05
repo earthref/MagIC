@@ -2,6 +2,7 @@ import _ from  "lodash";
 import numeral from 'numeral';
 import getRanges from 'get-ranges';
 import React from "react";
+import {Link} from 'react-router-dom';
 import saveAs from "save-as";
 import Cookies from "js-cookie";
 import {Tracker}  from "meteor/tracker";
@@ -248,14 +249,10 @@ export default class extends React.Component {
           </div>
           :
           <div className="ui list" style={{margin: "0"}}>
-            <IconButton className="card" link="/MagIC/upload" portal="MagIC" style={{marginBottom: "1.5em"}}>
-              <i className="large icons">
-                <i className="table icon"/>
-                <i className="corner add icon"/>
-              </i>
-              <div className="title">Upload</div>
-              <div className="subtitle">Import data into your private workspace.</div>
-            </IconButton>
+            <Link className={portals['MagIC'].color + ' ui compact icon button'} style={{float:'right', margin:'-3em 0 0', paddingTop: '0.5em', paddingBottom: '0.5em'}} to="/MagIC/upload">
+              <i className="add icon"/>
+              Upload Data Into Your Private Workspace
+            </Link>
             {this.privateContributions.map((c,i) => {
               let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
               //console.log("ref", c, noReference);
@@ -269,13 +266,18 @@ export default class extends React.Component {
                             Private Contribution Name
                           </div>
                           <input type="text" default="None" placeholder="A name to help you remember which contribution you are working on" value={c.name !== undefined ? c.name : c.summary.contribution._name} readOnly={c.updatingName}
-                                 onChange={(e) => {
-                                   this.privateContributions[i].name = e.target.value;
-                                   this.setState({taps: this.state.taps + 1});
-                                 }}
-                                 onKeyPress={function(i, e) {
-                                   if (e.key === "Enter") this.updateName(i);
-                                 }.bind(this, i)}/>
+                            onBlur={(e) => {
+                              this.privateContributions[i].name = e.target.value;
+                              this.updateName(i);
+                            }}
+                            onChange={(e) => {
+                              this.privateContributions[i].name = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateName(i);
+                            }.bind(this, i)}
+                          />
                           {c.name !== undefined && <i className="red save link icon" onClick={function(i, e) {
                             this.updateName(i);
                           }.bind(this, i)}/>}
@@ -309,13 +311,18 @@ export default class extends React.Component {
                             DOI
                           </div>
                           <input type="text" default="None" placeholder="The study's DOI (required)" value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
-                                 onChange={(e) => {
-                                   this.privateContributions[i].reference = e.target.value;
-                                   this.setState({taps: this.state.taps + 1});
-                                 }}
-                                 onKeyPress={function(i, e) {
-                                   if (e.key === "Enter") this.updateReference(i);
-                                 }.bind(this, i)}/>
+                            onBlur={(e) => {
+                              this.privateContributions[i].reference = e.target.value;
+                              this.updateReference(i);
+                            }}
+                            onChange={(e) => {
+                              this.privateContributions[i].reference = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateReference(i);
+                            }.bind(this, i)}
+                          />
                           {c.reference !== undefined && <i className="red save link icon" onClick={function(i, e) {
                             this.updateReference(i);
                           }.bind(this, i)}/>}
@@ -327,20 +334,25 @@ export default class extends React.Component {
                             Description
                           </div>
                           <input type="text" default="None" placeholder="Describe the changes being made in this version" value={c.description !== undefined ? c.description : c.summary.contribution.description} readOnly={c.updatingDescription || c.summary.contribution._is_activated === "true"}
-                                 onChange={(e) => {
-                                   this.privateContributions[i].description = e.target.value;
-                                   this.setState({taps: this.state.taps + 1});
-                                 }}
-                                 onKeyPress={function(i, e) {
-                                   if (e.key === "Enter") this.updateDescription(i);
-                                 }.bind(this, i)}/>
+                            onBlur={(e) => {
+                              this.privateContributions[i].description = e.target.value;
+                              this.updateDescription(i);
+                            }}
+                            onChange={(e) => {
+                              this.privateContributions[i].description = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateDescription(i);
+                            }.bind(this, i)}
+                          />
                           {c.description !== undefined && <i className="red save link icon" onClick={function(i, e) {
                             this.updateDescription(i);
                           }.bind(this, i)}/>}
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
-                        <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                        <div className={"ui red small button"} style={{margin: "0 0 0 0.5em"}}
                             onClick={(e) => {
                               this.validate(c.summary.contribution.id);
                             }}

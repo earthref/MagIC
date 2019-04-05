@@ -913,8 +913,7 @@ export default function () {
                   "description": description,
                   "reference": doi,
                   "_reference": _reference,
-                  "_history": _history,
-                  "_is_valid": "false"
+                  "_history": _history
                 }
               },
               "contribution": {
