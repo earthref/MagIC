@@ -979,7 +979,7 @@ export default class MagICUploadContribution extends React.Component {
                             : undefined}
                           {file.nImportErrors > 0 ?
                             <div className="ui horizontal red label">
-                              {numeral(file.nImportErrors).format('0,0') + ' Import Error' + (file.nImportErrors === 1 ? '' : 's')}
+                              {numeral(file.nImportErrors).format('0,0') + ' Table' + (file.nImportErrors > 1 ? 's' : '') + ' With' + (file.nImportErrors > 1 ? '' : ' an') + ' Import Error' + (file.nImportErrors > 1 ? 's' : '')}
                             </div>
                             : undefined}
                         </div>
