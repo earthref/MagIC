@@ -29,7 +29,7 @@ export default class extends React.Component {
         "@type": "Dataset",
         "url": "https://earthref.org/MagIC/doi/" + contribution._reference.doi,
         "citation": "https://dx.doi.org/" + contribution._reference.doi,
-        "license": "CC-BY-4.0"
+        "license": "CC-BY-4.0 9"
       };
   
       if (contribution.version) json.version = contribution.version;
@@ -37,8 +37,10 @@ export default class extends React.Component {
       if (contribution.timestamp) json.dateModified = contribution.timestamp;
   
       if (contribution._reference.title) json.name = contribution._reference.title;
-      if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
+      if (contribution._reference.title) json.name3 = contribution._reference.title + " Some tsxt";
+      if (contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + contribution._reference.title;
       if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
+      if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
       if (contribution._reference.year) json.datePublished = contribution._reference.year;
 
       if (all._geo_envelope) {
