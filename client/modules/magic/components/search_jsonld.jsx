@@ -37,8 +37,9 @@ export default class extends React.Component {
       if (contribution.timestamp) json.dateModified = contribution.timestamp;
   
       if (contribution._reference.title) json.name = contribution._reference.title;
-      if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
+      if (contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + contribution._reference.title;
       if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
+      if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
       if (contribution._reference.year) json.datePublished = contribution._reference.year;
 
       if (all._geo_envelope) {
