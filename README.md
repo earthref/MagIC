@@ -26,3 +26,11 @@ Run the **Meteor** application by typing:
 meteor
 ```
 The web application will run locally at http://localhost:3000, but access to the **Elasticsearch** server is limited.
+
+### Browser Testing
+
+We use Browser Stack to check for cross-browser compatability:
+
+<a href="http://BrowserStack.com">
+  <img width="200" src="./Browserstack-logo.svg"/>
+</a>
