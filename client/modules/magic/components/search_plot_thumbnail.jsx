@@ -122,7 +122,7 @@ export default class extends React.Component {
         ) {
           const typeMatch = file.match(typeRe);
           if (typeMatch && typeMatch.length >= 1) {
-            if (typeMatch[1] === 'eqarea') { levels[level]['Equal Area'].push(f); }
+            if (typeMatch[1].substr(0,6) === 'eqarea') { levels[level]['Equal Area'].push(f); }
             else if (typeMatch[1] === 'zijd') { levels[level]['Zijderveld'].push(f); }
             else if (typeMatch[1] === 'arai') { levels[level]['Arai'].push(f); }
             else if (typeMatch[1] === 'demag') { levels[level]['Demagnetization'].push(f); }
