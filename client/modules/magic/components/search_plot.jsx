@@ -48,7 +48,7 @@ export default class extends React.Component {
                   <div className="ui text loader">Loading</div>
                 </div>
               }
-              <img style={{ visibility:isLoaded ? 'visible' : 'hidden', zIndex: 1, maxHeight:'100%', maxWidth:'100%', margin:'auto', border:'1px solid rgba(0,0,0,.1)'}} src={s3File} {...!isLoaded && {onLoad: () => _.defer(() => this.setState({ isLoaded: true }))}}/>
+              <img style={{ visibility:isLoaded ? 'visible' : 'hidden', zIndex: 1, objectFit:'contain', minWidth: 0, maxHeight:'100%', maxWidth:'100%', margin:'auto', border:'1px solid rgba(0,0,0,.1)'}} src={s3File} {...!isLoaded && {onLoad: () => _.defer(() => this.setState({ isLoaded: true }))}}/>
             </div>
             { isLoaded &&
               <div ref="img download" style={{minWidth:'200px', marginLeft:'1em'}}>
