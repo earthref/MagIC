@@ -24,7 +24,7 @@
     "filesize": "^3.6.1",
     "get-ranges": "^5.0.0",
     "history": "^4.7.2",
-    "jquery": "^3.3.1",
+    "jquery": "^3.4.1",
     "js-cookie": "^2.2.0",
     "jszip": "^3.1.5",
     "lodash": "^4.17.11",
