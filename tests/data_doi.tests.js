@@ -1,4 +1,4 @@
-import fs from "fs";
+import { Meteor } from 'meteor/meteor';
 import elasticsearch from "elasticsearch";
 import BPromise from 'bluebird';
 import request from 'request';
@@ -80,10 +80,7 @@ crossref: ${xml}`;
               request({
                 method: 'PUT',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id,
-                auth: {
-                  user: '
-                  pass: '
-                },
+                auth: Meteor.settings.ezid,
                 headers: {'content-type': 'text/plain; charset=UTF-8'},
                 body: payload
               }, function (error, response, body) {
