@@ -27,7 +27,7 @@
     "jquery": "^3.3.1",
     "js-cookie": "^2.2.0",
     "jszip": "^3.1.5",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.11",
     "meteor-node-stubs": "^0.4.1",
     "moment": "^2.22.1",
     "moment-timezone": "^0.5.16",
