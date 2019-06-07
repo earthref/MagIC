@@ -22,6 +22,12 @@ export default function () {
       this.unblock();
       //console.log("s3GetObjectBase64", bucket, key);
       return s3GetObjectBase64({bucket, key});
+    },
+
+    async s3GetObjectUTF8({bucket, key}) {
+      this.unblock();
+      //console.log("s3GetObjectUTF8", bucket, key);
+      return s3GetObjectUTF8({bucket, key});
     }
 
   });
@@ -96,6 +102,26 @@ async function s3GetObjectBase64({bucket, key}) {
   });
 }
 export { s3GetObjectBase64 };
+
+async function s3GetObjectUTF8({bucket, key}) {
+  return await new Promise(resolve => {
+    try {
+      s3.getObject({ Bucket: bucket, Key: key }, (error, data) => {
+        if (error) {
+          console.error("s3GetObjectUTF8", `Failed to retrieve S3 object ${bucket}/${key}`, error);
+          throw new Meteor.Error("s3GetObjectUTF8", `Failed to retrieve S3 object ${bucket}/${key}`);
+        }
+        else {
+          resolve(data.Body.toString('utf-8'));
+        }
+      });
+    } catch (e) {
+      console.error("s3GetObjectUTF8", `Failed to retrieve S3 object ${bucket}/${key}`, e);
+      throw new Meteor.Error("s3GetObjectUTF8", `Failed to retrieve S3 object ${bucket}/${key}`);
+    }
+  });
+}
+export { s3GetObjectUTF8 };
 
 async function s3DeleteKeys({bucket, keys}) {
   return await new Promise(resolve => {

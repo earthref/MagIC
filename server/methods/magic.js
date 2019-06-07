@@ -68,7 +68,11 @@ export default function () {
       
       try {
         return await new Promise(resolve => {
-          Meteor.call("s3ListObjects", { bucket: "magic-plots", prefix: `${cID}/`, limit }, (error, objects) => {
+          Meteor.call("s3ListObjects", {
+            bucket: "magic-plots",
+            prefix: `${cID}/`, 
+            limit
+          }, (error, objects) => {
             resolve(_.map(objects, 'Key'));
           });
         });
@@ -84,13 +88,36 @@ export default function () {
       
       try {
         return await new Promise(resolve => {
-          Meteor.call("s3GetObjectBase64", { bucket: "magic-plots", key: file }, (error, base64) => {
+          Meteor.call("s3GetObjectBase64", {
+            bucket: "magic-plots",
+            key: file
+          }, (error, base64) => {
             resolve(base64);
           });
         });
       } catch (e) {
         console.error("magicGetPmagPyPlot", `Failed to retrieve PmagPy plot ${file}`, e);
         throw new Meteor.Error("magicGetPmagPyPlot", `Failed to retrieve PmagPy plot ${file}`);
+      }
+    },
+
+    async magicGetPrivateContribution(id, user, attempt = 0) {
+      this.unblock();
+      console.log("magicGetPrivateContribution", id, user, attempt);
+
+      try {
+        return await new Promise(resolve => {
+          Meteor.call("s3GetObjectUTF8", { 
+            bucket: `magic-private-contributions/${id}`,
+            key: `magic_contribution_${id}.txt`
+          }, (error, contribution) => {
+            console.log("magicGetPrivateContribution", error, contribution.substr(100));
+            resolve(contribution);
+          });
+        });
+      } catch (e) {
+        console.error("magicGetPrivateContribution", `Failed to retrieve private contribution for ${id}`, e);
+        throw new Meteor.Error("magicGetPrivateContribution", `Failed to retrieve private contribution for ${id}`);
       }
     }
 
