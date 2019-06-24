@@ -1,5 +1,5 @@
 import React from 'react';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 import SearchJSONLD from '/client/modules/magic/components/search_jsonld';
 

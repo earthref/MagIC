@@ -1,6 +1,6 @@
 import React from 'react';
 import SearchFiltersBuckets from '/client/modules/common/components/search_filters_buckets';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 export const composer = ({es}, onData) => {
   onData(null, { filters: undefined });

@@ -1,6 +1,6 @@
 import React from 'react';
 import GoogleMap from '/client/modules/common/components/google_map';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 export const composer = ({}, onData) => {
   console.log('GoogleMaps.loaded()', GoogleMaps.loaded());

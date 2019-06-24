@@ -1,6 +1,6 @@
 import React from 'react';
 import DataImporter from '/client/modules/common/components/data_importer';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 export const composer = ({context, subscriptionName, user_id}, onData) => {
   const {Meteor, Collections} = context();

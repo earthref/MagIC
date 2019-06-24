@@ -11,12 +11,11 @@
     "autoprefixer": "^7.2.6",
     "html-loader": "^0.4.5",
     "jsdom": "9.12",
-    "less": "^3.8.1",
-    "mocha": "^5.2.0",
-    "react-addons-test-utils": "^15.6.2"
+    "mocha": "^5.2.0"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
+    "@storybook/react-komposer": "^2.0.5",
     "aws-sdk": "^2.397.0",
     "bluebird": "^3.5.1",
     "elasticsearch": "^15.1.1",
@@ -35,20 +34,19 @@
     "object-sizeof": "^1.3.0",
     "prop-types": "^15.6.1",
     "query-string": "^6.2.0",
-    "react": "^15.6.2",
+    "react": "^16.8.6",
     "react-debounce-input": "^3.2.0",
-    "react-dom": "^15.6.2",
+    "react-dom": "^16.8.6",
     "react-dropzone": "^3.13.4",
     "react-helmet": "^5.2.0",
-    "react-komposer": "^2.0",
     "react-redux": "^5.0.7",
-    "react-router": "^4.2.0",
-    "react-router-dom": "^4.2.2",
+    "react-router": "^5.0.1",
+    "react-router-dom": "^5.0.1",
     "react-router-redux": "^4.0.8",
     "redux": "^3.7.2",
     "request": "^2.88.0",
     "save-as": "^0.1",
-    "semantic-ui-react": "^0.78.3",
+    "semantic-ui-react": "^0.87.2",
     "semver": "^5.5.0",
     "source-map-support": "^0.5.6",
     "underscore": "^1.9.0",
@@ -68,6 +66,6 @@
     "test": "set TEST_WATCH=1&& set TEST_CLIENT=0&& meteor test --driver-package=meteortesting:mocha --port 3010 --settings settings.json",
     "debug": "meteor run --inspect --settings settings.json",
     "build-meteor": "meteor run --settings settings.json",
-    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.2.13/semantic.css"
+    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.4.2/semantic.css"
   }
 }

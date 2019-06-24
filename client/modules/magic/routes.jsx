@@ -6,19 +6,21 @@ import {Helmet} from 'react-helmet';
 
 import {versions} from '/lib/configs/magic/data_models.js';
 import Page from '/client/modules/common/components/page';
-import MagICMenu from '/client/modules/magic/components/menu';
-
 import MagICHome from '/client/modules/magic/components/home';
-import MagICAbout from '/client/modules/magic/components/about';
-import MagICContact from '/client/modules/magic/components/contact';
-import MagICHelp from '/client/modules/magic/components/help';
-import MagICHelpTextFileFormat from '/client/modules/magic/components/help/text_file_format';
-import MagICHelpUploadingData from '/client/modules/magic/components/help/uploading_data';
-import MagICHelpCreateAccount from '/client/modules/magic/components/help/create_account';
-import MagICWorkshops from '/client/modules/magic/components/workshops';
-import MagICLinks from '/client/modules/magic/components/links';
-import MagICJupyterNotebooks from '/client/modules/magic/components/jupyter_notebooks';
-import MagICGrandChallenges from '/client/modules/magic/components/grand_challenges';
+
+import MagICMenu from '/client/modules/magic/components/menu/menu';
+import MagICAbout from '/client/modules/magic/components/menu/about';
+import MagICTechnology from '/client/modules/magic/components/menu/technology';
+import MagICContact from '/client/modules/magic/components/menu/contact';
+import MagICWorkshops from '/client/modules/magic/components/menu/workshops';
+import MagICLinks from '/client/modules/magic/components/menu/links';
+import MagICJupyterNotebooks from '/client/modules/magic/components/menu/jupyter_notebooks';
+import MagICGrandChallenges from '/client/modules/magic/components/menu/grand_challenges';
+
+import MagICHelp from '/client/modules/magic/components/menu/help/help';
+import MagICHelpTextFileFormat from '/client/modules/magic/components/menu/help/text_file_format';
+import MagICHelpUploadingData from '/client/modules/magic/components/menu/help/uploading_data';
+import MagICHelpCreateAccount from '/client/modules/magic/components/menu/help/create_account';
 
 import MagICSearch from '/client/modules/magic/components/search';
 import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
@@ -41,13 +43,19 @@ const Routes = ({match}) => (
       </Page>
     }/>
     <Route exact path="/MagIC/about" render={() =>
-      <Page portal="MagIC" title="About MagIC" menu={<MagICMenu/>}>
+      <Page portal="MagIC" menu={<MagICMenu/>}>
         <Helmet><title>About MagIC | EarthRef.org</title></Helmet>
         <MagICAbout/>
       </Page>
     }/>
+    <Route exact path="/MagIC/technology" render={() =>
+      <Page portal="MagIC" menu={<MagICMenu/>}>
+        <Helmet><title>MagIC Technology | EarthRef.org</title></Helmet>
+        <MagICTechnology/>
+      </Page>
+    }/>
     <Route exact path="/MagIC/contact" render={() =>
-      <Page portal="MagIC" title="Contact Information" menu={<MagICMenu/>}>
+      <Page portal="MagIC" menu={<MagICMenu/>}>
         <Helmet><title>Contact MagIC | EarthRef.org</title></Helmet>
         <MagICContact/>
       </Page>

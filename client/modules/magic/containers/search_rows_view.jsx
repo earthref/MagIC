@@ -1,6 +1,6 @@
 import React from 'react';
 import SearchRowsView from '/client/modules/magic/components/search_rows_view';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 export const composer = ({es}, onData) => {
   onData(null, {error: undefined, count: undefined});

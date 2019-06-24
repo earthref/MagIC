@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie';
 import SearchPlotThumbnail from '/client/modules/magic/components/search_plot_thumbnail';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 export const composer = ({ id }, onData) => {
   onData(null, { files: undefined });

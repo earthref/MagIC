@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import React from 'react';
 import SearchPlot from '/client/modules/magic/components/search_plot';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 let plotCache = {};
 const cacheExpiration = 5*60*1000; // 5 minutes

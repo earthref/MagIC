@@ -1,5 +1,5 @@
 import React from 'react';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 import DividedList from '/client/modules/common/components/divided_list';
 

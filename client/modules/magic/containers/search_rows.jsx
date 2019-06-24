@@ -2,7 +2,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import Rows from '/client/modules/common/components/rows';
-import {compose} from 'react-komposer';
+import {compose} from '@storybook/react-komposer';
 
 export const composer = ({es, pageSize, pageNumber}, onData) => {
   onData(null, { rows: undefined, title: undefined });
