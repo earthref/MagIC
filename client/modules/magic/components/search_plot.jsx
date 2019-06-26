@@ -28,7 +28,7 @@ export default class extends React.Component {
   }
 
   render() {
-    const { file, error, source, style, download } = this.props;
+    const { file, error, source, style, loadingStyle, download } = this.props;
     const { isLoaded } = this.state;
     if (error) {
       return (
@@ -44,7 +44,7 @@ export default class extends React.Component {
           <div style={{display:'flex', flexDirection:'row', maxHeight:'100%', maxWidth:'100%', margin:'auto'}}>
             <div ref="img container" style={{display:'flex'}}>
               { !isLoaded &&
-                <div className="ui active inverted dimmer" style={style}>
+                <div className="ui active inverted dimmer" style={loadingStyle}>
                   <div className="ui text loader">Loading</div>
                 </div>
               }
@@ -63,7 +63,7 @@ export default class extends React.Component {
         </div>
       :
         <div ref="img container" style={{display:'flex'}}>
-          <div className="ui active inverted dimmer" style={style}>
+          <div className="ui active inverted dimmer" style={loadingStyle}>
             <div className="ui text loader">Loading</div>
           </div>
           <div style={{background:'white', zIndex: 1000, display:'flex'}}>
@@ -93,7 +93,7 @@ export default class extends React.Component {
         </div>
       :
         <div ref="img container" style={{display:'flex'}}>
-          <div className="ui active inverted dimmer" style={style}>
+          <div className="ui active inverted dimmer" style={loadingStyle}>
             <div className="ui text loader">Loading</div>
           </div>
           <div style={{background:'white', zIndex: 1000, display:'flex'}}>
@@ -104,7 +104,7 @@ export default class extends React.Component {
     }
     else {
       return (
-        <div className="ui active inverted dimmer" style={style}>
+        <div className="ui active inverted dimmer" style={loadingStyle}>
           <div className="ui text loader">Loading</div>
         </div>
       );

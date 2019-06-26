@@ -180,9 +180,10 @@ export default class extends React.Component {
     const { id, isPrivate, error, file, files, citation, location, site, sample, specimen } = this.props;
     const { level, type } = this.state;
 
-    const containerStyle = {position:'relative', boxSizing:'content-box', minHeight: 100, maxHeight: 100, minWidth: 100, maxWidth: 100, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
+    const containerStyle = {position:'relative', boxSizing:'content-box', minHeight: 98, maxHeight: 98, minWidth: 98, maxWidth: 98, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
     const thumbnailContainerStyle = _.extend({}, containerStyle, {display: 'flex'});
     const thumbnailStyle = {maxWidth: 80, maxHeight: 80, margin:'10px', objectFit:'contain'};
+    const loadingStyle = {minHeight: 98, maxHeight: 98, minWidth: 98, maxWidth: 98, padding: 0};
     const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 2rem 0', overflow:'visible'});
 
     const levels = this.filesToLevels();
@@ -324,7 +325,7 @@ export default class extends React.Component {
     else if (file) {
       return (
         <div style={thumbnailContainerStyle}>
-          <SearchPlot style={thumbnailStyle} id={id} isPrivate={isPrivate} file={file}/>
+          <SearchPlot style={thumbnailStyle} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate} file={file}/>
           <div className="ui top right attached small basic label" style={{ boxSizing:'border-box', padding:'1rem', margin:'-1px', zIndex: 1000 }}>
             <div className="ui active mini loader"></div>
           </div>
@@ -340,8 +341,8 @@ export default class extends React.Component {
     }
     else {
       return (
-        <div style={containerStyle}>
-          <div className="ui active inverted dimmer" style={{minHeight: 100}}>
+        <div style={thumbnailContainerStyle}>
+          <div className="ui active inverted dimmer" style={loadingStyle}>
             <div className="ui text loader">Loading</div>
           </div>
         </div>
