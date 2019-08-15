@@ -489,7 +489,7 @@ export default class DataImporter extends React.Component {
     if (Array.isArray(data)) {
       data.slice(0, 100).forEach((row, idx) => {
         console.log('guessHeaderRows', row[0], tableNames);
-        if (!nHeaderRows && _.indexOf(tableNames, `${row[0].toLowerCase()}s`) >= 0)
+        if (!nHeaderRows && row[0].toLowerCase && _.indexOf(tableNames, `${row[0].toLowerCase()}s`) >= 0)
           nHeaderRows = `${idx+1}`;
       })
     }
