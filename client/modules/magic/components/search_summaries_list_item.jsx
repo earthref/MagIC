@@ -788,11 +788,13 @@ class SearchSummariesListItem extends React.Component {
   }
 
   renderMapModal(item) {
+    let citation = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation;
+    let name = item.summary && item.summary.contribution && item.summary.contribution._name;
     return (
       <div ref="map modal" className="ui fullscreen modal">
       <i className="close icon"></i>
       <div className="header">
-        {item.summary.contribution._reference.citation} Map
+        {citation || name || "Unnamed"} Map
       </div>
       <GoogleMap style={{width:'100%', height:'calc(100vh - 10em)'}} docs={[item]}/>
     </div>
