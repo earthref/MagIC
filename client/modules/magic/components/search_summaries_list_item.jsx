@@ -191,7 +191,7 @@ class SearchSummariesListItem extends React.Component {
             return (
               <tr key={i}>
                 <td style={{textAlign: 'right'}}>
-                  {count}
+                  {numeral(count).format('0 a')}
                 </td>
                 <td>
                   &nbsp;{labels[i]}
@@ -623,21 +623,14 @@ class SearchSummariesListItem extends React.Component {
                         </button>
                       </form>}
                       {v.id && v.id >= 16282 &&
-                      <button type="submit" className="ui basic tiny fluid compact icon purple button"
-                              style={{marginTop:'0'}} onClick={function(id, e) {
-                        Meteor.call('esGetContribution', {index, id}, function(id, error, c) {
-                          if (!error && c) {
-                            const exporter = new ExportContribution({});
-                            //debugger;
-                            let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
-                            saveAs(blob, 'magic_contribution_' + id + '.txt');
-                          } else {
-                            alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-                          }
-                        }.bind(this, id));
-                      }.bind(this, v.id)}>
-                        <i className="ui file text outline icon"/> Download
-                      </button>}
+                      <a href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`} download>
+                        <button
+                          className="ui basic tiny fluid compact icon purple button"
+                          style={{marginTop:'0'}}
+                        >
+                          <i className="ui file text outline icon"/> Download
+                        </button>
+                      </a>}
                       {!v.id &&
                       <button className="ui basic tiny fluid compact icon purple disabled button"
                               style={{marginTop:'0'}}>
