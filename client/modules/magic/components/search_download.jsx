@@ -207,6 +207,7 @@ export default class extends React.Component {
                       singular="Contribution File"
                       plural="Contribution Files"
                     />
+                    &nbsp;(including all tables)
                   </td>
                 </tr>
                 <tr>
