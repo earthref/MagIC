@@ -1,5 +1,10 @@
+import os from 'os';
+import fs from 'fs';
+import path from 'path';
+import uuid from 'uuid';
 import { Meteor } from 'meteor/meteor';
 import { Promise } from 'meteor/promise';
+import Archiver from 'archiver';
 import AWS from 'aws-sdk';
 
 const s3 = new AWS.S3({
@@ -28,6 +33,12 @@ export default function () {
       this.unblock();
       //console.log("s3GetObjectUTF8", bucket, key);
       return s3GetObjectUTF8({bucket, key});
+    },
+
+    s3GetObjectsZip({objects, fileName}) {
+      this.unblock();
+      //console.log("s3GetObjectsZip", bucket, key);
+      return s3GetObjectsZip({objects, fileName});
     }
 
   });
@@ -124,6 +135,33 @@ async function s3GetObjectUTF8({bucket, key}) {
   });*/
 }
 export { s3GetObjectUTF8 };
+
+async function s3GetObjectsZip({objects, fileName}) {
+  return await new Promise((resolve, reject) => {
+    try {
+      const downloadsPath = path.join(os.tmpdir(), 'downloads');
+      if (!fs.existsSync(downloadsPath)) fs.mkdirSync(downloadsPath);
+      const zipPath = path.join(downloadsPath, uuid.v4());
+      fs.mkdirSync(zipPath);
+      const archive = Archiver('zip');
+      const output = fs.createWriteStream(`${zipPath}/${fileName}`);
+      archive.on('error', error => { throw new Error(`${error.name} ${error.code} ${error.message} ${error.path} ${error.stack}`); });
+      archive.pipe(output);
+      objects.forEach(object => {
+        const stream = s3.getObject({ Bucket: object.bucket, Key: object.key }).createReadStream();
+        console.log('zipping', object.key);
+        archive.append(stream, { name: object.key });
+      })
+      archive.finalize();
+      output.on('close', () => resolve(fs.readFileSync(`${zipPath}/${fileName}`)));
+      archive.on('error', (err) => reject(err));
+    } catch (e) {
+      console.error("s3GetObjectsZip", `Failed to retrieve and zip S3 objects`, e);
+      //throw new Meteor.Error("s3GetObjectsZip", `Failed to retrieve and zip S3 objects`);
+    }
+  });
+}
+export { s3GetObjectsZip };
 
 async function s3DeleteKeys({bucket, keys}) {
   return await new Promise(resolve => {

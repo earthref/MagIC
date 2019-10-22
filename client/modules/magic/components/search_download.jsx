@@ -4,6 +4,7 @@ import saveAs from 'save-as';
 import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx';
 import React from 'react';
+import Cookies from 'js-cookie';
 import {Form, Checkbox, Progress} from 'semantic-ui-react';
 
 import Count from '/client/modules/common/containers/search_count.jsx';
@@ -443,16 +444,19 @@ export default class extends React.Component {
               </div>
             }
             { this.state.downloadContributions && (this.state.downloadIDs.length > 0 && this.state.progress === 100) &&
-              <form style={{display:"inline-block"}} action="//earthref.org/cgi-bin/z-download.cgi" method="post" target="_blank">
-                {this.state.downloadIDs.map((id, i) =>
-                  <input key={i} type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${id}.txt`}/>
-                )}
-                <input type="hidden" name="file_name" value="magic_search_results.zip"/>
-                <input type="hidden" name="no_metadata" value="1"/>
-                <button type="submit" className="ui button purple">
-                  Download Files
-                </button>
-              </form>
+              <button type="submit" className="ui button purple" onClick={function (e) {
+                Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id'), function (error, source) {
+                  if (source) {
+                    let blob = new Blob([source], {type: "application/zip"});
+                    saveAs(blob, 'magic_search_results.zip');
+                  } else {
+                    console.error(error);
+                    alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                  }
+                }.bind(this));
+              }.bind(this)}>
+                Download Files
+              </button>
             }
             { !this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
               <div className="ui button purple" onClick={this.downloadLevelRows.bind(this)}>
