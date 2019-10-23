@@ -602,6 +602,7 @@ class SearchSummariesListItem extends React.Component {
               <tr>
                 <th style={{whiteSpace: 'nowrap'}}>Download</th>
                 <th style={{whiteSpace: 'nowrap'}}>MagIC Contribution Link</th>
+                <th style={{whiteSpace: 'nowrap'}}>EarthRef Data DOI Link</th>
                 <th style={{whiteSpace: 'nowrap'}}>Version</th>
                 <th style={{whiteSpace: 'nowrap'}}>Data Model</th>
                 <th style={{whiteSpace: 'nowrap'}}>Date</th>
@@ -611,6 +612,8 @@ class SearchSummariesListItem extends React.Component {
               </thead>
               <tbody>
               {item.summary.contribution && item.summary.contribution._history.map((v, i) => {
+                let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
+                let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
                 return (
                   <tr key={i}>
                     <td style={{whiteSpace: 'nowrap'}}>
@@ -638,11 +641,20 @@ class SearchSummariesListItem extends React.Component {
                       </button>}
                     </td>
                     <td>
-                      {(item.summary.contribution._is_activated === "true" || i > 0) &&
+                      {(_is_activated || i > 0) &&
                       <a style={this.styles.a}
                          href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a>}
-                      {(item.summary.contribution._is_activated !== "true" && i == 0) &&
+                      {(!_is_activated && i == 0) &&
                       <span>{'earthref.org/MagIC/' + v.id}</span>}
+                    </td>
+                    <td>
+                      {_is_activated && _has_data_doi &&
+                      <a style={this.styles.a}
+                         href={'http://dx.doi.org/10.7288/V4/MAGIC/' + v.id} target="_blank">{'10.7288/V4/MAGIC/' + v.id}</a>}
+                      {_is_activated && !_has_data_doi &&
+                      <span>Queued For Creation</span>}
+                      {!_is_activated &&
+                        <span>Created Upon Activation</span>}
                     </td>
                     <td>{v.version}</td>
                     <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
