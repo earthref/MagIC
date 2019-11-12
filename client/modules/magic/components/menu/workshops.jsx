@@ -11,7 +11,7 @@ export default class extends React.Component {
         </p>
         <p>
          <b>2020 MagIC Workshop</b><br/>
-           We plan to host another workshop in 2020. We like to have at least one day of talks on a related theme. If you have suggestions for the workshop, please feel free to <Link style={{color: 'purple'}} to={'contact'}>email us</Link> with suggestions.<br/>
+           We are hosting the 2020 MagIC workshop on March 16th-18th, 2020 in La Jolla, Callifornia at the Scripps Institution of Oceanography. We will have two days of science talks and one day of workshops for data uploading and MagIC database discussions. Please visit our <a href="https://earthref.org/events/MAGIC/2020/">workshop website</a> for more details and workshop updates.<br/>
         </p>
         <p>
          <b>2017 MagIC Workshop</b><br/>
