@@ -2,10 +2,10 @@ import {Meteor} from 'meteor/meteor';
 import {HTTP} from 'meteor/http';
 
 import _ from "lodash";
+import __ from 'deepdash/standalone';
 import fs from 'fs';
 import path from 'path';
 import moment from 'moment';
-
 
 export default function () {
 

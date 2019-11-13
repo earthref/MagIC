@@ -4,8 +4,10 @@ import {Meteor} from 'meteor/meteor';
 import {Promise} from 'meteor/promise';
 
 import _ from "lodash";
+import __ from "deepdash/standalone";
 import uuid from "uuid";
 import moment from "moment";
+import bcrypt from "bcrypt";
 import sizeof from "object-sizeof";
 import elasticsearch from "elasticsearch";
 
@@ -21,6 +23,7 @@ const esClient = new elasticsearch.Client({
   //log: "trace",
   host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || "",
   keepAlive: false,
+  apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 

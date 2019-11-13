@@ -5,3 +5,12 @@
 .top-navigation > a:first-child {
   padding-left: 0 !important;
 }
+
+@media only screen and (max-width: 767px) {
+  .top-navigation {
+    margin-left: 50px !important;
+  }
+  .top-navigation > a.item:not(.active) {
+    display: none !important;
+  }
+}
