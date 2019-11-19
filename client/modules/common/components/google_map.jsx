@@ -103,7 +103,10 @@ export default class GoogleMap extends React.Component {
       }, 500);
 
       if (GoogleMaps.maps[this.name])
-        _.delay(() => google.maps.event.trigger(GoogleMaps.maps[this.name].instance,'resize'), 500);
+        _.delay(() => {
+          if (GoogleMaps.maps[this.name]) 
+            google.maps.event.trigger(GoogleMaps.maps[this.name].instance,'resize');
+        }, 500);
 
     }
 
