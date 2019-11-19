@@ -34,7 +34,6 @@ export default class extends React.Component {
 
   componentDidUpdate(lastprops, lastState) {
     if (!_.isEqual(this.props.queries, lastprops.queries) || !_.isEqual(this.props.filters, lastprops.filters)) {
-      debugger;
       this.setState({progress: undefined, downloadIDs: []});
       this.downloadedRows = [];
       this.canceled = true;
