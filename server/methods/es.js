@@ -1392,12 +1392,13 @@ export default function () {
 
     async esCreateUserFromORCID({name, email, orcid}) {
       this.unblock();
-      if (email) email = email.toLowerCase();
       console.log("esCreateUserFromORCID", name, email, orcid);
+      if (email && email.address) email.address = email.address.toLowerCase();
       try {
-        let user = { name, email, orcid,
+        let handle;
+        if (email && email.address) handle = await Meteor.call('esNextAvailableHandleFromEmail', {email: email.address});
+        let user = { name, email, orcid, handle,
           id: await Meteor.call('esNextAvailableUserID'),
-          handle: await Meteor.call('esNextAvailableHandleFromEmail', {email}),
           has_password: false
         };
         await esClient.index({
@@ -1416,8 +1417,8 @@ export default function () {
 
     async esUpdateUserORCID({id, name, email, orcid}) {
       this.unblock();
-      if (email) email = email.toLowerCase();
       console.log("esUpdateUserORCID", id, name, email, orcid);
+      if (email && email.address) email.address = email.address.toLowerCase();
       try {
         await esClient.update({
           "index": "er_users_v1_sandbox",

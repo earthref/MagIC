@@ -21,9 +21,17 @@ export default function () {
       }
     },
 
-    async orcidLogIn(code) {
-      let token, orcid;
-      try {
+    async updateUserWithORCID({code, id}) {
+      let orcid, token, existingUser;
+      if (id) try {
+        let user = await Meteor.call('esGetUserByID', {id});
+        orcid = user && user.orcid && user.orcid.id;
+        token = user && user.orcid && user.orcid.token;
+        existingUser = user;
+      } catch (error) {
+        console.error('orcidConnect esGetUserByID', id, error);
+      }
+      if (code && (!orcid || !token)) try {
         let auth = HTTP.call("POST", `https://sandbox.orcid.org/oauth/token`, {
           headers: {
             Accept: 'application/json'
@@ -38,10 +46,11 @@ export default function () {
         token = auth.data.access_token;
         orcid = auth.data.orcid;
       } catch (error) {
-        console.error('orcidLogin Authorize', error);
+        console.error('orcidConnect Authorize', error);
         throw new Meteor.Error(
           'Failed to authenticate your ORCID account.',
-          'Please retry logging in with ORCID. If you are still having trouble, please email us.');
+          'Please retry logging in with ORCID. If you are still having trouble, please email us.'
+        );
       }
       try {
         let record = HTTP.call("GET", `https://api.sandbox.orcid.org/v3.0/${orcid}/record`, {
@@ -51,13 +60,15 @@ export default function () {
           }
         });
         let content = JSON.parse(record.content);
-        let emailsSortedByMostReliable = content.person.emails.email.sort((e1, e2) => { 
+        let emailsSortedByMostReliable = 
+            content.person.emails && 
+            content.person.emails.email &&
+            content.person.emails.email.sort((e1, e2) => { 
           if (e1.primary && !e2.primary) return -1;
           if (!e1.primary && e2.primary) return 1;
           if (e1.verified && !e2.verified) return -1;
           if (!e1.verified && e2.verified) return 1;
         }).map(x => { return { email: x.email, verified: x.verified, primary: x.primary }});
-        let existingUser;
         for (x of emailsSortedByMostReliable) {
           try {
             if (!existingUser) {
@@ -66,21 +77,39 @@ export default function () {
               existingUser = orcidUsers && orcidUsers.length && orcidUsers[0] || users[0];
             }
           } catch (e) {
-            console.error("orcidLogin esGetUsersByEmail", `Failed to get user for email ${x.email}`, e);
+            console.error("orcidConnect esGetUsersByEmail", `Failed to get user for email ${x.email}`, e);
           } 
         }
-        let email = emailsSortedByMostReliable[0].email;
         let user = {
-          orcid: { 
-            id: orcid, 
-            _token: token 
+          orcid: {
+            id: orcid,
+            token: token
           },
           name: {
-            first: content.person.name['given-names'].value, 
-            family: content.person.name['family-name'].value,
+            source: 'EarthRef'
           },
-          email
+          email: {
+            source: 'EarthRef'
+          }
         };
+        if (content.person.name) {
+          if (content.person.name['given-names'] && content.person.name['given-names'].value) {
+            user.name.given = content.person.name['given-names'].value;
+            user.name.source = 'ORCID';
+          }
+          if (content.person.name['family-name'] && content.person.name['family-name'].value) {
+            user.name.family = content.person.name['family-name'].value;
+            user.name.source = 'ORCID';
+          }
+          if (content.person.name['credit-name'] && content.person.name['credit-name'].value) {
+            user.name.published = content.person.name['credit-name'].value;
+            user.name.source = 'ORCID';
+          }
+        }
+        if (emailsSortedByMostReliable && emailsSortedByMostReliable[0] && emailsSortedByMostReliable[0].email) {
+          user.email.address = emailsSortedByMostReliable[0].email;
+          user.email.source = 'ORCID';
+        }
         if (existingUser) {
           user = _.merge(existingUser, user);
           await Meteor.call('esUpdateUserORCID', user);
@@ -92,14 +121,14 @@ export default function () {
         console.error('orcidLogin Record Request', error);
         throw new Meteor.Error(
           'Failed to retrieve your ORCID record.', 
-          'EarthRef requires your name and email to be set with TRUSTED or EVERYONE visibility in your ORCID account.'
+          'Please retry logging in with ORCID. If you are still having trouble, please email us.'
         );
       }
     },
 
     async getReferenceMetadata(doi, attempt = 0) {
       this.unblock();
-      //console.log("getReferenceMetadata", attempt, `http://api.crossref.org/works/${doi}`);
+      // console.log("getReferenceMetadata", attempt, `http://api.crossref.org/works/${doi}`);
       let resp = HTTP.call("GET", `http://api.crossref.org/works/${doi}`);
       if (!resp.statusCode || !resp.data || !resp.data.message) {
         if (attempt < 3) {

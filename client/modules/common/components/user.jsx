@@ -1,3 +1,4 @@
+import {Meteor} from 'meteor/meteor';
 import _ from 'lodash';
 import React, { useState } from 'react';
 import { Button, Icon, Form, Table, Modal, Segment, Message, Dimmer, Loader, Divider } from 'semantic-ui-react';
@@ -6,7 +7,7 @@ import owasp from 'owasp-password-strength-test';
 
 import { portals } from '/lib/configs/portals';
 
-const orcidRedirectURL = 'http://localhost:3000/orcid'; //'https://beta.earthref.org/orcid';
+const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://beta.earthref.org/orcid';
 const orcidAuthorizeURL = `https://sandbox.orcid.org/oauth/authorize?client_id=APP-F8JQS3NCYGINEF7B&response_type=code&scope=/read-limited%20/activities/update&redirect_uri=${orcidRedirectURL}`;
 
 owasp.config({
@@ -28,7 +29,7 @@ export function User({ openInitially, className, portal }) {
 	const [firstNames, setFirstNames] = useState({ value: undefined, error: undefined, isUpdating: false });
 	const [familyName, setFamilyName] = useState({ value: undefined, error: undefined, isUpdating: false });
 
-	const id = parseInt(Cookies.get('user_id'));
+	const id = parseInt(Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
 	if (!error && (!user || user.id !== id)) {
 		Meteor.call('esGetUserByID', {id}, (error, user) => {
 			if (error) {
@@ -46,7 +47,7 @@ export function User({ openInitially, className, portal }) {
 			trigger={
 				<Button className={className} onClick={() => setOpen(true)}>
 					<Icon color={portals[portal].color} name='user'/>
-					{ Cookies.get('name') }
+					{ Cookies.get('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }
 				</Button>
 			}
 		>
@@ -163,7 +164,7 @@ export function User({ openInitially, className, portal }) {
 							</>
 						}
 						<Form>
-							{ (!user.orcid || !user.orcid.id) && 
+            { (!user.orcid || !user.orcid.id || !user.name) && 
 								<>
 									<Form.Input
 										icon='user'
@@ -189,7 +190,7 @@ export function User({ openInitially, className, portal }) {
 															setFirstNames(x => { return {...x, error: error.reason, isUpdating: false }; });
 														} else {
 															setFirstNames({ value: undefined, error: undefined, isUpdating: false });
-															Cookies.set('name', `${updatedUser.name.first} ${updatedUser.name.family}`);
+															Cookies.set('name', `${updatedUser.name.first} ${updatedUser.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 															setUser(updatedUser);
 														}
 													});
@@ -221,7 +222,7 @@ export function User({ openInitially, className, portal }) {
 															setFamilyName(x => { return {...x, error: error.reason, isUpdating: false }; });
 														} else {
 															setFamilyName({ value: undefined, error: undefined, isUpdating: false });
-															Cookies.set('name', `${updatedUser.name.first} ${updatedUser.name.family}`);
+															Cookies.set('name', `${updatedUser.name.first} ${updatedUser.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 															setUser(updatedUser);
 														}
 													});
@@ -229,20 +230,22 @@ export function User({ openInitially, className, portal }) {
 											}
 										}}
 									/>
-									<Form.Input
-										icon='mail'
-										iconPosition='left'
-										label='Email'
-										placeholder='Email'
-										error={email.error}
-										value={user.email || ''}
-										onChange={(e, { value }) => setEmail(x => { 
-											return { ...x, 
-												error: 'Please connect your account to ORCID with the button above to control your EarthRef email.' 
-											};
-										}) }
-									/>
 								</>
+							}
+              { (!user.orcid || !user.orcid.id || !user.email) && 
+                <Form.Input
+                  icon='mail'
+                  iconPosition='left'
+                  label='Email'
+                  placeholder='Email'
+                  error={email.error}
+                  value={user.email || ''}
+                  onChange={(e, { value }) => setEmail(x => { 
+                    return { ...x, 
+                      error: 'Please connect your account to ORCID with the button above to control your EarthRef email.' 
+                    };
+                  }) }
+                />
 							}
 							<Form.Input
 								icon='at'
@@ -272,7 +275,7 @@ export function User({ openInitially, className, portal }) {
 															setHandle(x => { return {...x, error: error.reason, isUpdating: false }; });
 														} else {
 															setHandle({ value: undefined, error: undefined, isUpdating: false });
-															Cookies.set('mail_id', `${updatedUser.handle}`);
+															Cookies.set('mail_id', `${updatedUser.handle}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 															setUser(updatedUser);
 														}
 													});

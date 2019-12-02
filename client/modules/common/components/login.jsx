@@ -1,3 +1,4 @@
+import {Meteor} from 'meteor/meteor';
 import React, { useState } from 'react';
 import { Button, Icon, Header, Form, Grid, Modal, Segment, Message, Dimmer, Loader } from 'semantic-ui-react';
 import { useLocation, useHistory } from "react-router-dom";
@@ -5,7 +6,7 @@ import Cookies from 'js-cookie';
 
 import {portals} from '/lib/configs/portals';
 
-const orcidRedirectURL = 'http://localhost:3000/orcid'; //'https://beta.earthref.org/orcid';
+const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://beta.earthref.org/orcid';
 const orcidAuthorizeURL = `https://sandbox.orcid.org/oauth/authorize?client_id=APP-F8JQS3NCYGINEF7B&response_type=code&scope=/read-limited%20/activities/update&redirect_uri=${orcidRedirectURL}`;
 
 export function LogIn({ openInitially, className, portal }) {
@@ -45,10 +46,8 @@ export function LogIn({ openInitially, className, portal }) {
 								Log In or Register with ORCID
 							</Button>
 							<Message>
-								If the <b>ORCID</b> visibility for your email is set 
-								to <a href='https://orcid.org/privacy-policy' target='_blank'>TRUSTED or EVERYONE visibility</a> and 
-								it matches your <b>EarthRef</b> account, then the accounts will be linked.
-								Otherwise, a new <b>EarthRef</b> account will be created.
+								If an email in your <b>ORCID</b> profile matches your <b>EarthRef</b> account, then
+								the accounts will be linked. Otherwise, a new <b>EarthRef</b> account will be created.
 							</Message>
 						</Grid.Column>
 						<Grid.Column>
@@ -93,9 +92,9 @@ export function LogIn({ openInitially, className, portal }) {
 											else if (error && error.error === "Password") { setPasswordError(error.reason); setLogginIn(false); }
 											else if (error) { setLogInError(error.reason); setLogginIn(false); }
 											else {
-												Cookies.set('mail_id', user.handle);
-												Cookies.set('user_id', user.id);
-												Cookies.set('name', `${user.name.first} ${user.name.family}`);
+												Cookies.set('mail_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+												Cookies.set('user_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+												Cookies.set('name', `${user.name.first} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												history.replace(location);
 											}
 										});
@@ -128,15 +127,15 @@ export function ORCIDLoggingInModal({ code }) {
   const [error, setError] = useState();
 
 	if (code && !error && !record) {
-		Meteor.call('orcidLogIn', code, (error, record) => {
+		Meteor.call('updateUserWithORCID', { code, id: Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }, (error, record) => {
 			if (error) {
 				console.error(error);
 				setError(error);
 			} else {
 				// console.log(record);
-				Cookies.set('mail_id', record.handle);
-				Cookies.set('user_id', record.id);
-				Cookies.set('name', `${record.name.first} ${record.name.family}`);
+				Cookies.set('mail_id', record.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				Cookies.set('user_id', record.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				Cookies.set('name', `${record.name.first} ${record.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				history.push(localStorage.getItem('orcid.nextLocation'));
 			}
 		});
