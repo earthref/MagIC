@@ -94,7 +94,10 @@ export function LogIn({ openInitially, className, portal }) {
 											else {
 												Cookies.set('mail_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												Cookies.set('user_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-												Cookies.set('name', `${user.name.first} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+												if (user.name)
+													Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+												else
+													Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												history.replace(location);
 											}
 										});
@@ -123,19 +126,23 @@ export function LogIn({ openInitially, className, portal }) {
 
 export function ORCIDLoggingInModal({ code }) {
 	const history = useHistory();
-  const [record, setRecord] = useState();
+  const [user, setUser] = useState();
   const [error, setError] = useState();
 
-	if (code && !error && !record) {
-		Meteor.call('updateUserWithORCID', { code, id: Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }, (error, record) => {
+	if (code && !error && !user) {
+		Meteor.call('updateUserWithORCID', { code, id: Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }, (error, user) => {
 			if (error) {
 				console.error(error);
 				setError(error);
 			} else {
-				// console.log(record);
-				Cookies.set('mail_id', record.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-				Cookies.set('user_id', record.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-				Cookies.set('name', `${record.name.first} ${record.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				// console.log(user);
+				Cookies.set('mail_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				Cookies.set('user_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				if (user.name)
+					Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				else
+					Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				setUser(user);
 				history.push(localStorage.getItem('orcid.nextLocation'));
 			}
 		});
@@ -154,14 +161,14 @@ export function ORCIDLoggingInModal({ code }) {
 						</Message.Content>
 					</Message>
 				}
-				{ !error && !record &&
+				{ !error && !user &&
 					<Segment basic padded='very'>
 						<Dimmer active inverted>
 							<Loader inline='centered' size='large' />
 						</Dimmer>
 					</Segment>
 				}
-				{ !error && record && 
+				{ !error && user && 
 					<div>{ localStorage.getItem('orcid.nextLocation') }</div>
 				}
 			</Modal.Content>

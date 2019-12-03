@@ -1442,7 +1442,7 @@ export default function () {
           "type": "_doc",
           "id": id,
           "refresh": true,
-          "body": { doc: { orcid: { id: '', _token: '' }}}
+          "body": { doc: { orcid: { id: '', token: '' }}}
         });
       } catch(error) {
         console.error("esDisconnectUserORCID", id, error.message);
@@ -1450,13 +1450,17 @@ export default function () {
       }  
     },
 
-    async esUpdateUser({ id, name, handle, password}) {
+    async esUpdateUser({ id, name, email, handle, password}) {
       this.unblock();
-      let passHash = password && bcrypt.hashSync(password, saltRounds);
+      if (email && email.address) email.address = email.address.toLowerCase();
       if (handle) handle = handle.toLowerCase();
+      let passHash = password && bcrypt.hashSync(password, saltRounds);
       console.log("esUpdateUser", id, name, handle, passHash);
-      let doc = _.pickBy({ name, handle, password: passHash }, _.identity);
-      if (password) doc.has_password = true;
+      let doc = { name, handle, email };
+      if (passHash) {
+        doc._password = passHash;
+        doc.has_password = true;
+      }
       try {
         await esClient.update({
           "index": "er_users_v1_sandbox",
@@ -1470,95 +1474,7 @@ export default function () {
         console.error("esUpdateUser", id, name, handle, passHash, error.message);
         throw new Meteor.Error("esUpdateUser", "Failed to update user data.");
       }  
-    },
-
-    /*async esConnectORCID({emails, firstNames, familyName, orcid, token}) {
-      console.log("esConnectORCID", email, firstNames, familyName, orcid, token);
-      this.unblock();
-
-      let resp;
-      try {
-        resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
-          "type": "user",
-          "body": {
-            "query": {
-              "term": {
-                "email.address.raw": email.toLowerCase()
-              }
-            }
-          }
-        });
-        if (resp.hits.total === 0) {
-          resp = await esClient.search({
-            "index": "er_users_v1_sandbox",
-            "type": "user",
-            "body": {
-              "query": {
-                "term": {
-                  "orcid.id.raw": orcid.toLowerCase()
-                }
-              }
-            }
-          });
-          if (resp.hits.total === 0) {
-            resp = await esClient.search({
-              "index": "er_users_v1_sandbox",
-              "type": "user",
-              "_source": false,
-              "size": 1,
-              "body": {
-                "query": {
-                  "match_all": {}
-                },
-                "sort": { "_id": "desc" }
-              }
-            });
-            let nextUserId = resp.hits.hits[0]._id + 1;
-            await esClient.index({
-              "index": "er_users_v1_sandbox",
-              "type": "user",
-              "id": nextUserId,
-              "body": {
-                "name": {
-                  "user": 
-                  "first": first,
-                  "family": family,
-                },
-                "email": {
-
-                },
-                "orcid": {
-                  "id": orcid,
-                  "token": token
-                }
-              },
-              "refresh": true
-            });
-          }
-        }
-        resp.hits.hits.forEach(hit => {
-          if (password && hit._source.password &&
-            bcrypt.compareSync(password, hit._source.password)
-          ) {
-            return {
-              id: hit._id,
-              name: hit._source.name,
-              email: hit._source.email,
-              orcid: hit._source.orcid,
-              password_exists: true
-            }
-          }
-        })
-        throw new Meteor.Error("Password", "Incorrect password.");
-      } catch(error) {
-        console.error("esPasswordLogIn", email, error.message);
-        if (error.error === "Email" || error.error === "Password")
-          throw new Meteor.Error(error.error, error.reason);
-        else
-          throw new Meteor.Error("LogIn", "Logging in failed. Please try again.");
-      }
-    }*/
+    }
 
   });
 

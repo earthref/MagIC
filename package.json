@@ -23,6 +23,7 @@
     "canvas": "^2.6.0",
     "deepdash": "^4.2.17",
     "elasticsearch": "^16.5.0",
+    "email-validator": "^2.0.4",
     "fibers": "^4.0.2",
     "filesize": "^6.0.0",
     "get-ranges": "^5.0.0",

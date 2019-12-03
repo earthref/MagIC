@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Button, Icon, Form, Table, Modal, Segment, Message, Dimmer, Loader, Divider } from 'semantic-ui-react';
 import Cookies from 'js-cookie';
 import owasp from 'owasp-password-strength-test';
+import * as EmailValidator from 'email-validator';
 
 import { portals } from '/lib/configs/portals';
 
@@ -26,7 +27,7 @@ export function User({ openInitially, className, portal }) {
 	const [email, setEmail] = useState({ value: undefined, error: undefined, isUpdating: false });
 	const [password, setPassword] = useState({ value: undefined, error: undefined, isUpdating: false });
 	const [handle, setHandle] = useState({ value: undefined, error: undefined, isUpdating: false });
-	const [firstNames, setFirstNames] = useState({ value: undefined, error: undefined, isUpdating: false });
+	const [givenNames, setGivenNames] = useState({ value: undefined, error: undefined, isUpdating: false });
 	const [familyName, setFamilyName] = useState({ value: undefined, error: undefined, isUpdating: false });
 
 	const id = parseInt(Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
@@ -89,18 +90,24 @@ export function User({ openInitially, className, portal }) {
 											</a>
 										</Table.Cell>
 									</Table.Row>
-									<Table.Row>
-										<Table.Cell><Icon name='user'/>First Names *</Table.Cell>
-										<Table.Cell>{ user.name && user.name.first || '' }</Table.Cell>
-									</Table.Row>
-									<Table.Row>
-										<Table.Cell><Icon name='users'/>Last Name *</Table.Cell>
-										<Table.Cell>{ user.name && user.name.family || '' }</Table.Cell>
-									</Table.Row>
-									<Table.Row>
-										<Table.Cell><Icon name='mail'/>Email *</Table.Cell>
-										<Table.Cell>{ user.email || '' }</Table.Cell>
-									</Table.Row>
+                  { user.name && user.name.source === 'ORCID'  && user.name.given && 
+                    <Table.Row>
+                      <Table.Cell><Icon name='user'/>Given Names *</Table.Cell>
+                      <Table.Cell>{ user.name.given || '' }</Table.Cell>
+                    </Table.Row>
+                  }
+                  { user.name && user.name.source === 'ORCID' && user.name.family && 
+                    <Table.Row>
+                      <Table.Cell><Icon name='users'/>Last Name *</Table.Cell>
+                      <Table.Cell>{ user.name.family || '' }</Table.Cell>
+                    </Table.Row>
+                  }
+                  { user.email && user.email.source === 'ORCID'  && user.email.address && 
+                    <Table.Row>
+                      <Table.Cell><Icon name='mail'/>Email *</Table.Cell>
+                      <Table.Cell>{ user.email.address || '' }</Table.Cell>
+                    </Table.Row>
+                  }
 								</Table.Body>
 								<Table.Footer fullWidth>
 								<Table.Row>
@@ -110,18 +117,32 @@ export function User({ openInitially, className, portal }) {
 								</Table.Row>
 								<Table.Row>
 									<Table.HeaderCell colSpan='2'>
-										<Button	floated='right'
-											disabled={ password.error || orcid.error || orcid.isUpdating }
+										<Form.Button	floated='right'
+                      disabled={ (email.error || password.error || orcid.error || orcid.isUpdating) && true || false }
+                      error={orcid.error}
 											onClick={() => {
-												if (!user || !user.password) {
+                        let canDisconnect = true;
+												if (!user || !user.email || !user.email.address) {
+                          canDisconnect = false;
+													setEmail(x => { 
+														return {
+															...x, 
+															error: 'An email is required before disconnecting your account from ORCID.', 
+															isUpdating: false 
+														};
+                          });
+                        }
+                        if (!user || !user.has_password) {
+                          canDisconnect = false;
 													setPassword(x => { 
 														return {
 															...x, 
-															error: 'An EarthRef password is required before disconnecting your account from ORCID.', 
+															error: 'A password is required before disconnecting your account from ORCID.', 
 															isUpdating: false 
 														};
 													});
-												} else {
+                        }
+                        if (canDisconnect) {
 													setORCID({ error: undefined, isUpdating: true });
 													Meteor.call('esDisconnectUserORCID', { id: user.id }, (error) => {
 														if (error) {
@@ -146,7 +167,7 @@ export function User({ openInitially, className, portal }) {
 												/>
 											}
 											Disconnect Your EarthRef Account From ORCID
-										</Button>
+										</Form.Button>
 									</Table.HeaderCell>
 								</Table.Row>
 							</Table.Footer>
@@ -164,33 +185,36 @@ export function User({ openInitially, className, portal }) {
 							</>
 						}
 						<Form>
-            { (!user.orcid || !user.orcid.id || !user.name) && 
+            { (!user.orcid || !user.orcid.id || !user.name || user.name.source === 'EarthRef') && 
 								<>
 									<Form.Input
 										icon='user'
 										iconPosition='left'
-										label='First Names'
+										label='Given Names'
 										placeholder='John A.'
-										error={firstNames.error}
-										value={firstNames.value !== undefined ? firstNames.value :  (user.name && user.name.first) || ''}
-										onChange={(e, { value }) => setFirstNames(x => { return { ...x, value }; }) }
-										action={firstNames.value !== undefined && {
+										error={givenNames.error}
+										value={givenNames.value !== undefined ? givenNames.value : user.name.given || ''}
+										onChange={(e, { value }) => setGivenNames(x => { return { ...x, value }; }) }
+										action={givenNames.value !== undefined && {
 											content: 'Save',
-											icon: firstNames.isUpdating && <Icon loading name='spinner' /> || 'save',
+											icon: givenNames.isUpdating && <Icon loading name='spinner' /> || 'save',
 											color: portals[portal].color,
-											disabled: firstNames.isUpdating,
+											disabled: givenNames.isUpdating,
 											onClick: () => {
-												if (firstNames.value === '') {
-													setFirstNames(x => { return {...x, error: 'First Names cannot be blank.', isUpdating: false }; });
+												if (givenNames.value === '') {
+													setGivenNames(x => { return {...x, error: 'Given Names cannot be blank.', isUpdating: false }; });
 												} else {
-													setFirstNames(x => { return {...x, error: undefined, isUpdating: true }; });
-													Meteor.call('esUpdateUser', { id: user.id, name: { first: firstNames.value }}, (error, updatedUser) => {
+													setGivenNames(x => { return {...x, error: undefined, isUpdating: true }; });
+													Meteor.call('esUpdateUser', { id: user.id, name: { given: givenNames.value }}, (error, updatedUser) => {
 														if (error) {
 															console.error(error);
-															setFirstNames(x => { return {...x, error: error.reason, isUpdating: false }; });
+															setGivenNames(x => { return {...x, error: error.reason, isUpdating: false }; });
 														} else {
-															setFirstNames({ value: undefined, error: undefined, isUpdating: false });
-															Cookies.set('name', `${updatedUser.name.first} ${updatedUser.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+															setGivenNames({ value: undefined, error: undefined, isUpdating: false });
+                              if (user.name)
+                                Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+                              else
+                                Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 															setUser(updatedUser);
 														}
 													});
@@ -204,7 +228,7 @@ export function User({ openInitially, className, portal }) {
 										label='Family Name'
 										placeholder='Doe'
 										error={familyName.error}
-										value={familyName.value !== undefined ? familyName.value :  (user.name && user.name.family) || ''}
+										value={familyName.value !== undefined ? familyName.value : user.name.family || ''}
 										onChange={(e, { value }) => setFamilyName(x => { return { ...x, value }; }) }
 										action={familyName.value !== undefined && {
 											content: 'Save',
@@ -212,7 +236,7 @@ export function User({ openInitially, className, portal }) {
 											color: portals[portal].color,
 											disabled: familyName.isUpdating,
 											onClick: () => {
-												if (firstNames.value === '') {
+												if (givenNames.value === '') {
 													setFamilyName(x => { return {...x, error: 'Family Name cannot be blank.', isUpdating: false }; });
 												} else {
 													setFamilyName(x => { return {...x, error: undefined, isUpdating: true }; });
@@ -222,8 +246,11 @@ export function User({ openInitially, className, portal }) {
 															setFamilyName(x => { return {...x, error: error.reason, isUpdating: false }; });
 														} else {
 															setFamilyName({ value: undefined, error: undefined, isUpdating: false });
-															Cookies.set('name', `${updatedUser.name.first} ${updatedUser.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-															setUser(updatedUser);
+                              if (user.name)
+                                Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+                              else
+                                Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+                              setUser(updatedUser);
 														}
 													});
 												}
@@ -232,25 +259,47 @@ export function User({ openInitially, className, portal }) {
 									/>
 								</>
 							}
-              { (!user.orcid || !user.orcid.id || !user.email) && 
+              { (!user.orcid || !user.orcid.id || !user.email || !user.email.address || user.email.source === 'EarthRef') && 
                 <Form.Input
                   icon='mail'
                   iconPosition='left'
                   label='Email'
-                  placeholder='Email'
+                  placeholder='Email for EarthRef Communications'
                   error={email.error}
-                  value={user.email || ''}
-                  onChange={(e, { value }) => setEmail(x => { 
-                    return { ...x, 
-                      error: 'Please connect your account to ORCID with the button above to control your EarthRef email.' 
-                    };
-                  }) }
+                  value={email.value !== undefined ? email.value : user.email.address || ''}
+                  onChange={(e, { value }) => setEmail(x => { return { ...x, value }; }) }
+                  action={email.value !== undefined && {
+                    content: 'Save',
+                    icon: email.isUpdating && <Icon loading name='spinner' /> || 'save',
+                    color: portals[portal].color,
+                    disabled: email.isUpdating,
+                    onClick: () => {
+                      if (email.value === '') {
+                        setEmail(x => { return {...x, error: 'The email cannot be blank.', isUpdating: false }; });
+                      } if (!EmailValidator.validate(email.value)) {
+                        setEmail(x => { return {...x, error: 'The email is invalid.', isUpdating: false }; });
+                      } else {
+                        setEmail(x => { return {...x, error: undefined, isUpdating: true }; });
+                        Meteor.call('esUpdateUser', { id: user.id, email: { address: email.value, source: 'EarthRef' }}, (error, updatedUser) => {
+                          if (error) {
+                            console.error(error);
+                            setEmail(x => { return {...x, error: error.reason, isUpdating: false }; });
+                          } else {
+                            setEmail({ value: undefined, error: undefined, isUpdating: false });
+                            console.log('updatedUser', updatedUser);
+                            setUser(updatedUser);
+                          }
+                        });
+                      }
+                    }
+                  }}
                 />
 							}
 							<Form.Input
 								icon='at'
 								iconPosition='left'
 								label='Handle'
+                placeholder='User name for display'
 								error={handle.error}
 								value={handle.value !== undefined ? handle.value :  user.handle || ''}
 								onChange={(e, { value }) => setHandle(x => { return { ...x, value }; }) }
