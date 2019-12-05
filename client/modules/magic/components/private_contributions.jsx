@@ -50,22 +50,23 @@ export default class extends React.Component {
     $(this.refs["validate error"]).hide();
     $(this.refs["validate"]).modal().modal("show");
     Meteor.call("esValidatePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id")},
-    (error, validation) => {
-      if (error) {
-        $(this.refs["validate error"]).html(error.message);
-        $(this.refs["validate loading"]).hide();
-        $(this.refs["validate results"]).hide();
-        $(this.refs["validate error"]).show();
-      } else {
-        this.setState({validation}, () => {
+      (error, validation) => {
+        if (error) {
+          $(this.refs["validate error"]).html(error.message);
           $(this.refs["validate loading"]).hide();
-          $(this.refs["validate results"]).show();
-          $(this.refs["validate error"]).hide();
-        });
+          $(this.refs["validate results"]).hide();
+          $(this.refs["validate error"]).show();
+        } else {
+          this.setState({validation}, () => {
+            $(this.refs["validate loading"]).hide();
+            $(this.refs["validate error"]).hide();
+            if (!activate) $(this.refs["validate results"]).show();
+          });
+          if (activate) this.confirmActivate(id);
+        }
+        this.updateContributions();
       }
-      this.updateContributions();
-    }
-  );
+    );
   }
 
   validateThenActivate(id) {
@@ -354,7 +355,7 @@ export default class extends React.Component {
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
                         <div className={"ui red small button"} style={{margin: "0 0 0 0.5em"}}
                             onClick={(e) => {
-                              this.validate(c.summary.contribution.id);
+                              this.validateThenActivate(c.summary.contribution.id);
                             }}
                         >
                           Validate
