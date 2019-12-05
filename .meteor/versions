@@ -43,6 +43,7 @@ lmieulet:meteor-coverage@3.2.0
 localstorage@1.2.0
 logging@1.1.20
 mdg:meteor-apm-agent@3.2.3
+mdg:seo@3.2.1_1
 meteor@1.9.3
 meteor-base@1.4.0
 meteorhacks:picker@1.0.3
