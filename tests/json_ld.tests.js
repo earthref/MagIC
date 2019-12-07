@@ -1,3 +1,4 @@
+import _ from "lodash";
 import fs from "fs";
 import elasticsearch from "elasticsearch";
 import uuid from "uuid";
@@ -37,13 +38,13 @@ let index = "magic_v4";
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&apos;');
-            return`<url>` +
+            return _.trim(hit._source.summary.contribution._reference.doi) !== '' && `<url>` +
               `<loc>https://earthref.org/MagIC/doi/${doi}</loc>` + 
               `<lastmod>${hit._source.summary.contribution.timestamp}</lastmod>` +
-            `</url>`;
-          });
+            `</url>` || undefined;
+          }).filter(Boolean);
         }
-        fs.writeFileSync(`C:/Users/Rupert/Git/EarthRef/MagIC/public/MagIC/contributions.sitemap.xml`, 
+        fs.writeFileSync(`C:/Users/rminn/source/repos/MagIC/public/MagIC/contributions.sitemap.xml`, 
           `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
           xml.join('\n') + 
           `\n</urlset>`

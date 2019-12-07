@@ -48,8 +48,8 @@ let index = "magic_v4";
               { "term": { "summary.contribution._is_activated": "true"}},
               //{ "term": { "summary.contribution._is_latest": "true"}}
             ],
-            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
-            "filter": { "term": { "summary.contribution.id": 16515}}
+            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
+            //"filter": { "term": { "summary.contribution.id": 16515}}
           }}
         }
       }).then((resp) => {
@@ -169,7 +169,7 @@ let index = "magic_v4";
                   ${geos || ''}
                   ${subjects || ''}
                   <rightsList>
-                    <rights rightsURI="http://creativecommons.org/publicdomain/zero/1.0/"/>
+                    <rights rightsURI="https://creativecommons.org/licenses/by/4.0/"/>
                   </rightsList>
                 </resource>`;
               // console.log(datacite);

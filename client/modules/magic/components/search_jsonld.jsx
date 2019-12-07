@@ -94,6 +94,7 @@ export default class extends React.Component {
 
       return (
         <Helmet>
+          <link rel="canonical" href={"https://earthref.org/MagIC/doi/" + contribution._reference.doi} />
           <script id="schemaorg" type="application/ld+json">{JSON.stringify(json, null, '  ')}</script>
         </Helmet>
       );
