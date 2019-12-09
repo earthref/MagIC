@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import {Helmet} from 'react-helmet';
+import {versions, models} from '/lib/configs/magic/data_models';
 
 export default class extends React.Component {
 
@@ -13,31 +14,41 @@ export default class extends React.Component {
   render() {
 
     if (this.props.item && this.props.item.summary && 
-      this.props.item.summary.contribution && 
-      this.props.item.summary.contribution._reference && 
-      this.props.item.summary.contribution._reference.doi
+      this.props.item.summary.contribution
     ) {
 
       let contribution = this.props.item.summary.contribution;
       let all = this.props.item.summary._all || {};
 
-      console.log("JSONLD", contribution, all);
+      const model = models[_.last(versions)];
+      const now = new Date();
+
       let json = {
         "@context": {
           "@vocab": "http://schema.org"
         },
         "@type": "Dataset",
-        "url": "https://earthref.org/MagIC/doi/" + contribution._reference.doi,
-        "citation": "https://dx.doi.org/" + contribution._reference.doi,
-        "license": "CC-BY-4.0"
+        "url": "https://earthref.org/MagIC/" + (this.props.id || contribution.id),
+        "identifier": "http://dx.doi.org/10.7288/V4/MAGIC/" + (this.props.id || contribution.id),
+        "license": "https://creativecommons.org/licenses/by/4.0/",
+        "sdPublisher": "EarthRef.org",
+        "sdLicense": "https://creativecommons.org/licenses/by/4.0/",
+        "sdDatePublished": now.toISOString()
       };
-  
-      if (contribution.version) json.version = contribution.version;
+
+      if (this.props.id && contribution._history) {
+        let history = contribution._history.filter(x => parseInt(x.id, 10) === parseInt(this.props.id, 10));
+        if (history[0] && history[0].version) json.version = history[0].version;
+      }
+      if (!json.version && contribution.version) json.version = contribution.version;
+
       if (contribution._contributor) json.contributor = contribution._contributor;
       if (contribution.timestamp) json.dateModified = contribution.timestamp;
   
-      if (contribution._reference.title) json.name = contribution._reference.title;
-      if (contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + contribution._reference.title;
+      if (contribution._reference.doi) json.citation = "https://dx.doi.org/" + contribution._reference.doi;
+      if (contribution._reference.doi) json.sameAs = ["https://earthref.org/MagIC/" + contribution._reference.doi];
+      if (contribution._reference.html || contribution._reference.title) json.name = (contribution._reference.html || contribution._reference.title) + ' (Dataset)';
+      if (contribution._reference.html || contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + (contribution._reference.html || contribution._reference.title);
       if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
       if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
       if (contribution._reference.year) json.datePublished = contribution._reference.year;
@@ -91,10 +102,49 @@ export default class extends React.Component {
           console.error("JSONLD", error);
         }
       }
+      
+      if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
+        let startYBP = Math.round(all._age_range_ybp.range.gte);
+        let endYBP = Math.round(all._age_range_ybp.range.lte);
+        json.temporalCoverage = { 
+          "@type": "DateTime", 
+          "startDate": -startYBP + 1949 + (startYBP < 1950 ? 1 : 0), 
+          "endDate": -endYBP + 1949 + (endYBP < 1950 ? 1 : 0)
+        };
+      }
+
+      const modelAllColumns = {};
+      _.keys(model.tables).forEach(table => {
+        _.keys(model.tables[table].columns).forEach(column => {
+          if (all[column]) modelAllColumns[column] = model.tables[table].columns[column];
+        });
+      });
+
+      _.keys(all).forEach(key => {
+        if (
+          key[0] !== '_' && 
+          key.substr(0, 4) !== 'age_' && 
+          key.substr(0, 4) !== 'lat_' && 
+          key.substr(0, 4) !== 'lon_' && 
+          all[key].range
+        ) {
+          //console.log(key, all[key], modelAllColumns[key]);
+          json.variableMeasured = json.variableMeasured || [];
+          json.variableMeasured.push({
+            "@type": "PropertyValue", 
+            "name": modelAllColumns[key].label,
+            "description": modelAllColumns[key].description,
+            "minValue": all[key].range.gte,
+            "maxValue": all[key].range.lte
+          });
+        }
+      });
+
+      //console.log("JSONLD", contribution, all, json, modelAllColumns);
 
       return (
         <Helmet>
-          <link rel="canonical" href={"https://earthref.org/MagIC/doi/" + contribution._reference.doi} />
+          <link rel="canonical" href={"https://earthref.org/MagIC/" + (this.props.id || contribution.id)} />
           <script id="schemaorg" type="application/ld+json">{JSON.stringify(json, null, '  ')}</script>
         </Helmet>
       );
