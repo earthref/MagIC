@@ -29,6 +29,8 @@ const esClient = new elasticsearch.Client({
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
+const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1_sandbox' : 'er_users_v1';
+
 export default function () {
 
   Meteor.methods({
@@ -1245,9 +1247,9 @@ export default function () {
       let resp;
       try {
         resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "body": {
-            "query": { "term": { "email.raw": email.toLowerCase() }}
+            "query": { "term": { "email.address.raw": email.toLowerCase() }}
           }
         });
         if (resp.hits.total === 0) {
@@ -1255,8 +1257,8 @@ export default function () {
         }
         let user;
         resp.hits.hits.forEach(hit => {
-          if (!user && password && hit._source.password &&
-            bcrypt.compareSync(password, hit._source.password)
+          if (!user && password && hit._source._password &&
+            bcrypt.compareSync(password, hit._source._password)
           ) {
             user = hit._source;
             user = __.omitDeep(user, /(^|\.)_/);
@@ -1279,7 +1281,7 @@ export default function () {
       this.unblock();
       try {
         let resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "size": 1,
           "body": {
             "query": { "term": { "id": id }}
@@ -1299,9 +1301,9 @@ export default function () {
       this.unblock();
       try {
         let resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "body": {
-            "query": { "term": { "email.raw": email.toLowerCase() }},
+            "query": { "term": { "email.address.raw": email.toLowerCase() }},
             "sort": { "_id": "desc" }
           }
         });
@@ -1317,7 +1319,7 @@ export default function () {
       this.unblock();
       try {
         let resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "body": {
             "query": { "term": { "handle.raw": handle.toLowerCase() }},
             "sort": { "_id": "desc" }
@@ -1339,7 +1341,7 @@ export default function () {
       let resp;
       try {
         resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "_source": false,
           "size": 1,
           "body": {
@@ -1351,7 +1353,7 @@ export default function () {
           return handle;
         for (x of [...Array(1000).keys()]) {
           resp = await esClient.search({
-            "index": "er_users_v1_sandbox",
+            "index": erUsersIndex,
             "_source": false,
             "size": 1,
             "body": {
@@ -1373,7 +1375,7 @@ export default function () {
       this.unblock();
       try {
         let resp = await esClient.search({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "_source": false,
           "size": 1,
           "body": {
@@ -1402,7 +1404,7 @@ export default function () {
           has_password: false
         };
         await esClient.index({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "type": "_doc",
           "id": user.id,
           "body": user,
@@ -1421,7 +1423,7 @@ export default function () {
       if (email && email.address) email.address = email.address.toLowerCase();
       try {
         await esClient.update({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "type": "_doc",
           "id": id,
           "refresh": true,
@@ -1438,7 +1440,7 @@ export default function () {
       console.log("esDisconnectUserORCID", id);
       try {
         await esClient.update({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "type": "_doc",
           "id": id,
           "refresh": true,
@@ -1463,7 +1465,7 @@ export default function () {
       }
       try {
         await esClient.update({
-          "index": "er_users_v1_sandbox",
+          "index": erUsersIndex,
           "type": "_doc",
           "id": id,
           "refresh": true,

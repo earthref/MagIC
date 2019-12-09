@@ -99,7 +99,7 @@ class SearchSummariesListItem extends React.Component {
         {id && !_is_activated && 
         <button type="submit" className="ui basic tiny fluid compact icon header purple button"
           style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
-            Meteor.call('magicGetPrivateContribution', id, '@' + Cookies.get('user_id'), function (id, error, source) {
+            Meteor.call('magicGetPrivateContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
               if (source) {
                 let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
                 saveAs(blob, 'magic_contribution_' + id + '.txt');
@@ -666,7 +666,7 @@ class SearchSummariesListItem extends React.Component {
               })}
               </tbody>
             </table>}
-            {Cookies.get('user_id') == 'rminnett' && this.props.table === 'contribution' && item.summary.contribution &&
+            {Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) == 'rminnett' && this.props.table === 'contribution' && item.summary.contribution &&
             <table className="ui compact red table">
               <thead>
                 <tr>

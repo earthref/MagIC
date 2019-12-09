@@ -6,8 +6,11 @@ import Cookies from 'js-cookie';
 
 import {portals} from '/lib/configs/portals';
 
-const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://beta.earthref.org/orcid';
-const orcidAuthorizeURL = `https://sandbox.orcid.org/oauth/authorize?client_id=APP-F8JQS3NCYGINEF7B&response_type=code&scope=/read-limited%20/activities/update&redirect_uri=${orcidRedirectURL}`;
+const orcidURL = Meteor.isDevelopment ? 'sandbox.orcid.org' : 'orcid.org';
+const orcidClientID = Meteor.isDevelopment ? 'APP-F8JQS3NCYGINEF7B' : 'APP-7V8YQW9CI7R01H1T';
+const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://earthref.org/orcid';
+const orcidScope = '/read-limited%20/activities/update';
+const orcidAuthorizeURL = `https://${orcidURL}/oauth/authorize?client_id=${orcidClientID}&response_type=code&scope=${orcidScope}&redirect_uri=${orcidRedirectURL}`;
 
 export function LogIn({ openInitially, className, portal }) {
 	const history = useHistory();
@@ -92,8 +95,8 @@ export function LogIn({ openInitially, className, portal }) {
 											else if (error && error.error === "Password") { setPasswordError(error.reason); setLogginIn(false); }
 											else if (error) { setLogInError(error.reason); setLogginIn(false); }
 											else {
-												Cookies.set('mail_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-												Cookies.set('user_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+												Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+												Cookies.set('user_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												if (user.name)
 													Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												else
@@ -130,14 +133,15 @@ export function ORCIDLoggingInModal({ code }) {
   const [error, setError] = useState();
 
 	if (code && !error && !user) {
-		Meteor.call('updateUserWithORCID', { code, id: Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }, (error, user) => {
+		const id = Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+		Meteor.call('updateUserWithORCID', { code, id }, (error, user) => {
 			if (error) {
 				console.error(error);
 				setError(error);
 			} else {
 				// console.log(user);
-				Cookies.set('mail_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-				Cookies.set('user_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				Cookies.set('user_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				if (user.name)
 					Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				else

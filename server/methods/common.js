@@ -29,31 +29,31 @@ export default function () {
         token = user && user.orcid && user.orcid.token;
         existingUser = user;
       } catch (error) {
-        console.error('orcidConnect esGetUserByID', id, error);
+        console.error('updateUserWithORCID esGetUserByID', id, error);
       }
       if (code && (!orcid || !token)) try {
-        let auth = HTTP.call("POST", `https://sandbox.orcid.org/oauth/token`, {
+        let auth = HTTP.call("POST", `https://${Meteor.isDevelopment ? 'sandbox.' : ''}orcid.org/oauth/token`, {
           headers: {
             Accept: 'application/json'
           },
           params: {
-            client_id: 'APP-F8JQS3NCYGINEF7B',
-            client_secret: Meteor.settings.orcid.client_secret,
+            client_id: Meteor.isDevelopment ? 'APP-F8JQS3NCYGINEF7B' : 'APP-7V8YQW9CI7R01H1T',
+            client_secret: Meteor.isDevelopment ? Meteor.settings.orcid.sandbox_client_secret : Meteor.settings.orcid.client_secret,
             grant_type: 'authorization_code',
             code: code
           }
         });
-        token = auth.data.access_token;
         orcid = auth.data.orcid;
+        token = auth.data.access_token;
       } catch (error) {
-        console.error('orcidConnect Authorize', error);
+        console.error('updateUserWithORCID Authorize', error);
         throw new Meteor.Error(
           'Failed to authenticate your ORCID account.',
           'Please retry logging in with ORCID. If you are still having trouble, please email us.'
         );
       }
       try {
-        let record = HTTP.call("GET", `https://api.sandbox.orcid.org/v3.0/${orcid}/record`, {
+        let record = HTTP.call("GET", `https://api.${Meteor.isDevelopment ? 'sandbox.' : ''}orcid.org/v3.0/${orcid}/record`, {
           headers: {
             Accept: 'application/vnd.orcid+json',
             Authorization: `Bearer ${token}`
@@ -77,7 +77,7 @@ export default function () {
               existingUser = orcidUsers && orcidUsers.length && orcidUsers[0] || users[0];
             }
           } catch (e) {
-            console.error("orcidConnect esGetUsersByEmail", `Failed to get user for email ${x.email}`, e);
+            console.error("updateUserWithORCID esGetUsersByEmail", `Failed to get user for email ${x.email}`, e);
           } 
         }
         let user = {

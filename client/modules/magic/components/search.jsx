@@ -342,7 +342,7 @@ class Search extends React.Component {
               </div>
             </div>
           )}
-          {Cookies.get('user_id') ?
+          {Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) ?
             <div className="right menu">
               <div className="item" style={{paddingRight: 0}}>
                 <Link className={portals['MagIC'].color + ' ui compact button'} style={{paddingTop: '0.5em', paddingBottom: '0.5em'}} to="/MagIC/private">

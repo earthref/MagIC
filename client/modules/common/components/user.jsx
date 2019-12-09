@@ -8,8 +8,11 @@ import * as EmailValidator from 'email-validator';
 
 import { portals } from '/lib/configs/portals';
 
-const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://beta.earthref.org/orcid';
-const orcidAuthorizeURL = `https://sandbox.orcid.org/oauth/authorize?client_id=APP-F8JQS3NCYGINEF7B&response_type=code&scope=/read-limited%20/activities/update&redirect_uri=${orcidRedirectURL}`;
+const orcidURL = Meteor.isDevelopment ? 'sandbox.orcid.org' : 'orcid.org';
+const orcidClientID = Meteor.isDevelopment ? 'APP-F8JQS3NCYGINEF7B' : 'APP-7V8YQW9CI7R01H1T';
+const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://earthref.org/orcid';
+const orcidScope = '/read-limited%20/activities/update';
+const orcidAuthorizeURL = `https://${orcidURL}/oauth/authorize?client_id=${orcidClientID}&response_type=code&scope=${orcidScope}&redirect_uri=${orcidRedirectURL}`;
 
 owasp.config({
   allowPassphrases       : false,
@@ -30,7 +33,7 @@ export function User({ openInitially, className, portal }) {
 	const [givenNames, setGivenNames] = useState({ value: undefined, error: undefined, isUpdating: false });
 	const [familyName, setFamilyName] = useState({ value: undefined, error: undefined, isUpdating: false });
 
-	const id = parseInt(Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
+	const id = parseInt(Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
 	if (!error && (!user || user.id !== id)) {
 		Meteor.call('esGetUserByID', {id}, (error, user) => {
 			if (error) {
@@ -324,7 +327,7 @@ export function User({ openInitially, className, portal }) {
 															setHandle(x => { return {...x, error: error.reason, isUpdating: false }; });
 														} else {
 															setHandle({ value: undefined, error: undefined, isUpdating: false });
-															Cookies.set('mail_id', `${updatedUser.handle}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+															Cookies.set('user_id', `${updatedUser.handle}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 															setUser(updatedUser);
 														}
 													});

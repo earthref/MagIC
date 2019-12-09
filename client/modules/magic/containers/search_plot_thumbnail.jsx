@@ -4,7 +4,7 @@ import {compose} from '@storybook/react-komposer';
 
 export const composer = ({ id }, onData) => {
   onData(null, { files: undefined });
-  Meteor.call('magicGetPmagPyPlotFiles', id, Cookies.get('user_id'), 1, function (error, f) {
+  Meteor.call('magicGetPmagPyPlotFiles', id, Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), 1, function (error, f) {
     if (error) {
       onData(null, { error });
     } else {
@@ -15,7 +15,7 @@ export const composer = ({ id }, onData) => {
         file = f[0].slice(0, f[0].length - 4) + '.thumb.png';
       }
       if (file) onData(null, { file });
-      Meteor.call('magicGetPmagPyPlotFiles', id, Cookies.get('user_id'), undefined, function (error, allFiles) {
+      Meteor.call('magicGetPmagPyPlotFiles', id, Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), undefined, function (error, allFiles) {
         if (error) {
           onData(null, { error });
         } else {

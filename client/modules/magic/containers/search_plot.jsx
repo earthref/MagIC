@@ -15,7 +15,7 @@ export const composer = ({ file, isPrivate }, onData) => {
       onData(null, { source: plotCache[file].source })
     } else {
       onData(null, { source: undefined });
-      Meteor.call('magicGetPmagPyPlot', file, '@' + Cookies.get('user_id'), function (error, source) {
+      Meteor.call('magicGetPmagPyPlot', file, '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), function (error, source) {
         if (source) {
           plotCache[file] = { source, timestamp: Date.now() };
           onData(null, { source });

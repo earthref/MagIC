@@ -97,18 +97,18 @@ class Layout extends React.Component {
           </div>
         </div>
         <div className="ui top fixed secondary pointing menu right-menu">
-          {(Cookies.get('mail_id') && Cookies.get('name')) && 
+          {(Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) && Cookies.get('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) && 
             <a className="ui button item" onClick={(e) => {
-              Cookies.remove('mail_id');
-              Cookies.remove('user_id');
-              Cookies.remove('name');
+              Cookies.remove('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+              Cookies.remove('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+              Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
               this.setState({ tick: this.state.tick+1 });
             }}>
               <i className="close icon"/>
               Log Out
             </a>
           }
-          {Cookies.get('mail_id') && Cookies.get('name') ?
+          {Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) && Cookies.get('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) ?
             <User className='item' portal={portal}/> :
             <LogIn className='item' portal={portal}/>
           }
