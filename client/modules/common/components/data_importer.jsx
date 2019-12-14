@@ -127,12 +127,12 @@ export default class DataImporter extends React.Component {
       onApprove: ($modal) => {
         const templateName = this.refs['create import settings template name'].value;
         Meteor.call('createImportSettingsTemplate',
-          '@' + Cookies.get('user_id'),
+          '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
           templateName,
           this.state.settings,
           (error, templateID) => {
             if (error) console.error('create import settings template', templateID, templateName, error);
-            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), (error, templates) => {
               this.importTemplates = templates;
               this.setState({
                 creatingTemplate: false,
@@ -153,12 +153,12 @@ export default class DataImporter extends React.Component {
       onApprove: ($modal) => {
         localStorage.removeItem('Import Templates');
         Meteor.call('saveImportSettingsTemplate',
-          '@' + Cookies.get('user_id'),
+          '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
           this.state.templateID,
           this.state.settings,
           (error) => {
             if (error) console.error('saved import settings template', error);
-            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), (error, templates) => {
               this.importTemplates = templates;
               this.setState({
                 savingTemplate: false,
@@ -179,11 +179,11 @@ export default class DataImporter extends React.Component {
         const templateID = this.refs['delete import settings template ID'].value;
         localStorage.removeItem('Import Templates');
         Meteor.call('deleteImportSettingsTemplate',
-          '@' + Cookies.get('user_id'),
+          '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
           templateID,
           (error) => {
             if (error) console.error('delete import settings template', error);
-            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), (error, templates) => {
               this.importTemplates = templates;
               if (templateID === this.state.templateID)
                 this.setState({templateID: undefined, templateName: undefined});
@@ -211,7 +211,7 @@ export default class DataImporter extends React.Component {
           templateName,
           (error) => {
             if (error) console.error('rename import settings template', templateID, this.state.templateID, templateName, this.refs['rename import settings template name'].value, error);
-            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id'), (error, templates) => {
+            Meteor.call('getImportSettingsTemplates', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), (error, templates) => {
               this.importTemplates = templates;
               if (templateID === this.state.templateID)
                 this.setState({templateName: this.refs['rename import settings template name'].value});

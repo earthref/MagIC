@@ -21,9 +21,114 @@ export default function () {
       }
     },
 
+    async updateUserWithORCID({code, id}) {
+      let orcid, token, existingUser;
+      if (id) try {
+        let user = await Meteor.call('esGetUserByID', {id});
+        orcid = user && user.orcid && user.orcid.id;
+        token = user && user.orcid && user.orcid.token;
+        existingUser = user;
+      } catch (error) {
+        console.error('updateUserWithORCID esGetUserByID', id, error);
+      }
+      if (code && (!orcid || !token)) try {
+        let auth = HTTP.call("POST", `https://${Meteor.isDevelopment ? 'sandbox.' : ''}orcid.org/oauth/token`, {
+          headers: {
+            Accept: 'application/json'
+          },
+          params: {
+            client_id: Meteor.isDevelopment ? 'APP-F8JQS3NCYGINEF7B' : 'APP-7V8YQW9CI7R01H1T',
+            client_secret: Meteor.isDevelopment ? Meteor.settings.orcid.sandbox_client_secret : Meteor.settings.orcid.client_secret,
+            grant_type: 'authorization_code',
+            code: code
+          }
+        });
+        orcid = auth.data.orcid;
+        token = auth.data.access_token;
+      } catch (error) {
+        console.error('updateUserWithORCID Authorize', error);
+        throw new Meteor.Error(
+          'Failed to authenticate your ORCID account.',
+          'Please retry logging in with ORCID. If you are still having trouble, please email us.'
+        );
+      }
+      try {
+        let record = HTTP.call("GET", `https://api.${Meteor.isDevelopment ? 'sandbox.' : ''}orcid.org/v3.0/${orcid}/record`, {
+          headers: {
+            Accept: 'application/vnd.orcid+json',
+            Authorization: `Bearer ${token}`
+          }
+        });
+        let content = JSON.parse(record.content);
+        let emailsSortedByMostReliable = 
+            content.person.emails && 
+            content.person.emails.email &&
+            content.person.emails.email.sort((e1, e2) => { 
+          if (e1.primary && !e2.primary) return -1;
+          if (!e1.primary && e2.primary) return 1;
+          if (e1.verified && !e2.verified) return -1;
+          if (!e1.verified && e2.verified) return 1;
+        }).map(x => { return { email: x.email, verified: x.verified, primary: x.primary }});
+        for (x of emailsSortedByMostReliable) {
+          try {
+            if (!existingUser) {
+              let users = await Meteor.call('esGetUsersByEmail', {email: x.email});
+              let orcidUsers = users.filter(x => x.orcid && x.orcid.id === orcid);
+              existingUser = orcidUsers && orcidUsers.length && orcidUsers[0] || users[0];
+            }
+          } catch (e) {
+            console.error("updateUserWithORCID esGetUsersByEmail", `Failed to get user for email ${x.email}`, e);
+          } 
+        }
+        let user = {
+          orcid: {
+            id: orcid,
+            token: token
+          },
+          name: {
+            source: 'EarthRef'
+          },
+          email: {
+            source: 'EarthRef'
+          }
+        };
+        if (content.person.name) {
+          if (content.person.name['given-names'] && content.person.name['given-names'].value) {
+            user.name.given = content.person.name['given-names'].value;
+            user.name.source = 'ORCID';
+          }
+          if (content.person.name['family-name'] && content.person.name['family-name'].value) {
+            user.name.family = content.person.name['family-name'].value;
+            user.name.source = 'ORCID';
+          }
+          if (content.person.name['credit-name'] && content.person.name['credit-name'].value) {
+            user.name.published = content.person.name['credit-name'].value;
+            user.name.source = 'ORCID';
+          }
+        }
+        if (emailsSortedByMostReliable && emailsSortedByMostReliable[0] && emailsSortedByMostReliable[0].email) {
+          user.email.address = emailsSortedByMostReliable[0].email;
+          user.email.source = 'ORCID';
+        }
+        if (existingUser) {
+          user = _.merge(existingUser, user);
+          await Meteor.call('esUpdateUserORCID', user);
+        } else {
+          user = await Meteor.call('esCreateUserFromORCID', user);
+        }
+        return __.omitDeep(user, /(^|\.)_/);
+      } catch (error) {
+        console.error('orcidLogin Record Request', error);
+        throw new Meteor.Error(
+          'Failed to retrieve your ORCID record.', 
+          'Please retry logging in with ORCID. If you are still having trouble, please email us.'
+        );
+      }
+    },
+
     async getReferenceMetadata(doi, attempt = 0) {
       this.unblock();
-      //console.log("getReferenceMetadata", attempt, `http://api.crossref.org/works/${doi}`);
+      // console.log("getReferenceMetadata", attempt, `http://api.crossref.org/works/${doi}`);
       let resp = HTTP.call("GET", `http://api.crossref.org/works/${doi}`);
       if (!resp.statusCode || !resp.data || !resp.data.message) {
         if (attempt < 3) {

@@ -10,13 +10,16 @@ import Cookies from 'js-cookie';
 import {portals} from '/lib/configs/portals';
 
 import Navigation from '/client/modules/common/components/navigation';
+import { User } from './user';
+import { LogIn } from './login';
 
 class Layout extends React.Component {
 
   constructor(props) {
     super(props);
     this.state = {
-      deployedDate: undefined
+      deployedDate: undefined,
+      tick: 0,
     };
   }
 
@@ -94,20 +97,20 @@ class Layout extends React.Component {
           </div>
         </div>
         <div className="ui top fixed secondary pointing menu right-menu">
-          {(Cookies.get('mail_id') && Cookies.get('name')) && 
-            <a className="ui button item" href={'//earthref.org/log-out/?next_url=' + window.location.href}>
-              Logout
+          {(Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) && Cookies.get('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) && 
+            <a className="ui button item" onClick={(e) => {
+              Cookies.remove('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+              Cookies.remove('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+              Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+              this.setState({ tick: this.state.tick+1 });
+            }}>
+              <i className="close icon"/>
+              Log Out
             </a>
           }
-          {Cookies.get('mail_id') && Cookies.get('name') ?
-            <a className="ui button item" href="//earthref.org/edit-profile/">
-              <i className={'user icon ' + portals[portal].color}/>
-              {Cookies.get('name')}
-            </a> :
-            <a className="ui button item" href={'//earthref.org/log-in/?next_url=' + window.location.href}>
-              <i className={'user icon ' + portals[portal].color}/>
-              Login
-            </a>
+          {Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) && Cookies.get('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) ?
+            <User className='item' portal={portal}/> :
+            <LogIn className='item' portal={portal}/>
           }
         </div>
         <div className="ui bottom fixed small menu footer">
@@ -146,24 +149,6 @@ class Layout extends React.Component {
         </div>
       </div>
     );
-  }
-
-  renderLogin() {
-   return (
-     <div className="ui top fixed secondary pointing menu right-menu">
-       <div className="ui search search-earthref">
-         <div className="ui transparent icon input item">
-           <input className="prompt" type="text" placeholder="Search EarthRef ..."/>
-           <i className="search icon"/>
-         </div>
-         <div className="results"></div>
-       </div>
-       <a className="ui dropdown item">
-         Login
-         <i className="dropdown icon"/>
-       </a>
-     </div>
-   );
   }
 }
 

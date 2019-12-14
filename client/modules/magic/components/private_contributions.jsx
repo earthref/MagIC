@@ -49,7 +49,7 @@ export default class extends React.Component {
     $(this.refs["validate results"]).height($(window).height() - 400).hide();
     $(this.refs["validate error"]).hide();
     $(this.refs["validate"]).modal().modal("show");
-    Meteor.call("esValidatePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id")},
+    Meteor.call("esValidatePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})},
       (error, validation) => {
         if (error) {
           $(this.refs["validate error"]).html(error.message);
@@ -93,7 +93,7 @@ export default class extends React.Component {
       onApprove: ($modal) => {
         this.privateContributions = _.reject(this.privateContributions, {summary: {contribution: {id: id}}});
         this.setState({taps: this.state.taps + 1});
-        Meteor.call("esDeletePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id")},
+        Meteor.call("esDeletePrivateContribution", {index: index, id: id, contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})},
           (error) => {
             if (error)
               $(this.refs["failed to delete"]).modal("show");
@@ -111,12 +111,12 @@ export default class extends React.Component {
   }
 
   updateContributions() {
-    if (!Cookies.get("user_id")) {
+    if (!Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) {
       this.setState({loaded: true});
     } else {
       Meteor.call("esGetPrivateContributionSummaries", {
         index: index,
-        contributor: "@" + Cookies.get("user_id"),
+        contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
         includeActivated: true
       }, (error, contributions) => {
         if (error) {
@@ -148,8 +148,8 @@ export default class extends React.Component {
     this.setState({taps: this.state.taps + 1});
     Meteor.call("esUpdateContributionReference", {
       index: index,
-      contributor: "@" + Cookies.get("user_id"),
-      _contributor: Cookies.get("name"),
+      contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
+      _contributor: Cookies.get("name", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
       id: this.privateContributions[i].summary.contribution.id,
       reference: this.privateContributions[i].reference,
       description: this.privateContributions[i].summary.contribution.description,
@@ -198,8 +198,8 @@ export default class extends React.Component {
     0);
     const strValidationErrors = numeral(nValidationErrors).format('0,0') + ' Validation Error' + (nValidationErrors === 1 ? '' : 's');
 
-    console.log("privateContributions", this.privateContributions, Cookies.get("user_id"));
-    if (!Cookies.get("user_id")) return (
+    console.log("privateContributions", this.privateContributions, Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
+    if (!Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) return (
       <div>
         <div className="ui top attached segment">
           <div className="ui center aligned two column relaxed grid">
@@ -375,7 +375,7 @@ export default class extends React.Component {
                           Activated
                         </div>
                       }
-                      {c.summary.contribution._is_activated === "true" && "@" + Cookies.get("user_id") === "@rminnett" && 
+                      {c.summary.contribution._is_activated === "true" && "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) === "@rminnett" && 
                       <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
                            onClick={(e) => {
                              console.log("deactivating");

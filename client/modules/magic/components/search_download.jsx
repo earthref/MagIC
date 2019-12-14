@@ -34,7 +34,6 @@ export default class extends React.Component {
 
   componentDidUpdate(lastprops, lastState) {
     if (!_.isEqual(this.props.queries, lastprops.queries) || !_.isEqual(this.props.filters, lastprops.filters)) {
-      debugger;
       this.setState({progress: undefined, downloadIDs: []});
       this.downloadedRows = [];
       this.canceled = true;
@@ -446,7 +445,7 @@ export default class extends React.Component {
             }
             { this.state.downloadContributions && (this.state.downloadIDs.length > 0 && this.state.progress === 100) &&
               <button type="submit" className="ui button purple" onClick={function (e) {
-                Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id'), function (error, source) {
+                Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), function (error, source) {
                   if (source) {
                     let blob = new Blob([source], {type: "application/zip"});
                     saveAs(blob, 'magic_search_results.zip');

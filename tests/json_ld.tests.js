@@ -20,33 +20,30 @@ let index = "magic_v4";
 
       esClient.search({
         index: index, type: "contribution", size: 1e4, 
-        _source: ["summary.contribution._reference.doi", "summary.contribution.timestamp"],
+        _source: ["summary.contribution._history"],
         body: {
           "query": { "bool": { 
-            "must": { "exists": { "field": "summary.contribution._reference.doi" }},
-            "filter": { "term": { "summary.contribution._is_latest": "true"}}
+            "must": { "exists": { "field": "summary.contribution._history" }},
+            "filter": { "term": { "summary.contribution._is_activated": "true"}}
           }}
         }
       }).then((resp) => {
-        let xml = [];
+        //let xml = [];
         //console.log(resp.hits.total, resp.hits.hits);
+        let urls = {};
         if (resp.hits.total > 0) {
-          xml = resp.hits.hits.map(hit => {
-            let doi = encodeURI(hit._source.summary.contribution._reference.doi)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
-            return _.trim(hit._source.summary.contribution._reference.doi) !== '' && `<url>` +
-              `<loc>https://earthref.org/MagIC/doi/${doi}</loc>` + 
-              `<lastmod>${hit._source.summary.contribution.timestamp}</lastmod>` +
-            `</url>` || undefined;
-          }).filter(Boolean);
+          xml = resp.hits.hits.forEach(hit => {
+            hit._source.summary.contribution._history.forEach(contribution => {
+              urls[contribution.id] = `<url>` +
+              `<loc>https://earthref.org/MagIC/${contribution.id}</loc>` + 
+              `<lastmod>${contribution.timestamp}</lastmod>` +
+            `</url>`;
+            });
+          });
         }
         fs.writeFileSync(`C:/Users/rminn/source/repos/MagIC/public/MagIC/contributions.sitemap.xml`, 
           `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-          xml.join('\n') + 
+          _.keys(urls).sort((a, b) => a - b).map(id => urls[id]).join('\n') + 
           `\n</urlset>`
         );
         done();

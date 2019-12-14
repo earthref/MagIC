@@ -19,6 +19,8 @@ import {levels} from '/lib/configs/magic/search_levels.js';
 import { s3UploadObject, s3DeleteKeys } from './s3';
 import { resolveTxt } from 'dns';
 
+const saltRounds = 10;
+
 const esClient = new elasticsearch.Client({
   //log: "trace",
   host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || "",
@@ -26,6 +28,8 @@ const esClient = new elasticsearch.Client({
   apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
+
+const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1_sandbox' : 'er_users_v1';
 
 export default function () {
 
@@ -1234,6 +1238,244 @@ export default function () {
         throw new Meteor.Error("esDeactivateContribution", error.message);
       }
       return true;
+    },
+
+    async esPasswordLogIn({email, password}) {
+      console.log("esPasswordLogIn", email);
+      this.unblock();
+
+      let resp;
+      try {
+        resp = await esClient.search({
+          "index": erUsersIndex,
+          "body": {
+            "query": { "term": { "email.address.raw": email.toLowerCase() }}
+          }
+        });
+        if (resp.hits.total === 0) {
+          throw new Meteor.Error("Email", "Unrecognized email address.");
+        }
+        let user;
+        resp.hits.hits.forEach(hit => {
+          if (!user && password && hit._source._password &&
+            bcrypt.compareSync(password, hit._source._password)
+          ) {
+            user = hit._source;
+            user = __.omitDeep(user, /(^|\.)_/);
+            user.has_password = true;
+          }
+        });
+        if (user) return user;
+        else throw new Meteor.Error("Password", "Incorrect password.");
+      } catch(error) {
+        console.error("esPasswordLogIn", email, error.message);
+        if (error.error === "Email" || error.error === "Password")
+          throw new Meteor.Error(error.error, error.reason);
+        else
+          throw new Meteor.Error("LogIn", "Logging in failed. Please try again.");
+      }
+    },
+
+    async esGetUserByID({id}) {
+      console.log("esGetUserByID", id);
+      this.unblock();
+      try {
+        let resp = await esClient.search({
+          "index": erUsersIndex,
+          "size": 1,
+          "body": {
+            "query": { "term": { "id": id }}
+          }
+        });
+        let user = resp.hits.hits[0]._source;
+        user = __.omitDeep(user, /(^|\.)_/);
+        return user;
+      } catch(error) {
+        console.error("esGetUserByID", id, error.message);
+        throw new Meteor.Error("User ID", `Unrecognized user ID ${id}.`);
+      }
+    },
+
+    async esGetUsersByEmail({email}) {
+      console.log("esGetUsersByEmail", email);
+      this.unblock();
+      try {
+        let resp = await esClient.search({
+          "index": erUsersIndex,
+          "body": {
+            "query": { "term": { "email.address.raw": email.toLowerCase() }},
+            "sort": { "_id": "desc" }
+          }
+        });
+        return resp.hits.hits.map(hit => __.omitDeep(hit._source, /(^|\.)_/));
+      } catch(error) {
+        console.error("esGetUserByEmail", email, error.message);
+        throw new Meteor.Error("Email", `Unrecognized email address ${email}.`);
+      }
+    },
+
+    async esGetUserByHandle({handle}) {
+      console.log("esGetUserByHandle", handle);
+      this.unblock();
+      try {
+        let resp = await esClient.search({
+          "index": erUsersIndex,
+          "body": {
+            "query": { "term": { "handle.raw": handle.toLowerCase() }},
+            "sort": { "_id": "desc" }
+          }
+        });
+        let user = resp.hits.hits[0]._source;
+        user = __.omitDeep(user, /(^|\.)_/);
+        return user;
+      } catch(error) {
+        console.error("esGetUserByHandle", handle, error.message);
+        throw new Meteor.Error("Handle", `Unrecognized handle ${handle}.`);
+      }
+    },
+
+    async esNextAvailableHandleFromEmail({email}) {
+      console.log("esNextAvailableHandleFromEmail", email);
+      this.unblock();
+      let handle = email.match(/^([^@]*)@/)[1];
+      let resp;
+      try {
+        resp = await esClient.search({
+          "index": erUsersIndex,
+          "_source": false,
+          "size": 1,
+          "body": {
+            "query": { "term": { "handle.raw": handle.toLowerCase() }},
+            "sort": { "_id": "desc" }
+          }
+        });
+        if (resp.hits.total === 0)
+          return handle;
+        for (x of [...Array(1000).keys()]) {
+          resp = await esClient.search({
+            "index": erUsersIndex,
+            "_source": false,
+            "size": 1,
+            "body": {
+              "query": { "term": { "handle.raw": handle.toLowerCase() + (x+1) }},
+              "sort": { "_id": "desc" }
+            }
+          });
+          if (resp.hits.total === 0)
+            return handle + (x+1);
+        }
+      } catch(error) {
+        console.error("esNextAvailableHandleFromEmail", email, error.message);
+        throw new Meteor.Error("esNextAvailableHandleFromEmail", `Failed to find the next available handle for ${email}.`);
+      }
+    },
+
+    async esNextAvailableUserID() {
+      console.log("esNextAvailableUserID");
+      this.unblock();
+      try {
+        let resp = await esClient.search({
+          "index": erUsersIndex,
+          "_source": false,
+          "size": 1,
+          "body": {
+            "query": {
+              "match_all": {}
+            },
+            "sort": { "_id": "desc" }
+          }
+        });
+        return parseInt(resp.hits.hits[0]._id) + 1;
+      } catch(error) {
+        console.error("esNextAvailableUserID", error.message);
+        throw new Meteor.Error("esNextAvailableUserID", "Failed to calculate the next available user ID.");
+      }
+    },
+
+    async esCreateUserFromORCID({name, email, orcid}) {
+      this.unblock();
+      console.log("esCreateUserFromORCID", name, email, orcid);
+      if (email && email.address) email.address = email.address.toLowerCase();
+      try {
+        let handle;
+        if (email && email.address) handle = await Meteor.call('esNextAvailableHandleFromEmail', {email: email.address});
+        let user = { name, email, orcid, handle,
+          id: await Meteor.call('esNextAvailableUserID'),
+          has_password: false
+        };
+        await esClient.index({
+          "index": erUsersIndex,
+          "type": "_doc",
+          "id": user.id,
+          "body": user,
+          "refresh": true
+        });
+        return user;
+      } catch(error) {
+        console.error("esCreateUserFromORCID", name, email, orcid, error.message);
+        throw new Meteor.Error("esCreateUserFromORCID", "Failed to create a new user record.");
+      }  
+    },
+
+    async esUpdateUserORCID({id, name, email, orcid}) {
+      this.unblock();
+      console.log("esUpdateUserORCID", id, name, email, orcid);
+      if (email && email.address) email.address = email.address.toLowerCase();
+      try {
+        await esClient.update({
+          "index": erUsersIndex,
+          "type": "_doc",
+          "id": id,
+          "refresh": true,
+          "body": { doc: { name, email, orcid }}
+        });
+      } catch(error) {
+        console.error("esUpdateUserORCID", id, name, email, orcid, error.message);
+        throw new Meteor.Error("esUpdateUserORCID", "Failed to update user ORCID data.");
+      }  
+    },
+
+    async esDisconnectUserORCID({id}) {
+      this.unblock();
+      console.log("esDisconnectUserORCID", id);
+      try {
+        await esClient.update({
+          "index": erUsersIndex,
+          "type": "_doc",
+          "id": id,
+          "refresh": true,
+          "body": { doc: { orcid: { id: '', token: '' }}}
+        });
+      } catch(error) {
+        console.error("esDisconnectUserORCID", id, error.message);
+        throw new Meteor.Error("esDisconnectUserORCID", "Failed to disconnect user from ORCID.");
+      }  
+    },
+
+    async esUpdateUser({ id, name, email, handle, password}) {
+      this.unblock();
+      if (email && email.address) email.address = email.address.toLowerCase();
+      if (handle) handle = handle.toLowerCase();
+      let passHash = password && bcrypt.hashSync(password, saltRounds);
+      console.log("esUpdateUser", id, name, handle, passHash);
+      let doc = { name, handle, email };
+      if (passHash) {
+        doc._password = passHash;
+        doc.has_password = true;
+      }
+      try {
+        await esClient.update({
+          "index": erUsersIndex,
+          "type": "_doc",
+          "id": id,
+          "refresh": true,
+          "body": { doc }
+        });
+        return await Meteor.call('esGetUserByID', { id });
+      } catch(error) {
+        console.error("esUpdateUser", id, name, handle, passHash, error.message);
+        throw new Meteor.Error("esUpdateUser", "Failed to update user data.");
+      }  
     }
 
   });

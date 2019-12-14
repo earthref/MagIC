@@ -1,190 +1,398 @@
+import {Meteor} from 'meteor/meteor';
 import _ from 'lodash';
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
-import {Item, Label} from 'semantic-ui-react';
+import React, { useState } from 'react';
+import { Button, Icon, Form, Table, Modal, Segment, Message, Dimmer, Loader, Divider } from 'semantic-ui-react';
+import Cookies from 'js-cookie';
+import owasp from 'owasp-password-strength-test';
+import * as EmailValidator from 'email-validator';
 
-import { portals } from '/lib/configs/portals.js';
+import { portals } from '/lib/configs/portals';
 
-class User extends React.Component {
+const orcidURL = Meteor.isDevelopment ? 'sandbox.orcid.org' : 'orcid.org';
+const orcidClientID = Meteor.isDevelopment ? 'APP-F8JQS3NCYGINEF7B' : 'APP-7V8YQW9CI7R01H1T';
+const orcidRedirectURL = Meteor.isDevelopment ? 'http://localhost:3000/orcid' : 'https://earthref.org/orcid';
+const orcidScope = '/read-limited%20/activities/update';
+const orcidAuthorizeURL = `https://${orcidURL}/oauth/authorize?client_id=${orcidClientID}&response_type=code&scope=${orcidScope}&redirect_uri=${orcidRedirectURL}`;
 
-  constructor(props) {
-    super(props);
-  }
+owasp.config({
+  allowPassphrases       : false,
+  maxLength              : 128,
+  minLength              : 10,
+  minPhraseLength        : 20,
+  minOptionalTestsToPass : 3,
+});
 
-  portalColor() {
-    return portals[this.props.portal].color || 'green';
-  }
+export function User({ openInitially, className, portal }) {
+  const [open, setOpen] = useState(openInitially);
+  const [user, setUser] = useState();
+	const [error, setError] = useState();
+	const [orcid, setORCID] = useState({ error: undefined, isUpdating: false });
+	const [email, setEmail] = useState({ value: undefined, error: undefined, isUpdating: false });
+	const [password, setPassword] = useState({ value: undefined, error: undefined, isUpdating: false });
+	const [handle, setHandle] = useState({ value: undefined, error: undefined, isUpdating: false });
+	const [givenNames, setGivenNames] = useState({ value: undefined, error: undefined, isUpdating: false });
+	const [familyName, setFamilyName] = useState({ value: undefined, error: undefined, isUpdating: false });
 
-  render() {
-    let {portal, id, ...props} = this.props;
+	const id = parseInt(Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
+	if (!error && (!user || user.id !== id)) {
+		Meteor.call('esGetUserByID', {id}, (error, user) => {
+			if (error) {
+				console.error(error);
+				setError(error);
+			} else {
+				console.log(user);
+				setUser(user);
+			}
+		});
+	}
 
-    return (
-      <Item className='er-user' {...props}>
-        <Item.Image size='small' src={users[id].avatar}/>
-        <Item.Content>
-          <Item.Header as='a'>{users[id].name.first} {users[id].name.last}</Item.Header>
-          <Item.Meta>
-            {users[id].position}
-          </Item.Meta>
-          <Item.Meta className="affiliation">
-            {users[id].affiliation}
-          </Item.Meta>
-          <Item.Description>
-            {users[id].badges.map((badge, i) =>
-              <Label basic content={<div dangerouslySetInnerHTML={{__html: badge}}/>} key={i}/>
-            )}
-            { users[id].note && <p dangerouslySetInnerHTML={{__html: users[id].note}}/> }
-            { users[id].bio && <p dangerouslySetInnerHTML={{__html: users[id].bio}}/> }
-          </Item.Description>
-          <Item.Extra>
-            { users[id].email && 
-              <Label as='a' href={'mailto:' + users[id].email}>
-                <i className='mail icon' />
-                {users[id].email}
-              </Label>
-            }
-            { users[id].website && 
-              <Label as='a' href={users[id].website} target='_blank'>
-                <i className='globe icon' />
-                {users[id].website}
-              </Label>
-            }
-            { users[id].orcid &&
-              <Label as='a' image href={'https://orcid.org/' + users[id].orcid}>
-                <img src='/ORCIDiD_icon64x64.png'/>
-                {'https://orcid.org/' + users[id].orcid}
-              </Label>
-            }
-          </Item.Extra>
-        </Item.Content>
-      </Item>
-    );
-  }
-
-}
-
-User.propTypes = {
-  portal:    PropTypes.oneOf(_.keys(portals)),
-  className: PropTypes.string
-};
-
-export default User;
-
-const users = {
-  "njarboe": {
-    "name": {
-      "first": "Nick",
-      "last": "Jarboe"
-    },
-    "avatar": "/MagIC/people/njarboe.jpg",
-    "position": "Data Analyst",
-    "affiliation": "Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego",
-    "badges": [
-      "Science Community Relations and Outreach", 
-      "Data Analyst", 
-      "Website Content", 
-      "MagIC Workshops", 
-      "PmagPy Data Integration"
-    ],
-    "email": "njarboe@ucsd.edu",
-    "orcid": "0000-0003-1465-9394",
-    "note": "Please contact him for questions about data uploading, problems with the website, data accuracy, questions about the data model, how to install and use the PmagPy software, requests for additions to MagIC's controlled vocabulary lists, requests for new data columns, or questions about the MagIC workshops and related videos.",
-    "bio": "Nick Jarboe joined the MagIC team in 2011. He has a Ph.D. in Earth Science from UC Santa Cruz with a thesis on the behavior of the magnetic field during the Steens reversal (16.7 Ma) and the precise dating of the reversal using the <sup>40</sup>Ar/<sup>39</sup>Ar method on primarily plagioclase crystals from basalts."
-  },
-  "rminnett": {
-    "name": {
-      "first": "Rupert",
-      "last": "Minnett"
-    },
-    "avatar": "/MagIC/people/rminnett.jpg",
-    "position": "Software Developer",
-    "affiliation": "College of Earth, Ocean and Atmospheric Science, Oregon State University",
-    "badges": [
-      "MagIC Database", 
-      "MagIC API",
-      "Custom Scientific Software",
-      "Data Visualization",
-      "Machine Learning"
-    ],
-    "email": "rminnett@earthref.org",
-    "orcid": "0000-0002-9000-2100",
-    "bio": "Rupert Minnett joined the MagIC team in 2005. He has a Ph.D. in computer engineering from UC San Diego with a thesis in biologically-inspired machine learning and computer vision. His primary interest is in enabling science with custom software solutions."
-  },
-  "ljonestrask": {
-    "name": {
-      "first": "Lori",
-      "last": "Jonestrask"
-    },
-    "avatar": "/MagIC/people/ljonestrask.jpg",
-    "position": "Software Developer",
-    "affiliation": "Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego",
-    "badges": [
-      "PmagPy Development",
-      "Python"
-    ],
-    "email": "ljonestrask@ucsd.edu",
-    "note": "Please contact her to report software errors and installation problems with the PmagPy software suite. Issues can also be submitted directly on the <a href=\"https://github.com/PmagPy/PmagPy/issues\" target=\"_blank\">PmagPy GitHub</a> site.",
-    "bio": "Lori Jonestrask joined the MagIC team in 2014 and has worked closely with Lisa Tauxe and others in maintaining and adding features to the PmagPy software suite."
-  },
-  "cconstable": {
-    "name": {
-      "first": "Cathy",
-      "last": "Constable"
-    },
-    "avatar": "/MagIC/people/cconstable.jpg",
-    "position": "Professor of Geophysics",
-    "affiliation": "Institute of Geophysics and Planetary Physics, Scripps Institution of Oceanography, UC San Diego",
-    "badges": [
-      "Paleomagnetism and Geomagnetism",
-      "Secular Variation and Reversals of the Geomagnetic Field",
-      "Inverse Problems",
-      "Applications of Statistical Techniques in Geophysics",
-      "Electrical Conductivity of the Mantle",
-      "Paleo and Rock Magnetic Databases"
-    ],
-    "email": "cconstable@ucsd.edu",
-    "orcid": "0000-0003-4534-4977",
-    "website": "http://scrippsscholars.ucsd.edu/cconstable"
-  },
-  "akoppers": {
-    "name": {
-      "first": "Anthony",
-      "last": "Koppers"
-    },
-    "avatar": "/MagIC/people/akoppers.jpg",
-    "position": "Professor of Geology and Geophysics and Associate Dean for Research Operations",
-    "affiliation": "College of Earth, Ocean and Atmospheric Sciences, Oregon State University",
-    "badges": [
-      "Hotspots", 
-      "Tectonics", 
-      "Mantle Geodynamics and Plumes", 
-      "<sup>40</sup>Ar/<sup>39</sup>Ar Geochronology", 
-      "Online Data Curation",
-      "Isotope Geochemistry"
-    ],
-    "email": "akoppers@ceoas.oregonstate.edu",
-    "orcid": "0000-0002-8136-5372",
-    "website": "https://ceoas.oregonstate.edu/profile/koppers"
-  },
-  "ltauxe": {
-    "name": {
-      "first": "Lisa",
-      "last": "Tauxe"
-    },
-    "avatar": "/MagIC/people/ltauxe.jpg",
-    "position": "Distinguished Professor of Geophysics",
-    "affiliation": "Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego",
-    "badges": [
-      "Paleomagnetism",
-      "Rock Magnetism",
-      "Magnetostratigraphy",
-      "Paleointensity",
-      "Archaeomagnetism",
-      "Ancient Geomagnetic Field"
-    ],
-    "email": "ltauxe@ucsd.edu",
-    "orcid": "0000-0002-4837-8200",
-    "website": "http://scrippsscholars.ucsd.edu/ltauxe"
-  },
+  return (
+		<Modal size='small' open={open} closeIcon onClose={() => setOpen(false)}
+			trigger={
+				<Button className={className} onClick={() => setOpen(true)}>
+					<Icon color={portals[portal].color} name='user'/>
+					{ Cookies.get('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }
+				</Button>
+			}
+		>
+			<Modal.Header>
+				EarthRef Account
+			</Modal.Header>
+			<Modal.Content>
+				{ error && 
+					<Message icon error>
+						<Icon name='warning' />
+						<Message.Content>
+							<Message.Header>{ error.error }</Message.Header>
+							{ error.reason }
+						</Message.Content>
+					</Message>
+				}
+				{ !error && (!user || user.id !== id) &&
+					<Segment basic padded='very'>
+						<Dimmer active inverted>
+							<Loader inline='centered' size='large' />
+						</Dimmer>
+					</Segment>
+				}
+				{ !error && user &&
+					<>
+						{ user.orcid && user.orcid.id &&
+							<Table definition>
+								<Table.Body>
+									<Table.Row>
+										<Table.Cell>
+											<img src='/ORCIDiD_icon64x64.png'
+												style={{ height: '1.25em', margin: '-.25em .25em -.25em 0' }}
+											/>
+											ORCID iD
+										</Table.Cell>
+										<Table.Cell>
+											<a href={'https://orcid.org/' + user.orcid.id}>
+												{'https://orcid.org/' + user.orcid.id}
+											</a>
+										</Table.Cell>
+									</Table.Row>
+                  { user.name && user.name.source === 'ORCID'  && user.name.given && 
+                    <Table.Row>
+                      <Table.Cell><Icon name='user'/>Given Names *</Table.Cell>
+                      <Table.Cell>{ user.name.given || '' }</Table.Cell>
+                    </Table.Row>
+                  }
+                  { user.name && user.name.source === 'ORCID' && user.name.family && 
+                    <Table.Row>
+                      <Table.Cell><Icon name='users'/>Last Name *</Table.Cell>
+                      <Table.Cell>{ user.name.family || '' }</Table.Cell>
+                    </Table.Row>
+                  }
+                  { user.email && user.email.source === 'ORCID'  && user.email.address && 
+                    <Table.Row>
+                      <Table.Cell><Icon name='mail'/>Email *</Table.Cell>
+                      <Table.Cell>{ user.email.address || '' }</Table.Cell>
+                    </Table.Row>
+                  }
+								</Table.Body>
+								<Table.Footer fullWidth>
+								<Table.Row>
+									<Table.HeaderCell colSpan='2'>
+										<b>* Log in to your <a href={'https://orcid.org/' + user.orcid.id}>ORCID account</a> to edit these values.</b>
+									</Table.HeaderCell>
+								</Table.Row>
+								<Table.Row>
+									<Table.HeaderCell colSpan='2'>
+										<Form.Button	floated='right'
+                      disabled={ (email.error || password.error || orcid.error || orcid.isUpdating) && true || false }
+                      error={orcid.error}
+											onClick={() => {
+                        let canDisconnect = true;
+												if (!user || !user.email || !user.email.address) {
+                          canDisconnect = false;
+													setEmail(x => { 
+														return {
+															...x, 
+															error: 'An email is required before disconnecting your account from ORCID.', 
+															isUpdating: false 
+														};
+                          });
+                        }
+                        if (!user || !user.has_password) {
+                          canDisconnect = false;
+													setPassword(x => { 
+														return {
+															...x, 
+															error: 'A password is required before disconnecting your account from ORCID.', 
+															isUpdating: false 
+														};
+													});
+                        }
+                        if (canDisconnect) {
+													setORCID({ error: undefined, isUpdating: true });
+													Meteor.call('esDisconnectUserORCID', { id: user.id }, (error) => {
+														if (error) {
+															console.error(error);
+															setORCID({ error: error.reason, isUpdating: false });
+														} else {
+															setORCID({ error: undefined, isUpdating: false });
+															let updatedUser = _.cloneDeep(user);
+															delete updatedUser.orcid;
+															setUser(updatedUser);
+														}
+													});
+												}
+											}}
+										>
+											{ orcid.isUpdating && 
+												<Icon loading name='spinner'/>
+											}
+											{ !orcid.isUpdating && 
+												<img src='/ORCIDiD_icon64x64.png'
+													style={{ height: '1.25em', margin: '-.25em .25em -.25em 0' }}
+												/>
+											}
+											Disconnect Your EarthRef Account From ORCID
+										</Form.Button>
+									</Table.HeaderCell>
+								</Table.Row>
+							</Table.Footer>
+							</Table>
+						}
+						{ (!user.orcid || !user.orcid.id) && 
+							<>
+								<Button	fluid as='a' href={ orcidAuthorizeURL }>
+									<img src='/ORCIDiD_icon64x64.png'
+										style={{ height: '1.25em', margin: '-.25em .25em -.25em 0' }}
+									/>
+									Connect Your EarthRef Account to ORCID
+								</Button>
+								<Divider hidden />
+							</>
+						}
+						<Form>
+            { (!user.orcid || !user.orcid.id || !user.name || user.name.source === 'EarthRef') && 
+								<>
+									<Form.Input
+										icon='user'
+										iconPosition='left'
+										label='Given Names'
+										placeholder='John A.'
+										error={givenNames.error}
+										value={givenNames.value !== undefined ? givenNames.value : user.name.given || ''}
+										onChange={(e, { value }) => setGivenNames(x => { return { ...x, value }; }) }
+										action={givenNames.value !== undefined && {
+											content: 'Save',
+											icon: givenNames.isUpdating && <Icon loading name='spinner' /> || 'save',
+											color: portals[portal].color,
+											disabled: givenNames.isUpdating,
+											onClick: () => {
+												if (givenNames.value === '') {
+													setGivenNames(x => { return {...x, error: 'Given Names cannot be blank.', isUpdating: false }; });
+												} else {
+													setGivenNames(x => { return {...x, error: undefined, isUpdating: true }; });
+													Meteor.call('esUpdateUser', { id: user.id, name: { given: givenNames.value }}, (error, updatedUser) => {
+														if (error) {
+															console.error(error);
+															setGivenNames(x => { return {...x, error: error.reason, isUpdating: false }; });
+														} else {
+															setGivenNames({ value: undefined, error: undefined, isUpdating: false });
+                              if (user.name)
+                                Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+                              else
+                                Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+															setUser(updatedUser);
+														}
+													});
+												}
+											}
+										}}
+									/>
+									<Form.Input
+										icon='users'
+										iconPosition='left'
+										label='Family Name'
+										placeholder='Doe'
+										error={familyName.error}
+										value={familyName.value !== undefined ? familyName.value : user.name.family || ''}
+										onChange={(e, { value }) => setFamilyName(x => { return { ...x, value }; }) }
+										action={familyName.value !== undefined && {
+											content: 'Save',
+											icon: familyName.isUpdating && <Icon loading name='spinner' /> || 'save',
+											color: portals[portal].color,
+											disabled: familyName.isUpdating,
+											onClick: () => {
+												if (givenNames.value === '') {
+													setFamilyName(x => { return {...x, error: 'Family Name cannot be blank.', isUpdating: false }; });
+												} else {
+													setFamilyName(x => { return {...x, error: undefined, isUpdating: true }; });
+													Meteor.call('esUpdateUser', { id: user.id, name: { family: familyName.value }}, (error, updatedUser) => {
+														if (error) {
+															console.error(error);
+															setFamilyName(x => { return {...x, error: error.reason, isUpdating: false }; });
+														} else {
+															setFamilyName({ value: undefined, error: undefined, isUpdating: false });
+                              if (user.name)
+                                Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+                              else
+                                Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+                              setUser(updatedUser);
+														}
+													});
+												}
+											}
+										}}
+									/>
+								</>
+							}
+              { (!user.orcid || !user.orcid.id || !user.email || !user.email.address || user.email.source === 'EarthRef') && 
+                <Form.Input
+                  icon='mail'
+                  iconPosition='left'
+                  label='Email'
+                  placeholder='Email for EarthRef Communications'
+                  error={email.error}
+                  value={email.value !== undefined ? email.value : user.email.address || ''}
+                  onChange={(e, { value }) => setEmail(x => { return { ...x, value }; }) }
+                  action={email.value !== undefined && {
+                    content: 'Save',
+                    icon: email.isUpdating && <Icon loading name='spinner' /> || 'save',
+                    color: portals[portal].color,
+                    disabled: email.isUpdating,
+                    onClick: () => {
+                      if (email.value === '') {
+                        setEmail(x => { return {...x, error: 'The email cannot be blank.', isUpdating: false }; });
+                      } if (!EmailValidator.validate(email.value)) {
+                        setEmail(x => { return {...x, error: 'The email is invalid.', isUpdating: false }; });
+                      } else {
+                        setEmail(x => { return {...x, error: undefined, isUpdating: true }; });
+                        Meteor.call('esUpdateUser', { id: user.id, email: { address: email.value, source: 'EarthRef' }}, (error, updatedUser) => {
+                          if (error) {
+                            console.error(error);
+                            setEmail(x => { return {...x, error: error.reason, isUpdating: false }; });
+                          } else {
+                            setEmail({ value: undefined, error: undefined, isUpdating: false });
+                            console.log('updatedUser', updatedUser);
+                            setUser(updatedUser);
+                          }
+                        });
+                      }
+                    }
+                  }}
+                />
+							}
+							<Form.Input
+								icon='at'
+								iconPosition='left'
+								label='Handle'
+                placeholder='User name for display'
+								error={handle.error}
+								value={handle.value !== undefined ? handle.value :  user.handle || ''}
+								onChange={(e, { value }) => setHandle(x => { return { ...x, value }; }) }
+								action={handle.value !== undefined && {
+									content: 'Save',
+									icon: handle.isUpdating && <Icon loading name='spinner' /> || 'save',
+									color: portals[portal].color,
+									disabled: handle.isUpdating,
+									onClick: () => {
+										if (handle.value === '') {
+											setHandle(x => { return {...x, error: 'The handle cannot be blank.', isUpdating: false }; });
+										} else {
+											setHandle(x => { return {...x, error: undefined, isUpdating: true }; });
+											Meteor.call('esGetUserByHandle', { handle: handle.value }, (error, existingUser) => {
+												if (!error && existingUser) {
+													console.error('existingUser', existingUser);
+													setHandle(x => { return {...x, error: 'The handle already exists.', isUpdating: false }; });
+												} else {
+													Meteor.call('esUpdateUser', { id: user.id, handle: handle.value }, (error, updatedUser) => {
+														if (error) {
+															console.error(error);
+															setHandle(x => { return {...x, error: error.reason, isUpdating: false }; });
+														} else {
+															setHandle({ value: undefined, error: undefined, isUpdating: false });
+															Cookies.set('user_id', `${updatedUser.handle}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+															setUser(updatedUser);
+														}
+													});
+												}
+											});
+										}
+									}
+								}}
+							/>
+							<Form.Input
+								icon='key'
+								iconPosition='left'
+								label='Password'
+								type='password'
+								error={password.error}
+								value={password.value !== undefined ? password.value : ''}
+								placeholder={user.has_password && '********' || 'Create a Password'}
+								onChange={(e, { value }) => setPassword(x => { return { ...x, value }; }) }
+								action={password.value !== undefined && {
+									content: 'Save',
+									icon: password.isUpdating && <Icon loading name='spinner' /> || 'save',
+									color: portals[portal].color,
+									disabled: password.isUpdating,
+									onClick: () => {
+										const passwordTest = owasp.test(password.value);
+										if (passwordTest.errors.length) {
+											setPassword(x => { return {...x, error: passwordTest.errors.join(' '), isUpdating: false }; });
+										} else {
+											setPassword(x => { return {...x, error: undefined, isUpdating: true }; });
+											Meteor.call('esUpdateUser', { id: user.id, password: password.value }, (error, updatedUser) => {
+												if (error) {
+													console.error(error);
+													setPassword(x => { return {...x, error: error.reason, isUpdating: false }; });
+												} else {
+													setPassword({ value: undefined, error: undefined, isUpdating: false });
+													setUser(updatedUser);
+												}
+											});
+										}
+									}
+								}}
+							/>
+						</Form>
+					</>
+				}
+			</Modal.Content>
+			{ error &&
+				<Modal.Actions>
+					<Button 
+						basic
+						negative
+						as='a'
+						href={'mailto:webmaster@earthref.org?subject=[EarthRef Log In Help]%20I%27m%20having%20trouble%20logging%20in%20with%20ORCID'} 
+						style={{ float: 'left' }}
+					>
+						<Icon name='mail'/>
+						&nbsp;<b>Having Trouble?</b>&nbsp;Email Us
+					</Button>
+						<Button
+							onClick={() => { setUser(undefined); setError(undefined); }}
+						>
+							Retry Fetching User Data
+						</Button>
+				</Modal.Actions>
+			}
+		</Modal>
+  );
 }
