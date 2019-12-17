@@ -56,13 +56,17 @@ export default class extends React.Component {
           $(this.refs["validate loading"]).hide();
           $(this.refs["validate results"]).hide();
           $(this.refs["validate error"]).show();
+        } else if (activate && this.nValidationErrors(validation) === 0) {
+          $(this.refs["validate loading"]).hide();
+          $(this.refs["validate results"]).hide();
+          $(this.refs["validate error"]).hide();
+          this.confirmActivate(id);
         } else {
           this.setState({validation}, () => {
             $(this.refs["validate loading"]).hide();
             $(this.refs["validate error"]).hide();
-            if (!activate) $(this.refs["validate results"]).show();
+            $(this.refs["validate results"]).show();
           });
-          if (activate) this.confirmActivate(id);
         }
         this.updateContributions();
       }
@@ -182,20 +186,28 @@ export default class extends React.Component {
     );
   }
 
+  nValidationWarnings(validation) {
+    return validation && _.reduce(_.keys(validation.warnings), (n, table) => 
+      n + _.reduce(_.keys(validation.warnings[table]), (nTable, column) =>
+        nTable + _.keys(validation.warnings[table][column]).length,
+      0),
+    0);
+  }
+
+  nValidationErrors(validation) {
+    return validation && _.reduce(_.keys(validation.errors), (n, table) => 
+      n + _.reduce(_.keys(validation.errors[table]), (nTable, column) =>
+        nTable + _.keys(validation.errors[table][column]).length,
+      0),
+    0);
+  }
+
   render() {
 
-    const nValidationWarnings = _.reduce(_.keys(this.state.validation.warnings), (n, table) => 
-      n + _.reduce(_.keys(this.state.validation.warnings[table]), (nTable, column) =>
-        nTable + _.keys(this.state.validation.warnings[table][column]).length,
-      0),
-    0);
+    const nValidationWarnings = this.nValidationWarnings(this.state.validation);
     const strValidationWarnings = numeral(nValidationWarnings).format('0,0') + ' Validation Warning' + (nValidationWarnings === 1 ? '' : 's');
 
-    const nValidationErrors = _.reduce(_.keys(this.state.validation.errors), (n, table) => 
-      n + _.reduce(_.keys(this.state.validation.errors[table]), (nTable, column) =>
-        nTable + _.keys(this.state.validation.errors[table][column]).length,
-      0),
-    0);
+    const nValidationErrors = this.nValidationErrors(this.state.validation);
     const strValidationErrors = numeral(nValidationErrors).format('0,0') + ' Validation Error' + (nValidationErrors === 1 ? '' : 's');
 
     console.log("privateContributions", this.privateContributions, Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
@@ -355,7 +367,7 @@ export default class extends React.Component {
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
                         <div className={"ui red small button"} style={{margin: "0 0 0 0.5em"}}
                             onClick={(e) => {
-                              this.validateThenActivate(c.summary.contribution.id);
+                              this.validate(c.summary.contribution.id);
                             }}
                         >
                           Validate
@@ -364,7 +376,7 @@ export default class extends React.Component {
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
                         <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
                              onClick={(e) => {
-                               this.confirmActivate(c.summary.contribution.id);
+                               this.validateThenActivate(c.summary.contribution.id);
                              }}
                         >
                           Activate
