@@ -10,28 +10,6 @@ export default class extends React.Component {
     return (
       <div style={{textAlign: "justify"}}>
         <h3>
-          <Image size="mini" src="/MagIC/agu.jpg" floated="left"/>
-          {` MagIC at AGU`}
-        </h3>
-        <p>
-          {`MagIC will be presenting an `}
-          <a href="https://agu.confex.com/agu/fm19/meetingapp.cgi/Paper/548126" target="_blank"><b>eLightning talk</b></a>
-          {` on Tuesday morning at 10:20 AM (`}
-          <b>IN22B-01</b>
-          {` - `}
-          <i>Thorough Annotation of Magnetics Information Consortium (MagIC) Contributions with Schema.org Structured Metadata</i>
-          {`) and a `}
-          <a href="https://agu.confex.com/agu/fm19/meetingapp.cgi/Paper/560891" target="_blank"><b>poster</b></a>
-          {` on Thursday afternoon (`}
-          <b>GP43A-0788</b>
-          {` - `}
-          <i>Magnetics Information Consortium (MagIC) Database Interoperability Improvements: ORCID, EarthCube, Google, and PmagPy</i>
-          {`) at the `}
-          <a href="https://www.agu.org/fall-meeting" target="_blank"><b>2019 AGU Fall Meeting</b></a>
-          {`. We hope you can come by one of our presentations to discuss MagIC's current status and future improvements.`}
-        </p>
-        <div className="ui divider"></div>
-        <h3>
           <Image size="mini" src="/MagIC/sio.jpg" floated="left"/>
           {` 2020 MagIC Workshop`}
         </h3>
@@ -48,6 +26,28 @@ export default class extends React.Component {
           {` for contribution to the MagIC database and practice using the `}
           <a href="https://earthref.org/PmagPy/cookbook/"><b>PmagPy</b></a>
           {` paleomagnetic software suite.`}
+        </p>
+        <div className="ui divider"></div>
+        <h3>
+          <Image size="mini" src="/MagIC/agu.jpg" floated="left"/>
+          {` MagIC at AGU`}
+        </h3>
+        <p>
+          {`MagIC presented an `}
+          <a href="https://agu.confex.com/agu/fm19/meetingapp.cgi/Paper/548126" target="_blank"><b>eLightning talk</b></a>
+          {` on Tuesday morning at 10:20 AM (`}
+          <b>IN22B-01</b>
+          {` - `}
+          <i>Thorough Annotation of Magnetics Information Consortium (MagIC) Contributions with Schema.org Structured Metadata</i>
+          {`) and a `}
+          <a href="https://agu.confex.com/agu/fm19/meetingapp.cgi/Paper/560891" target="_blank"><b>poster</b></a>
+          {` on Thursday afternoon (`}
+          <b>GP43A-0788</b>
+          {` - `}
+          <i>Magnetics Information Consortium (MagIC) Database Interoperability Improvements: ORCID, EarthCube, Google, and PmagPy</i>
+          {`) at the `}
+          <a href="https://www.agu.org/fall-meeting" target="_blank"><b>2019 AGU Fall Meeting</b></a>
+          {`.`}
         </p>
         <div className="ui divider"></div>
         <h3>
