@@ -25,7 +25,8 @@ export default class extends React.Component {
 
       let json = {
         "@context": {
-          "@vocab": "http://schema.org"
+          "@vocab": "http://schema.org",
+          "geosciTime": "http://schema.geoschemas.org/contexts/temporal#"
         },
         "@type": "Dataset",
         "url": "https://earthref.org/MagIC/" + (this.props.id || contribution.id),
@@ -109,7 +110,36 @@ export default class extends React.Component {
         json.temporalCoverage = { 
           "@type": "DateTime", 
           "startDate": -startYBP + 1949 + (startYBP < 1950 ? 1 : 0), 
-          "endDate": -endYBP + 1949 + (endYBP < 1950 ? 1 : 0)
+          "endDate": -endYBP + 1949 + (endYBP < 1950 ? 1 : 0),
+        };
+      }
+
+      if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
+        let startYBP = Math.round(all._age_range_ybp.range.gte);
+        let endYBP = Math.round(all._age_range_ybp.range.lte);
+        json.geosciTime =  json.geosciTime || {
+          "@type": "time:Instant", 
+          "time:inTimePosition" : {
+            "@type": "time:ProperInterval",
+            "time:hasBeginning": {
+              "time:hasTRS": { 
+                "@id": "geosciTime:BeforePresent" 
+              },
+              "time:numericPosition": {
+                "@value": startYBP, 
+                "@type": "xsd:decimal"
+              },
+            },
+            "time:hasEnd": {
+              "time:hasTRS": { 
+                "@id": "geosciTime:BeforePresent" 
+              },
+              "time:numericPosition": {
+                "@value": endYBP, 
+                "@type": "xsd:decimal"
+              },
+            },
+          },
         };
       }
 
