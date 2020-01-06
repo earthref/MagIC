@@ -26,7 +26,7 @@ export default class extends React.Component {
       let json = {
         "@context": {
           "@vocab": "http://schema.org",
-          "geosciTime": "http://schema.geoschemas.org/contexts/temporal#"
+          "geosci-time": "http://schema.geoschemas.org/contexts/temporal#"
         },
         "@type": "Dataset",
         "url": "https://earthref.org/MagIC/" + (this.props.id || contribution.id),
@@ -117,13 +117,13 @@ export default class extends React.Component {
       if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
         let startYBP = Math.round(all._age_range_ybp.range.gte);
         let endYBP = Math.round(all._age_range_ybp.range.lte);
-        json.geosciTime =  json.geosciTime || {
+        json['geosci-time'] =  json['geosci-time'] || {
           "@type": "time:Instant", 
           "time:inTimePosition" : {
             "@type": "time:ProperInterval",
             "time:hasBeginning": {
               "time:hasTRS": { 
-                "@id": "geosciTime:BeforePresent" 
+                "@id": "geosci-time:BeforePresent" 
               },
               "time:numericPosition": {
                 "@value": startYBP, 
@@ -132,7 +132,7 @@ export default class extends React.Component {
             },
             "time:hasEnd": {
               "time:hasTRS": { 
-                "@id": "geosciTime:BeforePresent" 
+                "@id": "geosci-time:BeforePresent" 
               },
               "time:numericPosition": {
                 "@value": endYBP, 
