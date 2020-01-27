@@ -1276,7 +1276,7 @@ export default function () {
       }
     },
 
-    async esGetUserByID({id}) {
+    async esGetUserByID({id, session}) {
       console.log("esGetUserByID", id);
       this.unblock();
       try {
@@ -1287,12 +1287,49 @@ export default function () {
             "query": { "term": { "id": id }}
           }
         });
-        let user = resp.hits.hits[0]._source;
+        let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
+        if (user && session && session.id) {
+          console.log('before session', user);
+          session.last_active = moment().utc().format('YYYY-MM-DD[T]HH:mm:ss.SS[Z]');
+          user.session = user.session || [];
+          user.session = user.session.filter ? user.session : [user.session]; 
+          let thisSession = user.session.filter(x => x.id === session.id);
+          if (thisSession.length) user.session = user.session.forEach(x => (x.id === session.id ? session : x));
+          else user.session.push(session);
+          console.log('after session', user);
+          await esClient.update({
+            "index": erUsersIndex,
+            "type": "_doc",
+            "id": user.id,
+            "refresh": true,
+            "body": { doc: { session }}
+          });
+        }
         return user;
       } catch(error) {
         console.error("esGetUserByID", id, error.message);
         throw new Meteor.Error("User ID", `Unrecognized user ID ${id}.`);
+      }
+    },
+
+    async esGetUserByORCID({orcid}) {
+      console.log("esGetUserByORCID", orcid);
+      this.unblock();
+      try {
+        let resp = await esClient.search({
+          "index": erUsersIndex,
+          "size": 1,
+          "body": {
+            "query": { "term": { "orcid.id.raw": orcid }}
+          }
+        });
+        let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
+        user = __.omitDeep(user, /(^|\.)_/);
+        return user;
+      } catch(error) {
+        console.error("esGetUserByORCID", orcid, error.message);
+        throw new Meteor.Error("ORCID iD", `Unrecognized ORCID iD ${orcid}.`);
       }
     },
 
@@ -1304,7 +1341,7 @@ export default function () {
           "index": erUsersIndex,
           "body": {
             "query": { "term": { "email.address.raw": email.toLowerCase() }},
-            "sort": { "_id": "desc" }
+            "sort": { "id": "desc" }
           }
         });
         return resp.hits.hits.map(hit => __.omitDeep(hit._source, /(^|\.)_/));
@@ -1322,7 +1359,7 @@ export default function () {
           "index": erUsersIndex,
           "body": {
             "query": { "term": { "handle.raw": handle.toLowerCase() }},
-            "sort": { "_id": "desc" }
+            "sort": { "id": "desc" }
           }
         });
         let user = resp.hits.hits[0]._source;
@@ -1346,7 +1383,7 @@ export default function () {
           "size": 1,
           "body": {
             "query": { "term": { "handle.raw": handle.toLowerCase() }},
-            "sort": { "_id": "desc" }
+            "sort": { "id": "desc" }
           }
         });
         if (resp.hits.total === 0)
@@ -1358,7 +1395,7 @@ export default function () {
             "size": 1,
             "body": {
               "query": { "term": { "handle.raw": handle.toLowerCase() + (x+1) }},
-              "sort": { "_id": "desc" }
+              "sort": { "id": "desc" }
             }
           });
           if (resp.hits.total === 0)
@@ -1382,7 +1419,7 @@ export default function () {
             "query": {
               "match_all": {}
             },
-            "sort": { "_id": "desc" }
+            "sort": { "id": "desc" }
           }
         });
         return parseInt(resp.hits.hits[0]._id) + 1;
@@ -1403,6 +1440,7 @@ export default function () {
           id: await Meteor.call('esNextAvailableUserID'),
           has_password: false
         };
+        console.log("esCreateUserFromORCID", name, email, orcid, user);
         await esClient.index({
           "index": erUsersIndex,
           "type": "_doc",

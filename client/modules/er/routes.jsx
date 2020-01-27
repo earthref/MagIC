@@ -22,7 +22,7 @@ const Routes = () => (
         <ORCIDLoggingInModal code={queryString.parse(location.search).code} />
       </Page>
     }/>
-    <Route exact path="/login" render={({location}) =>
+    <Route exact path="/log-in" render={({location}) =>
       <Page portal="EarthRef.org">
         {	parseInt(Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) ?
           <User openInitially portal="EarthRef.org"/> :
@@ -30,6 +30,12 @@ const Routes = () => (
         }
       </Page>
     }/>
+    <Route exact path="/log-out" render={({location}) => {
+      Cookies.remove('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+      Cookies.remove('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+      Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+      return <Redirect to={location.search.next_url || '/'}/>;
+    }}/>
     <Route exact path="/edit-profile" render={({location}) =>
       <Page portal="EarthRef.org">
         {	parseInt(Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) ?

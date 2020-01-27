@@ -20,6 +20,7 @@ export function LogIn({ openInitially, className, portal }) {
 	const [emailError, setEmailError] = useState();
 	const [password, setPassword] = useState();
 	const [passwordError, setPasswordError] = useState();
+	const [loggingInWithORCID, setLoggingInWithORCID] = useState();
 	const [loggingIn, setLogginIn] = useState();
 	const [logInError, setLogInError] = useState();
 
@@ -43,9 +44,20 @@ export function LogIn({ openInitially, className, portal }) {
 								With an ORCID iD:
 							</Header>
 							<img src='/ORCIDiD_icon64x64.png' style={{ margin: '1em auto', display: 'block' }}/>
-							<Button fluid color='black' as='a' href={orcidAuthorizeURL} onClick={() => {
-								localStorage.setItem('orcid.nextLocation', location.pathname + location.search);
-							}}>
+							<Button 
+								fluid 
+								color='black' 
+								as='a' 
+								href={orcidAuthorizeURL} 
+								disabled={loggingInWithORCID} 
+								onClick={() => {
+									setLoggingInWithORCID(true);
+									localStorage.setItem('orcid.nextLocation', location.pathname + location.search);
+								}
+							}>
+								{ loggingInWithORCID && 
+									<Icon loading name='spinner'/>
+								}
 								Log In or Register with ORCID
 							</Button>
 							<Message>
@@ -129,17 +141,16 @@ export function LogIn({ openInitially, className, portal }) {
 
 export function ORCIDLoggingInModal({ code }) {
 	const history = useHistory();
-  const [user, setUser] = useState();
-  const [error, setError] = useState();
+	const [user, setUser] = useState();
+	const [error, setError] = useState();
 
 	if (code && !error && !user) {
-		const id = Cookies.get('mail_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
-		Meteor.call('updateUserWithORCID', { code, id }, (error, user) => {
+		Meteor.call('updateUserWithORCID', { code }, (error, user) => {
 			if (error) {
 				console.error(error);
 				setError(error);
 			} else {
-				// console.log(user);
+				console.log(user);
 				Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				Cookies.set('user_id', user.handle, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				if (user.name)
@@ -147,6 +158,7 @@ export function ORCIDLoggingInModal({ code }) {
 				else
 					Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				setUser(user);
+				localStorage.setItem('user.openInitially', true);
 				history.push(localStorage.getItem('orcid.nextLocation'));
 			}
 		});

@@ -21,8 +21,8 @@ export default function () {
       }
     },
 
-    async updateUserWithORCID({code, id}) {
-      let orcid, token, existingUser;
+    async updateUserWithORCID({code}) {
+      let id, orcid, token, existingUser;
       if (id) try {
         let user = await Meteor.call('esGetUserByID', {id});
         orcid = user && user.orcid && user.orcid.id;
@@ -51,6 +51,11 @@ export default function () {
           'Failed to authenticate your ORCID account.',
           'Please retry logging in with ORCID. If you are still having trouble, please email us.'
         );
+      }
+      if (orcid) try {
+        existingUser = await Meteor.call('esGetUserByORCID', {orcid});
+      } catch (error) {
+        console.error('updateUserWithORCID esGetUserByORCID', orcid, error);
       }
       try {
         let record = HTTP.call("GET", `https://api.${Meteor.isDevelopment ? 'sandbox.' : ''}orcid.org/v3.0/${orcid}/record`, {
