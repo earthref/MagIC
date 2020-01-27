@@ -46,13 +46,15 @@ export default class extends React.Component {
       if (contribution._contributor) json.contributor = contribution._contributor;
       if (contribution.timestamp) json.dateModified = contribution.timestamp;
   
-      if (contribution._reference.doi) json.citation = "https://dx.doi.org/" + contribution._reference.doi;
-      if (contribution._reference.doi) json.sameAs = ["https://earthref.org/MagIC/" + contribution._reference.doi];
-      if (contribution._reference.html || contribution._reference.title) json.name = (contribution._reference.html || contribution._reference.title) + ' (Dataset)';
-      if (contribution._reference.html || contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + (contribution._reference.html || contribution._reference.title);
-      if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
-      if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
-      if (contribution._reference.year) json.datePublished = contribution._reference.year;
+      if (contribution._reference) {
+        if (contribution._reference.doi) json.citation = "https://dx.doi.org/" + contribution._reference.doi;
+        if (contribution._reference.doi) json.sameAs = ["https://earthref.org/MagIC/" + contribution._reference.doi];
+        if (contribution._reference.html || contribution._reference.title) json.name = (contribution._reference.html || contribution._reference.title) + ' (Dataset)';
+        if (contribution._reference.html || contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + (contribution._reference.html || contribution._reference.title);
+        if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
+        if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
+        if (contribution._reference.year) json.datePublished = contribution._reference.year;
+      }
 
       if (all._geo_envelope) {
         try {
