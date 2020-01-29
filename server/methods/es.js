@@ -283,6 +283,8 @@ export default function () {
       console.log("esCreatePrivateContribution", index, contributor, _contributor, name);
       this.unblock();
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
 
         // Get the next contribution ID
         let next_id = await esClient.search({
@@ -371,6 +373,8 @@ export default function () {
       this.unblock();
 
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
 
         let contributionRow = {
           "contributor": contributor,
@@ -419,6 +423,9 @@ export default function () {
       let contribution = {};
       let summary = {};
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
+
         let resp = await esClient.search({
           "index": index,
           "type": "contribution",
@@ -518,6 +525,9 @@ export default function () {
       let contribution = {};
       let summary = {};
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
+
         let resp = await esClient.search({
           "index": index,
           "type": "contribution",
@@ -613,6 +623,8 @@ export default function () {
       console.log("esGetPrivateContributionSummaries", index, contributor);
       this.unblock();
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
 
         let resp = await esClient.search({
           "index": index,
@@ -661,6 +673,8 @@ export default function () {
       console.log("esGetPrivateContributionSummary", index, id, contributor);
       this.unblock();
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
 
         let resp = await esClient.search({
           "index": index,
@@ -849,6 +863,9 @@ export default function () {
       }];
 
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
+          
         let resp = await esClient.search({
           "index": index,
           "type": "contribution",
@@ -888,6 +905,9 @@ export default function () {
       let version = _history[0].version;
 
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
+          
         await esClient.update({
           "index": index,
           "type": "contribution",
@@ -1001,6 +1021,9 @@ export default function () {
       console.log("esDeletePrivateContribution", index, id, contributor);
       this.unblock();
       try {
+        if (!contributor || contributor === 'undefined')
+          throw new Error('Unrecognized contributor.');
+          
         let resp = await esClient.deleteByQuery({
           "index": index,
           "refresh": true,
@@ -1289,15 +1312,14 @@ export default function () {
         });
         let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
+        user.handle = user.handle || `user${user.id}`;
         if (user && session && session.id) {
-          console.log('before session', user);
           session.last_active = moment().utc().format('YYYY-MM-DD[T]HH:mm:ss.SS[Z]');
           user.session = user.session || [];
           user.session = user.session.filter ? user.session : [user.session]; 
           let thisSession = user.session.filter(x => x.id === session.id);
           if (thisSession.length) user.session = user.session.forEach(x => (x.id === session.id ? session : x));
           else user.session.push(session);
-          console.log('after session', user);
           await esClient.update({
             "index": erUsersIndex,
             "type": "_doc",
@@ -1326,6 +1348,7 @@ export default function () {
         });
         let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
+        user.handle = user.handle || `user${user.id}`;
         return user;
       } catch(error) {
         console.error("esGetUserByORCID", orcid, error.message);
@@ -1344,7 +1367,10 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        return resp.hits.hits.map(hit => __.omitDeep(hit._source, /(^|\.)_/));
+        return resp.hits.hits.map(hit => {
+          __.omitDeep(hit._source, /(^|\.)_/);
+          hit.handle = hit.handle || `user${hit.id}`;
+        });
       } catch(error) {
         console.error("esGetUserByEmail", email, error.message);
         throw new Meteor.Error("Email", `Unrecognized email address ${email}.`);
@@ -1362,8 +1388,9 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        let user = resp.hits.hits[0]._source;
+        let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
+        user.handle = user.handle || `user${user.id}`;
         return user;
       } catch(error) {
         console.error("esGetUserByHandle", handle, error.message);
