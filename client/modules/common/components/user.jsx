@@ -35,7 +35,7 @@ export function User({ openInitially, className, portal }) {
 	const [givenNames, setGivenNames] = useState({ value: undefined, error: undefined, isUpdating: false });
 	const [familyName, setFamilyName] = useState({ value: undefined, error: undefined, isUpdating: false });
 
-	localStorage.setItem('user.openInitially', false);
+	localStorage.removeItem('user.openInitially');
 
 	const id = parseInt(Cookies.get('mail_id', cookieSettings));
 	const session = { id: uuid.v4() };

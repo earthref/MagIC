@@ -159,7 +159,9 @@ export function ORCIDLoggingInModal({ code }) {
 					Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				setUser(user);
 				localStorage.setItem('user.openInitially', true);
-				history.push(localStorage.getItem('orcid.nextLocation'));
+				let nextLocation = localStorage.getItem('orcid.nextLocation');
+				localStorage.removeItem('orcid.nextLocation');
+				history.push(nextLocation);
 			}
 		});
 	}
@@ -199,9 +201,11 @@ export function ORCIDLoggingInModal({ code }) {
 					<Icon name='mail'/>
 					&nbsp;<b>Having Trouble?</b>&nbsp;Email Us
 				</Button>
-				<Button negative content='Cancel' onClick={() =>
-					history.push(localStorage.getItem('orcid.nextLocation'))
-				} />
+				<Button negative content='Cancel' onClick={() => {
+					let nextLocation = localStorage.getItem('orcid.nextLocation');
+					localStorage.removeItem('orcid.nextLocation');
+					history.push(nextLocation);
+				}} />
 				{ error &&
 					<Button as='a' href={ orcidAuthorizeURL }>
 						<img 
