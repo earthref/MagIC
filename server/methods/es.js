@@ -522,8 +522,7 @@ export default function () {
 
       const summarizer = new SummarizeContribution({});
 
-      let contribution = {};
-      let summary = {};
+      let doc = {};
       try {
         if (!contributor || contributor === 'undefined')
           throw new Error('Unrecognized contributor.');
@@ -532,9 +531,6 @@ export default function () {
           "index": index,
           "type": "contribution",
           "body": {
-            "_source": {
-              "includes": ["summary.contribution.*", "contribution.*"]
-            },
             "query": {
               "bool": {
                 "filter": [{
@@ -553,21 +549,19 @@ export default function () {
         if (resp.hits.total > 0) {
           if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
             resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-          contribution = resp.hits.hits[0]._source.contribution;
-          summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+          doc = resp.hits.hits[0]._source;
         }
 
-        await summarizer.summarizePromise(contribution, {summary: summary});
+        await summarizer.summarizePromise(doc.contribution, {summary: { contribution: doc.summary.contribution }});
+        doc.summary = summarizer.json.contribution.summary;
 
         console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0");
-        await esClient.update({
+        await esClient.index({
           "index": index,
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
-          "body": {
-            "doc": { summary: summarizer.json.contribution.summary }
-          }
+          "body": doc
         });
         console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
 
