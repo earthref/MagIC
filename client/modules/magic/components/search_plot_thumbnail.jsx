@@ -335,7 +335,7 @@ export default class extends React.Component {
     else if (files && (files.length === 0 || count === 0)) {
       return (
         <div style={containerStyle}>
-          <br/>No<br/><b>Plots</b><br/>Made<br/><br/>
+          <br/>No<br/><b>Plots</b><br/>Available<br/><br/>
         </div>
       );
     }
