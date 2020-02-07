@@ -6,9 +6,17 @@ export default class extends React.Component {
   render() {
     return (
       <div>
-        <p> The following is a list of Jupyter Notebooks resources that 
-            use PmagPy programs to manipulate, analyze and display paleomagnetic 
-            data using the MagIC data file format. 
+        <p> 
+            There are five Jupyter notebooks for PmagPy that explain the functions and uses of the PmagPy 
+            software. They can be found and downloaded from the PmagPy GitHub website: <br/>
+            <br/> 
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_introduction.ipynb'>Introduction</a><br/>
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_MagIC.ipynb'>PmagPy and MagIC</a><br/>
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_calculations.ipynb'>Calculations</a><br/>
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_plots_analysis.ipynb'>Plots and Analysis</a><br/>
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy-cli.ipynb'>PmagPy - Command Line Verson</a>
+        </p>
+        <p> <br/>Other PmagPy Jupyter Notebooks:
         </p>
         <p> <a href='https://github.com/PmagPy/2016_Tauxe-et-al_PmagPy_Notebooks'>Tauxe el al. (2016) PmagPy Example Notebooks</a>
             <br/>
