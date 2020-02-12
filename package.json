@@ -63,6 +63,7 @@
     "test": "set TEST_WATCH=1&& set TEST_CLIENT=0&& meteor test --driver-package=meteortesting:mocha --port 3010 --settings settings.json",
     "debug": "meteor run --inspect --settings settings.json",
     "build-meteor": "meteor run --settings settings.json",
-    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.4.2/semantic.css"
+    "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.4.2/semantic.css",
+    "deploy": "meteor deploy www2.earthref.org --settings settings.json"
   }
 }
