@@ -220,7 +220,7 @@ export function User({ openInitially, className, portal }) {
 														} else {
 															setGivenNames({ value: undefined, error: undefined, isUpdating: false });
 															if (user.name)
-																Cookies.set('name', user.name.published || `${updatedUser.name.given} ${updatedUser.name.family}`, cookieSettings);
+																Cookies.set('name', `${updatedUser.name.given} ${updatedUser.name.family}`, cookieSettings);
 															else
 																Cookies.remove('name', cookieSettings);
 															setUser(updatedUser);
@@ -255,7 +255,7 @@ export function User({ openInitially, className, portal }) {
 														} else {
 															setFamilyName({ value: undefined, error: undefined, isUpdating: false });
 															if (user.name)
-																Cookies.set('name', user.name.published || `${updatedUser.name.given} ${updatedUser.name.family}`, cookieSettings);
+																Cookies.set('name', `${updatedUser.name.given} ${updatedUser.name.family}`, cookieSettings);
 															else
 																Cookies.remove('name', cookieSettings);
 															setUser(updatedUser);

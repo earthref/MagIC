@@ -110,7 +110,7 @@ export function LogIn({ openInitially, className, portal }) {
 												Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												Cookies.set('user_id', user.handle || `user${user.id}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												if (user.name)
-													Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+													Cookies.set('name', `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												else
 													Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 												history.replace(location);
@@ -154,7 +154,7 @@ export function ORCIDLoggingInModal({ code }) {
 				Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				Cookies.set('user_id', user.handle || `user${user.id}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				if (user.name)
-					Cookies.set('name', user.name.published || `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+					Cookies.set('name', `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				else
 					Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				setUser(user);
