@@ -48,8 +48,8 @@ let index = "magic_v4";
               { "term": { "summary.contribution._is_activated": "true"}},
               //{ "term": { "summary.contribution._is_latest": "true"}}
             ],
-            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
-            //"filter": { "term": { "summary.contribution.id": 16515}}
+            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
+            "filter": { "term": { "summary.contribution.id": 16696}}
           }}
         }
       }).then((resp) => {
@@ -138,7 +138,6 @@ let index = "magic_v4";
                 `<creators><creator><creatorName>` +
                   `${hit._source.summary.contribution._reference.long_authors}` +
                 `</creatorName></creator></creators>`;
-
               let datacite = 
                 `<?xml version="1.0"?>
                 <resource 
@@ -172,8 +171,8 @@ let index = "magic_v4";
                     <rights rightsURI="https://creativecommons.org/licenses/by/4.0/"/>
                   </rightsList>
                 </resource>`;
-              // console.log(datacite);
-              datacite = datacite.replace(/%/g, "%25").replace(/\s*\n\s*/g, "%0A").replace(/\r/g, "%0D").replace(/:/g, "%3A");
+              datacite = datacite.replace(/%/g, "%25").replace(/\s*\n\s*/g, "%0A").replace(/\r/g, "%0D").replace(/:/g, "%3A").replace(/\s&\s/g, " and ");
+              console.log(datacite);
               let payload =
                 `_profile: datacite\n` +
                 `_status: public\n` +
