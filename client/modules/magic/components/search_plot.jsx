@@ -77,7 +77,7 @@ export default class extends React.Component {
         <div style={style}>
           <div style={{display:'flex', flexDirection:'row', maxHeight:'100%', maxWidth:'100%', margin:'auto'}}>
             <div ref="img container" style={{display:'flex'}}>
-              <div className="ui active inverted dimmer" style={style}>
+              <div className="ui active inverted dimmer" style={loadingStyle}>
                 <div className="ui text loader">Loading</div>
               </div>
               <img style={{ position:'absolute', zIndex: 1, maxHeight:'100%', maxWidth:'100%', margin:'auto', border:'1px solid rgba(0,0,0,.1)'}} src={source} onLoad={this.forceImgContainerReflow.bind(this)}/>

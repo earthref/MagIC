@@ -208,7 +208,7 @@ export default class extends React.Component {
       return (
         <div style={thumbnailContainerStyle}>
           <a href="#" onClick={this.showPlots.bind(this)} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
-            <SearchPlot style={thumbnailStyle} id={id} isPrivate={isPrivate}
+            <SearchPlot style={thumbnailStyle} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate}
               file={file || activeFiles.length && (activeFiles[0].thumbnail || activeFiles.full)}
             />
             <div className="ui top right attached small basic label" style={{ padding:'.5rem', margin:'-1px', zIndex: 1000 }}>
@@ -253,7 +253,7 @@ export default class extends React.Component {
               {!this.state.file && this.state.modal && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
                 <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
                   <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
-                    <SearchPlot style={thumbnailStyle} id={id} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
+                    <SearchPlot style={thumbnailStyle} id={id} loadingStyle={loadingStyle} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
                   </a>
                   <div className="ui bottom attached mini label" style={{ boxSizing:'border-box', zIndex: 1000, width:'calc(100% + 2px)', margin: '1px -1px -1rem -1px', lineHeight: '1rem', padding: '0 .25rem', border:'1px solid rgba(0,0,0,.1)', whiteSpace:'nowrap', direction:'rtl' }}>
                     <Clamp lines={1} ><span>{this.fileToRowName(f.thumbnail || f.full)}</span></Clamp>
@@ -274,7 +274,7 @@ export default class extends React.Component {
               }
               {this.state.file && 
                 <div style={{display:'flex', position:'absolute', top: 0, right: 0, bottom: 0, left: 0, padding:'2rem 4rem 2rem'}}>
-                  <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} id={id} isPrivate={isPrivate} file={this.state.file.full || this.state.file.thumbnail} download={true}/>
+                  <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate} file={this.state.file.full || this.state.file.thumbnail} download={true}/>
                   <a href="#" onClick={() => this.setState({file: undefined})} style={{position:'absolute', right:'1rem', top:'1rem', zIndex:1000}}>
                     <i className="ui large close icon"/>
                   </a>
