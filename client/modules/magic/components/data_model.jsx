@@ -294,7 +294,7 @@ class DataModel extends React.Component {
               )}
             </div>
             <div className="right aligned six wide column">
-              <a href="" onClick={this.downloadJSON.bind(this)}>
+              <a href="#" onClick={this.downloadJSON.bind(this)}>
               <i className="download icon"/>
               Download as .json</a> | <a href="https://docs.google.com/spreadsheets/d/1ldYzO6WMyxfVT6gv3imKaZIVqvp97uPmWijT_ElpZnY">View/Comment via Google Sheet</a>
             </div>

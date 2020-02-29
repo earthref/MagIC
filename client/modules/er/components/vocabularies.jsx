@@ -174,7 +174,7 @@ export default class extends React.Component {
           </div>
           <div className="ui equal width grid">
             <div className="right aligned column">
-              <a href="" onClick={this.downloadJSON.bind(this)}>
+              <a href="#" onClick={this.downloadJSON.bind(this)}>
               <i className="download icon"/>
               Download as .json</a>.
             </div>
@@ -196,7 +196,7 @@ export default class extends React.Component {
                     <div className="ui six column doubling padded grid">
                       {vocabularies[group].items.map((item,j) => {
                         return (
-                          <div className="column" key={j}>
+                          <div className="vocabularies-column" key={j}>
                             <div className="ui bulleted list">
                               <div className="item">
                                 <div className="content">
