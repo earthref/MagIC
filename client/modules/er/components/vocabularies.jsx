@@ -42,18 +42,12 @@ export default class extends React.Component {
     return false;
   }
 
-  componentWillReceiveProps(nextProps) {
-    this.setState({search: nextProps.search});
-  }
-
   onSearchChange(e) {
     this.setState({ search: e.target.value });
   }
 
   search(str) {
-    return;
     const $tbls  = $(this.refs['accordion']).find('.vocabularies-table');
-    const $grps  = $(this.refs['accordion']).find('.vocabularies-group');
     const $cols  = $(this.refs['accordion']).find('.vocabularies-column');
 
     // Enable columns that contain the string and disable others.
@@ -70,17 +64,6 @@ export default class extends React.Component {
         else
           $table.removeClass('no-match');
       });
-      $grps.find('.vocabularies-group-count').each(function() {
-        const $group = $(this).parents('.vocabularies-group');
-        const n_match = $group.find('.vocabularies-column').not('.no-match').length;
-        $(this).addClass(portals['MagIC'].color);
-        $(this).children('span').remove();
-        $(this).prepend(`<span>${n_match} of </span>`);
-        if (n_match === 0)
-          $group.addClass('no-match');
-        else
-          $group.removeClass('no-match');
-      });
       $(this.refs['count']).html($cols.not('.no-match').length + ' of ' + $cols.length);
       $(this.refs['count']).addClass(portals['MagIC'].color);
     }
@@ -88,7 +71,6 @@ export default class extends React.Component {
     // Enable all columns since the search string is empty.
     else {
       $tbls.removeClass('no-match');
-      $grps.removeClass('no-match');
       $cols.removeClass('no-match');
       const $counts = $tbls.find('.vocabularies-table-count, .vocabularies-group-count');
       $counts.removeClass(portals['MagIC'].color);
@@ -101,7 +83,6 @@ export default class extends React.Component {
     // expand all tables and groups.
     if ($cols.not('.no-match').length <= 100 || $tbls.filter('.no-match').length >= 1) {
       $tbls.not('.no-match').children().addClass('active');
-      $grps.not('.no-match').children().addClass('active');
 
       if ($cols.not('.no-match').length <= 10)
         $cols.not('.no-match').children().children().addClass('active');
@@ -112,7 +93,6 @@ export default class extends React.Component {
     // Otherwise, expand the first table and all of the groups.
     else {
       $tbls.not('.no-match').children().removeClass('active');
-      $grps.not('.no-match').children().addClass('active');
       $cols.not('.no-match').children().children().removeClass('active');
       $tbls.not('.no-match').first().children().addClass('active');
     }
@@ -149,7 +129,7 @@ export default class extends React.Component {
           <Link className={(this.props.vocabularies === 'suggested' ? 'active ' : '') + 'item'} to={'suggested'}>
             Suggested Vocabularies
           </Link>
-          <div className="right menu" style={{display:'none'}}>
+          <div className="right menu">
             <div className="active item">
               <div className="ui search">
                 <div className="ui transparent icon input">
@@ -158,7 +138,7 @@ export default class extends React.Component {
                     className="prompt"
                     type="text"
                     placeholder="Search the columns ..."
-                    value={this.state.search}
+                    value={this.state.search || (this.props.search && this.props.search.q) || ""}
                     onChange={this.onSearchChange.bind(this)}
                   />
                   <i className={portals['MagIC'].color + ' search icon'}/>
