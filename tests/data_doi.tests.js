@@ -19,8 +19,6 @@ let index = "magic_v4";
     it("should update data dois", function (done) { setTimeout(() => {
       this.timeout(0);
 
-      //console.log(process.env.EZID_USER, process.env.EZID_PASS);
-
       esClient.search({
         index: index, type: "contribution", size: 1e4, 
         _source: [
@@ -45,11 +43,10 @@ let index = "magic_v4";
               { "exists": { "field": "summary.contribution._reference.title" }},
               { "exists": { "field": "summary.contribution._reference.year" }},
               { "exists": { "field": "summary.contribution.version" }},
-              { "term": { "summary.contribution._is_activated": "true"}},
-              //{ "term": { "summary.contribution._is_latest": "true"}}
+              { "term": { "summary.contribution._is_activated": "true"}}
             ],
-            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}]
-            "filter": { "term": { "summary.contribution.id": 16696}}
+            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
+            //"filter": { "term": { "summary.contribution.id": 16696}}
           }}
         }
       }).then((resp) => {
@@ -172,14 +169,12 @@ let index = "magic_v4";
                   </rightsList>
                 </resource>`;
               datacite = datacite.replace(/%/g, "%25").replace(/\s*\n\s*/g, "%0A").replace(/\r/g, "%0D").replace(/:/g, "%3A").replace(/\s&\s/g, " and ");
-              console.log(datacite);
               let payload =
                 `_profile: datacite\n` +
                 `_status: public\n` +
                 `_target: https://earthref.org/MagIC/${hit._source.summary.contribution.id}\n` +
                 `datacite: ${datacite}`;
 
-              //console.log('PUT', 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id, payload);
               request({
                 method: 'PUT',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id + '?update_if_exists=yes',
