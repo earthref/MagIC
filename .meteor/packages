@@ -18,7 +18,6 @@ reactive-dict@1.3.0
 dynamic-import@0.5.1
 less@2.8.0
 http@1.4.2
-mdg:meteor-apm-agent    # For Meteor Application Performance Monitoring (formerly Kadira) on Galaxy
 
 dburles:google-maps
 juliancwirko:postcss    # Replace standard-minifier-css for Autoprefixer support

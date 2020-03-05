@@ -29,7 +29,8 @@ const esClient = new elasticsearch.Client({
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
-const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1_sandbox' : 'er_users_v1';
+//const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1_sandbox' : 'er_users_v1';
+const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1' : 'er_users_v1';
 
 export default function () {
 
@@ -1306,7 +1307,7 @@ export default function () {
         });
         let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
-        user.handle = user.handle || `user${user.id}`;
+        user.handle = (user && user.handle) || `user${user.id}`;
         if (user && session && session.id) {
           session.last_active = moment().utc().format('YYYY-MM-DD[T]HH:mm:ss.SS[Z]');
           user.session = user.session || [];

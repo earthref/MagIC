@@ -46,7 +46,7 @@ let index = "magic_v4";
               { "term": { "summary.contribution._is_activated": "true"}}
             ],
             "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
-            //"filter": { "term": { "summary.contribution.id": 16696}}
+            //"filter": { "term": { "summary.contribution.id": 16758}}
           }}
         }
       }).then((resp) => {
