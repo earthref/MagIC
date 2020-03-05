@@ -143,9 +143,9 @@ class SearchSummariesListItem extends React.Component {
             <span>{'earthref.org/MagIC/' + id}</span>
           }</p>
         </span>}
-        {id && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
+        {id &&
         <span>
-          <b>{_is_activated ? 'EarthRef Data DOI Link:' : 'Future Data DOI Link:'}</b>
+          <b>{_is_activated ? 'EarthRef Data DOI:' : 'Future Data DOI:'}</b>
           <p>{_is_activated ?
             (_has_data_doi ? 
               <a style={this.styles.a} href={'http://dx.doi.org/10.7288/V4/MAGIC/' + id} target="_blank">{'10.7288/V4/MAGIC/' + id}</a> : 
