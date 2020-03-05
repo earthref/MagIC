@@ -134,10 +134,10 @@ class SearchSummariesListItem extends React.Component {
     let id            = item.summary && item.summary.contribution && item.summary.contribution.id;
     let doi           = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.doi;
     return (
-      <div style={{minWidth: 175, maxWidth: 175, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+      <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
         {id &&
         <span>
-          <b>MagIC Contribution Link:</b>
+          <b>{_is_activated ? 'MagIC Contribution Link:' : 'Future Contribution Link:'}</b>
           <p>{_is_activated ?
             <a style={this.styles.a} href={'https://earthref.org/MagIC/' + id} target="_blank">{'earthref.org/MagIC/' + id}</a> :
             <span>{'earthref.org/MagIC/' + id}</span>
@@ -145,18 +145,18 @@ class SearchSummariesListItem extends React.Component {
         </span>}
         {id && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.title && item.summary.contribution._reference.long_authors && 
         <span>
-          <b>EarthRef Data DOI Link:</b>
+          <b>{_is_activated ? 'EarthRef Data DOI Link:' : 'Future Data DOI Link:'}</b>
           <p>{_is_activated ?
             (_has_data_doi ? 
               <a style={this.styles.a} href={'http://dx.doi.org/10.7288/V4/MAGIC/' + id} target="_blank">{'10.7288/V4/MAGIC/' + id}</a> : 
               <span>Queued For Creation</span>
              ) :
-            <span>Created Upon Activation</span>
+            <span>{'10.7288/V4/MAGIC/' + id}</span>
           }</p>
         </span>}
         {doi &&
         <span>
-          <b>Publication DOI Link:</b>
+          <b>Publication DOI: </b>
           <Clamp lines={1}><a style={this.styles.a} href={'https://dx.doi.org/' + doi} target="_blank">{doi}</a></Clamp>
         </span>}
       </div>
@@ -654,7 +654,7 @@ class SearchSummariesListItem extends React.Component {
                       {_is_activated && !_has_data_doi &&
                       <span>Queued For Creation</span>}
                       {!_is_activated &&
-                        <span>Created Upon Activation</span>}
+                      <span>{'10.7288/V4/MAGIC/' + v.id}</span>}
                     </td>
                     <td>{v.version}</td>
                     <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
