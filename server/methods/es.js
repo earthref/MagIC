@@ -627,7 +627,7 @@ export default function () {
           "body": {
             "size": 100,
             "_source": {
-              "excludes": ["*.vals", "*._geo_shape"],
+              "excludes": ["*.vals", "*._geo_shape", "summary._all.vadm_sigma.range"],
               "includes": ["summary.contribution.*", "summary._all.*", "summary._incomplete_summary"]
             },
             "query": {
@@ -676,7 +676,7 @@ export default function () {
           "type": "contribution",
           "body": {
             "_source": {
-              "excludes": ["*.vals", "*._geo_shape"],
+              "excludes": ["*.vals", "*._geo_shape", "summary._all.vadm_sigma.range"],
               "includes": ["summary.contribution.*", "summary._all.*"]
             },
             "query": {
