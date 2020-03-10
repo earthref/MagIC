@@ -213,7 +213,7 @@ export default class extends React.Component {
     console.log("privateContributions", this.privateContributions, Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}));
     if (!Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) return (
       <div>
-        <div className="ui top attached segment">
+        <div className="ui top attached segment" ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
           <div className="ui center aligned two column relaxed grid">
             <div className="column">
               <IconButton
@@ -271,7 +271,7 @@ export default class extends React.Component {
               //console.log("ref", c, noReference);
               return (
                 <div className="item" key={i} style={{marginBottom: "1.5em"}}>
-                  <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}}>
+                  <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
                         <div className={"ui labeled fluid small icon input" + (c.updatingName ? " loading" : "")}>
@@ -316,7 +316,7 @@ export default class extends React.Component {
                       }
                     </div>
                   </div>
-                  <div className="ui attached secondary segment" style={{padding: "0.5em"}}>
+                  <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
                         <div className={"ui labeled fluid small icon input" + (c.updatingReference ? " loading" : "") + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
@@ -401,7 +401,7 @@ export default class extends React.Component {
                       }
                     </div>
                   </div>
-                  <div className="ui bottom attached segment" style={{padding: "1px 1em 0"}}>
+                  <div className="ui bottom attached segment" style={{padding: "1px 1em 0"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <DividedList items={[c]}>
                       <SearchSummaryListItem table="contribution" collapsed/>
                     </DividedList>

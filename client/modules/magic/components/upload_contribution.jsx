@@ -734,7 +734,7 @@ export default class MagICUploadContribution extends React.Component {
     if (this.state.uploaded) return <Redirect push to="/MagIC/private"/>;
     else if (!this.state._contributor) return (
       <div>
-        <div className="ui top attached segment">
+        <div className="ui top attached segment" ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
           <div className="ui center aligned two column relaxed grid">
             <div className="column">
               <IconButton
@@ -775,7 +775,7 @@ export default class MagICUploadContribution extends React.Component {
     );
     else return (
       <div className="upload-contribution">
-        <div className="ui top attached stackable three steps">
+        <div className="ui top attached stackable three steps" ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
           {(this.state.processingStep === 1 ?
             <div ref="select step" className="active pointing below step">
               <i className="icons">
