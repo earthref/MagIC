@@ -308,7 +308,7 @@ export default class DataImporter extends React.Component {
         for (let columnName in this.props.dataModel.tables[newState.settings.tableName].columns) {
           const columnLabel = this.props.dataModel.tables[newState.settings.tableName].columns[columnName].label;
           if (newState.inColumnNames[i] && (
-              newState.inColumnNames[i].toLowerCase() === columnName ||
+              newState.inColumnNames[i].toLowerCase() === columnName.toLowerCase() ||
               newState.inColumnNames[i].toLowerCase() === columnLabel.toLowerCase()))
             modelColumnByLabel = columnName;
         }
