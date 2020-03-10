@@ -387,7 +387,7 @@ export default class extends React.Component {
                           Activated
                         </div>
                       }
-                      {c.summary.contribution._is_activated === "true" && "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) === "@rminnett" && 
+                      {c.summary.contribution._is_activated === "true" && Meteor.isDevelopment && 
                       <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
                            onClick={(e) => {
                              console.log("deactivating");

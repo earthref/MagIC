@@ -666,7 +666,7 @@ class SearchSummariesListItem extends React.Component {
               })}
               </tbody>
             </table>}
-            {Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) == 'rminnett' && this.props.table === 'contribution' && item.summary.contribution &&
+            {Meteor.isDevelopment && this.props.table === 'contribution' && item.summary.contribution &&
             <table className="ui compact red table">
               <thead>
                 <tr>
