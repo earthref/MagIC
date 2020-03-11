@@ -804,7 +804,7 @@ export default class MagICUploadContribution extends React.Component {
               </i>
               <div className="content">
                 <div className="title">Step 2. Import</div>
-                <div className="description">Read and parse the files.</div>
+                <div className="description">Read the files and check the column headers.</div>
               </div>
             </div>
             :
@@ -1253,7 +1253,7 @@ export default class MagICUploadContribution extends React.Component {
           <div className="ui bottom attached icon success message">
             <i className="check circle icon"/>
             <div className="content">
-              The selected {this.files.length === 1 ? ' file was' : ' files were'} parsed successfully.
+              The {this.files.length === 1 ? ' file has' : ' files have'} valid column headers.
             </div>
             <div className="ui right floated purple button" onClick={this.reviewUpload.bind(this)}>
               Upload
