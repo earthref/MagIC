@@ -14,7 +14,10 @@ export default class extends React.Component {
           {` 2020 MagIC Workshop`}
         </h3>
         <p>
-          {`MagIC is hosting the `}
+          {' The MagIC workshop has been canceled due to the COVAD-19 outbreak. '}
+        </p>
+        <p>
+          {` MagIC is hosting the `}
           <a href="https://earthref.org/events/MAGIC/2020/"><b>2020 Workshop: Rock and Paleomagnetism through Time and Space</b></a>
           {` on `}
           <b>March 16th-18th, 2020</b>
