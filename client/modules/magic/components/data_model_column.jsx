@@ -15,54 +15,89 @@ export default class extends React.Component {
 
   formatValidation(validation) {
     let matches;
-    if (validation == 'required()')
+    if (validation === 'required()') {
       return (
         <span>
-          Required: this column must not be empty in the <a href={'?q=' + this.props.table + '.'}>
-            {this.props.table}
-          </a> table rows.
+          <div className="ui red horizontal small label">Required</div>
+          The values in this column must not be empty.
         </span>
       );
-    else if (validation == 'downloadOnly()')
-      return `Download Only: this column is included in downloaded contributions,
-        but is ignored in uploaded contributions.`;
-    else if (validation.substr(0,4) == 'in("') {
+    }
+    else if (validation === 'recommended()') {
+      return (
+        <span>
+          <div className="ui yellow horizontal small label">Recommended</div>
+          The values in this column are recommended not to be empty.
+        </span>
+      );
+    }
+    else if (validation === 'downloadOnly()') {
+      return (
+        <span>
+          <div className="ui black horizontal small label">Download Only</div>
+          The value in this column is included in downloaded contributions,
+          but is ignored in uploaded contributions.
+        </span>
+      );
+    }
+    else if (validation.substr(0,4) === 'in("') {
       const column = validation.substr(4,validation.length-6);
       return (
         <span>
-          Found In: this column must contain a value
-          found in the contribution's <a href={'?q=' + column}>
+          <div className="ui teal horizontal small label">Found In</div>
+          The values in this column must contain a value found in the contribution's <a href={'?q=' + column}>
             {column}
           </a> column.
         </span>
       );
     }
-    else if (validation.substr(0,21) == 'requiredUnlessTable("') {
+    else if (validation.substr(0,4) === 'min(') {
+      const min = validation.substr(4,validation.length-5);
+      return (
+        <span>
+          <div className="ui purple horizontal small label">Validation</div>
+          The values in this column must contain a value greater than or equal to {min}.
+        </span>
+      );
+    }
+    else if (validation.substr(0,4) === 'max(') {
+      const max = validation.substr(4,validation.length-5);
+      return (
+        <span>
+          <div className="ui purple horizontal small label">Validation</div>
+          The values in this column must contain a value less than or equal to {max}.
+        </span>
+      );
+    }
+    else if (validation.substr(0,21) === 'requiredUnlessTable("') {
       const table = validation.substr(21,validation.length-23);
       return (
         <span>
-          Governed: this column must not be empty unless the contribution
+          <div className="ui green horizontal small label">Required (?)</div>
+          The values in this column must not be empty unless the contribution
           includes rows in the  <a href={'?q=' + table + '.'}>
           {table}
         </a> table.
         </span>
       );
     }
-    else if (validation.substr(0,10) == 'requiredIf("') {
-      const column = validation.substr(10,validation.length-12);
+    else if (validation.substr(0,12) === 'requiredIf("') {
+      const column = validation.substr(12,validation.length-14);
       return (
         <span>
-          Governed: this column must not be empty if the <a href={'?q=' + column + '.'}>
+          <div className="ui green horizontal small label">Required (?)</div>
+          For each row, the value in this column must not be empty if the <a href={'?q=' + column + '.'}>
           {column}
-        </a> column is not empty.
+        </a> column value is not empty.
         </span>
       );
     }
-    else if (validation.substr(0,16) == 'requiredUnless("') {
+    else if (validation.substr(0,16) === 'requiredUnless("') {
       const columns = validation.substr(16,validation.length-18).split('","');
       return (
         <span>
-          Governed: this column must not be empty unless the {(columns.map((c, i) => {
+          <div className="ui green horizontal small label">Required (?)</div>
+          For each row, the value in this column must not be empty unless the {(columns.map((c, i) => {
             return (
               <span key={i}>
                 {(i > 0 ? ' or ' : '')}
@@ -71,86 +106,139 @@ export default class extends React.Component {
                 </a>
               </span>
             );
-          }))} column is not empty.
+          }))} column value{columns.length > 1 ? 's are' : ' is'} not empty.
         </span>
       );
     }
-    else if (validation == 'type("users")') {
+    else if (validation.substr(0,17) === 'requiredIfGroup("') {
+      const groups = validation.substr(17,validation.length-19).split('","');
       return (
         <span>
-          Suggested: this column could contain a user's handle found
-          in the <a href={'/users/'}>EarthRef.org Users</a> list.
-          If not, the column value should include the user's email address and
-          the user will be contacted when the contribution is activated (made public).
+          <div className="ui green horizontal small label">Required (?)</div>
+          For each row, the value in this column must not be empty if one of the column values in the {(groups.map((g, i) => {
+            return (
+              <span key={i}>
+                {(i > 0 ? ' or ' : '')}
+                <a href={'?q=' + g}>
+                  {g} Group
+                </a>
+              </span>
+            );
+          }))} of this table is not empty.
         </span>
       );
     }
-    else if (validation == 'type("url")') {
+    else if (validation.substr(0,20) === 'requiredOneInGroup("') {
+      const groups = validation.substr(20,validation.length-22).split('","');
       return (
         <span>
-          Controlled: this column must contain a valid URL.
+          <div className="ui green horizontal small label">Required (?)</div>
+          For each row, the value in this column must not be empty unless one of the column values in the {(groups.map((g, i) => {
+            return (
+              <span key={i}>
+                {(i > 0 ? ' or ' : '')}
+                <a href={'?q=' + g}>
+                  {g} Group
+                </a>
+              </span>
+            );
+          }))} of this table is not empty.
         </span>
       );
     }
-    else if (validation == 'type("igsn")') {
+    else if (validation === 'requiredUnlessSynthetic()') {
       return (
         <span>
-          Controlled: this column must contain a
+          <div className="ui green horizontal small label">Required (?)</div>
+          For each row, the value in this column must not be empty unless the
+          contribution is being validated as a sythentic samples study.
+        </span>
+      );
+    }
+    else if (validation === 'type("users")') {
+      return (
+        <span>
+          <div className="ui purple horizontal small label">Validation</div>
+          Any values in this column could contain a user's ORCID iD or an EarthRef.org 
+          user's handle. If neither are known, the column value should include the user's 
+          email address and the they will be contacted when the contribution is made public.
+        </span>
+      );
+    }
+    else if (validation === 'type("url")') {
+      return (
+        <span>
+          <div className="ui purple horizontal small label">Validation</div>
+          Any values in this column must contain a valid URL.
+        </span>
+      );
+    }
+    else if (validation === 'type("igsn")') {
+      return (
+        <span>
+          <div className="ui purple horizontal small label">Validation</div>
+          Any values in this column must contain a
           valid <a href="http://www.geosamples.org/aboutigsn">International Geo Sample Number</a>.
         </span>
       );
     }
-    else if (validation == 'type("date_time")') {
+    else if (validation === 'type("date_time")') {
       return (
         <span>
-          Controlled: this column must contain a valid date and time between 1900 and today.
+          <div className="ui purple horizontal small label">Validation</div>
+          Any values in this column must contain a valid date and time between 1900 and today.
         </span>
       );
     }
-    else if (validation == 'type("references")') {
+    else if (validation === 'type("references")') {
       return (
         <span>
-            Validation: This DOI should be a valid DOI that is resolvable by doi.org. If you have
-            a data set associated with a paper that does not have a DOI (PhD thesis,
-            master thesis, USGS report, etc), MagIC can store the paper in the ERDA
+            <div className="ui purple horizontal small label">Validation</div>
+            Any values in this column shoud either contain valid DOI that is resolvable by 
+            doi.org or a valid URL that resolves to a web page. If you have
+            a dataset associated with a paper that does not have a DOI (PhD thesis,
+            master thesis, USGS report, etc.), MagIC can store the paper in the ERDA
             database (barring copyright issues) and mint a DOI for it.
         </span>
       );
     }
-    else if (validation == 'type("method_codes")') {
+    else if (validation === 'type("method_codes")') {
       return (
         <span>
-          Controlled: this column must contain a value found
+          <div className="ui orange horizontal small label">Vocabulary</div>
+          Any values in this column must contain a value found
           in the <Link to={'/MagIC/method-codes/'}>Method Codes</Link> controlled vocabulary.
         </span>
       );
     }
-    else if (validation.substr(0,4) == 'cv("') {
+    else if (validation.substr(0,4) === 'cv("') {
       const cv = validation.substr(4,validation.length-6);
       let cv_label = cv;
       if (cvs[cv] && cvs[cv].label) cv_label = cvs[cv].label;
       else console.error(`cvs[${cv}].label is not defined.`);
       return (
         <span>
-          Controlled: this column must contain a value found
+          <div className="ui orange horizontal small label">Vocabulary</div>
+          Any values in this column must contain a value found
           in the <Link to={'/vocabularies/controlled/?q=' + _.kebabCase(cv)}>
             {cv_label}
           </Link> controlled vocabulary.
         </span>
       );
     }
-    else if (validation.substr(0,4) == 'sv("') {
+    else if (validation.substr(0,4) === 'sv("') {
       const sv = validation.substr(4,validation.length-6);
       let sv_label = sv;
       if (svs[sv] && svs[sv].label) sv_label = svs[sv].label;
       else console.error(`svs[${sv}].label is not defined.`);
       return (
         <span>
-          Suggested: this column could contain a value found
+          <div className="ui orange horizontal small label">Vocabulary</div>
+          Any values in this column could contain a value found
           in the <Link to={'/vocabularies/controlled/?q=' + _.kebabCase(sv)}>
             {sv_label}
           </Link> suggested vocabulary. If not, the value will be added to the
-          suggested vocabulary when the contribution is activated (made public).
+          suggested vocabulary when the contribution is made public.
         </span>
       );
     }
@@ -158,9 +246,9 @@ export default class extends React.Component {
   }
 
   formatTypeUnit(type, unit) {
-    if (!unit || unit == 'Custom' || unit == 'Dimensionless')
+    if (!unit || unit === 'Custom' || unit === 'Dimensionless')
       return type;
-    if (unit == 'Flag')
+    if (unit === 'Flag')
       return unit;
     return type + (unit ? ' in ' + unit : unit);
   }
@@ -184,25 +272,34 @@ export default class extends React.Component {
     const model = models[version].tables[table].columns[column];
 
     let validations = model.validations;
-    const user_validation = _.find(validations, (x) => { return x == 'type("users")'; });
-    const mc_validation   = _.find(validations, (x) => { return x == 'type("method_codes")'; });
-    const ref_validation  = _.find(validations, (x) => { return x == 'type("references")'; });
-    const cv_validation   = _.find(validations, (x) => { return x.substr(0,4) == 'cv("'; });
-    const sv_validation   = _.find(validations, (x) => { return x.substr(0,4) == 'sv("'; });
-    const required = _.some(validations, (x) => {
-      return x == 'required()';
+    const user_validation = _.find(validations, (x) => { return x === 'type("users")'; });
+    const mc_validation   = _.find(validations, (x) => { return x === 'type("method_codes")'; });
+    const ref_validation  = _.find(validations, (x) => { return x === 'type("references")'; });
+    const cv_validation   = _.find(validations, (x) => { return x.substr(0,4) === 'cv("'; });
+    const sv_validation   = _.find(validations, (x) => { return x.substr(0,4) === 'sv("'; });
+    const key = _.some(validations, (x) => {
+      return x === 'key()';
     });
-    const governed = _.some(validations, (x) => {
-      return x != 'required()' && x.substr(0,8) == 'required';
+    const required = _.some(validations, (x) => {
+      return x === 'required()';
+    });
+    const requiredConditionally = _.some(validations, (x) => {
+      return x != 'required()' && x.substr(0,8) === 'required';
     });
     const downloadOnly = _.some(validations, (x) => {
-      return x == 'downloadOnly()';
+      return x === 'downloadOnly()';
     });
     const foundIn = _.some(validations, (x) => {
-      return x.substr(0,4) == 'in("';
+      return x.substr(0,4) === 'in("';
+    });
+    const range = _.some(validations, (x) => {
+      return x.substr(0,4) === 'min(' || x.substr(0,4) === 'max(';
+    });
+    const recommended = _.some(validations, (x) => {
+      return x === 'recommended()';
     });
     const type = (_.some(validations, (x) => {
-      return x.substr(0,6) == 'type("';
+      return x.substr(0,6) === 'type("';
     }) && !mc_validation && !ref_validation && !user_validation);
 
     let examples = model.examples;
@@ -241,30 +338,20 @@ export default class extends React.Component {
             {this.formatTypeUnit(model.type, model.unit)}
           </span>
           <span className="description">{model.description}</span>
-          {(governed && !required ?
-            <div className="ui green horizontal small label">
-              Governed
-            </div>  : undefined)}
-          {(required ?
-            <div className="ui red horizontal small label">
-              Required
-            </div>  : undefined)}
+          {(requiredConditionally && !required ?
+            <div className="ui green horizontal small label">Required (?)</div> : undefined)}
+          {(required || key ?
+            <div className="ui red horizontal small label">Required</div> : undefined)}
+          {(recommended ?
+            <div className="ui yellow horizontal small label">Recommended</div> : undefined)}
           {(downloadOnly ?
-            <div className="ui black horizontal small label">
-              Download Only
-            </div>  : undefined)}
-          {(cv_validation || mc_validation || type ?
-            <div className="ui orange horizontal small label">
-              Controlled
-            </div>  : undefined)}
-          {(sv_validation || ref_validation || user_validation ?
-            <div className="ui yellow horizontal small label">
-              Suggested
-            </div>  : undefined)}
+            <div className="ui black horizontal small label">Download Only</div> : undefined)}
+          {(type || range || ref_validation || user_validation ?
+            <div className="ui purple horizontal small label">Validation</div> : undefined)}
+          {(cv_validation || mc_validation || sv_validation ?
+            <div className="ui orange horizontal small label">Vocabulary</div> : undefined)}
           {(foundIn ?
-            <div className="ui teal horizontal small label">
-              Found In
-            </div>  : undefined)}
+            <div className="ui teal horizontal small label">Found In</div> : undefined)}
         </div>
         <div className="content">
           <table className="ui very basic small compact table"><tbody>
