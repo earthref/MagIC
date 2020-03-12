@@ -207,7 +207,7 @@ export default class extends React.Component {
         <span>
           <div className="ui orange horizontal small label">Vocabulary</div>
           Any values in this column must contain a value found
-          in the <Link to={'/MagIC/method-codes/'}>Method Codes</Link> controlled vocabulary.
+          in the <Link to={'/MagIC/method-codes'}>Method Codes</Link> controlled vocabulary.
         </span>
       );
     }
@@ -220,7 +220,7 @@ export default class extends React.Component {
         <span>
           <div className="ui orange horizontal small label">Vocabulary</div>
           Any values in this column must contain a value found
-          in the <Link to={'/vocabularies/controlled/?q=' + _.kebabCase(cv)}>
+          in the <Link to={'/vocabularies/controlled/?q=' + encodeURI(cv)}>
             {cv_label}
           </Link> controlled vocabulary.
         </span>
@@ -235,7 +235,7 @@ export default class extends React.Component {
         <span>
           <div className="ui orange horizontal small label">Vocabulary</div>
           Any values in this column could contain a value found
-          in the <Link to={'/vocabularies/controlled/?q=' + _.kebabCase(sv)}>
+          in the <Link to={'/vocabularies/suggested/?q=' + encodeURI(sv)}>
             {sv_label}
           </Link> suggested vocabulary. If not, the value will be added to the
           suggested vocabulary when the contribution is made public.

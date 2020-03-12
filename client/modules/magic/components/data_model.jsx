@@ -101,6 +101,10 @@ class DataModel extends React.Component {
     return _.pull(list, undefined);
   }
 
+  clearSearch() {
+    this.setState({ search: '' });
+  }
+
   onSearchChange(e) {
     this.setState({ search: e.target.value });
   }
@@ -266,7 +270,10 @@ class DataModel extends React.Component {
                     value={this.state.search}
                     onChange={this.onSearchChange.bind(this)}
                   />
-                  <i className={portals['MagIC'].color + ' search icon'}/>
+                  { this.state.search ?
+                    <i className={portals['MagIC'].color + ' close link icon'} onClick={this.clearSearch.bind(this)}/>:
+                    <i className={portals['MagIC'].color + ' search icon'}/>
+                  }
                 </div>
                 <div className="results"></div>
               </div>

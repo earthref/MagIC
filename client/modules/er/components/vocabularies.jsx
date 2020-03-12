@@ -12,7 +12,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: "",
+      search: props.search || "",
       loaded: false,
       updating: false
     };
@@ -42,6 +42,10 @@ export default class extends React.Component {
     return false;
   }
 
+  clearSearch() {
+    this.setState({ search: '' });
+  }
+
   onSearchChange(e) {
     this.setState({ search: e.target.value });
   }
@@ -56,7 +60,7 @@ export default class extends React.Component {
       $tbls.find('.vocabularies-table-count').each(function() {
         const $table = $(this).parents('.vocabularies-table');
         const n_match = $table.find('.vocabularies-column').not('.no-match').length;
-        $(this).addClass(portals['MagIC'].color);
+        $(this).addClass(portals['EarthRef.org'].color);
         $(this).children('span').remove();
         $(this).prepend(`<span>${n_match} of </span>`);
         if (n_match === 0)
@@ -65,7 +69,7 @@ export default class extends React.Component {
           $table.removeClass('no-match');
       });
       $(this.refs['count']).html($cols.not('.no-match').length + ' of ' + $cols.length);
-      $(this.refs['count']).addClass(portals['MagIC'].color);
+      $(this.refs['count']).addClass(portals['EarthRef.org'].color);
     }
 
     // Enable all columns since the search string is empty.
@@ -73,10 +77,10 @@ export default class extends React.Component {
       $tbls.removeClass('no-match');
       $cols.removeClass('no-match');
       const $counts = $tbls.find('.vocabularies-table-count, .vocabularies-group-count');
-      $counts.removeClass(portals['MagIC'].color);
+      $counts.removeClass(portals['EarthRef.org'].color);
       $counts.children().remove();
       $(this.refs['count']).html($cols.length);
-      $(this.refs['count']).removeClass(portals['MagIC'].color);
+      $(this.refs['count']).removeClass(portals['EarthRef.org'].color);
     }
 
     // If the search has up to 100 column matches or excludes an entire table,
@@ -123,10 +127,10 @@ export default class extends React.Component {
     return (
       <div className="vocabularies">
         <div className="ui top attached tabular menu">
-          <Link className={(this.props.vocabularies === 'controlled' ? 'active ' : '') + 'item'} to={'controlled'}>
+          <Link className={(this.props.vocabularies === 'controlled' ? 'active ' : '') + 'item'} to={'/vocabularies/controlled'}>
             Controlled Vocabularies
           </Link>
-          <Link className={(this.props.vocabularies === 'suggested' ? 'active ' : '') + 'item'} to={'suggested'}>
+          <Link className={(this.props.vocabularies === 'suggested' ? 'active ' : '') + 'item'} to={'/vocabularies/suggested'}>
             Suggested Vocabularies
           </Link>
           <div className="right menu">
@@ -137,11 +141,14 @@ export default class extends React.Component {
                     ref="search"
                     className="prompt"
                     type="text"
-                    placeholder="Search the columns ..."
-                    value={this.state.search || (this.props.search && this.props.search.q) || ""}
+                    placeholder="Search the vocabularies ..."
+                    value={this.state.search}
                     onChange={this.onSearchChange.bind(this)}
                   />
-                  <i className={portals['MagIC'].color + ' search icon'}/>
+                  { this.state.search ?
+                    <i className={portals['EarthRef.org'].color + ' close link icon'} onClick={this.clearSearch.bind(this)}/>:
+                    <i className={portals['EarthRef.org'].color + ' search icon'}/>
+                  }
                 </div>
                 <div className="results"></div>
               </div>
@@ -167,6 +174,7 @@ export default class extends React.Component {
                     <i className="dropdown icon"/>
                     <span>
                       {vocabularies[group].label}
+                      <span className="column">, {group}</span>
                     </span>
                     <div className="ui circular small basic label vocabularies-table-count">
                       {vocabularies[group].items.length}
@@ -182,6 +190,8 @@ export default class extends React.Component {
                                 <div className="content">
                                   <div className="header">{item.item}</div>
                                   <div className="description">{item.label}</div>
+                                  <div style={{ display: "none" }}>{group}</div>
+                                  <div style={{ display: "none" }}>{vocabularies[group].label}</div>
                                 </div>
                               </div>
                             </div>
@@ -196,7 +206,7 @@ export default class extends React.Component {
           </div>
         </div>
         <div ref="no-match-message" className="ui hidden error bottom attached message">
-          No method codes match your search. Please edit the search string.
+          No vocabularies match your search. Please edit the search string.
         </div>
       </div>
     );
