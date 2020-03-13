@@ -44,6 +44,10 @@ export default class extends React.Component {
     this.setState({search: nextProps.search});
   }
 
+  clearSearch() {
+    this.setState({ search: '' });
+  }
+
   onSearchChange(e) {
     this.setState({ search: e.target.value });
   }
@@ -145,7 +149,10 @@ export default class extends React.Component {
                     value={this.state.search}
                     onChange={this.onSearchChange.bind(this)}
                   />
-                  <i className={portals['MagIC'].color + ' search icon'}/>
+                  { this.state.search ?
+                    <i className={portals['MagIC'].color + ' close link icon'} onClick={this.clearSearch.bind(this)}/>:
+                    <i className={portals['MagIC'].color + ' search icon'}/>
+                  }
                 </div>
                 <div className="results"></div>
               </div>

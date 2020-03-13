@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {Image} from 'semantic-ui-react';
+import {Image, Message} from 'semantic-ui-react';
 
 import {portals} from '/lib/configs/portals.js';
 
@@ -13,9 +13,9 @@ export default class extends React.Component {
           <Image size="mini" src="/MagIC/sio.jpg" floated="left"/>
           {` 2020 MagIC Workshop`}
         </h3>
-        <p>
-          {' The MagIC workshop has been canceled due to the COVAD-19 outbreak. '}
-        </p>
+        <Message color="red" style={{ marginTop: '1.5em' }}>
+          {' The 2020 MagIC Workshop has been postponed to 20-22 January 2021 due to the COVID-19 outbreak. '}
+        </Message>
         <p>
           {` MagIC is hosting the `}
           <a href="https://earthref.org/events/MAGIC/2020/"><b>2020 Workshop: Rock and Paleomagnetism through Time and Space</b></a>

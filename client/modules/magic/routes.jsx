@@ -202,23 +202,31 @@ const Routes = ({match}) => (
     }/>
 
     <Redirect exact from="/MagIC/data-models" to={`/MagIC/data-models/${_.last(versions)}`}/>
-    <Route exact path="/MagIC/data-models/:v" render={({match, location}) =>
-      <Page portal="MagIC" title="Browse the current and recent MagIC Data Models:" menu={<MagICMenu/>}>
-        <Helmet>
-          <title>MagIC Data Models | EarthRef.org</title>
-        </Helmet>
-        <MagICDataModel version={match.params.v} search={queryString.parse(location.search).q || ""}/>
-      </Page>
-    }/>
+    <Route exact path="/MagIC/data-models/:v" render={({match, location}) => {
+      if (window.history.replaceState)
+        window.history.replaceState({}, 'MagIC Data Models | EarthRef.org', '/MagIC/data-models/' + match.params.v);    
+      return (
+        <Page portal="MagIC" title="Browse the current and recent MagIC Data Models:" menu={<MagICMenu/>}>
+          <Helmet>
+            <title>MagIC Data Models | EarthRef.org</title>
+          </Helmet>
+          <MagICDataModel version={match.params.v} search={queryString.parse(location.search).q || ""}/>
+        </Page>
+      );
+    }}/>
 
-    <Route exact path="/MagIC/method-codes" render={({location}) =>
-      <Page portal="MagIC" title="Browse the MagIC Method Codes:" menu={<MagICMenu/>}>
-        <Helmet>
-          <title>MagIC Method Codes | EarthRef.org</title>
-        </Helmet>
-        <MagICMethodCodes search={location.search || ""}/>
-      </Page>
-    }/>
+    <Route exact path="/MagIC/method-codes" render={({location}) =>{
+      if (window.history.replaceState)
+        window.history.replaceState({}, 'MagIC Method Codes | EarthRef.org', '/MagIC/method-codes');    
+      return (
+        <Page portal="MagIC" title="Browse the MagIC Method Codes:" menu={<MagICMenu/>}>
+          <Helmet>
+            <title>MagIC Method Codes | EarthRef.org</title>
+          </Helmet>
+          <MagICMethodCodes search={queryString.parse(location.search).q || ""}/>
+        </Page>
+      );
+    }}/>
     
     {/* 404 Not Found */}
     <Route render={() =>
