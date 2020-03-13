@@ -78,7 +78,7 @@ export default function () {
           try {
             if (!existingUser) {
               let users = await Meteor.call('esGetUsersByEmail', {email: x.email});
-              let orcidUsers = users.filter(x => x.orcid && x.orcid.id === orcid);
+              let orcidUsers = users && users.filter(x => x && x.orcid && x.orcid.id === orcid) || undefined;
               existingUser = orcidUsers && orcidUsers.length && orcidUsers[0] || users[0];
             }
           } catch (e) {

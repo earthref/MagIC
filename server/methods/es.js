@@ -1341,8 +1341,8 @@ export default function () {
             "query": { "term": { "orcid.id.raw": orcid }}
           }
         });
-        let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
-        user = __.omitDeep(user, /(^|\.)_/);
+        if (resp.hits.total === 0) return undefined;
+        const user = __.omitDeep(resp.hits.hits[0]._source, /(^|\.)_/);
         user.handle = user.handle || `user${user.id}`;
         return user;
       } catch(error) {
@@ -1362,10 +1362,13 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        return resp.hits.hits.map(hit => {
-          __.omitDeep(hit._source, /(^|\.)_/);
-          hit.handle = hit.handle || `user${hit.id}`;
+        if (resp.hits.total === 0) return undefined;
+        const users = resp.hits.hits.map(hit => {
+          const user = __.omitDeep(hit._source, /(^|\.)_/);
+          user.handle = user.handle || `user${user.id}`;
+          return user;
         });
+        return users;
       } catch(error) {
         console.error("esGetUserByEmail", email, error.message);
         throw new Meteor.Error("Email", `Unrecognized email address ${email}.`);
