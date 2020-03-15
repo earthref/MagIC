@@ -177,8 +177,8 @@ export default class extends React.Component {
                     <i className="dropdown icon"/>
                     <span>
                       {vocabularies[group].label}
-                      <span className="column">, {vocabularies[group].database_name}</span>
-                      <span className="column">, {(vocabularies[group].database_name == group ? '' : group)}</span>
+                      <span className="column">, {vocabularies[group].database_column}</span>
+                      <span className="column">{(vocabularies[group].database_column == group ? '' : ', ' + group)}</span>
                     </span>
                     <div className="ui circular small basic label vocabularies-table-count">
                       {vocabularies[group].items.length}
