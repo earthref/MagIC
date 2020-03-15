@@ -161,7 +161,7 @@ export default class extends React.Component {
           </div>
           <div className="ui grid">
             <div className="left aligned twelve wide column">
-            <b>List label</b>, database column name, .json list name (if different from database name)
+            <b>List label</b>, database column name, .json file name (if different from database name)
             </div>
             <div className="right aligned four wide column">
               <a href="#" onClick={this.downloadJSON.bind(this)}>
