@@ -159,8 +159,11 @@ export default class extends React.Component {
           <div ref="loading" className="ui inverted active dimmer">
             <div className="ui text loader">Loading</div>
           </div>
-          <div className="ui equal width grid">
-            <div className="right aligned column">
+          <div className="ui grid">
+            <div className="left aligned twelve wide column">
+            <b>List label</b>, database column name, .json list name (if different from database name)
+            </div>
+            <div className="right aligned four wide column">
               <a href="#" onClick={this.downloadJSON.bind(this)}>
               <i className="download icon"/>
               Download as .json</a>.
@@ -174,7 +177,8 @@ export default class extends React.Component {
                     <i className="dropdown icon"/>
                     <span>
                       {vocabularies[group].label}
-                      <span className="column">, {group}</span>
+                      <span className="column">, {vocabularies[group].database_name}</span>
+                      <span className="column">, {(vocabularies[group].database_name == group ? '' : group)}</span>
                     </span>
                     <div className="ui circular small basic label vocabularies-table-count">
                       {vocabularies[group].items.length}
