@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 
 import {portals} from '/lib/configs/portals';
@@ -21,7 +22,10 @@ export default class extends React.Component {
 
   forceImgContainerReflow() {
     try  {
-      if (this.refs['img container']) $(this.refs['img container']).hide().show(0);
+      _.delay(() => { if (this.refs['img container']) $(this.refs['img container']).hide().show(0); }, 50);
+      _.delay(() => { if (this.refs['img container']) $(this.refs['img container']).hide().show(0); }, 100);
+      _.delay(() => { if (this.refs['img container']) $(this.refs['img container']).hide().show(0); }, 500);
+      _.delay(() => { if (this.refs['img container']) $(this.refs['img container']).hide().show(0); }, 1000);
     } catch (e) {
       // Ignore errors since this is a Chrome rendering patch
     }

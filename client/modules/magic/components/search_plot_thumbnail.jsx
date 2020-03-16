@@ -182,7 +182,7 @@ export default class extends React.Component {
 
     const containerStyle = {position:'relative', boxSizing:'content-box', minHeight: 98, maxHeight: 98, minWidth: 98, maxWidth: 98, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
     const thumbnailContainerStyle = _.extend({}, containerStyle, {display: 'flex'});
-    const thumbnailStyle = {maxWidth: 80, maxHeight: 80, margin:'10px', objectFit:'contain'};
+    const thumbnailStyle = {maxWidth: 78, maxHeight: 78, margin:'10px', objectFit:'contain'};
     const loadingStyle = {minHeight: 98, maxHeight: 98, minWidth: 98, maxWidth: 98, padding: 0};
     const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 2rem 0', overflow:'visible'});
 
