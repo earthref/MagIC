@@ -17,7 +17,7 @@ export default class extends React.Component {
           account with an ORCID id, you will have to set your username and password before logging into the JupyterHub. 
         </p>
         <p>
-        The JuypterHub site can be found at <a href="jupyterhub.earthref.org">jupyterhub.earthref.org</a>.
+        The JuypterHub site can be found at <a href="https://jupyterhub.earthref.org">jupyterhub.earthref.org</a>.
         </p>
 
         <p><b>PmagPy Fundemetals</b><br/>
