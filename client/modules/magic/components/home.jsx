@@ -50,7 +50,7 @@ export default class extends React.Component {
         <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
           MagIC Resources
         </h2>
-        <div className="ui eight cards" style={{marginTop: 0}}>
+        <div className="ui nine cards" style={{marginTop: 0}}>
           <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
             <i className="icons">
               <i className="sitemap icon"/>
@@ -72,13 +72,6 @@ export default class extends React.Component {
             </i>
             <div className="small title">Vocabulary<br/>Lists</div>
           </IconButton>          
-          <IconButton className="borderless card" link="/MagIC/upgrade" portal="MagIC">
-            <i className="icons">
-              <i className="file text outline icon"/>
-              <i className="corner arrow up icon"/>
-            </i>
-            <div className="small title">Upgrade<br/>Tool</div>
-          </IconButton>
           <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
             <i className="icons">
               <i className="file text icon"/>
@@ -106,6 +99,19 @@ export default class extends React.Component {
               <i className="corner code icon"/>
             </i>
             <div className="small title">Jupyter<br/>Notebooks</div>
+          </IconButton>
+          <IconButton className="borderless card" href="https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ" portal="MagIC">
+            <i className="icons">
+              <i className="tv icon"/>
+              <i className="corner headphones icon"/>
+            </i>
+            <div className="small title">YouTube<br/>Channel</div>
+          </IconButton>
+          <IconButton className="borderless card" link="/MagIC/help" portal="MagIC">
+            <i className="icons">
+              <i className="question icon"/>
+            </i>
+            <div className="small title">Help<br/>Upgrade_Tool</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">
