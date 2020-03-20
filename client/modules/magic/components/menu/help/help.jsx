@@ -15,13 +15,12 @@ export default class extends React.Component {
         </p>
         <p>
           <b>Video Tutorials</b><br/>
-          A series of four demo videos were make for the 2020 MagIC Workshop demo series. They can be seen on the MagIC YouTube channel:<br/>
-          <a href="https://www.youtube.com/watch?v=9yGPbATqRtI">PmagPy Using Jupyter Notebooks - MagIC Workshop 2020</a> - 2020/3/18 (1hr 5min) - <a href="">notebook download</a>
+          The 2020 MagIC Workshop demo series:<br/>
+          <a href="https://youtu.be/pchdPBzSmT0">MagIC Data Model and Uploading Data to the MagIC Database</a> - 2020/3/16 (54min) - Nick Jarboe <br/>
+          <a href="https://www.youtube.com/watch?v=9yGPbATqRtI">PmagPy Using Jupyter Notebooks</a> - 2020/3/18 (1hr 5min) - <a href="https://github.com/PmagPy/PmagPy/blob/master/MagIC_workshop_demo.ipynb">notebook download</a> - Lisa Tauxe
           <br/>
-          <a href="https://youtu.be/GUjf33aNnFQ">PmagPy Demag GUI Paleomagnetic Analysis And MagIC File Export Software Demo - MagIC Workshop 2020</a> - 2020/3/17 (57min) - <a href="">Write up</a><br/>
-          <a href="https://youtu.be/pchdPBzSmT0">MagIC Data Model and Uploading Data to the MagIC Database - MagIC Workshop 2020</a> - 2020/3/16 (54min)<br/>
-          <a href="https://youtu.be/vRDiIXCm-sY">Pmag GUI install, SIO Data Import, and Thellier GUI Demo: A Paleomagnetic Analysis Tool - MagIC 2020</a> - 2020/3/12 (37 min)
-          <br/>
+          <a href="https://youtu.be/GUjf33aNnFQ">PmagPy Demag GUI Paleomagnetic Analysis And MagIC File Export Software Demo</a> - 2020/3/17 (57min) - <a href="https://github.com/Swanson-Hysell-Group/2020_Demag_GUI_tutorial/">Write up</a> - Nick Swanson-Hysell<br/>
+          <a href="https://youtu.be/vRDiIXCm-sY">Pmag GUI install, SIO Data Import, and Thellier GUI Demo: A Paleomagnetic Analysis Tool</a> - 2020/3/12 (37 min) - Lisa Tauxe<br/>
           <br/>
         <p>
           <b>Written Tutorials</b><br/>
