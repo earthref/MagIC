@@ -7,14 +7,17 @@ export default class extends React.Component {
     return (
       <div>
 
-        <b>EarthRef's JupyterHub Server</b>
+        <a href="jupyterhub.earthref.org"><b>EarthRef's JupyterHub Server</b></a>
         <p> EarthRef.org supports a JupyterHub server where you can run MagIC PmagPy notebooks and create your own. 
-        Login using your EarthRef(MagIC) username(handle) and password. If you don't know your MagIC username and password, 
-        login to the MagIC website at the <a href="https://www2.earthref.org/MagIC">login page</a>. You can 
-        login using your ORCID id or your 
-        username and password, or create an account with your ORCID id. You can then view, set, or edit your 
-        username and password by clicking on your name in the upper right of the webpage. If you created your 
-        account with an ORCID id, you will have to set your username and password before logging into the JupyterHub. 
+          Login using your EarthRef(MagIC) username(handle) and password. If you don't know your MagIC username and password, 
+          login to the MagIC website at the <a href="https://www2.earthref.org/MagIC">home page</a>. You can 
+          login using your ORCID id or your 
+          username and password, or create an account with your ORCID id. You can then view, set, or edit your 
+          username and password by clicking on your name in the upper right of the webpage. If you created your 
+          account with an ORCID id, you will have to set your username and password before logging into the JupyterHub. 
+        </p>
+        <p>
+        The JuypterHub site can be found at <a href="jupyterhub.earthref.org">jupyterhub.earthref.org</a>.
         </p>
 
         <p><b>PmagPy Fundemetals</b><br/>
