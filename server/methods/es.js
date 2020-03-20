@@ -397,6 +397,7 @@ export default function () {
         summary.contribution._is_valid = "false",
 
         console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
+        if (id == 16798) delete contribution.measurements;
         await esClient.update({
           "index": index,
           "type": "contribution",
