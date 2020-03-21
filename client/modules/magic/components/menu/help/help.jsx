@@ -20,11 +20,12 @@ export default class extends React.Component {
           <a href="https://www.youtube.com/watch?v=9yGPbATqRtI">PmagPy Using Jupyter Notebooks</a> - 2020/3/18 (1hr 5min) - <a href="https://github.com/PmagPy/PmagPy/blob/master/MagIC_workshop_demo.ipynb">notebook download</a> - Lisa Tauxe
           <br/>
           <a href="https://youtu.be/GUjf33aNnFQ">PmagPy Demag GUI Paleomagnetic Analysis And MagIC File Export Software Demo</a> - 2020/3/17 (57min) - <a href="https://github.com/Swanson-Hysell-Group/2020_Demag_GUI_tutorial/">Write up</a> - Nick Swanson-Hysell<br/>
-          <a href="https://youtu.be/vRDiIXCm-sY">Pmag GUI install, SIO Data Import, and Thellier GUI Demo: A Paleomagnetic Analysis Tool</a> - 2020/3/12 (37 min) - Lisa Tauxe<br/>
+          <a href="https://youtu.be/vRDiIXCm-sY">Pmag GUI install, SIO Data Import, and Thellier GUI Demo: A Paleomagnetic Analysis Tool</a> - 2020/3/12 (37 min)- <a href="https://github.com/ltauxe/PmagPy_tutorials">Write up</a> - Lisa Tauxe<br/>
           <br/>
         <p>
           <b>Written Tutorials</b><br/>
           <a href="https://github.com/Swanson-Hysell-Group/2020_Demag_GUI_tutorial/"> PmagPy Demag GUI Paleomagnetic Analysis And MagIC File Export Software</a><br/>
+          <a href="https://github.com/ltauxe/PmagPy_tutorials">Using Thellier GUI with an Example Dataset</a><br/>
         </p>
         <p>
           <b>Upgrade Older MagIC DataFiles</b><br/>
