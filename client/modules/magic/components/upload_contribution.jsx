@@ -453,7 +453,9 @@ export default class MagICUploadContribution extends React.Component {
             Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
               id: this.state._id,
-              contributor: this.state._userid
+              contributor: this.state._userid,
+              contribution: this.contribution,
+              summary: this.summary.contribution.summary
             }, (error) => {
               console.log('updated contribution pre-summaries', this.state._id, error);
               if (error) { this.setState({uploadError: error, uploading: false});
@@ -462,7 +464,9 @@ export default class MagICUploadContribution extends React.Component {
                 Meteor.call('esUpdatePrivateSummaries', {
                   index: index,
                   id: this.state._id,
-                  contributor: this.state._userid
+                  contributor: this.state._userid,
+                  contribution: this.contribution,
+                  summary: this.summary.contribution.summary
                 });
               }
             });
@@ -485,7 +489,9 @@ export default class MagICUploadContribution extends React.Component {
             Meteor.call('esUpdatePrivatePreSummaries', {
               index: index,
               id: id,
-              contributor: this.state._userid
+              contributor: this.state._userid,
+              contribution: this.contribution,
+              summary: this.summary.contribution.summary
             }, (error) => {
               console.log('updated contribution pre-summaries', this.state._id, error);
               if (error) {
@@ -495,7 +501,9 @@ export default class MagICUploadContribution extends React.Component {
                 Meteor.call('esUpdatePrivateSummaries', {
                   index: index,
                   id: id,
-                  contributor: this.state._userid
+                  contributor: this.state._userid,
+                  contribution: this.contribution,
+                  summary: this.summary.contribution.summary
                 });
               }
             });

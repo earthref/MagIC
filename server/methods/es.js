@@ -394,7 +394,7 @@ export default function () {
         summary = summary || {};
         summary.contribution = summary.contribution || {};
         summary.contribution = _.merge(summary.contribution, contributionRow);
-        summary.contribution._is_valid = "false",
+        summary.contribution._is_valid = "false";
 
         console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
         if (id == 16798) delete contribution.measurements;
@@ -404,10 +404,7 @@ export default function () {
           "id": id + "_0",
           "refresh": true,
           "body": {
-            "doc": {
-              "summary": summary,
-              "contribution": contribution
-            }
+            "doc": { summary, contribution }
           }
         });
       } catch(error) {
@@ -416,48 +413,50 @@ export default function () {
       }
     },
 
-    async esUpdatePrivatePreSummaries({index, contributor, id}) {
+    async esUpdatePrivatePreSummaries({index, contributor, id, contribution, summary}) {
       console.log("esUpdatePrivatePreSummaries", index, contributor, id);
       this.unblock();
 
       const summarizer = new SummarizeContribution({});
 
-      let contribution = {};
-      let summary = {};
       try {
         if (!contributor || contributor === 'undefined')
           throw new Error('Unrecognized contributor.');
 
-        let resp = await esClient.search({
-          "index": index,
-          "type": "contribution",
-          "body": {
-            "_source": {
-              "includes": ["summary.contribution.*", "contribution.*", "criteria.*"]
-            },
-            "query": {
-              "bool": {
-                "filter": [{
-                  "term": {
-                    "summary.contribution.id": id
-                  }
-                }, {
-                  "term": {
-                    "summary.contribution.contributor.raw": contributor
-                  }
-                }]
+        if (contribution === undefined || summary === undefined) {
+          let contribution = {};
+          let summary = {};
+          let resp = await esClient.search({
+            "index": index,
+            "type": "contribution",
+            "body": {
+              "_source": {
+                "includes": ["summary.contribution.*", "contribution.*", "criteria.*"]
+              },
+              "query": {
+                "bool": {
+                  "filter": [{
+                    "term": {
+                      "summary.contribution.id": id
+                    }
+                  }, {
+                    "term": {
+                      "summary.contribution.contributor.raw": contributor
+                    }
+                  }]
+                }
               }
             }
+          });
+          if (resp.hits.total > 0) {
+            if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+              resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+            contribution = resp.hits.hits[0]._source.contribution;
+            summary.contribution = resp.hits.hits[0]._source.summary.contribution;
           }
-        });
-        if (resp.hits.total > 0) {
-          if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-            resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-          contribution = resp.hits.hits[0]._source.contribution;
-          summary.contribution = resp.hits.hits[0]._source.summary.contribution;
         }
 
-        await summarizer.preSummarizePromise(contribution, {summary: summary});
+        await summarizer.preSummarizePromise(contribution, {summary: { contribution: summary.contribution }});
 
         console.log("esUpdatePrivatePreSummaries updating contribution doc", index, contributor, id + "_0");
         await esClient.update({
@@ -518,52 +517,60 @@ export default function () {
       }
     },
 
-    async esUpdatePrivateSummaries({index, contributor, id}) {
+    async esUpdatePrivateSummaries({index, contributor, id, contribution, summary}) {
       console.log("esUpdatePrivateSummaries", index, contributor, id);
       this.unblock();
 
       const summarizer = new SummarizeContribution({});
 
-      let doc = {};
       try {
         if (!contributor || contributor === 'undefined')
           throw new Error('Unrecognized contributor.');
 
-        let resp = await esClient.search({
-          "index": index,
-          "type": "contribution",
-          "body": {
-            "query": {
-              "bool": {
-                "filter": [{
-                  "term": {
-                    "summary.contribution.id": id
-                  }
-                }, {
-                  "term": {
-                    "summary.contribution.contributor.raw": contributor
-                  }
-                }]
+        if (contribution === undefined || summary === undefined) {
+          let contribution = {};
+          let summary = {};
+          let resp = await esClient.search({
+            "index": index,
+            "type": "contribution",
+            "body": {
+              "query": {
+                "bool": {
+                  "filter": [{
+                    "term": {
+                      "summary.contribution.id": id
+                    }
+                  }, {
+                    "term": {
+                      "summary.contribution.contributor.raw": contributor
+                    }
+                  }]
+                }
               }
             }
+          });
+          if (resp.hits.total > 0) {
+            if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
+              resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+            contribution = resp.hits.hits[0]._source.contribution;
+            summary.contribution = resp.hits.hits[0]._source.summary.contribution;
           }
-        });
-        if (resp.hits.total > 0) {
-          if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-            resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-          doc = resp.hits.hits[0]._source;
         }
-
-        await summarizer.summarizePromise(doc.contribution, {summary: { contribution: doc.summary.contribution }});
-        doc.summary = summarizer.json.contribution.summary;
-
+  
+        await summarizer.preSummarizePromise(contribution, {summary: { contribution: summary.contribution }});
+        
         console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0");
-        await esClient.index({
+        await esClient.update({
           "index": index,
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
-          "body": doc
+          "body": {
+            "doc": { 
+              _incomplete_summary: summarizer.json.contribution._incomplete_summary,
+              summary: summarizer.json.contribution.summary
+            }
+          }
         });
         console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
 
