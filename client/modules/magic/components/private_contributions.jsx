@@ -8,13 +8,14 @@ import Cookies from "js-cookie";
 import {Tracker}  from "meteor/tracker";
 import {portals} from "/lib/configs/portals";
 import {Collections} from "/lib/collections";
-import { Accordion, List } from 'semantic-ui-react'
+import { Accordion, List, Dropdown } from 'semantic-ui-react';
 
 import DividedList from "/client/modules/common/components/divided_list";
 import SearchSummaryListItem from "/client/modules/magic/components/search_summaries_list_item";
 import IconButton from "/client/modules/common/components/icon_button";
 import {index} from "/lib/configs/magic/search_levels.js";
 import {versions, models} from '/lib/configs/magic/data_models';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
 
 export default class extends React.Component {
 
@@ -174,6 +175,19 @@ export default class extends React.Component {
     });
   }
 
+  updateLabNames(i) {
+    this.privateContributions[i].updatingLabNames = true;
+    this.setState({taps: this.state.taps + 1}, () =>
+      Meteor.call("esUpdateContributionLabNames", {
+        index: index,
+        id: this.privateContributions[i].summary.contribution.id,
+        lab_names: this.privateContributions[i].lab_names
+      }, (error, c) => {
+        this.updateContributions();
+      })
+    );
+  }
+
   renderOffline() {
     return (
       <div ref="segment" className="ui warning message">
@@ -319,7 +333,55 @@ export default class extends React.Component {
                   <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
-                        <div className={"ui labeled fluid small icon input" + (c.updatingReference ? " loading" : "") + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
+                        <div className="ui corner labeled fluid small icon input">
+                          <div className="ui label"
+                            style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                          >
+                            Laboratory Names
+                          </div>
+                          <Dropdown multiple selection
+                            defaultValue={
+                              (c.lab_names && c.lab_names.split(":")) ||
+                              (c.summary.contribution.lab_names && c.summary.contribution.lab_names.split(":")) ||
+                              ""
+                            }
+                            placeholder="Select one or more laboratories where the measurements in the contribution were made"
+                            options={cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
+                              return {
+                                key: item.item,
+                                text: item.item,
+                                value: item.item
+                              };
+                            })}
+                            style={{ borderRadius: 0, flexGrow: 1 }}
+                            onChange={(e, data) => {
+                              c.lab_names = data.value.join(":");
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateLabNames(i);
+                            }.bind(this, i)}
+                          />
+                          <div className={
+                              "ui small right attached icon button" + 
+                              (c.lab_names === undefined ? " disabled" : " red") + 
+                              (c.updatingLabNames ? " disabled loading" : "")
+                            }
+                            style={{ marginRight: 0 }}
+                            onClick={function(i, e) {
+                              this.updateLabNames(i);
+                            }.bind(this, i)}
+                          >
+                            <i className="save link icon"/>&nbsp;Save
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                    <div style={{display: "flex", flexFlow: "row wrap"}}>
+                      <div style={{flex: "1 1 auto"}}>
+                        <div className={"ui labeled fluid small icon input" + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
                           <div className={"ui label" + (c.summary.contribution._is_activated === "true" || hasReference ? "" : " red")} style={{position: "relative"}}>
                             DOI
                           </div>

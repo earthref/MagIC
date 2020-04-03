@@ -841,6 +841,32 @@ export default function () {
       }
     },
 
+    async esUpdateContributionLabNames({index, id, lab_names}) {
+      console.log("esUpdateContributionLabNames", index, id, lab_names);
+      this.unblock();
+      
+      try {
+        await esClient.update({
+          "index": index,
+          "type": "contribution",
+          "id": id + "_0",
+          "refresh": true,
+          "body": {
+            "script": {
+              "source": `
+                ctx._source.summary.contribution.lab_names = params.lab_names; 
+                ctx._source.contribution.contribution[0].lab_names = params.lab_names;
+              `,
+              "params": {lab_names}
+            }
+          }
+        });
+      } catch(error) {
+        console.error("esUpdateContributionLabNames", index, id, lab_names, error.message);
+        throw new Meteor.Error("esUpdateContributionLabNames", error.message);
+      }
+    },
+
     // TODO: pass login token to authenticate changes
     async esUpdateContributionReference({index, id, contributor, _contributor, timestamp, reference, description}) {
       console.log("esUpdateContributionReference", index, id, contributor, _contributor, timestamp, reference, description);
