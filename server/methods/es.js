@@ -423,7 +423,7 @@ export default function () {
         if (!contributor || contributor === 'undefined')
           throw new Error('Unrecognized contributor.');
 
-        if (contribution === undefined || summary === undefined) {
+        //if (contribution === undefined || summary === undefined) {
           let contribution = {};
           let summary = {};
           let resp = await esClient.search({
@@ -454,7 +454,7 @@ export default function () {
             contribution = resp.hits.hits[0]._source.contribution;
             summary.contribution = resp.hits.hits[0]._source.summary.contribution;
           }
-        }
+        //}
 
         await summarizer.preSummarizePromise(contribution, {summary: { contribution: summary.contribution }});
 
@@ -527,7 +527,7 @@ export default function () {
         if (!contributor || contributor === 'undefined')
           throw new Error('Unrecognized contributor.');
 
-        if (contribution === undefined || summary === undefined) {
+        //if (contribution === undefined || summary === undefined) {
           let contribution = {};
           let summary = {};
           let resp = await esClient.search({
@@ -555,11 +555,11 @@ export default function () {
             contribution = resp.hits.hits[0]._source.contribution;
             summary.contribution = resp.hits.hits[0]._source.summary.contribution;
           }
-        }
+        //}
   
         await summarizer.preSummarizePromise(contribution, {summary: { contribution: summary.contribution }});
         
-        console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0");
+        console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0", summary.contribution, summarizer.json.contribution.summary.contribution);
         await esClient.update({
           "index": index,
           "type": "contribution",
