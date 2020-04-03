@@ -657,7 +657,7 @@ export default class extends React.Component {
       });
     });
     return (
-      <Accordion panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
+      <Accordion exclusive={false} panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
     );
   }
 
@@ -675,7 +675,7 @@ export default class extends React.Component {
       });
     });
     return (
-      <Accordion.Accordion panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
+      <Accordion.Accordion exclusive={false} panels={panels} style={{ margin: '0 0 0 0.5em' }}/>
     );
   }
 
