@@ -137,42 +137,45 @@ export default class extends React.Component {
 
   updateName(i) {
     this.privateContributions[i].updatingName = true;
-    this.setState({taps: this.state.taps + 1});
-    Meteor.call("esUpdateContributionName", {
-      index: index,
-      id: this.privateContributions[i].summary.contribution.id,
-      name: this.privateContributions[i].name
-    }, (error, c) => {
-      this.updateContributions();
-    });
+    this.setState({taps: this.state.taps + 1}, () =>
+      Meteor.call("esUpdateContributionName", {
+        index: index,
+        id: this.privateContributions[i].summary.contribution.id,
+        name: this.privateContributions[i].name
+      }, (error, c) => {
+        this.updateContributions();
+      })
+    );
   }
 
   updateReference(i) {
     this.privateContributions[i].updatingReference = true;
     this.privateContributions[i].summary.contribution._reference = {};
-    this.setState({taps: this.state.taps + 1});
-    Meteor.call("esUpdateContributionReference", {
-      index: index,
-      contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
-      _contributor: Cookies.get("name", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
-      id: this.privateContributions[i].summary.contribution.id,
-      reference: this.privateContributions[i].reference,
-      description: this.privateContributions[i].summary.contribution.description,
-    }, (error, c) => {
-      this.updateContributions();
-    });
+    this.setState({taps: this.state.taps + 1}, () =>
+      Meteor.call("esUpdateContributionReference", {
+        index: index,
+        contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
+        _contributor: Cookies.get("name", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
+        id: this.privateContributions[i].summary.contribution.id,
+        reference: this.privateContributions[i].reference,
+        description: this.privateContributions[i].summary.contribution.description,
+      }, (error, c) => {
+        this.updateContributions();
+      })
+    );
   }
 
   updateDescription(i) {
     this.privateContributions[i].updatingDescription = true;
-    this.setState({taps: this.state.taps + 1});
-    Meteor.call("esUpdateContributionDescription", {
-      index: index,
-      id: this.privateContributions[i].summary.contribution.id,
-      description: this.privateContributions[i].description
-    }, (error, c) => {
-      this.updateContributions();
-    });
+    this.setState({taps: this.state.taps + 1}, () =>
+      Meteor.call("esUpdateContributionDescription", {
+        index: index,
+        id: this.privateContributions[i].summary.contribution.id,
+        description: this.privateContributions[i].description
+      }, (error, c) => {
+        this.updateContributions();
+      })
+    );
   }
 
   updateLabNames(i) {
@@ -288,26 +291,34 @@ export default class extends React.Component {
                   <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
-                        <div className={"ui labeled fluid small icon input" + (c.updatingName ? " loading" : "")}>
+                        <div className="ui labeled fluid small icon input">
                           <div className="ui label">
                             Private Contribution Name
                           </div>
-                          <input type="text" default="None" placeholder="A name to help you remember which contribution you are working on" value={c.name !== undefined ? c.name : c.summary.contribution._name} readOnly={c.updatingName}
-                            onBlur={(e) => {
-                              this.privateContributions[i].name = e.target.value;
-                              this.updateName(i);
-                            }}
+                          <input type="text" default="None"
+                            placeholder="A name to help you remember which contribution you are working on"
+                            value={c.name !== undefined ? c.name : c.summary.contribution._name} readOnly={c.updatingName}
+                            style={{ borderRadius: 0 }}
                             onChange={(e) => {
-                              this.privateContributions[i].name = e.target.value;
+                              c.name = e.target.value;
                               this.setState({taps: this.state.taps + 1});
                             }}
                             onKeyPress={function(i, e) {
                               if (e.key === "Enter") this.updateName(i);
                             }.bind(this, i)}
                           />
-                          {c.name !== undefined && <i className="red save link icon" onClick={function(i, e) {
-                            this.updateName(i);
-                          }.bind(this, i)}/>}
+                          <div className={
+                              "ui small right attached icon button" + 
+                              (c.name === undefined ? " disabled" : " red") + 
+                              (c.updatingName ? " disabled loading" : "")
+                            }
+                            style={{ marginRight: 0 }}
+                            onClick={function(i, e) {
+                              this.updateName(i);
+                            }.bind(this, i)}
+                          >
+                            <i className="save link icon"/>&nbsp;Save
+                          </div>
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" &&
@@ -385,45 +396,60 @@ export default class extends React.Component {
                           <div className={"ui label" + (c.summary.contribution._is_activated === "true" || hasReference ? "" : " red")} style={{position: "relative"}}>
                             DOI
                           </div>
-                          <input type="text" default="None" placeholder="The study's DOI (required)" value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
-                            onBlur={(e) => {
-                              this.privateContributions[i].reference = e.target.value;
-                              this.updateReference(i);
-                            }}
+                          <input type="text" default="None" placeholder="The study's DOI (required)" 
+                            value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} 
+                            readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
+                            style={{ borderRadius: 0 }}
                             onChange={(e) => {
-                              this.privateContributions[i].reference = e.target.value;
+                              c.reference = e.target.value;
                               this.setState({taps: this.state.taps + 1});
                             }}
                             onKeyPress={function(i, e) {
                               if (e.key === "Enter") this.updateReference(i);
                             }.bind(this, i)}
                           />
-                          {c.reference !== undefined && <i className="red save link icon" onClick={function(i, e) {
-                            this.updateReference(i);
-                          }.bind(this, i)}/>}
+                          <div className={
+                              "ui small right attached icon button" + 
+                              (c.reference === undefined ? " disabled" : " red") + 
+                              (c.updatingReference ? " disabled loading" : "")
+                            }
+                            onClick={function(i, e) {
+                              this.updateReference(i);
+                            }.bind(this, i)}
+                          >
+                            <i className="save link icon"/>&nbsp;Save
+                          </div>
                         </div>
                       </div>
                       <div style={{flex: "1 1 auto", margin: "0 0 0 0.5em"}}>
-                        <div className={"ui labeled fluid small icon input" + (c.updatingDescription ? " loading" : "")}>
+                        <div className="ui labeled fluid small icon input">
                           <div className="ui label">
                             Description
                           </div>
-                          <input type="text" default="None" placeholder="Describe the changes being made in this version" value={c.description !== undefined ? c.description : c.summary.contribution.description} readOnly={c.updatingDescription || c.summary.contribution._is_activated === "true"}
-                            onBlur={(e) => {
-                              this.privateContributions[i].description = e.target.value;
-                              this.updateDescription(i);
-                            }}
+                          <input type="text" default="None"
+                            placeholder="Describe the changes being made in this version"
+                            value={c.description !== undefined ? c.description : c.summary.contribution.description}
+                            readOnly={c.updatingDescription || c.summary.contribution._is_activated === "true"}
+                            style={{ borderRadius: 0 }}
                             onChange={(e) => {
-                              this.privateContributions[i].description = e.target.value;
+                              c.description = e.target.value;
                               this.setState({taps: this.state.taps + 1});
                             }}
                             onKeyPress={function(i, e) {
                               if (e.key === "Enter") this.updateDescription(i);
                             }.bind(this, i)}
                           />
-                          {c.description !== undefined && <i className="red save link icon" onClick={function(i, e) {
-                            this.updateDescription(i);
-                          }.bind(this, i)}/>}
+                          <div className={
+                              "ui small right attached icon button" + 
+                              (c.description === undefined ? " disabled" : " red") + 
+                              (c.updatingDescription ? " disabled loading" : "")
+                            }
+                            onClick={function(i, e) {
+                              this.updateDescription(i);
+                            }.bind(this, i)}
+                          >
+                            <i className="save link icon"/>&nbsp;Save
+                          </div>
                         </div>
                       </div>
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
@@ -437,28 +463,28 @@ export default class extends React.Component {
                       }
                       {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
                         <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
-                             onClick={(e) => {
-                               this.validateThenActivate(c.summary.contribution.id);
-                             }}
+                          onClick={(e) => {
+                            this.validateThenActivate(c.summary.contribution.id);
+                          }}
                         >
-                          Activate
+                          Make Public
                         </div>
                       }
                       {c.summary.contribution._is_activated === "true" &&
                         <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
-                          Activated
+                          Public
                         </div>
                       }
                       {c.summary.contribution._is_activated === "true" && Meteor.isDevelopment && 
                       <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
-                           onClick={(e) => {
-                             console.log("deactivating");
-                             Meteor.call("esDeactivateContribution", {index: index, id: c.summary.contribution.id},
-                               (error) => { console.log("deactivated"); this.updateContributions(); }
-                             );
-                           }}
+                          onClick={(e) => {
+                            console.log("deactivating");
+                            Meteor.call("esDeactivateContribution", {index: index, id: c.summary.contribution.id},
+                              (error) => { console.log("deactivated"); this.updateContributions(); }
+                            );
+                          }}
                       >
-                        Deactivate
+                        Make Private
                       </div>
                       }
                     </div>
