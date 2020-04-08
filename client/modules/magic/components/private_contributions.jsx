@@ -567,7 +567,7 @@ export default class extends React.Component {
             Activate Your Private Contribution
           </div>
           <div className="content">
-            <p>Failed to activate this contribution.</p>
+            <p>Failed to make this contribution public.</p>
           </div>
           <div className="actions">
             <div className="ui red basic cancel inverted button">
@@ -579,18 +579,18 @@ export default class extends React.Component {
         <div ref="confirm activate" className="ui modal">
           <div className="ui icon header">
             <i className="file text outline icon"></i>
-            Activate Your Private Contribution
+            Make Your Private Contribution Public
           </div>
           <div className="content">
             <div className="ui icon error message">
               <i className="warning sign icon"></i>
-              Warning! Activating your contribution makes the data publicly visible.
+              Warning! Your data will be publicly visible.
             </div>
           </div>
           <div className="actions">
             <div className="ui red approve button">
               <i className="check icon"></i>
-              Activate
+              Make Public
             </div>
             <div className="ui cancel button">Cancel</div>
           </div>
