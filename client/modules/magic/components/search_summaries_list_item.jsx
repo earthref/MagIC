@@ -100,16 +100,16 @@ class SearchSummariesListItem extends React.Component {
         <button type="submit" className="ui basic tiny fluid compact icon header purple button"
           style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
             document.getElementById('downloadButton' + id).className = "ui spinner loading icon";
-            Meteor.call('magicGetPrivateContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
+            Meteor.call('magicGetPrivateContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
               if (source) {
-                let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
+                let blob = new Blob([source], {type: "application/zip"});
                 saveAs(blob, 'magic_contribution_' + id + '.zip');
                 document.getElementById('downloadButton' + id).className = "ui file text outline icon";
               } else {
-                Meteor.call('magicGetPrivateContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
+                Meteor.call('magicGetPrivateContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
                   if (source) {
-                    let blob = new Blob([source], {type: "application/zip"});
-                    saveAs(blob, 'magic_contribution_' + id + '.zip');
+                    let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
+                    saveAs(blob, 'magic_contribution_' + id + '.txt');
                     document.getElementById('downloadButton' + id).className = "ui file text outline icon";
                   } else {
                     Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
