@@ -458,7 +458,6 @@ export default function () {
 
         await summarizer.preSummarizePromise(contribution, {summary: { contribution: summary.contribution }});
 
-        console.log("esUpdatePrivatePreSummaries updating contribution doc", index, contributor, id + "_0");
         await esClient.update({
           "index": index,
           "type": "contribution",
@@ -557,9 +556,8 @@ export default function () {
           }
         //}
   
-        await summarizer.preSummarizePromise(contribution, {summary: { contribution: summary.contribution }});
+        await summarizer.summarizePromise(contribution, {summary: { contribution: summary.contribution }});
         
-        console.log("esUpdatePrivateSummaries updating contribution doc", index, contributor, id + "_0", summary.contribution, summarizer.json.contribution.summary.contribution);
         await esClient.update({
           "index": index,
           "type": "contribution",
