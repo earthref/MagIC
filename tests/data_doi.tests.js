@@ -34,7 +34,8 @@ let index = "magic_v4";
           "summary._all.geologic_classes", 
           "summary._all.geologic_types", 
           "summary._all.lithologies", 
-          "summary._all._geo_envelope"
+          "summary._all._geo_envelope",
+          "summary._all._age_range_ybp"
         ],
         body: {
           "query": { "bool": { 
@@ -81,6 +82,18 @@ let index = "magic_v4";
                     `<subject subjectScheme="earthref.magic.lithologies">${lithology}</subject>`
                   );
                 });
+              hit._source.summary._all && hit._source.summary._all._age_range_ybp && 
+              hit._source.summary._all._age_range_ybp.range && 
+              hit._source.summary._all._age_range_ybp.range.gte && 
+              subjects.push(
+                `<subject subjectScheme="earthref.magic.age_low">${hit._source.summary._all._age_range_ybp.range.gte}</subject>`
+              );
+              hit._source.summary._all && hit._source.summary._all._age_range_ybp && 
+              hit._source.summary._all._age_range_ybp.range && 
+              hit._source.summary._all._age_range_ybp.range.lte && 
+              subjects.push(
+                `<subject subjectScheme="earthref.magic.age_high">${hit._source.summary._all._age_range_ybp.range.lte}</subject>`
+              );
               subjects = subjects.length && `<subjects>${subjects.join('')}</subjects>`;
 
               let geos = [];
