@@ -67,33 +67,65 @@ let index = "magic_v4";
               hit._source.summary._all && hit._source.summary._all.geologic_classes && 
                 hit._source.summary._all.geologic_classes.forEach(geologic_class => {
                   subjects.push(
-                    `<subject subjectScheme="earthref.magic.geologic_classes">${geologic_class}</subject>`
+                    `<subject 
+                      subjectScheme="earthref.magic.geologic_classes"
+                      schemeURI="https://earthref.org/MagIC/data-models/3.0?q=geologic_classes"
+                      valueURI="https://earthref.org/vocabularies/controlled?q=${geologic_class}"
+                    >${geologic_class}</subject>`
                   );
                 });
               hit._source.summary._all && hit._source.summary._all.geologic_types && 
                 hit._source.summary._all.geologic_types.forEach(geologic_type => {
                   subjects.push(
-                    `<subject subjectScheme="earthref.magic.geologic_types">${geologic_type}</subject>`
+                    `<subject
+                      subjectScheme="earthref.magic.geologic_types"
+                      schemeURI="https://earthref.org/MagIC/data-models/3.0?q=geologic_types"
+                      valueURI="https://earthref.org/vocabularies/controlled?q=${geologic_type}"
+                    >${geologic_type}</subject>`
                   );
                 });
               hit._source.summary._all && hit._source.summary._all.lithologies && 
                 hit._source.summary._all.lithologies.forEach(lithology => {
                   subjects.push(
-                    `<subject subjectScheme="earthref.magic.lithologies">${lithology}</subject>`
+                    `<subject
+                      subjectScheme="earthref.magic.lithologies"
+                      schemeURI="https://earthref.org/MagIC/data-models/3.0?q=lithologies"
+                      valueURI="https://earthref.org/vocabularies/controlled?q=${lithology}"
+                    >${lithology}</subject>`
                   );
                 });
               hit._source.summary._all && hit._source.summary._all._age_range_ybp && 
               hit._source.summary._all._age_range_ybp.range && 
-              hit._source.summary._all._age_range_ybp.range.gte && 
+              hit._source.summary._all._age_range_ybp.range.gte !== undefined && 
               subjects.push(
-                `<subject subjectScheme="earthref.magic.age_low">${hit._source.summary._all._age_range_ybp.range.gte}</subject>`
+                `<subject
+                  schemeURI="https://earthref.org/MagIC/data-models/3.0?q=age_low"
+                  subjectScheme="earthref.magic.age_low"
+                >${hit._source.summary._all._age_range_ybp.range.gte}</subject>`
               );
               hit._source.summary._all && hit._source.summary._all._age_range_ybp && 
               hit._source.summary._all._age_range_ybp.range && 
-              hit._source.summary._all._age_range_ybp.range.lte && 
+              hit._source.summary._all._age_range_ybp.range.lte !== undefined && 
               subjects.push(
-                `<subject subjectScheme="earthref.magic.age_high">${hit._source.summary._all._age_range_ybp.range.lte}</subject>`
+                `<subject
+                  schemeURI="https://earthref.org/MagIC/data-models/3.0?q=age_high"
+                  subjectScheme="earthref.magic.age_high"
+                >${hit._source.summary._all._age_range_ybp.range.lte}</subject>`
               );
+              hit._source.summary._all && hit._source.summary._all._age_range_ybp && 
+              hit._source.summary._all._age_range_ybp.range && (
+                hit._source.summary._all._age_range_ybp.range.lte !== undefined || 
+                hit._source.summary._all._age_range_ybp.range.gte !== undefined
+              ) && 
+              subjects.push(
+                `<subject 
+                  subjectScheme="earthref.magic.age_unit"
+                  schemeURI="https://earthref.org/MagIC/data-models/3.0?q=age_unit"
+                  valueURI="https://earthref.org/vocabularies/controlled?q=Years BP"
+                >Years BP</subject>`
+              );
+
+              
               subjects = subjects.length && `<subjects>${subjects.join('')}</subjects>`;
 
               let geos = [];
