@@ -192,10 +192,11 @@ export default class extends React.Component {
                             <div className="ui bulleted list">
                               <div className="item">
                                 <div className="content">
+                                <div style={{ display: "none" }}>"</div>
                                   <div className="header">{item.item}</div>
+                                  <div style={{ display: "none" }}>"</div>
                                   <div className="description">{item.label}</div>
-                                  <div style={{ display: "none" }}>{group}</div>
-                                  <div style={{ display: "none" }}>{vocabularies[group].label}</div>
+                                  <div style={{ display: "none" }}>"{group}"{vocabularies[group].database_column}"{vocabularies[group].label}"</div>
                                 </div>
                               </div>
                             </div>
