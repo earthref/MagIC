@@ -25,6 +25,7 @@ let index = "magic_v4";
           "summary.contribution.id", 
           "summary.contribution.timestamp", 
           "summary.contribution.version", 
+          "summary.contribution.lab_names", 
           "summary.contribution._reference.title", 
           "summary.contribution._reference.long_authors", 
           "summary.contribution._reference.year", 
@@ -123,9 +124,7 @@ let index = "magic_v4";
                   schemeURI="https://earthref.org/MagIC/data-models/3.0?q=age_unit"
                   valueURI="https://earthref.org/vocabularies/controlled?q=Years BP"
                 >Years BP</subject>`
-              );
-
-              
+              );              
               subjects = subjects.length && `<subjects>${subjects.join('')}</subjects>`;
 
               let geos = [];
@@ -158,6 +157,17 @@ let index = "magic_v4";
               });
               geos = geos.length && `<geoLocations>${geos.join('')}</geoLocations>`;
 
+              let labNames = [];
+              hit._source.summary.contribution.lab_names &&
+                hit._source.summary.contribution.lab_names.split(':').forEach(labName => {
+                  labNames.push(
+                    `<contributor contributorType="HostingInstitution">
+                      <contributorName>${labName}</contributorName>
+                    </contributor>`
+                  );
+                });
+              labNames = labNames.join('');
+
               let creators = [];
               hit._source.summary.contribution._reference.authors &&
                 hit._source.summary.contribution._reference.authors.forEach(author => {
@@ -180,6 +190,7 @@ let index = "magic_v4";
                 `<creators><creator><creatorName>` +
                   `${hit._source.summary.contribution._reference.long_authors}` +
                 `</creatorName></creator></creators>`;
+
               let datacite = 
                 `<?xml version="1.0"?>
                 <resource 
@@ -196,6 +207,7 @@ let index = "magic_v4";
                     <contributor contributorType="Distributor">
                       <contributorName>Magnetics Information Consortium (MagIC)</contributorName>
                     </contributor>
+                    ${labNames || ''}
                   </contributors>
                   <publisher>${hit._source.summary.contribution._reference.journal || 
                     'Magnetics Information Consortium (MagIC)'}</publisher>

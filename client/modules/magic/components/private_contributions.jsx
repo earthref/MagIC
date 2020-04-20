@@ -564,7 +564,7 @@ export default class extends React.Component {
         <div ref="failed to activate" className="ui basic modal">
           <div className="ui icon header">
             <i className="file text outline icon"></i>
-            Activate Your Private Contribution
+            Make Your Private Contribution Public
           </div>
           <div className="content">
             <p>Failed to make this contribution public.</p>
