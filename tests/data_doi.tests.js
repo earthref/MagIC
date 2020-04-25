@@ -47,8 +47,8 @@ let index = "magic_v4";
               { "exists": { "field": "summary.contribution.version" }},
               { "term": { "summary.contribution._is_activated": "true"}}
             ],
-            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
-            //"filter": { "term": { "summary.contribution.id": 16758}}
+            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
+            "filter": { "term": { "summary.contribution.id": 16834}}
           }}
         }
       }).then((resp) => {
@@ -62,8 +62,9 @@ let index = "magic_v4";
                 `<relatedIdentifiers>
                   <relatedIdentifier relatedIdentifierType="DOI" relationType="IsDocumentedBy">` +
                     `${hit._source.summary.contribution._reference.doi.replace(/</g, "&lt;").replace(/>/g, "&gt;")}` +
-                  `</relatedIdentifier>
-                </relatedIdentifiers>`;
+                  `</relatedIdentifier>` +
+                  (hit._source.summary.contribution.id == 16829 ? '<relatedIdentifier relatedIdentifierType="DOI" relationType="IsVariantFormOf">10.5880/FIDGEO.2019.011</relatedIdentifier>' : '') +
+                `</relatedIdentifiers>`;
               let subjects = [];
               hit._source.summary._all && hit._source.summary._all.geologic_classes && 
                 hit._source.summary._all.geologic_classes.forEach(geologic_class => {
@@ -208,6 +209,7 @@ let index = "magic_v4";
                       <contributorName>Magnetics Information Consortium (MagIC)</contributorName>
                     </contributor>
                     ${labNames || ''}
+                    ${hit._source.summary.contribution.id == 16834 ? '<contributor contributorType="ContactPerson"><contributorName>Joseph M Grappone (jmgrappone@gmail.com)</contributorName></contributor>' : ''}
                   </contributors>
                   <publisher>${hit._source.summary.contribution._reference.journal || 
                     'Magnetics Information Consortium (MagIC)'}</publisher>
@@ -232,6 +234,7 @@ let index = "magic_v4";
                 `_target: https://earthref.org/MagIC/${hit._source.summary.contribution.id}\n` +
                 `datacite: ${datacite}`;
 
+              console.log('datacite', datacite);
               request({
                 method: 'PUT',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id + '?update_if_exists=yes',
