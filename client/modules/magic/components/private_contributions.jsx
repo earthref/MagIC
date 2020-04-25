@@ -8,7 +8,7 @@ import Cookies from "js-cookie";
 import {Tracker}  from "meteor/tracker";
 import {portals} from "/lib/configs/portals";
 import {Collections} from "/lib/collections";
-import { Accordion, List, Dropdown } from 'semantic-ui-react';
+import { Accordion, List, Dropdown, Tab, Input } from 'semantic-ui-react';
 
 import DividedList from "/client/modules/common/components/divided_list";
 import SearchSummaryListItem from "/client/modules/magic/components/search_summaries_list_item";
@@ -291,7 +291,7 @@ export default class extends React.Component {
                   <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
-                        <div className="ui labeled fluid small icon input">
+                        <div className="ui labeled fluid small input">
                           <div className="ui label">
                             Private Contribution Name
                           </div>
@@ -344,7 +344,7 @@ export default class extends React.Component {
                   <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
-                        <div className="ui corner labeled fluid small icon input">
+                        <div className="ui corner labeled fluid small input">
                           <div className="ui label"
                             style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                           >
@@ -392,7 +392,7 @@ export default class extends React.Component {
                   <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <div style={{display: "flex", flexFlow: "row wrap"}}>
                       <div style={{flex: "1 1 auto"}}>
-                        <div className={"ui labeled fluid small icon input" + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
+                        <div className={"ui labeled fluid small input" + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
                           <div className={"ui label" + (c.summary.contribution._is_activated === "true" || hasReference ? "" : " red")} style={{position: "relative"}}>
                             DOI
                           </div>
@@ -422,7 +422,7 @@ export default class extends React.Component {
                         </div>
                       </div>
                       <div style={{flex: "1 1 auto", margin: "0 0 0 0.5em"}}>
-                        <div className="ui labeled fluid small icon input">
+                        <div className="ui labeled fluid small input">
                           <div className="ui label">
                             Description
                           </div>
