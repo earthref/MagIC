@@ -167,7 +167,8 @@ export default class extends React.Component {
             "name": modelAllColumns[key].label,
             "description": modelAllColumns[key].description,
             "minValue": all[key].range.gte,
-            "maxValue": all[key].range.lte
+            "maxValue": all[key].range.lte,
+            "unitText": modelAllColumns[key].unit
           });
         }
       });
