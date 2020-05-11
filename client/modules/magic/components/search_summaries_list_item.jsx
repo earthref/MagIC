@@ -86,7 +86,7 @@ class SearchSummariesListItem extends React.Component {
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id && _is_activated &&
+        {id && (_is_activated || id == 16837) &&
         <a
           href={`//earthref.org/MagIC/download/${id}/magic_contribution_${id}.txt`}
           download
