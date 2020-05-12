@@ -47,8 +47,8 @@ let index = "magic_v4";
               { "exists": { "field": "summary.contribution.version" }},
               { "term": { "summary.contribution._is_activated": "true"}}
             ],
-            //"must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
-            "filter": { "term": { "summary.contribution.id": 16834}}
+            "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
+            //"filter": { "term": { "summary.contribution.id": 16834}}
           }}
         }
       }).then((resp) => {
@@ -234,7 +234,7 @@ let index = "magic_v4";
                 `_target: https://earthref.org/MagIC/${hit._source.summary.contribution.id}\n` +
                 `datacite: ${datacite}`;
 
-              console.log('datacite', datacite);
+              //console.log('datacite', datacite);
               request({
                 method: 'PUT',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id + '?update_if_exists=yes',
