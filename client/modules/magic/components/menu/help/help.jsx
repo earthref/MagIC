@@ -14,6 +14,10 @@ export default class extends React.Component {
           If you would like to have live help or a walk through of any of the part of MagIC's uploading, searching, or downloading data procedures, please email Nick Jarboe. We can set up a time for a live chat over video using Skype, Zoom, Google Hangouts, etc.<br/>
         </p>
         <p>
+          <b>MagIC File Format</b><br/>
+          <Link to={"/MagIC/help/text-file-format"}>The MagIC file format</Link> - 2020/5/18<br/> 
+        </p>
+        <p>
           <b>Video Tutorials</b><br/>
           The 2020 MagIC Workshop demo series:<br/>
           <a href="https://youtu.be/pchdPBzSmT0">MagIC Data Model and Uploading Data to the MagIC Database</a> - 2020/3/16 (54min) - Nick Jarboe <br/>
@@ -30,10 +34,6 @@ export default class extends React.Component {
         <p>
           <b>Upgrade Older MagIC DataFiles</b><br/>
           The <Link to={"/MagIC/upgrade"}>Upgrade Tool</Link> converts older MagIC data format files to the current 3.0 MagIC data model.
-        </p>
-        <p>
-          <b>Other Help Pages</b><br/>
-          <Link to={"/MagIC/help/text-file-format"}>The MagIC file format</Link> - 2018/2/1 <br/> 
         </p>
           <b>Older Videos</b><br/>
           <a href="https://youtu.be/_Bb3YJKgwOA">Uploading Data Demo</a> - 2017/12/7 (9 min)<br/>
