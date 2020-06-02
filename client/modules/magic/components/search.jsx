@@ -271,13 +271,13 @@ class Search extends React.Component {
         _.isNumber(this.state.pole_lon_min) || _.isNumber(this.state.pole_lon_max)) {
       let pole_lon_min = -180;
       if (_.isNumber(this.state.pole_lon_min)) {
-        lon_min = this.state.pole_lon_min;
+        pole_lon_min = this.state.pole_lon_min;
         while(pole_lon_min < -180) pole_lon_min += 360;
         while(pole_lon_min >  180) pole_lon_min -= 360;
       }
       let pole_lon_max = 180;
       if (_.isNumber(this.state.pole_lon_max)) {
-        lon_max = this.state.pole_lon_max;
+        pole_lon_max = this.state.pole_lon_max;
         while(pole_lon_max < -180) pole_lon_max += 360;
         while(pole_lon_max >  180) pole_lon_max -= 360;
       }
@@ -300,7 +300,7 @@ class Search extends React.Component {
         _.isNumber(this.state.vgp_lon_min) || _.isNumber(this.state.vgp_lon_max)) {
       let vgp_lon_min = -180;
       if (_.isNumber(this.state.vgp_lon_min)) {
-        lon_min = this.state.vgp_lon_min;
+        vgp_lon_min = this.state.vgp_lon_min;
         while(vgp_lon_min < -180) vgp_lon_min += 360;
         while(vgp_lon_min >  180) vgp_lon_min -= 360;
       }
@@ -635,7 +635,7 @@ class Search extends React.Component {
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
-                        <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.pole_lat_min === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}}>
                           <input type="text" placeholder="-90"
                                  style={{borderRadius:0}}
@@ -645,7 +645,7 @@ class Search extends React.Component {
                           />
                         </div>
                         <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.lat_max === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.pole_lat_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
                           <input type="text" placeholder="90"
                                  style={{borderRadius:0}}
@@ -660,7 +660,7 @@ class Search extends React.Component {
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
-                        <div className={'ui input' + (this.state.lon_min === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.pole_lon_min === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}}>
                           <input type="text" placeholder="-360"
                                  style={{borderRadius:0}}
@@ -670,7 +670,7 @@ class Search extends React.Component {
                           />
                         </div>
                         <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.lon_max === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.pole_lon_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
                           <input type="text" placeholder="360"
                                  style={{borderRadius:0}}
@@ -695,7 +695,7 @@ class Search extends React.Component {
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
-                        <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.vgp_lat_min === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}}>
                           <input type="text" placeholder="-90"
                                  style={{borderRadius:0}}
@@ -705,7 +705,7 @@ class Search extends React.Component {
                           />
                         </div>
                         <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.lat_max === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.vgp_lat_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
                           <input type="text" placeholder="90"
                                  style={{borderRadius:0}}
@@ -720,7 +720,7 @@ class Search extends React.Component {
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
-                        <div className={'ui input' + (this.state.lon_min === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.vgp_lon_min === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}}>
                           <input type="text" placeholder="-360"
                                  style={{borderRadius:0}}
@@ -730,7 +730,7 @@ class Search extends React.Component {
                           />
                         </div>
                         <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.lon_max === null ? ' error' : '')}
+                        <div className={'ui input' + (this.state.vgp_lon_max === null ? ' error' : '')}
                              style={{flexShrink: '1', minWidth:20}} >
                           <input type="text" placeholder="360"
                                  style={{borderRadius:0}}
