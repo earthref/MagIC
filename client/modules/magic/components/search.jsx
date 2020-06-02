@@ -511,7 +511,7 @@ class Search extends React.Component {
                       </div>
                       
                       <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Geospatial Boundary
+                        Geospatial
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
@@ -570,7 +570,7 @@ class Search extends React.Component {
                         <i className="caret right icon"/>
                       </div>
                       <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Age Range
+                        Age
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className={'ui input' + (this.state.age_min === null ? ' error' : '')}
@@ -631,7 +631,7 @@ class Search extends React.Component {
                       </div>
                       
                       <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Paleomagnetic Poles Region
+                        Location Pole
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
@@ -691,7 +691,7 @@ class Search extends React.Component {
                       </div>
                       
                       <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Virtual Geomagnetic Poles Region
+                        Site VGP
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
@@ -750,7 +750,7 @@ class Search extends React.Component {
                         <i className="caret right icon"/>
                       </div>
                       <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Absolute Paleointensity Range
+                        Absolute Paleointensity
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
@@ -793,7 +793,7 @@ class Search extends React.Component {
                         <i className="caret right icon"/>
                       </div>
                       <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Declination Range
+                        Declination
                       </div>
                       <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
                         <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
