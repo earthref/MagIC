@@ -107,6 +107,14 @@ class Search extends React.Component {
       lat_max: undefined,
       lon_min: undefined,
       lon_max: undefined,
+      pole_lat_min: undefined,
+      pole_lat_max: undefined,
+      pole_lon_min: undefined,
+      pole_lon_max: undefined,
+      vgp_lat_min: undefined,
+      vgp_lat_max: undefined,
+      vgp_lon_min: undefined,
+      vgp_lon_max: undefined,
       age_min: undefined,
       age_min_unit: undefined,
       age_max: undefined,
@@ -257,6 +265,64 @@ class Search extends React.Component {
           }
         }
       });
+    }
+
+    if (_.isNumber(this.state.pole_lat_min) || _.isNumber(this.state.pole_lat_max) ||
+        _.isNumber(this.state.pole_lon_min) || _.isNumber(this.state.pole_lon_max)) {
+      let pole_lon_min = -180;
+      if (_.isNumber(this.state.pole_lon_min)) {
+        lon_min = this.state.pole_lon_min;
+        while(pole_lon_min < -180) pole_lon_min += 360;
+        while(pole_lon_min >  180) pole_lon_min -= 360;
+      }
+      let pole_lon_max = 180;
+      if (_.isNumber(this.state.pole_lon_max)) {
+        lon_max = this.state.pole_lon_max;
+        while(pole_lon_max < -180) pole_lon_max += 360;
+        while(pole_lon_max >  180) pole_lon_max -= 360;
+      }
+      if (pole_lon_min > pole_lon_max) {
+        let pole_lon_temp = pole_lon_min;
+        pole_lon_min = pole_lon_max;
+        pole_lon_max = pole_lon_temp;
+      }
+      activeFilters.push({ range: { 'summary._all.pole_lat.range': {
+        gte: this.state.pole_lat_min,
+        lte: this.state.pole_lat_max
+      }}});
+      activeFilters.push({ range: { 'summary._all.pole_lon.range': {
+        gte: pole_lon_min,
+        lte: pole_lon_max
+      }}});
+    }
+
+    if (_.isNumber(this.state.vgp_lat_min) || _.isNumber(this.state.vgp_lat_max) ||
+        _.isNumber(this.state.vgp_lon_min) || _.isNumber(this.state.vgp_lon_max)) {
+      let vgp_lon_min = -180;
+      if (_.isNumber(this.state.vgp_lon_min)) {
+        lon_min = this.state.vgp_lon_min;
+        while(vgp_lon_min < -180) vgp_lon_min += 360;
+        while(vgp_lon_min >  180) vgp_lon_min -= 360;
+      }
+      let vgp_lon_max = 180;
+      if (_.isNumber(this.state.vgp_lon_max)) {
+        vgp_lon_max = this.state.vgp_lon_max;
+        while(vgp_lon_max < -180) vgp_lon_max += 360;
+        while(vgp_lon_max >  180) vgp_lon_max -= 360;
+      }
+      if (vgp_lon_min > vgp_lon_max) {
+        let vgp_lon_temp = vgp_lon_min;
+        vgp_lon_min = vgp_lon_max;
+        vgp_lon_max = vgp_lon_temp;
+      }
+      activeFilters.push({ range: { 'summary._all.vgp_lat.range': {
+        gte: this.state.vgp_lat_min,
+        lte: this.state.vgp_lat_max
+      }}});
+      activeFilters.push({ range: { 'summary._all.vgp_lon.range': {
+        gte: vgp_lon_min,
+        lte: vgp_lon_max
+      }}});
     }
 
     if (_.isNumber(this.state.age_min) && _.isNumber(this.state.age_max))
@@ -563,6 +629,126 @@ class Search extends React.Component {
                       <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
                         <i className="caret right icon"/>
                       </div>
+                      
+                      <div className="ui tiny header" style={this.styles.filterHeader}>
+                        Paleomagnetic Poles Region
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
+                        <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder="-90"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('pole_lat_min', e.target.value, -90, _.isNumber(this.state.pole_lat_max) ? this.state.pole_lat_max : 90);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.lat_max === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder="90"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('pole_lat_max', e.target.value, _.isNumber(this.state.pole_lat_min) ? this.state.pole_lat_min : -90, 90);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                          deg
+                        </div>
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
+                        <div className={'ui input' + (this.state.lon_min === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder="-360"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('pole_lon_min', e.target.value, -360, _.isNumber(this.state.pole_lon_max) ? this.state.pole_lon_max : 360);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.lon_max === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder="360"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('pole_lon_max', e.target.value, _.isNumber(this.state.pole_lon_min) ? this.state.pole_lon_min : -360, 360);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                          deg
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={this.styles.filter}>
+                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
+                        <i className="caret right icon"/>
+                      </div>
+                      
+                      <div className="ui tiny header" style={this.styles.filterHeader}>
+                        Virtual Geomagnetic Poles Region
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
+                        <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder="-90"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('vgp_lat_min', e.target.value, -90, _.isNumber(this.state.vgp_lat_max) ? this.state.vgp_lat_max : 90);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.lat_max === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder="90"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('vgp_lat_max', e.target.value, _.isNumber(this.state.vgp_lat_min) ? this.state.vgp_lat_min : -90, 90);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                          deg
+                        </div>
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
+                        <div className={'ui input' + (this.state.lon_min === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder="-360"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('vgp_lon_min', e.target.value, -360, _.isNumber(this.state.vgp_lon_max) ? this.state.vgp_lon_max : 360);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.lon_max === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder="360"
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('vgp_lon_max', e.target.value, _.isNumber(this.state.vgp_lon_min) ? this.state.vgp_lon_min : -360, 360);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                          deg
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={this.styles.filter}>
+                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
+                        <i className="caret right icon"/>
+                      </div>
                       <div className="ui tiny header" style={this.styles.filterHeader}>
                         Absolute Paleointensity Range
                       </div>
@@ -601,7 +787,36 @@ class Search extends React.Component {
                         </div>
                       </div>
                     </div>
-
+                    { false &&
+                    <div style={this.styles.filter}>
+                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
+                        <i className="caret right icon"/>
+                      </div>
+                      <div className="ui tiny header" style={this.styles.filterHeader}>
+                        Declination Range
+                      </div>
+                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                        <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}}>
+                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
+                                 style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('dec_min', e.target.value, 0, _.isNumber(this.state.dec_max) ? this.state.int_max : 360);
+                                 }}
+                          />
+                        </div>
+                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                        <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
+                             style={{flexShrink: '1', minWidth:20}} >
+                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
+                                 style={{borderRadius:0}}
+                                 onChange={(e) => {
+                                   this.handleNumericInput('dec_max', e.target.value, _.isNumber(this.state.dec_min) ? this.state.dec_min : 0, 360);
+                                 }}
+                          />
+                        </div>
+                      </div>
+                    </div> }
                     <div>
                       {filters.map((filter, i) =>
                         <div key={i}>
