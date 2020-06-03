@@ -18,6 +18,15 @@ export default class extends React.Component {
           <Link to={"/MagIC/help/text-file-format"}>The MagIC file format</Link> - 2020/5/18<br/> 
         </p>
         <p>
+          <b>Dataset Citation</b><br/>
+          Data citations for data in MagIC should be in the form of:<br/>
+          Data Author/Principal Investigator name(s) (YEAR) "Title of Dataset", publisher or distributor, DOI 
+        </p>
+        <p>
+          <b>Example Citation</b><br/>
+          Jun Meng, Stuart A. Gilder, Yalin Li, Chengshan Wang, Tao Liu (2020) "Expanse of Greater India in the late Cretaceous", Magnetics Information Consortium (MagIC), doi:10.7288/V4/MAGIC/16853
+        </p>
+        <p>
           <b>Video Tutorials</b><br/>
           The 2020 MagIC Workshop demo series:<br/>
           <a href="https://youtu.be/pchdPBzSmT0">MagIC Data Model and Uploading Data to the MagIC Database</a> - 2020/3/16 (54min) - Nick Jarboe <br/>
