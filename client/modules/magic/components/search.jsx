@@ -385,7 +385,15 @@ class Search extends React.Component {
       age_max_unit: undefined,
       int_min: undefined,
       int_max: undefined,
-      int_unit: undefined
+      int_unit: undefined,
+      pole_lat_min: undefined,
+      pole_lat_max: undefined,
+      pole_lon_min: undefined,
+      pole_lon_max: undefined,
+      vgp_lat_min: undefined,
+      vgp_lat_max: undefined,
+      vgp_lon_min: undefined,
+      vgp_lon_max: undefined
     });
   }
 
