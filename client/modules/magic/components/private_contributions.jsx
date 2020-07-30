@@ -649,6 +649,7 @@ export default class extends React.Component {
     _.sortBy(_.keys(model.tables), table => model.tables[table].position).forEach(table => {
       const n = _.reduce(_.keys(results[table]), (n, column) => n + _.keys(results[table][column]).length, 0);
       if (results[table]) panels.push({
+        active: true,
         title: `${model.tables[table].label} (${n} ${type}${n > 1 ? 's' : ''})`,
         content: { 
           key: table,
@@ -667,6 +668,7 @@ export default class extends React.Component {
     _.sortBy(_.keys(model.tables[table].columns), column => model.tables[table].columns[column].position).forEach(column => {
       const n = _.keys(results[table][column]).length
       if (results[table][column]) panels.push({
+        active: true,
         title: `${model.tables[table].columns[column].label} (${n} ${type}${n > 1 ? 's' : ''})`,
         content: {
           key: table + '_' + column,
