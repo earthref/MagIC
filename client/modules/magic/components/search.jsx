@@ -456,11 +456,13 @@ class Search extends React.Component {
                 Clear
               </div>
             </div>
-            <SearchDownload className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
-                 queries={searchQueries} filters={activeFilters}>
-              <i className="download icon"/>
-              Download Results
-            </SearchDownload>
+            { this.state.search.indexOf('private_key:') === -1 &&
+              <SearchDownload className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
+                  queries={searchQueries} filters={activeFilters}>
+                <i className="download icon"/>
+                Download Results
+              </SearchDownload>
+            }
           </div>
           <div ref="results" style={{display: 'flex', marginTop: '1em', height: this.state.height || '100%', width: this.state.width || '100%'}}>
             <div>

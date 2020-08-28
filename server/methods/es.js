@@ -1217,7 +1217,7 @@ export default function () {
         }
       } catch(error) {
         console.error("esUploadActivatedContributionToS3", index, id, error);
-        throw new Meteor.Error("esUploadActivatedContributionToS3", error.message);
+        //throw new Meteor.Error("esUploadActivatedContributionToS3", error.message);
       }
       
       console.error("esUploadActivatedContributionToS3 finished", id);

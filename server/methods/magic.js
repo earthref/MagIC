@@ -148,7 +148,7 @@ export default function () {
         });
       } catch (e) {
         console.error("magicGetPublicContributions", `Failed to retrieve private contributions for IDs ${ids.join(', ')}`, e);
-        throw new Meteor.Error("magicGetPublicContributions", `Failed to retrieve private contributions for IDs ${ids.join(', ')}`);
+        // throw new Meteor.Error("magicGetPublicContributions", `Failed to retrieve private contributions for IDs ${ids.join(', ')}`);
       }
     }
 
