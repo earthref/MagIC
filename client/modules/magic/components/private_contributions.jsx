@@ -11,7 +11,7 @@ import {Collections} from "/lib/collections";
 import { Accordion, List, Dropdown, Tab, Input } from 'semantic-ui-react';
 
 import DividedList from "/client/modules/common/components/divided_list";
-import SearchSummaryListItem from "/client/modules/magic/components/search_summaries_list_item";
+import SearchSummariesListItem from "/client/modules/magic/containers/search_summaries_list_item";
 import IconButton from "/client/modules/common/components/icon_button";
 import {index} from "/lib/configs/magic/search_levels.js";
 import {versions, models} from '/lib/configs/magic/data_models';
@@ -491,7 +491,7 @@ export default class extends React.Component {
                   </div>
                   <div className="ui bottom attached segment" style={{padding: "1px 1em 0"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                     <DividedList items={[c]}>
-                      <SearchSummaryListItem table="contribution" collapsed/>
+                      <SearchSummariesListItem table="contribution" collapsed/>
                     </DividedList>
                   </div>
                 </div>

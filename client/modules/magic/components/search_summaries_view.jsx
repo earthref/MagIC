@@ -2,7 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import InfiniteScrollerWithCount from '/client/modules/common/containers/infinite_scroller_with_count';
 import SearchDividedList from '/client/modules/common/containers/search_divided_list';
-import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
+import SearchSummariesListItem from '/client/modules/magic/containers/search_summaries_list_item';
 
 export default class extends React.Component {
 
@@ -23,7 +23,7 @@ export default class extends React.Component {
         pageSize={this.props.pageSize || 5}
       >
         <SearchDividedList es={this.props.es}>
-          <SearchSummaryListItem table={this.props.es.type}/>
+          <SearchSummariesListItem table={this.props.es.type}/>
         </SearchDividedList>
       </InfiniteScrollerWithCount>
     );

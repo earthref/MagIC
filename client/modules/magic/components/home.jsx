@@ -4,7 +4,7 @@ import {Grid} from 'semantic-ui-react';
 
 import IconButton from '/client/modules/common/components/icon_button';
 import SearchDividedList from '/client/modules/common/containers/search_divided_list';
-import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
+import SearchSummariesListItem from '/client/modules/magic/containers/search_summaries_list_item';
 import News from '/client/modules/magic/components/home_news';
 import {levels} from '/lib/configs/magic/search_levels.js';
 
@@ -122,7 +122,7 @@ export default class extends React.Component {
           pageSize={7}
           pageNumber={1}
         >
-          <SearchSummaryListItem table="contribution"/>
+          <SearchSummariesListItem table="contribution"/>
         </SearchDividedList>
         <IconButton className="small card" link="/MagIC/search" portal="MagIC" style={{margin:0}}>
           <div className="small title">View More Contributions in the MagIC Search Interface</div>

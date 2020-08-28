@@ -18,7 +18,7 @@ import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js'
 //import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
 import DataImporter from '/client/modules/common/components/data_importer';
 import DividedList from '/client/modules/common/components/divided_list';
-import SearchSummaryListItem from '/client/modules/magic/components/search_summaries_list_item';
+import SearchSummariesListItem from '/client/modules/magic/containers/search_summaries_list_item';
 import IconButton from '/client/modules/common/components/icon_button';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {index} from '/lib/configs/magic/search_levels.js';
@@ -1162,7 +1162,7 @@ export default class MagICUploadContribution extends React.Component {
                               </div>
                               <br/>
                               <DividedList items={[this.state._existing_summary]}>
-                                <SearchSummaryListItem table="contribution" collapsed/>
+                                <SearchSummariesListItem table="contribution" collapsed/>
                               </DividedList>
                             </div>
                             <div className="ui horizontal divider">
@@ -1174,7 +1174,7 @@ export default class MagICUploadContribution extends React.Component {
                               </div>
                               <br/>
                               <DividedList items={[this.summary.contribution]}>
-                                <SearchSummaryListItem table="contribution" collapsed/>
+                                <SearchSummariesListItem table="contribution" collapsed/>
                               </DividedList>
                             </div>
                           </div>
@@ -1182,7 +1182,7 @@ export default class MagICUploadContribution extends React.Component {
                           <div>
                             <div className="ui basic segment">
                               <DividedList items={[this.summary.contribution]}>
-                                <SearchSummaryListItem table="contribution" collapsed/>
+                                <SearchSummariesListItem table="contribution" collapsed/>
                               </DividedList>
                             </div>
                           </div>
