@@ -439,16 +439,15 @@ class Search extends React.Component {
                 defaultValue={this.props.search || ''}
                 placeholder={'e.g. metamorphic "field intensity" -precambrian'}
                 style={this.styles.input}
-                onChange={(e) => this.updateSearchInput(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && this.setState({search: e.target.value})}
               />
-              <div className={'ui basic black button' + (this.state.searchInput === this.state.search ? ' disabled' : '')}
+              <div className={'ui basic black button'}
                    onClick={(e) => this.setState({search: this.state.searchInput})}
               >
                 <i className="search icon"/>
                 Search
               </div>
-              <div className={'ui basic black button' + (_.isEmpty(this.state.search + this.state.searchInput) ? ' disabled' : '')}
+              <div className={'ui basic black button'}
                    style={this.styles.searchButton}
                    onClick={(e) => { this.refs['search'].value = ''; this.setState({search: "", searchInput: ""}); }}
               >

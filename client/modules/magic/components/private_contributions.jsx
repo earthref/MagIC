@@ -276,12 +276,10 @@ export default class extends React.Component {
       <div>
         <div className="ui list" style={{margin: "0"}}>
           <Link className={portals['MagIC'].color + ' ui icon button'} style={{float:'right', margin:'0 0 0.5em'}} to="/MagIC/upload">
-            <i className="add icon"/>
-            Upload Data Into Your Private Workspace
+            <i className="add icon"/> Upload Data Into Your Private Workspace
           </Link>
           <button className={(this.state.activated ? '' : portals['MagIC'].color) + ' ui icon button'} style={{margin:'0 1em 0.5em 0'}} onClick={() => { this.setState({ activated: false }, this.updateContributions.bind(this))}}>
-            <i className="edit icon" style={{ marginRight: '0.5em !important' }}/>
-            In Preparation
+            <i className="edit icon"/> In Preparation
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
               es={{ index: 'magic_v4', type: 'contribution', filters: [
@@ -292,8 +290,7 @@ export default class extends React.Component {
             </div>
           </button>
           <button className={(!this.state.activated ? '' : portals['MagIC'].color) + ' ui icon button'} style={{margin:'0 1em 0.5em 0'}} onClick={() => { this.setState({ activated: true }, this.updateContributions.bind(this))}}>
-            <i className="clipboard check icon" style={{ marginRight: '0.5em !important' }}/>
-            Made Public
+            <i className="clipboard check icon"/> Made Public
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
                 es={{ index: 'magic_v4', type: 'contribution', filters: [

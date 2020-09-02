@@ -207,7 +207,7 @@ export default class extends React.Component {
     else if (count) {
       return (
         <div style={thumbnailContainerStyle}>
-          <a href="#" onClick={this.showPlots.bind(this)} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
+          <a onClick={this.showPlots.bind(this)} style={{ cursor:'pointer', display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
             <SearchPlot style={thumbnailStyle} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate}
               file={file || activeFiles.length && (activeFiles[0].thumbnail || activeFiles.full)}
             />
@@ -250,7 +250,7 @@ export default class extends React.Component {
               </div>
             </div>
             <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 275px)' }}>
-              {!this.state.file && this.state.modal && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
+              {!this.state.file && this.state.modal && activeFiles.length && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
                 <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
                   <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
                     <SearchPlot style={thumbnailStyle} id={id} loadingStyle={loadingStyle} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
