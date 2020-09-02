@@ -95,7 +95,9 @@ export default function () {
           }
         };
         
-        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key") &&
+            !_.find(_.map(queries, "term"), "summary.contribution._is_activated") &&
+            !_.find(_.map(filters, "term"), "summary.contribution._is_activated")) {
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -620,7 +622,7 @@ export default function () {
     },
 
     // TODO: pass login token to authenticate changes
-    async esGetPrivateContributionSummaries({index, contributor, includeActivated}) {
+    async esGetPrivateContributionSummaries({index, contributor, activated}) {
       console.log("esGetPrivateContributionSummaries", index, contributor);
       this.unblock();
       try {
@@ -638,21 +640,15 @@ export default function () {
             },
             "query": {
               "bool": {
-                "filter": (includeActivated ?
-                  [{
-                    "term": {
-                      "summary.contribution.contributor.raw": contributor
-                    }
-                  }] : [{
-                    "term": {
-                      "summary.contribution.contributor.raw": contributor
-                    }
-                  },{
-                    "term": {
-                      "summary.contribution._is_activated": "false"
-                    }
-                  }]
-                )
+                "filter": [{
+                  "term": {
+                    "summary.contribution.contributor.raw": contributor
+                  },
+                }, {
+                  "term": {
+                    "summary.contribution._is_activated": activated ? "true" : "false"
+                  }
+                }]
               }
             },
             "sort": [{

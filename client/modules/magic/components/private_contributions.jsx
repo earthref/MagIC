@@ -10,6 +10,7 @@ import {portals} from "/lib/configs/portals";
 import {Collections} from "/lib/collections";
 import { Accordion, List, Dropdown, Tab, Input } from 'semantic-ui-react';
 
+import Count from '/client/modules/common/containers/search_count';
 import DividedList from "/client/modules/common/components/divided_list";
 import SearchSummariesListItem from "/client/modules/magic/containers/search_summaries_list_item";
 import IconButton from "/client/modules/common/components/icon_button";
@@ -25,6 +26,7 @@ export default class extends React.Component {
     this.state = {
       loaded: false,
       validation: { errors: [], warnings: [] },
+      activated: false,
       taps: 0
     };
   }
@@ -119,10 +121,11 @@ export default class extends React.Component {
     if (!Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) {
       this.setState({loaded: true});
     } else {
+      this.setState({loaded: false});
       Meteor.call("esGetPrivateContributionSummaries", {
         index: index,
         contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}),
-        includeActivated: true
+        activated: this.state.activated
       }, (error, contributions) => {
         if (error) {
           console.error(error);
@@ -271,237 +274,264 @@ export default class extends React.Component {
     );
     else return (
       <div>
-        {!this.state.loaded ?
-          <div className="ui segment" style={{minHeight: "8em"}}>
-            <div className="ui inverted active dimmer">
-              <div className="ui text loader">Loading</div>
+        <div className="ui list" style={{margin: "0"}}>
+          <Link className={portals['MagIC'].color + ' ui icon button'} style={{float:'right', margin:'0 0 0.5em'}} to="/MagIC/upload">
+            <i className="add icon"/>
+            Upload Data Into Your Private Workspace
+          </Link>
+          <button className={(this.state.activated ? '' : portals['MagIC'].color) + ' ui icon button'} style={{margin:'0 1em 0.5em 0'}} onClick={() => { this.setState({ activated: false }, this.updateContributions.bind(this))}}>
+            <i className="edit icon" style={{ marginRight: '0.5em !important' }}/>
+            In Preparation
+            <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
+              <Count
+              es={{ index: 'magic_v4', type: 'contribution', filters: [
+                {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
+                {"term": { "summary.contribution._is_activated": "false" }}
+              ] }}
+              />
             </div>
-          </div>
+          </button>
+          <button className={(!this.state.activated ? '' : portals['MagIC'].color) + ' ui icon button'} style={{margin:'0 1em 0.5em 0'}} onClick={() => { this.setState({ activated: true }, this.updateContributions.bind(this))}}>
+            <i className="clipboard check icon" style={{ marginRight: '0.5em !important' }}/>
+            Made Public
+            <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
+              <Count
+                es={{ index: 'magic_v4', type: 'contribution', filters: [
+                  {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
+                  {"term": { "summary.contribution._is_activated": "true" }}
+                ] }}
+              />
+            </div>
+          </button>
+          {!this.state.loaded ?
+            <div className="ui segment" style={{minHeight: "8em"}}>
+              <div className="ui inverted active dimmer">
+                <div className="ui text loader">Loading</div>
+              </div>
+            </div>
           :
-          <div className="ui list" style={{margin: "0"}}>
-            <Link className={portals['MagIC'].color + ' ui compact icon button'} style={{float:'right', margin:'-3em 0 0', paddingTop: '0.5em', paddingBottom: '0.5em'}} to="/MagIC/upload">
-              <i className="add icon"/>
-              Upload Data Into Your Private Workspace
-            </Link>
-            {this.privateContributions.map((c,i) => {
-              let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
-              //console.log("ref", c, noReference);
-              return (
-                <div className="item" key={i} style={{marginBottom: "1.5em"}}>
-                  <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
-                    <div style={{display: "flex", flexFlow: "row wrap"}}>
-                      <div style={{flex: "1 1 auto"}}>
-                        <div className="ui labeled fluid small input">
-                          <div className="ui label">
-                            Private Contribution Name
-                          </div>
-                          <input type="text" default="None"
-                            placeholder="A name to help you remember which contribution you are working on"
-                            value={c.name !== undefined ? c.name : c.summary.contribution._name} readOnly={c.updatingName}
-                            style={{ borderRadius: 0 }}
-                            onChange={(e) => {
-                              c.name = e.target.value;
-                              this.setState({taps: this.state.taps + 1});
-                            }}
-                            onKeyPress={function(i, e) {
-                              if (e.key === "Enter") this.updateName(i);
-                            }.bind(this, i)}
-                          />
-                          <div className={
-                              "ui small right attached icon button" + 
-                              (c.name === undefined ? " disabled" : " red") + 
-                              (c.updatingName ? " disabled loading" : "")
-                            }
-                            style={{ marginRight: 0 }}
-                            onClick={function(i, e) {
-                              this.updateName(i);
-                            }.bind(this, i)}
-                          >
-                            <i className="save link icon"/>&nbsp;Save
-                          </div>
+          this.privateContributions.map((c,i) => {
+            let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
+            //console.log("ref", c, noReference);
+            return (
+              <div className="item" key={i} style={{marginBottom: "1.5em"}}>
+                <div className={portals["MagIC"].color + " ui top attached inverted segment"} style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                  <div style={{display: "flex", flexFlow: "row wrap"}}>
+                    <div style={{flex: "1 1 auto"}}>
+                      <div className="ui labeled fluid small input">
+                        <div className="ui label">
+                          Private Contribution Name
                         </div>
-                      </div>
-                      {c.summary.contribution._is_activated !== "true" &&
-                        <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
-                            onClick={(e) => {
-                              this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
-                            }}
-                        >
-                          Share
-                        </div>
-                      }
-                      {c.summary.contribution._is_activated !== "true" &&
-                        <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
-                            onClick={(e) => {
-                              this.confirmDelete(c.summary.contribution.id);
-                            }}
-                        >
-                          Delete
-                        </div>
-                      }
-                    </div>
-                  </div>
-                  <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
-                    <div style={{display: "flex", flexFlow: "row wrap"}}>
-                      <div style={{flex: "1 1 auto"}}>
-                        <div className="ui corner labeled fluid small input">
-                          <div className="ui label"
-                            style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
-                          >
-                            Laboratory Names
-                          </div>
-                          <Dropdown multiple selection
-                            defaultValue={
-                              (c.lab_names && c.lab_names.split(":")) ||
-                              (c.summary.contribution.lab_names && c.summary.contribution.lab_names.split(":")) ||
-                              ""
-                            }
-                            placeholder="Select one or more laboratories where the measurements in the contribution were made"
-                            options={cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
-                              return {
-                                key: item.item,
-                                text: item.item,
-                                value: item.item
-                              };
-                            })}
-                            style={{ borderRadius: 0, flexGrow: 1 }}
-                            onChange={(e, data) => {
-                              c.lab_names = data.value.join(":");
-                              this.setState({taps: this.state.taps + 1});
-                            }}
-                            onKeyPress={function(i, e) {
-                              if (e.key === "Enter") this.updateLabNames(i);
-                            }.bind(this, i)}
-                          />
-                          <div className={
-                              "ui small right attached icon button" + 
-                              (c.lab_names === undefined ? " disabled" : " red") + 
-                              (c.updatingLabNames ? " disabled loading" : "")
-                            }
-                            style={{ marginRight: 0 }}
-                            onClick={function(i, e) {
-                              this.updateLabNames(i);
-                            }.bind(this, i)}
-                          >
-                            <i className="save link icon"/>&nbsp;Save
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
-                    <div style={{display: "flex", flexFlow: "row wrap"}}>
-                      <div style={{flex: "1 1 auto"}}>
-                        <div className={"ui labeled fluid small input" + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
-                          <div className={"ui label" + (c.summary.contribution._is_activated === "true" || hasReference ? "" : " red")} style={{position: "relative"}}>
-                            DOI
-                          </div>
-                          <input type="text" default="None" placeholder="The study's DOI (required)" 
-                            value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} 
-                            readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
-                            style={{ borderRadius: 0 }}
-                            onChange={(e) => {
-                              c.reference = e.target.value;
-                              this.setState({taps: this.state.taps + 1});
-                            }}
-                            onKeyPress={function(i, e) {
-                              if (e.key === "Enter") this.updateReference(i);
-                            }.bind(this, i)}
-                          />
-                          <div className={
-                              "ui small right attached icon button" + 
-                              (c.reference === undefined ? " disabled" : " red") + 
-                              (c.updatingReference ? " disabled loading" : "")
-                            }
-                            onClick={function(i, e) {
-                              this.updateReference(i);
-                            }.bind(this, i)}
-                          >
-                            <i className="save link icon"/>&nbsp;Save
-                          </div>
-                        </div>
-                      </div>
-                      <div style={{flex: "1 1 auto", margin: "0 0 0 0.5em"}}>
-                        <div className="ui labeled fluid small input">
-                          <div className="ui label">
-                            Description
-                          </div>
-                          <input type="text" default="None"
-                            placeholder="Describe the changes being made in this version"
-                            value={c.description !== undefined ? c.description : c.summary.contribution.description}
-                            readOnly={c.updatingDescription || c.summary.contribution._is_activated === "true"}
-                            style={{ borderRadius: 0 }}
-                            onChange={(e) => {
-                              c.description = e.target.value;
-                              this.setState({taps: this.state.taps + 1});
-                            }}
-                            onKeyPress={function(i, e) {
-                              if (e.key === "Enter") this.updateDescription(i);
-                            }.bind(this, i)}
-                          />
-                          <div className={
-                              "ui small right attached icon button" + 
-                              (c.description === undefined ? " disabled" : " red") + 
-                              (c.updatingDescription ? " disabled loading" : "")
-                            }
-                            onClick={function(i, e) {
-                              this.updateDescription(i);
-                            }.bind(this, i)}
-                          >
-                            <i className="save link icon"/>&nbsp;Save
-                          </div>
-                        </div>
-                      </div>
-                      {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
-                        <div className={"ui red small button"} style={{margin: "0 0 0 0.5em"}}
-                            onClick={(e) => {
-                              this.validate(c.summary.contribution.id);
-                            }}
-                        >
-                          Validate
-                        </div>
-                      }
-                      {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
-                        <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
-                          onClick={(e) => {
-                            this.validateThenActivate(c.summary.contribution.id);
+                        <input type="text" default="None"
+                          placeholder="A name to help you remember which contribution you are working on"
+                          value={c.name !== undefined ? c.name : c.summary.contribution._name} readOnly={c.updatingName}
+                          style={{ borderRadius: 0 }}
+                          onChange={(e) => {
+                            c.name = e.target.value;
+                            this.setState({taps: this.state.taps + 1});
                           }}
+                          onKeyPress={function(i, e) {
+                            if (e.key === "Enter") this.updateName(i);
+                          }.bind(this, i)}
+                        />
+                        <div className={
+                            "ui small right attached icon button" + 
+                            (c.name === undefined ? " disabled" : " red") + 
+                            (c.updatingName ? " disabled loading" : "")
+                          }
+                          style={{ marginRight: 0 }}
+                          onClick={function(i, e) {
+                            this.updateName(i);
+                          }.bind(this, i)}
                         >
-                          Make Public
+                          <i className="save link icon"/>&nbsp;Save
                         </div>
-                      }
-                      {c.summary.contribution._is_activated === "true" &&
-                        <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
-                          Public
-                        </div>
-                      }
-                      {c.summary.contribution._is_activated === "true" && Meteor.isDevelopment && 
-                      <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                      </div>
+                    </div>
+                    {c.summary.contribution._is_activated !== "true" &&
+                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
                           onClick={(e) => {
-                            console.log("deactivating");
-                            Meteor.call("esDeactivateContribution", {index: index, id: c.summary.contribution.id},
-                              (error) => { console.log("deactivated"); this.updateContributions(); }
-                            );
+                            this.showShareLink(c.summary.contribution.id, c.summary.contribution._private_key);
                           }}
                       >
-                        Make Private
+                        Share
                       </div>
-                      }
-                    </div>
-                  </div>
-                  <div className="ui bottom attached segment" style={{padding: "1px 1em 0"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
-                    <DividedList items={[c]}>
-                      <SearchSummariesListItem table="contribution" collapsed/>
-                    </DividedList>
+                    }
+                    {c.summary.contribution._is_activated !== "true" &&
+                      <div className="ui small button" style={{margin: "0 0 0 0.5em"}}
+                          onClick={(e) => {
+                            this.confirmDelete(c.summary.contribution.id);
+                          }}
+                      >
+                        Delete
+                      </div>
+                    }
                   </div>
                 </div>
-              );
-            })}
+                <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                  <div style={{display: "flex", flexFlow: "row wrap"}}>
+                    <div style={{flex: "1 1 auto"}}>
+                      <div className="ui corner labeled fluid small input">
+                        <div className="ui label"
+                          style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+                        >
+                          Laboratory Names
+                        </div>
+                        <Dropdown multiple selection
+                          defaultValue={
+                            (c.lab_names && c.lab_names.split(":")) ||
+                            (c.summary.contribution.lab_names && c.summary.contribution.lab_names.split(":")) ||
+                            ""
+                          }
+                          placeholder="Select one or more laboratories where the measurements in the contribution were made"
+                          options={cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
+                            return {
+                              key: item.item,
+                              text: item.item,
+                              value: item.item
+                            };
+                          })}
+                          style={{ borderRadius: 0, flexGrow: 1 }}
+                          onChange={(e, data) => {
+                            c.lab_names = data.value.join(":");
+                            this.setState({taps: this.state.taps + 1});
+                          }}
+                          onKeyPress={function(i, e) {
+                            if (e.key === "Enter") this.updateLabNames(i);
+                          }.bind(this, i)}
+                        />
+                        <div className={
+                            "ui small right attached icon button" + 
+                            (c.lab_names === undefined ? " disabled" : " red") + 
+                            (c.updatingLabNames ? " disabled loading" : "")
+                          }
+                          style={{ marginRight: 0 }}
+                          onClick={function(i, e) {
+                            this.updateLabNames(i);
+                          }.bind(this, i)}
+                        >
+                          <i className="save link icon"/>&nbsp;Save
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                  <div style={{display: "flex", flexFlow: "row wrap"}}>
+                    <div style={{flex: "1 1 auto"}}>
+                      <div className={"ui labeled fluid small input" + (c.summary.contribution._is_activated == "true" || hasReference ? "" : " error")}>
+                        <div className={"ui label" + (c.summary.contribution._is_activated === "true" || hasReference ? "" : " red")} style={{position: "relative"}}>
+                          DOI
+                        </div>
+                        <input type="text" default="None" placeholder="The study's DOI (required)" 
+                          value={c.reference !== undefined ? c.reference : c.summary.contribution.reference} 
+                          readOnly={c.updatingReference || c.summary.contribution._is_activated === "true"}
+                          style={{ borderRadius: 0 }}
+                          onChange={(e) => {
+                            c.reference = e.target.value;
+                            this.setState({taps: this.state.taps + 1});
+                          }}
+                          onKeyPress={function(i, e) {
+                            if (e.key === "Enter") this.updateReference(i);
+                          }.bind(this, i)}
+                        />
+                        <div className={
+                            "ui small right attached icon button" + 
+                            (c.reference === undefined ? " disabled" : " red") + 
+                            (c.updatingReference ? " disabled loading" : "")
+                          }
+                          onClick={function(i, e) {
+                            this.updateReference(i);
+                          }.bind(this, i)}
+                        >
+                          <i className="save link icon"/>&nbsp;Save
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{flex: "1 1 auto", margin: "0 0 0 0.5em"}}>
+                      <div className="ui labeled fluid small input">
+                        <div className="ui label">
+                          Description
+                        </div>
+                        <input type="text" default="None"
+                          placeholder="Describe the changes being made in this version"
+                          value={c.description !== undefined ? c.description : c.summary.contribution.description}
+                          readOnly={c.updatingDescription || c.summary.contribution._is_activated === "true"}
+                          style={{ borderRadius: 0 }}
+                          onChange={(e) => {
+                            c.description = e.target.value;
+                            this.setState({taps: this.state.taps + 1});
+                          }}
+                          onKeyPress={function(i, e) {
+                            if (e.key === "Enter") this.updateDescription(i);
+                          }.bind(this, i)}
+                        />
+                        <div className={
+                            "ui small right attached icon button" + 
+                            (c.description === undefined ? " disabled" : " red") + 
+                            (c.updatingDescription ? " disabled loading" : "")
+                          }
+                          onClick={function(i, e) {
+                            this.updateDescription(i);
+                          }.bind(this, i)}
+                        >
+                          <i className="save link icon"/>&nbsp;Save
+                        </div>
+                      </div>
+                    </div>
+                    {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid !== "true" &&
+                      <div className={"ui red small button"} style={{margin: "0 0 0 0.5em"}}
+                          onClick={(e) => {
+                            this.validate(c.summary.contribution.id);
+                          }}
+                      >
+                        Validate
+                      </div>
+                    }
+                    {c.summary.contribution._is_activated !== "true" && c.summary.contribution._is_valid === "true" &&
+                      <div className={"ui small button " + (hasReference ? portals["MagIC"].color : "disabled red")} style={{margin: "0 0 0 0.5em"}}
+                        onClick={(e) => {
+                          this.validateThenActivate(c.summary.contribution.id);
+                        }}
+                      >
+                        Make Public
+                      </div>
+                    }
+                    {c.summary.contribution._is_activated === "true" &&
+                      <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
+                        Public
+                      </div>
+                    }
+                    {c.summary.contribution._is_activated === "true" && Meteor.isDevelopment && 
+                    <div className={portals["MagIC"].color + " ui basic small button"} style={{margin: "0 0 0 0.5em"}}
+                        onClick={(e) => {
+                          console.log("deactivating");
+                          Meteor.call("esDeactivateContribution", {index: index, id: c.summary.contribution.id},
+                            (error) => { console.log("deactivated"); this.updateContributions(); }
+                          );
+                        }}
+                    >
+                      Make Private
+                    </div>
+                    }
+                  </div>
+                </div>
+                <div className="ui bottom attached segment" style={{padding: "1px 1em 0"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                  <DividedList items={[c]}>
+                    <SearchSummariesListItem table="contribution" collapsed/>
+                  </DividedList>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        { this.state.loaded && this.privateContributions.length === 0 && 
+          <div className="ui fluid warning message">
+            <div className="ui center aligned huge basic segment">
+              No Items to Display
+            </div>
           </div>
         }
-        <div ref="no-match-message" className="ui hidden error bottom attached message">
-          None of your contributions match your search. Please edit the search string.
-        </div>
         <div ref="share" className="ui modal">
           <div className="ui icon header">
             <i className="add user icon"></i>
