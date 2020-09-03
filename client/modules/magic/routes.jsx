@@ -22,6 +22,8 @@ import MagICHelpTextFileFormat from '/client/modules/magic/components/menu/help/
 import MagICHelpUploadingData from '/client/modules/magic/components/menu/help/uploading_data';
 import MagICHelpCreateAccount from '/client/modules/magic/components/menu/help/create_account';
 
+import MagICMagNetS from '/client/modules/magic/components/magnets';
+
 import MagICSearch from '/client/modules/magic/components/search';
 import MagICUpgradeContribution from '/client/modules/magic/components/upgrade_contribution';
 import MagICUploadContribution from '/client/modules/magic/components/upload_contribution';
@@ -106,6 +108,12 @@ const Routes = ({match}) => (
       <Page portal="MagIC" title="The MagIC Grand Challenges" menu={<MagICMenu/>}>
         <Helmet><title>MagIC Grand Challenges | EarthRef.org</title></Helmet>
         <MagICGrandChallenges/>
+      </Page>
+    }/>
+    <Route exact path="/MagIC/magnets" render={() =>
+      <Page portal="MagIC" title="MagNetS Information Page" menu={<MagICMenu/>}>
+        <Helmet><title>MagIC MagNetS Information Page | EarthRef.org</title></Helmet>
+        <MagICMagNetS/>
       </Page>
     }/>
 
