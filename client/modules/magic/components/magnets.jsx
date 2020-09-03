@@ -29,7 +29,7 @@ export default class extends React.Component {
         </p>
         <p>
          <b>Contact</b><br/>
-         Please send questions, interest in giving a seminar, or a request to be put on the mailing list for the seminars to <a href='mailto:greig.Paterson@liverpool.ac.uk'><font color='purple'>greig.Paterson@liverpool.ac.uk</font></a><br/>  
+         Please send questions, interest in giving a seminar, or a request to be put on the mailing list for the seminars to <a href='mailto:greig.paterson@liverpool.ac.uk'><font color='purple'>greig.paterson@liverpool.ac.uk</font></a><br/>  
         </p>
       </div>
     );
