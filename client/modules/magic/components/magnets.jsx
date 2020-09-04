@@ -5,8 +5,14 @@ export default () => {
   const [data, setData] = useState(null);
   useEffect(() => {
     async function fetchData() {
-      const resp = await fetch('https://cdn.jsdelivr.net/gh/earthref/MagIC-MagNetS/magnets.md');
-      setData(resp.ok && await resp.text());
+      const resp = await fetch('https://api.github.com/repos/earthref/MagIC-MagNetS/contents/magnets.md');
+      if (!resp.ok) {
+        setData(false);
+      } else {
+        const json = await resp.json();
+        const b64 = json.content;
+        setData(atob(b64));
+      }
     }
     fetchData();
   }, []);
