@@ -7,9 +7,9 @@ export default class extends React.Component {
     return (
       <div>
 
-        <a href="jupyterhub.earthref.org"><b>EarthRef's JupyterHub Server</b></a>
-        <p> EarthRef.org supports a JupyterHub server where you can run MagIC PmagPy notebooks and create your own. 
-          Login using your EarthRef(MagIC) username(handle) and password. If you don't know your MagIC username and password, 
+        <a href='https://jupyterhub.earthref.org'><b>EarthRef's JupyterHub Server</b></a>
+        <p> EarthRef.org supports a JupyterHub server where you can run PmagPy notebooks and create your own. 
+          Login using your EarthRef(MagIC) username(handle) and password. If you don't know your EarthRef username and password, 
           login to the MagIC website at the <a href="https://www2.earthref.org/MagIC">home page</a>. You can 
           login using your ORCID id or your 
           username and password, or create an account with your ORCID id. You can then view, set, or edit your 
@@ -17,17 +17,18 @@ export default class extends React.Component {
           account with an ORCID id, you will have to set your username and password before logging into the JupyterHub. 
         </p>
         <p>
-        The JuypterHub site can be found at <a href="https://jupyterhub.earthref.org">jupyterhub.earthref.org</a>.
+        The JuypterHub site can be found at <a href="https://jupyterhub.earthref.org">jupyterhub.earthref.org</a>.<br/>
         </p>
-
         <p><b>PmagPy Fundemetals</b><br/>
-            These five Jupyter notebooks for PmagPy explain many of the functions and uses of the PmagPy 
-            software. They can be downloaded from the PmagPy GitHub website: <br/>
+        A <a href="https://github.com/PmagPy/PmagPy/blob/master/PmagPy_online.ipynb">Juypter Notebook</a> explaining PmagPy Online. This is a tutorial on using the EarthRef JuypterHub, PmagPy, and the MagIC database.<br/>
+        A presentation of the notebook by Lisa Tauxe at the EarthCube 2020 meeting can be found at <a href="https://doi.org/10.1002/essoar.10504182.1">doi.org/10.1002/essoar.10504182.1</a>.<br/>
+        <br/>
+            These five Jupyter notebooks for PmagPy can also be downloaded separately and describes many of the functions and uses of the PmagPy in more detail.They can be downloaded from the PmagPy GitHub website:<br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_introduction.ipynb'>Introduction</a><br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_MagIC.ipynb'>PmagPy and MagIC</a><br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_calculations.ipynb'>Calculations</a><br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_plots_analysis.ipynb'>Plots and Analysis</a><br/>
-            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy-cli.ipynb'>PmagPy - Command Line Verson</a>
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy-cli.ipynb'>PmagPy - Command Line Versons of PmagPy Functions</a>
         </p>
         <p><b>Other PmagPy  Notebooks</b><br/>
           <a href='https://github.com/PmagPy/PmagPy/blob/master/MagIC_workshop_demo.ipynb'>2020 MagIC Workshop PmagPy Jupyter Notebook Tutorial</a><br/>
