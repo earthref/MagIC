@@ -5,7 +5,7 @@ import {index} from '/lib/configs/magic/search_levels.js';
 
 export const composer = ({item}, onData) => {
   onData(null, {});
-  if (item && item.summary && item.summary._incomplete_summary === undefined) {
+  /*if (item && item.summary && item.summary._incomplete_summary === "true") {
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     let contributor = item.summary && item.summary.contribution && item.summary.contribution.contributor;
     Meteor.call("esUpdatePrivateSummaries", {index, id, contributor}, (error) => {
@@ -21,7 +21,7 @@ export const composer = ({item}, onData) => {
         console.error('SearchSummariesListItem', error);
       }
     });
-  }
+  }*/
 };
 
 export default compose(

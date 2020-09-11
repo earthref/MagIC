@@ -16,7 +16,9 @@ export default class GoogleStaticMap extends React.Component {
 
   render() {
 
-    const key = 'AIzaSyBLZOmrD0zBidUXezxmNRHcpPp5cA45pUQ';
+    const key = Meteor.isDevelopment && Meteor.settings.public.google ?
+      Meteor.settings.public.google.apiKey :
+      'AIzaSyBLZOmrD0zBidUXezxmNRHcpPp5cA45pUQ';
     const width   = this.props.width    || 100;
     const height  = this.props.height   || 100;
     const padding = this.props.padding  || 2  ;

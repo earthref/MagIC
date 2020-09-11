@@ -292,7 +292,7 @@ class SearchSummariesListItem extends React.Component {
     return paths.length > 0 ? (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
         {paths.length > 0 &&
-          <a className="ui tiny image" style={{ cursor:'pointer' }} aonClick={this.showMap.bind(this)}>
+          <a className="ui tiny image" style={{ cursor:'pointer' }} onClick={this.showMap.bind(this)}>
             <GoogleStaticMap
               width={100}
               height={100}

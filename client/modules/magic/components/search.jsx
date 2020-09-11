@@ -21,20 +21,7 @@ const sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) =
   return models[_.last(versions)].tables[table].position;
 });
 
-let filters = [
-  {type: 'string'   , name: 'summary.contribution._reference.authors._name', title: 'Author'                  , term: 'summary.contribution._reference.authors._name.raw', aggs: {buckets: {terms: {field: 'summary.contribution._reference.authors._name.raw', size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.external_database_ids'           , title: 'External Database'       , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary.contribution._contributor'            , title: 'Contributor'             , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.location_type'                   , title: 'Location Type'           , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.geologic_type'                   , title: 'Geologic Type'           , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.geologic_class'                  , title: 'Geologic Class'          , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.lithology'                       , title: 'Lithology'               , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.method_codes'                    , title: 'Method Code'             , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 1001}}}, maxBuckets: 1000},
-  //{type: 'string'   , name: 'summary._all.scientists'                      , title: 'Research Scientist Name' , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 1001}}}, maxBuckets: 1000},
-  //{type: 'string'   , name: 'summary._all.analysts'                        , title: 'Analyst Name'            , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 1001}}}, maxBuckets: 1000},
-  {type: 'string'   , name: 'summary._all.software_packages'               , title: 'Software Package'        , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 1001}}}, maxBuckets: 1000},
-];
-let filterNames = {};
+//let filterNames = {};
 //sortedTables.forEach((table) => {
 //  let sortedColumns = _.sortBy(_.keys(model.tables[table].columns), (column) => {
 //    return model.tables[table].columns[column].position;
@@ -90,6 +77,36 @@ const ageUnitsDefault = 'Ma';
 
 class Search extends React.Component {
 
+  filters = [
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary.contribution._reference.authors._name', title: 'Author'                  , term: 'summary.contribution._reference.authors._name.raw', aggs: {buckets: {terms: {field: 'summary.contribution._reference.authors._name.raw', size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary.contribution._contributor'            , title: 'Contributor'             , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderPublicationYearFilter.bind(this), name: 'publicationYear' },
+    { render: this.renderGeospatialFilter.bind(this),      name: 'geospatial' },
+    { render: this.renderAgeFilter.bind(this),             name: 'age' },
+    { render: this.renderPoleFilter.bind(this),            name: 'pole' },
+    { render: this.renderVGPFilter.bind(this),             name: 'VGP' },
+    { render: this.renderIntensityFilter.bind(this),       name: 'intensity' },
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.method_codes'                    , title: 'Method Code'             , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.external_database_ids'           , title: 'External Database'       , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.location_type'                   , title: 'Location Type'           , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.geologic_type'                   , title: 'Geologic Type'           , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.geologic_class'                  , title: 'Geologic Class'          , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.lithology'                       , title: 'Lithology'               , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 1001}}}, maxBuckets: 1000},
+  //{ render: this.renderBucketsFilter.bind(this),         name: 'summary._all.scientists'                      , title: 'Research Scientist Name' , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 1001}}}, maxBuckets: 1000},
+  //{ render: this.renderBucketsFilter.bind(this),         name: 'summary._all.analysts'                        , title: 'Analyst Name'            , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.software_packages'               , title: 'Software Package'        , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 1001}}}, maxBuckets: 1000},
+  ];
+
+  toggleFilter(name) {
+    if (this.state.openedFilters[name] && this.state.activeFilters[name])
+      return;
+    $(this.refs[name + '_title']).toggleClass('active');
+    $(this.refs[name + '_content']).slideToggle(250);
+    let openedFilters = _.cloneDeep(this.state.openedFilters);
+    openedFilters[name] = !openedFilters[name];
+    this.setState({ openedFilters });
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -127,6 +144,10 @@ class Search extends React.Component {
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
+      b: {fontWeight: 'bold'},
+      flex: {display: 'flex', marginBottom: '0.25em'},
+      flexGrow: {flexGrow: 1, marginRight: '0.5em', whiteSpace: 'normal'},
+      content: {paddingTop: 0},
       table: {width: '100%'},
       input: {borderColor: '#888888', borderLeft: 'none', borderRight: 'none', flex: '1'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
@@ -171,10 +192,11 @@ class Search extends React.Component {
     window.removeEventListener("resize", this.onWindowResize.bind(this));
   }
 
-  componentWillUpdate(nextProps, nextState) {
+  shouldComponentUpdate(nextProps, nextState) {
     if (nextState.view !== this.state.view) {
       _.delay(() => $(window).trigger('resize'), 500);
     }
+    return !_.isEqual(this.props, nextProps) || !_.isEqual(this.state, nextState);
   }
 
   componentDidUpdate() {
@@ -222,12 +244,12 @@ class Search extends React.Component {
         }
       });
     }
-    console.log('queries', queries);
+    // console.log('queries', queries);
     return queries;
   }
 
   getActiveFilters() {
-    const activeFilters = _.reduce(filters, (activeFilters, filter) => {
+    const activeFilters = _.reduce(this.filters, (activeFilters, filter) => {
       if (this.state.activeFilters[filter.name]) {
         activeFilters.push({ terms: { [filter.term]: this.state.activeFilters[filter.name] } });
       }
@@ -367,7 +389,6 @@ class Search extends React.Component {
         lte: this.state.pub_yr_max
       }}});
 
-    console.log('activeFilters', activeFilters);
     return activeFilters;
   }
 
@@ -442,14 +463,14 @@ class Search extends React.Component {
                 onKeyPress={(e) => e.key === 'Enter' && this.setState({search: e.target.value})}
               />
               <div className={'ui basic black button'}
-                   onClick={(e) => this.setState({search: this.state.searchInput})}
+                   onClick={(e) => this.setState({search: this.refs['search'].value})}
               >
                 <i className="search icon"/>
                 Search
               </div>
               <div className={'ui basic black button'}
                    style={this.styles.searchButton}
-                   onClick={(e) => { this.refs['search'].value = ''; this.setState({search: "", searchInput: ""}); }}
+                   onClick={(e) => { this.refs['search'].value = ''; this.clearActiveFilters(); this.setState({search: "", searchInput: ""}); }}
               >
                 <i className="remove circle icon"/>
                 Clear
@@ -483,380 +504,8 @@ class Search extends React.Component {
                 </div>
                 <div ref="filters" className="ui small basic attached segment" style={this.styles.filters}>
                   <div style={{marginTop: '-1em'}}>
-
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Publication Year
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className={'ui input' + (this.state.pub_yr_min === null ? ' error' : '')}
-                            style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder={"-Infinity"}
-                                style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
-                                onChange={(e) => {
-                                  this.handleNumericInput('pub_yr_min', e.target.value, -Infinity, _.isNumber(this.state.pub_yr_max) ? this.state.pub_yr_max: moment().year());
-                                }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.pub_yr_max === null ? ' error' : '')}
-                            style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder={moment().year()}
-                                style={{borderTopLeftRadius:0, borderBottomLeftRadius:0}}
-                                onChange={(e) => {
-                                  this.handleNumericInput('pub_yr_max', e.target.value, _.isNumber(this.state.pub_yr_min) ? this.state.pub_yr_min: -Infinity, moment().year());
-                                }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Geospatial
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
-                        <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder="-90"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('lat_min', e.target.value, -90, _.isNumber(this.state.lat_max) ? this.state.lat_max: 90);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.lat_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder="90"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('lat_max', e.target.value, _.isNumber(this.state.lat_min) ? this.state.lat_min: -90, 90);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          deg
-                        </div>
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
-                        <div className={'ui input' + (this.state.lon_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder="-360"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('lon_min', e.target.value, -360, 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.lon_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder="360"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('lon_max', e.target.value, -360, 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          deg
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Age
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className={'ui input' + (this.state.age_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder={_.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).min}
-                                 style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('age_min', e.target.value,
-                                     _.isNumber(this.state.age_min_unit === 'AD' && this.state.age_max) ? this.state.age_max : 0,
-                                     _.isNumber(this.state.age_min_unit !== 'AD' && this.state.age_max) ? this.state.age_max: Infinity);
-                                 }}
-                          />
-                        </div>
-                        <div ref="age_min_unit" className="ui dropdown label" style={{borderRadius:0, margin:0}}>
-                          <div className="text">{this.state.age_min_unit || ageUnitsDefault}</div>
-                          <i className="dropdown icon"/>
-                          <div className="menu">
-                            {ageUnits.map((unit, i) =>
-                              <div key={i} className={
-                                ((this.state.age_min_unit || ageUnitsDefault) === unit.name ? 'active ' : '') + 'item'
-                              }>
-                                {unit.name}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0, borderLeft:'1px solid #dddede'}}>to</div>
-                        <div className={'ui input' + (this.state.age_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder={_.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).max}
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('age_max', e.target.value,
-                                     _.isNumber(this.state.age_max_unit !== 'AD' && this.state.age_min) ? this.state.age_min: 0,
-                                     _.isNumber(this.state.age_max_unit === 'AD' && this.state.age_min) ? this.state.age_min : Infinity);
-                                 }}
-                          />
-                        </div>
-                        <div ref="age_max_unit" className="ui dropdown label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          <div className="text">{this.state.age_max_unit || ageUnitsDefault}</div>
-                          <i className="dropdown icon"/>
-                          <div className="menu">
-                            {ageUnits.map((unit, i) =>
-                              <div key={i} className={
-                                ((this.state.age_min_unit || ageUnitsDefault) === unit.name ? 'active ' : '') + 'item'
-                              }>
-                                {unit.name}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Location Pole
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
-                        <div className={'ui input' + (this.state.pole_lat_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder="-90"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('pole_lat_min', e.target.value, -90, _.isNumber(this.state.pole_lat_max) ? this.state.pole_lat_max : 90);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.pole_lat_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder="90"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('pole_lat_max', e.target.value, _.isNumber(this.state.pole_lat_min) ? this.state.pole_lat_min : -90, 90);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          deg
-                        </div>
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
-                        <div className={'ui input' + (this.state.pole_lon_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder="-360"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('pole_lon_min', e.target.value, -360, _.isNumber(this.state.pole_lon_max) ? this.state.pole_lon_max : 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.pole_lon_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder="360"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('pole_lon_max', e.target.value, _.isNumber(this.state.pole_lon_min) ? this.state.pole_lon_min : -360, 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          deg
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Site VGP
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
-                        <div className={'ui input' + (this.state.vgp_lat_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder="-90"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('vgp_lat_min', e.target.value, -90, _.isNumber(this.state.vgp_lat_max) ? this.state.vgp_lat_max : 90);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.vgp_lat_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder="90"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('vgp_lat_max', e.target.value, _.isNumber(this.state.vgp_lat_min) ? this.state.vgp_lat_min : -90, 90);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          deg
-                        </div>
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
-                        <div className={'ui input' + (this.state.vgp_lon_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder="-360"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('vgp_lon_min', e.target.value, -360, _.isNumber(this.state.vgp_lon_max) ? this.state.vgp_lon_max : 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.vgp_lon_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder="360"
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('vgp_lon_max', e.target.value, _.isNumber(this.state.vgp_lon_min) ? this.state.vgp_lon_min : -360, 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          deg
-                        </div>
-                      </div>
-                    </div>
-
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Absolute Paleointensity
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
-                                 style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('int_min', e.target.value, 0, _.isNumber(this.state.int_max) ? this.state.int_max: Infinity);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('int_max', e.target.value, _.isNumber(this.state.int_min) ? this.state.int_min: 0, Infinity);
-                                 }}
-                          />
-                        </div>
-                        <div ref="int_unit" className="ui dropdown label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
-                          <div className="text">{this.state.int_unit || intUnitsDefault}</div>
-                          <i className="dropdown icon"/>
-                          <div className="menu">
-                            {intUnits.map((unit, i) =>
-                              <div key={i} className={
-                                ((this.state.int_unit || intUnitsDefault) === unit.name ? 'active ' : '') + 'item'
-                              }>
-                                {unit.name}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    { false &&
-                    <div style={this.styles.filter}>
-                      <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em', display:'none'}}>
-                        <i className="caret right icon"/>
-                      </div>
-                      <div className="ui tiny header" style={this.styles.filterHeader}>
-                        Declination
-                      </div>
-                      <div className="ui mini labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
-                        <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}}>
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
-                                 style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('dec_min', e.target.value, 0, _.isNumber(this.state.dec_max) ? this.state.int_max : 360);
-                                 }}
-                          />
-                        </div>
-                        <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-                        <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
-                             style={{flexShrink: '1', minWidth:20}} >
-                          <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
-                                 style={{borderRadius:0}}
-                                 onChange={(e) => {
-                                   this.handleNumericInput('dec_max', e.target.value, _.isNumber(this.state.dec_min) ? this.state.dec_min : 0, 360);
-                                 }}
-                          />
-                        </div>
-                      </div>
-                    </div> }
                     <div>
-                      {filters.map((filter, i) =>
-                        <div key={i}>
-                          <SearchFiltersBuckets
-                            name={filter.name}
-                            title={filter.title}
-                            maxBuckets={filter.maxBuckets}
-                            es={this.state.openedFilters[filter.name] && {
-                              index: index,
-                              type: 'contribution',
-                              queries: searchQueries,
-                              aggs: filter.aggs
-                            }}
-                            activeFilters={this.state.activeFilters[filter.name]}
-                            onChange={(filters) => {
-                              let activeFilters = this.state.activeFilters;
-                              if (filters && filters.length && filters.length > 0)
-                                activeFilters[filter.name] = filters;
-                              else
-                                delete activeFilters[filter.name];
-                              this.setState({activeFilters});
-                            }}
-                            onClick={() => {
-                              console.log('clicked');
-                              let openedFilters = this.state.openedFilters;
-                              openedFilters[filter.name] = true;
-                              this.setState({openedFilters});
-                            }}
-                          />
-                        </div>
-                      )}
+                      { this.filters.map((filter, i) => filter.render(searchQueries, filter, i)) }
                     </div>
                   </div>
                 </div>
@@ -874,6 +523,466 @@ class Search extends React.Component {
         </div>
       </div>
     );
+  }
+
+  renderPublicationYearFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter.name)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+                Publication Year
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, 
+              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className={'ui input' + (this.state.pub_yr_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder={"-Infinity"}
+                    style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('pub_yr_min', e.target.value, -Infinity, _.isNumber(this.state.pub_yr_max) ? this.state.pub_yr_max: moment().year());
+                    }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.pub_yr_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder={moment().year()}
+                    style={{borderTopLeftRadius:0, borderBottomLeftRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('pub_yr_max', e.target.value, _.isNumber(this.state.pub_yr_min) ? this.state.pub_yr_min: -Infinity, moment().year());
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderGeospatialFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter.name)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+                Geospatial
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, 
+              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
+                <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder="-90"
+                    style={{borderRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('lat_min', e.target.value, -90, _.isNumber(this.state.lat_max) ? this.state.lat_max: 90);
+                    }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.lat_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder="90"
+                    style={{borderRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('lat_max', e.target.value, _.isNumber(this.state.lat_min) ? this.state.lat_min: -90, 90);
+                    }}
+                  />
+                </div>
+                <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  deg
+                </div>
+              </div>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
+                <div className={'ui input' + (this.state.lon_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder="-360"
+                    style={{borderRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('lon_min', e.target.value, -360, 360);
+                    }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.lon_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder="360"
+                    style={{borderRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('lon_max', e.target.value, -360, 360);
+                    }}
+                  />
+                </div>
+                <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  deg
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderAgeFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter.name)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+                Age
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, 
+              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className={'ui input' + (this.state.age_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder={_.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).min}
+                        style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('age_min', e.target.value,
+                            _.isNumber(this.state.age_min_unit === 'AD' && this.state.age_max) ? this.state.age_max : 0,
+                            _.isNumber(this.state.age_min_unit !== 'AD' && this.state.age_max) ? this.state.age_max: Infinity);
+                        }}
+                  />
+                </div>
+                <div ref="age_min_unit" className="ui dropdown label" style={{borderRadius:0, margin:0}}>
+                  <div className="text">{this.state.age_min_unit || ageUnitsDefault}</div>
+                  <i className="dropdown icon"/>
+                  <div className="menu">
+                    {ageUnits.map((unit, i) =>
+                      <div key={i} className={
+                        ((this.state.age_min_unit || ageUnitsDefault) === unit.name ? 'active ' : '') + 'item'
+                      }>
+                        {unit.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0, borderLeft:'1px solid #dddede'}}>to</div>
+                <div className={'ui input' + (this.state.age_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder={_.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).max}
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('age_max', e.target.value,
+                            _.isNumber(this.state.age_max_unit !== 'AD' && this.state.age_min) ? this.state.age_min: 0,
+                            _.isNumber(this.state.age_max_unit === 'AD' && this.state.age_min) ? this.state.age_min : Infinity);
+                        }}
+                  />
+                </div>
+                <div ref="age_max_unit" className="ui dropdown label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  <div className="text">{this.state.age_max_unit || ageUnitsDefault}</div>
+                  <i className="dropdown icon"/>
+                  <div className="menu">
+                    {ageUnits.map((unit, i) =>
+                      <div key={i} className={
+                        ((this.state.age_min_unit || ageUnitsDefault) === unit.name ? 'active ' : '') + 'item'
+                      }>
+                        {unit.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderPoleFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter.name)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+                Location Pole
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, 
+              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
+                <div className={'ui input' + (this.state.pole_lat_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder="-90"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('pole_lat_min', e.target.value, -90, _.isNumber(this.state.pole_lat_max) ? this.state.pole_lat_max : 90);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.pole_lat_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder="90"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('pole_lat_max', e.target.value, _.isNumber(this.state.pole_lat_min) ? this.state.pole_lat_min : -90, 90);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  deg
+                </div>
+              </div>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
+                <div className={'ui input' + (this.state.pole_lon_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder="-360"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('pole_lon_min', e.target.value, -360, _.isNumber(this.state.pole_lon_max) ? this.state.pole_lon_max : 360);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.pole_lon_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder="360"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('pole_lon_max', e.target.value, _.isNumber(this.state.pole_lon_min) ? this.state.pole_lon_min : -360, 360);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  deg
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderVGPFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter.name)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+                Site VGP
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, 
+              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
+                <div className={'ui input' + (this.state.vgp_lat_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder="-90"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('vgp_lat_min', e.target.value, -90, _.isNumber(this.state.vgp_lat_max) ? this.state.vgp_lat_max : 90);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.vgp_lat_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder="90"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('vgp_lat_max', e.target.value, _.isNumber(this.state.vgp_lat_min) ? this.state.vgp_lat_min : -90, 90);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  deg
+                </div>
+              </div>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lon</div>
+                <div className={'ui input' + (this.state.vgp_lon_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder="-360"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('vgp_lon_min', e.target.value, -360, _.isNumber(this.state.vgp_lon_max) ? this.state.vgp_lon_max : 360);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.vgp_lon_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder="360"
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('vgp_lon_max', e.target.value, _.isNumber(this.state.vgp_lon_min) ? this.state.vgp_lon_min : -360, 360);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  deg
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderIntensityFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter.name)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+              Absolute Paleointensity
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, 
+              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+                <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
+                        style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('int_min', e.target.value, 0, _.isNumber(this.state.int_max) ? this.state.int_max: Infinity);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
+                        style={{borderRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('int_max', e.target.value, _.isNumber(this.state.int_min) ? this.state.int_min: 0, Infinity);
+                        }}
+                  />
+                </div>
+                <div ref="int_unit" className="ui dropdown label" style={{borderTopLeftRadius:0, borderBottomLeftRadius:0, margin:0}}>
+                  <div className="text">{this.state.int_unit || intUnitsDefault}</div>
+                  <i className="dropdown icon"/>
+                  <div className="menu">
+                    {intUnits.map((unit, i) =>
+                      <div key={i} className={
+                        ((this.state.int_unit || intUnitsDefault) === unit.name ? 'active ' : '') + 'item'
+                      }>
+                        {unit.name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderDeclinationFilter(searchQueries, filter, i) {
+    return (
+      <div key={i} style={this.styles.filter}>
+        <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em'}}>
+          <i className="caret right icon"/>
+        </div>
+        <div className="ui tiny header" style={this.styles.filterHeader}>
+          Declination
+        </div>
+        <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+          <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
+              style={{flexShrink: '1', minWidth:20}}>
+            <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
+                  style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                  onChange={(e) => {
+                    this.handleNumericInput('dec_min', e.target.value, 0, _.isNumber(this.state.dec_max) ? this.state.int_max : 360);
+                  }}
+            />
+          </div>
+          <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+          <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
+              style={{flexShrink: '1', minWidth:20}} >
+            <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
+                  style={{borderRadius:0}}
+                  onChange={(e) => {
+                    this.handleNumericInput('dec_max', e.target.value, _.isNumber(this.state.dec_min) ? this.state.dec_min : 0, 360);
+                  }}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderBucketsFilter(searchQueries, filter, i) {
+    return (
+      <div key={i}>
+        <SearchFiltersBuckets
+          name={filter.name}
+          title={filter.title}
+          maxBuckets={filter.maxBuckets}
+          es={this.state.openedFilters[filter.name] && {
+            index: index,
+            type: 'contribution',
+            queries: searchQueries,
+            aggs: filter.aggs
+          }}
+          activeFilters={this.state.activeFilters[filter.name]}
+          onChange={(filters) => {
+            let activeFilters = _.cloneDeep(this.state.activeFilters);
+            if (filters && filters.length && filters.length > 0)
+              activeFilters[filter.name] = filters;
+            else
+              delete activeFilters[filter.name];
+            this.setState({activeFilters});
+          }}
+          onClick={() => {
+            let openedFilters = _.cloneDeep(this.state.openedFilters);
+            openedFilters[filter.name] = true;
+            this.setState({openedFilters});
+          }}
+        />
+      </div>
+    )
   }
 
   renderTabs(searchQueries, activeFilters) {

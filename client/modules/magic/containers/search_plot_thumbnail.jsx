@@ -16,21 +16,25 @@ export const composer = ({ id }, onData) => {
       }
       if (file) onData(null, { file });
       Meteor.call('magicGetPmagPyPlotFiles', id, Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), undefined, function (error, allFiles) {
-        if (error) {
-          onData(null, { error });
-        } else {
-          const files = {};
-          allFiles.forEach(x => {
-            if (x && x.length > 10 && x.slice(x.length - 10, x.length).toLowerCase() === '.thumb.png') {
-              const file = x.slice(0, x.length - 10) + '.png';
-              files[file] = files[file] || {};
-              files[file].thumbnail = x;
-            } else if (x && x.length > 4 && x.slice(x.length - 4, x.length).toLowerCase() === '.png') {
-              files[x] = files[x] || {};
-              files[x].full = x;
-            }
-          });
-          onData(null, { file, files: _.values(files) });
+        try {
+          if (error) {
+            onData(null, { error });
+          } else {
+            const files = {};
+            allFiles.forEach(x => {
+              if (x && x.length > 10 && x.slice(x.length - 10, x.length).toLowerCase() === '.thumb.png') {
+                const file = x.slice(0, x.length - 10) + '.png';
+                files[file] = files[file] || {};
+                files[file].thumbnail = x;
+              } else if (x && x.length > 4 && x.slice(x.length - 4, x.length).toLowerCase() === '.png') {
+                files[x] = files[x] || {};
+                files[x].full = x;
+              }
+            });
+            onData(null, { file, files: _.values(files) });
+          }
+        } catch(e) {
+          console.log('onData error', e.name, e.message);
         }
       });
     }

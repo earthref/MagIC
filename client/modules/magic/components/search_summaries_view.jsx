@@ -8,11 +8,13 @@ export default class extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-    };
     this.styles = {
       scroller: {overflowY: 'scroll', background: 'white', padding: '0 1em', borderRadius: '0', boxShadow: 'none'}
     }
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return !_.isEqual(this.props, nextProps);
   }
 
   render() {

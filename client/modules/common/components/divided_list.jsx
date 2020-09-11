@@ -8,7 +8,7 @@ export default class extends React.Component {
   }
 
   render() {
-    if (this.props.items) console.log('divided list', this.props.items);
+    // if (this.props.items) console.log('divided list', this.props.items);
     return (
       <div>
         <div className="ui list" style={{padding: 0, margin: '1em 0'}}>

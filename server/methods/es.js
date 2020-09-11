@@ -37,7 +37,7 @@ export default function () {
   Meteor.methods({
 
     async esBuckets({index, type, queries, aggs}) {
-      console.log("esBuckets", index, type, queries, aggs);
+      // console.log("esBuckets", index, type, queries, aggs);
       this.unblock();
       try {
 
@@ -78,7 +78,7 @@ export default function () {
     },
 
     async esCount({index, type, queries, filters, countField}) {
-      console.log("esCount", index, type, queries, filters, countField);
+      // console.log("esCount", index, type, queries, filters, countField);
       this.unblock();
       try {
 
@@ -107,7 +107,7 @@ export default function () {
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
         if (_.trim(countField) !== "") search.aggs = { count: { sum: { field: countField }}};
 
-        console.log("esCount search:", JSON.stringify(search));
+        // console.log("esCount search:", JSON.stringify(search));
         let resp = _.trim(countField) !== "" ? 
           await esClient.search({
             "index": index,
@@ -122,7 +122,7 @@ export default function () {
           });
         let count = _.trim(countField) !== "" ? resp.aggregations.count.value : resp.count;
 
-        console.log("esCount hits:", count);
+        // console.log("esCount hits:", count);
         return count;
 
       } catch(error) {
@@ -132,7 +132,7 @@ export default function () {
     },
 
     async esPage({index, type, queries, filters, source, sort}, pageSize, pageNumber) {
-      console.log("esPage", pageSize, pageNumber, index, type, queries, filters, sort);
+      // console.log("esPage", pageSize, pageNumber, index, type, queries, filters, sort);
       this.unblock();
       try {
 
@@ -163,14 +163,14 @@ export default function () {
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
-        console.log("esPage search:", JSON.stringify(search));
+        // console.log("esPage search:", JSON.stringify(search));
         let resp = await esClient.search({
           "index": index,
           "type": type,
           "body": search,
           "timeout": "60s"
         });
-        console.log("esPage hits:", resp.hits.total);
+        // console.log("esPage hits:", resp.hits.total);
         return resp.hits.hits.map(hit => hit._source);
 
       } catch(error) {
@@ -180,7 +180,7 @@ export default function () {
     },
     
     async esScroll({index, type, queries, filters, source, sort}, pageSize) {
-      console.log("esScroll", index, type, queries, filters, sort);
+      // console.log("esScroll", index, type, queries, filters, sort);
       this.unblock();
       try {
 
@@ -224,7 +224,7 @@ export default function () {
     },
 
     async esScrollByID(scrollID) {
-      console.log("esScrollByID", scrollID);
+      // console.log("esScrollByID", scrollID);
       this.unblock();
       try {
 
@@ -241,7 +241,7 @@ export default function () {
     },
 
     async esContributionIDs({index, queries, filters}) {
-      console.log("esContributionIDs", index, queries, filters);
+      // console.log("esContributionIDs", index, queries, filters);
       this.unblock();
       try {
 
@@ -283,7 +283,7 @@ export default function () {
     },
 
     async esCreatePrivateContribution({index, contributor, _contributor, name, contribution, summary}) {
-      console.log("esCreatePrivateContribution", index, contributor, _contributor, name);
+      // console.log("esCreatePrivateContribution", index, contributor, _contributor, name);
       this.unblock();
       try {
         if (!contributor || contributor === 'undefined')
@@ -372,7 +372,7 @@ export default function () {
     },
 
     async esUpdatePrivateContribution({index, contributor, _contributor, id, contribution, summary}) {
-      console.log("esUpdatePrivateContribution", index, contributor, _contributor, id);
+      // console.log("esUpdatePrivateContribution", index, contributor, _contributor, id);
       this.unblock();
 
       try {
@@ -398,7 +398,7 @@ export default function () {
         summary.contribution = _.merge(summary.contribution, contributionRow);
         summary.contribution._is_valid = "false";
 
-        console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
+        // console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
         if (id == 16798) delete contribution.measurements;
         await esClient.update({
           "index": index,
@@ -416,7 +416,7 @@ export default function () {
     },
 
     async esUpdatePrivatePreSummaries({index, contributor, id, contribution, summary}) {
-      console.log("esUpdatePrivatePreSummaries", index, contributor, id);
+      // console.log("esUpdatePrivatePreSummaries", index, contributor, id);
       this.unblock();
 
       const summarizer = new SummarizeContribution({});
@@ -469,7 +469,7 @@ export default function () {
             "doc": { summary: summarizer.json.contribution.summary }
           }
         });
-        console.log("esUpdatePrivatePreSummaries updated contribution doc", index, contributor, id + "_0");
+        // console.log("esUpdatePrivatePreSummaries updated contribution doc", index, contributor, id + "_0");
 
         let bulkIndex = [], rowIdx = 1;
         _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
@@ -486,7 +486,7 @@ export default function () {
 
         await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
-            console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n);
+            // console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n);
             esClient.bulk({ 
               body: bulkIndexChunk.map(row => {
                 if (row && row.summarizer)
@@ -519,7 +519,7 @@ export default function () {
     },
 
     async esUpdatePrivateSummaries({index, contributor, id, contribution, summary}) {
-      console.log("esUpdatePrivateSummaries", index, contributor, id);
+      // console.log("esUpdatePrivateSummaries", index, contributor, id);
       this.unblock();
 
       const summarizer = new SummarizeContribution({});
@@ -530,7 +530,7 @@ export default function () {
 
         //if (contribution === undefined || summary === undefined) {
           let contribution = {};
-          let summary = {};
+          let summary = { contribution: {} };
           let resp = await esClient.search({
             "index": index,
             "type": "contribution",
@@ -554,7 +554,8 @@ export default function () {
             if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
               resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
             contribution = resp.hits.hits[0]._source.contribution;
-            summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+            if (resp.hits.hits[0]._source.summary)
+              summary.contribution = resp.hits.hits[0]._source.summary.contribution;
           }
         //}
   
@@ -572,7 +573,7 @@ export default function () {
             }
           }
         });
-        console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
+        // console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
 
         let bulkIndex = [], rowIdx = 1;
         _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
@@ -589,7 +590,7 @@ export default function () {
 
         await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
-            console.log('esUpdatePrivateSummaries starting chunk', i+1, 'of', n);
+            // console.log('esUpdatePrivateSummaries starting chunk', i+1, 'of', n);
             esClient.bulk({ 
               body: bulkIndexChunk.map(row => {
                 if (row && row.summarizer)
@@ -623,7 +624,7 @@ export default function () {
 
     // TODO: pass login token to authenticate changes
     async esGetPrivateContributionSummaries({index, contributor, activated}) {
-      console.log("esGetPrivateContributionSummaries", index, contributor);
+      // console.log("esGetPrivateContributionSummaries", index, contributor);
       this.unblock();
       try {
         if (!contributor || contributor === 'undefined')
@@ -667,7 +668,7 @@ export default function () {
     },
 
     async esGetPrivateContributionSummary({index, id, contributor}) {
-      console.log("esGetPrivateContributionSummary", index, id, contributor);
+      // console.log("esGetPrivateContributionSummary", index, id, contributor);
       this.unblock();
       try {
         if (!contributor || contributor === 'undefined')
@@ -709,7 +710,7 @@ export default function () {
     },
 
     async esGetContribution({index, id}) {
-      console.log("esGetContribution", index, id);
+      // console.log("esGetContribution", index, id);
       this.unblock();
       try {
 
@@ -742,7 +743,7 @@ export default function () {
     },
 
     async esUpdateContributionName({index, id, name}) {
-      console.log("esUpdateContributionName", index, id, name);
+      // console.log("esUpdateContributionName", index, id, name);
       this.unblock();
 
       try {
@@ -768,7 +769,7 @@ export default function () {
     },
 
     async esUpdateContributionDescription({index, id, description}) {
-      console.log("esUpdateContributionDescription", index, id, description);
+      // console.log("esUpdateContributionDescription", index, id, description);
       this.unblock();
 
       try {
@@ -836,7 +837,7 @@ export default function () {
     },
 
     async esUpdateContributionLabNames({index, id, lab_names}) {
-      console.log("esUpdateContributionLabNames", index, id, lab_names);
+      // console.log("esUpdateContributionLabNames", index, id, lab_names);
       this.unblock();
       
       try {
@@ -863,7 +864,7 @@ export default function () {
 
     // TODO: pass login token to authenticate changes
     async esUpdateContributionReference({index, id, contributor, _contributor, timestamp, reference, description}) {
-      console.log("esUpdateContributionReference", index, id, contributor, _contributor, timestamp, reference, description);
+      // console.log("esUpdateContributionReference", index, id, contributor, _contributor, timestamp, reference, description);
       this.unblock();
 
       timestamp = timestamp || moment().utc().toISOString();
@@ -987,7 +988,7 @@ export default function () {
     },
 
     async esValidatePrivateContribution({index, id, contributor}) {
-      console.log("esValidatePrivateContribution", index, id, contributor);
+      // console.log("esValidatePrivateContribution", index, id, contributor);
       this.unblock();
       try {
 
@@ -1041,7 +1042,7 @@ export default function () {
     },
 
     async esDeletePrivateContribution({index, id, contributor}) {
-      console.log("esDeletePrivateContribution", index, id, contributor);
+      // console.log("esDeletePrivateContribution", index, id, contributor);
       this.unblock();
       try {
         if (!contributor || contributor === 'undefined')
@@ -1066,7 +1067,7 @@ export default function () {
     },
 
     async esActivateContribution({index, id}) {
-      console.log("esActivateContribution", index, id);
+      // console.log("esActivateContribution", index, id);
       this.unblock();
 
       let prev_id;
@@ -1131,7 +1132,7 @@ export default function () {
             }
           }
         });
-        console.log("esActivateContribution activated ", resp.updated, "of", resp.total);
+        // console.log("esActivateContribution activated ", resp.updated, "of", resp.total);
       } catch(error) {
         console.error("esActivateContribution", index, id, error.message);
         throw new Meteor.Error("esActivateContribution", error.message);
@@ -1141,7 +1142,7 @@ export default function () {
     },
 
     async esUploadActivatedContributionToS3({index, id}) {
-      console.log("esUploadActivatedContributionToS3", index, id);
+      // console.log("esUploadActivatedContributionToS3", index, id);
       this.unblock();
 
       try {
@@ -1220,7 +1221,7 @@ export default function () {
     },
 
     async esDeactivateContribution({index, id}) {
-      console.log("esDeactivateContribution", index, id);
+      // console.log("esDeactivateContribution", index, id);
       this.unblock();
 
       let prev_id;
@@ -1287,7 +1288,7 @@ export default function () {
     },
 
     async esPasswordLogIn({email, password}) {
-      console.log("esPasswordLogIn", email);
+      // console.log("esPasswordLogIn", email);
       this.unblock();
 
       let resp;
@@ -1323,7 +1324,7 @@ export default function () {
     },
 
     async esGetUserByID({id, session}) {
-      console.log("esGetUserByID", id);
+      // console.log("esGetUserByID", id);
       this.unblock();
       try {
         let resp = await esClient.search({
@@ -1359,7 +1360,7 @@ export default function () {
     },
 
     async esGetUserByORCID({orcid}) {
-      console.log("esGetUserByORCID", orcid);
+      // console.log("esGetUserByORCID", orcid);
       this.unblock();
       try {
         let resp = await esClient.search({
@@ -1380,7 +1381,7 @@ export default function () {
     },
 
     async esGetUsersByEmail({email}) {
-      console.log("esGetUsersByEmail", email);
+      // console.log("esGetUsersByEmail", email);
       this.unblock();
       try {
         let resp = await esClient.search({
@@ -1404,7 +1405,7 @@ export default function () {
     },
 
     async esGetUserByHandle({handle}) {
-      console.log("esGetUserByHandle", handle);
+      // console.log("esGetUserByHandle", handle);
       this.unblock();
       try {
         let resp = await esClient.search({
@@ -1425,7 +1426,7 @@ export default function () {
     },
 
     async esNextAvailableHandleFromEmail({email}) {
-      console.log("esNextAvailableHandleFromEmail", email);
+      // console.log("esNextAvailableHandleFromEmail", email);
       this.unblock();
       let handle = email.match(/^([^@]*)@/)[1];
       let resp;
@@ -1461,7 +1462,7 @@ export default function () {
     },
 
     async esNextAvailableUserID() {
-      console.log("esNextAvailableUserID");
+      // console.log("esNextAvailableUserID");
       this.unblock();
       try {
         let resp = await esClient.search({
@@ -1484,7 +1485,7 @@ export default function () {
 
     async esCreateUserFromORCID({name, email, orcid}) {
       this.unblock();
-      console.log("esCreateUserFromORCID", name, email, orcid);
+      // console.log("esCreateUserFromORCID", name, email, orcid);
       if (email && email.address) email.address = email.address.toLowerCase();
       try {
         let handle;
@@ -1510,7 +1511,7 @@ export default function () {
 
     async esUpdateUserORCID({id, name, email, orcid}) {
       this.unblock();
-      console.log("esUpdateUserORCID", id, name, email, orcid);
+      // console.log("esUpdateUserORCID", id, name, email, orcid);
       if (email && email.address) email.address = email.address.toLowerCase();
       try {
         await esClient.update({
@@ -1528,7 +1529,7 @@ export default function () {
 
     async esDisconnectUserORCID({id}) {
       this.unblock();
-      console.log("esDisconnectUserORCID", id);
+      // console.log("esDisconnectUserORCID", id);
       try {
         await esClient.update({
           "index": erUsersIndex,
@@ -1548,7 +1549,7 @@ export default function () {
       if (email && email.address) email.address = email.address.toLowerCase();
       if (handle) handle = handle.toLowerCase();
       let passHash = password && bcrypt.hashSync(password, saltRounds);
-      console.log("esUpdateUser", id, name, handle, passHash);
+      // console.log("esUpdateUser", id, name, handle, passHash);
       let doc = { name, handle, email };
       if (passHash) {
         doc._password = passHash;

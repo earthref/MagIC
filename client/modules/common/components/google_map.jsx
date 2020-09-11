@@ -5,7 +5,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {Random} from 'meteor/random';
 
-GoogleMaps.load({v: "3", key: "AIzaSyBLZOmrD0zBidUXezxmNRHcpPp5cA45pUQ"});
+GoogleMaps.load({
+  v: "3", 
+  key: Meteor.isDevelopment && Meteor.settings.public.google ? 
+        Meteor.settings.public.google.apiKey :
+        "AIzaSyBLZOmrD0zBidUXezxmNRHcpPp5cA45pUQ"
+});
 
 export default class GoogleMap extends React.Component {
 

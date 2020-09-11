@@ -1,13 +1,17 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import Highlighter from 'react-highlight-words';
 
 export default class SearchFiltersBuckets extends React.Component {
+
+  search = '';
 
   constructor(props) {
     super(props);
     this.state = {
       activeFilters: this.propsActiveFiltersTostateActiveFilters(props.activeFilters),
-      showAll: false
+      search: ''
     };
     //console.log(props.name, props.activeFilters, this.state.activeFilters);
     this.styles = {
@@ -17,6 +21,7 @@ export default class SearchFiltersBuckets extends React.Component {
       content: {paddingTop: 0},
       click: {cursor: 'pointer'}
     };
+    this.handleSearchOnChange = _.debounce(this._handleSearchOnChange.bind(this), 500);
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -34,16 +39,13 @@ export default class SearchFiltersBuckets extends React.Component {
     if (this.props.onClick) this.props.onClick();
   }
 
-  toggleOverflow() {
-    this.setState({showAll: !this.state.showAll}, () => {
-      this.state.showAll ? $(this.refs['overflow']).slideDown(250): $(this.refs['overflow']).slideUp(250);
-    });
+  _handleSearchOnChange(search) {
+    this.setState({ search });
   }
 
   propsActiveFiltersTostateActiveFilters(activeFilters) {
     return _.reduce(activeFilters, (filters, key) => { if (key) filters[key] = true; return filters; }, {});
   }
-
 
   addFilter(key) {
     this.setState({activeFilters: _.extend({}, this.state.activeFilters, {[key]: true})});
@@ -59,64 +61,48 @@ export default class SearchFiltersBuckets extends React.Component {
       <div>
         {filters.slice(0, this.props.maxBuckets).map((filter) => {
           if (filter.key in this.state.activeFilters)
-            return this.renderFilter(filter, true);
+            return this.renderFilter(filter, true, false);
         })}
       </div>
     );
   }
 
-  renderInactiveFilters() {
-    const nToShow = this.props.show || 10;
-    let i = 0;
+  renderMatchedFilters() {
     let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
-    return (this.props.filters === undefined ? 
-      <div style={{textAlign: "center"}}>
-        <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
-      </div>
-    :
+    if (this.props.filters !== undefined) return (
       <div>
         {filters.slice(0, this.props.maxBuckets).map((filter) => {
-          if (!(filter.key in this.state.activeFilters) && i < nToShow) {
-            i += 1;
-            return this.renderFilter(filter, false);
+          if (!(filter.key in this.state.activeFilters) && 
+              this.state.search !== '' &&
+              _.toLower(filter.key).indexOf(this.state.search) !== -1) {
+            return this.renderFilter(filter, false, true);
           }
         })}
       </div>
     );
   }
 
-  renderOverflowFilters() {
-    const nToShow = this.props.show || 10;
-    let i = 0;
-    let hasOverflow = false;
+  renderInactiveFilters() {
     let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
+    if (this.props.filters === undefined) return (
+      <div style={{textAlign: "center"}}>
+        <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
+      </div>
+    );
     return (
       <div>
-        <div ref="overflow" style={{display: 'none'}}>
-          {filters.slice(0, this.props.maxBuckets).map((filter) => {
-            if (!(filter.key in this.state.activeFilters)) {
-              hasOverflow = (i >= nToShow);
-              i += 1;
-              if (hasOverflow) return this.renderFilter(filter, false);
-            }
-          })}
-        </div>
-        {hasOverflow ? this.renderOverflowButton() : undefined}
+        {filters.slice(0, this.props.maxBuckets).map((filter) => {
+          if (!(filter.key in this.state.activeFilters) && (
+              this.state.search === '' ||
+              _.toLower(filter.key).indexOf(this.state.search) === -1)) {
+            return this.renderFilter(filter, false, false);
+          }
+        })}
       </div>
     );
   }
 
-  renderOverflowButton() {
-    return (
-      <div className="ui mini fluid compact basic button"
-           onClick={this.toggleOverflow.bind(this)}
-      >
-        {this.state.showAll ? 'Show Less' : 'Show More'}
-      </div>
-    );
-  }
-
-  renderFilter(filter, active) {
+  renderFilter(filter, active, matched) {
     return (
       <div key={filter.key}
            style={_.extend({}, this.styles.flex, this.styles.click)}
@@ -126,16 +112,14 @@ export default class SearchFiltersBuckets extends React.Component {
           <label/>
         </div>
         <div style={_.extend({}, this.styles.flexGrow, this.styles.click, (active ? this.styles.b : ''))}>
-          {filter.key}
+          "{matched ? 
+            <Highlighter searchWords={[this.state.search]} textToHighlight={filter.key}/>
+          : 
+            filter.key
+          }"
         </div>
         <div>
-          <div className="ui circular small basic label" onMouseOver={(e) => $(e.target).popup({
-            html: `${filter.doc_count} ${filter.doc_count === 1 ? 'has' : 'have'} a ` +
-                  `<b>${this.props.title} "${filter.key}" ${filter.doc_count === 1 ? 'value' : 'values'}</b> ` +
-                  `and ${filter.doc_count === 1 ? 'matches' : 'match'} the current search and filters.`,
-            position: 'bottom right',
-            variation: 'small'
-          }).popup('show')}>
+          <div className="ui circular small basic label">
             {filter.doc_count}
           </div>
         </div>
@@ -157,8 +141,12 @@ export default class SearchFiltersBuckets extends React.Component {
           {this.renderActiveFilters()}
         </div>
         <div ref="content" className="content" style={this.styles.content}>
+          <div className="ui small input fluid" style={{ marginBottom: '0.25em' }}>
+            <input placeholder="Find a value" defaultValue={this.state.search} onChange={(e) => this.handleSearchOnChange(e.target.value)}/>
+          </div>
+          {this.renderMatchedFilters()}
+          <div className="ui divider"/>
           {this.renderInactiveFilters()}
-          {this.renderOverflowFilters()}
         </div>
       </div>
     );
@@ -168,5 +156,4 @@ export default class SearchFiltersBuckets extends React.Component {
 SearchFiltersBuckets.propTypes = {
   activeFilters: PropTypes.array,
   title:         PropTypes.string.isRequired,
-  show:          PropTypes.number
 };
