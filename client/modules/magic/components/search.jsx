@@ -6,6 +6,7 @@ import Cookies from 'js-cookie';
 
 import Count from '/client/modules/common/containers/search_count';
 import SearchFiltersBuckets from '/client/modules/common/containers/search_filters_buckets';
+import SearchFiltersExists from '/client/modules/common/containers/search_filters_exists';
 import SearchSummariesView from '/client/modules/magic/components/search_summaries_view';
 import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
@@ -78,32 +79,52 @@ const ageUnitsDefault = 'Ma';
 class Search extends React.Component {
 
   filters = [
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary.contribution._reference.authors._name', title: 'Author'                  , term: 'summary.contribution._reference.authors._name.raw', aggs: {buckets: {terms: {field: 'summary.contribution._reference.authors._name.raw', size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary.contribution._contributor'            , title: 'Contributor'             , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderPublicationYearFilter.bind(this), name: 'publicationYear' },
-    { render: this.renderGeospatialFilter.bind(this),      name: 'geospatial' },
-    { render: this.renderAgeFilter.bind(this),             name: 'age' },
-    { render: this.renderPoleFilter.bind(this),            name: 'pole' },
-    { render: this.renderVGPFilter.bind(this),             name: 'VGP' },
-    { render: this.renderIntensityFilter.bind(this),       name: 'intensity' },
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.method_codes'                    , title: 'Method Code'             , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.external_database_ids'           , title: 'External Database'       , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.location_type'                   , title: 'Location Type'           , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.geologic_type'                   , title: 'Geologic Type'           , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.geologic_class'                  , title: 'Geologic Class'          , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.lithology'                       , title: 'Lithology'               , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 1001}}}, maxBuckets: 1000},
-  //{ render: this.renderBucketsFilter.bind(this),         name: 'summary._all.scientists'                      , title: 'Research Scientist Name' , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 1001}}}, maxBuckets: 1000},
-  //{ render: this.renderBucketsFilter.bind(this),         name: 'summary._all.analysts'                        , title: 'Analyst Name'            , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 1001}}}, maxBuckets: 1000},
-    { render: this.renderBucketsFilter.bind(this),         name: 'summary._all.software_packages'               , title: 'Software Package'        , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 1001}}}, maxBuckets: 1000},
+    { render: this.renderPublicationYearFilter.bind(this), defaultOpen: true , name: 'publicationYear' },
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary.contribution._reference.authors._name', title: 'Author'                         , term: 'summary.contribution._reference.authors._name.raw', aggs: {buckets: {terms: {field: 'summary.contribution._reference.authors._name.raw', size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary.contribution._contributor'            , title: 'Contributor'                    , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 10000}}}},
+    { render: this.renderGeospatialFilter.bind(this)     , defaultOpen: true , name: 'geospatial' },   
+    { render: this.renderAgeFilter.bind(this)            , defaultOpen: true , name: 'age' },   
+  //{ render: this.renderPoleFilter.bind(this)           , defaultOpen: false, name: 'pole' },   
+  //{ render: this.renderVGPFilter.bind(this)            , defaultOpen: false, name: 'VGP' },   
+    { render: this.renderIntensityFilter.bind(this)      , defaultOpen: false, name: 'intensity' },   
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.method_codes'                    , title: 'Method Code'                    , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.external_database_ids'           , title: 'External Database'              , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.location_type'                   , title: 'Location Type'                  , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_type'                   , title: 'Geologic Type'                  , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_class'                  , title: 'Geologic Class'                 , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.lithology'                       , title: 'Lithology'                      , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 10000}}}},
+  //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.scientists'                      , title: 'Research Scientist Name'        , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 10000}}}},
+  //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.analysts'                        , title: 'Analyst Name'                   , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.software_packages'               , title: 'Software Package'               , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 10000}}}},
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withAnyData'                                  , title: 'With Data in Any Table'         , summaryLevel: '_all'        , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutAnyData'                               , title: 'Without Data in Any Table'      , summaryLevel: '_all'        , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withLocationsData'                            , title: 'With Locations Table Data'      , summaryLevel: 'locations'   , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutLocationsData'                         , title: 'Without Locations Table Data'   , summaryLevel: 'locations'   , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSitesData'                                , title: 'With Sites Table Data'          , summaryLevel: 'sites'       , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSitesData'                             , title: 'Without Sites Table Data'       , summaryLevel: 'sites'       , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSamplesData'                              , title: 'With Samples Table Data'        , summaryLevel: 'samples'     , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSamplesData'                           , title: 'Without Samples Table Data'     , summaryLevel: 'samples'     , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSpecimensData'                            , title: 'With Specimens Table Data'      , summaryLevel: 'specimens'   , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSpecimensData'                         , title: 'Without Specimens Table Data'   , summaryLevel: 'specimens'   , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withMeasurementsData'                         , title: 'With Measurements Table Data'   , summaryLevel: 'measurements', exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutMeasurementsData'                      , title: 'Without Measurements Table Data', summaryLevel: 'measurements', exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withCriteriaData'                             , title: 'With Criteria Table Data'       , summaryLevel: 'criteria'    , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutCriteriaData'                          , title: 'Without Criteria Table Data'    , summaryLevel: 'criteria'    , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withAgesData'                                 , title: 'With Ages Table Data'           , summaryLevel: 'ages'        , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutAgesData'                              , title: 'Without Ages Table Data'        , summaryLevel: 'ages'        , exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withImagesData'                               , title: 'With Images Table Data'         , summaryLevel: 'images'      , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withouImagestData'                            , title: 'Without Images Table Data'      , summaryLevel: 'images'      , exists: false },
   ];
 
-  toggleFilter(name) {
-    if (this.state.openedFilters[name] && this.state.activeFilters[name])
+  toggleFilter(filter) {
+    // console.log('toggle', filter.name, this.state);
+    if (this.state.openedFilters[filter.name] && this.state.activeBucketsFilters[filter.name])
       return;
-    $(this.refs[name + '_title']).toggleClass('active');
-    $(this.refs[name + '_content']).slideToggle(250);
+    $(this.refs[filter.name + '_title']).toggleClass('active');
+    $(this.refs[filter.name + '_content']).slideToggle(250);
     let openedFilters = _.cloneDeep(this.state.openedFilters);
-    openedFilters[name] = !openedFilters[name];
+    const wasOpen = openedFilters[name] || (openedFilters[name] === undefined && filter.defaultOpen);
+    openedFilters[filter.name] = !wasOpen;
     this.setState({ openedFilters });
   }
 
@@ -116,7 +137,9 @@ class Search extends React.Component {
       view: '',
       sort: 'Recently Contributed First',
       sortDefault: true,
-      activeFilters: {},
+      activeBucketsFilters: {},
+      activeExistsFilters: {},
+      activeNotExistsFilters: {},
       openedFilters: {},
       height: undefined,
       width: undefined,
@@ -147,7 +170,7 @@ class Search extends React.Component {
       b: {fontWeight: 'bold'},
       flex: {display: 'flex', marginBottom: '0.25em'},
       flexGrow: {flexGrow: 1, marginRight: '0.5em', whiteSpace: 'normal'},
-      content: {paddingTop: 0},
+      content: {padding: '0 0 0.25em'},
       table: {width: '100%'},
       input: {borderColor: '#888888', borderLeft: 'none', borderRight: 'none', flex: '1'},
       td: {verticalAlign: 'top', overflow: 'hidden', transition: 'all 0.5s ease', position: 'relative'},
@@ -156,8 +179,8 @@ class Search extends React.Component {
       activeTab: {backgroundColor: '#F0F0F0'},
       countLabel: {color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'},
       searchInput: {padding: '1em', paddingBottom: 0, flex: 1},
-      filters: {whiteSpace: 'nowrap', overflowY: 'scroll', border: 'none', flex: 1 },
-      filter: {margin: '1em 0 .5em'},
+      filters: {whiteSpace: 'nowrap', overflowY: 'scroll', border: 'none', flex: 1, margin: 0, width: '100%', padding: 0 },
+      filter: {padding: '0.25em 1em 0.5em', borderBottom: '1px solid #D4D4D5'},
       filterHeader: {margin: '0'},
       filterBuckets: {paddingLeft: '0.5em', position: 'relative'}
     };
@@ -214,7 +237,7 @@ class Search extends React.Component {
       const windowWidth = $(window).width();
       if (windowWidth !== this.windowWidth) {
         this.windowWidth = windowWidth;
-        const width = windowWidth - $(this.refs['filters']).outerWidth() - 2 * $(this.refs['filters']).offset().left - 10;
+        const width = windowWidth - $(this.refs['filters']).outerWidth() - (2 * $(this.refs['filters']).offset().left) - 10;
         this.setState({width: width});
       }
     } catch(e) {}
@@ -248,12 +271,20 @@ class Search extends React.Component {
     return queries;
   }
 
-  getActiveFilters() {
-    const activeFilters = _.reduce(this.filters, (activeFilters, filter) => {
-      if (this.state.activeFilters[filter.name]) {
-        activeFilters.push({ terms: { [filter.term]: this.state.activeFilters[filter.name] } });
-      }
-      return activeFilters;
+  getESFilters(excludeFilterName) {
+    const esFilters = _.reduce(this.filters, (esFilters, filter) => {
+      if (excludeFilterName === filter.name) return esFilters;
+      if (this.state.activeBucketsFilters[filter.name])
+        esFilters.push({ terms: { [filter.term]: this.state.activeBucketsFilters[filter.name] } });
+      if (this.state.activeExistsFilters[filter.name])
+        esFilters.push(...this.state.activeExistsFilters[filter.name].map(field => {
+          return { exists: { field } };
+        }));
+      if (this.state.activeNotExistsFilters[filter.name])
+        esFilters.push(...this.state.activeNotExistsFilters[filter.name].map(field => {
+          return { bool: { must_not: { exists: { field } }}};
+        }));
+      return esFilters;
     }, []);
 
     if (_.isNumber(this.state.lat_min) || _.isNumber(this.state.lat_max) ||
@@ -275,7 +306,7 @@ class Search extends React.Component {
         lon_min = lon_max;
         lon_max = lon_temp;
       }
-      activeFilters.push({
+      esFilters.push({
         geo_shape: {
           'summary._all._geo_envelope': {
             shape: {
@@ -308,11 +339,11 @@ class Search extends React.Component {
         pole_lon_min = pole_lon_max;
         pole_lon_max = pole_lon_temp;
       }
-      activeFilters.push({ range: { 'summary._all.pole_lat.range': {
+      esFilters.push({ range: { 'summary._all.pole_lat.range': {
         gte: this.state.pole_lat_min,
         lte: this.state.pole_lat_max
       }}});
-      activeFilters.push({ range: { 'summary._all.pole_lon.range': {
+      esFilters.push({ range: { 'summary._all.pole_lon.range': {
         gte: pole_lon_min,
         lte: pole_lon_max
       }}});
@@ -337,76 +368,72 @@ class Search extends React.Component {
         vgp_lon_min = vgp_lon_max;
         vgp_lon_max = vgp_lon_temp;
       }
-      activeFilters.push({ range: { 'summary._all.vgp_lat.range': {
+      esFilters.push({ range: { 'summary._all.vgp_lat.range': {
         gte: this.state.vgp_lat_min,
         lte: this.state.vgp_lat_max
       }}});
-      activeFilters.push({ range: { 'summary._all.vgp_lon.range': {
+      esFilters.push({ range: { 'summary._all.vgp_lon.range': {
         gte: vgp_lon_min,
         lte: vgp_lon_max
       }}});
     }
 
     if (_.isNumber(this.state.age_min) && _.isNumber(this.state.age_max))
-      activeFilters.push({ range: { 'summary._all._age_range_ybp.range': {
+      esFilters.push({ range: { 'summary._all._age_range_ybp.range': {
         gte: _.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min),
         lte: _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max)
       }}});
     else if (_.isNumber(this.state.age_min))
-      activeFilters.push({ range: { 'summary._all._age_range_ybp.range': {
+      esFilters.push({ range: { 'summary._all._age_range_ybp.range': {
         gte: _.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min)
       }}});
     else if (_.isNumber(this.state.age_max))
-      activeFilters.push({ range: { 'summary._all._age_range_ybp.range': {
+      esFilters.push({ range: { 'summary._all._age_range_ybp.range': {
         lte: _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max)
       }}});
 
     if (_.isNumber(this.state.int_min) && _.isNumber(this.state.int_max))
-      activeFilters.push({ range: { 'summary._all.int_abs.range': {
+      esFilters.push({ range: { 'summary._all.int_abs.range': {
         gte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min),
         lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
       }}});
     else if (_.isNumber(this.state.int_min))
-      activeFilters.push({ range: { 'summary._all.int_abs.range': {
+      esFilters.push({ range: { 'summary._all.int_abs.range': {
         gte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min)
       }}});
     else if (_.isNumber(this.state.int_max))
-      activeFilters.push({ range: { 'summary._all.int_abs.range': {
+      esFilters.push({ range: { 'summary._all.int_abs.range': {
         lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
       }}});
 
     if (_.isNumber(this.state.pub_yr_min) && _.isNumber(this.state.pub_yr_max))
-      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+      esFilters.push({ range: { 'summary.contribution._reference.year': {
         gte: this.state.pub_yr_min,
         lte: this.state.pub_yr_max
       }}});
     else if (_.isNumber(this.state.pub_yr_min))
-      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+      esFilters.push({ range: { 'summary.contribution._reference.year': {
         gte: this.state.pub_yr_min
       }}});
     else if (_.isNumber(this.state.pub_yr_max))
-      activeFilters.push({ range: { 'summary.contribution._reference.year': {
+      esFilters.push({ range: { 'summary.contribution._reference.year': {
         lte: this.state.pub_yr_max
       }}});
 
-    return activeFilters;
+    return esFilters;
   }
 
   clearActiveFilters() {
-    $(this.refs.filters).find('input').val('');
+    $(this.refs.filters).find('input:checked').click();
+    $(this.refs.filters).find('input').val('').change();
     this.setState({
-      activeFilters: {},
+      activeBucketsFilters: {},
+      activeExistsFilters: {},
+      activeNotExistsFilters: {},
       lat_min: undefined,
       lat_max: undefined,
       lon_min: undefined,
       lon_max: undefined,
-      age_min: undefined,
-      age_min_unit: undefined,
-      age_max: undefined,
-      age_max_unit: undefined,
-      int_min: undefined,
-      int_max: undefined,
-      int_unit: undefined,
       pole_lat_min: undefined,
       pole_lat_max: undefined,
       pole_lon_min: undefined,
@@ -414,13 +441,22 @@ class Search extends React.Component {
       vgp_lat_min: undefined,
       vgp_lat_max: undefined,
       vgp_lon_min: undefined,
-      vgp_lon_max: undefined
+      vgp_lon_max: undefined,
+      age_min: undefined,
+      age_min_unit: undefined,
+      age_max: undefined,
+      age_max_unit: undefined,
+      int_min: undefined,
+      int_max: undefined,
+      int_unit: undefined,
+      pub_yr_min: undefined,
+      pub_yr_max: undefined,
     });
   }
 
   render() {
     let searchQueries = this.getSearchQueries();
-    let activeFilters = this.getActiveFilters();
+    let esFilters = this.getESFilters();
     return (
       <div className="magic-search">
         {this.renderJSONLD(searchQueries)}
@@ -432,7 +468,7 @@ class Search extends React.Component {
               {level.name}
               <div className="ui circular small basic label" style={this.styles.countLabel}>
                 <Count
-                  es={_.extend({}, level.views[0].es, { queries: searchQueries, filters: activeFilters })}
+                  es={_.extend({}, level.views[0].es, { queries: searchQueries, filters: esFilters })}
                 />
               </div>
             </div>
@@ -478,7 +514,7 @@ class Search extends React.Component {
             </div>
             { this.state.search.indexOf('private_key:') === -1 &&
               <SearchDownload className={portals['MagIC'].color + ' ui basic button'} style={{margin: '1em 1em 0 0'}}
-                  queries={searchQueries} filters={activeFilters}>
+                  queries={searchQueries} filters={esFilters}>
                 <i className="download icon"/>
                 Download Results
               </SearchDownload>
@@ -493,7 +529,7 @@ class Search extends React.Component {
                       Filters
                     </div>
                     <div className="right aligned item" style={{padding:'0 1em'}}>
-                      <div className={'ui small compact button' + (activeFilters.length > 0 ? ' ' + portals['MagIC'].color : ' basic disabled')} style={{padding:'0.5em'}}
+                      <div className={'ui small compact button' + (esFilters.length > 0 ? ' ' + portals['MagIC'].color : ' basic disabled')} style={{padding:'0.5em'}}
                            onClick={(e) => this.clearActiveFilters()}
                       >
                         <i className="remove circle icon"/>
@@ -503,19 +539,17 @@ class Search extends React.Component {
                   </div>
                 </div>
                 <div ref="filters" className="ui small basic attached segment" style={this.styles.filters}>
-                  <div style={{marginTop: '-1em'}}>
-                    <div>
-                      { this.filters.map((filter, i) => filter.render(searchQueries, filter, i)) }
-                    </div>
+                  <div>
+                    { this.filters.map((filter, i) => filter.render(searchQueries, filter, i)) }
                   </div>
                 </div>
               </div>
             </div>
             <div style={{flex: 1}}>
               <div style={{width: '100%', height: '100%'}}>
-                {this.renderTabs(searchQueries, activeFilters)}
+                {this.renderTabs(searchQueries, esFilters)}
                 <div style={{width: '100%', height: '100%'}}>
-                  {this.renderView(searchQueries, activeFilters)}
+                  {this.renderView(searchQueries, esFilters)}
                 </div>
               </div>
             </div>
@@ -526,22 +560,23 @@ class Search extends React.Component {
   }
 
   renderPublicationYearFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i}>
+      <div key={i} style={this.styles.filter}>
         <div className="ui small accordion">
-          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
-                onClick={() => this.toggleFilter(filter.name)}>
+                onClick={() => this.toggleFilter(filter)}>
               <i className="dropdown icon"/>
               <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
                 Publication Year
               </div>
             </div>
             <div ref={filter.name + '_content'} className="content" style={_.extend(
-              {}, this.styles.content, 
-              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
             )}>
-              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
                 <div className={'ui input' + (this.state.pub_yr_min === null ? ' error' : '')}
                     style={{flexShrink: '1', minWidth:20}}>
                   <input type="text" placeholder={"-Infinity"}
@@ -570,22 +605,23 @@ class Search extends React.Component {
   }
 
   renderGeospatialFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i}>
+      <div key={i} style={this.styles.filter}>
         <div className="ui small accordion">
-          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
-                onClick={() => this.toggleFilter(filter.name)}>
+                onClick={() => this.toggleFilter(filter)}>
               <i className="dropdown icon"/>
               <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
                 Geospatial
               </div>
             </div>
             <div ref={filter.name + '_content'} className="content" style={_.extend(
-              {}, this.styles.content, 
-              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
             )}>
-              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
                 <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
                 <div className={'ui input' + (this.state.lat_min === null ? ' error' : '')}
                     style={{flexShrink: '1', minWidth:20}}>
@@ -643,22 +679,23 @@ class Search extends React.Component {
   }
 
   renderAgeFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i}>
+      <div key={i} style={this.styles.filter}>
         <div className="ui small accordion">
-          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
-                onClick={() => this.toggleFilter(filter.name)}>
+                onClick={() => this.toggleFilter(filter)}>
               <i className="dropdown icon"/>
               <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
                 Age
               </div>
             </div>
             <div ref={filter.name + '_content'} className="content" style={_.extend(
-              {}, this.styles.content, 
-              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
             )}>
-              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
                 <div className={'ui input' + (this.state.age_min === null ? ' error' : '')}
                     style={{flexShrink: '1', minWidth:20}}>
                   <input type="text" placeholder={_.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).min}
@@ -717,22 +754,23 @@ class Search extends React.Component {
   }
 
   renderPoleFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i}>
+      <div key={i} style={this.styles.filter}>
         <div className="ui small accordion">
-          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
-                onClick={() => this.toggleFilter(filter.name)}>
+                onClick={() => this.toggleFilter(filter)}>
               <i className="dropdown icon"/>
               <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
                 Location Pole
               </div>
             </div>
             <div ref={filter.name + '_content'} className="content" style={_.extend(
-              {}, this.styles.content, 
-              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
             )}>
-              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
                 <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
                 <div className={'ui input' + (this.state.pole_lat_min === null ? ' error' : '')}
                     style={{flexShrink: '1', minWidth:20}}>
@@ -790,22 +828,23 @@ class Search extends React.Component {
   }
 
   renderVGPFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i}>
+      <div key={i} style={this.styles.filter}>
         <div className="ui small accordion">
-          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
-                onClick={() => this.toggleFilter(filter.name)}>
+                onClick={() => this.toggleFilter(filter)}>
               <i className="dropdown icon"/>
               <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
                 Site VGP
               </div>
             </div>
             <div ref={filter.name + '_content'} className="content" style={_.extend(
-              {}, this.styles.content, 
-              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
             )}>
-              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
                 <div className="ui label" style={{borderTopRightRadius:0, borderBottomRightRadius:0, margin:0, width:40}}>Lat</div>
                 <div className={'ui input' + (this.state.vgp_lat_min === null ? ' error' : '')}
                     style={{flexShrink: '1', minWidth:20}}>
@@ -863,22 +902,23 @@ class Search extends React.Component {
   }
 
   renderIntensityFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i}>
+      <div key={i} style={this.styles.filter}>
         <div className="ui small accordion">
-          <div ref={filter.name + '_title'} className="title" style={{paddingBottom: 0}}>
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
-                onClick={() => this.toggleFilter(filter.name)}>
+                onClick={() => this.toggleFilter(filter)}>
               <i className="dropdown icon"/>
               <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
               Absolute Paleointensity
               </div>
             </div>
             <div ref={filter.name + '_content'} className="content" style={_.extend(
-              {}, this.styles.content, 
-              this.state.activeFilters[filter.name] || this.state.openedFilters[filter.name] ? {} : { display: 'none' }
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
             )}>
-              <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
                 <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
                     style={{flexShrink: '1', minWidth:20}}>
                   <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
@@ -928,7 +968,7 @@ class Search extends React.Component {
         <div className="ui tiny header" style={this.styles.filterHeader}>
           Declination
         </div>
-        <div className="ui small labeled input" style={{display: 'flex', marginTop: '0.25em'}}>
+        <div className="ui small labeled input" style={{display: 'flex'}}>
           <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
               style={{flexShrink: '1', minWidth:20}}>
             <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
@@ -953,27 +993,105 @@ class Search extends React.Component {
     );
   }
 
-  renderBucketsFilter(searchQueries, filter, i) {
+  renderWithDataFilter(searchQueries, filter, i) {
+    let esFilters = this.getESFilters(filter.name);
+    const model = models[_.last(versions)];
+    let labels = [];
+    let aggs = {};
+    sortedTables.forEach(tableName => {
+      if (tableName !== 'contribution' && (filter.summaryLevel === '_all' || filter.summaryLevel === tableName)) {
+        const table = model.tables[tableName];        
+        _.sortBy(
+          _.keys(table.columns), columnName => table.columns[columnName].position
+        ).forEach(columnName => {
+          const key = `summary.${filter.summaryLevel === 'measurements' ? 'experiments' : filter.summaryLevel}.${columnName}`;
+          const column = table.columns[columnName];
+          if (!aggs[key] && (!column.validations || !column.validations.includes('downloadOnly()'))) {
+            labels.push({
+              key, label: column.label
+            });
+            aggs[key] = {
+              filter: filter.exists ? 
+                { exists: { field: key }}
+              :
+                { bool: { must_not: { exists: { field: key }}}}
+            };
+          }
+        });
+      }
+    });
     return (
-      <div key={i}>
-        <SearchFiltersBuckets
+      <div key={i} style={this.styles.filter}>
+        <SearchFiltersExists
           name={filter.name}
           title={filter.title}
-          maxBuckets={filter.maxBuckets}
+          labels={labels}
+          itemsName={'Columns'}
           es={this.state.openedFilters[filter.name] && {
             index: index,
             type: 'contribution',
             queries: searchQueries,
+            filters: esFilters,
+            aggs
+          }}
+          activeFilters={filter.exists ?
+            this.state.activeExistsFilters[filter.name]
+          :
+            this.state.activeNotExistsFilters[filter.name]
+          }
+          onChange={filter.exists ? 
+            (filters) => {
+              let activeExistsFilters = _.cloneDeep(this.state.activeExistsFilters);
+              if (filters && filters.length && filters.length > 0)
+                activeExistsFilters[filter.name] = filters;
+              else
+                delete activeExistsFilters[filter.name];
+              this.setState({activeExistsFilters});
+            }
+          :
+            (filters) => {
+              let activeNotExistsFilters = _.cloneDeep(this.state.activeNotExistsFilters);
+              if (filters && filters.length && filters.length > 0)
+              activeNotExistsFilters[filter.name] = filters;
+              else
+                delete activeNotExistsFilters[filter.name];
+              this.setState({activeNotExistsFilters});
+            }
+          }
+          onClick={() => {
+            let openedFilters = _.cloneDeep(this.state.openedFilters);
+            openedFilters[filter.name] = true;
+            this.setState({openedFilters});
+          }}
+        />
+      </div>
+    )
+  }
+
+  renderBucketsFilter(searchQueries, filter, i) {
+    let esFilters = this.getESFilters(filter.name);
+    return (
+      <div key={i} style={this.styles.filter}>
+        <SearchFiltersBuckets
+          name={filter.name}
+          title={filter.title}
+          quoted={true}
+          itemsName={'Values'}
+          es={this.state.openedFilters[filter.name] && {
+            index: index,
+            type: 'contribution',
+            queries: searchQueries,
+            filters: esFilters,
             aggs: filter.aggs
           }}
-          activeFilters={this.state.activeFilters[filter.name]}
+          activeFilters={this.state.activeBucketsFilters[filter.name]}
           onChange={(filters) => {
-            let activeFilters = _.cloneDeep(this.state.activeFilters);
+            let activeBucketsFilters = _.cloneDeep(this.state.activeBucketsFilters);
             if (filters && filters.length && filters.length > 0)
-              activeFilters[filter.name] = filters;
+              activeBucketsFilters[filter.name] = filters;
             else
-              delete activeFilters[filter.name];
-            this.setState({activeFilters});
+              delete activeBucketsFilters[filter.name];
+            this.setState({activeBucketsFilters});
           }}
           onClick={() => {
             let openedFilters = _.cloneDeep(this.state.openedFilters);
@@ -985,7 +1103,7 @@ class Search extends React.Component {
     )
   }
 
-  renderTabs(searchQueries, activeFilters) {
+  renderTabs(searchQueries, esFilters) {
     let activeView =
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
@@ -1003,7 +1121,7 @@ class Search extends React.Component {
                 queries: view.name === 'Map' ? _.concat(searchQueries, {exists: 
                   {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
                 }) : searchQueries,
-                filters: activeFilters
+                filters: esFilters
               })}/>
             </div>
           </div>
@@ -1039,7 +1157,7 @@ class Search extends React.Component {
     );
   }
 
-  renderView(searchQueries, activeFilters) {
+  renderView(searchQueries, esFilters) {
     let viewStyle = {
       borderLeft: '1px solid #d4d4d5',
       height: (this.state.height ? this.state.height - $(this.refs['tabs']).outerHeight() : '100%'),
@@ -1050,7 +1168,7 @@ class Search extends React.Component {
       levels[this.state.levelNumber].views[0];
     let es = _.extend({}, activeView.es, {
       queries: searchQueries,
-      filters: activeFilters,
+      filters: esFilters,
       sort:    searchQueries.length > 0 && this.state.sortDefault ? searchSortOption.sort : _.find(sortOptions, {name: this.state.sort}).sort
     });
     if (activeView.name === 'Summaries') return (

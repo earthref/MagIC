@@ -36,8 +36,8 @@ export default function () {
 
   Meteor.methods({
 
-    async esBuckets({index, type, queries, aggs}) {
-      // console.log("esBuckets", index, type, queries, aggs);
+    async esBuckets({index, type, queries, filters, aggs}) {
+      // console.log("esBuckets", index, type, queries, filters, aggs);
       this.unblock();
       try {
 
@@ -63,13 +63,14 @@ export default function () {
           });
 
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
+        if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
         let resp = await esClient.search({
           "index": index,
           "type": type,
           "body": search
         });
-        return _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"]));
+        return resp.aggregations.buckets ? _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"])) : resp.aggregations;
 
       } catch(error) {
         console.error("esBuckets", index, type, queries, error.message);
@@ -77,8 +78,8 @@ export default function () {
       }
     },
 
-    async esCount({index, type, queries, filters, countField}) {
-      // console.log("esCount", index, type, queries, filters, countField);
+    async esCount({index, type, queries, filters, countField, allVersions}) {
+      // console.log("esCount", index, type, queries, filters, countField, allVersions);
       this.unblock();
       try {
 
@@ -86,11 +87,7 @@ export default function () {
           "query": {
             "bool": {
               "must": [],
-              "filter": [{
-                "term": {
-                  "summary.contribution._is_latest": "true"
-                }
-              }]
+              "filter": []
             }
           }
         };
@@ -100,6 +97,12 @@ export default function () {
             !_.find(_.map(filters, "term"), "summary.contribution._is_activated")) {
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
+          });
+        }
+
+        if (!allVersions) {
+          search.query.bool.filter.push({
+            "term": { "summary.contribution._is_latest": "true" }
           });
         }
 
@@ -405,6 +408,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "doc": { summary, contribution }
           }
@@ -465,6 +469,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "doc": { summary: summarizer.json.contribution.summary }
           }
@@ -566,6 +571,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "doc": { 
               _incomplete_summary: summarizer.json.contribution._incomplete_summary,
@@ -752,6 +758,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "doc": {
               "summary": {
@@ -820,6 +827,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "script": {
               "source": `
@@ -846,6 +854,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "script": {
               "source": `
@@ -953,6 +962,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "doc": {
               "summary": {
@@ -1022,6 +1032,7 @@ export default function () {
           "type": "contribution",
           "id": id + "_0",
           "refresh": true,
+          "retryOnConflict": 5,
           "body": {
             "doc": {
               "summary": {
@@ -1349,6 +1360,7 @@ export default function () {
             "type": "_doc",
             "id": user.id,
             "refresh": true,
+            "retryOnConflict": 5,
             "body": { doc: { session }}
           });
         }
@@ -1519,6 +1531,7 @@ export default function () {
           "type": "_doc",
           "id": id,
           "refresh": true,
+          "retryOnConflict": 5,
           "body": { doc: { name, email, orcid }}
         });
       } catch(error) {
@@ -1536,6 +1549,7 @@ export default function () {
           "type": "_doc",
           "id": id,
           "refresh": true,
+          "retryOnConflict": 5,
           "body": { doc: { orcid: { id: '', token: '' }}}
         });
       } catch(error) {
@@ -1561,6 +1575,7 @@ export default function () {
           "type": "_doc",
           "id": id,
           "refresh": true,
+          "retryOnConflict": 5,
           "body": { doc }
         });
         return await Meteor.call('esGetUserByID', { id });

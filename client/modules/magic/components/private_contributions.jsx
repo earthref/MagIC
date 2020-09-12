@@ -282,10 +282,10 @@ export default class extends React.Component {
             <i className="edit icon"/> In Preparation
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
-              es={{ index: 'magic_v4', type: 'contribution', filters: [
-                {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
-                {"term": { "summary.contribution._is_activated": "false" }}
-              ] }}
+                es={{ index: 'magic_v4', type: 'contribution', allVersions: true, filters: [
+                  {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
+                  {"term": { "summary.contribution._is_activated": "false" }}
+                ] }}
               />
             </div>
           </button>
@@ -293,7 +293,7 @@ export default class extends React.Component {
             <i className="clipboard check icon"/> Made Public
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
-                es={{ index: 'magic_v4', type: 'contribution', filters: [
+                es={{ index: 'magic_v4', type: 'contribution', allVersions: true, filters: [
                   {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
                   {"term": { "summary.contribution._is_activated": "true" }}
                 ] }}

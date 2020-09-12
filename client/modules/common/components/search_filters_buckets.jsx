@@ -55,68 +55,28 @@ export default class SearchFiltersBuckets extends React.Component {
     this.setState({activeFilters: _.omit(this.state.activeFilters, key)});
   }
 
-  renderActiveFilters() {
-    let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
-    return (
-      <div>
-        {filters.slice(0, this.props.maxBuckets).map((filter) => {
-          if (filter.key in this.state.activeFilters)
-            return this.renderFilter(filter, true, false);
-        })}
-      </div>
-    );
-  }
-
-  renderMatchedFilters() {
-    let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
-    if (this.props.filters !== undefined) return (
-      <div>
-        {filters.slice(0, this.props.maxBuckets).map((filter) => {
-          if (!(filter.key in this.state.activeFilters) && 
-              this.state.search !== '' &&
-              _.toLower(filter.key).indexOf(this.state.search) !== -1) {
-            return this.renderFilter(filter, false, true);
-          }
-        })}
-      </div>
-    );
-  }
-
-  renderInactiveFilters() {
-    let filters = _.filter(this.props.filters, (o) => o.doc_count > 0);
-    if (this.props.filters === undefined) return (
-      <div style={{textAlign: "center"}}>
-        <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
-      </div>
-    );
-    return (
-      <div>
-        {filters.slice(0, this.props.maxBuckets).map((filter) => {
-          if (!(filter.key in this.state.activeFilters) && (
-              this.state.search === '' ||
-              _.toLower(filter.key).indexOf(this.state.search) === -1)) {
-            return this.renderFilter(filter, false, false);
-          }
-        })}
-      </div>
-    );
-  }
-
   renderFilter(filter, active, matched) {
     return (
       <div key={filter.key}
-           style={_.extend({}, this.styles.flex, this.styles.click)}
-           onClick={() => (active ? this.removeFilter(filter.key) : this.addFilter(filter.key))}>
-        <div className="ui checkbox">
+        style={_.extend({}, this.styles.flex, this.styles.click)}
+        onClick={(e) => {
+          e.target.style.opacity = 0.5;
+          e.target.style.cursor = 'wait';
+          _.delay(() => (active ? this.removeFilter(filter.key) : this.addFilter(filter.key)));
+        }}
+      >
+        <div className="ui checkbox" style={{ minWidth: 22, maxWidth: 22 }}>
           <input type="checkbox" checked={active} onChange={() => {}}/>
           <label/>
         </div>
         <div style={_.extend({}, this.styles.flexGrow, this.styles.click, (active ? this.styles.b : ''))}>
-          "{matched ? 
-            <Highlighter searchWords={[this.state.search]} textToHighlight={filter.key}/>
+          { this.props.quoted && '"' || undefined }
+          {matched ? 
+            <Highlighter searchWords={[this.state.search]} textToHighlight={filter.label || filter.key}/>
           : 
-            filter.key
-          }"
+            filter.label || filter.key
+          }
+          { this.props.quoted && '"' || undefined }
         </div>
         <div>
           <div className="ui circular small basic label">
@@ -128,6 +88,16 @@ export default class SearchFiltersBuckets extends React.Component {
   }
 
   render() {
+    const activeFilters = {};
+    const matchedFilters = {};
+    this.props.filters && this.props.filters.forEach((filter, i) => {
+      if (filter.key in this.state.activeFilters)
+        activeFilters[filter.key] = { i, filter };
+      if (!(filter.key in this.state.activeFilters) && 
+          this.state.search !== '' &&
+          _.toLower(filter.label || filter.key).indexOf(_.toLower(this.state.search)) !== -1)
+        matchedFilters[filter.key] = { i, filter };
+    });
     return (
       <div ref="filter" className="ui small accordion">
         <div ref="title" className="title" style={{paddingBottom: 0}}>
@@ -138,15 +108,36 @@ export default class SearchFiltersBuckets extends React.Component {
               {this.props.title}
             </div>
           </div>
-          {this.renderActiveFilters()}
+          {_.sortBy(_.keys(activeFilters), x => activeFilters[x].i).map(x =>
+            this.renderFilter(activeFilters[x].filter, true, false)
+          )}
         </div>
         <div ref="content" className="content" style={this.styles.content}>
           <div className="ui small input fluid" style={{ marginBottom: '0.25em' }}>
-            <input placeholder="Find a value" defaultValue={this.state.search} onChange={(e) => this.handleSearchOnChange(e.target.value)}/>
+            <input 
+              placeholder={`Find ${this.props.itemsName}`}
+              defaultValue={this.state.search}
+              onChange={(e) => this.handleSearchOnChange(e.target.value)}
+            />
           </div>
-          {this.renderMatchedFilters()}
+          {(_.keys(matchedFilters).length === 0 && this.state.search !== '' && 
+            <b>No Matches</b>) || undefined
+          }
+          {_.sortBy(_.keys(matchedFilters), x => matchedFilters[x].i).map(x =>
+            this.renderFilter(matchedFilters[x].filter, false, true)
+          )}
           <div className="ui divider"/>
-          {this.renderInactiveFilters()}
+          { this.props.filters === undefined &&
+            <div style={{textAlign: "center"}}>
+              <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
+            </div> || undefined
+          }
+          { (this.props.filters && this.props.filters.length === 0 &&
+            <b>No {this.props.itemsName}s</b>) || undefined}
+          { this.props.filters && this.props.filters.length && this.props.filters.map(filter => 
+              (!activeFilters[filter.key] && !matchedFilters[filter.key] &&
+              this.renderFilter(filter, false, false)) || undefined
+          ) || undefined}
         </div>
       </div>
     );
