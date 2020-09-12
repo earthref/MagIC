@@ -28,7 +28,7 @@ export default compose(
   composer,
   {
     shouldSubscribe(currentProps, nextProps) {
-      return nextProps.es && !_.isEqual(currentProps.es, nextProps.es);
+      return !_.isEqual(currentProps.es, nextProps.es);
     }
   }
 )(SearchFiltersBuckets);

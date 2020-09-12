@@ -98,6 +98,8 @@ export default class SearchFiltersBuckets extends React.Component {
           _.toLower(filter.label || filter.key).indexOf(_.toLower(this.state.search)) !== -1)
         matchedFilters[filter.key] = { i, filter };
     });
+    const inactiveFilters = this.props.filters && this.props.filters.length && 
+      this.props.filters.filter(x => !activeFilters[x.key] && !matchedFilters[x.key]) || [];
     return (
       <div ref="filter" className="ui small accordion">
         <div ref="title" className="title" style={{paddingBottom: 0}}>
@@ -117,10 +119,13 @@ export default class SearchFiltersBuckets extends React.Component {
             <input 
               placeholder={`Find ${this.props.itemsName}`}
               defaultValue={this.state.search}
-              onChange={(e) => this.handleSearchOnChange(e.target.value)}
+              onChange={(e) => {
+                console.log('onChange', e);
+                this.handleSearchOnChange(e.target.value);
+              }}
             />
           </div>
-          {(_.keys(matchedFilters).length === 0 && this.state.search !== '' && 
+          {(this.props.filters && _.keys(matchedFilters).length === 0 && this.state.search !== '' && 
             <b>No Matches</b>) || undefined
           }
           {_.sortBy(_.keys(matchedFilters), x => matchedFilters[x].i).map(x =>
@@ -132,12 +137,13 @@ export default class SearchFiltersBuckets extends React.Component {
               <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
             </div> || undefined
           }
-          { (this.props.filters && this.props.filters.length === 0 &&
-            <b>No {this.props.itemsName}s</b>) || undefined}
-          { this.props.filters && this.props.filters.length && this.props.filters.map(filter => 
-              (!activeFilters[filter.key] && !matchedFilters[filter.key] &&
-              this.renderFilter(filter, false, false)) || undefined
-          ) || undefined}
+          { (this.props.filters && inactiveFilters.length === 0 &&
+            <b>No {this.props.itemsName}s</b>) || undefined
+          }
+          { (this.props.filters && inactiveFilters.length && inactiveFilters.map(filter => 
+              this.renderFilter(filter, false, false)
+            )) || undefined
+          }
         </div>
       </div>
     );

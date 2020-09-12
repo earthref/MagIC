@@ -141,6 +141,7 @@ class Search extends React.Component {
       activeExistsFilters: {},
       activeNotExistsFilters: {},
       openedFilters: {},
+      filtersTap: 0,
       height: undefined,
       width: undefined,
       lat_min: undefined,
@@ -424,12 +425,16 @@ class Search extends React.Component {
   }
 
   clearActiveFilters() {
-    $(this.refs.filters).find('input:checked').click();
-    $(this.refs.filters).find('input').val('').change();
+    // $(this.refs.filters).find('input:checked').click();
+    //$(this.refs.filters).find('input').val('').each((i, x) => 
+    //  x.dispatchEvent(new Event('change'))
+    //);
     this.setState({
       activeBucketsFilters: {},
       activeExistsFilters: {},
       activeNotExistsFilters: {},
+      openedFilters: {},
+      filtersTap: this.state.filtersTap + 1,
       lat_min: undefined,
       lat_max: undefined,
       lon_min: undefined,
@@ -529,7 +534,7 @@ class Search extends React.Component {
                       Filters
                     </div>
                     <div className="right aligned item" style={{padding:'0 1em'}}>
-                      <div className={'ui small compact button' + (esFilters.length > 0 ? ' ' + portals['MagIC'].color : ' basic disabled')} style={{padding:'0.5em'}}
+                      <div className={'ui small compact button ' + portals['MagIC'].color} style={{padding:'0.5em'}}
                            onClick={(e) => this.clearActiveFilters()}
                       >
                         <i className="remove circle icon"/>
@@ -563,7 +568,7 @@ class Search extends React.Component {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui small accordion">
           <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
@@ -608,7 +613,7 @@ class Search extends React.Component {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui small accordion">
           <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
@@ -682,7 +687,7 @@ class Search extends React.Component {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui small accordion">
           <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
@@ -757,7 +762,7 @@ class Search extends React.Component {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui small accordion">
           <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
@@ -831,7 +836,7 @@ class Search extends React.Component {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui small accordion">
           <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
@@ -905,7 +910,7 @@ class Search extends React.Component {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui small accordion">
           <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
             <div style={this.styles.flex}
@@ -961,7 +966,7 @@ class Search extends React.Component {
 
   renderDeclinationFilter(searchQueries, filter, i) {
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em'}}>
           <i className="caret right icon"/>
         </div>
@@ -1021,7 +1026,7 @@ class Search extends React.Component {
       }
     });
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <SearchFiltersExists
           name={filter.name}
           title={filter.title}
@@ -1071,7 +1076,7 @@ class Search extends React.Component {
   renderBucketsFilter(searchQueries, filter, i) {
     let esFilters = this.getESFilters(filter.name);
     return (
-      <div key={i} style={this.styles.filter}>
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <SearchFiltersBuckets
           name={filter.name}
           title={filter.title}
