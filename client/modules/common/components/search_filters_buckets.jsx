@@ -97,7 +97,6 @@ export default class SearchFiltersBuckets extends React.Component {
   render() {
     const activeFilters = {};
     const matchedFilters = {};
-    console.log(this.props.title, this.props.activeFilters, this.state.activeFilters)
     // this.state.activeFilters may contain a filter from another level that is no longer in
     // this.props.filters, so prepend the activeFilters
     const filters = (this.props.activeFilters && this.props.activeFilters.map(x => ({ key: x, doc_count: 0 })) || []).concat(this.props.filters || []);

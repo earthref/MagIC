@@ -278,13 +278,27 @@ class Search extends React.Component {
       if (this.state.activeBucketsFilters[filter.name])
         esFilters.push({ terms: { [filter.term]: this.state.activeBucketsFilters[filter.name] } });
       if (this.state.activeExistsFilters[filter.name])
-        esFilters.push(...this.state.activeExistsFilters[filter.name].map(field => {
-          return { exists: { field } };
-        }));
+        esFilters.push({
+          bool: { 
+            minimum_should_match: 1,
+            should: [
+              ...this.state.activeExistsFilters[filter.name].map(field => {
+                return { exists: { field } };
+              })
+            ]
+          }
+        });
       if (this.state.activeNotExistsFilters[filter.name])
-        esFilters.push(...this.state.activeNotExistsFilters[filter.name].map(field => {
-          return { bool: { must_not: { exists: { field } }}};
-        }));
+        esFilters.push({
+          bool: { 
+            minimum_should_match: 1,
+            should: [
+              ...this.state.activeNotExistsFilters[filter.name].map(field => {
+                return { bool: { must_not: { exists: { field } }}};
+              })
+            ]
+          }
+        });
       return esFilters;
     }, []);
 
