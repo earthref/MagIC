@@ -75,7 +75,11 @@ export default class SearchFiltersBuckets extends React.Component {
           {matched ? 
             <Highlighter searchWords={[this.state.search]} textToHighlight={filter.label || filter.key}/>
           : 
-            filter.label || filter.key
+            <span style={
+              filter.style || 
+              Meteor.isDevelopment && this.props.cv && !this.props.cv.includes(filter.key) && { color: 'red' } || 
+              {}
+            }>{filter.label || filter.key }</span>
           }
           { this.props.quoted && '"' || undefined }
         </div>
@@ -130,29 +134,30 @@ export default class SearchFiltersBuckets extends React.Component {
               placeholder={`Find ${this.props.itemsName}`}
               defaultValue={this.state.search}
               onChange={(e) => {
-                console.log('onChange', e);
                 this.handleSearchOnChange(e.target.value);
               }}
             />
           </div>
-          {(this.props.filters && _.keys(matchedFilters).length === 0 && this.state.search !== '' && 
-            <b>No Matches</b>) || undefined
+          {this.props.filters && _.keys(matchedFilters).length === 0 && this.state.search !== '' && 
+            <div style={{ textAlign: 'center'}}><b>No Matches</b></div> || undefined
           }
           {_.sortBy(_.keys(matchedFilters), x => matchedFilters[x].i).map(x =>
             this.renderFilter(matchedFilters[x].filter, false, true)
           )}
           <div className="ui divider"/>
           { this.props.filters === undefined &&
-            <div style={{textAlign: "center"}}>
+            <div style={{textAlign: 'center'}}>
               <i className="notched circle loading icon" style={{animationDuration:'0.75s', margin:0}}></i> Loading ...
             </div> || undefined
           }
-          { (this.props.filters && inactiveFilters.length === 0 &&
-            <b>No {this.props.itemsName}</b>) || undefined
+          { this.props.filters && inactiveFilters.length === 0 &&
+            <div style={{ textAlign: 'center'}}>
+              <b>No {this.props.itemsName}</b>
+            </div> || undefined
           }
-          { (this.props.filters && inactiveFilters.length && inactiveFilters.map(filter => 
+          { this.props.filters && inactiveFilters.length && inactiveFilters.map(filter => 
               this.renderFilter(filter, false, false)
-            )) || undefined
+            ) || undefined
           }
         </div>
       </div>

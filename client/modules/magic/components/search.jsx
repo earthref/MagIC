@@ -16,28 +16,13 @@ import SearchJSONLD from '/client/modules/magic/containers/search_jsonld';
 import {portals} from '/lib/configs/portals.js';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {levels, index} from '/lib/configs/magic/search_levels.js';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
+import {methodCodes} from '/lib/configs/magic/method_codes.js';
 
 const model = models[_.last(versions)];
 const sortedTables = _.sortBy(_.keys(models[_.last(versions)].tables), (table) => {
   return models[_.last(versions)].tables[table].position;
 });
-
-//let filterNames = {};
-//sortedTables.forEach((table) => {
-//  let sortedColumns = _.sortBy(_.keys(model.tables[table].columns), (column) => {
-//    return model.tables[table].columns[column].position;
-//  });
-//  sortedColumns.forEach((column) => {
-//    let label = model.tables[table].columns[column].label;
-//    let type = model.tables[table].columns[column].type;
-//    if (filterNames['magic.filters.' + column] === undefined) {
-//      if (type === 'String') {
-//        filters.push({ type: 'string', name: 'magic.filters.' + column, term: 'summary._all.' + column + '.raw', title: label });
-//      }
-//      filterNames['magic.filters.' + column] = true;
-//    }
-//  });
-//});
 
 const searchTerms = {
   "id":          { field: 'summary.contribution._history.id', processor: x => x },
@@ -57,6 +42,8 @@ const sortOptions = [
   { name: 'Most Cited Publication First', sort: [{'summary.contribution._reference.n_citations': 'desc'}] },
   { name: 'Citations A-z'               , sort: [{'summary.contribution._reference.citation.raw': 'asc'}] },
   { name: 'Citations z-A'               , sort: [{'summary.contribution._reference.citation.raw': 'desc'}] },
+  { name: 'Largest ID First'            , sort: [{'summary.contribution.id': 'asc'}] },
+  { name: 'Largest ID Last'             , sort: [{'summary.contribution.id': 'desc'}] },
 //  { name: 'Youngest Age First'          , sort: [{'summary._all._age_range_ybp': 'asc'}] },
 //  { name: 'Oldest Age First'            , sort: [{'summary._all._age_range_ybp': 'desc'}] },
 ];
@@ -87,12 +74,12 @@ class Search extends React.Component {
   //{ render: this.renderPoleFilter.bind(this)           , defaultOpen: false, name: 'pole' },   
   //{ render: this.renderVGPFilter.bind(this)            , defaultOpen: false, name: 'VGP' },   
     { render: this.renderIntensityFilter.bind(this)      , defaultOpen: false, name: 'intensity' },   
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.method_codes'                    , title: 'Method Code'                    , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.method_codes'                    , title: 'Method Code'                    , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 10000}}}, cv: _.flatMap(methodCodes, (group => group.codes.map(x => x.code))) },
     { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.external_database_ids'           , title: 'External Database'              , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.location_type'                   , title: 'Location Type'                  , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_type'                   , title: 'Geologic Type'                  , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_class'                  , title: 'Geologic Class'                 , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.lithology'                       , title: 'Lithology'                      , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 10000}}}},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.location_type'                   , title: 'Location Type'                  , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 10000}}}, cv: cvs.location_type.items.map(x => x.item) },
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_type'                   , title: 'Geologic Type'                  , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 10000}}}, cv: cvs.type.items.map(x => x.item)},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_class'                  , title: 'Geologic Class'                 , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 10000}}}, cv: cvs.class.items.map(x => x.item)},
+    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.lithology'                       , title: 'Lithology'                      , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 10000}}}, cv: cvs.lithology.items.map(x => x.item)},
   //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.scientists'                      , title: 'Research Scientist Name'        , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 10000}}}},
   //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.analysts'                        , title: 'Analyst Name'                   , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 10000}}}},
     { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.software_packages'               , title: 'Software Package'               , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 10000}}}},
@@ -106,8 +93,8 @@ class Search extends React.Component {
     { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSamplesData'                           , title: 'Without Samples Table Data'     , summaryLevel: 'samples'     , exists: false },
     { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSpecimensData'                            , title: 'With Specimens Table Data'      , summaryLevel: 'specimens'   , exists: true  },
     { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSpecimensData'                         , title: 'Without Specimens Table Data'   , summaryLevel: 'specimens'   , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withMeasurementsData'                         , title: 'With Measurements Table Data'   , summaryLevel: 'measurements', exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutMeasurementsData'                      , title: 'Without Measurements Table Data', summaryLevel: 'measurements', exists: false },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withMeasurementsData'                         , title: 'With Measurements Table Data'   , summaryLevel: 'experiments' , exists: true  },
+    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutMeasurementsData'                      , title: 'Without Measurements Table Data', summaryLevel: 'experiments' , exists: false },
     { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withCriteriaData'                             , title: 'With Criteria Table Data'       , summaryLevel: 'criteria'    , exists: true  },
     { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutCriteriaData'                          , title: 'Without Criteria Table Data'    , summaryLevel: 'criteria'    , exists: false },
     { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withAgesData'                                 , title: 'With Ages Table Data'           , summaryLevel: 'ages'        , exists: true  },
@@ -294,7 +281,10 @@ class Search extends React.Component {
             minimum_should_match: 1,
             should: [
               ...this.state.activeNotExistsFilters[filter.name].map(field => {
-                return { bool: { must_not: { exists: { field } }}};
+                return { bool: {
+                  must: { exists: { field: `summary.${filter.summaryLevel}` }},
+                  must_not: { exists: { field }}
+                }};
               })
             ]
           }
@@ -1025,29 +1015,45 @@ class Search extends React.Component {
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
     const type = activeView && activeView.es && activeView.es.type || 'contribution';
-    const levelsName = type == 'contribution' ? 'Contributions' : _.startCase(type);
+    const levelsName = type === 'contribution' ? 'Contributions' : (type === 'measurements' ? 'Experiments' : _.startCase(type));
     const levelName = levelsName.substr(0, levelsName.length);
     const tableName = _.startCase(filter.summaryLevel);
     const model = models[_.last(versions)];
     let labels = [];
     let aggs = {};
     sortedTables.forEach(tableKey => {
-      if (tableKey !== 'contribution' && (filter.summaryLevel === '_all' || filter.summaryLevel === tableKey)) {
+      if (tableKey !== 'contribution' && (
+        filter.summaryLevel === '_all' ||
+        filter.summaryLevel === 'experiments' && tableKey === 'measurements' || 
+        filter.summaryLevel === tableKey
+      )) {
         const table = model.tables[tableKey];        
         _.sortBy(
           _.keys(table.columns), columnName => table.columns[columnName].position
         ).forEach(columnName => {
-          const key = `summary.${filter.summaryLevel === 'measurements' ? 'experiments' : filter.summaryLevel}.${columnName}`;
+          const key = `summary.${filter.summaryLevel}.${columnName}`;
           const column = table.columns[columnName];
           if (!aggs[key] && (!column.validations || !column.validations.includes('downloadOnly()'))) {
             labels.push({
-              key, label: column.label
+              key,
+              label: column.label, 
+              style: 
+                Meteor.isDevelopment &&
+                !filter.exists &&
+                filter.summaryLevel !== '_all' && (
+                  column.validations && column.validations.includes('required()') && { color: 'red' } || 
+                  column.validations && column.validations.includes('recommended()') && { color: 'orange' } || 
+                  {}
+                )
             });
             aggs[key] = {
               filter: filter.exists ? 
                 { exists: { field: key }}
               :
-                { bool: { must_not: { exists: { field: key }}}}
+                { bool: {
+                  must: { exists: { field: `summary.${filter.summaryLevel}` }},
+                  must_not: { exists: { field: key }}
+                }}
             };
           }
         });
@@ -1114,7 +1120,7 @@ class Search extends React.Component {
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
     const type = activeView && activeView.es && activeView.es.type || 'contribution';
-    const levelsName = type === 'contribution' ? 'Contributions' : _.startCase(type);
+    const levelsName = type === 'contribution' ? 'Contributions' : (type === 'measurements' ? 'Experiments' : _.startCase(type));
     const levelName = levelsName.substr(0, levelsName.length - 1);
     return (
       <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
@@ -1123,6 +1129,7 @@ class Search extends React.Component {
           title={filter.title}
           quoted={true}
           itemsName={'Values'}
+          cv={filter.cv}
           es={this.state.openedFilters[filter.name] && {
             index: index,
             type: type,
