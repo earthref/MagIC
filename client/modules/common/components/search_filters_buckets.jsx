@@ -2,6 +2,7 @@ import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import Highlighter from 'react-highlight-words';
+import Count from './count';
 
 export default class SearchFiltersBuckets extends React.Component {
 
@@ -79,9 +80,15 @@ export default class SearchFiltersBuckets extends React.Component {
           { this.props.quoted && '"' || undefined }
         </div>
         <div>
-          <div className="ui circular small basic label">
-            {filter.doc_count}
-          </div>
+          <Count
+            className="ui circular small basic label"
+            count={filter.doc_count}
+            onMouseOver={(e) => $(e.target).popup({
+              html: this.props.onMouseOver(filter.label || filter.key, filter.doc_count),
+              position: 'bottom right',
+              variation: 'small'
+            }).popup('show')}
+          />
         </div>
       </div>
     );
@@ -90,7 +97,11 @@ export default class SearchFiltersBuckets extends React.Component {
   render() {
     const activeFilters = {};
     const matchedFilters = {};
-    this.props.filters && this.props.filters.forEach((filter, i) => {
+    console.log(this.props.title, this.props.activeFilters, this.state.activeFilters)
+    // this.state.activeFilters may contain a filter from another level that is no longer in
+    // this.props.filters, so prepend the activeFilters
+    const filters = (this.props.activeFilters && this.props.activeFilters.map(x => ({ key: x, doc_count: 0 })) || []).concat(this.props.filters || []);
+    filters.forEach((filter, i) => {
       if (filter.key in this.state.activeFilters)
         activeFilters[filter.key] = { i, filter };
       if (!(filter.key in this.state.activeFilters) && 
@@ -138,7 +149,7 @@ export default class SearchFiltersBuckets extends React.Component {
             </div> || undefined
           }
           { (this.props.filters && inactiveFilters.length === 0 &&
-            <b>No {this.props.itemsName}s</b>) || undefined
+            <b>No {this.props.itemsName}</b>) || undefined
           }
           { (this.props.filters && inactiveFilters.length && inactiveFilters.map(filter => 
               this.renderFilter(filter, false, false)

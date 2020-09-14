@@ -15,7 +15,7 @@ export const composer = ({es, labels}, onData) => {
           return { ...x, 
             doc_count: result[x.key] && result[x.key].doc_count || 0
           };
-        }).filter(x => x.doc_count > 0);
+        });
         onData(null, { filters });
       }
     } catch (e) {

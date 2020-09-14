@@ -501,15 +501,22 @@ class Search extends React.Component {
                 defaultValue={this.props.search || ''}
                 placeholder={'e.g. metamorphic "field intensity" -precambrian'}
                 style={this.styles.input}
-                onKeyPress={(e) => e.key === 'Enter' && this.setState({search: e.target.value})}
+                onChange={(e) => {
+                  const $buttons = $(this.refs['searchButton']).add(this.refs['clearButton']);
+                  if (e.target.value !== '') $buttons.removeClass('disabled');
+                  if (e.target.value === '') $buttons.addClass('disabled');
+                }}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') this.setState({search: e.target.value});
+                }}
               />
-              <div className={'ui basic black button'}
+              <div ref="searchButton" className={'ui basic black button' + (this.refs['search'] && this.refs['search'].value !== '' ? '' : ' disabled')}
                    onClick={(e) => this.setState({search: this.refs['search'].value})}
               >
                 <i className="search icon"/>
                 Search
               </div>
-              <div className={'ui basic black button'}
+              <div ref="clearButton" className={'ui basic black button' + (this.refs['search'] && this.refs['search'].value !== '' ? '' : ' disabled')}
                    style={this.styles.searchButton}
                    onClick={(e) => { this.refs['search'].value = ''; this.clearActiveFilters(); this.setState({search: "", searchInput: ""}); }}
               >
@@ -534,8 +541,8 @@ class Search extends React.Component {
                       Filters
                     </div>
                     <div className="right aligned item" style={{padding:'0 1em'}}>
-                      <div className={'ui small compact button ' + portals['MagIC'].color} style={{padding:'0.5em'}}
-                           onClick={(e) => this.clearActiveFilters()}
+                      <div className={'ui small compact button' + (esFilters.length > 0 ? ' ' + portals['MagIC'].color : ' basic disabled')} style={{padding:'0.5em'}}
+                        onClick={(e) => this.clearActiveFilters()}
                       >
                         <i className="remove circle icon"/>
                         Clear Filters
@@ -999,13 +1006,20 @@ class Search extends React.Component {
   }
 
   renderWithDataFilter(searchQueries, filter, i) {
-    let esFilters = this.getESFilters(filter.name);
+    const esFilters = this.getESFilters(filter.name);
+    const activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    const type = activeView && activeView.es && activeView.es.type || 'contribution';
+    const levelsName = type == 'contribution' ? 'Contributions' : _.startCase(type);
+    const levelName = levelsName.substr(0, levelsName.length);
+    const tableName = _.startCase(filter.summaryLevel);
     const model = models[_.last(versions)];
     let labels = [];
     let aggs = {};
-    sortedTables.forEach(tableName => {
-      if (tableName !== 'contribution' && (filter.summaryLevel === '_all' || filter.summaryLevel === tableName)) {
-        const table = model.tables[tableName];        
+    sortedTables.forEach(tableKey => {
+      if (tableKey !== 'contribution' && (filter.summaryLevel === '_all' || filter.summaryLevel === tableKey)) {
+        const table = model.tables[tableKey];        
         _.sortBy(
           _.keys(table.columns), columnName => table.columns[columnName].position
         ).forEach(columnName => {
@@ -1034,7 +1048,7 @@ class Search extends React.Component {
           itemsName={'Columns'}
           es={this.state.openedFilters[filter.name] && {
             index: index,
-            type: 'contribution',
+            type: type,
             queries: searchQueries,
             filters: esFilters,
             aggs
@@ -1068,13 +1082,26 @@ class Search extends React.Component {
             openedFilters[filter.name] = true;
             this.setState({openedFilters});
           }}
+          onMouseOver={(x, n) => `
+            <b>${n} ${n === 1 ? levelName : levelsName}</b>
+            ${filter.exists ? (n === 1 ? 'has' : 'have') : (n === 1 ? 'does not have' : 'do not have')}
+            data in the <b>${x}</b> column of 
+            ${filter.summaryLevel === '_all' ? '<b>any</b>' : `the <b>${tableName}</b>`} table
+            and ${n === 1 ? 'matches' : 'match'} your current text search and your other filters.`
+          }
         />
       </div>
     )
   }
 
   renderBucketsFilter(searchQueries, filter, i) {
-    let esFilters = this.getESFilters(filter.name);
+    const esFilters = this.getESFilters(filter.name);
+    const activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    const type = activeView && activeView.es && activeView.es.type || 'contribution';
+    const levelsName = type === 'contribution' ? 'Contributions' : _.startCase(type);
+    const levelName = levelsName.substr(0, levelsName.length - 1);
     return (
       <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
         <SearchFiltersBuckets
@@ -1084,7 +1111,7 @@ class Search extends React.Component {
           itemsName={'Values'}
           es={this.state.openedFilters[filter.name] && {
             index: index,
-            type: 'contribution',
+            type: type,
             queries: searchQueries,
             filters: esFilters,
             aggs: filter.aggs
@@ -1103,6 +1130,11 @@ class Search extends React.Component {
             openedFilters[filter.name] = true;
             this.setState({openedFilters});
           }}
+          onMouseOver={(x, n) => `
+            <b>${n} ${n === 1 ? levelName : levelsName}</b> ${n === 1 ? 'has a' : 'have'}
+            <b>${filter.title}</b> ${n === 1 ? 'value' : 'values'} of <b>"${x}"</b> 
+            and ${n === 1 ? 'matches' : 'match'} your current text search and your other filters.`
+          }
         />
       </div>
     )

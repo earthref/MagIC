@@ -11,7 +11,7 @@ export const composer = ({es, title}, onData) => {
         console.error('esBuckets', error);
         onData(null, {error: error});
       } else {
-        result = _.sortBy(_.filter(result, (o) => o.doc_count > 0), (x) => {
+        result = _.sortBy(result, (x) => {
           let key = x.key;
           if (title === 'Author') {
             const names = x.key.split('. ');
@@ -19,6 +19,7 @@ export const composer = ({es, title}, onData) => {
           }
           return _.deburr(_.toLower(key));
         });
+        console.log(result);
         onData(null, {filters: result});
       }
     } catch (e) {
