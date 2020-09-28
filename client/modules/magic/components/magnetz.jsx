@@ -5,7 +5,7 @@ export default () => {
   const [data, setData] = useState(null);
   useEffect(() => {
     async function fetchData() {
-      const resp = await fetch('https://api.github.com/repos/earthref/MagIC-MagNetS/contents/magnets.md');
+      const resp = await fetch('https://api.github.com/repos/earthref/MagIC-MagNetZ/contents/magnetz.md');
       if (!resp.ok) {
         setData(false);
       } else {
