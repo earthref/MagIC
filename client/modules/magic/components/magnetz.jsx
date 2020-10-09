@@ -11,7 +11,7 @@ export default () => {
       } else {
         const json = await resp.json();
         const b64 = json.content;
-        setData(atob(b64));
+        setData(decodeURIComponent(escape(atob(b64))));
       }
     }
     fetchData();
