@@ -10,6 +10,32 @@ export default class extends React.Component {
     return (
       <div style={{textAlign: "justify"}}>
         <h3>
+          <Image size="mini" src="https://github.com/earthref/MagIC-MagNetS/raw/master/MagnetZ_Logo.jpg" floated="left"/>
+          {` Mag-NetZ`}
+        </h3>
+        <p>
+          <Link to="/MagIC/MagNetZ"><b>MagNetZ (Magnetic NetworkZ)</b></Link>
+          {` is a biweekly online seminar organized by `}
+          <b>Greig Paterson</b>
+          {` and `}
+          <b>Anita Di Chiara</b>
+          {`. The seminars cover topics in the geomagnetism, paleomagnetism, rock magnetism, archeomagnetism, and environmental magnetism (all things magnetic).
+          Visit the `}
+          <Link to="/MagIC/MagNetZ"><b>website</b></Link>
+          {` for info on all the `}
+          <b>speakers</b>
+          {`, their `}
+          <b>abstracts</b>
+          {`, as well as links to the `}
+          <b>YouTube</b>
+          {` videos, `}
+          <b>ERDA</b>
+          {` entries, `}
+          <b>citable DOIs</b>
+          {`.`}
+        </p>
+        <div className="ui divider"></div>
+        <h3>
           <Image size="mini" src="/MagIC/sio.jpg" floated="left"/>
           {` MagIC Workshop 2021`}
         </h3>
