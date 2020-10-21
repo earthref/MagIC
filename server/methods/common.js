@@ -177,7 +177,7 @@ export default function () {
         if (d.author)
           _reference.authors = d.author.map((a) => {
             let author = {};
-            author.family = a.family;
+            author.family = (a.family == a.family.toUpperCase() ? _.startCase(_.lowerCase(a.family)) : a.family);
             author._name = (_.trim(a.given) === '' ? '' : a.given.toUpperCase().substr(0, 1) + '. ') + a.family;
             if (a.given) author.given = a.given;
             if (a.affiliation && a.affiliation.length > 0)
