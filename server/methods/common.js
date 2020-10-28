@@ -21,8 +21,8 @@ export default function () {
       }
     },
 
-    async updateUserWithORCID({code}) {
-      let id, orcid, token, existingUser;
+    async updateUserWithORCID({id, code}) {
+      let orcid, token, existingUser;
       if (id) try {
         let user = await Meteor.call('esGetUserByID', {id});
         orcid = user && user.orcid && user.orcid.id;

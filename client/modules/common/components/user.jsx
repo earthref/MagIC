@@ -62,6 +62,9 @@ export function User({ openInitially, className, portal }) {
 		>
 			<Modal.Header>
 				EarthRef Account
+				{ Meteor.isDevelopment &&
+					<div style={{ float: 'right' }}>User ID: { id }</div>
+				}
 			</Modal.Header>
 			<Modal.Content>
 				{ error && 
@@ -73,18 +76,29 @@ export function User({ openInitially, className, portal }) {
 						</Message.Content>
 					</Message>
 				}
-				{ !error && (!user || user.id !== id) &&
+				{ !error && (orcid.isUpdating || !user || user.id !== id) &&
 					<Segment basic padded='very'>
 						<Dimmer active inverted>
 							<Loader inline='centered' size='large' />
 						</Dimmer>
 					</Segment>
 				}
-				{ !error && user &&
+				{ !error && user && !orcid.isUpdating &&
 					<>
 						{ user.orcid && user.orcid.id &&
 							<Table definition>
 								<Table.Body>
+									<Table.Row>
+										<Table.Cell colSpan='2'>
+											<b>EarthRef is an <a href={`https://orcid.org/members/0010f00002MLGl6AAH-earthref`} target='_blank'>
+												ORCID Member Organization
+											</a> and can retrieve <a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+													ORCID account
+												</a> information <a href="https://support.orcid.org/hc/en-us/articles/360006897614-Visibility-settings" target='_blank'>
+												shared
+											</a> with "Trusted Parties" or "Everyone".</b>
+										</Table.Cell>
+									</Table.Row>
 									<Table.Row>
 										<Table.Cell>
 											<img src='/ORCIDiD_icon64x64.png'
@@ -98,87 +112,103 @@ export function User({ openInitially, className, portal }) {
 											</a>
 										</Table.Cell>
 									</Table.Row>
-									{ user.name && user.name.source === 'ORCID'  && user.name.given && 
+									{ user.name && user.name.source === 'ORCID'  && user.name.given ? 
 										<Table.Row>
-											<Table.Cell><Icon name='user'/>Given Names *</Table.Cell>
+											<Table.Cell><Icon name='user circle'/>Given Names *</Table.Cell>
 											<Table.Cell>{ user.name.given || '' }</Table.Cell>
+										</Table.Row> : 
+										<Table.Row error>
+											<Table.Cell><Icon name='attention'/>Given Names *</Table.Cell>
+											<Table.Cell rowSpan="2">
+												Your Name on your <a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+													ORCID account
+												</a> is not <a href="https://support.orcid.org/hc/en-us/articles/360006897614-Visibility-settings" target='_blank'>
+													shared
+												</a> with "trusted parties"</Table.Cell>
 										</Table.Row>
 									}
-									{ user.name && user.name.source === 'ORCID' && user.name.family && 
+									{ user.name && user.name.source === 'ORCID' && user.name.given ? 
 										<Table.Row>
-											<Table.Cell><Icon name='users'/>Last Name *</Table.Cell>
+											<Table.Cell><Icon name='user circle outline'/>Last Name *</Table.Cell>
 											<Table.Cell>{ user.name.family || '' }</Table.Cell>
+										</Table.Row> : 
+										<Table.Row error>
+											<Table.Cell><Icon name='attention'/>Last Name *</Table.Cell>
 										</Table.Row>
 									}
-									{ user.email && user.email.source === 'ORCID'  && user.email.address && 
+									{ user.email && user.email.source === 'ORCID'  && user.email.address ? 
 										<Table.Row>
 											<Table.Cell><Icon name='mail'/>Email *</Table.Cell>
 											<Table.Cell>{ user.email.address || '' }</Table.Cell>
+										</Table.Row> : 
+										<Table.Row error>
+											<Table.Cell><Icon name='attention'/>Email *</Table.Cell>
+											<Table.Cell>
+												Your Email on your <a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+													ORCID account
+												</a> is not <a href="https://support.orcid.org/hc/en-us/articles/360006897614-Visibility-settings" target='_blank'>
+													shared
+												</a> with "trusted parties"</Table.Cell>
 										</Table.Row>
 									}
 								</Table.Body>
 								<Table.Footer fullWidth>
-								<Table.Row>
-									<Table.HeaderCell colSpan='2'>
-										<b>* Log in to your <a href={`https://${orcidURL}/${user.orcid.id}`}>ORCID account</a> to edit these values.</b>
-									</Table.HeaderCell>
-								</Table.Row>
-								<Table.Row>
-									<Table.HeaderCell colSpan='2'>
-										<Form.Button	floated='right'
-											disabled={ (email.error || password.error || orcid.error || orcid.isUpdating) && true || false }
-											error={orcid.error}
-											onClick={() => {
-												let canDisconnect = true;
-												if (!user || !user.email || !user.email.address) {
-													canDisconnect = false;
-													setEmail(x => { 
-														return {
-															...x, 
-															error: 'An email is required before disconnecting your account from ORCID.', 
-															isUpdating: false 
-														};
-													});
-												}
-												if (!user || !user.has_password) {
-													canDisconnect = false;
-													setPassword(x => { 
-														return {
-															...x, 
-															error: 'A password is required before disconnecting your account from ORCID.', 
-															isUpdating: false 
-														};
-													});
-												}
-												if (canDisconnect) {
-													setORCID({ error: undefined, isUpdating: true });
-													Meteor.call('esDisconnectUserORCID', { id: user.id }, (error) => {
-														if (error) {
-															console.error(error);
-															setORCID({ error: error.reason, isUpdating: false });
-														} else {
-															setORCID({ error: undefined, isUpdating: false });
-															let updatedUser = _.cloneDeep(user);
-															delete updatedUser.orcid;
-															setUser(updatedUser);
-														}
-													});
-												}
-											}}
-										>
-											{ orcid.isUpdating && 
-												<Icon loading name='spinner'/>
-											}
-											{ !orcid.isUpdating && 
+									<Table.Row>
+										<Table.HeaderCell colSpan='2'>
+											<b>* Log in to your <a href={`https://${orcidURL}/${user.orcid.id}`}>ORCID account</a> to edit these values.</b>
+										</Table.HeaderCell>
+									</Table.Row>
+									<Table.Row>
+										<Table.HeaderCell colSpan='2'>
+											<Form.Button floated='right'
+												disabled={ (email.error || password.error || orcid.error || orcid.isUpdating) && true || false }
+												error={orcid.error}
+												onClick={() => {
+													let canDisconnect = true;
+													if (!user || !user.email || !user.email.address) {
+														canDisconnect = false;
+														setEmail(x => { 
+															return {
+																...x, 
+																error: 'An email is required before disconnecting your account from ORCID.', 
+																isUpdating: false 
+															};
+														});
+													}
+													if (!user || !user.has_password) {
+														canDisconnect = false;
+														setPassword(x => { 
+															return {
+																...x, 
+																error: 'A password is required before disconnecting your account from ORCID.', 
+																isUpdating: false 
+															};
+														});
+													}
+													if (canDisconnect) {
+														setORCID({ error: undefined, isUpdating: true });
+														Meteor.call('esDisconnectUserORCID', { id: user.id }, (error) => {
+															if (error) {
+																console.error(error);
+																setORCID({ error: error.reason, isUpdating: false });
+															} else {
+																setORCID({ error: undefined, isUpdating: false });
+																let updatedUser = _.cloneDeep(user);
+																delete updatedUser.orcid;
+																setUser(updatedUser);
+															}
+														});
+													}
+												}}
+											>
 												<img src='/ORCIDiD_icon64x64.png'
 													style={{ height: '1.25em', margin: '-.25em .25em -.25em 0' }}
 												/>
-											}
-											Disconnect Your EarthRef Account From ORCID
-										</Form.Button>
-									</Table.HeaderCell>
-								</Table.Row>
-							</Table.Footer>
+												Disconnect Your EarthRef Account From ORCID
+											</Form.Button>
+										</Table.HeaderCell>
+									</Table.Row>
+								</Table.Footer>
 							</Table>
 						}
 						{ (!user.orcid || !user.orcid.id) && 
@@ -196,7 +226,7 @@ export function User({ openInitially, className, portal }) {
 						{ (!user.orcid || !user.orcid.id || !user.name || user.name.source === 'EarthRef') && 
 								<>
 									<Form.Input
-										icon='user'
+										icon='user circle'
 										iconPosition='left'
 										label='Given Names'
 										placeholder='John A.'
@@ -231,7 +261,7 @@ export function User({ openInitially, className, portal }) {
 										}}
 									/>
 									<Form.Input
-										icon='users'
+										icon='user circle outline'
 										iconPosition='left'
 										label='Family Name'
 										placeholder='Doe'
@@ -275,8 +305,8 @@ export function User({ openInitially, className, portal }) {
 									placeholder='Preferred Email Address'
 									error={
 										email.error || 
-										(user.orcid && user.orcid.id && (!user.email || !user.email.address) && 'The email cannot be blank. Please either set your email to be shared with "trusted parties" (EarthRef.org is an ORCID Member Organization) by clicking on your ORCID iD above or enter your email here.') ||
-										((!user.email || !user.email.address) && 'The email cannot be blank. Please enter your email here so we can identify you as unique user.')
+										(user.orcid && user.orcid.id && (!user.email || !user.email.address) && 'The email cannot be blank. Please enter your email or set your email to be shared with "trusted parties" by clicking on your ORCID iD link above.') ||
+										((!user.email || !user.email.address) && 'The email cannot be blank. Please enter your email here so we can identify you as a unique user.')
 									}
 									value={email.value !== undefined ? email.value : user.email.address || ''}
 									onChange={(e, { value }) => setEmail(x => { return { ...x, value }; }) }
@@ -308,9 +338,9 @@ export function User({ openInitially, className, portal }) {
 								/>
 							}
 							<Form.Input
-								icon='at'
+								icon='user'
 								iconPosition='left'
-								label='Handle'
+								label='EarthRef Username'
 								placeholder='Username for Display'
 								error={handle.error}
 								value={handle.value !== undefined ? handle.value :  user.handle || ''}
@@ -349,7 +379,7 @@ export function User({ openInitially, className, portal }) {
 							<Form.Input
 								icon='key'
 								iconPosition='left'
-								label='Password'
+								label='EarthRef Password'
 								type='password'
 								error={password.error}
 								value={password.value !== undefined ? password.value : ''}
@@ -383,25 +413,46 @@ export function User({ openInitially, className, portal }) {
 					</>
 				}
 			</Modal.Content>
-			{ error &&
-				<Modal.Actions>
-					<Button 
-						basic
-						negative
-						as='a'
-						href={'mailto:webmaster@earthref.org?subject=[EarthRef Log In Help]%20I%27m%20having%20trouble%20logging%20in%20with%20ORCID'} 
-						style={{ float: 'left' }}
+			<Modal.Actions>
+				<Button 
+					basic
+					negative
+					as='a'
+					href={ user ? 
+						'mailto:webmaster@earthref.org?subject=[EarthRef User Account Help]%20I%27m%20having%20trouble%20with%20my%20account' :
+						'mailto:webmaster@earthref.org?subject=[EarthRef Log In Help]%20I%27m%20having%20trouble%20logging%20in%20with%20ORCID'
+					} 
+					style={{ float: 'left' }}
+				>
+					<Icon name='mail'/>
+					&nbsp;<b>Having Trouble?</b>&nbsp;Email Us
+				</Button>
+					<Button
+						onClick={() => {
+							setError(undefined);
+							setORCID({ error: undefined, isUpdating: true });
+							Meteor.call('updateUserWithORCID', { id: user.id }, (error, user) => {
+								if (error) {
+									console.error(error);
+									setError(error);
+								} else {
+									console.log(user);
+									Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+									Cookies.set('user_id', user.handle || `user${user.id}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+									if (user.name)
+										Cookies.set('name', `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+									else
+										Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+									setUser(user);
+									setORCID({ error: undefined, isUpdating: false });
+								}
+							});
+						}}
 					>
-						<Icon name='mail'/>
-						&nbsp;<b>Having Trouble?</b>&nbsp;Email Us
+						<Icon name='refresh'/>
+						Refresh EarthRef User Data
 					</Button>
-						<Button
-							onClick={() => { setUser(undefined); setError(undefined); }}
-						>
-							Retry Fetching User Data
-						</Button>
-				</Modal.Actions>
-			}
+			</Modal.Actions>
 		</Modal>
 	);
 }
