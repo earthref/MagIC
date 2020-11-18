@@ -522,283 +522,290 @@ class SearchSummariesListItem extends React.Component {
 
   render() {
     const item = this.props.item;
+    let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
     try {
-    return (
-      <div>
-        <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active && !this.props.collapsed ? ' active' : '')} onMouseOver={(e) => {
-          clearTimeout(this.hideAccordionButtonTimeout);
-          this.showAccordionButtonTimeout = setTimeout(() => {
-            if ($(this.refs['accordion title']).hasClass('active')) {
+      return (
+        <div>
+          <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active && !this.props.collapsed ? ' active' : '')} onMouseOver={(e) => {
+            clearTimeout(this.hideAccordionButtonTimeout);
+            this.showAccordionButtonTimeout = setTimeout(() => {
+              if ($(this.refs['accordion title']).hasClass('active')) {
+                $(this.refs['close accordion button']).show();
+                $(this.refs['open accordion button']).hide();
+              } else {
+                $(this.refs['open accordion button']).show();
+                $(this.refs['close accordion button']).hide();
+              }
+            }, 500);
+          }} onMouseLeave={(e) => {
+            clearTimeout(this.showAccordionButtonTimeout);
+            this.hideAccordionButtonTimeout = setTimeout(() => {
+              $(this.refs['open accordion button']).hide();
+              $(this.refs['close accordion button']).hide();
+            }, 500);
+          }}>
+            <div ref="accordion title" className={'title' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{padding:'0 0 0 1em'}}>
+              <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
+              <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
+                <div className="row accordion-trigger" style={{display:'flex', padding:'0 1em 0.5em'}}>
+                  <span style={{
+                    fontSize:'small', fontWeight:'bold',
+                    color: !_is_activated && Meteor.isDevelopment ? '#9F3A38' : 'default'
+                  }}>
+                    {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation || 'Unknown'}
+                    {item.summary.contribution && item.summary.contribution.version && <span>&nbsp;v.&nbsp;{item.summary.contribution.version}</span>}
+                  </span>
+                  <span style={{
+                    fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em',
+                    color: !_is_activated && Meteor.isDevelopment ? '#9F3A38' : 'default'
+                  }}>
+                    {this.renderTitle(item)}
+                  </span>
+                  <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
+                    {item.summary.contribution && moment.utc(item.summary.contribution.timestamp).local().format('LL')}
+                    &nbsp;by&nbsp;
+                    <b>{item.summary.contribution && item.summary.contribution._contributor}</b>
+                  </span>
+                </div>
+                {item.summary && item.summary._incomplete_summary !== "true" ? 
+                  <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                    {this.renderDownloadButton(item)}
+                    {this.renderLinks(item)}
+                    {this.renderCounts(item)}
+                    {this.renderMapThumbnail(item)}
+                    <SearchPlotThumbnail 
+                      id={item && item.summary && item.summary.contribution && item.summary.contribution.id}
+                      citation={item && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation }
+                      location={item && item.summary && item.summary.locations && item.summary.locations.location && item.summary.locations.location[0] }
+                      site={item && item.summary && item.summary.sites && item.summary.sites.site && item.summary.sites.site[0] }
+                      sample={item && item.summary && item.summary.samples && item.summary.samples.sample && item.summary.samples.sample[0] }
+                      specimen={item && item.summary && item.summary.specimens && item.summary.specimens.specimen && item.summary.specimens.specimen[0] }
+                    />
+                    {this.renderGeo(item)}
+                    {this.renderGeology(item)}
+                    {this.renderAge(item)}
+                    {this.renderInt(item)}
+                    {this.renderMethodCodes(item)}
+                    {this.renderCitations(item)}
+                  </div>
+                :
+                  <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                    {this.renderDownloadButton(item)}
+                    {this.renderLinks(item)}
+                    {this.renderCounts(item)}
+                    {this.renderQueuedForIndex(item)}
+                </div>
+                }
+              </div>
+            </div>
+            <div className={'content' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{fontSize: 'small', paddingBottom: 0}}>
+              <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.html}} />
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.abstract_html}} />
+              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && item.summary.contribution._reference.keywords.join &&
+
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords.join(', ')}} />}
+              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && !item.summary.contribution._reference.keywords.join &&
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords}} />}
+              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && item.summary.contribution._reference.tags.join &&
+
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags.join(', ')}} />}
+              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && !item.summary.contribution._reference.tags.join &&
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
+              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
+
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org" style="color: #792f91">Crossref</a> Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
+
+              {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
+              <table className="ui very basic compact collapsing table">
+                <thead>
+                <tr>
+                  <th style={{whiteSpace: 'nowrap'}}>Download</th>
+                  <th style={{whiteSpace: 'nowrap'}}>MagIC Contribution Link</th>
+                  <th style={{whiteSpace: 'nowrap'}}>EarthRef Data DOI Link</th>
+                  <th style={{whiteSpace: 'nowrap'}}>Version</th>
+                  <th style={{whiteSpace: 'nowrap'}}>Data Model</th>
+                  <th style={{whiteSpace: 'nowrap'}}>Date</th>
+                  <th style={{whiteSpace: 'nowrap'}}>Contributor</th>
+                  {_.find(item.summary.contribution._history, 'description') && <th style={{whiteSpace: 'nowrap'}}>Description</th>}
+                </tr>
+                </thead>
+                <tbody>
+                {item.summary.contribution && item.summary.contribution._history.map((v, i) => {
+                  let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
+                  let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
+                  return (
+                    <tr key={i}>
+                      <td style={{whiteSpace: 'nowrap'}}>
+                        {v.id && v.id < 16282 &&
+                        <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
+                          <input type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${v.id}.txt`}/>
+                          <input type="hidden" name="file_name" value={`magic_contribution_${v.id}.txt`}/>
+                          <button type="submit" className={'ui basic tiny fluid icon compact purple button'} style={{marginTop:'0'}}>
+                            <i className="ui file text outline icon"/> Download
+                          </button>
+                        </form>}
+                        {v.id && v.id >= 16282 &&
+                        <a href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`} download>
+                          <button
+                            className="ui basic tiny fluid compact icon purple button"
+                            style={{marginTop:'0'}}
+                          >
+                            <i className="ui file text outline icon"/> Download
+                          </button>
+                        </a>}
+                        {!v.id &&
+                        <button className="ui basic tiny fluid compact icon purple disabled button"
+                                style={{marginTop:'0'}}>
+                          <i className="ui file text outline icon"/> Download
+                        </button>}
+                      </td>
+                      <td>
+                        {(_is_activated || i > 0) &&
+                        <a style={this.styles.a}
+                          href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a>}
+                        {(!_is_activated && i == 0) &&
+                        <span>{'earthref.org/MagIC/' + v.id}</span>}
+                      </td>
+                      <td>
+                        {_is_activated && _has_data_doi &&
+                        <a style={this.styles.a}
+                          href={'http://dx.doi.org/10.7288/V4/MAGIC/' + v.id} target="_blank">{'10.7288/V4/MAGIC/' + v.id}</a>}
+                        {_is_activated && !_has_data_doi &&
+                        <span>Queued For Creation</span>}
+                        {!_is_activated &&
+                        <span>{'10.7288/V4/MAGIC/' + v.id}</span>}
+                      </td>
+                      <td>{v.version}</td>
+                      <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
+                      <td>{moment(v.timestamp).local().format('LL')}</td>
+                      <td>{v.contributor}</td>
+                      {_.find(item.summary.contribution._history, 'description') && <td>{v.description}</td>}
+                    </tr>
+                  );
+                })}
+                </tbody>
+              </table>}
+              {Meteor.isDevelopment && this.props.table === 'contribution' && item.summary.contribution &&
+              <table className="ui compact red table">
+                <thead>
+                  <tr>
+                    <th style={{whiteSpace: 'nowrap'}}>Developer Tasks</th>
+                    <th style={{whiteSpace: 'nowrap'}}></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {item.summary.contribution._is_activated === 'true' &&
+                    <tr>
+                      <td style={{whiteSpace: 'nowrap'}}>
+                        <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                          onClick={function(id, e) {
+                            console.log("esDeactivateContribution");
+                            Meteor.call("esDeactivateContribution", {index: index, id: id},
+                              (error) => { console.log("esDeactivateContribution done"); }
+                            );
+                          }.bind(this, item.summary.contribution.id)}
+                        >
+                          Deactivate
+                        </button>
+                      </td>
+                      <td>
+                        Deactivate the contribution (contribution and Data DOI links will be broken until activated again).
+                      </td>
+                    </tr>
+                  }
+                  {item.summary.contribution._is_activated !== 'true' &&
+                    <tr>
+                      <td style={{whiteSpace: 'nowrap'}}>
+                        <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                          onClick={function(id, e) {
+                            console.log("esActivateContribution");
+                            Meteor.call("esActivateContribution", {index: index, id: id},
+                              (error) => { console.log("esActivateContribution done"); }
+                            );
+                          }.bind(this, item.summary.contribution.id)}
+                        >
+                          Force Activate
+                        </button>
+                      </td>
+                      <td>
+                        Activate the contribution even if not validated.
+                      </td>
+                    </tr>
+                  }
+                  <tr>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                        onClick={function(id, contributor, e) {
+                          console.log("esUpdatePrivatePreSummaries");
+                          Meteor.call("esUpdatePrivatePreSummaries", {index, id, contributor},
+                            (error) => { console.log("esUpdatePrivatePreSummaries done"); }
+                          );
+                        }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
+                      >
+                        Pre Summary
+                      </button>
+                    </td>
+                    <td>
+                      Calculate the contribution pre summary and submit it to Elasticsearch for indexing.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{whiteSpace: 'nowrap'}}>
+                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                        onClick={function(id, contributor, e) {
+                          console.log("esUpdatePrivateSummaries");
+                          Meteor.call("esUpdatePrivateSummaries", {index, id, contributor},
+                            (error) => { console.log("esUpdatePrivateSummaries done"); }
+                          );
+                        }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
+                      >
+                        Full Summary
+                      </button>
+                    </td>
+                    <td>
+                      Calculate the full contribution summary and submit it to Elasticsearch for indexing.
+                    </td>
+                  </tr>
+                  {item.summary.contribution && item.summary.contribution._history && item.summary.contribution._history.map((v, i) =>
+                    <tr key={i}>
+                      <td style={{whiteSpace: 'nowrap'}}>
+                        <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
+                          onClick={function(id, e) {
+                            console.log("esUploadActivatedContributionToS3");
+                            Meteor.call("esUploadActivatedContributionToS3", {index, id},
+                              (error) => { console.log("esUploadActivatedContributionToS3 done"); }
+                            );
+                          }.bind(this,v.id)}
+                        >
+                          Upload {v.id} to S3
+                        </button>
+                      </td>
+                      <td>
+                        Upload the contribution text file to magic-contributions and/or magic-activated-contributions.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>}
+            </div>
+            <div ref="open accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
+              $(this.refs['accordion']).accordion('open', 0);
               $(this.refs['close accordion button']).show();
               $(this.refs['open accordion button']).hide();
-            } else {
+            }}>
+              <i className="caret down icon"></i>
+            </div>
+            <div ref="close accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
+              $(this.refs['accordion']).accordion('close', 0);
               $(this.refs['open accordion button']).show();
               $(this.refs['close accordion button']).hide();
-            }
-          }, 500);
-        }} onMouseLeave={(e) => {
-          clearTimeout(this.showAccordionButtonTimeout);
-          this.hideAccordionButtonTimeout = setTimeout(() => {
-            $(this.refs['open accordion button']).hide();
-            $(this.refs['close accordion button']).hide();
-          }, 500);
-        }}>
-          <div ref="accordion title" className={'title' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{padding:'0 0 0 1em'}}>
-            <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
-            <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
-              <div className="row accordion-trigger" style={{display:'flex', padding:'0 1em 0.5em'}}>
-                <span style={{fontSize:'small', fontWeight:'bold'}}>
-                  {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation || 'Unknown'}
-                  {item.summary.contribution && item.summary.contribution.version && <span>&nbsp;v.&nbsp;{item.summary.contribution.version}</span>}
-                </span>
-                <span style={{fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em'}}>
-                  {this.renderTitle(item)}
-                </span>
-                <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                  {item.summary.contribution && moment.utc(item.summary.contribution.timestamp).local().format('LL')}
-                  &nbsp;by&nbsp;
-                  <b>{item.summary.contribution && item.summary.contribution._contributor}</b>
-                </span>
-              </div>
-              {item.summary && item.summary._incomplete_summary !== "true" ? 
-                <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
-                  {this.renderDownloadButton(item)}
-                  {this.renderLinks(item)}
-                  {this.renderCounts(item)}
-                  {this.renderMapThumbnail(item)}
-                  <SearchPlotThumbnail 
-                    id={item && item.summary && item.summary.contribution && item.summary.contribution.id}
-                    citation={item && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation }
-                    location={item && item.summary && item.summary.locations && item.summary.locations.location && item.summary.locations.location[0] }
-                    site={item && item.summary && item.summary.sites && item.summary.sites.site && item.summary.sites.site[0] }
-                    sample={item && item.summary && item.summary.samples && item.summary.samples.sample && item.summary.samples.sample[0] }
-                    specimen={item && item.summary && item.summary.specimens && item.summary.specimens.specimen && item.summary.specimens.specimen[0] }
-                  />
-                  {this.renderGeo(item)}
-                  {this.renderGeology(item)}
-                  {this.renderAge(item)}
-                  {this.renderInt(item)}
-                  {this.renderMethodCodes(item)}
-                  {this.renderCitations(item)}
-                </div>
-              :
-                <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
-                  {this.renderDownloadButton(item)}
-                  {this.renderLinks(item)}
-                  {this.renderCounts(item)}
-                  {this.renderQueuedForIndex(item)}
-              </div>
-              }
+            }}>
+              <i className="caret up icon"></i>
             </div>
+            {this.state.loadMap && this.renderMapModal(item)}
           </div>
-          <div className={'content' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{fontSize: 'small', paddingBottom: 0}}>
-            <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.html}} />
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.abstract_html}} />
-            {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && item.summary.contribution._reference.keywords.join &&
-
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords.join(', ')}} />}
-            {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && !item.summary.contribution._reference.keywords.join &&
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords}} />}
-            {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && item.summary.contribution._reference.tags.join &&
-
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags.join(', ')}} />}
-            {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && !item.summary.contribution._reference.tags.join &&
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
-            {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
-
-            <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org" style="color: #792f91">Crossref</a> Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
-
-            {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
-            <table className="ui very basic compact collapsing table">
-              <thead>
-              <tr>
-                <th style={{whiteSpace: 'nowrap'}}>Download</th>
-                <th style={{whiteSpace: 'nowrap'}}>MagIC Contribution Link</th>
-                <th style={{whiteSpace: 'nowrap'}}>EarthRef Data DOI Link</th>
-                <th style={{whiteSpace: 'nowrap'}}>Version</th>
-                <th style={{whiteSpace: 'nowrap'}}>Data Model</th>
-                <th style={{whiteSpace: 'nowrap'}}>Date</th>
-                <th style={{whiteSpace: 'nowrap'}}>Contributor</th>
-                {_.find(item.summary.contribution._history, 'description') && <th style={{whiteSpace: 'nowrap'}}>Description</th>}
-              </tr>
-              </thead>
-              <tbody>
-              {item.summary.contribution && item.summary.contribution._history.map((v, i) => {
-                let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
-                let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
-                return (
-                  <tr key={i}>
-                    <td style={{whiteSpace: 'nowrap'}}>
-                      {v.id && v.id < 16282 &&
-                      <form action="//earthref.org/cgi-bin/z-download.cgi" method="post">
-                        <input type="hidden" name="file_path" value={`/projects/earthref/local/oracle/earthref/magic/meteor/activated/magic_contribution_${v.id}.txt`}/>
-                        <input type="hidden" name="file_name" value={`magic_contribution_${v.id}.txt`}/>
-                        <button type="submit" className={'ui basic tiny fluid icon compact purple button'} style={{marginTop:'0'}}>
-                          <i className="ui file text outline icon"/> Download
-                        </button>
-                      </form>}
-                      {v.id && v.id >= 16282 &&
-                      <a href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`} download>
-                        <button
-                          className="ui basic tiny fluid compact icon purple button"
-                          style={{marginTop:'0'}}
-                        >
-                          <i className="ui file text outline icon"/> Download
-                        </button>
-                      </a>}
-                      {!v.id &&
-                      <button className="ui basic tiny fluid compact icon purple disabled button"
-                              style={{marginTop:'0'}}>
-                        <i className="ui file text outline icon"/> Download
-                      </button>}
-                    </td>
-                    <td>
-                      {(_is_activated || i > 0) &&
-                      <a style={this.styles.a}
-                         href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a>}
-                      {(!_is_activated && i == 0) &&
-                      <span>{'earthref.org/MagIC/' + v.id}</span>}
-                    </td>
-                    <td>
-                      {_is_activated && _has_data_doi &&
-                      <a style={this.styles.a}
-                         href={'http://dx.doi.org/10.7288/V4/MAGIC/' + v.id} target="_blank">{'10.7288/V4/MAGIC/' + v.id}</a>}
-                      {_is_activated && !_has_data_doi &&
-                      <span>Queued For Creation</span>}
-                      {!_is_activated &&
-                      <span>{'10.7288/V4/MAGIC/' + v.id}</span>}
-                    </td>
-                    <td>{v.version}</td>
-                    <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
-                    <td>{moment(v.timestamp).local().format('LL')}</td>
-                    <td>{v.contributor}</td>
-                    {_.find(item.summary.contribution._history, 'description') && <td>{v.description}</td>}
-                  </tr>
-                );
-              })}
-              </tbody>
-            </table>}
-            {Meteor.isDevelopment && this.props.table === 'contribution' && item.summary.contribution &&
-            <table className="ui compact red table">
-              <thead>
-                <tr>
-                  <th style={{whiteSpace: 'nowrap'}}>Developer Tasks</th>
-                  <th style={{whiteSpace: 'nowrap'}}></th>
-                </tr>
-              </thead>
-              <tbody>
-                {item.summary.contribution._is_activated === 'true' &&
-                  <tr>
-                    <td style={{whiteSpace: 'nowrap'}}>
-                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                        onClick={function(id, e) {
-                          console.log("esDeactivateContribution");
-                          Meteor.call("esDeactivateContribution", {index: index, id: id},
-                            (error) => { console.log("esDeactivateContribution done"); }
-                          );
-                        }.bind(this, item.summary.contribution.id)}
-                      >
-                        Deactivate
-                      </button>
-                    </td>
-                    <td>
-                      Deactivate the contribution (contribution and Data DOI links will be broken until activated again).
-                    </td>
-                  </tr>
-                }
-                {item.summary.contribution._is_activated !== 'true' &&
-                  <tr>
-                    <td style={{whiteSpace: 'nowrap'}}>
-                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                        onClick={function(id, e) {
-                          console.log("esActivateContribution");
-                          Meteor.call("esActivateContribution", {index: index, id: id},
-                            (error) => { console.log("esActivateContribution done"); }
-                          );
-                        }.bind(this, item.summary.contribution.id)}
-                      >
-                        Force Activate
-                      </button>
-                    </td>
-                    <td>
-                      Activate the contribution even if not validated.
-                    </td>
-                  </tr>
-                }
-                <tr>
-                  <td style={{whiteSpace: 'nowrap'}}>
-                    <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                      onClick={function(id, contributor, e) {
-                        console.log("esUpdatePrivatePreSummaries");
-                        Meteor.call("esUpdatePrivatePreSummaries", {index, id, contributor},
-                          (error) => { console.log("esUpdatePrivatePreSummaries done"); }
-                        );
-                      }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
-                    >
-                      Pre Summary
-                    </button>
-                  </td>
-                  <td>
-                    Calculate the contribution pre summary and submit it to Elasticsearch for indexing.
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{whiteSpace: 'nowrap'}}>
-                    <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                      onClick={function(id, contributor, e) {
-                        console.log("esUpdatePrivateSummaries");
-                        Meteor.call("esUpdatePrivateSummaries", {index, id, contributor},
-                          (error) => { console.log("esUpdatePrivateSummaries done"); }
-                        );
-                      }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
-                    >
-                      Full Summary
-                    </button>
-                  </td>
-                  <td>
-                    Calculate the full contribution summary and submit it to Elasticsearch for indexing.
-                  </td>
-                </tr>
-                {item.summary.contribution && item.summary.contribution._history && item.summary.contribution._history.map((v, i) =>
-                  <tr key={i}>
-                    <td style={{whiteSpace: 'nowrap'}}>
-                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                        onClick={function(id, e) {
-                          console.log("esUploadActivatedContributionToS3");
-                          Meteor.call("esUploadActivatedContributionToS3", {index, id},
-                            (error) => { console.log("esUploadActivatedContributionToS3 done"); }
-                          );
-                        }.bind(this,v.id)}
-                      >
-                        Upload {v.id} to S3
-                      </button>
-                    </td>
-                    <td>
-                      Upload the contribution text file to magic-contributions and/or magic-activated-contributions.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>}
-          </div>
-          <div ref="open accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
-            $(this.refs['accordion']).accordion('open', 0);
-            $(this.refs['close accordion button']).show();
-            $(this.refs['open accordion button']).hide();
-          }}>
-            <i className="caret down icon"></i>
-          </div>
-          <div ref="close accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
-            $(this.refs['accordion']).accordion('close', 0);
-            $(this.refs['open accordion button']).show();
-            $(this.refs['close accordion button']).hide();
-          }}>
-            <i className="caret up icon"></i>
-          </div>
-          {this.state.loadMap && this.renderMapModal(item)}
         </div>
-      </div>
-    );
+      );
     } catch(e) {
       console.error(e);
     }

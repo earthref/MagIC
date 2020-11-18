@@ -57,7 +57,7 @@ export default function () {
           aggs : aggs
         };
 
-        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key") && !Meteor.isDevelopment) 
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -94,7 +94,8 @@ export default function () {
         
         if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key") &&
             !_.find(_.map(queries, "term"), "summary.contribution._is_activated") &&
-            !_.find(_.map(filters, "term"), "summary.contribution._is_activated")) {
+            !_.find(_.map(filters, "term"), "summary.contribution._is_activated") &&
+            !Meteor.isDevelopment) {
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -157,7 +158,7 @@ export default function () {
         
         if (sort) search.sort = sort;
 
-        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) {
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key") && !Meteor.isDevelopment) {
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -204,7 +205,7 @@ export default function () {
         
         if (sort) search.sort = sort;
 
-        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key") && !Meteor.isDevelopment) 
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
@@ -264,7 +265,7 @@ export default function () {
           aggs : {buckets: {terms: {field: "summary.contribution.id", size:1e6}}}
         };
 
-        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key")) 
+        if (!_.find(_.map(queries, "terms"), "summary.contribution._private_key") && !Meteor.isDevelopment) 
           search.query.bool.filter.push({
             "term": { "summary.contribution._is_activated": "true" }
           });
