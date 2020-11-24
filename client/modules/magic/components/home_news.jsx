@@ -37,29 +37,18 @@ export default class extends React.Component {
         <div className="ui divider"></div>
         <h3>
           <Image size="mini" src="/MagIC/sio.jpg" floated="left"/>
-          {` MagIC Workshop 2021`}
+          {` 2021 MagIC Workshop`}
         </h3>
         <p>
-          {` MagIC is planning to host it's postponed 2020 workshop on `}
-          <b>January 20th-22nd, 2021</b>
-          {`. The retitled workshop, `}
-          <b>MagIC Workshop 2021: Rock and Paleomagnetism through Time and Space</b>
-          {`, will be held at SIO in La Jolla, CA. It will consist of two days of `}
-          <b>science talks</b>
-          {` followed by a day of `}
-          <b>hands-on tutorials</b>
-          {`, during which participants will work on `}
-          <Link to="/MagIC/upload"><b>uploading</b></Link>
-          {` data into their `}
-          <Link to="/MagIC/private"><b>private workspace</b></Link>
-          {` for contribution to the MagIC database and practice using the `}
-          <a href="https://earthref.org/PmagPy/cookbook/"><b>PmagPy</b></a>
-          {` paleomagnetic software suite.`}
-          </p>
-          <p>
-          {`Due to the ongoing COVID-19 outbreak, this date and/or live attendance is still `}
-          <b>preliminary</b>
-          {`. Please check back here for the most recent information. We will also send updates about the workshop to the gpmag list, the MagIC user list, and to the cancelled workshop registrants.`}
+          {` MagIC is hosting its 2021 workshop on `}
+          <b>January 19th-21st, 2021</b>
+          {` online via Zoom and Slack. Titled "`}
+          <a href="https://earthref.org/events/MAGIC/2021/"><b>2021 MagIC Workshop: Rock and Paleomagnetism through Time and Space</b></a>
+          {`", it will consist of three days of science talks in four sessions. We have timed the sessions to allow most participants to attend at least some of the sessions live during this online global event. Registration is free and can be completed by filling out this `}
+          <a href="https://docs.google.com/forms/d/118u4mwEQHny_r1KsDMJ9aXllacJHqRziIAmcgZEXSBs"><b>form</b></a>
+          {`. Please visit the `}
+          <a href="https://earthref.org/events/MAGIC/2021/"><b>workshop website</b></a>
+          {` for the full schedule, presenter instructions, and other workshop details. All attendees are encouraged to present a poster via Slack.`} 
         </p>
         <div className="ui divider"></div>
         <h3>
@@ -119,34 +108,6 @@ export default class extends React.Component {
           <a href="https://www.epos-ip.org/" target="_blank"><b>European Plate Observing System</b></a>
           {` and `}
           <a href="https://developers.google.com/search/docs/guides/intro-structured-data" target="_blank"><b>Google Search with Structured Data</b></a>
-          {`.`}
-        </p>
-        <div className="ui divider"></div>
-        <h3>
-          <Image size="mini" src="/MagIC/egu.png" floated="left"/>
-          {` MagIC at EGU`}
-        </h3>
-        <p>
-          {`MagIC was part of the `}
-          <a href="https://www.egu2018.eu/" target="_blank"><b>EGU General Assembly 2018</b></a>
-          {` where our poster `}
-          <b>EGU2018-11767</b>
-          {` `}
-          <em>MagIC’s Migration to a Simplified Data Model and Updated Open Source 
-            Technologies Improves Community Engagement, Website Responsiveness, and 
-            Development Times</em>
-          {` was in `}
-          <b>Session EMRP3.5</b>
-          {` `}
-          <em>Geomagnetic field variations in ancient times: new paleo/archeomagnetic data 
-            and models to disclose fundamental properties of the Earth's magnetic field</em>
-          {`. We met with representives of the `}
-          <a href="https:https://www.epos-ip.org/" target="_blank"><b>European Plate Observing System (EPOS)</b></a>
-          {` and other groups to discuss how best to interoperate with the evolving `}
-          <b>EPOS</b> 
-          {` project and how `}
-          {`MagIC can be a data store for European researchers who wish to share data via `}
-          <b>EPOS</b> 
           {`.`}
         </p>
       </div>
