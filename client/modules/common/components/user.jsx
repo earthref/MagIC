@@ -40,13 +40,20 @@ export function User({ openInitially, className, portal }) {
 	const id = parseInt(Cookies.get('mail_id', cookieSettings));
 	const session = { id: uuid.v4() };
 	if (!error && (!user || user.id !== id)) {
-		Meteor.call('esGetUserByID', {id, session}, (error, user) => {
+		Meteor.call('updateUserWithORCID', { id: user && user.id || id }, (error, user) => {
 			if (error) {
 				console.error(error);
 				setError(error);
 			} else {
 				console.log(user);
+				Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				Cookies.set('user_id', user.handle || `user${user.id}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				if (user.name)
+					Cookies.set('name', `${user.name.given}${user.name.family ? ' ' + user.name.family : ''}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+				else
+					Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				setUser(user);
+				setORCID({ error: undefined, isUpdating: false });
 			}
 		});
 	}
@@ -54,7 +61,7 @@ export function User({ openInitially, className, portal }) {
 	return (
 		<Modal size='small' open={open} closeIcon onClose={() => setOpen(false)}
 			trigger={
-				<Button className={className} onClick={() => setOpen(true)}>
+				<Button className={className} onClick={() => { setOpen(true); setUser(undefined); }}>
 					<Icon color={portals[portal].color} name='user'/>
 					{ Cookies.get('name', cookieSettings) }
 				</Button>
@@ -92,7 +99,7 @@ export function User({ openInitially, className, portal }) {
 										<Table.Cell colSpan='2'>
 											<b>EarthRef is an <a href={`https://orcid.org/members/0010f00002MLGl6AAH-earthref`} target='_blank'>
 												ORCID Member Organization
-											</a> and can retrieve <a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+											</a> and can retrieve <a href={`https://${orcidURL}/my-orcid`} target='_blank'>
 													ORCID account
 												</a> information <a href="https://support.orcid.org/hc/en-us/articles/360006897614-Visibility-settings" target='_blank'>
 												shared
@@ -107,7 +114,7 @@ export function User({ openInitially, className, portal }) {
 											ORCID iD
 										</Table.Cell>
 										<Table.Cell>
-											<a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+											<a href={`https://${orcidURL}/my-orcid`} target='_blank'>
 												{`https://${orcidURL}/${user.orcid.id}`}
 											</a>
 										</Table.Cell>
@@ -120,7 +127,7 @@ export function User({ openInitially, className, portal }) {
 										<Table.Row error>
 											<Table.Cell><Icon name='attention'/>Given Names *</Table.Cell>
 											<Table.Cell rowSpan="2">
-												Your Name on your <a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+												Your Name on your <a href={`https://${orcidURL}/my-orcid`} target='_blank'>
 													ORCID account
 												</a> is not <a href="https://support.orcid.org/hc/en-us/articles/360006897614-Visibility-settings" target='_blank'>
 													shared
@@ -144,7 +151,7 @@ export function User({ openInitially, className, portal }) {
 										<Table.Row error>
 											<Table.Cell><Icon name='attention'/>Email *</Table.Cell>
 											<Table.Cell>
-												Your Email on your <a href={`https://${orcidURL}/${user.orcid.id}`} target='_blank'>
+												Your Email on your <a href={`https://${orcidURL}/my-orcid`} target='_blank'>
 													ORCID account
 												</a> is not <a href="https://support.orcid.org/hc/en-us/articles/360006897614-Visibility-settings" target='_blank'>
 													shared
@@ -155,7 +162,7 @@ export function User({ openInitially, className, portal }) {
 								<Table.Footer fullWidth>
 									<Table.Row>
 										<Table.HeaderCell colSpan='2'>
-											<b>* Log in to your <a href={`https://${orcidURL}/${user.orcid.id}`}>ORCID account</a> to edit these values.</b>
+											<b>* Log in to your <a href={`https://${orcidURL}/my-orcid`}>ORCID account</a> to edit these values.</b>
 										</Table.HeaderCell>
 									</Table.Row>
 									<Table.Row>
@@ -250,7 +257,7 @@ export function User({ openInitially, className, portal }) {
 														} else {
 															setGivenNames({ value: undefined, error: undefined, isUpdating: false });
 															if (user.name)
-																Cookies.set('name', `${updatedUser.name.given} ${updatedUser.name.family}`, cookieSettings);
+																Cookies.set('name', `${updatedUser.name.given}${user.name.family ? ' ' + user.name.family : ''}`, cookieSettings);
 															else
 																Cookies.remove('name', cookieSettings);
 															setUser(updatedUser);
@@ -285,7 +292,7 @@ export function User({ openInitially, className, portal }) {
 														} else {
 															setFamilyName({ value: undefined, error: undefined, isUpdating: false });
 															if (user.name)
-																Cookies.set('name', `${updatedUser.name.given} ${updatedUser.name.family}`, cookieSettings);
+																Cookies.set('name', `${updatedUser.name.given}${user.name.family ? ' ' + user.name.family : ''}`, cookieSettings);
 															else
 																Cookies.remove('name', cookieSettings);
 															setUser(updatedUser);
@@ -440,7 +447,7 @@ export function User({ openInitially, className, portal }) {
 									Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 									Cookies.set('user_id', user.handle || `user${user.id}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 									if (user.name)
-										Cookies.set('name', `${user.name.given} ${user.name.family}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
+										Cookies.set('name', `${user.name.given}${user.name.family ? ' ' + user.name.family : ''}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 									else
 										Cookies.remove('name', Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 									setUser(user);
