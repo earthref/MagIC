@@ -111,7 +111,7 @@ export default class extends React.Component {
             <i className="icons">
               <i className="question icon"/>
             </i>
-            <div className="small title">Help and<br/>Upgrade&nbsp;Tool</div>
+            <div className="small title">MagIC&nbsp;FAQ<br/>and Help</div>
           </IconButton>
         </div>
         <h2 className="ui horizontal divider header">

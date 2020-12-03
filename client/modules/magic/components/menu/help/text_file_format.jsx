@@ -9,10 +9,15 @@ export default class extends React.Component {
       <div>
         <h4>MagIC Standard Format</h4>
         <p>
-         The MagIC text file format is a tab delimited file which contains the data for a contribution archived in the MagIC datastore. Empty tables and columns are not placed in the MagIC text file. The format consists of a table name header (the word "delimited" is optional), column names, data, and a table separator. Please see the <Link style={{color: 'purple'}} to={'/MagIC/data-models/3.0'}>MagIC data model</Link> for a detailed description of all the possible tables and columns available in the MagIC datastore. 
+         The MagIC text file format is a tab delimited file which contains the data for a contribution archived in the MagIC datastore. Empty tables and columns are not placed in the MagIC text file. The format consists of a table name header (the word "delimited" is optional), column names, data, and a table separator. Please see the <Link style={{color: 'purple'}} to={'/MagIC/data-models/3.0'}>MagIC data model</Link> for a detailed description of all the possible tables and columns available in the MagIC datastore.<br/> 
         </p>
         <p>
 An example of a MagIC text file that contains contribution, location, and site level information (-- represents tab) is shown below. The contribution table is not generally used while uploading and is created by the MagIC data upload software.
+        </p>
+        <p>
+        This <b><a href='https://github.com/earthref/MagIC/blob/master/.public/MagIC/Template3.0ForMagICUpload.xlsx?raw=true'>Excel file</a></b> is 
+        also useful for quickly seeing which columns in each table are required and some additional commonly used columns.
+        Bold column headers indicate the column is required.
         </p>
         <p>
         <code>
@@ -28,6 +33,14 @@ tab delimited--sites<br/>
 site--location--method_codes--citations--geologic_classes--geologic_types--lithologies--bed_dip--bed_dip_direction--lat--lon--age--age_sigma--age_unit--dir_dec--dir_inc--dir_alpha95--dir_k--dir_n_sample--analysts<br/>
 E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Extrusive:Igneous--Lava Flow--Basaltic Lava--6--79.6--40.7--243.2--15.23--0.26--Ma--357.3--47.6--1.4--1949.1--7--Bogue<br/>
         </code>
+        </p>
+        <p>
+        <b>Paleomagnetic directional example</b><br/>
+        For the complete data file from the above example see <a href="https://earthref.org/MagIC/16875">Bogue et al. (2017)</a>.
+        It is a good example of a paleomagnetic directional study that has tables all the way down to the measurement level.<br/>
+        <b>Paleointensity example</b><br/>
+        For an example of a data file from a paleointensity study with measurement data 
+        see <a href="https://earthref.org/MagIC/16357">Cai et al. (2020)</a>.
         </p>
         <h4>MagIC Compact Format</h4>
         <p>
@@ -51,6 +64,10 @@ E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Ext
            2--43--9.488e-09--0.0<br/>
            3--49--1.8976e-08--0.0<br/>
           </code>
+        <br/>
+        <b>SQUID microscopy file example</b><br/>
+        For an example of a SQUID microscopy study using the compact MagIC file format 
+        see <a href="https://earthref.org/MagIC/16969">Borlina et al. (2020)</a>.
         </p>
         <h4>MagIC Zip File Download Formats</h4>
         <p>
