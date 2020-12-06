@@ -26,7 +26,7 @@ export default class extends React.Component {
           <a href="https://youtu.be/pchdPBzSmT0">MagIC Data Model and Uploading Data to the MagIC Database</a> - Mar. 16, 2020 (54min) - Nick Jarboe <br/>
           <a href="https://www.youtube.com/watch?v=9yGPbATqRtI">PmagPy Using Jupyter Notebooks</a> - Mar. 18, 2020 (1hr 5min) - <a href="https://github.com/PmagPy/PmagPy/blob/master/MagIC_workshop_demo.ipynb">notebook download</a> - Lisa Tauxe
           <br/>
-          <a href="https://youtu.be/GUjf33aNnFQ">PmagPy Demag GUI Paleomagnetic Analysis And MagIC File Export Software Demo</a> - Mar 17., 2020 (57min) - <a href="https://github.com/Swanson-Hysell-Group/2020_Demag_GUI_tutorial/">Write up</a> - Nick Swanson-Hysell<br/>
+          <a href="https://youtu.be/GUjf33aNnFQ">PmagPy Demag GUI Paleomagnetic Analysis And MagIC File Export Software Demo</a> - Mar. 17, 2020 (57min) - <a href="https://github.com/Swanson-Hysell-Group/2020_Demag_GUI_tutorial/">Write up</a> - Nick Swanson-Hysell<br/>
           <a href="https://youtu.be/vRDiIXCm-sY">Pmag GUI install, SIO Data Import, and Thellier GUI Demo: A Paleomagnetic Analysis Tool</a> - Mar. 12, 2020 (37 min)- <a href="https://github.com/ltauxe/PmagPy_tutorials">Write up</a> - Lisa Tauxe<br/>
           <br/>
         <p>
