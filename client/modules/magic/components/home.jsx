@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {Grid} from 'semantic-ui-react';
+import {Grid, Message} from 'semantic-ui-react';
 
 import IconButton from '/client/modules/common/components/icon_button';
 import SearchDividedList from '/client/modules/common/containers/search_divided_list';
@@ -20,117 +20,128 @@ export default class extends React.Component {
 
   render() {
     return (
-      <Grid divided><Grid.Row><Grid.Column width={12}>
-        <div className="ui three cards">
-          <IconButton className="card" link="/MagIC/search" portal="MagIC">
-            <i className="large icons">
-              <i className="database icon"/>
-              <i className="corner search icon"/>
-            </i>
-            <div className="title">Search Interface</div>
-            <div className="subtitle">Browse, combine, and save datasets.</div>
+      <React.Fragment>
+        <Message size="small" icon floating style={{ marginBottom: '2em' }}>
+          <i className="purple users icon"></i>
+          <Message.Content>
+            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2021/">
+              MagIC 2021 Workshop: Rock and Paleomagnetism through Time and Space
+            </a>
+            MagIC is hosting a workshop on January 19th-21rd, 2021 online.
+          </Message.Content>
+        </Message>
+        <Grid divided><Grid.Row><Grid.Column width={12}>
+          <div className="ui three cards">
+            <IconButton className="card" link="/MagIC/search" portal="MagIC">
+              <i className="large icons">
+                <i className="database icon"/>
+                <i className="corner search icon"/>
+              </i>
+              <div className="title">Search Interface</div>
+              <div className="subtitle">Browse, combine, and save datasets.</div>
+            </IconButton>
+            <IconButton className="card" link="/MagIC/upload" portal="MagIC">
+              <i className="large icons">
+                <i className="table icon"/>
+                <i className="corner add icon"/>
+              </i>
+              <div className="title">Upload Tool</div>
+              <div className="subtitle">Import data into your private workspace.</div>
+            </IconButton>
+            <IconButton className="card" link="/MagIC/private" portal="MagIC">
+              <i className="large icons">
+                <i className="file text outline icon"/>
+                <i className="corner checkmark icon"/>
+              </i>
+              <div className="title">Private Workspace</div>
+              <div className="subtitle">Manage your contributions to MagIC.</div>
+            </IconButton>
+          </div>
+          <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
+            MagIC Resources
+          </h2>
+          <div className="ui nine cards" style={{marginTop: 0}}>
+            <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
+              <i className="icons">
+                <i className="sitemap icon"/>
+                <i className="corner table icon"/>
+              </i>
+              <div className="small title">Data<br/>Model</div>
+            </IconButton>
+            <IconButton className="borderless card" link="/MagIC/method-codes" portal="MagIC">
+              <i className="icons">
+                <i className="lab icon"/>
+                <i className="corner write icon"/>
+              </i>
+              <div className="small title">Method<br/>Codes</div>
+            </IconButton>
+            <IconButton className="borderless card" link="/vocabularies" portal="MagIC">
+              <i className="icons">
+                <i className="list icon"/>
+                <i className="corner info icon"/>
+              </i>
+              <div className="small title">Vocabulary<br/>Lists</div>
+            </IconButton>          
+            <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
+              <i className="icons">
+                <i className="file text icon"/>
+                <i className="corner write icon"/>
+              </i>
+              <div className="small title">D.M.P.<br/>Tool</div>
+            </IconButton>
+            <IconButton className="borderless card" href="https://earthref.org/PmagPy/cookbook/" portal="MagIC">
+              <i className="icons">
+                <i className="bar chart icon"/>
+                <i className="corner calculator icon"/>
+              </i>
+              <div className="small title">PmagPy<br/>Software</div>
+            </IconButton>
+            <IconButton className="borderless card" href="https://earthref.org/MagIC/books/Tauxe/Essentials/" portal="MagIC">
+              <i className="icons">
+                <i className="book icon"/>
+                <i className="corner info icon"/>
+              </i>
+              <div className="small title">Paleomag <br/>Textbook</div>
+            </IconButton>
+            <IconButton className="borderless card" link="/MagIC/jupyter-notebooks" portal="MagIC">
+              <i className="icons">
+                <i className="file outline icon"/>
+                <i className="corner code icon"/>
+              </i>
+              <div className="small title">Jupyter<br/>Notebooks</div>
+            </IconButton>
+            <IconButton className="borderless card" href="https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ" portal="MagIC">
+              <i className="icons">
+                <i className="tv icon"/>
+                <i className="corner headphones icon"/>
+              </i>
+              <div className="small title">YouTube<br/>Channel</div>
+            </IconButton>
+            <IconButton className="borderless card" link="/MagIC/help" portal="MagIC">
+              <i className="icons">
+                <i className="question icon"/>
+              </i>
+              <div className="small title">MagIC&nbsp;FAQ<br/>and Help</div>
+            </IconButton>
+          </div>
+          <h2 className="ui horizontal divider header">
+            Recent Contributions
+          </h2>
+          <SearchDividedList
+            es={_.extend({}, levels[0].views[0].es, { sort: [{'summary.contribution.timestamp': 'desc'}]})}
+            pageSize={7}
+            pageNumber={1}
+          >
+            <SearchSummariesListItem table="contribution"/>
+          </SearchDividedList>
+          <IconButton className="small card" link="/MagIC/search" portal="MagIC" style={{margin:0}}>
+            <div className="small title">View More Contributions in the MagIC Search Interface</div>
           </IconButton>
-          <IconButton className="card" link="/MagIC/upload" portal="MagIC">
-            <i className="large icons">
-              <i className="table icon"/>
-              <i className="corner add icon"/>
-            </i>
-            <div className="title">Upload Tool</div>
-            <div className="subtitle">Import data into your private workspace.</div>
-          </IconButton>
-          <IconButton className="card" link="/MagIC/private" portal="MagIC">
-            <i className="large icons">
-              <i className="file text outline icon"/>
-              <i className="corner checkmark icon"/>
-            </i>
-            <div className="title">Private Workspace</div>
-            <div className="subtitle">Manage your contributions to MagIC.</div>
-          </IconButton>
-        </div>
-        <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
-          MagIC Resources
-        </h2>
-        <div className="ui nine cards" style={{marginTop: 0}}>
-          <IconButton className="borderless card" link="/MagIC/data-models/3.0" portal="MagIC">
-            <i className="icons">
-              <i className="sitemap icon"/>
-              <i className="corner table icon"/>
-            </i>
-            <div className="small title">Data<br/>Model</div>
-          </IconButton>
-          <IconButton className="borderless card" link="/MagIC/method-codes" portal="MagIC">
-            <i className="icons">
-              <i className="lab icon"/>
-              <i className="corner write icon"/>
-            </i>
-            <div className="small title">Method<br/>Codes</div>
-          </IconButton>
-          <IconButton className="borderless card" link="/vocabularies" portal="MagIC">
-            <i className="icons">
-              <i className="list icon"/>
-              <i className="corner info icon"/>
-            </i>
-            <div className="small title">Vocabulary<br/>Lists</div>
-          </IconButton>          
-          <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
-            <i className="icons">
-              <i className="file text icon"/>
-              <i className="corner write icon"/>
-            </i>
-            <div className="small title">D.M.P.<br/>Tool</div>
-          </IconButton>
-          <IconButton className="borderless card" href="https://earthref.org/PmagPy/cookbook/" portal="MagIC">
-            <i className="icons">
-              <i className="bar chart icon"/>
-              <i className="corner calculator icon"/>
-            </i>
-            <div className="small title">PmagPy<br/>Software</div>
-          </IconButton>
-          <IconButton className="borderless card" href="https://earthref.org/MagIC/books/Tauxe/Essentials/" portal="MagIC">
-            <i className="icons">
-              <i className="book icon"/>
-              <i className="corner info icon"/>
-            </i>
-            <div className="small title">Paleomag <br/>Textbook</div>
-          </IconButton>
-          <IconButton className="borderless card" link="/MagIC/jupyter-notebooks" portal="MagIC">
-            <i className="icons">
-              <i className="file outline icon"/>
-              <i className="corner code icon"/>
-            </i>
-            <div className="small title">Jupyter<br/>Notebooks</div>
-          </IconButton>
-          <IconButton className="borderless card" href="https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ" portal="MagIC">
-            <i className="icons">
-              <i className="tv icon"/>
-              <i className="corner headphones icon"/>
-            </i>
-            <div className="small title">YouTube<br/>Channel</div>
-          </IconButton>
-          <IconButton className="borderless card" link="/MagIC/help" portal="MagIC">
-            <i className="icons">
-              <i className="question icon"/>
-            </i>
-            <div className="small title">MagIC&nbsp;FAQ<br/>and Help</div>
-          </IconButton>
-        </div>
-        <h2 className="ui horizontal divider header">
-          Recent Contributions
-        </h2>
-        <SearchDividedList
-          es={_.extend({}, levels[0].views[0].es, { sort: [{'summary.contribution.timestamp': 'desc'}]})}
-          pageSize={7}
-          pageNumber={1}
-        >
-          <SearchSummariesListItem table="contribution"/>
-        </SearchDividedList>
-        <IconButton className="small card" link="/MagIC/search" portal="MagIC" style={{margin:0}}>
-          <div className="small title">View More Contributions in the MagIC Search Interface</div>
-        </IconButton>
-      </Grid.Column>
-      <Grid.Column width={4}>
-        <News/>
-      </Grid.Column></Grid.Row></Grid>
+        </Grid.Column>
+        <Grid.Column width={4}>
+          <News/>
+        </Grid.Column></Grid.Row></Grid>
+      </React.Fragment>
     );
   }
 
