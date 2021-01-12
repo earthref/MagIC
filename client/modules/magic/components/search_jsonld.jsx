@@ -38,7 +38,7 @@ export default class extends React.Component {
         "sdDatePublished": now.toISOString(),
         "distribution":{
           "@type":"DataDownoad",
-          "contentURL": "https://earthref.org/MagIC/download/" + (this.props.id || contribution.id) + "/magic_contribution_" + (this.props.id || contribution.id) + "15032.txt",
+          "contentUrl": "https://earthref.org/MagIC/download/" + (this.props.id || contribution.id) + "/magic_contribution_" + (this.props.id || contribution.id) + "15032.txt",
           "encodingFormat": ["text/plain; application=magic-tsv", "MagIC-tsv-Multipart"] }
       };
 
