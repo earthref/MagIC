@@ -25,10 +25,11 @@ export default class extends React.Component {
 
       let json = {
         "@context": {
-          "@vocab": "http://schema.org",
+          "@vocab": "https://schema.org/",
           "geosci-time": "http://schema.geoschemas.org/contexts/temporal#"
         },
         "@type": "Dataset",
+        "@id": "http://dx.doi.org/10.7288/V4/MAGIC/" + (this.props.id || contribution.id),
         "url": "https://earthref.org/MagIC/" + (this.props.id || contribution.id),
         "identifier": "http://dx.doi.org/10.7288/V4/MAGIC/" + (this.props.id || contribution.id),
         "license": "https://creativecommons.org/licenses/by/4.0/",
