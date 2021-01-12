@@ -35,7 +35,11 @@ export default class extends React.Component {
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "sdPublisher": "EarthRef.org",
         "sdLicense": "https://creativecommons.org/licenses/by/4.0/",
-        "sdDatePublished": now.toISOString()
+        "sdDatePublished": now.toISOString(),
+        "distribution":{
+          "@type":"DataDownoad",
+          "contentURL": "https://earthref.org/MagIC/download/" + (this.props.id || contribution.id) + "/magic_contribution_" + (this.props.id || contribution.id) + "15032.txt",
+          "encodingFormat": ["text/plain; application=magic-tsv", "MagIC-tsv-Multipart"] }
       };
 
       if (this.props.id && contribution._history) {
