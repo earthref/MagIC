@@ -27,6 +27,7 @@
     "fibers": "^5.0.0",
     "filesize": "^6.1.0",
     "get-ranges": "^5.0.0",
+    "google-map-react": "^2.1.9",
     "history": "^5.0.0",
     "jquery": "^3.5.1",
     "js-cookie": "^2.2.1",
