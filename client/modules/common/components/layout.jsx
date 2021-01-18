@@ -137,7 +137,7 @@ class Layout extends React.Component {
             </div>
             <div className="menu">
               <a className={'ui button compact basic ' + portals['EarthRef.org'].color} style={{margin: '0.5em 1em'}}
-                 href="https://github.com/earthref/FIESTA-API">
+                 href="https://github.com/earthref/FIESTA-API#readme">
                  Powered by
                  <img src="/MagIC/FIESTA.png" style={{ height: '1.75em', margin: '-1.25em 0.5em -.5em' }}/>
                 <b>FIESTA</b>
