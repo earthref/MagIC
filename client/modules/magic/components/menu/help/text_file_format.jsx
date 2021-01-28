@@ -45,6 +45,7 @@ E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Ext
         For an example of a data file from a paleointensity study with measurement data 
         see <a href="https://earthref.org/MagIC/16357">Cai et al. (2020)</a>.
         </p>
+        <a name="compact"></a>
         <h4>MagIC Compact Format</h4>
         <p>
           For large MagIC upload files with columns that repeat the same values for every row, a compact form of the MagIC file format should be used. This allows for a large reduction in size in the measurement table for MagIC files with XPEEM, SQUID microscopy, FORC, QDM and other image like data. Large MagIC sites tables due to long core records can also often be reduced significantly in size by using the compact format.
@@ -88,6 +89,7 @@ E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Ext
            5--8.102042666666771e-13--0.00010047--6.95e-07<br/>
         </code> 
         </p>
+        <a name="zip"></a>
         <h4>MagIC Zip File Download Formats</h4>
         <p>
             If the MagIC test files are very large, the data may be configured as a zip file for downloading. This zip file may contain just one MagIC text file or may contain multiple files where the measurement data has been divided into separate files for each experiment. This separation is useful when the individual MagIC file size would be many gigabytes and unwieldy to work with.
