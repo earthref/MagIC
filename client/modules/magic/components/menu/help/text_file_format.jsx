@@ -43,7 +43,10 @@ E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Ext
         It is a good example of a paleomagnetic directional study that has tables all the way down to the measurement level.<br/>
         <b>Paleointensity example</b><br/>
         For an example of a data file from a paleointensity study with measurement data 
-        see <a href="https://earthref.org/MagIC/16357">Cai et al. (2020)</a>.
+        see <a href="https://earthref.org/MagIC/16357">Cai et al. (2020)</a>.<br/>
+        <b>FORC example</b><br/>
+        For an example of a data file from a study with FORC measurement data 
+        see <a href="https://earthref.org/MagIC/16769">Bowles et al. (2020)</a>.
         </p>
         <a name="compact"></a>
         <h4>MagIC Compact Format</h4>
