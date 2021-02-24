@@ -49,6 +49,7 @@ export default class extends React.Component {
         "sdPublisher": "EarthRef.org",
         "sdLicense": "https://creativecommons.org/licenses/by/4.0/",
         "sdDatePublished": now.toISOString(),
+        "labNames": contribution.lab_names,
         "distribution":{
           "@type":"DataDownoad",
           "contentUrl": "https://earthref.org/MagIC/download/" + (this.props.id || contribution.id) + "/magic_contribution_" + (this.props.id || contribution.id) +".txt",
