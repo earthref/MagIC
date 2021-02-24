@@ -17,9 +17,10 @@ export default class extends React.Component {
       this.props.item.summary.contribution
     ) {
 
-      let contribution = this.props.item.summary.contribution;
-      let all = this.props.item.summary._all || {};
-
+      const contribution = this.props.item.summary.contribution;
+      const all = this.props.item.summary._all || {};
+      const cid = this.props.id || contribution.id;
+      
       const model = models[_.last(versions)];
       const now = new Date();
 
@@ -30,10 +31,10 @@ export default class extends React.Component {
         },
         "@type": "Dataset",
         "identifier": {
-          "@id": "http://dx.doi.org/10.7288/V4/MAGIC/" + (this.props.id || contribution.id),
+          "@id": `http://dx.doi.org/10.7288/V4/MAGIC/{cid}`,
         },
-        "url": "https://earthref.org/MagIC/" + (this.props.id || contribution.id),
-        "identifier": "http://dx.doi.org/10.7288/V4/MAGIC/" + (this.props.id || contribution.id),
+        "url": `https://earthref.org/MagIC/{cid}`,
+        "identifier": `http://dx.doi.org/10.7288/V4/MAGIC/{cid}`,
         "isAccessibleForFree": true,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "provider": {
@@ -51,9 +52,9 @@ export default class extends React.Component {
         "sdDatePublished": now.toISOString(),
         "labNames": contribution.lab_names,
         "distribution":{
-          "@type":"DataDownoad",
-          "contentUrl": "https://earthref.org/MagIC/download/" + (this.props.id || contribution.id) + "/magic_contribution_" + (this.props.id || contribution.id) +".txt",
-          "encodingFormat": ["text/plain; application=magic-tsv", "MagIC-tsv-Multipart"] }
+          "@type":"DataDownload",
+          "contentUrl": `https://earthref.org/MagIC/download/{cid}/magic_contribution_{cid}.txt`,
+          "encodingFormat": ["text/plain; application=earthref-tsv", "EarthRef-tsv-Multipart"] }
       };
 
       if (this.props.id && contribution._history) {
