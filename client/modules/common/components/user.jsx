@@ -70,7 +70,7 @@ export function User({ openInitially, className, portal }) {
 			<Modal.Header>
 				EarthRef Account
 				{ Meteor.isDevelopment &&
-					<div style={{ float: 'right' }}>User ID: { id }</div>
+					<div style={{ float: 'right', marginRight: '1em' }}>User ID: { id }</div>
 				}
 			</Modal.Header>
 			<Modal.Content>
@@ -220,7 +220,10 @@ export function User({ openInitially, className, portal }) {
 						}
 						{ (!user.orcid || !user.orcid.id) && 
 							<>
-								<Button	fluid as='a' href={ orcidAuthorizeURL }>
+								<Button	fluid as='a' onClick={() => {
+									localStorage.setItem('orcid.nextLocation', location.pathname + location.search);
+									window.location.href = orcidAuthorizeURL;
+								}}>
 									<img src='/ORCIDiD_icon64x64.png'
 										style={{ height: '1.25em', margin: '-.25em .25em -.25em 0' }}
 									/>

@@ -22,9 +22,9 @@ export default function () {
     },
 
     async updateUserWithORCID({id, code}) {
-      let orcid, token, existingUser;
+      let orcid, token, existingUser, user;
       if (id) try {
-        let user = await Meteor.call('esGetUserByID', {id});
+        user = await Meteor.call('esGetUserByID', {id});
         orcid = user && user.orcid && user.orcid.id;
         token = user && user.orcid && user.orcid.token;
         existingUser = user;
@@ -57,7 +57,7 @@ export default function () {
       } catch (error) {
         console.error('updateUserWithORCID esGetUserByORCID', orcid, error);
       }
-      try {
+      if (orcid) try {
         let record = HTTP.call("GET", `https://api.${Meteor.isDevelopment ? 'sandbox.' : ''}orcid.org/v3.0/${orcid}/record`, {
           headers: {
             Accept: 'application/vnd.orcid+json',
@@ -85,7 +85,7 @@ export default function () {
             console.error("updateUserWithORCID esGetUsersByEmail", `Failed to get user for email ${x.email}`, e);
           } 
         }
-        let user = {
+        let newUser = {
           orcid: {
             id: orcid,
             token: token
@@ -99,29 +99,28 @@ export default function () {
         };
         if (content.person.name) {
           if (content.person.name['given-names'] && content.person.name['given-names'].value) {
-            user.name.given = content.person.name['given-names'].value;
-            user.name.source = 'ORCID';
+            newUser.name.given = content.person.name['given-names'].value;
+            newUser.name.source = 'ORCID';
           }
           if (content.person.name['family-name'] && content.person.name['family-name'].value) {
-            user.name.family = content.person.name['family-name'].value;
-            user.name.source = 'ORCID';
+            newUser.name.family = content.person.name['family-name'].value;
+            newUser.name.source = 'ORCID';
           }
           if (content.person.name['credit-name'] && content.person.name['credit-name'].value) {
-            user.name.published = content.person.name['credit-name'].value;
-            user.name.source = 'ORCID';
+            newUser.name.published = content.person.name['credit-name'].value;
+            newUser.name.source = 'ORCID';
           }
         }
         if (emailsSortedByMostReliable && emailsSortedByMostReliable[0] && emailsSortedByMostReliable[0].email) {
-          user.email.address = emailsSortedByMostReliable[0].email;
-          user.email.source = 'ORCID';
+          newUser.email.address = emailsSortedByMostReliable[0].email;
+          newUser.email.source = 'ORCID';
         }
         if (existingUser) {
-          user = _.merge(existingUser, user);
+          user = _.merge(existingUser, newUser);
           await Meteor.call('esUpdateUserORCID', user);
         } else {
-          user = await Meteor.call('esCreateUserFromORCID', user);
+          user = await Meteor.call('esCreateUserFromORCID', newUser);
         }
-        return __.omitDeep(user, /(^|\.)_/);
       } catch (error) {
         console.error('orcidLogin Record Request', error);
         throw new Meteor.Error(
@@ -129,6 +128,7 @@ export default function () {
           'Please retry logging in with ORCID. If you are still having trouble, please email us.'
         );
       }
+      return __.omitDeep(user, /(^|\.)_/);
     },
 
     async getReferenceMetadata(doi, attempt = 0) {

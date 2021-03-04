@@ -102,7 +102,7 @@ export function LogIn({ openInitially, className, portal }) {
 										setPasswordError(undefined);
 										setLogInError(undefined);
 										Meteor.call('esPasswordLogIn', { email, password }, (error, user) => {
-											console.log(user, error);
+											// console.log("esPasswordLogIn", user, error);
 											if (error && error.error === "Email") { setEmailError(error.reason); setLogginIn(false); }
 											else if (error && error.error === "Password") { setPasswordError(error.reason); setLogginIn(false); }
 											else if (error) { setLogInError(error.reason); setLogginIn(false); }
@@ -147,10 +147,10 @@ export function ORCIDLoggingInModal({ code }) {
 	if (code && !error && !user) {
 		Meteor.call('updateUserWithORCID', { code }, (error, user) => {
 			if (error) {
-				console.error(error);
+				console.error("updateUserWithORCID error:", error);
 				setError(error);
 			} else {
-				console.log(user);
+				// console.log("updateUserWithORCID success:", user, localStorage.getItem('orcid.nextLocation'));
 				Cookies.set('mail_id', user.id, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				Cookies.set('user_id', user.handle || `user${user.id}`, Meteor.isDevelopment ? {} : { domain: '.earthref.org'});
 				if (user.name)
