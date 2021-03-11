@@ -15,7 +15,7 @@ export default class extends React.Component {
         </p>
         <p>
           You can email questions and comments to Nick Jarboe (<a href="mailto:njarboe@ucsd.edu">njarboe@ucsd.edu</a>) about any aspect of the MagIC and PmagPy software systems. 
-          If you would like to have live help or a walk through of any of the part of MagIC's uploading, searching, or downloading data procedures, please email Nick Jarboe. I can also set up a time for a live chat over video using Skype, Zoom, Google Hangouts, etc.<br/>
+          If you would like to have live help or a walkthrough of any of the part of MagIC's uploading, searching, or downloading data procedures, please email Nick Jarboe. I can also set up a time for a live chat over video using Skype, Zoom, Google Hangouts, etc.<br/>
         </p>
         <p>
           <b>MagIC File Format - What You Need to Know to Create MagIC Data Files</b><br/>
