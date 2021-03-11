@@ -290,7 +290,7 @@ export default class extends React.Component {
             </div>
           </button>
           <button className={(!this.state.activated ? '' : portals['MagIC'].color) + ' ui icon button'} style={{margin:'0 1em 0.5em 0'}} onClick={() => { this.setState({ activated: true }, this.updateContributions.bind(this))}}>
-            <i className="clipboard check icon"/> Made Public
+            <i className="clipboard check icon"/> Published 
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
                 es={{ index: 'magic_v4', type: 'contribution', allVersions: true, filters: [
@@ -491,12 +491,12 @@ export default class extends React.Component {
                           this.validateThenActivate(c.summary.contribution.id);
                         }}
                       >
-                        Make Public
+                        Publish
                       </div>
                     }
                     {c.summary.contribution._is_activated === "true" &&
                       <div className="ui green disabled small button" style={{margin: "0 0 0 0.5em"}}>
-                        Public
+                        Published
                       </div>
                     }
                     {c.summary.contribution._is_activated === "true" && Meteor.isDevelopment && 
@@ -591,10 +591,10 @@ export default class extends React.Component {
         <div ref="failed to activate" className="ui basic modal">
           <div className="ui icon header">
             <i className="file text outline icon"></i>
-            Make Your Private Contribution Public
+            Publish Your Private Contribution
           </div>
           <div className="content">
-            <p>Failed to make this contribution public.</p>
+            <p>Failed to publish this contribution.</p>
           </div>
           <div className="actions">
             <div className="ui red basic cancel inverted button">
@@ -606,7 +606,7 @@ export default class extends React.Component {
         <div ref="confirm activate" className="ui modal">
           <div className="ui icon header">
             <i className="file text outline icon"></i>
-            Make Your Private Contribution Public
+            Publish Your Private Contribution
           </div>
           <div className="content">
             <div className="ui icon error message">
@@ -617,7 +617,7 @@ export default class extends React.Component {
           <div className="actions">
             <div className="ui red approve button">
               <i className="check icon"></i>
-              Make Public
+              Publish
             </div>
             <div className="ui cancel button">Cancel</div>
           </div>
