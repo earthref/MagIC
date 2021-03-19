@@ -12,6 +12,10 @@ const esClient = new elasticsearch.Client({
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
+const matchZeros = /00000+\d+?$/;
+const matchNines = /([0-8])99999+\d+?$/;
+const floatFix = (x) => `${x}`.replace(matchZeros, '').replace(matchNines, (y) => parseInt(`${y}`.substr(0,1))+1);
+
 let index = "magic_v4";
 
   describe("magic.data_doi", () => {
@@ -48,7 +52,7 @@ let index = "magic_v4";
               { "term": { "summary.contribution._is_activated": "true"}}
             ],
             "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
-            //"filter": { "term": { "summary.contribution.id": 16834}}
+            //"filter": { "term": { "summary.contribution.id": 17096}}
           }}
         }
       }).then((resp) => {
@@ -142,16 +146,16 @@ let index = "magic_v4";
                 ) {
                   geos[n] += 
                     `<geoLocationPoint>
-                      <pointLongitude>${envelope.coordinates[0][0]}</pointLongitude>
-                      <pointLatitude>${envelope.coordinates[0][1]}</pointLatitude>
+                      <pointLongitude>${floatFix(envelope.coordinates[0][0])}</pointLongitude>
+                      <pointLatitude>${floatFix(envelope.coordinates[0][1])}</pointLatitude>
                     </geoLocationPoint>`;
                 } else {
                   geos[n] += 
                     `<geoLocationBox>
-                      <westBoundLongitude>${envelope.coordinates[0][0]}</westBoundLongitude>
-                      <eastBoundLongitude>${envelope.coordinates[1][0]}</eastBoundLongitude>
-                      <southBoundLatitude> ${envelope.coordinates[0][1]}</southBoundLatitude>
-                      <northBoundLatitude>${envelope.coordinates[1][1]}</northBoundLatitude>
+                      <westBoundLongitude>${floatFix(envelope.coordinates[0][0])}</westBoundLongitude>
+                      <eastBoundLongitude>${floatFix(envelope.coordinates[1][0])}</eastBoundLongitude>
+                      <southBoundLatitude>${floatFix(envelope.coordinates[0][1])}</southBoundLatitude>
+                      <northBoundLatitude>${floatFix(envelope.coordinates[1][1])}</northBoundLatitude>
                     </geoLocationBox>`;
                 }
                 geos[n] += '</geoLocation>';
@@ -234,7 +238,7 @@ let index = "magic_v4";
                 `_target: https://earthref.org/MagIC/${hit._source.summary.contribution.id}\n` +
                 `datacite: ${datacite}`;
 
-              //console.log('datacite', datacite);
+              // console.log('datacite', datacite); return done();
               request({
                 method: 'PUT',
                 uri: 'https://ezid.cdlib.org/id/doi:10.7288/V4/MAGIC/' + hit._source.summary.contribution.id + '?update_if_exists=yes',
