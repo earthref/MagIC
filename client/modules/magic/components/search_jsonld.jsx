@@ -31,10 +31,10 @@ export default class extends React.Component {
         },
         "@type": "Dataset",
         "identifier": {
-          "@id": `http://dx.doi.org/10.7288/V4/MAGIC/{cid}`,
+          "@id": `http://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
         },
-        "url": `https://earthref.org/MagIC/{cid}`,
-        "identifier": `http://dx.doi.org/10.7288/V4/MAGIC/{cid}`,
+        "url": `https://earthref.org/MagIC/${cid}`,
+        "identifier": `http://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
         "isAccessibleForFree": true,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "provider": {
@@ -53,7 +53,7 @@ export default class extends React.Component {
         "labNames": contribution.lab_names,
         "distribution":{
           "@type":"DataDownload",
-          "contentUrl": `https://earthref.org/MagIC/download/{cid}/magic_contribution_{cid}.txt`,
+          "contentUrl": `https://earthref.org/MagIC/download/${cid}/magic_contribution_${cid}.txt`,
           "encodingFormat": ["text/plain; application=earthref-tsv", "EarthRef-tsv-Multipart"] }
       };
 
