@@ -65,7 +65,6 @@ export default class extends React.Component {
           <a name="faq"></a>
           <h3>FAQ</h3>
           <b>How do I cite a data set that I have used that is in MagIC?</b><br/>
-          <br/>
           Data that you have placed into MagIC as supporting data for a paper should be cited in the paper and placed in the reference
           list. Data downloaded from MagIC should also be cited when used.<br/>
           <br/>
@@ -77,7 +76,6 @@ export default class extends React.Component {
         </p>
         <p>
           <b>When should I upload my data for my journal article to MagIC?</b><br/>
-          <br/>
           Many journals now require that the data be available to reviewers of your paper while it is in review. Others 
           only require the data to be available at publication. 
           MagIC encourages you to <a href="https://www.earthref.org/MagIC/upload">upload</a> your data to your private workspace
@@ -96,7 +94,6 @@ export default class extends React.Component {
         </p>
         <p>
           <b>What is the best way to view and edit MagIC text files?</b><br/>
-          <br/>
           Since MagIC text files are tab delimited files, we find that opening them in a spreadsheet is the best way to view and edit them.
           If you are using Excel, use the "Open" option under the "File" menu. Make sure to import the file as "Text" and not 
           "General", otherwise Excel will
