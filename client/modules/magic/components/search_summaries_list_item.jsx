@@ -24,7 +24,7 @@ class SearchSummariesListItem extends React.Component {
       loadMap: false
     };
     this.styles = {
-      a: {cursor: 'pointer', color: '#792f91'}
+      a: {cursor: 'pointer', color: '#800080'}
     }
   }
 
@@ -86,7 +86,7 @@ class SearchSummariesListItem extends React.Component {
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id && (_is_activated || id == 16837 || id == 16841 || id == 17115) &&
+        {id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129) &&
         <a
           href={`//earthref.org/MagIC/download/${id}/magic_contribution_${id}.txt`}
           download
@@ -96,7 +96,7 @@ class SearchSummariesListItem extends React.Component {
         >
           <i className="ui file text outline icon"/> Download
         </button></a>}
-        {id && !(_is_activated || id == 16837 || id == 16841 || id == 17115) && 
+        {id && !(_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129) && 
         <button type="submit" className="ui basic tiny fluid compact icon header purple button"
           style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
             document.getElementById('downloadButton' + id).className = "ui spinner loading icon";
@@ -616,7 +616,7 @@ class SearchSummariesListItem extends React.Component {
               <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
               {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
 
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org" style="color: #792f91">Crossref</a> Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
+              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org" style="color: #800080">Crossref</a> Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
 
               {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
               <table className="ui very basic compact collapsing table">

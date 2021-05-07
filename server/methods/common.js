@@ -161,6 +161,9 @@ export default function () {
         else if (d['published-online'] && d['published-online']['date-parts'] &&
           d['published-online']['date-parts'][0] && d['published-online']['date-parts'][0][0])
           _reference.year = d['published-online']['date-parts'][0][0];
+        else if (d['accepted'] && d['accepted']['date-parts'] &&
+          d['accepted']['date-parts'][0] && d['accepted']['date-parts'][0][0])
+          _reference.year = d['accepted']['date-parts'][0][0];
 
         if (d.subject)
           _reference.keywords = d.subject;
