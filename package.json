@@ -59,7 +59,7 @@
     "semantic-ui-react": "^1.2.1",
     "semver": "^7.3.2",
     "source-map-support": "^0.5.19",
-    "underscore": "^1.10.2",
+    "underscore": "^1.12.1",
     "uuid": "^8.3.0",
     "xlsx": "^0.16.6"
   },
