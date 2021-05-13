@@ -21,15 +21,6 @@ export default class extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Message size="small" icon floating style={{ marginBottom: '2em' }}>
-          <i className="purple users icon"></i>
-          <Message.Content>
-            <a className="ui purple header" href="https://earthref.org/events/MAGIC/2021/">
-              MagIC 2021 Workshop: Rock and Paleomagnetism through Time and Space
-            </a>
-            MagIC is hosting a workshop on January 19th-21rd, 2021 online.
-          </Message.Content>
-        </Message>
         <Grid divided><Grid.Row><Grid.Column width={12}>
           <div className="ui three cards">
             <IconButton className="card" link="/MagIC/search" portal="MagIC">
