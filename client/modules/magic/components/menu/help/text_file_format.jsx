@@ -41,6 +41,8 @@ E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Ext
         <b>Paleomagnetic directional example</b><br/>
         For the complete data file from the above example see <a href="https://earthref.org/MagIC/16875">Bogue et al. (2017)</a>.
         It is a good example of a paleomagnetic directional study that has tables all the way down to the measurement level.<br/>
+        For a paleodirectional study that includes directional fits of two components, see <a href="https://earthref.org/MagIC/17114">Fairchild et al. (2017)</a>. There is also a <a href="https://youtu.be/GUjf33aNnFQ">video tutorial</a> on the MagIC YouTube channel by Nick Swanson-Hysell demonstrating the Demag GUI software and how this file was created.<br/>
+
         <b>Paleointensity example</b><br/>
         For an example of a data file from a paleointensity study with measurement data 
         see <a href="https://earthref.org/MagIC/16357">Cai et al. (2020)</a>.<br/>
