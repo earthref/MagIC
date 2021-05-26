@@ -40,15 +40,17 @@ export default class extends React.Component {
           {` 2021 MagIC Workshop`}
         </h3>
         <p>
-          {` MagIC is hosting its 2021 workshop on `}
+          {` MagIC hosted its 2021 workshop on `}
           <b>January 19th-21st, 2021</b>
-          {` online via Zoom and Slack. Titled "`}
+          {` online via Zoom and Slack with 194 participants. Titled "`}
           <a href="https://earthref.org/events/MAGIC/2021/"><b>2021 MagIC Workshop: Rock and Paleomagnetism through Time and Space</b></a>
-          {`", it will consist of three days of science talks in four sessions. We have timed the sessions to allow most participants to attend at least some of the sessions live during this online global event. Registration is free and can be completed by filling out this `}
-          <a href="https://docs.google.com/forms/d/118u4mwEQHny_r1KsDMJ9aXllacJHqRziIAmcgZEXSBs"><b>form</b></a>
-          {`. Please visit the `}
+          {`", it consisted of three days of science talks in four sessions. Visit the `}
           <a href="https://earthref.org/events/MAGIC/2021/"><b>workshop website</b></a>
-          {` for the full schedule, presenter instructions, and other workshop details. All attendees are encouraged to present a poster via Slack.`} 
+          {` for the full schedule and other workshop details. The `} 
+          <a href="https://www.youtube.com/playlist?list=PLirL2unikKCi2xvyly82krC-_jWpelB0P"><b>workshop talks</b></a>
+          {` and `} 
+          <a href="https://www.youtube.com/playlist?list=PLirL2unikKChSOapeWSKBZRbj1aGiT48r"><b>poster lightning talks</b></a>
+          {` are up on our YouTube channel. The posters can be found on MagIC's Slack channel. Email Nick Jarboe (njarboe@ucsd.edu) to request an invite to the channel.`} 
         </p>
         <div className="ui divider"></div>
         <h3>
