@@ -71,7 +71,7 @@ export default class extends React.Component {
           <i>General data citation form:</i><br/>
           Data Author(s)/Principal Investigator name(s) (YEAR) "Title of Dataset", publisher or distributor, DOI<br/>
           <br/>
-          <i>Example Citation</i><br/>
+          <i>Example Citation:</i><br/>
           Jun Meng, Stuart A. Gilder, Yalin Li, Chengshan Wang, Tao Liu (2020) "Expanse of Greater India in the late Cretaceous", Magnetics Information Consortium (MagIC), doi:10.7288/V4/MAGIC/16853
         </p>
         <p>
