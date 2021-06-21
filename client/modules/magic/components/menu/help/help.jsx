@@ -101,15 +101,6 @@ export default class extends React.Component {
           If you imported the file as tab delimited, this should be the default save setting.
           <br/>
         </p>
-        <p>
-          <b>How do I upgrade older MagIC data files formats to the 3.0 data model?</b><br/>
-          The <Link to={"/MagIC/upgrade"}>Upgrade Tool</Link> converts older MagIC data format files to the current 3.0 MagIC data model.
-        </p>
-        <p>
-          <b></b><br/>
-          <br/>
-          <br/>
-        </p>
       </div>
     );
   }
