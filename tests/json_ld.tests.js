@@ -12,7 +12,7 @@ const esClient = new elasticsearch.Client({
 });
 
 const index = "magic_v4";
-const minLastMod = Date.parse("02-24-2021");
+const minLastMod = Date.parse("07-01-2021");
 
 describe("magic.json_ld", () => {
 
@@ -24,8 +24,11 @@ describe("magic.json_ld", () => {
       _source: ["summary.contribution._history"],
       body: {
         "query": { "bool": { 
-          "must": { "exists": { "field": "summary.contribution._history" }},
-          "filter": { "term": { "summary.contribution._is_activated": "true"}}
+          "must": [
+            { "exists": { "field": "summary.contribution._history" }},
+            { "term": { "summary.contribution._is_latest": "true"}},
+            { "term": { "summary.contribution._is_activated": "true"}}
+          ]
         }}
       }
     }).then((resp) => {
@@ -34,12 +37,11 @@ describe("magic.json_ld", () => {
       let urls = {};
       if (resp.hits.total > 0) {
         xml = resp.hits.hits.forEach(hit => {
-          hit._source.summary.contribution._history.forEach(contribution => {
-            urls[contribution.id] = `<url>` +
+          const contribution = hit._source.summary.contribution._history[0];
+          urls[contribution.id] = `<url>` +
             `<loc>https://earthref.org/MagIC/${contribution.id}</loc>` + 
             `<lastmod>${(new Date(Math.max(Date.parse(contribution.timestamp), minLastMod))).toISOString()}</lastmod>` +
           `</url>`;
-          });
         });
       }
       fs.writeFileSync(`C:/Users/rminn/Git/EarthRef/MagIC/public/MagIC/contributions.sitemap.xml`, 
