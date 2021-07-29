@@ -384,7 +384,7 @@ export default class extends React.Component {
                         <Dropdown multiple selection
                           error={!labNames.length}
                           defaultValue={labNames}
-                          placeholder="Labs ordered by university or institutional name. Select one or more labs where the measurements were made (required)."
+                          placeholder="Labs ordered by university or institutional name. Select one or more labs where the measurements were made (required)"
                           options={cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
                             return {
                               key: item.item,
