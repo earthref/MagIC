@@ -164,6 +164,7 @@ let index = "magic_v4";
 
               let labNames = [];
               hit._source.summary.contribution.lab_names &&
+                hit._source.summary.contribution.lab_names.split &&
                 hit._source.summary.contribution.lab_names.split(':').forEach(labName => {
                   labNames.push(
                     `<contributor contributorType="HostingInstitution">

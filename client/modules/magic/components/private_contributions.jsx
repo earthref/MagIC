@@ -187,7 +187,7 @@ export default class extends React.Component {
       Meteor.call("esUpdateContributionLabNames", {
         index: index,
         id: this.privateContributions[i].summary.contribution.id,
-        lab_names: this.privateContributions[i].lab_names
+        lab_names: this.privateContributions[i].lab_names.join(":")
       }, (error, c) => {
         this.updateContributions();
       })
@@ -309,6 +309,13 @@ export default class extends React.Component {
           :
           this.privateContributions.map((c,i) => {
             let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
+            
+            let labNames = c.lab_names || 
+              (c.summary.contribution.lab_names && 
+                c.summary.contribution.lab_names.split && 
+                c.summary.contribution.lab_names.split(':')
+              ) || [];
+            
             //console.log("ref", c, noReference);
             return (
               <div className="item" key={i} style={{marginBottom: "1.5em"}}>
@@ -368,18 +375,15 @@ export default class extends React.Component {
                 <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                   <div style={{display: "flex", flexFlow: "row wrap"}}>
                     <div style={{flex: "1 1 auto"}}>
-                      <div className="ui corner labeled fluid small input">
-                        <div className="ui label"
+                      <div className={"ui corner labeled fluid small input" + (!labNames.length ? " error": "")}>
+                        <div className={"ui label" + (!labNames.length ? " red": "")}
                           style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                         >
                           Laboratory Names
                         </div>
                         <Dropdown multiple selection
-                          defaultValue={
-                            (c.lab_names && c.lab_names.split(":")) ||
-                            (c.summary.contribution.lab_names && c.summary.contribution.lab_names.split(":")) ||
-                            ""
-                          }
+                          error={!labNames.length}
+                          defaultValue={labNames}
                           placeholder="Labs ordered by university or institutional name. Select one or more labs where the measurements were made (required)."
                           options={cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
                             return {
@@ -390,7 +394,7 @@ export default class extends React.Component {
                           })}
                           style={{ borderRadius: 0, flexGrow: 1 }}
                           onChange={(e, data) => {
-                            c.lab_names = data.value.join(":");
+                            c.lab_names = data.value;
                             this.setState({taps: this.state.taps + 1});
                           }}
                           onKeyPress={function(i, e) {
