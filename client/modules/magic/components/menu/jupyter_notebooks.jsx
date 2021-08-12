@@ -23,12 +23,12 @@ export default class extends React.Component {
         A <a href="https://github.com/PmagPy/PmagPy/blob/master/PmagPy_online.ipynb">Juypter Notebook</a> explaining PmagPy Online. This is a tutorial on using the EarthRef JuypterHub, PmagPy, and the MagIC database.<br/>
         A presentation of the notebook by Lisa Tauxe at the EarthCube 2020 meeting can be found at <a href="https://doi.org/10.1002/essoar.10504182.1">doi.org/10.1002/essoar.10504182.1</a>.<br/>
         <br/>
-            These five Jupyter notebooks for PmagPy can also be downloaded separately and describes many of the functions and uses of the PmagPy in more detail.They can be downloaded from the PmagPy GitHub website:<br/>
+            These five Jupyter notebooks for PmagPy can also be downloaded separately and describes many of the functions and uses of the PmagPy in more detail. They can be downloaded from the PmagPy GitHub website:<br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_introduction.ipynb'>Introduction</a><br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_MagIC.ipynb'>PmagPy and MagIC</a><br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_calculations.ipynb'>Calculations</a><br/>
             <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy_plots_analysis.ipynb'>Plots and Analysis</a><br/>
-            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy-cli.ipynb'>PmagPy - Command Line Versons of PmagPy Functions</a>
+            <a href='https://github.com/PmagPy/PmagPy/blob/master/PmagPy-cli.ipynb'>PmagPy - Command Line Versions of PmagPy Functions</a>
         </p>
         <p><b>Other PmagPy  Notebooks</b><br/>
           <a href='https://github.com/PmagPy/PmagPy/blob/master/MagIC_workshop_demo.ipynb'>2020 MagIC Workshop PmagPy Jupyter Notebook Tutorial</a><br/>
