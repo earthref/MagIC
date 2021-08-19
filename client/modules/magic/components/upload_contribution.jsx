@@ -388,6 +388,9 @@ export default class MagICUploadContribution extends React.Component {
         reference: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.reference || null,
+        lab_names: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.lab_names || null,
         version: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.version || null
