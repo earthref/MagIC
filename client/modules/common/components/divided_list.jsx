@@ -17,7 +17,10 @@ export default class extends React.Component {
               <div className="item" style={{padding: 0}}>
                 <div className="ui fluid warning message">
                   <div className="ui center aligned huge basic segment">
-                    No Items to Display
+                    { this.props.idFilter ? 
+                      "In Preparation For Publishing - Check Back Soon" : 
+                      "No Items to Display"
+                    }
                   </div>
                 </div>
               </div>
