@@ -403,7 +403,6 @@ export default function () {
         summary.contribution._is_valid = "false";
 
         // console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
-        if (id == 16798) delete contribution.measurements;
         await esClient.update({
           "index": index,
           "type": "contribution",
@@ -849,6 +848,7 @@ export default function () {
       // console.log("esUpdateContributionLabNames", index, id, lab_names);
       this.unblock();
       
+      const lab_names_list = lab_names.join(":");
       try {
         await esClient.update({
           "index": index,
@@ -859,10 +859,11 @@ export default function () {
           "body": {
             "script": {
               "source": `
+                ctx._source.summary.contribution._is_valid = "false"; 
                 ctx._source.summary.contribution.lab_names = params.lab_names; 
-                ctx._source.contribution.contribution[0].lab_names = params.lab_names;
+                ctx._source.contribution.contribution[0].lab_names = params.lab_names_list;
               `,
-              "params": {lab_names}
+              "params": {lab_names, lab_names_list}
             }
           }
         });
@@ -897,9 +898,6 @@ export default function () {
       }];
 
       try {
-        if (!contributor || contributor === 'undefined')
-          throw new Error('Unrecognized contributor.');
-          
         let resp = await esClient.search({
           "index": index,
           "type": "contribution",
@@ -939,25 +937,6 @@ export default function () {
       let version = _history[0].version;
 
       try {
-        if (!contributor || contributor === 'undefined')
-          throw new Error('Unrecognized contributor.');
-          
-        await esClient.update({
-          "index": index,
-          "type": "contribution",
-          "id": id + "_0",
-          "refresh": true,
-          "body": {
-            "script": {
-              "source": `
-                ctx._source.summary.contribution.version = null; 
-                ctx._source.summary.contribution._reference = null; 
-                ctx._source.summary.contribution._history = null;
-              `
-            }
-          }
-        });
-        // TODO: change this to an update by script and only update the reference info:
         await esClient.update({
           "index": index,
           "type": "contribution",
@@ -965,30 +944,17 @@ export default function () {
           "refresh": true,
           "retryOnConflict": 5,
           "body": {
-            "doc": {
-              "summary": {
-                "contribution": {
-                  "version": version,
-                  "contributor": contributor,
-                  "timestamp": timestamp,
-                  "data_model_version": _.last(versions),
-                  "description": description,
-                  "reference": doi,
-                  "_reference": _reference,
-                  "_history": _history
-                }
-              },
-              "contribution": {
-                "contribution": [{
-                  "id": _.parseInt(id),
-                  "version": version,
-                  "contributor": contributor,
-                  "timestamp": timestamp,
-                  "data_model_version": _.last(versions),
-                  "description": description,
-                  "reference": doi
-                }]
-              }
+            "script": {
+              "source": `
+                ctx._source.summary.contribution._is_valid = "false"; 
+                ctx._source.summary.contribution.version = params.version; 
+                ctx._source.summary.contribution.reference = params.doi; 
+                ctx._source.summary.contribution._reference = params._reference; 
+                ctx._source.summary.contribution._history = params._history; 
+                ctx._source.contribution.contribution[0].version = params.version;
+                ctx._source.contribution.contribution[0].reference = params.doi;
+              `,
+              "params": {version, doi, _reference, _history}
             }
           }
         });

@@ -187,7 +187,7 @@ export default class extends React.Component {
       Meteor.call("esUpdateContributionLabNames", {
         index: index,
         id: this.privateContributions[i].summary.contribution.id,
-        lab_names: this.privateContributions[i].lab_names.join(":")
+        lab_names: this.privateContributions[i].lab_names
       }, (error, c) => {
         this.updateContributions();
       })
@@ -310,12 +310,14 @@ export default class extends React.Component {
           this.privateContributions.map((c,i) => {
             let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
             
-            let labNames = c.lab_names || 
-              (c.summary.contribution.lab_names && 
-                c.summary.contribution.lab_names.split && 
-                c.summary.contribution.lab_names.split(':')
-              ) || [];
-            
+            let labNames = [];
+            labNames = c.summary.contribution.lab_names && (
+              _.isArray(c.summary.contribution.lab_names) ? 
+              c.summary.contribution.lab_names : 
+              c.summary.contribution.lab_names.split(':')
+            ) || labNames;
+            labNames = c.lab_names || labNames;
+
             //console.log("ref", c, noReference);
             return (
               <div className="item" key={i} style={{marginBottom: "1.5em"}}>

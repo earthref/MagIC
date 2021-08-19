@@ -383,15 +383,22 @@ export default class MagICUploadContribution extends React.Component {
         id: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.id || null,
-        _contributor: this.state._contributor,
+        contributor: this.state._userid,
         timestamp: moment().utc().toISOString(),
         reference: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.reference || null,
+        lab_names: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.lab_names || null,
         version: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.version || null
       };
+      this.contribution.contribution = this.contribution.contribution || [{}];
+      this.contribution.contribution[0] = _.merge({}, this.contribution.contribution[0], contributionOverride);
+      if(this.contribution.contribution[0].lab_names) this.contribution.contribution[0].lab_names = this.contribution.contribution[0].lab_names.join(":");
+      contributionOverride._contributor = this.state._contributor;
       this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
         if (this.summarizer.json.contribution && 
             this.summarizer.json.contribution.summary && 
