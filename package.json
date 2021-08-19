@@ -34,7 +34,7 @@
     "history": "^5.0.0",
     "jquery": "^3.5.1",
     "js-cookie": "^2.2.1",
-    "jszip": "^3.5.0",
+    "jszip": "^3.7.0",
     "lodash": "^4.17.21",
     "markdown-to-jsx": "^6.11.4",
     "meteor-node-stubs": "^1.0.1",
