@@ -14,7 +14,7 @@ export default class extends React.Component {
          {/* <a href="http://www.ngdc.noaa.gov/geomag/paleo.shtml">IAGA geomagnetic databases</a> - compiled in the late 90' early 2000's (<a href="https://www.ngdc.noaa.gov/geomag/data/paleo/gpmdb_46.zip" >GPMDB 4.6</a>, <a href="ftp://ftp.ngdc.noaa.gov/geomag/Paleomag/access/ver3.5">Archeo</a>, <a href="ftp://ftp.ngdc.noaa.gov/geomag/Paleomag/access/ver3.5">Magst</a>, <a href="ftp://ftp.ngdc.noaa.gov/geomag/Paleomag/access/ver3.5">Pint</a>, <a href="ftp://ftp.ngdc.noaa.gov/geomag/Paleomag/access/ver4.1">PSVRL</a>, <a href="ftp://ftp.ngdc.noaa.gov/geomag/Paleomag/access/ver3.5">Secvr</a>, <a href="ftp://ftp.ngdc.noaa.gov/geomag/Paleomag/access/ver3.5">Trans</a>)<br/> */}
          <a href="http://www.ngdc.noaa.gov/geomag/paleo.shtml">IAGA geomagnetic databases</a> - databases compiled in the late 90' early 2000's (GPMDB 4.6, Archeo, Magst, PintPSVRL, Secvr, and Trans)<br/>
          <a href="http://h175.it.helsinki.fi/database/">PALEOMAGIA</a> - Precambrian paleomagnetic pole database - Toni Veikkolainen<br/>
-         <a href="http://earth.liv.ac.uk/pint/">PINT</a> - Absolute paleointensity database - Any Biggin<br/>   
+         <a href="http://earth.liv.ac.uk/pint/">PINT</a> - Absolute paleointensity database - Andy Biggin<br/>   
         </p>
         <p>
          <b>Software Tools</b><br/>
@@ -27,7 +27,7 @@ export default class extends React.Component {
          <b>Organizations</b><br/>
          <a href="http://geopaleomagnetism.agu.org/">American Geophysical Union (AGU)</a> - The Geomagnetism, Paleomagnetism and Electromagnetism (GPE) section homepage<br/>
          <a href="https://www.egu.eu/emrp/home/">European Geosciences Union</a> - The Earth Magnetism & Rock Physics (EMRP) section<br/>
-         <a href="http://www.irm.umn.edu/index.html">Institute for Rock Magnetism</a> - NSF funded rock magnetism rearch facility<br/>
+         <a href="http://www.irm.umn.edu/index.html">Institute for Rock Magnetism</a> - NSF funded rock magnetism research facility<br/>
          <a href="http://www.intermagnet.org/index-eng.php">International Real-time Magnetic Observatory Network (Intermagnet)</a> - Global network of earth based geomagnetic  observatories<br/>
         </p>
          <a href=""></a><br/>
