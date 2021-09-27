@@ -333,6 +333,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   reviewUpload() {
+    const dataModel = models[_.last(versions)];
     this.setState({
       totalParseErrors: 0,
       importProgressTaps: this.state.importProgressTaps + 1,
@@ -356,21 +357,32 @@ export default class MagICUploadContribution extends React.Component {
       for (let file of this.files) {
         if (file.imported) file.imported.map((data) => {
           if (data.table && data.columns && data.rows) {
+            const dataModelColumns = dataModel.tables[data.table] && dataModel.tables[data.table].columns;
             if (data.table === 'measurements') {
               if (this.contribution.measurements !== undefined) {
                 file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
               } else {
                 this.contribution.measurements = {
                   columns: _.without(data.columns, undefined),
-                  rows: data.rows.map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
+                  rows: data.rows.map(row => _.without(row.map((x, j) => {
+                    if (data.columns[j] === undefined) return false;
+                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
+                      x = x.replace(/\.0+\s*$/, '');
+                    }
+                    return x;
+                  }), false))
                 }
               }
             } else {
               this.contribution[data.table] = this.contribution[data.table] || [];
               data.rows.map((row, i) =>
                 this.contribution[data.table].push(
-                  _.reduce(row, (json, column, j) => {
-                    json[data.columns[j]] = column;
+                  _.reduce(row, (json, x, j) => {
+                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
+                      x = x.replace(/\.0+\s*$/, '');
+                    }
+                    console.log(dataModelColumns, data.columns[j], x);
+                    json[data.columns[j]] = x;
                     return json;
                   }, {})
                 )
