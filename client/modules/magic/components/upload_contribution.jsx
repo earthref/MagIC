@@ -4,6 +4,7 @@ import {Tracker}  from 'meteor/tracker';
 import _ from 'lodash';
 import moment from 'moment';
 import filesize from 'filesize';
+import levenshtein from 'js-levenshtein';
 import React from 'react';
 import {Redirect} from 'react-router-dom';
 import saveAs from 'save-as';
@@ -22,6 +23,7 @@ import SearchSummariesListItem from '/client/modules/magic/containers/search_sum
 import IconButton from '/client/modules/common/components/icon_button';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {index} from '/lib/configs/magic/search_levels.js';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
 
 export default class MagICUploadContribution extends React.Component {
 
@@ -369,6 +371,21 @@ export default class MagICUploadContribution extends React.Component {
                     if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
                       x = x.replace(/\.0+\s*$/, '');
                     }
+                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
+                      dataModelColumns[data.columns[j]].validations.forEach(validation => {
+                        if (validation.substr(0,4) === 'cv("') {
+                          const cv = validation.substr(4,validation.length-6);
+                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) x = 'True';
+                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) x = 'False';
+                          else if (cvs[cv] && cvs[cv].items) cvs[cv].items.forEach(item => {
+                            if (x.toLowerCase() === item.item.toLowerCase() || 
+                              levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
+                              x = item.item;
+                            }
+                          });
+                        }
+                      });
+                    }
                     return x;
                   }), false))
                 }
@@ -381,7 +398,22 @@ export default class MagICUploadContribution extends React.Component {
                     if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
                       x = x.replace(/\.0+\s*$/, '');
                     }
-                    console.log(dataModelColumns, data.columns[j], x);
+                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
+                      dataModelColumns[data.columns[j]].validations.forEach(validation => {
+                        if (validation.substr(0,4) === 'cv("') {
+                          const cv = validation.substr(4,validation.length-6);
+                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) x = 'True';
+                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) x = 'False';
+                          else if (cvs[cv] && cvs[cv].items) cvs[cv].items.forEach(item => {
+                            if (x.toLowerCase() === item.item.toLowerCase() || 
+                              levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
+                              x = item.item;
+                            }
+                          });
+                          console.log('after', data.columns[j], x, cv);
+                        }
+                      });
+                    }
                     json[data.columns[j]] = x;
                     return json;
                   }, {})

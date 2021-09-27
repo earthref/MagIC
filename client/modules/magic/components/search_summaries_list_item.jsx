@@ -8,7 +8,6 @@ import Cookies from 'js-cookie';
 import saveAs from 'save-as';
 
 import Clamp from '/client/modules/common/components/clamp';
-import ParseContribution from '/lib/modules/magic/parse_contribution.js';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import GoogleStaticMap from '/client/modules/common/components/google_static_map';
 import GoogleMap from '/client/modules/common/components/google_map';
