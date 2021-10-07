@@ -11,7 +11,10 @@ import Clamp from '/client/modules/common/components/clamp';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import GoogleStaticMap from '/client/modules/common/components/google_static_map';
 import GoogleMap from '/client/modules/common/components/google_map';
+import Count from '/client/modules/common/components/count';
 import SearchPlotThumbnail from '/client/modules/magic/containers/search_plot_thumbnail';
+import { Modal } from 'semantic-ui-react';
+import {versions, models} from '/lib/configs/magic/data_models.js';
 import {index} from '/lib/configs/magic/search_levels.js';
 
 class SearchSummariesListItem extends React.Component {
@@ -20,7 +23,12 @@ class SearchSummariesListItem extends React.Component {
     super(props);
     this.state = {
       loaded: false,
-      loadMap: false
+      loadMap: false,
+      showDataModal: false,
+      dataLoading: false,
+      dataLevel: undefined,
+      contributionData: undefined,
+      contributionDataError: undefined
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#800080'}
@@ -32,12 +40,6 @@ class SearchSummariesListItem extends React.Component {
       exclusive: false,
       selector: { trigger: '.accordion-trigger'}
     });
-  }
-
-  showData() {
-    /*$(this.refs['data modal']).modal('show');
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();*/
   }
 
   showMap(e) {
@@ -111,7 +113,7 @@ class SearchSummariesListItem extends React.Component {
                     saveAs(blob, 'magic_contribution_' + id + '.txt');
                     document.getElementById('downloadButton' + id).className = "ui file text outline icon";
                   } else {
-                    Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
+                    Meteor.call('esGetContribution', {index, id}, function (error, c) {
                       if (!error && c) {
                         const exporter = new ExportContribution({});
                         let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
@@ -177,6 +179,7 @@ class SearchSummariesListItem extends React.Component {
   renderCounts(item) {
     let counts = [];
     let labels = [];
+    let levels = [];
     ['Location', 'Site', 'Sample', 'Specimen', 'Experiment'].forEach(label => {
       let level = label.toLowerCase() + 's';
       let name = label.toLowerCase();
@@ -184,16 +187,19 @@ class SearchSummariesListItem extends React.Component {
         let count = item.summary._all['_n_' + level];
         counts.push(count);
         labels.push(label + (count !== 1 ? 's' : ''));
+        levels.push(level);
       } else if (item.summary && item.summary._all && item.summary._all[name] && item.summary._all[name].length) {
         let count = item.summary._all[name].length;
         counts.push(count);
         labels.push(label + (count !== 1 ? 's' : ''));
+        levels.push(level);
       }
     });
     if (item.summary && item.summary._all && item.summary._all._n_measurements) {
       let count = item.summary._all._n_measurements;
       counts.push(count);
       labels.push('Measurement' + (count !== 1 ? 's' : ''));
+      levels.push('measurements');
     }
     return (
       <div style={{minWidth: 135, maxWidth: 135, marginRight: '1em', marginBottom: 5, fontSize:'small', lineHeight:1}}>
@@ -202,10 +208,26 @@ class SearchSummariesListItem extends React.Component {
             return (
               <tr key={i}>
                 <td style={{textAlign: 'right'}}>
-                  {numeral(count).format('0 a')}
+                  { this.props.table === 'contribution' && levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
+                    <a onClick={() => {
+                      this.setState({ dataLevel: levels[i], showDataModal: true });
+                    }}>
+                      {numeral(count).format('0 a')}
+                    </a>
+                  :
+                    numeral(count).format('0 a')
+                  }
                 </td>
                 <td>
-                  &nbsp;{labels[i]}
+                  { this.props.table === 'contribution' && levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
+                    <a onClick={() => {
+                      this.setState({ dataLevel: levels[i], showDataModal: true });
+                    }}>
+                      &nbsp;{labels[i]}
+                    </a>
+                  :
+                    <span>&nbsp;{labels[i]}</span>
+                }
                 </td>
               </tr>
             );
@@ -748,7 +770,7 @@ class SearchSummariesListItem extends React.Component {
                       </button>
                     </td>
                     <td>
-                      Calculate the contribution pre summary and submit it to Elasticsearch for indexing.
+                      Calculate the contribution pre-summary and submit it to Elasticsearch for indexing.
                     </td>
                   </tr>
                   <tr>
@@ -805,6 +827,7 @@ class SearchSummariesListItem extends React.Component {
               <i className="caret up icon"></i>
             </div>
             {this.state.loadMap && this.renderMapModal(item)}
+            {this.state.showDataModal && this.renderDataModal(item)}
           </div>
         </div>
       );
@@ -820,42 +843,203 @@ class SearchSummariesListItem extends React.Component {
       <div ref="map modal" className="ui fullscreen modal">
       <i className="close icon"></i>
       <div className="header">
-        {citation || name || "Unnamed"} Map
+        {citation || name || "Unnamed"} - Map
       </div>
       <GoogleMap style={{width:'100%', height:'calc(100vh - 10em)'}} docs={[item]}/>
     </div>
     );
   }
 
-  renderDataModal() {
+  renderDataModal(item) {
+    let citation = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation;
+    let name = item.summary && item.summary.contribution && item.summary.contribution._name;
     return (
-      <div ref="data modal" className="ui fullscreen basic modal">
-        <i className="close icon" style={{color: 'white', top:'.5rem', right: '0'}}></i>
-        <div className="ui top attached inverted tabular menu">
-          <a className="item" href="#">
-            Locations
-          </a>
-          <a className="active item" href="#">
-            Sites
-          </a>
-          <a className="item" href="#">
-            Samples
-          </a>
-          <a className="item" href="#">
-            Specimens
-          </a>
-          <a className="item" href="#">
-            Experiments
-          </a>
-        </div>
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 10em)'}}>
-          {this.renderData()}
-        </div>
-      </div>
+      <Modal
+        onClose={() => this.setState({ showDataModal: false })}
+        open={true}
+        style={{ width: 'calc(100vw - 4em)' }}
+        closeIcon
+      >
+        <Modal.Header>{citation || name || "Unnamed"} - Raw Data</Modal.Header>
+        <Modal.Content>
+          <div className="ui top attached tabular small menu search-tab-menu">
+            { this.state.contributionData && this.state.contributionData.locations ?
+              <a 
+                className={`${this.state.dataLevel === 'locations' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'locations' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState({ dataLoading: true, dataLevel: 'locations' })}
+              >
+                Locations
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.locations.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'locations' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'locations' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Locations
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+            { this.state.contributionData && this.state.contributionData.sites ?
+              <a 
+                className={`${this.state.dataLevel === 'sites' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'sites' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState({ dataLoading: true, dataLevel: 'sites' })}
+              >
+                Sites
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.sites.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'sites' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'sites' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Sites
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+            { this.state.contributionData && this.state.contributionData.samples ?
+              <a 
+                className={`${this.state.dataLevel === 'samples' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'samples' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState({ dataLoading: true, dataLevel: 'samples' })}
+              >
+                Samples
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.samples.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'samples' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'samples' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Samples
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+            { this.state.contributionData && this.state.contributionData.specimens ?
+              <a 
+                className={`${this.state.dataLevel === 'specimens' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'specimens' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState({ dataLoading: true, dataLevel: 'specimens' })}
+              >
+                Specimens
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.specimens.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'specimens' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'specimens' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Specimens
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+          </div>
+          <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 14em)'}}>
+            {this.renderData(item)}
+          </div>
+        </Modal.Content>
+      </Modal>
     );
   }
 
-  renderData() {
+  renderData(item) {
+    if (!this.state.contributionData && item && item.summary && item.summary.contribution)
+      Meteor.call('esGetContribution', {index, id: item.summary.contribution.id, tables: ['locations', 'sites', 'samples', 'specimens']}, (error, c) => {
+        console.log('esGetContribution', error, c);
+        if (!error && c)
+          this.setState({ contributionData: c });
+        else
+          this.setState({ contributionData: {}, contributionDataError: error });
+      });
+    if (!this.state.contributionData)
+      return (
+        <div className="ui inverted active dimmer">
+          <div className="ui text loader">Loading Contribution Data</div>
+        </div>
+      );
+    if (this.state.dataLoading) {
+      _.delay(() => this.setState({ dataLoading: false }));
+      return (
+        <div className="ui inverted active dimmer">
+          <div className="ui text loader">Loading Contribution Data</div>
+        </div>
+      );
+    }
+    if (this.state.contributionDataError)
+      return (
+        <div className="ui error message">
+          <div className="header">Contribution Data Error</div>
+          <p>{this.state.contributionDataError}</p>
+        </div>
+    );
+    if (!this.state.contributionData[this.state.dataLevel])
+      return (
+        <div className="ui fluid warning message">
+          <div className="ui center aligned huge basic segment">No Rows to Display</div>
+        </div>
+      );
+    const model = models[_.last(versions)];
+    const table = model.tables[this.state.dataLevel];
+    const modelColumns = _.sortBy(
+      _.keys(table.columns), columnName => table.columns[columnName].position
+    );
+    const tableData = this.state.contributionData[this.state.dataLevel];
+    const usedColumns = {};
+    tableData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
+    const columns = modelColumns.filter(x => usedColumns[x]);
+    return (
+      <table className="ui compact celled striped definition single line table">
+        <thead>
+        <tr ref="table column headers">
+          <th></th>
+          {columns.map((columnName, i) => {
+            return (
+              <th key={i}>
+                {columnName}
+              </th>
+            );
+          })}
+        </tr>
+        </thead>
+        <tbody>
+        {tableData.map((row, i) => {
+          return (
+            <tr key={i}>
+              <td className="collapsing right aligned">
+                {i + 1}
+              </td>
+              {(columns.map((col, j) => {
+                return (
+                  <td key={j}>{row[col]}</td>
+                );
+              }))}
+            </tr>
+          );
+        })}
+        </tbody>
+      </table>
+    );
+  }
+
+  renderData2() {
     let columns = `site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon\tage\tage_sigma\tage_unit\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_specimens\tdir_polarity\tdir_nrm_origin\tvgp_lat\tvgp_lon\tvdm\tvdm_n_samples\tvadm\tvadm_n_samples\tint_abs\tint_abs_sigma\tdescription\tsoftware_packages`;
     let data = `01a\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
 01b\tHawaii\t\t\t:This study:\t:" Extrusive:Igneous ":\t:Lava Flow:\t:Not Specified:\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t

@@ -715,7 +715,7 @@ export default function () {
       }
     },
 
-    async esGetContribution({index, id}) {
+    async esGetContribution({index, id, tables}) {
       // console.log("esGetContribution", index, id);
       this.unblock();
       try {
@@ -725,7 +725,7 @@ export default function () {
           "type": "contribution",
           "body": {
             "_source": {
-              "includes": ["contribution.*"]
+              "includes": !tables ? ["contribution.*"] : tables.map(x => `contribution.${x}`)
             },
             "query": {
               "bool": {
