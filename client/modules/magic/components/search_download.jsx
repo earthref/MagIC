@@ -5,7 +5,7 @@ import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx';
 import React from 'react';
 import Cookies from 'js-cookie';
-import {Form, Checkbox, Progress} from 'semantic-ui-react';
+import {Modal, Button, Checkbox, Progress} from 'semantic-ui-react';
 
 import Count from '/client/modules/common/containers/search_count.jsx';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
@@ -17,7 +17,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      renderModal: false,
+      showModal: false,
       downloadIDs: [],
       downloadContributions: false,
       downloadLocations: true,
@@ -159,20 +159,15 @@ export default class extends React.Component {
   render() {
     return (
       <div ref="download button" className={this.props.className} style={this.props.style}
-        onClick={(e) => { 
-          if (e.target === this.refs["download button"]) 
-            this.setState({renderModal: true}, () => 
-              $(this.refs['download modal']).modal('show')
-            )
-        }}
+        onClick={() => this.setState({showModal: true})}
       >
         {this.props.children}
-        { this.state.renderModal && <div ref="download modal" className="ui modal">
-          <div className="ui icon header">
-          <i className="download icon"></i>
-          Download Results
-          </div>
-          <div className="content">
+        <Modal
+          onClose={() => this.setState({ showModal: false })}
+          open={this.state.showModal}
+        >
+          <Modal.Header>Download Results</Modal.Header>
+          <Modal.Content>
             <table style={{margin: "auto"}}>
               <tbody>
                 <tr>
@@ -436,43 +431,40 @@ export default class extends React.Component {
                 style={{margin:0}}
               />
             }
-          </div>
-          <div className="actions">
-          { this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
-              <div className="ui button purple" onClick={this.downloadContributionFiles.bind(this)}>
-                Prepare Files
-              </div>
-            }
-            { this.state.downloadContributions && (this.state.downloadIDs.length > 0 && this.state.progress === 100) &&
-              <button type="submit" className="ui button purple" onClick={function (e) {
-                Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), function (error, source) {
-                  if (source) {
-                    let blob = new Blob([source], {type: "application/zip"});
-                    saveAs(blob, 'magic_search_results.zip');
-                  } else {
-                    console.error(error);
-                    alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-                  }
-                }.bind(this));
-              }.bind(this)}>
-                Download Files
-              </button>
-            }
-            { !this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
-              <div className="ui button purple" onClick={this.downloadLevelRows.bind(this)}>
-                Download Rows
-              </div>
-            }
-            { this.state.progress !== undefined && this.state.progress < 100 && 
-              <div className="ui button red" onClick={() => this.canceled = true}>
-                Cancel Download
-              </div>
-            }
-            <div className="ui deny button">
-              Close
-            </div>
-          </div>
-        </div> }
+          </Modal.Content>
+          <Modal.Actions>
+            { this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
+                <div className="ui button purple" onClick={this.downloadContributionFiles.bind(this)}>
+                  Prepare Files
+                </div>
+              }
+              { this.state.downloadContributions && (this.state.downloadIDs.length > 0 && this.state.progress === 100) &&
+                <button type="submit" className="ui button purple" onClick={function (e) {
+                  Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), function (error, source) {
+                    if (source) {
+                      let blob = new Blob([source], {type: "application/zip"});
+                      saveAs(blob, 'magic_search_results.zip');
+                    } else {
+                      console.error(error);
+                      alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                    }
+                  }.bind(this));
+                }.bind(this)}>
+                  Download Files
+                </button>
+              }
+              { !this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
+                <div className="ui button purple" onClick={this.downloadLevelRows.bind(this)}>
+                  Download Rows
+                </div>
+              }
+              { this.state.progress !== undefined && this.state.progress < 100 && 
+                <div className="ui button red" onClick={() => this.canceled = true}>
+                  Cancel Download
+                </div>
+              }
+          </Modal.Actions>
+        </Modal>
       </div>
     );
   }

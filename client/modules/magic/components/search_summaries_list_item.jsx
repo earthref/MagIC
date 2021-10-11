@@ -13,7 +13,7 @@ import GoogleStaticMap from '/client/modules/common/components/google_static_map
 import GoogleMap from '/client/modules/common/components/google_map';
 import Count from '/client/modules/common/components/count';
 import SearchPlotThumbnail from '/client/modules/magic/containers/search_plot_thumbnail';
-import { Modal } from 'semantic-ui-react';
+import { Button, Modal } from 'semantic-ui-react';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {index} from '/lib/configs/magic/search_levels.js';
 
@@ -26,6 +26,7 @@ class SearchSummariesListItem extends React.Component {
       loadMap: false,
       showDataModal: false,
       dataLoading: false,
+      dataEdited: false,
       dataLevel: undefined,
       contributionData: undefined,
       contributionDataError: undefined
@@ -851,16 +852,19 @@ class SearchSummariesListItem extends React.Component {
   }
 
   renderDataModal(item) {
-    let citation = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation;
-    let name = item.summary && item.summary.contribution && item.summary.contribution._name;
+    const citation = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation;
+    const name = item.summary && item.summary.contribution && item.summary.contribution._name;
+    const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
     return (
       <Modal
         onClose={() => this.setState({ showDataModal: false })}
         open={true}
         style={{ width: 'calc(100vw - 4em)' }}
-        closeIcon
       >
-        <Modal.Header>{citation || name || "Unnamed"} - Raw Data</Modal.Header>
+        <Modal.Header>
+          <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ float: 'right' }} />
+          {citation || name || "Unnamed"} - Contribution Data
+        </Modal.Header>
         <Modal.Content>
           <div className="ui top attached tabular small menu search-tab-menu">
             { this.state.contributionData && this.state.contributionData.locations ?
@@ -952,10 +956,27 @@ class SearchSummariesListItem extends React.Component {
               </div>
             }
           </div>
-          <div className="ui bottom attached segment" style={{overflow:'auto', height:'calc(100vh - 14em)'}}>
+          <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
             {this.renderData(item)}
           </div>
         </Modal.Content>
+        { isPrivate && 
+          <Modal.Actions>
+            <Button color='purple' floated="left" disabled={!this.state.dataEdited} onClick={() => {}}>
+              Save Edits
+            </Button>
+            <Button color='red' disabled={!this.state.dataEdited} onClick={() => this.setState({ 
+              dataEdited: false, 
+              contributionData: undefined, 
+              contributionDataError: undefined
+            })}>
+              Cancel Edits
+            </Button>
+            <Button onClick={() => this.setState({ showDataModal: false })}>
+              Close
+            </Button>
+          </Modal.Actions>
+        }
       </Modal>
     );
   }
@@ -1005,6 +1026,7 @@ class SearchSummariesListItem extends React.Component {
     const usedColumns = {};
     tableData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
     const columns = modelColumns.filter(x => usedColumns[x]);
+    const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
     return (
       <table className="ui compact celled striped definition single line table">
         <thead>
@@ -1028,7 +1050,9 @@ class SearchSummariesListItem extends React.Component {
               </td>
               {(columns.map((col, j) => {
                 return (
-                  <td key={j}>{row[col]}</td>
+                  <td contentEditable={isPrivate} suppressContentEditableWarning={true} key={j} onInput={e => {
+                    console.log(e);
+                  }}>{row[col]}</td>
                 );
               }))}
             </tr>
