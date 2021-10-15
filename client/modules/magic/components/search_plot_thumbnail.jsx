@@ -220,7 +220,7 @@ export default class extends React.Component {
               style={{ width: 'calc(100vw - 4em)' }}
             >
               <Modal.Header>
-                <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ float: 'right' }} />
+                <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ cursor:'pointer', float: 'right', marginRight: '-1em' }} />
                 { specimen || sample || site || location || citation } PmagPy Plots
               </Modal.Header>
               <div className="header actions" style={{ textAlign: 'left', padding: '.5rem' }}>

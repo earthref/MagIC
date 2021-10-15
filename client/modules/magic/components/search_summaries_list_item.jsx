@@ -6,6 +6,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import saveAs from 'save-as';
+import { HotTable, HotColumn } from "@handsontable/react";
+import "handsontable/dist/handsontable.min.css";
 
 import Clamp from '/client/modules/common/components/clamp';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
@@ -27,6 +29,7 @@ class SearchSummariesListItem extends React.Component {
       showDataModal: false,
       dataLoading: false,
       dataEdited: false,
+      dataSaving: false,
       dataLevel: undefined,
       contributionData: undefined,
       contributionDataError: undefined
@@ -34,6 +37,7 @@ class SearchSummariesListItem extends React.Component {
     this.styles = {
       a: {cursor: 'pointer', color: '#800080'}
     }
+    this.contributionDataEdited = undefined;
   }
 
   componentDidMount() {
@@ -865,7 +869,7 @@ class SearchSummariesListItem extends React.Component {
           <i className="close icon" onClick={() => this.setState({ showDataModal: false })} style={{ cursor:'pointer', float: 'right', marginRight: '-1em' }} />
           {citation || name || "Unnamed"} - Contribution Data
         </Modal.Header>
-        <Modal.Content>
+        <Modal.Content style={{ paddingLeft: 0, paddingRight: 0, paddingBottom: 0 }}>
           <div className="ui top attached tabular small menu search-tab-menu">
             { this.state.contributionData && this.state.contributionData.locations ?
               <a 
@@ -956,20 +960,77 @@ class SearchSummariesListItem extends React.Component {
               </div>
             }
           </div>
-          <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
-            {this.renderData(item)}
-          </div>
+          {this.renderData(item)}
         </Modal.Content>
         { isPrivate && 
           <Modal.Actions>
-            <Button color='purple' floated="left" disabled={!this.state.dataEdited} onClick={() => {}}>
-              Save Edits
+            <Button color='purple' floated="left" disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
+              const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
+              if (this.state.dataEdited && data) {
+                const rowData = this.state.contributionData[this.state.dataLevel];
+                const model = models[_.last(versions)];
+                const table = model.tables[this.state.dataLevel];
+                const modelColumns = _.sortBy(
+                  _.keys(table.columns), columnName => table.columns[columnName].position
+                );
+                const tableData = this.state.contributionData[this.state.dataLevel];
+                const usedColumns = {};
+                tableData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
+                const columns = modelColumns.filter(x => usedColumns[x]);
+                const contributionData = { ...this.state.contributionData,
+                  [this.state.dataLevel]: data.map(row => {
+                    const editedRow = {};
+                    row.forEach((col, colIdx) => {
+                      editedRow[columns[colIdx]] = col
+                    });
+                    return editedRow;
+                  })
+                };
+                console.log('updating contribution', item);
+                const contributor = item.summary.contribution.contributor;
+                const _contributor = item.summary.contribution._contributor;
+                const id = item.summary.contribution.id;
+                const contribution = contributionData;
+                const summary = item.summary;
+                console.log('updating contribution', item, index, contributor, _contributor, id, contribution, summary);
+                Meteor.call('esUpdatePrivateContribution', {
+                  index, contributor, _contributor, id, contribution, summary
+                }, (error) => {
+                  console.log('updated contribution', id, error);
+                  if (error) { this.setState({contributionDataError: error, dataSaving: false});
+                  } else { 
+                    this.setState({dataSaving: false});
+                    Meteor.call('esUpdatePrivatePreSummaries', {
+                      index, contributor, _contributor, id, contribution, summary
+                    }, (error) => {
+                      console.log('updated contribution pre-summaries', id, error);
+                      if (error) { this.setState({contributionDataError: error});
+                      } else {
+                        Meteor.call('esUpdatePrivateSummaries', {
+                          index, contributor, _contributor, id, contribution, summary
+                        });
+                      }
+                    });
+                  }
+                });
+                this.setState({
+                  dataEdited: false,
+                  dataSaving: true,
+                  contributionData
+                });
+                this.contributionDataEdited = undefined;
+              }
+            }}>
+              {this.state.dataSaving ? 'Saving' : 'Save'} Edits
             </Button>
-            <Button color='red' disabled={!this.state.dataEdited} onClick={() => this.setState({ 
-              dataEdited: false, 
-              contributionData: undefined, 
-              contributionDataError: undefined
-            })}>
+            <Button color='red' disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
+              this.contributionDataEdited = undefined;
+              this.setState({ 
+                dataEdited: false,
+                contributionData: undefined, 
+                contributionDataError: undefined
+              });
+            }}>
               Cancel Edits
             </Button>
             <Button onClick={() => this.setState({ showDataModal: false })}>
@@ -982,6 +1043,89 @@ class SearchSummariesListItem extends React.Component {
   }
 
   renderData(item) {
+    const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
+    if (!this.state.contributionData && item && item.summary && item.summary.contribution)
+      Meteor.call('esGetContribution', {index, id: item.summary.contribution.id, tables: ['locations', 'sites', 'samples', 'specimens']}, (error, c) => {
+        console.log('esGetContribution', error, c);
+        if (!error && c)
+          this.setState({ contributionData: c });
+        else
+          this.setState({ contributionData: {}, contributionDataError: error });
+      });
+    if (!this.state.contributionData)
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui inverted active dimmer">
+            <div className="ui text loader">Loading Contribution Data</div>
+          </div>
+        </div>
+      );
+    if (this.state.dataLoading) {
+      _.delay(() => this.setState({ dataLoading: false }));
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui inverted active dimmer">
+          <div className="ui text loader">Loading Contribution Data</div>
+        </div>
+        </div>
+      );
+    }
+    if (this.state.contributionDataError)
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui error message">
+            <div className="header">Contribution Data Error</div>
+            <p>{this.state.contributionDataError}</p>
+          </div>
+        </div>
+    );
+    if (!this.state.contributionData[this.state.dataLevel])
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui fluid warning message">
+            <div className="ui center aligned huge basic segment">No Rows to Display</div>
+          </div>
+        </div>
+      );
+    const model = models[_.last(versions)];
+    const table = model.tables[this.state.dataLevel];
+    const modelColumns = _.sortBy(
+      _.keys(table.columns), columnName => table.columns[columnName].position
+    );
+    const rowData = this.state.contributionData[this.state.dataLevel];
+    const usedColumns = {};
+    rowData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
+    const columns = modelColumns.filter(x => usedColumns[x]);
+    return (
+      <HotTable
+        ref="hotTableComponent"
+        className={!isPrivate ? 'handsontable-readonly' : ''}
+        style={{marginTop: -1, height:`calc(100vh - ${isPrivate ? 20 : 15}em)`, overflow: 'hidden', backgroundColor: '#EEE' }}
+        settings={{
+          licenseKey: "non-commercial-and-evaluation",
+          data: rowData,
+          readOnly: !isPrivate,
+          contextMenu: isPrivate,
+          rowHeaders: true,
+          colHeaders: columns,    
+          outsideClickDeselects: false,
+          afterChange: (changes) => {
+            if (changes) {
+              const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
+              if (data && !this.state.dataEdited) this.setState({ dataEdited: true });
+              this.contributionDataEdited = data;
+            }
+          }
+        }}
+      >
+        {columns.map((columnName, i) => 
+          <HotColumn key={i} data={columnName}></HotColumn>
+        )}
+      </HotTable>
+    );
+  }
+
+  renderStaticData(item) {
     if (!this.state.contributionData && item && item.summary && item.summary.contribution)
       Meteor.call('esGetContribution', {index, id: item.summary.contribution.id, tables: ['locations', 'sites', 'samples', 'specimens']}, (error, c) => {
         console.log('esGetContribution', error, c);
