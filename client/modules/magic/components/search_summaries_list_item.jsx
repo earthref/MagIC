@@ -862,7 +862,7 @@ class SearchSummariesListItem extends React.Component {
         style={{ width: 'calc(100vw - 4em)' }}
       >
         <Modal.Header>
-          <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ float: 'right' }} />
+          <i className="close icon" onClick={() => this.setState({ showDataModal: false })} style={{ cursor:'pointer', float: 'right', marginRight: '-1em' }} />
           {citation || name || "Unnamed"} - Contribution Data
         </Modal.Header>
         <Modal.Content>
