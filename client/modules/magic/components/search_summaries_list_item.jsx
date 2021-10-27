@@ -118,7 +118,7 @@ class SearchSummariesListItem extends React.Component {
                     saveAs(blob, 'magic_contribution_' + id + '.txt');
                     document.getElementById('downloadButton' + id).className = "ui file text outline icon";
                   } else {
-                    Meteor.call('esGetContribution', {index, id}, function (error, c) {
+                    Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
                       if (!error && c) {
                         const exporter = new ExportContribution({});
                         let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
@@ -992,7 +992,6 @@ class SearchSummariesListItem extends React.Component {
                 const id = item.summary.contribution.id;
                 const contribution = contributionData;
                 const summary = item.summary;
-                console.log('updating contribution', item, index, contributor, _contributor, id, contribution, summary);
                 Meteor.call('esUpdatePrivateContribution', {
                   index, contributor, _contributor, id, contribution, summary
                 }, (error) => {
