@@ -27,6 +27,9 @@ class SearchSummariesListItem extends React.Component {
       loaded: false,
       loadMap: false,
       showDataModal: false,
+      showConfirmCloseEditedDataModal: false,
+      showConfirmChangeTabsEditedDataModal: false,
+      confirmChangeTabsDataLevel: undefined,
       dataLoading: false,
       dataEdited: false,
       dataSaving: false,
@@ -861,21 +864,28 @@ class SearchSummariesListItem extends React.Component {
     const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
     return (
       <Modal
-        onClose={() => this.setState({ showDataModal: false })}
+        onClose={() => this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })}
         open={true}
         style={{ width: 'calc(100vw - 4em)' }}
       >
         <Modal.Header>
-          <i className="close icon" onClick={() => this.setState({ showDataModal: false })} style={{ cursor:'pointer', float: 'right', marginRight: '-1em' }} />
+          <i 
+            className="close icon" 
+            onClick={() => this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })}
+            style={{ cursor:'pointer', float: 'right' }}
+          />
           {citation || name || "Unnamed"} - Contribution Data
         </Modal.Header>
-        <Modal.Content style={{ paddingLeft: 0, paddingRight: 0, paddingBottom: 0 }}>
+        <Modal.Content>
           <div className="ui top attached tabular small menu search-tab-menu">
             { this.state.contributionData && this.state.contributionData.locations ?
               <a 
                 className={`${this.state.dataLevel === 'locations' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'locations' ? {backgroundColor: '#F0F0F0'} : {}}
-                onClick={() => this.setState({ dataLoading: true, dataLevel: 'locations' })}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'locations' } : 
+                  { dataLoading: true, dataLevel: 'locations' }
+                )}
               >
                 Locations
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
@@ -897,7 +907,10 @@ class SearchSummariesListItem extends React.Component {
               <a 
                 className={`${this.state.dataLevel === 'sites' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'sites' ? {backgroundColor: '#F0F0F0'} : {}}
-                onClick={() => this.setState({ dataLoading: true, dataLevel: 'sites' })}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'sites' } : 
+                  { dataLoading: true, dataLevel: 'sites' }
+              )}
               >
                 Sites
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
@@ -919,7 +932,10 @@ class SearchSummariesListItem extends React.Component {
               <a 
                 className={`${this.state.dataLevel === 'samples' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'samples' ? {backgroundColor: '#F0F0F0'} : {}}
-                onClick={() => this.setState({ dataLoading: true, dataLevel: 'samples' })}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'samples' } : 
+                  { dataLoading: true, dataLevel: 'samples' }
+                )}
               >
                 Samples
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
@@ -941,7 +957,10 @@ class SearchSummariesListItem extends React.Component {
               <a 
                 className={`${this.state.dataLevel === 'specimens' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'specimens' ? {backgroundColor: '#F0F0F0'} : {}}
-                onClick={() => this.setState({ dataLoading: true, dataLevel: 'specimens' })}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true } : 
+                  { dataLoading: true, dataLevel: 'specimens', confirmChangeTabsDataLevel: 'specimens' }
+                  )}
               >
                 Specimens
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
@@ -961,6 +980,42 @@ class SearchSummariesListItem extends React.Component {
             }
           </div>
           {this.renderData(item)}
+          <Modal size="small"
+            onClose={() => this.setState({ showConfirmCloseEditedDataModal: false })}
+            open={this.state.showConfirmCloseEditedDataModal}
+            content="Closing the Contribution Data tables will cancel edits made to this table."
+            actions={[
+              { content: 'Cancel Edits and Close', key: 'cancel', negative: true, onClick: () => 
+                this.setState({ 
+                  dataEdited: false,
+                  contributionData: undefined, 
+                  contributionDataError: undefined,
+                  showDataModal: false,
+                  showConfirmCloseEditedDataModal: false,
+                  confirmChangeTabsDataLevel: undefined
+                })
+              },
+              'Continue Editing'
+            ]}
+          />
+          <Modal size="small"
+            onClose={() => this.setState({ showConfirmChangeTabsEditedDataModal: false, confirmChangeTabsDataLevel: undefined })}
+            open={this.state.showConfirmChangeTabsEditedDataModal}
+            content="Changing table tabs will cancel edits made to this table."
+            actions={[
+              { content: 'Cancel Edits and Change Tabs', key: 'cancel', negative: true, onClick: () => 
+                this.setState({ 
+                  dataEdited: false,
+                  contributionData: undefined, 
+                  contributionDataError: undefined,
+                  showConfirmChangeTabsEditedDataModal: false,
+                  confirmChangeTabsDataLevel: undefined,
+                  dataLevel: this.state.confirmChangeTabsDataLevel
+                })
+              },
+              'Continue Editing'
+            ]}
+          />
         </Modal.Content>
         { isPrivate && 
           <Modal.Actions>
@@ -1032,7 +1087,9 @@ class SearchSummariesListItem extends React.Component {
             }}>
               Cancel Edits
             </Button>
-            <Button onClick={() => this.setState({ showDataModal: false })}>
+            <Button onClick={() => 
+              this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })
+            }>
               Close
             </Button>
           </Modal.Actions>
