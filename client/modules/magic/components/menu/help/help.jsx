@@ -69,7 +69,7 @@ export default class extends React.Component {
           list. Data downloaded from MagIC should also be cited when used.<br/>
           <br/>
           <i>General data citation form:</i><br/>
-          Data Author(s)/Principal Investigator name(s) (YEAR) "Title of Dataset", publisher or distributor, DOI<br/>
+          Data Author(s)/Principal Investigator name(s) (YEAR) "Title of Dataset", publisher or distributor, data DOI<br/>
           <br/>
           <i>Example Citation:</i><br/>
           Jun Meng, Stuart A. Gilder, Yalin Li, Chengshan Wang, Tao Liu (2020) "Expanse of Greater India in the late Cretaceous", Magnetics Information Consortium (MagIC), doi:10.7288/V4/MAGIC/16853
