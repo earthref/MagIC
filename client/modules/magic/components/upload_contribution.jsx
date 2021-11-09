@@ -372,19 +372,30 @@ export default class MagICUploadContribution extends React.Component {
                       x = x.replace(/\.0+\s*$/, '');
                     }
                     if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
-                      dataModelColumns[data.columns[j]].validations.forEach(validation => {
+                      for (let validation of dataModelColumns[data.columns[j]].validations) {
                         if (validation.substr(0,4) === 'cv("') {
                           const cv = validation.substr(4,validation.length-6);
-                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) x = 'True';
-                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) x = 'False';
-                          else if (cvs[cv] && cvs[cv].items) cvs[cv].items.forEach(item => {
-                            if (x.toLowerCase() === item.item.toLowerCase() || 
-                              levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
-                              x = item.item;
+                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) { x = 'True'; break; }
+                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) { x = 'False'; break; }
+                          else if (cvs[cv] && cvs[cv].items) {
+                            let caseCorrected = false;
+                            for (let item of cvs[cv].items) {
+                              if (x.toLowerCase() === item.item.toLowerCase()) {
+                                x = item.item;
+                                caseCorrected = true;
+                                break;
+                              }
                             }
-                          });
+                            if (caseCorrected) break;
+                            for (let item of cvs[cv].items) {
+                              if (levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
+                                x = item.item;
+                                break;
+                              }
+                            }
+                          }
                         }
-                      });
+                      }
                     }
                     return x;
                   }), false))
@@ -399,20 +410,32 @@ export default class MagICUploadContribution extends React.Component {
                       x = x.replace(/\.0+\s*$/, '');
                     }
                     if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
-                      dataModelColumns[data.columns[j]].validations.forEach(validation => {
+                      for (let validation of dataModelColumns[data.columns[j]].validations) {
                         if (validation.substr(0,4) === 'cv("') {
                           const cv = validation.substr(4,validation.length-6);
-                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) x = 'True';
-                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) x = 'False';
-                          else if (cvs[cv] && cvs[cv].items) cvs[cv].items.forEach(item => {
-                            if (x.toLowerCase() === item.item.toLowerCase() || 
-                              levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
-                              x = item.item;
+                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) { x = 'True'; break; }
+                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) { x = 'False'; break; }
+                          else if (cvs[cv] && cvs[cv].items) {
+                            let caseCorrected = false;
+                            for (let item of cvs[cv].items) {
+                              if (x.toLowerCase() === item.item.toLowerCase()) {
+                                console.log(cv, x, item.item, x.toLowerCase(), item.item.toLowerCase(), x.toLowerCase() === item.item.toLowerCase())
+                                x = item.item;
+                                caseCorrected = true;
+                                break;
+                              }
                             }
-                          });
-                          console.log('after', data.columns[j], x, cv);
+                            if (caseCorrected) break;
+                            for (let item of cvs[cv].items) {
+                              if (levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
+                                console.log(cv, x, item.item, x.toLowerCase(), levenshtein(x.toLowerCase(), item.item.toLowerCase()))
+                                x = item.item;
+                                break;
+                              }
+                            }
+                          }
                         }
-                      });
+                      }
                     }
                     json[data.columns[j]] = x;
                     return json;
