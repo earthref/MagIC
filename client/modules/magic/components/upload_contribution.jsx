@@ -368,10 +368,10 @@ export default class MagICUploadContribution extends React.Component {
                   columns: _.without(data.columns, undefined),
                   rows: data.rows.map(row => _.without(row.map((x, j) => {
                     if (data.columns[j] === undefined) return false;
-                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
                       x = x.replace(/\.0+\s*$/, '');
                     }
-                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
                       for (let validation of dataModelColumns[data.columns[j]].validations) {
                         if (validation.substr(0,4) === 'cv("') {
                           const cv = validation.substr(4,validation.length-6);
@@ -406,10 +406,10 @@ export default class MagICUploadContribution extends React.Component {
               data.rows.map((row, i) =>
                 this.contribution[data.table].push(
                   _.reduce(row, (json, x, j) => {
-                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
                       x = x.replace(/\.0+\s*$/, '');
                     }
-                    if (dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
                       for (let validation of dataModelColumns[data.columns[j]].validations) {
                         if (validation.substr(0,4) === 'cv("') {
                           const cv = validation.substr(4,validation.length-6);
@@ -419,7 +419,6 @@ export default class MagICUploadContribution extends React.Component {
                             let caseCorrected = false;
                             for (let item of cvs[cv].items) {
                               if (x.toLowerCase() === item.item.toLowerCase()) {
-                                console.log(cv, x, item.item, x.toLowerCase(), item.item.toLowerCase(), x.toLowerCase() === item.item.toLowerCase())
                                 x = item.item;
                                 caseCorrected = true;
                                 break;
@@ -428,7 +427,6 @@ export default class MagICUploadContribution extends React.Component {
                             if (caseCorrected) break;
                             for (let item of cvs[cv].items) {
                               if (levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
-                                console.log(cv, x, item.item, x.toLowerCase(), levenshtein(x.toLowerCase(), item.item.toLowerCase()))
                                 x = item.item;
                                 break;
                               }
