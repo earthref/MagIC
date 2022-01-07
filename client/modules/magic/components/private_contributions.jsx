@@ -600,7 +600,7 @@ export default class extends React.Component {
             Publish Your Private Contribution
           </div>
           <div className="content">
-            <p>Error: Failed to publish this contribution. Please email webmaster@earthref.org to report this problem. We will get your validated dataset published quickly. 
+            <p>Error: Failed to publish this contribution. Please email <a href="mailto:magic-support@earthref.org">magic-support@earthref.org</a> to report this problem. We will get your validated dataset published quickly. 
             </p>
           </div>
           <div className="actions">
