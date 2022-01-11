@@ -31,7 +31,6 @@ import MagICPrivateContributions from '/client/modules/magic/components/private_
 import MagICDataModel from '/client/modules/magic/components/data_model';
 import MagICMethodCodes from '/client/modules/magic/components/method_codes';
 
-import MagICValidateContribution from '/client/modules/magic/components/validate_contribution';
 import Error from '/client/modules/common/components/error';
 
 const Routes = ({match}) => (
@@ -172,16 +171,6 @@ const Routes = ({match}) => (
       }}/>
     }/>
     
-    {/* Other Tools */}
-    <Route exact path="/MagIC/validate" render={() =>
-      <Page portal="MagIC" title="Validate a MagIC contribution:" menu={<MagICMenu/>}>
-        <Helmet>
-          <title>MagIC Validator | EarthRef.org</title>
-        </Helmet>
-        <MagICValidateContribution/>
-      </Page>
-    }/>
-
     <Route exact path="/MagIC/upgrade" render={() =>
       <Page portal="MagIC" title="Upgrade an outdated MagIC contribution to the latest MagIC data model version:" menu={<MagICMenu/>}>
         <Helmet>
