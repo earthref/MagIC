@@ -6,7 +6,7 @@ import request from 'request';
 
 const esClient = new elasticsearch.Client({
   //log: "trace",
-  host: "http://128.193.70.68:9200",
+  host: Meteor.settings.elasticsearch.url,
   keepAlive: false,
   apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
