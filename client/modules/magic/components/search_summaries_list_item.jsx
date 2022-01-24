@@ -15,7 +15,7 @@ import GoogleStaticMap from '/client/modules/common/components/google_static_map
 import GoogleMap from '/client/modules/common/components/google_map';
 import Count from '/client/modules/common/components/count';
 import SearchPlotThumbnail from '/client/modules/magic/containers/search_plot_thumbnail';
-import { Button, Modal } from 'semantic-ui-react';
+import { Button, Modal, Icon } from 'semantic-ui-react';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {index} from '/lib/configs/magic/search_levels.js';
 
@@ -185,10 +185,11 @@ class SearchSummariesListItem extends React.Component {
   }
 
   renderCounts(item) {
+    let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
     let counts = [];
     let labels = [];
     let levels = [];
-    ['Location', 'Site', 'Sample', 'Specimen', 'Experiment'].forEach(label => {
+    ['Location', 'Site', 'Sample', 'Specimen'].forEach(label => {
       let level = label.toLowerCase() + 's';
       let name = label.toLowerCase();
       if (item.summary && item.summary._all && item.summary._all['_n_' + level]) {
@@ -211,6 +212,7 @@ class SearchSummariesListItem extends React.Component {
     }
     return (
       <div style={{minWidth: 135, maxWidth: 135, marginRight: '1em', marginBottom: 5, fontSize:'small', lineHeight:1}}>
+        <b>{_is_activated ? 'View Data:' : 'Edit Data:'}</b>
         <table><tbody>
           {counts.map((count, i) => {
             return (
@@ -866,9 +868,9 @@ class SearchSummariesListItem extends React.Component {
       <Modal
         onClose={() => this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })}
         open={true}
-        style={{ width: 'calc(100vw - 4em)' }}
+        style={{ marginTop: 0, width: 'calc(100vw - 2em)' }}
       >
-        <Modal.Header>
+        <Modal.Header style={{ border: 0, padding: '.5em' }}>
           <i 
             className="close icon" 
             onClick={() => this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })}
@@ -876,7 +878,7 @@ class SearchSummariesListItem extends React.Component {
           />
           {citation || name || "Unnamed"} - Contribution Data
         </Modal.Header>
-        <Modal.Content>
+        <Modal.Content style={{ padding: 0 }}>
           <div className="ui top attached tabular small menu search-tab-menu">
             { this.state.contributionData && this.state.contributionData.locations ?
               <a 
@@ -1018,8 +1020,8 @@ class SearchSummariesListItem extends React.Component {
           />
         </Modal.Content>
         { isPrivate && 
-          <Modal.Actions>
-            <Button color='purple' floated="left" disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
+          <Modal.Actions style={{ padding: '.5em' }}>
+            <Button color='purple' floated="left" style={{ marginLeft: 0 }} disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
               const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
               if (this.state.dataEdited && data) {
                 const rowData = this.state.contributionData[this.state.dataLevel];
@@ -1077,6 +1079,9 @@ class SearchSummariesListItem extends React.Component {
             }}>
               {this.state.dataSaving ? 'Saving' : 'Save'} Edits
             </Button>
+            <Button floated="left" basic disabled style={{ border: 0, background: 'none', opacity: 1 }}>
+              <Icon name="idea"/>Right click to insert and remove rows.
+            </Button>
             <Button color='red' disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
               this.contributionDataEdited = undefined;
               this.setState({ 
@@ -1087,7 +1092,7 @@ class SearchSummariesListItem extends React.Component {
             }}>
               Cancel Edits
             </Button>
-            <Button onClick={() => 
+            <Button style={{ rightMargin: 0 }} onClick={() => 
               this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })
             }>
               Close
@@ -1110,7 +1115,7 @@ class SearchSummariesListItem extends React.Component {
       });
     if (!this.state.contributionData)
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{border: 0, overflow:'auto', height:`calc(100vh - ${isPrivate ? 12 : 8}em)`}}>
           <div className="ui inverted active dimmer">
             <div className="ui text loader">Loading Contribution Data</div>
           </div>
@@ -1119,7 +1124,7 @@ class SearchSummariesListItem extends React.Component {
     if (this.state.dataLoading) {
       _.delay(() => this.setState({ dataLoading: false }));
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{border: 0, overflow:'auto', height:`calc(100vh - ${isPrivate ? 12 : 8}em)`}}>
           <div className="ui inverted active dimmer">
           <div className="ui text loader">Loading Contribution Data</div>
         </div>
@@ -1128,7 +1133,7 @@ class SearchSummariesListItem extends React.Component {
     }
     if (this.state.contributionDataError)
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{border: 0, overflow:'auto', height:`calc(100vh - ${isPrivate ? 12 : 8}em)`}}>
           <div className="ui error message">
             <div className="header">Contribution Data Error</div>
             <p>{this.state.contributionDataError}</p>
@@ -1137,7 +1142,7 @@ class SearchSummariesListItem extends React.Component {
     );
     if (!this.state.contributionData[this.state.dataLevel])
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{border: 0, overflow:'auto', height:`calc(100vh - ${isPrivate ? 12 : 8}em)`}}>
           <div className="ui fluid warning message">
             <div className="ui center aligned huge basic segment">No Rows to Display</div>
           </div>
@@ -1156,7 +1161,7 @@ class SearchSummariesListItem extends React.Component {
       <HotTable
         ref="hotTableComponent"
         className={!isPrivate ? 'handsontable-readonly' : ''}
-        style={{marginTop: -1, height:`calc(100vh - ${isPrivate ? 20 : 15}em)`, overflow: 'hidden', backgroundColor: '#EEE' }}
+        style={{marginTop: -1, height:`calc(100vh - ${isPrivate ? 12.5 : 8.5}em)`, overflow: 'hidden', backgroundColor: '#EEE' }}
         settings={{
           licenseKey: "non-commercial-and-evaluation",
           data: rowData,
