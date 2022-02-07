@@ -31,7 +31,7 @@ export default class extends React.Component {
         },
         "@type": "Dataset",
         "identifier": {
-          "@id": `http://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
+          "@id": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
         },
         "url": `https://earthref.org/MagIC/${cid}`,
         "identifier": `http://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
