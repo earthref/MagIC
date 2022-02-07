@@ -76,36 +76,36 @@ export default class extends React.Component {
         if (contribution._reference.year) json.datePublished = contribution.timestamp;
       }
 
-      if (all._geo_envelope) {
-        try {
-          _.sortedUniqBy(
-            _.sortBy(all._geo_envelope, 
-              x => _.flatten(x.coordinates).join('_')), 
-            x => _.flatten(x.coordinates).join('_'))
-          .forEach((envelope, i) => {
-            json.spatialCoverage = json.spatialCoverage || { "@type": "Place", "geo": [] };
-            if (
-              envelope.coordinates[0][0] == envelope.coordinates[1][0] &&
-              envelope.coordinates[0][1] == envelope.coordinates[1][1]
-            ) {
-              json.spatialCoverage.geo.push({ 
-                "@type": "GeoCoordinates",
-                "latitude": envelope.coordinates[0][1],
-                "longitude": envelope.coordinates[0][0]
-              });
-            } else {
-              json.spatialCoverage.geo.push({ "@type": "GeoShape", "box":  
-                envelope.coordinates[1][1] + " " +
-                envelope.coordinates[0][0] + " " +
-                envelope.coordinates[0][1] + " " +
-                envelope.coordinates[1][0]
-              });
-            }
-          });
-        } catch(error) {
-          console.error("JSONLD", error);
-        }
-      }
+      // if (all._geo_envelope) {
+      //   try {
+      //     _.sortedUniqBy(
+      //       _.sortBy(all._geo_envelope, 
+      //         x => _.flatten(x.coordinates).join('_')), 
+      //       x => _.flatten(x.coordinates).join('_'))
+      //     .forEach((envelope, i) => {
+      //       json.spatialCoverage = json.spatialCoverage || { "@type": "Place", "geo": [] };
+      //       if (
+      //         envelope.coordinates[0][0] == envelope.coordinates[1][0] &&
+      //         envelope.coordinates[0][1] == envelope.coordinates[1][1]
+      //       ) {
+      //         json.spatialCoverage.geo.push({ 
+      //           "@type": "GeoCoordinates",
+      //           "latitude": envelope.coordinates[0][1],
+      //           "longitude": envelope.coordinates[0][0]
+      //         });
+      //       } else {
+      //         json.spatialCoverage.geo.push({ "@type": "GeoShape", "box":  
+      //           envelope.coordinates[1][1] + " " +
+      //           envelope.coordinates[0][0] + " " +
+      //           envelope.coordinates[0][1] + " " +
+      //           envelope.coordinates[1][0]
+      //         });
+      //       }
+      //     });
+      //   } catch(error) {
+      //     console.error("JSONLD", error);
+      //   }
+      // }
       
       if (all._geo_point) {
         try {

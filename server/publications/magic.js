@@ -3,11 +3,11 @@ import Fiber from 'fibers';
 import {Collections, collectionDefinitions} from '/lib/collections';
 import {Meteor} from 'meteor/meteor';
 import {check} from 'meteor/check';
-import elasticsearch from 'elasticsearch';
+import opensearch from "@opensearch-project/opensearch";
 
-const esClient = new elasticsearch.Client({
+const esClient = new opensearch.Client({
   //log: 'trace',
-  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || ''
+  node: Meteor.settings.opensearch && Meteor.settings.opensearch.node || ''
 });
 
 export default function () {
@@ -93,7 +93,7 @@ export default function () {
           type: definition.type,
           body: search
         }).then((resp) => {
-          this.added(definition.recordSet, 'id', {count: resp.hits.total});
+          this.added(definition.recordSet, 'id', {count: resp.body.hits.total.value});
           this.ready();
         }, function (err) {
           console.trace(err.message);
@@ -195,8 +195,8 @@ export default function () {
         //  body: search
         //}).then((resp) => {
         //  let i = (pageNumber - 1) * search.size + 1;
-        //  if (resp.hits.hits.length === 0) this.ready();
-        //  resp.hits.hits.forEach((hit) => {
+        //  if (resp.body.hits.hits.length === 0) this.ready();
+        //  resp.body.hits.hits.forEach((hit) => {
         //    this.added(definition.recordSet, hit._id, _.extend(hit._source, {
         //      _id: hit._id,
         //      _score: hit._score,
