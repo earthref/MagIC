@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import { Meteor } from 'meteor/meteor';
-import elasticsearch from "elasticsearch";
+import opensearch from "@opensearch-project/opensearch";
 import BPromise from 'bluebird';
 import request from 'request';
 
-const esClient = new elasticsearch.Client({
+const esClient = new opensearch.Client({
   //log: "trace",
-  host: "http://128.193.72.53:9200",
+  node: Meteor.settings.opensearch && Meteor.settings.opensearch.node || "",
   keepAlive: false,
   apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
@@ -16,7 +16,7 @@ const matchZeros = /00000+\d+?$/;
 const matchNines = /([0-8])99999+\d+?$/;
 const floatFix = (x) => `${x}`.replace(matchZeros, '').replace(matchNines, (y) => parseInt(`${y}`.substr(0,1))+1);
 
-let index = "magic_v4";
+let index = "magic";
 
   describe("magic.data_doi", () => {
 
@@ -24,7 +24,7 @@ let index = "magic_v4";
       this.timeout(0);
 
       esClient.search({
-        index: index, type: "contribution", size: 1e4, 
+        index: index, size: 1e4, 
         _source: [
           "summary.contribution.id", 
           "summary.contribution.timestamp", 
@@ -45,6 +45,7 @@ let index = "magic_v4";
         body: {
           "query": { "bool": { 
             "must": [
+              { "term": { "type": "contribution" } },
               { "exists": { "field": "summary.contribution._reference.long_authors" }},
               { "exists": { "field": "summary.contribution._reference.title" }},
               { "exists": { "field": "summary.contribution._reference.year" }},
@@ -56,10 +57,10 @@ let index = "magic_v4";
           }}
         }
       }).then((resp) => {
-        console.log('Contributions without a data DOI:', resp.hits.total);
-        if (resp.hits.total > 0) {
+        console.log('Contributions without a data DOI:', resp.body.hits.total);
+        if (resp.body.hits.total.value > 0) {
 
-          BPromise.each(resp.hits.hits, hit => {
+          BPromise.each(resp.body.hits.hits, hit => {
             return new Promise((resolve) => {
 
               let related = hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.doi &&
@@ -257,7 +258,7 @@ let index = "magic_v4";
                 } else if (body === 'error: bad request - identifier already exists') {
                   esClient.update({
                     "index": hit._index,
-                    "type":hit._type,
+                    "type": "_doc",
                     "id": hit._id,
                     "refresh": true,
                     "body": {
@@ -279,7 +280,7 @@ let index = "magic_v4";
                 } else {
                   esClient.update({
                     "index": hit._index,
-                    "type":hit._type,
+                    "type": "_doc",
                     "id": hit._id,
                     "refresh": true,
                     "body": {

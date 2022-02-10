@@ -261,19 +261,19 @@ class SearchSummariesListItem extends React.Component {
     let allSummary   = item.summary && item.summary._all;
 
     if (tableSummary && (tableSummary._geo_envelope || tableSummary._geo_point)) {
-      if (tableSummary._geo_envelope) 
-        _.sortedUniqBy(
-          _.sortBy(tableSummary._geo_envelope, 
-            x => _.flatten(x.coordinates).join('_')),
-          x => _.flatten(x.coordinates).join('_'))
-        .forEach(envelope => {
-          paths.push({
-            lat_s: envelope.coordinates[0][1],
-            lat_n: envelope.coordinates[1][1],
-            lon_w: envelope.coordinates[0][0],
-            lon_e: envelope.coordinates[1][0]
-          });
-        });
+      //if (tableSummary._geo_envelope) 
+      //  _.sortedUniqBy(
+      //    _.sortBy(tableSummary._geo_envelope, 
+      //      x => _.flatten(x.coordinates).join('_')),
+      //    x => _.flatten(x.coordinates).join('_'))
+      //  .forEach(envelope => {
+      //    paths.push({
+      //      lat_s: envelope.coordinates[0][1],
+      //      lat_n: envelope.coordinates[1][1],
+      //      lon_w: envelope.coordinates[0][0],
+      //      lon_e: envelope.coordinates[1][0]
+      //    });
+      //  });
 
       if (tableSummary._geo_point) 
         _.sortedUniqBy(
