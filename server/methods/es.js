@@ -236,7 +236,7 @@ export default function () {
 
         let resp = await esClient.scroll({
           "scrollId": scrollID,
-          "scroll": '30s'
+          "scroll": '600s'
         });
         return resp;
 

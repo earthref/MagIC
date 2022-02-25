@@ -202,7 +202,7 @@ describe("magic.data_quality", () => {
       return Promise.each(resp.hits.hits, (hit, i) => {
         let cid = hit._source.summary.contribution.id;
         let id = hit._id;
-        let type = hit._type;
+        let type = hit._source.type;
         let n = resp.hits.total;
         return esClient.search({
           index: index, type: "contribution", size: 1e4, 

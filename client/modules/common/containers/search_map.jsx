@@ -16,7 +16,7 @@ export const composer = ({es}, onData) => {
         console.log('SearchMap', docs.length, results.body.hits.total.value);
         onData(null, {docs: docs, nDocs: results.body.hits.total.value});
         if (results.body.hits.total.value > docs.length)
-          Meteor.call('esScrollByID', results._scroll_id, processResults);
+          Meteor.call('esScrollByID', results.body._scroll_id, processResults);
       }
     } catch (error) {
       console.error(error);
