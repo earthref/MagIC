@@ -18,7 +18,7 @@ export default class extends React.Component {
 An example of a MagIC text file that contains contribution, location, and site level information (-- represents tab) is shown below. The contribution table is not generally used while uploading and is created by the MagIC data upload software.
         </p>
         <p>
-        This <b><a href='https://github.com/earthref/MagIC/blob/master/.public/MagIC/Template3.0ForMagICUpload.xlsx?raw=true'>Excel file</a></b> is 
+        This <b><a href='https://github.com/earthref/MagIC/blob/master/.public/MagIC/TemplateForMagICDataUpload.xlsx?raw=true'>Excel file</a></b> is 
         also useful for quickly seeing which columns in each table are required and some additional commonly used columns.
         Bold column headers indicate the column is required.
         </p>
