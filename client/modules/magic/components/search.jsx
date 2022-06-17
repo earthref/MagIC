@@ -313,7 +313,7 @@ class Search extends React.Component {
       }
       esFilters.push({
         geo_shape: {
-          'summary._all._geo_envelope': {
+          'summary._all._geo_point': {
             shape: {
             type: 'envelope',
             coordinates : [[lon_min, _.isNumber(this.state.lat_max) ? this.state.lat_max :  90],
@@ -1180,7 +1180,7 @@ class Search extends React.Component {
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
               <Count es={_.extend({}, view.es, {
-                queries: view.name === 'Map' ? _.concat(searchQueries, {exists: 
+                queries: view.name === 'Sites Map' ? _.concat(searchQueries, {exists: 
                   {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
                 }) : searchQueries,
                 filters: esFilters
@@ -1250,7 +1250,7 @@ class Search extends React.Component {
         pageSize={20}
       />
     );
-    if (activeView.name === 'Map') return (
+    if (activeView.name === 'Sites Map') return (
       <SearchMapView
         key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
