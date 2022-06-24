@@ -509,7 +509,7 @@ export default function () {
               }
               return row;
             });
-            console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n, JSON.stringify(body).substring(0, 50000));
+            // console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n, JSON.stringify(body).substring(0, 50000));
             esClient.bulk({ body }, (err, resp) => {
               if (!resp || resp.body.errors) {
                 console.error('esUpdatePrivatePreSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp).substring(0, 10000));
