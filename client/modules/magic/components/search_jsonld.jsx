@@ -20,28 +20,38 @@ export default class extends React.Component {
       const contribution = this.props.item.summary.contribution;
       const all = this.props.item.summary._all || {};
       const cid = this.props.id || contribution.id;
+//	  const pubdoi = this.props.pubdoi || contribution.pubdoi;
       
       const model = models[_.last(versions)];
       const now = new Date();
 
       let json = {
-        "@context": {
-          "@vocab": "https://schema.org/",
-          "geosci-time": "http://schema.geoschemas.org/contexts/temporal#"
-        },
+        "@context": [
+          "https://schema.org/", 
+          {
+         	  "gsqtime": "https://vocabs.gsq.digital/object?uri=http://linked.data.gov.au/def/trs",
+            "time": "http://www.w3.org/2006/time#",
+            "xsd": "https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html"
+			    }
+        ],
         "@type": "Dataset",
         "identifier": {
           "@id": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
+          "@type": "PropertyValue",
+          "propertyID": "https://registry.identifiers.org/registry/doi",
+          "value": `doi:10.7288/V4/MAGIC/${cid}`,
+          "url": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}` 
         },
-        "url": `https://earthref.org/MagIC/${cid}`,
-        "identifier": `http://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
+		"sameAs": `https://earthref.org/MagIC/${cid}`,
+//		"sameAs": `https://earthref.org/MagIC/doi/${pubdoi}`,
         "isAccessibleForFree": true,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "provider": {
           "@id": "https://earthref.org/MagIC",
-          "type": "Organization",
+          "@type": "Organization",
           "legalName": "Magnetics Information Consortium (MagIC) Data Repository",
           "name": "MagIC",
+          "sameAs": "https://www.re3data.org/repository/r3d100011910",
           "url": "https://earthref.org/MagIC"
         },
         "publisher": {
@@ -139,27 +149,32 @@ export default class extends React.Component {
       if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
         let startYBP = Math.round(all._age_range_ybp.range.gte);
         let endYBP = Math.round(all._age_range_ybp.range.lte);
-        json['geosci-time'] =  json['geosci-time'] || {
-          "@type": "time:Instant", 
-          "time:inTimePosition" : {
-            "@type": "time:ProperInterval",
-            "time:hasBeginning": {
-              "time:hasTRS": { 
-                "@id": "geosci-time:BeforePresent" 
-              },
-              "time:numericPosition": {
-                "@value": startYBP, 
-                "@type": "xsd:decimal"
-              },
+        json['gsqtime'] =  json['gsqtime'] || {
+          "@type": "time:ProperInterval",
+          "time:hasBeginning": {
+            "time:hasTRS": { 
+              "@id": "gsqtime:BeforePresent" 
             },
-            "time:hasEnd": {
-              "time:hasTRS": { 
-                "@id": "geosci-time:BeforePresent" 
-              },
-              "time:numericPosition": {
-                "@value": endYBP, 
-                "@type": "xsd:decimal"
-              },
+            "time:numericPosition": {
+              "@value": startYBP, 
+              "@type": "xsd:decimal"
+            },
+            "gstime:geologicTimeUnitAbbreviation": {
+              "@type": "xsd:string",
+              "value": "BP"
+             },
+          },
+          "time:hasEnd": {
+            "time:hasTRS": { 
+              "@id": "gsqtime:BeforePresent" 
+            },
+            "time:numericPosition": {
+              "@value": endYBP, 
+              "@type": "xsd:decimal"
+            },
+            "gstime:geologicTimeUnitAbbreviation": {
+              "@type": "xsd:string",
+              "value": "BP"
             },
           },
         };
