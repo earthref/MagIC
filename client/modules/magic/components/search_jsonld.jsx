@@ -61,11 +61,29 @@ export default class extends React.Component {
         "sdLicense": "https://creativecommons.org/licenses/by/4.0/",
         "sdDatePublished": now.toISOString(),
         "labNames": contribution.lab_names,
+        "funding": [{
+          "@id": `"{this.funding.id1}",`
+          "@type": "MonetaryGrant", 
+          "identifier":  `{this.funding.identifier2}`
+          "name": `"{this.funding.name3}",`
+           "url": `"{this.funding.url4}",`
+           "funder": {
+             "@id": `"{this.funding.funder_id5}",`
+             "@type": "Organization",
+             "name": `"{this.funding.funder_name6}",`
+             "identifier": [
+               `"{this.funding.funder_id5}",`
+               `"{this.funding.funder_id_alt7}"  //Maybe not needed to have possiblity of multiple funder ids
+             ]
+           }
+         },
         "distribution":{
           "@type":"DataDownload",
           "contentUrl": `https://earthref.org/MagIC/download/${cid}/magic_contribution_${cid}.txt`,
           "encodingFormat": ["text/plain; application=earthref-tsv", "EarthRef-tsv-Multipart"] }
       };
+
+      if (contribution.version >1) json.prov:wasRevisionOf = contribution.version-1  // Not sure of syntax
 
       if (this.props.id && contribution._history) {
         let history = contribution._history.filter(x => parseInt(x.id, 10) === parseInt(this.props.id, 10));
