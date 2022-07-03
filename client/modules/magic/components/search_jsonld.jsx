@@ -20,7 +20,6 @@ export default class extends React.Component {
       const contribution = this.props.item.summary.contribution;
       const all = this.props.item.summary._all || {};
       const cid = this.props.id || contribution.id;
-//	  const pubdoi = this.props.pubdoi || contribution.pubdoi;
       
       const model = models[_.last(versions)];
       const now = new Date();
@@ -42,8 +41,7 @@ export default class extends React.Component {
           "value": `doi:10.7288/V4/MAGIC/${cid}`,
           "url": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}` 
         },
-		"sameAs": `https://earthref.org/MagIC/${cid}`,
-//		"sameAs": `https://earthref.org/MagIC/doi/${pubdoi}`,
+		    "sameAs": `https://earthref.org/MagIC/${cid}`,
         "isAccessibleForFree": true,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "provider": {
@@ -62,28 +60,17 @@ export default class extends React.Component {
         "sdDatePublished": now.toISOString(),
         "labNames": contribution.lab_names,
         "funding": [{
-          "@id": `"{this.funding.id1}",`
+          "@id": `"{this.funding.url}"`,
           "@type": "MonetaryGrant", 
-          "identifier":  `{this.funding.identifier2}`
-          "name": `"{this.funding.name3}",`
-           "url": `"{this.funding.url4}",`
-           "funder": {
-             "@id": `"{this.funding.funder_id5}",`
-             "@type": "Organization",
-             "name": `"{this.funding.funder_name6}",`
-             "identifier": [
-               `"{this.funding.funder_id5}",`
-               `"{this.funding.funder_id_alt7}"  //Maybe not needed to have possiblity of multiple funder ids
-             ]
-           }
-         },
+          "identifier":  `{this.funding.url}`,
+          "name": `"{this.funding.title}"`,
+          "url": `"{this.funding.url}"`,
+         }],
         "distribution":{
           "@type":"DataDownload",
           "contentUrl": `https://earthref.org/MagIC/download/${cid}/magic_contribution_${cid}.txt`,
           "encodingFormat": ["text/plain; application=earthref-tsv", "EarthRef-tsv-Multipart"] }
       };
-
-      if (contribution.version >1) json.prov:wasRevisionOf = contribution.version-1  // Not sure of syntax
 
       if (this.props.id && contribution._history) {
         let history = contribution._history.filter(x => parseInt(x.id, 10) === parseInt(this.props.id, 10));
@@ -93,10 +80,9 @@ export default class extends React.Component {
 
       if (contribution._contributor) json.contributor = contribution._contributor;
       if (contribution.timestamp) json.dateModified = contribution.timestamp;
-  
       if (contribution._reference) {
         if (contribution._reference.html || contribution._reference.title) json.citation = (contribution._reference.html || contribution._reference.title);
-        if (contribution._reference.doi) json.sameAs = ["https://doi.org/" + contribution._reference.doi];
+        if (contribution._reference.doi) json.sameAs = ["https://earthref.org/MagIC/doi/" + contribution._reference.doi];
         if (contribution._reference.html || contribution._reference.title) json.name = (contribution._reference.html || contribution._reference.title) + ' (Dataset)';
         if (contribution._reference.html || contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + (contribution._reference.html || contribution._reference.title);
         if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
@@ -135,25 +121,6 @@ export default class extends React.Component {
       //   }
       // }
       
-      if (all._geo_point) {
-        try {
-          _.sortedUniqBy(
-            _.sortBy(all._geo_point, 
-              x => _.flatten(x.coordinates).join('_')), 
-            x => _.flatten(x.coordinates).join('_'))
-          .forEach((point, i) => {
-            json.spatialCoverage = json.spatialCoverage || { "@type": "Place", "geo": [] };
-            json.spatialCoverage.geo.push({ 
-              "@type": "GeoCoordinates",
-              "latitude": point.coordinates[1],
-              "longitude": point.coordinates[0]
-            });
-          });
-        } catch(error) {
-          console.error("JSONLD", error);
-        }
-      }
-      
       if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
         let startYBP = Math.round(all._age_range_ybp.range.gte);
         let endYBP = Math.round(all._age_range_ybp.range.lte);
@@ -167,7 +134,7 @@ export default class extends React.Component {
       if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
         let startYBP = Math.round(all._age_range_ybp.range.gte);
         let endYBP = Math.round(all._age_range_ybp.range.lte);
-        json['gsqtime'] =  json['gsqtime'] || {
+        json.temporalCoverage = {
           "@type": "time:ProperInterval",
           "time:hasBeginning": {
             "time:hasTRS": { 
@@ -196,6 +163,25 @@ export default class extends React.Component {
             },
           },
         };
+      }
+      
+      if (all._geo_point) {
+        try {
+          _.sortedUniqBy(
+            _.sortBy(all._geo_point, 
+              x => _.flatten(x.coordinates).join('_')), 
+            x => _.flatten(x.coordinates).join('_'))
+          .forEach((point, i) => {
+            json.spatialCoverage = json.spatialCoverage || { "@type": "Place", "geo": [] };
+            json.spatialCoverage.geo.push({ 
+              "@type": "GeoCoordinates",
+              "latitude": point.coordinates[1],
+              "longitude": point.coordinates[0]
+            });
+          });
+        } catch(error) {
+          console.error("JSONLD", error);
+        }
       }
 
       const modelAllColumns = {};
