@@ -18,6 +18,7 @@ export default class extends React.Component {
     ) {
 
       const contribution = this.props.item.summary.contribution;
+      const contributionRow = this.props.item.contribution && this.props.item.contribution.contribution && this.props.item.contribution.contribution[0] || {};
       const all = this.props.item.summary._all || {};
       const cid = this.props.id || contribution.id;
       
@@ -58,14 +59,6 @@ export default class extends React.Component {
         "sdPublisher": "EarthRef.org",
         "sdLicense": "https://creativecommons.org/licenses/by/4.0/",
         "sdDatePublished": now.toISOString(),
-        "labNames": contribution.lab_names,
-        "funding": [{
-          "@id": `"{this.funding.url}"`,
-          "@type": "MonetaryGrant", 
-          "identifier":  `{this.funding.url}`,
-          "name": `"{this.funding.title}"`,
-          "url": `"{this.funding.url}"`,
-         }],
         "distribution":{
           "@type":"DataDownload",
           "contentUrl": `https://earthref.org/MagIC/download/${cid}/magic_contribution_${cid}.txt`,
@@ -89,6 +82,18 @@ export default class extends React.Component {
         if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
         if (contribution._reference.year) json.datePublished = contribution.timestamp;
       }
+      if (contribution.lab_names) json.labNames = contribution.lab_names;
+      console.log('jsonld', contributionRow.funding);
+      if (contributionRow.funding) json.funding =
+        contributionRow.funding.replace(/^([^:])/, ":$1").replace(/([^:])$/, "$1:").replaceAll(/(?<=:".*?):(?=.*?":)/g, "[colon]").replaceAll(/^:|:$/g, '').split(':')
+          .map(x => x.replaceAll(/^"|"$/g, '').replaceAll(/\[colon\]/g, ':')).map(x => ({ key: x.replace(/\[.*/, ''), value: x.replaceAll(/.*\[|\]$/g, '') }))
+          .map(x => ({
+          "@id": `${x.value}`,
+          "@type": "MonetaryGrant", 
+          "identifier":  `${x.value}`,
+          "name": `${x.key}`,
+          "url": `${x.value}`,
+      }));
 
       // if (all._geo_envelope) {
       //   try {
