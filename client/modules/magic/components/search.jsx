@@ -1273,7 +1273,8 @@ class Search extends React.Component {
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
     let es = _.extend({}, activeView.es, {
-      queries: searchQueries
+      queries: searchQueries,
+      source: ['summary.contribution', 'contribution.contribution']
     });
     let queries = {};
     this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {

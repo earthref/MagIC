@@ -18,6 +18,7 @@ export default class extends React.Component {
     ) {
 
       const contribution = this.props.item.summary.contribution;
+      const contributionRow = this.props.item.contribution && this.props.item.contribution.contribution && this.props.item.contribution.contribution[0] || {};
       const all = this.props.item.summary._all || {};
       const cid = this.props.id || contribution.id;
       
@@ -25,23 +26,31 @@ export default class extends React.Component {
       const now = new Date();
 
       let json = {
-        "@context": {
-          "@vocab": "https://schema.org/",
-          "geosci-time": "http://schema.geoschemas.org/contexts/temporal#"
-        },
+        "@context": [
+          "https://schema.org/", 
+          {
+         	  "gsqtime": "https://vocabs.gsq.digital/object?uri=http://linked.data.gov.au/def/trs",
+            "time": "http://www.w3.org/2006/time#",
+            "xsd": "https://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html"
+			    }
+        ],
         "@type": "Dataset",
         "identifier": {
           "@id": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
+          "@type": "PropertyValue",
+          "propertyID": "https://registry.identifiers.org/registry/doi",
+          "value": `doi:10.7288/V4/MAGIC/${cid}`,
+          "url": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}` 
         },
-        "url": `https://earthref.org/MagIC/${cid}`,
-        "identifier": `http://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
+		    "sameAs": `https://earthref.org/MagIC/${cid}`,
         "isAccessibleForFree": true,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "provider": {
           "@id": "https://earthref.org/MagIC",
-          "type": "Organization",
+          "@type": "Organization",
           "legalName": "Magnetics Information Consortium (MagIC) Data Repository",
           "name": "MagIC",
+          "sameAs": "https://www.re3data.org/repository/r3d100011910",
           "url": "https://earthref.org/MagIC"
         },
         "publisher": {
@@ -50,7 +59,6 @@ export default class extends React.Component {
         "sdPublisher": "EarthRef.org",
         "sdLicense": "https://creativecommons.org/licenses/by/4.0/",
         "sdDatePublished": now.toISOString(),
-        "labNames": contribution.lab_names,
         "distribution":{
           "@type":"DataDownload",
           "contentUrl": `https://earthref.org/MagIC/download/${cid}/magic_contribution_${cid}.txt`,
@@ -65,16 +73,27 @@ export default class extends React.Component {
 
       if (contribution._contributor) json.contributor = contribution._contributor;
       if (contribution.timestamp) json.dateModified = contribution.timestamp;
-  
       if (contribution._reference) {
         if (contribution._reference.html || contribution._reference.title) json.citation = (contribution._reference.html || contribution._reference.title);
-        if (contribution._reference.doi) json.sameAs = ["https://doi.org/" + contribution._reference.doi];
+        if (contribution._reference.doi) json.sameAs = ["https://earthref.org/MagIC/doi/" + contribution._reference.doi];
         if (contribution._reference.html || contribution._reference.title) json.name = (contribution._reference.html || contribution._reference.title) + ' (Dataset)';
         if (contribution._reference.html || contribution._reference.title) json.description = "Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository from a paper titled: " + (contribution._reference.html || contribution._reference.title);
         if (contribution._reference.keywords) json.keywords = contribution._reference.keywords;
         if (contribution._reference.abstract_html) json.description = contribution._reference.abstract_html;
         if (contribution._reference.year) json.datePublished = contribution.timestamp;
       }
+      if (contribution.lab_names) json.labNames = contribution.lab_names;
+      console.log('jsonld', contributionRow.funding);
+      if (contributionRow.funding) json.funding =
+        contributionRow.funding.replace(/^([^:])/, ":$1").replace(/([^:])$/, "$1:").replaceAll(/(?<=:".*?):(?=.*?":)/g, "[colon]").replaceAll(/^:|:$/g, '').split(':')
+          .map(x => x.replaceAll(/^"|"$/g, '').replaceAll(/\[colon\]/g, ':')).map(x => ({ key: x.replace(/\[.*/, ''), value: x.replaceAll(/.*\[|\]$/g, '') }))
+          .map(x => ({
+          "@id": `${x.value}`,
+          "@type": "MonetaryGrant", 
+          "identifier":  `${x.value}`,
+          "name": `${x.key}`,
+          "url": `${x.value}`,
+      }));
 
       // if (all._geo_envelope) {
       //   try {
@@ -107,6 +126,50 @@ export default class extends React.Component {
       //   }
       // }
       
+      if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
+        let startYBP = Math.round(all._age_range_ybp.range.gte);
+        let endYBP = Math.round(all._age_range_ybp.range.lte);
+        json.temporalCoverage = { 
+          "@type": "DateTime", 
+          "startDate": -startYBP + 1949 + (startYBP < 1950 ? 1 : 0), 
+          "endDate": -endYBP + 1949 + (endYBP < 1950 ? 1 : 0),
+        };
+      }
+
+      if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
+        let startYBP = Math.round(all._age_range_ybp.range.gte);
+        let endYBP = Math.round(all._age_range_ybp.range.lte);
+        json.temporalCoverage = {
+          "@type": "time:ProperInterval",
+          "time:hasBeginning": {
+            "time:hasTRS": { 
+              "@id": "gsqtime:BeforePresent" 
+            },
+            "time:numericPosition": {
+              "@value": startYBP, 
+              "@type": "xsd:decimal"
+            },
+            "gstime:geologicTimeUnitAbbreviation": {
+              "@type": "xsd:string",
+              "value": "BP"
+             },
+          },
+          "time:hasEnd": {
+            "time:hasTRS": { 
+              "@id": "gsqtime:BeforePresent" 
+            },
+            "time:numericPosition": {
+              "@value": endYBP, 
+              "@type": "xsd:decimal"
+            },
+            "gstime:geologicTimeUnitAbbreviation": {
+              "@type": "xsd:string",
+              "value": "BP"
+            },
+          },
+        };
+      }
+      
       if (all._geo_point) {
         try {
           _.sortedUniqBy(
@@ -124,45 +187,6 @@ export default class extends React.Component {
         } catch(error) {
           console.error("JSONLD", error);
         }
-      }
-      
-      if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
-        let startYBP = Math.round(all._age_range_ybp.range.gte);
-        let endYBP = Math.round(all._age_range_ybp.range.lte);
-        json.temporalCoverage = { 
-          "@type": "DateTime", 
-          "startDate": -startYBP + 1949 + (startYBP < 1950 ? 1 : 0), 
-          "endDate": -endYBP + 1949 + (endYBP < 1950 ? 1 : 0),
-        };
-      }
-
-      if (all._age_range_ybp && all._age_range_ybp.range.gte && all._age_range_ybp.range.lte) {
-        let startYBP = Math.round(all._age_range_ybp.range.gte);
-        let endYBP = Math.round(all._age_range_ybp.range.lte);
-        json['geosci-time'] =  json['geosci-time'] || {
-          "@type": "time:Instant", 
-          "time:inTimePosition" : {
-            "@type": "time:ProperInterval",
-            "time:hasBeginning": {
-              "time:hasTRS": { 
-                "@id": "geosci-time:BeforePresent" 
-              },
-              "time:numericPosition": {
-                "@value": startYBP, 
-                "@type": "xsd:decimal"
-              },
-            },
-            "time:hasEnd": {
-              "time:hasTRS": { 
-                "@id": "geosci-time:BeforePresent" 
-              },
-              "time:numericPosition": {
-                "@value": endYBP, 
-                "@type": "xsd:decimal"
-              },
-            },
-          },
-        };
       }
 
       const modelAllColumns = {};
