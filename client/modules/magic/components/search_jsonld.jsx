@@ -85,7 +85,7 @@ export default class extends React.Component {
       if (contribution.lab_names) json.labNames = contribution.lab_names;
       console.log('jsonld', contributionRow.funding);
       if (contributionRow.funding) json.funding =
-        contributionRow.funding.replace(/^([^:])/, ":$1").replace(/([^:])$/, "$1:").replaceAll(/(?<=:".*?):(?=.*?":)/g, "[colon]").replaceAll(/^:|:$/g, '').split(':')
+        contributionRow.funding.replace(/^([^:])/, ":$1").replace(/([^:])$/, "$1:").replaceAll(/(?<=:"[^"]*?):(?=[^"]*?":)/g, "[colon]").replaceAll(/^:|:$/g, '').split(':')
           .map(x => x.replaceAll(/^"|"$/g, '').replaceAll(/\[colon\]/g, ':')).map(x => ({ key: x.replace(/\[.*/, ''), value: x.replaceAll(/.*\[|\]$/g, '') }))
           .map(x => ({
           "@id": `${x.value}`,
