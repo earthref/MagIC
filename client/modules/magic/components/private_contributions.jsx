@@ -541,17 +541,8 @@ export default class extends React.Component {
             Share Your Private Contribution
           </div>
           <div className="content">
-            <div className="ui fluid action input">
+            <div className="ui fluid input">
               <input ref="share link" type="text" readOnly={true}/>
-              <button className="ui icon button" onClick={(e) => {
-                var $temp = $("<input>");
-                $("body").append($temp);
-                $temp.val(this.refs["share link"].value).select();
-                document.execCommand("copy");
-                $temp.remove();
-              }}>
-                <i className="copy icon"></i>&nbsp;Copy
-              </button>
             </div>
           </div>
           <div className="actions">
