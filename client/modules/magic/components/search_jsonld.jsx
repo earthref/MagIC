@@ -35,22 +35,16 @@ export default class extends React.Component {
 			    }
         ],
         "@type": "Dataset",
-        "identifier": {
-          "@id": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
-          "@type": "PropertyValue",
-          "propertyID": "https://registry.identifiers.org/registry/doi",
-          "value": `doi:10.7288/V4/MAGIC/${cid}`,
-          "url": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}` 
-        },
+        "identifier": `https://dx.doi.org/10.7288/V4/MAGIC/${cid}`,
 		    "sameAs": `https://earthref.org/MagIC/${cid}`,
         "isAccessibleForFree": true,
         "license": "https://creativecommons.org/licenses/by/4.0/",
         "provider": {
           "@id": "https://earthref.org/MagIC",
           "@type": "Organization",
+          "identifier": "https://www.re3data.org/repository/r3d100011910",
           "legalName": "Magnetics Information Consortium (MagIC) Data Repository",
           "name": "MagIC",
-          "sameAs": "https://www.re3data.org/repository/r3d100011910",
           "url": "https://earthref.org/MagIC"
         },
         "publisher": {
