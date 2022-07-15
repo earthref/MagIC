@@ -15,8 +15,8 @@
     "mocha": "^9.1.1"
   },
   "dependencies": {
-    "@opensearch-project/opensearch": "^1.0.2",
     "@handsontable/react": "^10.0.0",
+    "@opensearch-project/opensearch": "^1.0.2",
     "@storybook/react-komposer": "^2.0.5",
     "archiver": "^5.3.0",
     "aws-sdk": "^2.995.0",
@@ -64,7 +64,8 @@
     "source-map-support": "^0.5.20",
     "underscore": "^1.13.1",
     "uuid": "^8.3.2",
-    "xlsx": "^0.17.2"
+    "xlsx": "^0.17.2",
+    "xregexp": "^5.1.1"
   },
   "browserslist": [
     "last 2 versions"
