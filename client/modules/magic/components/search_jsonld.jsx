@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import {Helmet} from 'react-helmet';
-import {versions, models} from '/lib/configs/magic/data_models';
+import { versions, models } from '/lib/configs/magic/data_models';
 
 export default class extends React.Component {
 
@@ -77,17 +77,20 @@ export default class extends React.Component {
         if (contribution._reference.year) json.datePublished = contribution.timestamp;
       }
       if (contribution.lab_names) json.labNames = contribution.lab_names;
-      console.log('jsonld', contributionRow.funding);
-      if (contributionRow.funding) json.funding =
-        contributionRow.funding.replace(/^([^:])/, ":$1").replace(/([^:])$/, "$1:").replaceAll(/(?<=:"[^"]*?):(?=[^"]*?":)/g, "[colon]").replaceAll(/^:|:$/g, '').split(':')
-          .map(x => x.replaceAll(/^"|"$/g, '').replaceAll(/\[colon\]/g, ':')).map(x => ({ key: x.replace(/\[.*/, ''), value: x.replaceAll(/.*\[|\]$/g, '') }))
-          .map(x => ({
+      if (contributionRow.funding) {
+        let funding = contributionRow.funding.replace(/^([^:])/, ":$1").replace(/([^:])$/, "$1:");
+        funding = funding.split(':"').map(x => x.split('":').map(y => y.replaceAll(/:/g, "[colon]")).join('":')).join(':"');
+        funding = funding.replaceAll(/^:|:$/g, '').split(':');
+        funding = funding.map(x => x.replaceAll(/^"|"$/g, '').replaceAll(/\[colon\]/g, ':'));
+        funding = funding.map(x => ({ key: x.replace(/\[.*/, ''), value: x.replaceAll(/.*\[|\]$/g, '') }));
+        json.funding = funding.map(x => ({
           "@id": `${x.value}`,
-          "@type": "MonetaryGrant", 
-          "identifier":  `${x.value}`,
+          "@type": "MonetaryGrant",
+          "identifier": `${x.value}`,
           "name": `${x.key}`,
           "url": `${x.value}`,
-      }));
+        }));
+      }
 
       // if (all._geo_envelope) {
       //   try {
