@@ -85,7 +85,7 @@ export default class extends React.Component {
 									<img src="/MagIC/people/njarboe.jpg" />
 								</div><br/>
 								Nick Jarboe
-								<div className="sub header">Data Analyst at<br/>SIO, UCSD</div>
+								<div className="sub header">Data Analyst at<br/>CEOAS, OSU</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
@@ -116,6 +116,14 @@ export default class extends React.Component {
 						<li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
 						<li><a href="http://earthref.org/erml/8184">Luke Fairchild</a></li>
 						<li><a href="http://earthref.org/erml/8260">Kevin Gaastra</a></li>
+					</ul>
+				</Container>
+				<Container fluid textAlign='justified'>
+					<Header size='medium' dividing>MagIC Info</Header>
+					<ul>
+						<li>MagIC's Research Organization Registry (ROR) id: <a href="https://ror.org/00f89wy98">https://ror.org/00f89wy98</a></li>
+						<li>MagIC at re3data.org: : <a href="https://www.re3data.org/repository/r3d100011910">https://www.re3data.org/repository/r3d100011910</a></li>
+						<li><a href=""></a></li>
 					</ul>
 				</Container>
 			</div>
