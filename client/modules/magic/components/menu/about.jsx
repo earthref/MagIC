@@ -123,7 +123,6 @@ export default class extends React.Component {
 					<ul>
 						<li>MagIC's Research Organization Registry (ROR) id: <a href="https://ror.org/00f89wy98">https://ror.org/00f89wy98</a></li>
 						<li>MagIC at re3data.org: : <a href="https://www.re3data.org/repository/r3d100011910">https://www.re3data.org/repository/r3d100011910</a></li>
-						<li><a href=""></a></li>
 					</ul>
 				</Container>
 			</div>
