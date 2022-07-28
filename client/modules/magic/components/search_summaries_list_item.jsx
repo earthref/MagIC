@@ -95,7 +95,7 @@ class SearchSummariesListItem extends React.Component {
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
     return (
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215) &&
+        {id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215 || id == 19602) &&
         <a
           href={`//earthref.org/MagIC/download/${id}/magic_contribution_${id}.txt`}
           download
@@ -105,7 +105,7 @@ class SearchSummariesListItem extends React.Component {
         >
           <i className="ui file text outline icon"/> Download
         </button></a>}
-        {id && !(_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215) && 
+        {id && !(_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215 || id == 19602) && 
         <button type="submit" className="ui basic tiny fluid compact icon header purple button"
           style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
             document.getElementById('downloadButton' + id).className = "ui spinner loading icon";
