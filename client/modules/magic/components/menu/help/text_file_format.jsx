@@ -46,12 +46,12 @@ E28--Eastern Sheep Creek--GM-ARAR:LT-AF-Z:SO-SM:LP-DIR-AF:FS-FD--This study--Ext
         <b>Paleointensity example</b><br/>
         For an example of a data file from a paleointensity study with measurement data 
         see <a href="https://earthref.org/MagIC/16357">Cai et al. (2020)</a>.<br/>
+        <a name="compact"></a>
         <b>FORC example</b><br/>
         For an example of a data file from a study with FORC measurement data 
         see <a href="https://earthref.org/MagIC/16769">Bowles et al. (2020)</a>.
         </p>
-        <a name="compact"></a>
-        <h4>MagIC Compact Format</h4>
+        <h4>Compact MagiC Format</h4>
         <p>
           For large MagIC upload files with columns that repeat the same values for every row, a compact form of the MagIC file format should be used. This allows for a large reduction in size in the measurement table for MagIC files with XPEEM, SQUID microscopy, FORC, QDM and other image like data. Large MagIC sites tables due to long core records can also often be reduced significantly in size by using the compact format.
         </p>
