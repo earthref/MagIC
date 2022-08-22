@@ -53,21 +53,30 @@ export default class extends React.Component {
 					<Grid padded columns={6}>
 						<Grid.Row>
 							<Grid.Column>
-								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#cconstable">
-								<div className="ui huge icon bordered rounded image" data-tooltip="Institute for Geophysics and Planetary Physics, SIO, UCSD" >
-									<img src="/MagIC/people/cconstable.jpg" />
-								</div><br/>
-								Cathy Constable
-								<div className="sub header">Professor at<br/>SIO, UCSD</div>
-							</a>
-							</Grid.Column>
-							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#akoppers">
 								<div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
 									<img src="/MagIC/people/akoppers.jpg" />
 								</div><br/>
 								Anthony Koppers
 								<div className="sub header">Associate Dean at<br/>CEOAS, OSU</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#nswanson-hysell">
+								<div className="ui huge icon bordered rounded image" data-tooltip="Earth and Planetary Science, Berkeley" >
+									<img src="/MagIC/people/nswanson-hysell.jpg" />
+								</div><br/>
+								Nick Swanson-Hysell
+								<div className="sub header">Associate Professor at<br/>EPS, Berkeley</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#cconstable">
+								<div className="ui huge icon bordered rounded image" data-tooltip="Institute for Geophysics and Planetary Physics, SIO, UCSD" >
+									<img src="/MagIC/people/cconstable.jpg" />
+								</div><br/>
+								Cathy Constable
+								<div className="sub header">Professor at<br/>SIO, UCSD</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
@@ -85,7 +94,7 @@ export default class extends React.Component {
 									<img src="/MagIC/people/njarboe.jpg" />
 								</div><br/>
 								Nick Jarboe
-								<div className="sub header">Data Analyst at<br/>CEOAS, OSU</div>
+								<div className="sub header">Data Analyst via<br/>CEOAS, OSU</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
@@ -95,15 +104,6 @@ export default class extends React.Component {
 								</div><br/>
 								Rupert Minnett
 								<div className="sub header">Programmer via<br/>CEOAS, OSU</div>
-							</a>
-							</Grid.Column>
-							<Grid.Column>
-								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#ljonestrask">
-								<div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
-									<img src="/MagIC/people/ljonestrask.jpg" />
-								</div><br/>
-								Lori Jonestrask
-								<div className="sub header">Programmer at<br/>SIO, UCSD</div>
 							</a>
 							</Grid.Column>
 						</Grid.Row>
