@@ -116,6 +116,7 @@ export default class extends React.Component {
 						<li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
 						<li><a href="http://earthref.org/erml/8184">Luke Fairchild</a></li>
 						<li><a href="http://earthref.org/erml/8260">Kevin Gaastra</a></li>
+						<li><a href="http://earthref.org/erml/6434">Nick Jarboe</a></li>
 					</ul>
 				</Container>
 				<Container fluid textAlign='justified'>

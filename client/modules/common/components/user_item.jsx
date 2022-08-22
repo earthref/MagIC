@@ -79,7 +79,7 @@ const users = {
     },
     "avatar": "/MagIC/people/njarboe.jpg",
     "position": "Data Analyst",
-    "affiliation": "Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego",
+    "affiliation": "College of Earth, Ocean and Atmospheric Science, Oregon State University",
     "badges": [
       "Science Community Relations and Outreach", 
       "Data Analyst", 
@@ -111,41 +111,23 @@ const users = {
     "orcid": "0000-0002-9000-2100",
     "bio": "Rupert Minnett joined the MagIC team in 2005. He has a Ph.D. in computer engineering from UC San Diego with a thesis in biologically-inspired machine learning and computer vision. His primary interest is in enabling science with custom software solutions."
   },
-  "ljonestrask": {
+  "nswanson-hysell": {
     "name": {
-      "first": "Lori",
-      "last": "Jonestrask"
+      "first": "Nicholas",
+      "last": "Swanson-Hysell"
     },
-    "avatar": "/MagIC/people/ljonestrask.jpg",
-    "position": "Software Developer",
-    "affiliation": "Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego",
+    "avatar": "/MagIC/people/nswanson-hysell.jpg",
+    "position": "Associate Professor of Earth and Planetary Science",
+    "affiliation": "Earth and Planetary Science, University of California, Berkeley",
     "badges": [
-      "PmagPy Development",
-      "Python"
+      "Paleogeography", 
+      "Geomagnetic Field Evolution", 
+      "Earth History", 
+      "Long-term Climate Drivers"
     ],
-    "email": "ljonestrask@ucsd.edu",
-    "note": "Please contact her to report software errors and installation problems with the PmagPy software suite. Issues can also be submitted directly on the <a href=\"https://github.com/PmagPy/PmagPy/issues\" target=\"_blank\">PmagPy GitHub</a> site.",
-    "bio": "Lori Jonestrask joined the MagIC team in 2014 and has worked closely with Lisa Tauxe and others in maintaining and adding features to the PmagPy software suite."
-  },
-  "cconstable": {
-    "name": {
-      "first": "Cathy",
-      "last": "Constable"
-    },
-    "avatar": "/MagIC/people/cconstable.jpg",
-    "position": "Professor of Geophysics",
-    "affiliation": "Institute of Geophysics and Planetary Physics, Scripps Institution of Oceanography, UC San Diego",
-    "badges": [
-      "Paleomagnetism and Geomagnetism",
-      "Secular Variation and Reversals of the Geomagnetic Field",
-      "Inverse Problems",
-      "Applications of Statistical Techniques in Geophysics",
-      "Electrical Conductivity of the Mantle",
-      "Paleo and Rock Magnetic Databases"
-    ],
-    "email": "cconstable@ucsd.edu",
-    "orcid": "0000-0003-4534-4977",
-    "website": "http://scrippsscholars.ucsd.edu/cconstable"
+    "email": " swanson-hysell@berkeley.edu",
+    "orcid": "0000-0003-3215-4648",
+    "website": "http://www.swanson-hysell.org"
   },
   "akoppers": {
     "name": {
@@ -166,6 +148,26 @@ const users = {
     "email": "akoppers@ceoas.oregonstate.edu",
     "orcid": "0000-0002-8136-5372",
     "website": "https://ceoas.oregonstate.edu/profile/koppers"
+  },
+  "cconstable": {
+    "name": {
+      "first": "Cathy",
+      "last": "Constable"
+    },
+    "avatar": "/MagIC/people/cconstable.jpg",
+    "position": "Professor of Geophysics",
+    "affiliation": "Institute of Geophysics and Planetary Physics, Scripps Institution of Oceanography, UC San Diego",
+    "badges": [
+      "Paleomagnetism and Geomagnetism",
+      "Secular Variation and Reversals of the Geomagnetic Field",
+      "Inverse Problems",
+      "Applications of Statistical Techniques in Geophysics",
+      "Electrical Conductivity of the Mantle",
+      "Paleo and Rock Magnetic Databases"
+    ],
+    "email": "cconstable@ucsd.edu",
+    "orcid": "0000-0003-4534-4977",
+    "website": "http://scrippsscholars.ucsd.edu/cconstable"
   },
   "ltauxe": {
     "name": {
