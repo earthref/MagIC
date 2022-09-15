@@ -110,13 +110,16 @@ export default class extends React.Component {
 					</Grid>
 				</Container>
 				<Container fluid textAlign='justified'>
-					<Header size='medium' dividing>MagIC Open-Source Software Contributors</Header>
+					<Header size='medium' dividing>PmagPy Open-Source Software Contributors</Header>
 					<ul>
+						<li><a href="http://earthref.org/erml/629">Lisa Tauxe</a></li>
 						<li><a href="http://earthref.org/erml/7441">Nick Swanson-Hysell</a></li>
-						<li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
-						<li><a href="http://earthref.org/erml/8184">Luke Fairchild</a></li>
+						<li><a href="http://earthref.org/erml/8110">Lori Jonestrask</a></li>
 						<li><a href="http://earthref.org/erml/8260">Kevin Gaastra</a></li>
+						<li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
 						<li><a href="http://earthref.org/erml/6434">Nick Jarboe</a></li>
+						<li><a href="http://earthref.org/erml/5730">Rupert Minnett</a></li>
+						<li><a href="http://earthref.org/erml/8184">Luke Fairchild</a></li>
 					</ul>
 				</Container>
 				<Container fluid textAlign='justified'>
