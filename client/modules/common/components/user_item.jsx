@@ -83,6 +83,7 @@ const users = {
     "badges": [
       "Science Community Relations and Outreach", 
       "Data Analyst", 
+      "Science-on-Schema.org Interoperability Standards", 
       "Website Content", 
       "MagIC Workshops", 
       "PmagPy Data Integration"
@@ -113,7 +114,7 @@ const users = {
   },
   "nswanson-hysell": {
     "name": {
-      "first": "Nicholas",
+      "first": "Nick",
       "last": "Swanson-Hysell"
     },
     "avatar": "/MagIC/people/nswanson-hysell.jpg",
@@ -149,6 +150,52 @@ const users = {
     "orcid": "0000-0002-8136-5372",
     "website": "https://ceoas.oregonstate.edu/profile/koppers"
   },
+  "mbrown": {
+    "name": {
+      "first": "Max",
+      "last": "Brown"
+    },
+    "avatar": "/MagIC/people/mbrown.jpg",
+    "position": "Research Associate Professor",
+    "affiliation": "Institute for Rock Magnetism (IRM), University of Minnesota",
+    "badges": [
+      "Paleomagnetism and Geomagnetism"
+    ],
+    "email": "mcbrown@umn.edu",
+    "orcid": "0000-0003-0753-397X",
+    "website": "https://sites.google.com/site/maxwellbrownpalaeomagnetism"
+  },
+  "jfeinberg": {
+    "name": {
+      "first": "Josh",
+      "last": "Feinberg"
+    },
+    "avatar": "/MagIC/people/jfeinberg.jpg",
+    "position": "Professor of Earth and Environmental Sciences",
+    "affiliation": "Earth and Environmental Sciences and the Institute for Rock Magnetism (IRM), University of Minnesota",
+    "badges": [
+      "Rock Magnetism",
+      "Paleomagnetism and Geomagnetism"
+    ],
+    "email": "feinberg@umn.edu",
+    "orcid": "",
+    "website": "https://cse.umn.edu/esci/joshua-feinberg"
+  },
+  "psolheid": {
+    "name": {
+      "first": "Peat",
+      "last": "Solheid"
+    },
+    "avatar": "/MagIC/people/psolheid.jpg",
+    "position": "Senior Scientist",
+    "affiliation": "Institute for Rock Magnetism (IRM), University of Minnesota",
+    "badges": [
+      "Rock Magnetism"
+    ],
+    "email": "peat@umn",
+    "orcid": "",
+    "website": "https://cse.umn.edu/irm/peter-solheid"
+  },
   "cconstable": {
     "name": {
       "first": "Cathy",
@@ -175,8 +222,8 @@ const users = {
       "last": "Tauxe"
     },
     "avatar": "/MagIC/people/ltauxe.jpg",
-    "position": "Distinguished Professor of Geophysics",
-    "affiliation": "Geoscience Research Divison, Scripps Institution of Oceanography, UC San Diego",
+    "position": "Professor Emerita of Geophysics",
+    "affiliation": "Geoscience Research Division, Scripps Institution of Oceanography, UC San Diego",
     "badges": [
       "Paleomagnetism",
       "Rock Magnetism",

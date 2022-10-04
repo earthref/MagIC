@@ -23,8 +23,6 @@ export default class extends React.Component {
 							<Grid.Column>
 							</Grid.Column>
 							<Grid.Column>
-							</Grid.Column>
-							<Grid.Column>
 								<Segment>
 									<Image src='/MagIC/technology/nsf_small.png'/>
 								</Segment>
@@ -40,6 +38,14 @@ export default class extends React.Component {
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
+								<Segment>
+									<Image src='/MagIC/technology/berkeley_small.png'/>
+								</Segment>
+							</Grid.Column>
+							<Grid.Column>
+								<Segment>
+									<Image src='/MagIC/technology/uminn_small.png'/>
+								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 							</Grid.Column>
@@ -50,7 +56,7 @@ export default class extends React.Component {
 				<Container fluid textAlign='justified'>
 					<Header size='medium' dividing>MagIC Core Group</Header>
 					MagIC is inherently domain-specific and directed by PIs who are both producers and consumers of rock and paleomagnetic data.
-					<Grid padded columns={6}>
+					<Grid padded columns={5}>
 						<Grid.Row>
 							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#akoppers">
@@ -71,6 +77,24 @@ export default class extends React.Component {
 							</a>
 							</Grid.Column>
 							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#mbrown">
+								<div className="ui huge icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+									<img src="/MagIC/people/mbrown.jpg" />
+								</div><br/>
+								Max Brown
+                                <div class="sub header">Research Associate Professor <br/>at IRM, U. of Minnesota</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#jfeinberg">
+								<div className="ui huge icon bordered rounded image" data-tooltip="College of Science and Engineering, Earth & Environmental Sciences, IRM, University of Minnesota" >
+									<img src="/MagIC/people/jfeinberg.jpg" />
+								</div><br/>
+								Josh Feinberg
+                                <div class="sub header">Professor at <br/>IRM, U. of Minnesota</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#cconstable">
 								<div className="ui huge icon bordered rounded image" data-tooltip="Institute for Geophysics and Planetary Physics, SIO, UCSD" >
 									<img src="/MagIC/people/cconstable.jpg" />
@@ -79,18 +103,20 @@ export default class extends React.Component {
 								<div className="sub header">Professor at<br/>SIO, UCSD</div>
 							</a>
 							</Grid.Column>
+						</Grid.Row>
+						<Grid.Row>
 							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#ltauxe">
 								<div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
 									<img src="/MagIC/people/ltauxe.jpg" />
 								</div><br/>
 								Lisa Tauxe
-								<div className="sub header">Distinguished Professor<br/>at SIO, UCSD</div>
+								<div className="sub header">Professor Emerita<br/>at SIO, UCSD</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#njarboe">
-								<div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
+								<div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
 									<img src="/MagIC/people/njarboe.jpg" />
 								</div><br/>
 								Nick Jarboe
@@ -104,6 +130,15 @@ export default class extends React.Component {
 								</div><br/>
 								Rupert Minnett
 								<div className="sub header">Programmer via<br/>CEOAS, OSU</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#psolheid">
+								<div className="ui huge icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+									<img src="/MagIC/people/psolheid.jpg" />
+								</div><br/>
+								Peat Solheid
+                                <div class="sub header">Senior Scientist at <br/>IRM, U. of Minnesota</div>
 							</a>
 							</Grid.Column>
 						</Grid.Row>
