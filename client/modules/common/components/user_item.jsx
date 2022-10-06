@@ -178,7 +178,7 @@ const users = {
       "Paleomagnetism and Geomagnetism"
     ],
     "email": "feinberg@umn.edu",
-    "orcid": "",
+    "orcid": "0000-0002-5845-9848",
     "website": "https://cse.umn.edu/esci/joshua-feinberg"
   },
   "psolheid": {
