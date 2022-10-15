@@ -1,15 +1,13 @@
 import {Promise as BPromise} from 'bluebird';
-
 import {Meteor} from 'meteor/meteor';
 import {Promise} from 'meteor/promise';
-
 import _ from "lodash";
 import __ from "deepdash/standalone";
 import uuid from "uuid";
 import moment from "moment";
 import bcrypt from "bcrypt";
 import sizeof from "object-sizeof";
-import elasticsearch from "elasticsearch";
+import opensearch from "@opensearch-project/opensearch";
 
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
@@ -21,16 +19,16 @@ import { resolveTxt } from 'dns';
 
 const saltRounds = 10;
 
-const esClient = new elasticsearch.Client({
+const esClient = new opensearch.Client({
   //log: "trace",
-  host: Meteor.settings.elasticsearch && Meteor.settings.elasticsearch.url || "",
+  node: Meteor.settings.opensearch && Meteor.settings.opensearch.node || "",
   keepAlive: false,
   apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
 //const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1_sandbox' : 'er_users_v1';
-const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1' : 'er_users_v1';
+const erUsersIndex = Meteor.isDevelopment ? 'er_users' : 'er_users';
 
 export default function () {
 
@@ -65,12 +63,13 @@ export default function () {
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
+        search.query.bool.filter.push({ term: { type }});
         let resp = await esClient.search({
           "index": index,
-          "type": type,
+          "type": "_doc",
           "body": search
         });
-        return resp.aggregations.buckets ? _.reverse(_.sortBy(resp.aggregations.buckets.buckets, ["doc_count"])) : resp.aggregations;
+        return resp.body.aggregations.buckets ? _.reverse(_.sortBy(resp.body.aggregations.buckets.buckets, ["doc_count"])) : resp.body.aggregations;
 
       } catch(error) {
         console.error("esBuckets", index, type, queries, error.message);
@@ -112,19 +111,20 @@ export default function () {
         if (_.trim(countField) !== "") search.aggs = { count: { sum: { field: countField }}};
 
         // console.log("esCount search:", JSON.stringify(search));
+        search.query.bool.filter.push({ term: { type }});
         let resp = _.trim(countField) !== "" ? 
           await esClient.search({
             "index": index,
-            "type": type,
+            "type": "_doc",
             "body": _.extend({}, search, { "_source": false, "size": 0 }),
             "timeout": "60s"
           }) :
           await esClient.count({
             "index": index,
-            "type": type,
+            "type": "_doc",
             "body": search
           });
-        let count = _.trim(countField) !== "" ? resp.aggregations.count.value : resp.count;
+        let count = _.trim(countField) !== "" ? resp.body.aggregations.count.value : resp.body.count;
 
         // console.log("esCount hits:", count);
         return count;
@@ -167,15 +167,16 @@ export default function () {
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
+        search.query.bool.filter.push({ term: { type }});
         // console.log("esPage search:", JSON.stringify(search));
         let resp = await esClient.search({
           "index": index,
-          "type": type,
+          "type": "_doc",
           "body": search,
           "timeout": "60s"
         });
-        // console.log("esPage hits:", resp.hits.total);
-        return resp.hits.hits.map(hit => hit._source);
+        // console.log("esPage hits:", resp.body.hits.total.value);
+        return resp.body.hits.hits.map(hit => hit._source);
 
       } catch(error) {
         console.error("esPage", index, type, queries, filters, source, sort, pageSize, pageNumber, error.message);
@@ -213,10 +214,11 @@ export default function () {
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
+        search.query.bool.filter.push({ term: { type }});
         let resp = await esClient.search({
           "index": index,
           "scroll": '30s',
-          "type": type,
+          "type": "_doc",
           "body": search
         });
         return resp;
@@ -234,7 +236,7 @@ export default function () {
 
         let resp = await esClient.scroll({
           "scrollId": scrollID,
-          "scroll": '30s'
+          "scroll": '600s'
         });
         return resp;
 
@@ -273,12 +275,13 @@ export default function () {
         if (_.isArray(queries)) search.query.bool.must.push(...queries);
         if (_.isArray(filters)) search.query.bool.filter.push(...filters);
 
+        search.query.bool.filter.push({ term: { type: "contribution" }});
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": search
         });
-        return resp.aggregations.buckets.buckets.map((id) => id.key);
+        return resp.body.aggregations.buckets.buckets.map((id) => id.key);
 
       } catch(error) {
         console.error("esContributionIDs", index, queries, filters, error.message);
@@ -296,7 +299,7 @@ export default function () {
         // Get the next contribution ID
         let next_id = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "size": 1,
             "_source": "summary.contribution.id",
@@ -310,9 +313,9 @@ export default function () {
             }]
           }
         });
-        if (isNaN(_.parseInt(next_id.hits.hits[0]._source.summary.contribution.id)))
+        if (isNaN(_.parseInt(next_id.body.hits.hits[0]._source.summary.contribution.id)))
           throw new Error('Failed to retrieve new contribution ID.');
-        next_id = _.parseInt(next_id.hits.hits[0]._source.summary.contribution.id) + 1;
+        next_id = _.parseInt(next_id.body.hits.hits[0]._source.summary.contribution.id) + 1;
 
         let timestamp = moment().utc().toISOString();
         let contributionSummary = {
@@ -358,11 +361,12 @@ export default function () {
         // Create the new contribution and return the new contribution ID
         await esClient.index({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": next_id + "_0",
           "body": {
             "summary": summary,
-            "contribution": contribution
+            "contribution": contribution,
+            type: "contribution"
           },
           "refresh": true
         });
@@ -403,15 +407,14 @@ export default function () {
         summary.contribution._is_valid = "false";
 
         // console.log("esUpdatePrivateContribution updating es index", index, contributor, _contributor, id, sizeof(summary), sizeof(contribution));
-        if (id == 16798) delete contribution.measurements;
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
           "body": {
-            "doc": { summary, contribution }
+            "doc": { summary, contribution, type: "contribution" }
           }
         });
       } catch(error) {
@@ -435,7 +438,7 @@ export default function () {
           let summary = {};
           let resp = await esClient.search({
             "index": index,
-            "type": "contribution",
+            "type": "_doc",
             "body": {
               "_source": {
                 "includes": ["summary.contribution.*", "contribution.*", "criteria.*"]
@@ -443,6 +446,10 @@ export default function () {
               "query": {
                 "bool": {
                   "filter": [{
+                    "term": {
+                      "type": "contribution"
+                    }
+                  }, {
                     "term": {
                       "summary.contribution.id": id
                     }
@@ -455,11 +462,11 @@ export default function () {
               }
             }
           });
-          if (resp.hits.total > 0) {
-            if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-              resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-            contribution = resp.hits.hits[0]._source.contribution;
-            summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+          if (resp.body.hits.total.value > 0) {
+            if (resp.body.hits.hits[0]._source.contribution && _.isPlainObject(resp.body.hits.hits[0]._source.contribution.contribution))
+              resp.body.hits.hits[0]._source.contribution.contribution = [resp.body.hits.hits[0]._source.contribution.contribution];
+            contribution = resp.body.hits.hits[0]._source.contribution;
+            summary.contribution = resp.body.hits.hits[0]._source.summary.contribution;
           }
         //}
 
@@ -467,7 +474,7 @@ export default function () {
 
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
@@ -478,12 +485,12 @@ export default function () {
         // console.log("esUpdatePrivatePreSummaries updated contribution doc", index, contributor, id + "_0");
 
         let bulkIndex = [], rowIdx = 1;
-        _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
-          _.keys(summarizer.json[indexType]).forEach((name) => {
-            _.keys(summarizer.json[indexType][name]).forEach((parent) => {
+        _.without(_.keys(summarizer.json), 'contribution').forEach((docType) => {
+          _.keys(summarizer.json[docType]).forEach((name) => {
+            _.keys(summarizer.json[docType][name]).forEach((parent) => {
               bulkIndex.push(
-                { index: { _index: index, _type: indexType, _id: id + '_' + rowIdx } },
-                { summarizer: { indexType, name, parent }}
+                { index: { _index: index, _type: "_doc", _id: id + '_' + rowIdx } },
+                { summarizer: { docType, name, parent }}
               );
               rowIdx += 1;
             });
@@ -492,18 +499,20 @@ export default function () {
 
         await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
-            // console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n);
-            esClient.bulk({ 
-              body: bulkIndexChunk.map(row => {
-                if (row && row.summarizer)
-                  row = summarizer.json[row.summarizer.indexType][row.summarizer.name][row.summarizer.parent];
-                  row.summary = row.summary || {};
-                  row.summary.contribution = summarizer.json.contribution.summary.contribution;
-                return row;
-              }) 
-            }, (err, resp) => {
-              if (!resp || resp.errors) {
-                console.error('esUpdatePrivatePreSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp));
+            const body = bulkIndexChunk.map(row => {
+              if (row && row.summarizer) {
+                const docType = row.summarizer.docType;
+                row = summarizer.json[row.summarizer.docType][row.summarizer.name][row.summarizer.parent];
+                row.summary = row.summary || {};
+                row.type = docType;
+                row.summary.contribution = summarizer.json.contribution.summary.contribution;
+              }
+              return row;
+            });
+            // console.log('esUpdatePrivatePreSummaries starting chunk', i+1, 'of', n, JSON.stringify(body).substring(0, 50000));
+            esClient.bulk({ body }, (err, resp) => {
+              if (!resp || resp.body.errors) {
+                console.error('esUpdatePrivatePreSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp).substring(0, 10000));
                 resolve(false);
               } else {
                 console.log('esUpdatePrivatePreSummaries finished chunk', i+1, 'of', n);
@@ -539,11 +548,15 @@ export default function () {
           let summary = { contribution: {} };
           let resp = await esClient.search({
             "index": index,
-            "type": "contribution",
+            "type": "_doc",
             "body": {
               "query": {
                 "bool": {
                   "filter": [{
+                    "term": {
+                      "type": "contribution"
+                    }
+                  }, {
                     "term": {
                       "summary.contribution.id": id
                     }
@@ -556,12 +569,12 @@ export default function () {
               }
             }
           });
-          if (resp.hits.total > 0) {
-            if (resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-              resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-            contribution = resp.hits.hits[0]._source.contribution;
-            if (resp.hits.hits[0]._source.summary)
-              summary.contribution = resp.hits.hits[0]._source.summary.contribution;
+          if (resp.body.hits.total.value > 0) {
+            if (resp.body.hits.hits[0]._source.contribution && _.isPlainObject(resp.body.hits.hits[0]._source.contribution.contribution))
+              resp.body.hits.hits[0]._source.contribution.contribution = [resp.body.hits.hits[0]._source.contribution.contribution];
+            contribution = resp.body.hits.hits[0]._source.contribution;
+            if (resp.body.hits.hits[0]._source.summary)
+              summary.contribution = resp.body.hits.hits[0]._source.summary.contribution;
           }
         //}
   
@@ -569,7 +582,7 @@ export default function () {
         
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
@@ -583,12 +596,12 @@ export default function () {
         // console.log("esUpdatePrivateSummaries updated contribution doc", index, contributor, id + "_0");
 
         let bulkIndex = [], rowIdx = 1;
-        _.without(_.keys(summarizer.json), 'contribution').forEach((indexType) => {
-          _.keys(summarizer.json[indexType]).forEach((name) => {
-            _.keys(summarizer.json[indexType][name]).forEach((parent) => {
+        _.without(_.keys(summarizer.json), 'contribution').forEach((docType) => {
+          _.keys(summarizer.json[docType]).forEach((name) => {
+            _.keys(summarizer.json[docType][name]).forEach((parent) => {
               bulkIndex.push(
-                { index: { _index: index, _type: indexType, _id: id + '_' + rowIdx } },
-                { summarizer: { indexType, name, parent }}
+                { index: { _index: index, _type: "_doc", _id: id + '_' + rowIdx } },
+                { summarizer: { docType, name, parent }}
               );
               rowIdx += 1;
             });
@@ -598,17 +611,19 @@ export default function () {
         await BPromise.map(_.chunk(bulkIndex, 100), (bulkIndexChunk, i, n) => {
           return new Promise((resolve) => {
             // console.log('esUpdatePrivateSummaries starting chunk', i+1, 'of', n);
-            esClient.bulk({ 
-              body: bulkIndexChunk.map(row => {
-                if (row && row.summarizer)
-                  row = summarizer.json[row.summarizer.indexType][row.summarizer.name][row.summarizer.parent];
-                  row.summary = row.summary || {};
-                  row.summary.contribution = summarizer.json.contribution.summary.contribution;
-                return row;
-              }) 
-            }, (err, resp) => {
-              if (!resp || resp.errors) {
-                console.error('esUpdatePrivateSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp));
+            const body = bulkIndexChunk.map(row => {
+              if (row && row.summarizer) {
+                const docType = row.summarizer.docType;
+                row = summarizer.json[row.summarizer.docType][row.summarizer.name][row.summarizer.parent];
+                row.summary = row.summary || {};
+                row.type = docType;
+                row.summary.contribution = summarizer.json.contribution.summary.contribution;
+              }
+              return row;
+            });
+            esClient.bulk({ body }, (err, resp) => {
+              if (!resp || resp.body.errors) {
+                console.error('esUpdatePrivateSummaries errors in chunk', i+1, 'of', n, JSON.stringify(resp).substring(0, 10000));
                 resolve(false);
               } else {
                 console.log('esUpdatePrivateSummaries finished chunk', i+1, 'of', n);
@@ -639,7 +654,7 @@ export default function () {
 
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "size": 100,
             "_source": {
@@ -649,6 +664,10 @@ export default function () {
             "query": {
               "bool": {
                 "filter": [{
+                  "term": {
+                    "type": "contribution"
+                  }
+                }, {
                   "term": {
                     "summary.contribution.contributor.raw": contributor
                   },
@@ -666,7 +685,7 @@ export default function () {
             }]
           }
         });
-        return resp.hits.hits.map(hit => hit._source);
+        return resp.body.hits.hits.map(hit => hit._source);
 
       } catch(error) {
         console.error("esGetPrivateContributionSummaries", index, contributor, error.message);
@@ -683,7 +702,7 @@ export default function () {
 
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "excludes": ["*.vals", "*._geo_shape", "summary._all.vadm_sigma.range"],
@@ -692,6 +711,10 @@ export default function () {
             "query": {
               "bool": {
                 "filter": [{
+                  "term": {
+                    "type": "contribution"
+                  }
+                }, {
                   "term": {
                     "summary.contribution.id": id
                   }
@@ -708,7 +731,7 @@ export default function () {
             }
           }
         });
-        return resp.hits.total > 0 && resp.hits.hits[0]._source;
+        return resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source;
 
       } catch(error) {
         console.error("esGetPrivateContributionSummary", index, id, contributor, error.message);
@@ -716,21 +739,25 @@ export default function () {
       }
     },
 
-    async esGetContribution({index, id}) {
+    async esGetContribution({index, id, tables}) {
       // console.log("esGetContribution", index, id);
       this.unblock();
       try {
 
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
-              "includes": ["contribution.*"]
+              "includes": !tables ? ["contribution.*"] : tables.map(x => `contribution.${x}`)
             },
             "query": {
               "bool": {
                 "filter": [{
+                  "term": {
+                    "type": "contribution"
+                  }
+                }, {
                   "term": {
                     "summary.contribution.id": id
                   }
@@ -739,9 +766,9 @@ export default function () {
             }
           }
         });
-        if (resp.hits.total > 0 && resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-          resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
-        return resp.hits.total > 0 && resp.hits.hits[0]._source.contribution;
+        if (resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source.contribution && _.isPlainObject(resp.body.hits.hits[0]._source.contribution.contribution))
+          resp.body.hits.hits[0]._source.contribution.contribution = [resp.body.hits.hits[0]._source.contribution.contribution];
+        return resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source.contribution;
 
       } catch(error) {
         console.error("esGetContribution", index, id, error.message);
@@ -756,7 +783,7 @@ export default function () {
       try {
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
@@ -783,7 +810,7 @@ export default function () {
       try {
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "includes": ["summary.contribution._history"]
@@ -792,6 +819,10 @@ export default function () {
               "bool": {
                 "filter": [{
                   "term": {
+                    "type": "contribution"
+                  }
+                }, {
+                  "term": {
                     "summary.contribution.id": id
                   }
                 }]
@@ -799,8 +830,8 @@ export default function () {
             }
           }
         });
-        if (resp.hits.total > 0) {
-          let _history = resp.hits.hits[0]._source.summary.contribution._history;
+        if (resp.body.hits.total.value > 0) {
+          let _history = resp.body.hits.hits[0]._source.summary.contribution._history;
           _history[0].description = description;
           resp = await esClient.updateByQuery({
             "index": index,
@@ -825,7 +856,7 @@ export default function () {
       try {
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
@@ -849,20 +880,22 @@ export default function () {
       // console.log("esUpdateContributionLabNames", index, id, lab_names);
       this.unblock();
       
+      const lab_names_list = lab_names.join(":");
       try {
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
           "body": {
             "script": {
               "source": `
+                ctx._source.summary.contribution._is_valid = "false"; 
                 ctx._source.summary.contribution.lab_names = params.lab_names; 
-                ctx._source.contribution.contribution[0].lab_names = params.lab_names;
+                ctx._source.contribution.contribution[0].lab_names = params.lab_names_list;
               `,
-              "params": {lab_names}
+              "params": {lab_names, lab_names_list}
             }
           }
         });
@@ -897,12 +930,9 @@ export default function () {
       }];
 
       try {
-        if (!contributor || contributor === 'undefined')
-          throw new Error('Unrecognized contributor.');
-          
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "includes": ["summary.contribution._history"]
@@ -910,6 +940,10 @@ export default function () {
             "query": {
               "bool": {
                 "filter": [{
+                  "term": {
+                    "type": "contribution"
+                  }
+                }, {
                   "term": {
                     "summary.contribution.reference.raw": doi
                   }
@@ -926,9 +960,9 @@ export default function () {
             }
           }
         });
-        if (resp.hits.total > 0) {
-          _history[0].version = parseInt(resp.hits.hits[0]._source.summary.contribution._history[0].version) + 1;
-          _history.push(...resp.hits.hits[0]._source.summary.contribution._history);
+        if (resp.body.hits.total.value > 0) {
+          _history[0].version = parseInt(resp.body.hits.hits[0]._source.summary.contribution._history[0].version) + 1;
+          _history.push(...resp.body.hits.hits[0]._source.summary.contribution._history);
         } else {
           _history[0].version = 1;
         }
@@ -939,56 +973,24 @@ export default function () {
       let version = _history[0].version;
 
       try {
-        if (!contributor || contributor === 'undefined')
-          throw new Error('Unrecognized contributor.');
-          
         await esClient.update({
           "index": index,
-          "type": "contribution",
-          "id": id + "_0",
-          "refresh": true,
-          "body": {
-            "script": {
-              "source": `
-                ctx._source.summary.contribution.version = null; 
-                ctx._source.summary.contribution._reference = null; 
-                ctx._source.summary.contribution._history = null;
-              `
-            }
-          }
-        });
-        // TODO: change this to an update by script and only update the reference info:
-        await esClient.update({
-          "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
           "body": {
-            "doc": {
-              "summary": {
-                "contribution": {
-                  "version": version,
-                  "contributor": contributor,
-                  "timestamp": timestamp,
-                  "data_model_version": _.last(versions),
-                  "description": description,
-                  "reference": doi,
-                  "_reference": _reference,
-                  "_history": _history
-                }
-              },
-              "contribution": {
-                "contribution": [{
-                  "id": _.parseInt(id),
-                  "version": version,
-                  "contributor": contributor,
-                  "timestamp": timestamp,
-                  "data_model_version": _.last(versions),
-                  "description": description,
-                  "reference": doi
-                }]
-              }
+            "script": {
+              "source": `
+                ctx._source.summary.contribution._is_valid = "false"; 
+                ctx._source.summary.contribution.version = params.version; 
+                ctx._source.summary.contribution.reference = params.doi; 
+                ctx._source.summary.contribution._reference = params._reference; 
+                ctx._source.summary.contribution._history = params._history; 
+                ctx._source.contribution.contribution[0].version = params.version;
+                ctx._source.contribution.contribution[0].reference = params.doi;
+              `,
+              "params": {version, doi, _reference, _history}
             }
           }
         });
@@ -1007,7 +1009,7 @@ export default function () {
 
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "includes": ["contribution.*"]
@@ -1016,6 +1018,10 @@ export default function () {
               "bool": {
                 "filter": [{
                   "term": {
+                    "type": "contribution"
+                  }
+                }, {
+                  "term": {
                     "summary.contribution.id": id
                   }
                 }]
@@ -1023,14 +1029,14 @@ export default function () {
             }
           }
         });
-        if (resp.hits.total > 0 && resp.hits.hits[0]._source.contribution && _.isPlainObject(resp.hits.hits[0]._source.contribution.contribution))
-          resp.hits.hits[0]._source.contribution.contribution = [resp.hits.hits[0]._source.contribution.contribution];
+        if (resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source.contribution && _.isPlainObject(resp.body.hits.hits[0]._source.contribution.contribution))
+          resp.body.hits.hits[0]._source.contribution.contribution = [resp.body.hits.hits[0]._source.contribution.contribution];
               
-        await validator.validatePromise(resp.hits.hits[0]._source.contribution);
+        await validator.validatePromise(resp.body.hits.hits[0]._source.contribution);
 
         await esClient.update({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "id": id + "_0",
           "refresh": true,
           "retryOnConflict": 5,
@@ -1087,7 +1093,7 @@ export default function () {
       try {
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "includes": ["summary.contribution"]
@@ -1096,6 +1102,10 @@ export default function () {
               "bool": {
                 "filter": [{
                   "term": {
+                    "type": "contribution"
+                  }
+                }, {
+                  "term": {
                     "summary.contribution.id": id
                   }
                 }]
@@ -1103,10 +1113,10 @@ export default function () {
             }
           }
         });
-        if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary)
-          contributionSummary = resp.hits.hits[0]._source.summary.contribution;
-        if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary.contribution._history.length > 1) {
-          prev_id = resp.hits.hits[0]._source.summary.contribution._history[1].id;
+        if (resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source.summary)
+          contributionSummary = resp.body.hits.hits[0]._source.summary.contribution;
+        if (resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source.summary.contribution._history.length > 1) {
+          prev_id = resp.body.hits.hits[0]._source.summary.contribution._history[1].id;
           await esClient.updateByQuery({
             "index": index,
             "refresh": true,
@@ -1144,7 +1154,7 @@ export default function () {
             }
           }
         });
-        // console.log("esActivateContribution activated ", resp.updated, "of", resp.total);
+        // console.log("esActivateContribution activated ", resp.body.updated, "of", resp.body.total);
       } catch(error) {
         console.error("esActivateContribution", index, id, error.message);
         throw new Meteor.Error("esActivateContribution", error.message);
@@ -1160,7 +1170,7 @@ export default function () {
       try {
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "includes": ["contribution", "summary.contribution._is_latest", "summary.contribution._history"]
@@ -1169,6 +1179,10 @@ export default function () {
               "bool": {
                 "filter": [{
                   "term": {
+                    "type": "contribution"
+                  }
+                }, {
+                  "term": {
                     "summary.contribution.id": id
                   }
                 }]
@@ -1176,9 +1190,9 @@ export default function () {
             }
           }
         });
-        const contribution = resp.hits.hits[0]._source.contribution;
-        const history = resp.hits.hits[0]._source.summary.contribution._history;
-        const isLatest = resp.hits.hits[0]._source.summary.contribution._is_latest;
+        const contribution = resp.body.hits.hits[0]._source.contribution;
+        const history = resp.body.hits.hits[0]._source.summary.contribution._history;
+        const isLatest = resp.body.hits.hits[0]._source.summary.contribution._is_latest;
         const exporter = new ExportContribution({});
         const contributionText = exporter.toText(contribution);
         //console.log("esUploadActivatedContributionToS3", id, isLatest, contribution, contributionText);
@@ -1240,7 +1254,7 @@ export default function () {
       try {
         let resp = await esClient.search({
           "index": index,
-          "type": "contribution",
+          "type": "_doc",
           "body": {
             "_source": {
               "includes": ["summary.contribution._history"]
@@ -1249,6 +1263,10 @@ export default function () {
               "bool": {
                 "filter": [{
                   "term": {
+                    "type": "contribution"
+                  }
+                }, {
+                  "term": {
                     "summary.contribution.id": id
                   }
                 }]
@@ -1256,8 +1274,8 @@ export default function () {
             }
           }
         });
-        if (resp.hits.total > 0 && resp.hits.hits[0]._source.summary.contribution._history.length > 1) {
-          prev_id = resp.hits.hits[0]._source.summary.contribution._history[1].id;
+        if (resp.body.hits.total.value > 0 && resp.body.hits.hits[0]._source.summary.contribution._history.length > 1) {
+          prev_id = resp.body.hits.hits[0]._source.summary.contribution._history[1].id;
           await esClient.updateByQuery({
             "index": index,
             "refresh": true,
@@ -1311,11 +1329,11 @@ export default function () {
             "query": { "term": { "email.address.raw": email.toLowerCase() }}
           }
         });
-        if (resp.hits.total === 0) {
+        if (resp.body.hits.total.value === 0) {
           throw new Meteor.Error("Email", "Unrecognized email address.");
         }
         let user;
-        resp.hits.hits.forEach(hit => {
+        resp.body.hits.hits.forEach(hit => {
           if (!user && password && hit._source._password &&
             bcrypt.compareSync(password, hit._source._password)
           ) {
@@ -1346,7 +1364,7 @@ export default function () {
             "query": { "term": { "id": id }}
           }
         });
-        let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
+        let user = resp.body.hits.total.value > 0 ? resp.body.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
         user.handle = (user && user.handle) || `user${user.id}`;
         if (user && session && session.id) {
@@ -1383,8 +1401,8 @@ export default function () {
             "query": { "term": { "orcid.id.raw": orcid }}
           }
         });
-        if (resp.hits.total === 0) return undefined;
-        const user = __.omitDeep(resp.hits.hits[0]._source, /(^|\.)_/);
+        if (resp.body.hits.total.value === 0) return undefined;
+        const user = __.omitDeep(resp.body.hits.hits[0]._source, /(^|\.)_/);
         user.handle = user.handle || `user${user.id}`;
         return user;
       } catch(error) {
@@ -1404,8 +1422,8 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        if (resp.hits.total === 0) return undefined;
-        const users = resp.hits.hits.map(hit => {
+        if (resp.body.hits.total.value === 0) return undefined;
+        const users = resp.body.hits.hits.map(hit => {
           const user = __.omitDeep(hit._source, /(^|\.)_/);
           user.handle = user.handle || `user${user.id}`;
           return user;
@@ -1428,7 +1446,7 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        let user = resp.hits.total > 0 ? resp.hits.hits[0]._source : undefined;
+        let user = resp.body.hits.total.value > 0 ? resp.body.hits.hits[0]._source : undefined;
         user = __.omitDeep(user, /(^|\.)_/);
         user.handle = user.handle || `user${user.id}`;
         return user;
@@ -1453,7 +1471,7 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        if (resp.hits.total === 0)
+        if (resp.body.hits.total.value === 0)
           return handle;
         for (x of [...Array(1000).keys()]) {
           resp = await esClient.search({
@@ -1465,7 +1483,7 @@ export default function () {
               "sort": { "id": "desc" }
             }
           });
-          if (resp.hits.total === 0)
+          if (resp.body.hits.total.value === 0)
             return handle + (x+1);
         }
       } catch(error) {
@@ -1489,7 +1507,7 @@ export default function () {
             "sort": { "id": "desc" }
           }
         });
-        return parseInt(resp.hits.hits[0]._id) + 1;
+        return parseInt(resp.body.hits.hits[0]._id) + 1;
       } catch(error) {
         console.error("esNextAvailableUserID", error.message);
         throw new Meteor.Error("esNextAvailableUserID", "Failed to calculate the next available user ID.");

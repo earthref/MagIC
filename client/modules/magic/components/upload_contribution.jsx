@@ -4,6 +4,7 @@ import {Tracker}  from 'meteor/tracker';
 import _ from 'lodash';
 import moment from 'moment';
 import filesize from 'filesize';
+import levenshtein from 'js-levenshtein';
 import React from 'react';
 import {Redirect} from 'react-router-dom';
 import saveAs from 'save-as';
@@ -22,6 +23,7 @@ import SearchSummariesListItem from '/client/modules/magic/containers/search_sum
 import IconButton from '/client/modules/common/components/icon_button';
 import {versions, models} from '/lib/configs/magic/data_models.js';
 import {index} from '/lib/configs/magic/search_levels.js';
+import {cvs} from '/lib/modules/er/controlled_vocabularies';
 
 export default class MagICUploadContribution extends React.Component {
 
@@ -333,6 +335,7 @@ export default class MagICUploadContribution extends React.Component {
   }
 
   reviewUpload() {
+    const dataModel = models[_.last(versions)];
     this.setState({
       totalParseErrors: 0,
       importProgressTaps: this.state.importProgressTaps + 1,
@@ -356,21 +359,83 @@ export default class MagICUploadContribution extends React.Component {
       for (let file of this.files) {
         if (file.imported) file.imported.map((data) => {
           if (data.table && data.columns && data.rows) {
+            const dataModelColumns = dataModel.tables[data.table] && dataModel.tables[data.table].columns;
             if (data.table === 'measurements') {
               if (this.contribution.measurements !== undefined) {
                 file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
               } else {
                 this.contribution.measurements = {
                   columns: _.without(data.columns, undefined),
-                  rows: data.rows.map(row => _.without(row.map((x, idx) => data.columns[idx] !== undefined && x), false))
+                  rows: data.rows.map(row => _.without(row.map((x, j) => {
+                    if (data.columns[j] === undefined) return false;
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
+                      x = x.replace(/\.0+\s*$/, '');
+                    }
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
+                      for (let validation of dataModelColumns[data.columns[j]].validations) {
+                        if (validation.substr(0,4) === 'cv("') {
+                          const cv = validation.substr(4,validation.length-6);
+                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) { x = 'True'; break; }
+                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) { x = 'False'; break; }
+                          else if (cvs[cv] && cvs[cv].items) {
+                            let caseCorrected = false;
+                            for (let item of cvs[cv].items) {
+                              if (x.toLowerCase() === item.item.toLowerCase()) {
+                                x = item.item;
+                                caseCorrected = true;
+                                break;
+                              }
+                            }
+                            if (caseCorrected) break;
+                            for (let item of cvs[cv].items) {
+                              if (levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
+                                x = item.item;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    return x;
+                  }), false))
                 }
               }
             } else {
               this.contribution[data.table] = this.contribution[data.table] || [];
               data.rows.map((row, i) =>
                 this.contribution[data.table].push(
-                  _.reduce(row, (json, column, j) => {
-                    json[data.columns[j]] = column;
+                  _.reduce(row, (json, x, j) => {
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].type === 'Integer') {
+                      x = x.replace(/\.0+\s*$/, '');
+                    }
+                    if (_.trim(x) != '' && dataModelColumns[data.columns[j]] && dataModelColumns[data.columns[j]].validations) {
+                      for (let validation of dataModelColumns[data.columns[j]].validations) {
+                        if (validation.substr(0,4) === 'cv("') {
+                          const cv = validation.substr(4,validation.length-6);
+                          if (cv === 'boolean' && (x.toLowerCase() === 't' || x === '1')) { x = 'True'; break; }
+                          else if (cv === 'boolean' && (x.toLowerCase() === 'f' || x === '0')) { x = 'False'; break; }
+                          else if (cvs[cv] && cvs[cv].items) {
+                            let caseCorrected = false;
+                            for (let item of cvs[cv].items) {
+                              if (x.toLowerCase() === item.item.toLowerCase()) {
+                                x = item.item;
+                                caseCorrected = true;
+                                break;
+                              }
+                            }
+                            if (caseCorrected) break;
+                            for (let item of cvs[cv].items) {
+                              if (levenshtein(x.toLowerCase(), item.item.toLowerCase()) <= 1) {
+                                x = item.item;
+                                break;
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                    json[data.columns[j]] = x;
                     return json;
                   }, {})
                 )
@@ -383,15 +448,22 @@ export default class MagICUploadContribution extends React.Component {
         id: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.id || null,
-        _contributor: this.state._contributor,
+        contributor: this.state._userid,
         timestamp: moment().utc().toISOString(),
         reference: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.reference || null,
+        lab_names: this.state._existing_summary.summary && 
+          this.state._existing_summary.summary.contribution && 
+          this.state._existing_summary.summary.contribution.lab_names || null,
         version: this.state._existing_summary.summary && 
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.version || null
       };
+      this.contribution.contribution = this.contribution.contribution || [{}];
+      this.contribution.contribution[0] = _.merge({}, this.contribution.contribution[0], contributionOverride);
+      if(this.contribution.contribution[0].lab_names) this.contribution.contribution[0].lab_names = this.contribution.contribution[0].lab_names.join(":");
+      contributionOverride._contributor = this.state._contributor;
       this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
         if (this.summarizer.json.contribution && 
             this.summarizer.json.contribution.summary && 

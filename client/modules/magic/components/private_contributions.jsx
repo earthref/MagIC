@@ -187,7 +187,7 @@ export default class extends React.Component {
       Meteor.call("esUpdateContributionLabNames", {
         index: index,
         id: this.privateContributions[i].summary.contribution.id,
-        lab_names: this.privateContributions[i].lab_names.join(":")
+        lab_names: this.privateContributions[i].lab_names
       }, (error, c) => {
         this.updateContributions();
       })
@@ -282,7 +282,7 @@ export default class extends React.Component {
             <i className="edit icon"/> In Preparation
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
-                es={{ index: 'magic_v4', type: 'contribution', allVersions: true, filters: [
+                es={{ index: 'magic', type: 'contribution', allVersions: true, filters: [
                   {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
                   {"term": { "summary.contribution._is_activated": "false" }}
                 ] }}
@@ -293,7 +293,7 @@ export default class extends React.Component {
             <i className="clipboard check icon"/> Published 
             <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -0.5em -1em 0.5em', minWidth: '4em'}}>
               <Count
-                es={{ index: 'magic_v4', type: 'contribution', allVersions: true, filters: [
+                es={{ index: 'magic', type: 'contribution', allVersions: true, filters: [
                   {"term": { "summary.contribution.contributor.raw": "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'}) }},
                   {"term": { "summary.contribution._is_activated": "true" }}
                 ] }}
@@ -310,12 +310,14 @@ export default class extends React.Component {
           this.privateContributions.map((c,i) => {
             let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
             
-            let labNames = c.lab_names || 
-              (c.summary.contribution.lab_names && 
-                c.summary.contribution.lab_names.split && 
-                c.summary.contribution.lab_names.split(':')
-              ) || [];
-            
+            let labNames = [];
+            labNames = c.summary.contribution.lab_names && (
+              _.isArray(c.summary.contribution.lab_names) ? 
+              c.summary.contribution.lab_names : 
+              c.summary.contribution.lab_names.split(':')
+            ) || labNames;
+            labNames = c.lab_names || labNames;
+
             //console.log("ref", c, noReference);
             return (
               <div className="item" key={i} style={{marginBottom: "1.5em"}}>
@@ -381,7 +383,7 @@ export default class extends React.Component {
                         >
                           Laboratory Names
                         </div>
-                        <Dropdown multiple selection
+                        <Dropdown multiple selection search
                           error={!labNames.length}
                           defaultValue={labNames}
                           placeholder="Labs ordered by university or institutional name. Select one or more labs where the measurements were made (required)"
@@ -539,17 +541,8 @@ export default class extends React.Component {
             Share Your Private Contribution
           </div>
           <div className="content">
-            <div className="ui fluid action input">
+            <div className="ui fluid input">
               <input ref="share link" type="text" readOnly={true}/>
-              <button className="ui icon button" onClick={(e) => {
-                var $temp = $("<input>");
-                $("body").append($temp);
-                $temp.val(this.refs["share link"].value).select();
-                document.execCommand("copy");
-                $temp.remove();
-              }}>
-                <i className="copy icon"></i>&nbsp;Copy
-              </button>
             </div>
           </div>
           <div className="actions">
@@ -598,7 +591,8 @@ export default class extends React.Component {
             Publish Your Private Contribution
           </div>
           <div className="content">
-            <p>Failed to publish this contribution.</p>
+            <p>Error: Failed to publish this contribution. Please email <a href="mailto:magic-support@earthref.org">magic-support@earthref.org</a> to report this problem. We will get your validated dataset published quickly. 
+            </p>
           </div>
           <div className="actions">
             <div className="ui red basic cancel inverted button">

@@ -23,8 +23,6 @@ export default class extends React.Component {
 							<Grid.Column>
 							</Grid.Column>
 							<Grid.Column>
-							</Grid.Column>
-							<Grid.Column>
 								<Segment>
 									<Image src='/MagIC/technology/nsf_small.png'/>
 								</Segment>
@@ -40,6 +38,14 @@ export default class extends React.Component {
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
+								<Segment>
+									<Image src='/MagIC/technology/berkeley_small.png'/>
+								</Segment>
+							</Grid.Column>
+							<Grid.Column>
+								<Segment>
+									<Image src='/MagIC/technology/uminn_small.png'/>
+								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 							</Grid.Column>
@@ -50,17 +56,8 @@ export default class extends React.Component {
 				<Container fluid textAlign='justified'>
 					<Header size='medium' dividing>MagIC Core Group</Header>
 					MagIC is inherently domain-specific and directed by PIs who are both producers and consumers of rock and paleomagnetic data.
-					<Grid padded columns={6}>
+					<Grid padded columns={5}>
 						<Grid.Row>
-							<Grid.Column>
-								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#cconstable">
-								<div className="ui huge icon bordered rounded image" data-tooltip="Institute for Geophysics and Planetary Physics, SIO, UCSD" >
-									<img src="/MagIC/people/cconstable.jpg" />
-								</div><br/>
-								Cathy Constable
-								<div className="sub header">Professor at<br/>SIO, UCSD</div>
-							</a>
-							</Grid.Column>
 							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#akoppers">
 								<div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
@@ -71,21 +68,59 @@ export default class extends React.Component {
 							</a>
 							</Grid.Column>
 							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#nswanson-hysell">
+								<div className="ui huge icon bordered rounded image" data-tooltip="Earth and Planetary Science, Berkeley" >
+									<img src="/MagIC/people/nswanson-hysell.jpg" />
+								</div><br/>
+								Nick Swanson-Hysell
+								<div className="sub header">Associate Professor at<br/>EPS, Berkeley</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#mbrown">
+								<div className="ui huge icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+									<img src="/MagIC/people/mbrown.jpg" />
+								</div><br/>
+								Max Brown
+                                <div class="sub header">Research Associate Professor <br/>at IRM, U. of Minnesota</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#jfeinberg">
+								<div className="ui huge icon bordered rounded image" data-tooltip="College of Science and Engineering, Earth & Environmental Sciences, IRM, University of Minnesota" >
+									<img src="/MagIC/people/jfeinberg.jpg" />
+								</div><br/>
+								Josh Feinberg
+                                <div class="sub header">Professor at <br/>IRM, U. of Minnesota</div>
+							</a>
+							</Grid.Column>
+							<Grid.Column>
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#cconstable">
+								<div className="ui huge icon bordered rounded image" data-tooltip="Institute for Geophysics and Planetary Physics, SIO, UCSD" >
+									<img src="/MagIC/people/cconstable.jpg" />
+								</div><br/>
+								Cathy Constable
+								<div className="sub header">Professor at<br/>SIO, UCSD</div>
+							</a>
+							</Grid.Column>
+						</Grid.Row>
+						<Grid.Row>
+							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#ltauxe">
 								<div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
 									<img src="/MagIC/people/ltauxe.jpg" />
 								</div><br/>
 								Lisa Tauxe
-								<div className="sub header">Distinguished Professor<br/>at SIO, UCSD</div>
+								<div className="sub header">Professor Emerita<br/>at SIO, UCSD</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
 								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#njarboe">
-								<div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
+								<div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
 									<img src="/MagIC/people/njarboe.jpg" />
 								</div><br/>
 								Nick Jarboe
-								<div className="sub header">Data Analyst at<br/>SIO, UCSD</div>
+								<div className="sub header">Data Analyst via<br/>CEOAS, OSU</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
@@ -98,24 +133,35 @@ export default class extends React.Component {
 							</a>
 							</Grid.Column>
 							<Grid.Column>
-								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#ljonestrask">
-								<div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
-									<img src="/MagIC/people/ljonestrask.jpg" />
+								<a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#psolheid">
+								<div className="ui huge icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+									<img src="/MagIC/people/psolheid.jpg" />
 								</div><br/>
-								Lori Jonestrask
-								<div className="sub header">Programmer at<br/>SIO, UCSD</div>
+								Peat Solheid
+                                <div class="sub header">Senior Scientist at <br/>IRM, U. of Minnesota</div>
 							</a>
 							</Grid.Column>
 						</Grid.Row>
 					</Grid>
 				</Container>
 				<Container fluid textAlign='justified'>
-					<Header size='medium' dividing>MagIC Open-Source Software Contributors</Header>
+					<Header size='medium' dividing>PmagPy Open-Source Software Contributors</Header>
 					<ul>
+						<li><a href="http://earthref.org/erml/629">Lisa Tauxe</a></li>
 						<li><a href="http://earthref.org/erml/7441">Nick Swanson-Hysell</a></li>
-						<li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
-						<li><a href="http://earthref.org/erml/8184">Luke Fairchild</a></li>
+						<li><a href="http://earthref.org/erml/8110">Lori Jonestrask</a></li>
 						<li><a href="http://earthref.org/erml/8260">Kevin Gaastra</a></li>
+						<li><a href="http://earthref.org/erml/6899">Ron Shaar</a></li>
+						<li><a href="http://earthref.org/erml/6434">Nick Jarboe</a></li>
+						<li><a href="http://earthref.org/erml/5730">Rupert Minnett</a></li>
+						<li><a href="http://earthref.org/erml/8184">Luke Fairchild</a></li>
+					</ul>
+				</Container>
+				<Container fluid textAlign='justified'>
+					<Header size='medium' dividing>MagIC Info</Header>
+					<ul>
+						<li>MagIC's Research Organization Registry (ROR) id: <a href="https://ror.org/00f89wy98">https://ror.org/00f89wy98</a></li>
+						<li>MagIC at re3data.org: : <a href="https://www.re3data.org/repository/r3d100011910">https://www.re3data.org/repository/r3d100011910</a></li>
 					</ul>
 				</Container>
 			</div>

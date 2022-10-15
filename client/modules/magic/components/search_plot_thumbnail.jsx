@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 
+import { Modal } from 'semantic-ui-react';
 import Clamp from '/client/modules/common/components/clamp';
 import SearchPlot from '/client/modules/magic/containers/search_plot';
 
@@ -17,7 +18,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      modal: false,
+      showPlots: false,
       file: undefined,
       maxVisible: 0,
       level: undefined,
@@ -42,7 +43,7 @@ export default class extends React.Component {
   componentDidMount(){
     document.addEventListener("keydown", this.handleKeyDown);
     const { activeFiles } = this.activeLevelTypeFiles();
-    if (!this.props.isPrivate && !this.state.file && this.state.modal && this.props.files && this.state.maxVisible < activeFiles.length)
+    if (!this.props.isPrivate && !this.state.file && this.state.showPlots && this.props.files && this.state.maxVisible < activeFiles.length)
       _.defer(() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement }));
   }
   
@@ -52,14 +53,14 @@ export default class extends React.Component {
 
   componentDidUpdate() {
     const { activeFiles } = this.activeLevelTypeFiles();
-    if (!this.props.isPrivate && !this.state.file && this.state.modal && this.props.files && this.state.maxVisible < activeFiles.length)
+    if (!this.props.isPrivate && !this.state.file && this.state.showPlots && this.props.files && this.state.maxVisible < activeFiles.length)
       _.defer(() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement }));
   }
 
   handleKeyDown(e) {
     const { file, maxVisible } = this.state
     // left/right arrow keystroke should select next/previous plot
-    if ($(this.refs['plots modal']).modal('is active') && file && this.fileIdx >= 0) {
+    if (this.state.showPlots && file && this.fileIdx >= 0) {
       if (this.prevFile && e.keyCode === 37) {
         const newMaxVisible = Math.max(maxVisible, Math.ceil(this.fileIdx/this.visibleIncrement)*this.visibleIncrement);
         this.setState({ file: this.prevFile, maxVisible: (!isNaN(newMaxVisible) && newMaxVisible) || maxVisible });
@@ -68,11 +69,6 @@ export default class extends React.Component {
         this.setState({ file: this.nextFile, maxVisible: (!isNaN(newMaxVisible) && newMaxVisible) || maxVisible });
       }
     }
-  }
-
-  showPlots() {
-    $(this.refs['plots modal']).modal({ observeChanges: true, onVisible: () => this.setState({modal: true, maxVisible: this.visibleIncrement}) });
-    $(this.refs['plots modal']).modal('show');
   }
 
   filesToLevels() {
@@ -207,7 +203,7 @@ export default class extends React.Component {
     else if (count) {
       return (
         <div style={thumbnailContainerStyle}>
-          <a onClick={this.showPlots.bind(this)} style={{ cursor:'pointer', display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
+          <a onClick={() => this.setState({ showPlots: true })} style={{ cursor:'pointer', display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
             <SearchPlot style={thumbnailStyle} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate}
               file={file || activeFiles.length && (activeFiles[0].thumbnail || activeFiles.full)}
             />
@@ -217,108 +213,114 @@ export default class extends React.Component {
               </span>
             </div>
           </a>
-          <div ref="plots modal" className="ui fullscreen modal">
-            <i className="close icon"></i>
-            <div className="header">
-              { specimen || sample || site || location || citation } PmagPy Plots
-            </div>
-            <div className="header actions" style={{ textAlign: 'left', padding: '.5rem' }}>
-              <div className="ui small basic compact buttons">
-                <div className="ui active button" style={{cursor: 'default'}}>
-                  <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
-                    Data Model Level:
-                  </span>
-                </div>
-                { this.levels.map((level, idx) => levels[level].count && 
-                  <div
-                    className={"ui button" + (level === activeLevel ? "" : " active")}
-                    key={idx}
-                    style={type === activeType ? {cursor: 'default'} : {}}
-                    onClick={() => this.setState({ level, file: undefined, maxVisible: this.visibleIncrement })}
-                  >
-                    <span style={{fontWeight: 'bold', color: (level === activeLevel ? portals['MagIC'].color : 'inherit') }}>
-                      { level }
+          { this.state.showPlots && 
+            <Modal
+              onClose={() => this.setState({ showPlots: false })}
+              open={true}
+              style={{ width: 'calc(100vw - 4em)' }}
+            >
+              <Modal.Header>
+                <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ cursor:'pointer', float: 'right', marginRight: '-1em' }} />
+                { specimen || sample || site || location || citation } PmagPy Plots
+              </Modal.Header>
+              <div className="header actions" style={{ textAlign: 'left', padding: '.5rem' }}>
+                <div className="ui small basic compact buttons">
+                  <div className="ui active button" style={{cursor: 'default'}}>
+                    <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
+                      Data Model Level:
                     </span>
-                    <div 
-                      className={"ui horizontal label" + (level === activeLevel ? "" : " basic")}
-                      style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (level === activeLevel ? portals['MagIC'].color : 'inherit') }}
-                    >
-                      { levels[level].count }
-                    </div>
-                  </div> || undefined
-                )}
-              </div>
-            </div>
-            <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 275px)' }}>
-              {!this.state.file && this.state.modal && activeFiles.length && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
-                <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
-                  <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
-                    <SearchPlot style={thumbnailStyle} id={id} loadingStyle={loadingStyle} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
-                  </a>
-                  <div className="ui bottom attached mini label" style={{ boxSizing:'border-box', zIndex: 1000, width:'calc(100% + 2px)', margin: '1px -1px -1rem -1px', lineHeight: '1rem', padding: '0 .25rem', border:'1px solid rgba(0,0,0,.1)', whiteSpace:'nowrap', direction:'rtl' }}>
-                    <Clamp lines={1} ><span>{this.fileToRowName(f.thumbnail || f.full)}</span></Clamp>
                   </div>
-                </div>
-              )}
-              {isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
-                <a style={{minWidth: 100, lineHeight: '1.25rem', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
-                  <br/>Load<br/>Plots<br/>
-                  {this.state.maxVisible + 1} - {Math.min(activeFiles.length, this.state.maxVisible + this.visibleIncrement)}
-                  <br/>of {activeFiles.length}
-                </a>
-              }
-              {!isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
-                <div style={{width: 100, height: 100, display:'flex'}}>
-                  <i className="ui huge grey icon ellipsis horizontal" style={{margin:'auto'}}/>
-                </div>
-              }
-              {this.state.file && 
-                <div style={{display:'flex', position:'absolute', top: 0, right: 0, bottom: 0, left: 0, padding:'2rem 4rem 2rem'}}>
-                  <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate} file={this.state.file.full || this.state.file.thumbnail} download={true}/>
-                  <a href="#" onClick={() => this.setState({file: undefined})} style={{position:'absolute', right:'1rem', top:'1rem', zIndex:1000}}>
-                    <i className="ui large close icon"/>
-                  </a>
-                  {this.prevFile &&
-                    <a href="#" onClick={() => this.setState({file: this.prevFile})} style={{position:'absolute', left:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
-                      <i className="ui large left arrow icon"/>
-                    </a>
-                  }
-                  {this.nextFile &&
-                    <a href="#" onClick={() => this.setState({file: this.nextFile})} style={{position:'absolute', right:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
-                      <i className="ui large right arrow icon"/>
-                    </a>
-                  }
-                </div>
-              }
-            </div>
-            <div className="actions" style={{ textAlign: 'left', padding: '.5rem' }}>
-              <div className="ui small basic compact buttons">
-                <div className="ui active button" style={{cursor: 'default'}}>
-                  <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
-                    { activeLevel } Level Plot Types:
-                  </span>
-                </div>
-                { _.keys(levels[activeLevel]).map((type, idx) => levels[activeLevel][type].length &&
-                  <div 
-                    className={"ui button" + (type === activeType ? "" : " active")}
-                    key={idx}
-                    style={type === activeType ? {cursor: 'default'} : {}}
-                    onClick={() => this.setState({ type, file: undefined, maxVisible: this.visibleIncrement })}
-                  >
-                    <span style={{fontWeight: 'bold', color: (type === activeType ? portals['MagIC'].color : 'inherit')}}>
-                      { type }
-                    </span>
-                    <div 
-                      className={"ui horizontal label" + (type === activeType ? "" : " basic")}
-                      style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (type === activeType ? portals['MagIC'].color : 'inherit') }}
+                  { this.levels.map((level, idx) => levels[level].count && 
+                    <div
+                      className={"ui button" + (level === activeLevel ? "" : " active")}
+                      key={idx}
+                      style={type === activeType ? {cursor: 'default'} : {}}
+                      onClick={() => this.setState({ level, file: undefined, maxVisible: this.visibleIncrement })}
                     >
-                      { levels[activeLevel][type].length }
-                    </div>
-                  </div> || undefined
-                )}
+                      <span style={{fontWeight: 'bold', color: (level === activeLevel ? portals['MagIC'].color : 'inherit') }}>
+                        { level }
+                      </span>
+                      <div 
+                        className={"ui horizontal label" + (level === activeLevel ? "" : " basic")}
+                        style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (level === activeLevel ? portals['MagIC'].color : 'inherit') }}
+                      >
+                        { levels[level].count }
+                      </div>
+                    </div> || undefined
+                  )}
+                </div>
               </div>
-            </div>
-          </div>
+              <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 15em)' }}>
+                {!this.state.file && this.state.showPlots && activeFiles.length && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
+                  <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
+                    <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
+                      <SearchPlot style={thumbnailStyle} id={id} loadingStyle={loadingStyle} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
+                    </a>
+                    <div className="ui bottom attached mini label" style={{ boxSizing:'border-box', zIndex: 1000, width:'calc(100% + 2px)', margin: '1px -1px -1rem -1px', lineHeight: '1rem', padding: '0 .25rem', border:'1px solid rgba(0,0,0,.1)', whiteSpace:'nowrap', direction:'rtl' }}>
+                      <Clamp lines={1} ><span>{this.fileToRowName(f.thumbnail || f.full)}</span></Clamp>
+                    </div>
+                  </div>
+                )}
+                {isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
+                  <a style={{minWidth: 100, lineHeight: '1.25rem', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
+                    <br/>Load<br/>Plots<br/>
+                    {this.state.maxVisible + 1} - {Math.min(activeFiles.length, this.state.maxVisible + this.visibleIncrement)}
+                    <br/>of {activeFiles.length}
+                  </a>
+                }
+                {!isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
+                  <div style={{width: 100, height: 100, display:'flex'}}>
+                    <i className="ui huge grey icon ellipsis horizontal" style={{margin:'auto'}}/>
+                  </div>
+                }
+                {this.state.file && 
+                  <div style={{display:'flex', position:'absolute', top: 0, right: 0, bottom: 0, left: 0, padding:'2rem 4rem 2rem'}}>
+                    <SearchPlot style={{display:'flex', height:'100%', width:'100%', margin:0}} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate} file={this.state.file.full || this.state.file.thumbnail} download={true}/>
+                    <a href="#" onClick={() => this.setState({file: undefined})} style={{position:'absolute', right:'1rem', top:'1rem', zIndex:1000}}>
+                      <i className="ui large close icon"/>
+                    </a>
+                    {this.prevFile &&
+                      <a href="#" onClick={() => this.setState({file: this.prevFile})} style={{position:'absolute', left:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
+                        <i className="ui large left arrow icon"/>
+                      </a>
+                    }
+                    {this.nextFile &&
+                      <a href="#" onClick={() => this.setState({file: this.nextFile})} style={{position:'absolute', right:'1rem', top:'50%', marginTop:'-.75rem', zIndex:1000}}>
+                        <i className="ui large right arrow icon"/>
+                      </a>
+                    }
+                  </div>
+                }
+              </div>
+              <div className="actions" style={{ textAlign: 'left', padding: '.5rem' }}>
+                <div className="ui small basic compact buttons">
+                  <div className="ui active button" style={{cursor: 'default'}}>
+                    <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
+                      { activeLevel } Level Plot Types:
+                    </span>
+                  </div>
+                  { _.keys(levels[activeLevel]).map((type, idx) => levels[activeLevel][type].length &&
+                    <div 
+                      className={"ui button" + (type === activeType ? "" : " active")}
+                      key={idx}
+                      style={type === activeType ? {cursor: 'default'} : {}}
+                      onClick={() => this.setState({ type, file: undefined, maxVisible: this.visibleIncrement })}
+                    >
+                      <span style={{fontWeight: 'bold', color: (type === activeType ? portals['MagIC'].color : 'inherit')}}>
+                        { type }
+                      </span>
+                      <div 
+                        className={"ui horizontal label" + (type === activeType ? "" : " basic")}
+                        style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (type === activeType ? portals['MagIC'].color : 'inherit') }}
+                      >
+                        { levels[activeLevel][type].length }
+                      </div>
+                    </div> || undefined
+                  )}
+                </div>
+              </div>
+            </Modal>
+          }
         </div>
       );
     }

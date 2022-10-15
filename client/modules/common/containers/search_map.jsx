@@ -12,11 +12,11 @@ export const composer = ({es}, onData) => {
         console.error('SearchMap', error);
         onData(null, {error: error});
       } else {
-        docs.push(...results.hits.hits.map(hit => hit._source));
-        console.log('SearchMap', docs.length, results.hits.total);
-        onData(null, {docs: docs, nDocs: results.hits.total});
-        if (results.hits.total > docs.length)
-          Meteor.call('esScrollByID', results._scroll_id, processResults);
+        docs.push(...results.body.hits.hits.map(hit => hit._source));
+        console.log('SearchMap', docs.length, results.body.hits.total.value);
+        onData(null, {docs: docs, nDocs: results.body.hits.total.value});
+        if (results.body.hits.total.value > docs.length)
+          Meteor.call('esScrollByID', results.body._scroll_id, processResults);
       }
     } catch (error) {
       console.error(error);

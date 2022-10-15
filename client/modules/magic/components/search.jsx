@@ -313,7 +313,7 @@ class Search extends React.Component {
       }
       esFilters.push({
         geo_shape: {
-          'summary._all._geo_envelope': {
+          'summary._all._geo_point': {
             shape: {
             type: 'envelope',
             coordinates : [[lon_min, _.isNumber(this.state.lat_max) ? this.state.lat_max :  90],
@@ -345,12 +345,12 @@ class Search extends React.Component {
         pole_lon_max = pole_lon_temp;
       }
       esFilters.push({ range: { 'summary._all.pole_lat.range': {
-        gte: this.state.pole_lat_min,
-        lte: this.state.pole_lat_max
+        gte: Math.min(this.state.pole_lat_min, this.state.pole_lat_max),
+        lte: Math.max(this.state.pole_lat_min, this.state.pole_lat_max)
       }}});
       esFilters.push({ range: { 'summary._all.pole_lon.range': {
-        gte: pole_lon_min,
-        lte: pole_lon_max
+        gte: Math.min(pole_lon_min, pole_lon_max),
+        lte: Math.max(pole_lon_min, pole_lon_max)
       }}});
     }
 
@@ -374,19 +374,21 @@ class Search extends React.Component {
         vgp_lon_max = vgp_lon_temp;
       }
       esFilters.push({ range: { 'summary._all.vgp_lat.range': {
-        gte: this.state.vgp_lat_min,
-        lte: this.state.vgp_lat_max
+        gte: Math.min(this.state.vgp_lat_min, this.state.vgp_lat_max),
+        lte: Math.max(this.state.vgp_lat_min, this.state.vgp_lat_max)
       }}});
       esFilters.push({ range: { 'summary._all.vgp_lon.range': {
-        gte: vgp_lon_min,
-        lte: vgp_lon_max
+        gte: Math.min(vgp_lon_min, vgp_lon_max),
+        lte: Math.max(vgp_lon_min, vgp_lon_max)
       }}});
     }
 
     if (_.isNumber(this.state.age_min) && _.isNumber(this.state.age_max))
       esFilters.push({ range: { 'summary._all._age_range_ybp.range': {
-        gte: _.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min),
-        lte: _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max)
+        gte: Math.min(_.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min),
+                      _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max)),
+        lte: Math.max(_.find(ageUnits, {name: this.state.age_min_unit || ageUnitsDefault}).from(this.state.age_min),
+                      _.find(ageUnits, {name: this.state.age_max_unit || ageUnitsDefault}).from(this.state.age_max))
       }}});
     else if (_.isNumber(this.state.age_min))
       esFilters.push({ range: { 'summary._all._age_range_ybp.range': {
@@ -399,8 +401,10 @@ class Search extends React.Component {
 
     if (_.isNumber(this.state.int_min) && _.isNumber(this.state.int_max))
       esFilters.push({ range: { 'summary._all.int_abs.range': {
-        gte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min),
-        lte: _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)
+        gte: Math.min(_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min),
+                      _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max)),
+        lte: Math.max(_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_min),
+                      _.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).from(this.state.int_max))        
       }}});
     else if (_.isNumber(this.state.int_min))
       esFilters.push({ range: { 'summary._all.int_abs.range': {
@@ -413,8 +417,8 @@ class Search extends React.Component {
 
     if (_.isNumber(this.state.pub_yr_min) && _.isNumber(this.state.pub_yr_max))
       esFilters.push({ range: { 'summary.contribution._reference.year': {
-        gte: this.state.pub_yr_min,
-        lte: this.state.pub_yr_max
+        gte: Math.min(this.state.pub_yr_min, this.state.pub_yr_max),
+        lte: Math.max(this.state.pub_yr_min, this.state.pub_yr_max)
       }}});
     else if (_.isNumber(this.state.pub_yr_min))
       esFilters.push({ range: { 'summary.contribution._reference.year': {
@@ -1176,7 +1180,7 @@ class Search extends React.Component {
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
               <Count es={_.extend({}, view.es, {
-                queries: view.name === 'Map' ? _.concat(searchQueries, {exists: 
+                queries: view.name === 'Sites Map' ? _.concat(searchQueries, {exists: 
                   {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
                 }) : searchQueries,
                 filters: esFilters
@@ -1246,7 +1250,7 @@ class Search extends React.Component {
         pageSize={20}
       />
     );
-    if (activeView.name === 'Map') return (
+    if (activeView.name === 'Sites Map') return (
       <SearchMapView
         key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
@@ -1269,7 +1273,8 @@ class Search extends React.Component {
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
     let es = _.extend({}, activeView.es, {
-      queries: searchQueries
+      queries: searchQueries,
+      source: ['summary.contribution', 'summary._all', 'contribution.contribution']
     });
     let queries = {};
     this.state.search.replace(/(\w+):\"(.+?)\"\s*/g, (match, term, value) => {

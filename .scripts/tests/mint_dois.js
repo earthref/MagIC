@@ -1,15 +1,16 @@
 const {describe, it} = global;
+import {Meteor} from 'meteor/meteor';
 import fs from 'fs';
 import {expect} from 'chai';
 import _ from 'lodash';
 import Promise from 'bluebird';
-import elasticsearch from 'elasticsearch';
+import opensearch from "@opensearch-project/opensearch";
 import ParseContribution from '../parse_contribution';
 import request from 'request';
 
-const esClient = new elasticsearch.Client({
+const esClient = new opensearch.Client({
   //log: 'trace',
-  host: "http://128.193.70.68:9200",
+  node: Meteor.settings.opensearch && Meteor.settings.opensearch.node || "",
   keepAlive: false,
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });

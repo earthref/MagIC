@@ -1,12 +1,12 @@
 import _ from 'lodash';
 import { Meteor } from 'meteor/meteor';
-import elasticsearch from "elasticsearch";
+import opensearch from "@opensearch-project/opensearch";
 import BPromise from 'bluebird';
 import request from 'request';
 
-const esClient = new elasticsearch.Client({
+const esClient = new opensearch.Client({
   //log: "trace",
-  host: "http://128.193.70.68:9200",
+  node: Meteor.settings.opensearch && Meteor.settings.opensearch.node || "",
   keepAlive: false,
   apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
@@ -16,7 +16,7 @@ const matchZeros = /00000+\d+?$/;
 const matchNines = /([0-8])99999+\d+?$/;
 const floatFix = (x) => `${x}`.replace(matchZeros, '').replace(matchNines, (y) => parseInt(`${y}`.substr(0,1))+1);
 
-let index = "magic_v4";
+let index = "magic";
 
   describe("magic.data_doi", () => {
 
@@ -24,7 +24,7 @@ let index = "magic_v4";
       this.timeout(0);
 
       esClient.search({
-        index: index, type: "contribution", size: 1e4, 
+        index: index, size: 1e4, 
         _source: [
           "summary.contribution.id", 
           "summary.contribution.timestamp", 
@@ -45,6 +45,7 @@ let index = "magic_v4";
         body: {
           "query": { "bool": { 
             "must": [
+              { "term": { "type": "contribution" } },
               { "exists": { "field": "summary.contribution._reference.long_authors" }},
               { "exists": { "field": "summary.contribution._reference.title" }},
               { "exists": { "field": "summary.contribution._reference.year" }},
@@ -52,17 +53,17 @@ let index = "magic_v4";
               { "term": { "summary.contribution._is_activated": "true"}}
             ],
             "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
-            //"filter": { "term": { "summary.contribution.id": 17096}}
+            //"filter": { "term": { "summary.contribution.id": 17051}}
           }}
         }
       }).then((resp) => {
-        console.log('Contributions without a data DOI:', resp.hits.total);
-        if (resp.hits.total > 0) {
+        console.log('Contributions without a data DOI:', resp.body.hits.total);
+        if (resp.body.hits.total.value > 0) {
 
-          BPromise.each(resp.hits.hits, hit => {
+          BPromise.each(resp.body.hits.hits, hit => {
             return new Promise((resolve) => {
 
-              let related = hit._source.summary.contribution._reference.doi &&
+              let related = hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.doi &&
                 `<relatedIdentifiers>
                   <relatedIdentifier relatedIdentifierType="DOI" relationType="IsDocumentedBy">` +
                     `${hit._source.summary.contribution._reference.doi.replace(/</g, "&lt;").replace(/>/g, "&gt;")}` +
@@ -175,7 +176,7 @@ let index = "magic_v4";
               labNames = labNames.join('');
 
               let creators = [];
-              hit._source.summary.contribution._reference.authors &&
+              hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.authors &&
                 hit._source.summary.contribution._reference.authors.forEach(author => {
                   creators.push(
                     `<creator>
@@ -193,8 +194,11 @@ let index = "magic_v4";
                   );
                 });
               creators = creators.length && `<creators>${creators.join('')}</creators>` || 
-                `<creators><creator><creatorName>` +
+                hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.long_authors && `<creators><creator><creatorName>` +
                   `${hit._source.summary.contribution._reference.long_authors}` +
+                `</creatorName></creator></creators>` || 
+                `<creators><creator><creatorName>` +
+                  `${hit._source.summary._contributor}` +
                 `</creatorName></creator></creators>`;
 
               let datacite = 
@@ -207,7 +211,7 @@ let index = "magic_v4";
                   <identifier identifierType="DOI">10.7288/V4/MAGIC/${hit._source.summary.contribution.id}</identifier>
                   ${creators}
                   <titles>
-                    <title>${hit._source.summary.contribution._reference.title} (Dataset)</title>
+                    <title>${hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.title || "In Preparation"} (Dataset)</title>
                   </titles>
                   <contributors>
                     <contributor contributorType="Distributor">
@@ -216,9 +220,9 @@ let index = "magic_v4";
                     ${labNames || ''}
                     ${hit._source.summary.contribution.id == 16834 ? '<contributor contributorType="ContactPerson"><contributorName>Joseph M Grappone (jmgrappone@gmail.com)</contributorName></contributor>' : ''}
                   </contributors>
-                  <publisher>${hit._source.summary.contribution._reference.journal || 
+                  <publisher>${hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.journal || 
                     'Magnetics Information Consortium (MagIC)'}</publisher>
-                  <publicationYear>${hit._source.summary.contribution._reference.year}</publicationYear>
+                  <publicationYear>${hit._source.summary.contribution._reference && hit._source.summary.contribution._reference.year || (new Date()).getFullYear()}</publicationYear>
                   <version>${hit._source.summary.contribution.version}</version>
                   <dates>
                     <date dateType="Available">${hit._source.summary.contribution.timestamp.substr(0, 10)}</date>
@@ -232,6 +236,7 @@ let index = "magic_v4";
                     <rights rightsURI="https://creativecommons.org/licenses/by/4.0/"/>
                   </rightsList>
                 </resource>`;
+              // console.log('datacite', datacite);
               datacite = datacite.replace(/%/g, "%25").replace(/\s*\n\s*/g, "%0A").replace(/\r/g, "%0D").replace(/:/g, "%3A").replace(/\s&\s/g, " and ");
               let payload =
                 `_profile: datacite\n` +
@@ -253,7 +258,7 @@ let index = "magic_v4";
                 } else if (body === 'error: bad request - identifier already exists') {
                   esClient.update({
                     "index": hit._index,
-                    "type":hit._type,
+                    "type": "_doc",
                     "id": hit._id,
                     "refresh": true,
                     "body": {
@@ -275,7 +280,7 @@ let index = "magic_v4";
                 } else {
                   esClient.update({
                     "index": hit._index,
-                    "type":hit._type,
+                    "type": "_doc",
                     "id": hit._id,
                     "refresh": true,
                     "body": {

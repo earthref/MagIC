@@ -61,21 +61,21 @@ export default class GoogleMap extends React.Component {
 
         let s = c.summary;
 
-        try {
-          _.uniqBy(s._all._geo_envelope, x => _.flatten(x.coordinates).join('_')).forEach((envelope, i) => {
-            if (i == 0) this.addObject(
-              envelope.coordinates[1][1],
-              envelope.coordinates[0][1],
-              envelope.coordinates[0][0],
-              envelope.coordinates[1][0],
-              s.contribution && '<a href="/MagIC/' + s.contribution.id + '"><b>' + (s.contribution._reference && s.contribution._reference.citation || "Unknown") + 
-              '</b> v. ' + s.contribution.version + '</a>' + 
-              '<br/>by ' + s.contribution._contributor
-            );
-          });
-        } catch(error) {
-          console.error(error);
-        }
+        // try {
+        //   _.uniqBy(s._all._geo_envelope, x => _.flatten(x.coordinates).join('_')).forEach((envelope, i) => {
+        //     if (i == 0) this.addObject(
+        //       envelope.coordinates[1][1],
+        //       envelope.coordinates[0][1],
+        //       envelope.coordinates[0][0],
+        //       envelope.coordinates[1][0],
+        //       s.contribution && '<a href="/MagIC/' + s.contribution.id + '"><b>' + (s.contribution._reference && s.contribution._reference.citation || "Unknown") + 
+        //       '</b> v. ' + s.contribution.version + '</a>' + 
+        //       '<br/>by ' + s.contribution._contributor
+        //     );
+        //   });
+        // } catch(error) {
+        //   console.error(error);
+        // }
 
         try {
           _.uniqBy(s._all._geo_point, x => _.flatten(x.coordinates).join('_')).forEach((point, i) => {

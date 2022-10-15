@@ -5,7 +5,7 @@ import jszip from 'jszip'; //import JSZip from 'xlsx-style/node_modules/jszip';
 import XLSX from 'xlsx';
 import React from 'react';
 import Cookies from 'js-cookie';
-import {Form, Checkbox, Progress} from 'semantic-ui-react';
+import {Modal, Button, Checkbox, Progress} from 'semantic-ui-react';
 
 import Count from '/client/modules/common/containers/search_count.jsx';
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
@@ -17,7 +17,7 @@ export default class extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      renderModal: false,
+      showModal: false,
       downloadIDs: [],
       downloadContributions: false,
       downloadLocations: true,
@@ -92,30 +92,30 @@ export default class extends React.Component {
         } else if (this.canceled) {
           this.setState({progress: undefined});
         } else {
-          results.hits.hits.map(hit => {
-            this.downloadedRows[hit._type] = this.downloadedRows[hit._type] || [];
+          results.body.hits.hits.map(hit => {
+            this.downloadedRows[hit._source.type] = this.downloadedRows[hit._source.type] || [];
             let reference, citation;
             try {reference = hit._source.summary.contribution.reference;} catch(e) {}
             try {citation = hit._source.summary.contribution._reference.citation;} catch(e) {}
             //if (hit._source.columns) console.log(_.zipObject(hit._source.columns, hit._source.rows[0]), hit._source.rows.map(row => _.zipObject(hit._source.columns, row)));
             //if (hit._source.columns)
-            //  this.downloadedRows[hit._type].push(...hit._source.rows.map(row => _.zipObject(hit._source.columns, row)));
+            //  this.downloadedRows[hit._source.type].push(...hit._source.rows.map(row => _.zipObject(hit._source.columns, row)));
             //else
-              this.downloadedRows[hit._type].push(...hit._source.rows.map(row => {
-                if (row['citations'] && (reference || citation))
-                  row['citations'] = row['citations'].replace(/this study/i, reference || citation)
-                return row;
-              }));
+            this.downloadedRows[hit._source.type].push(...hit._source.rows.map(row => {
+              if (row['citations'] && (reference || citation))
+                row['citations'] = row['citations'].replace(/this study/i, reference || citation)
+              return row;
+            }));
             processedHits++;
           });
-          console.log('SearchDownload', processedHits, results.hits.total);
-          this.setState({progress: Math.floor(100*processedHits/results.hits.total)});
-          if (results.hits.total > processedHits)
-            Meteor.call('esScrollByID', results._scroll_id, processResults);
+          console.log('SearchDownload', processedHits, results.body.hits.total.value);
+          this.setState({progress: Math.floor(100*processedHits/results.body.hits.total.value)});
+          if (results.body.hits.total.value > processedHits)
+            Meteor.call('esScrollByID', results.body._scroll_id, processResults);
           else if (this.state.format === "text") {
             const exporter = new ExportContribution({});
             const exportedRows = exporter.toText(this.downloadedRows);
-            //console.log('exporter', exporter.errors(), exportedRows);
+            console.log('exporter', exporter.errors(), exportedRows);
             let blob = new Blob([exportedRows], {type: "text/plain;charset=utf-8"});
             saveAs(blob, 'magic_downloaded_rows.txt');
           } else {
@@ -149,8 +149,7 @@ export default class extends React.Component {
       type: types.join(","), 
       queries: this.props.queries, 
       filters: this.props.filters,
-      source: ['columns',
-      'rows',
+      source: ['type', 'columns', 'rows',
       'summary.contribution._reference.citation',
       'summary.contribution.reference']
     }, 500, processResults);
@@ -159,20 +158,15 @@ export default class extends React.Component {
   render() {
     return (
       <div ref="download button" className={this.props.className} style={this.props.style}
-        onClick={(e) => { 
-          if (e.target === this.refs["download button"]) 
-            this.setState({renderModal: true}, () => 
-              $(this.refs['download modal']).modal('show')
-            )
-        }}
+        onClick={() => this.setState({showModal: true})}
       >
         {this.props.children}
-        { this.state.renderModal && <div ref="download modal" className="ui modal">
-          <div className="ui icon header">
-          <i className="download icon"></i>
-          Download Results
-          </div>
-          <div className="content">
+        <Modal
+          onClose={() => this.setState({ showModal: false })}
+          open={this.state.showModal}
+        >
+          <Modal.Header>Download Results</Modal.Header>
+          <Modal.Content>
             <table style={{margin: "auto"}}>
               <tbody>
                 <tr>
@@ -436,43 +430,40 @@ export default class extends React.Component {
                 style={{margin:0}}
               />
             }
-          </div>
-          <div className="actions">
-          { this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
-              <div className="ui button purple" onClick={this.downloadContributionFiles.bind(this)}>
-                Prepare Files
-              </div>
-            }
-            { this.state.downloadContributions && (this.state.downloadIDs.length > 0 && this.state.progress === 100) &&
-              <button type="submit" className="ui button purple" onClick={function (e) {
-                Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), function (error, source) {
-                  if (source) {
-                    let blob = new Blob([source], {type: "application/zip"});
-                    saveAs(blob, 'magic_search_results.zip');
-                  } else {
-                    console.error(error);
-                    alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-                  }
-                }.bind(this));
-              }.bind(this)}>
-                Download Files
-              </button>
-            }
-            { !this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
-              <div className="ui button purple" onClick={this.downloadLevelRows.bind(this)}>
-                Download Rows
-              </div>
-            }
-            { this.state.progress !== undefined && this.state.progress < 100 && 
-              <div className="ui button red" onClick={() => this.canceled = true}>
-                Cancel Download
-              </div>
-            }
-            <div className="ui deny button">
-              Close
-            </div>
-          </div>
-        </div> }
+          </Modal.Content>
+          <Modal.Actions>
+            { this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
+                <div className="ui button purple" onClick={this.downloadContributionFiles.bind(this)}>
+                  Prepare Files
+                </div>
+              }
+              { this.state.downloadContributions && (this.state.downloadIDs.length > 0 && this.state.progress === 100) &&
+                <button type="submit" className="ui button purple" onClick={function (e) {
+                  Meteor.call('magicGetPublicContributions', this.state.downloadIDs, 'magic_search_results.zip', '@' + Cookies.get('user_id', Meteor.isDevelopment ? {} : { domain: '.earthref.org'}), function (error, source) {
+                    if (source) {
+                      let blob = new Blob([source], {type: "application/zip"});
+                      saveAs(blob, 'magic_search_results.zip');
+                    } else {
+                      console.error(error);
+                      alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                    }
+                  }.bind(this));
+                }.bind(this)}>
+                  Download Files
+                </button>
+              }
+              { !this.state.downloadContributions && (this.state.progress === undefined || this.state.progress === 100) &&
+                <div className="ui button purple" onClick={this.downloadLevelRows.bind(this)}>
+                  Download Rows
+                </div>
+              }
+              { this.state.progress !== undefined && this.state.progress < 100 && 
+                <div className="ui button red" onClick={() => { this.canceled = true; this.setState({progress: undefined, downloadIDs: []}); }}>
+                  Cancel Download
+                </div>
+              }
+          </Modal.Actions>
+        </Modal>
       </div>
     );
   }
