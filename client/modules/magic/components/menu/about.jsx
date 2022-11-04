@@ -24,27 +24,27 @@ export default class extends React.Component {
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
-									<Image src='/MagIC/technology/nsf_small.png'/>
+									<Image src='/MagIC/orgs/nsf_small.png'/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
-									<Image src='/MagIC/technology/osu_small.png'/>
+									<Image src='/MagIC/orgs/osu_small.png'/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
-									<Image src='/MagIC/technology/ucsd_small.png'/>
+									<Image src='/MagIC/orgs/ucsd_small.png'/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
-									<Image src='/MagIC/technology/berkeley_small.png'/>
+									<Image src='/MagIC/orgs/berkeley_small.png'/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
-									<Image src='/MagIC/technology/uminn_small.png'/>
+									<Image src='/MagIC/orgs/uminn_small.png'/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
