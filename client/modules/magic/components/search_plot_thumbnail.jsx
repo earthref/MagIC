@@ -173,13 +173,15 @@ export default class extends React.Component {
   }
 
   render() {
-    const { id, isPrivate, error, file, files, citation, location, site, sample, specimen } = this.props;
+    const { id, isPrivate, error, file, files, citation, location, site, sample, specimen, size } = this.props;
     const { level, type } = this.state;
 
-    const containerStyle = {position:'relative', boxSizing:'content-box', minHeight: 98, maxHeight: 98, minWidth: 98, maxWidth: 98, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
+    let plotSize = size || 100;
+
+    const containerStyle = {position:'relative', boxSizing:'content-box', minHeight: plotSize - 2, maxHeight: plotSize - 2, minWidth: plotSize - 2, maxWidth: plotSize - 2, marginRight:'1rem', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis', border:'1px solid rgba(0,0,0,.1)'};
     const thumbnailContainerStyle = _.extend({}, containerStyle, {display: 'flex'});
-    const thumbnailStyle = {maxWidth: 78, maxHeight: 78, margin:'10px', objectFit:'contain'};
-    const loadingStyle = {minHeight: 98, maxHeight: 98, minWidth: 98, maxWidth: 98, padding: 0};
+    const thumbnailStyle = {maxWidth: plotSize - 22, maxHeight: plotSize - 22, margin:'10px', objectFit:'contain'};
+    const loadingStyle = {minHeight: plotSize - 2, maxHeight: plotSize - 2, minWidth: plotSize - 2, maxWidth: plotSize - 2, padding: 0};
     const modalStyle = _.extend({}, thumbnailContainerStyle, {margin:'0 1rem 2rem 0', overflow:'visible'});
 
     const levels = this.filesToLevels();
@@ -203,7 +205,7 @@ export default class extends React.Component {
     else if (count) {
       return (
         <div style={thumbnailContainerStyle}>
-          <a onClick={() => this.setState({ showPlots: true })} style={{ cursor:'pointer', display:'flex', maxWidth: 100, maxHeight: 100, margin:'auto'}}>
+          <a onClick={() => this.setState({ showPlots: true })} style={{ cursor:'pointer', display:'flex', maxWidth: plotSize, maxHeight: plotSize, margin:'auto'}}>
             <SearchPlot style={thumbnailStyle} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate}
               file={file || activeFiles.length && (activeFiles[0].thumbnail || activeFiles.full)}
             />
@@ -253,7 +255,7 @@ export default class extends React.Component {
               <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 15em)' }}>
                 {!this.state.file && this.state.showPlots && activeFiles.length && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
                   <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
-                    <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: 100, maxHeight: 100, margin: 'auto'}}>
+                    <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: plotSize, maxHeight: plotSize, margin: 'auto'}}>
                       <SearchPlot style={thumbnailStyle} id={id} loadingStyle={loadingStyle} isPrivate={isPrivate} file={f.thumbnail || f.full}/>
                     </a>
                     <div className="ui bottom attached mini label" style={{ boxSizing:'border-box', zIndex: 1000, width:'calc(100% + 2px)', margin: '1px -1px -1rem -1px', lineHeight: '1rem', padding: '0 .25rem', border:'1px solid rgba(0,0,0,.1)', whiteSpace:'nowrap', direction:'rtl' }}>
@@ -262,14 +264,14 @@ export default class extends React.Component {
                   </div>
                 )}
                 {isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
-                  <a style={{minWidth: 100, lineHeight: '1.25rem', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
+                  <a style={{minWidth: plotSize, lineHeight: '1.25rem', fontWeight: 'bold', textAlign: 'center'}} href="#" onClick={() => this.setState({ maxVisible: this.state.maxVisible + this.visibleIncrement })}>
                     <br/>Load<br/>Plots<br/>
                     {this.state.maxVisible + 1} - {Math.min(activeFiles.length, this.state.maxVisible + this.visibleIncrement)}
                     <br/>of {activeFiles.length}
                   </a>
                 }
                 {!isPrivate && !this.state.file && this.state.maxVisible && activeFiles.length > this.state.maxVisible && 
-                  <div style={{width: 100, height: 100, display:'flex'}}>
+                  <div style={{width: plotSize, height: plotSize, display:'flex'}}>
                     <i className="ui huge grey icon ellipsis horizontal" style={{margin:'auto'}}/>
                   </div>
                 }

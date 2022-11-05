@@ -454,6 +454,68 @@ class SearchSummariesListItem extends React.Component {
   //  else return undefined;
   //}
 
+  renderPole(item) {
+  
+    let tableSummary = item.summary && item.summary[this.props.table];
+    let allSummary   = item.summary && item.summary._all;
+
+    if ((!(tableSummary && tableSummary._age_range_ybp) && !(allSummary && allSummary._age_range_ybp)) ||
+    !(tableSummary && tableSummary.pole_lat && tableSummary.pole_lon)) return (
+      <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'center', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <br/>No<br/><b>Pole</b><br/>Data<br/><br/>
+      </div>
+    );
+
+    let min_ages  = (tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.gte) || (allSummary._age_range_ybp && allSummary._age_range_ybp.range.gte),
+        max_ages  = (tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.range.lte) || (allSummary._age_range_ybp && allSummary._age_range_ybp.range.lte),
+        n_ages    = (tableSummary && tableSummary._age_range_ybp && tableSummary._age_range_ybp.n        ) || (allSummary._age_range_ybp && allSummary._age_range_ybp.n),
+        age_range;
+
+    if (max_ages >= 1e9) {
+      max_ages = numeral(max_ages/1e9).format('0[.]0[00]');
+      min_ages = min_ages < 1e5 ? '0' : numeral(min_ages/1e9).format('0[.]0[00]');
+      age_range = max_ages === min_ages ? `${max_ages} Ga` : `${min_ages} - ${max_ages} Ga`;
+    }
+    else if (max_ages >= 1e6) {
+      max_ages = numeral(max_ages/1e6).format('0[.]0[00]');
+      min_ages = min_ages < 1e3 ? '0' : numeral(min_ages/1e6).format('0[.]0[00]');
+      age_range = max_ages === min_ages ? `${max_ages} Ma` : `${min_ages} - ${max_ages} Ma`;
+    }
+    else if (max_ages >= 1e3) {
+      max_ages = numeral(max_ages/1e3).format('0[.]0[00]');
+      min_ages = min_ages < 1e1 ? '0' : numeral(min_ages/1e3).format('0[.]0[00]');
+      age_range = max_ages === min_ages ? `${max_ages} ka` : `${min_ages} - ${max_ages} ka`;
+    }
+    else {
+      let max_ages_unit = max_ages >= 1949.5 ? 'BC' : 'AD';
+      let min_ages_unit = min_ages >= 1949.5 ? 'BC' : 'AD';
+      max_ages = max_ages >= 1949.5 ? numeral(max_ages - 1949).format('0[.]0[00]') : numeral(1950 - max_ages).format('0[.]0[00]');
+      min_ages = min_ages >= 1949.5 ? numeral(min_ages - 1949).format('0[.]0[00]') : numeral(1950 - min_ages).format('0[.]0[00]');
+      age_range = age_range || max_ages_unit === min_ages_unit && max_ages === min_ages && `${max_ages} ${max_ages_unit}`;
+      age_range = age_range || max_ages_unit === min_ages_unit && max_ages !== min_ages && `${max_ages} - ${min_ages} ${max_ages_unit}`;
+      age_range = age_range || max_ages_unit !== min_ages_unit                          && `${max_ages} ${max_ages_unit} - ${min_ages} ${min_ages_unit}`;
+    }
+
+    console.log(tableSummary);
+    return (
+      <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
+        <b>Pole:</b><br/>
+          {tableSummary.pole_lat.range.gte < 0 ?
+          numeral(-tableSummary.pole_lat.range.gte).format('0[.]00') + '°S' :
+          numeral( tableSummary.pole_lat.range.gte).format('0[.]00') + '°N'}{', '}
+          {tableSummary.pole_lon.range.gte < 0 ?
+          numeral(-tableSummary.pole_lon.range.gte).format('0[.]00') + '°W' :
+          numeral( tableSummary.pole_lon.range.gte).format('0[.]00') + '°E'}<br/>
+          {tableSummary.pole_alpha95 &&
+          <span><b>A<sub>95</sub>:</b><br/>{ 
+            numeral(tableSummary.pole_alpha95.range.gte).format('0[.]00')
+          }<br/></span>}
+          <b>Age:</b><br/>{age_range}
+      </div>
+    );
+
+  }
+  
   renderGeo(item) {
     let geologic = ['plate_blocks', 'terranes', 'geological_province_sections', 'tectonic_settings'];
     geologic = _.reduce(geologic, (list, column) => {

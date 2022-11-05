@@ -9,6 +9,7 @@ import SearchFiltersBuckets from '/client/modules/common/containers/search_filte
 import SearchFiltersExists from '/client/modules/common/containers/search_filters_exists';
 import SearchSummariesView from '/client/modules/magic/components/search_summaries_view';
 import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
+import SearchPolesView from '/client/modules/magic/components/search_poles_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
 import SearchDownload from '/client/modules/magic/components/search_download';
@@ -71,7 +72,7 @@ class Search extends React.Component {
     { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary.contribution._contributor'            , title: 'Contributor'                    , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 10000}}}},
     { render: this.renderGeospatialFilter.bind(this)     , defaultOpen: true , name: 'geospatial' },   
     { render: this.renderAgeFilter.bind(this)            , defaultOpen: true , name: 'age' },   
-  //{ render: this.renderPoleFilter.bind(this)           , defaultOpen: false, name: 'pole' },   
+    { render: this.renderPoleFilter.bind(this)           , defaultOpen: false, name: 'pole' },   
   //{ render: this.renderVGPFilter.bind(this)            , defaultOpen: false, name: 'VGP' },   
     { render: this.renderIntensityFilter.bind(this)      , defaultOpen: false, name: 'intensity' },   
     { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.method_codes'                    , title: 'Method Code'                    , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 10000}}}, cv: _.flatMap(methodCodes, (group => group.codes.map(x => x.code))) },
@@ -120,8 +121,8 @@ class Search extends React.Component {
     this.state = {
       search: this.props.search || '',
       searchInput: this.props.search || '',
-      levelNumber: 0,
-      view: '',
+      levelNumber: this.props.levelNumber || 0,
+      view: this.props.view || '',
       sort: 'Recently Contributed First',
       sortDefault: true,
       activeBucketsFilters: {},
@@ -1179,12 +1180,30 @@ class Search extends React.Component {
           >
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
-              <Count es={_.extend({}, view.es, {
-                queries: view.name === 'Sites Map' ? _.concat(searchQueries, {exists: 
-                  {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
-                }) : searchQueries,
-                filters: esFilters
-              })}/>
+              {view.name === 'Sites Map' && 
+                <Count es={_.extend({}, view.es, {
+                    queries: _.concat(searchQueries, {exists: 
+                      {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
+                    }),
+                    filters: esFilters
+                })} />
+              || undefined}
+              {view.name === 'Poles' && 
+                <Count es={_.extend({}, view.es, {
+                    queries: _.concat(searchQueries, {exists: 
+                      {field: "summary._all.pole_lat"}
+                    }, {exists: 
+                      {field: "summary._all.pole_lon"}
+                    }),
+                    filters: esFilters
+                })} />
+              || undefined}
+              {view.name !== 'Sites Map' && view.name !== 'Poles' && 
+                <Count es={_.extend({}, view.es, {
+                    queries: searchQueries,
+                    filters: esFilters
+                })} />
+              || undefined}              
             </div>
           </div>
         )}
@@ -1248,6 +1267,18 @@ class Search extends React.Component {
         es={es}
         table={activeView.es.type === 'experiments' ? 'measurements' : activeView.es.type}
         pageSize={20}
+      />
+    );
+    if (activeView.name === 'Poles') return (
+      <SearchPolesView
+        key={this.state.levelNumber + '_' + activeView.name}
+        style={viewStyle}
+        es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
+          {field: "summary._all.pole_lat"}
+        }, {exists: 
+          {field: "summary._all.pole_lon"}
+        })})}
+        pageSize={5}
       />
     );
     if (activeView.name === 'Sites Map') return (

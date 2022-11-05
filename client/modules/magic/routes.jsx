@@ -142,10 +142,23 @@ const Routes = ({match}) => (
       return (redirectTo && <Redirect to={redirectTo}/> ||
         <Page fullWidth portal="MagIC" menu={<MagICMenu/>}>
           <Helmet><title>MagIC Search | EarthRef.org</title></Helmet>
-          <MagICSearch search={location.state && location.state.search || ""}/>
+          <MagICSearch
+            search={location.state && location.state.search || ""}
+            levelNumber={location.state && location.state.levelNumber}
+            view={location.state && location.state.view}
+          />
         </Page>
       );
     }}/>
+    <Route exact path="/MagIC/search/poles" render={() =>
+      <Redirect to={{
+        pathname: "/MagIC/search", 
+        state: {
+          levelNumber: 1,
+          view: 'Poles'
+        }
+      }}/>
+    }/>
     <Route exact path="/MagIC/:id(\d+)/:private_key([0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})" render={({match, location}) =>
       <Redirect to={{
         pathname: "/MagIC/search", 

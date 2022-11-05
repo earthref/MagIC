@@ -49,6 +49,25 @@ export default class extends React.Component {
             </IconButton>
           </div>
           <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
+            Search Interface Subdomain Views
+          </h2>
+          <div className="ui two cards">
+            <IconButton className="borderless card" link="/MagIC/search/poles" portal="MagIC">
+              <i className="icons">
+                <i className="globe icon"/>
+                <i className="corner search icon"/>
+              </i>
+              <div className="small title">Poles<br/>View</div>
+            </IconButton>
+            <IconButton className="borderless disabled card" portal="MagIC">
+              <i className="icons">
+                <i className="magnet icon"/>
+                <i className="corner search icon"/>
+              </i>
+              <div className="small title">Rock-Mag<br/>View</div>
+            </IconButton>
+          </div>
+          <h2 className="ui horizontal divider header" style={{marginBottom: 0}}>
             MagIC Resources
           </h2>
           <div className="ui nine cards" style={{marginTop: 0}}>

@@ -18,7 +18,7 @@ import XLSX from 'xlsx';
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
 //import ExportContribution from '/client/modules/magic/actions/export_contribution.js';
 import DataImporter from '/client/modules/common/components/data_importer';
-import DividedList from '/client/modules/common/components/divided_list';
+import DividedList from '/client/modules/common/components/search_divided_list';
 import SearchSummariesListItem from '/client/modules/magic/containers/search_summaries_list_item';
 import IconButton from '/client/modules/common/components/icon_button';
 import {versions, models} from '/lib/configs/magic/data_models.js';

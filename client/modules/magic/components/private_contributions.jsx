@@ -11,7 +11,7 @@ import {Collections} from "/lib/collections";
 import { Accordion, List, Dropdown, Tab, Input } from 'semantic-ui-react';
 
 import Count from '/client/modules/common/containers/search_count';
-import DividedList from "/client/modules/common/components/divided_list";
+import DividedList from "/client/modules/common/components/search_divided_list";
 import SearchSummariesListItem from "/client/modules/magic/containers/search_summaries_list_item";
 import IconButton from "/client/modules/common/components/icon_button";
 import {index} from "/lib/configs/magic/search_levels.js";

@@ -2,14 +2,14 @@ import _ from 'lodash';
 import React from 'react';
 import {compose} from '@storybook/react-komposer';
 
-import SearchDividedList from '/client/modules/common/components/search_divided_list';
+import SearchDividedPolesList from '/client/modules/magic/components/search_divided_poles_list';
 
 export const composer = ({es, pageSize, pageNumber}, onData) => {
   onData(null, { items: undefined, idFilter: false });
   Meteor.call('esPage', es, pageSize, pageNumber, (error, results) => {
     try {
       if (error) {
-        console.error('SearchDividedList', error);
+        console.error('SearchDividedPolesList', error);
         onData(null, {error: error});
       } else {
         onData(null, {items: results, idFilter: es && es.queries && _.find(_.map(es.queries, "terms"), "summary.contribution._history.id") });
@@ -28,4 +28,4 @@ export default compose(
         !_.isEqual(currentProps.pageNumber, nextProps.pageNumber);
     }
   }
-)(SearchDividedList);
+)(SearchDividedPolesList);
