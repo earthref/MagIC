@@ -79,7 +79,7 @@ export default class GoogleMap extends React.Component {
 
         try {
           _.uniqBy(s._all._geo_point, x => _.flatten(x.coordinates).join('_')).forEach((point, i) => {
-            if (i == 0) this.addObject(
+            this.addObject(
               point.coordinates[1],
               point.coordinates[1],
               point.coordinates[0],
@@ -153,14 +153,14 @@ export default class GoogleMap extends React.Component {
     if (north < south) { let s = south; south = north; north = s; }
     if (east  < west ) { let e = east;  east  = west;  west  = e; }
     if (south + minDim < north && west + minDim < east) {
-      let rect = this.addRectangle({
+      this.addRectangle({
         south: south,
         north: north,
         west: west,
         east: east
       }, info);
     } else {
-      let point = this.addCircleMarker({
+      this.addCircleMarker({
         lat: south,
         lng: west
       }, info);
@@ -174,13 +174,13 @@ export default class GoogleMap extends React.Component {
     });
     let purpleCircle = {
       path: 'M 256,480c-84.828,0-153.6-68.157-153.6-152.228c0-84.081, 153.6-359.782, 153.6-359.782s 153.6,275.702, 153.6,359.782C 409.6,411.843, 340.828,480, 256,480z M 255.498,282.245c-26.184,0-47.401,21.043-47.401,46.981c0,25.958, 21.217,46.991, 47.401,46.991c 26.204,0, 47.421-21.033, 47.421-46.991 C 302.92,303.288, 281.702,282.245, 255.498,282.245z',
-      fillColor: '#FFFFFF',
+      fillColor: '#800080',
       fillOpacity: 1,
       strokeColor: '#800080',
       strokeWeight: 1,
       strokeWidth: 0.5,
       anchor: new google.maps.Point(255.498,-26.204),
-      scale: .04,
+      scale: .07,
       rotation: 180
     };
     let circle = new google.maps.Marker({

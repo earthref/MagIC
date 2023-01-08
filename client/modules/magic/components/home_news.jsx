@@ -10,6 +10,42 @@ export default class extends React.Component {
     return (
       <div style={{textAlign: "justify"}}>
         <h3>
+          <Image size="mini" src="/MagIC/sio.jpg" floated="left"/>
+          {` 2023 MagIC Workshop`}
+        </h3>
+        <p>
+          {` MagIC will host its 2023 workshop from `}
+          <b>Feb 28th to March 2nd, 2023</b>
+          {` in La Jolla, California at the Scripps Institution of Oceanography, UCSD. The workshop, "`}
+          <a href="https://earthref.org/events/MAGIC/2023/"><b>Magnetism and Earth History: Field Evolution, Environmental Change and Paleogeography</b></a>
+          {`", consists of two days of science talks in four sessions and a day of MagIC related group working sessions. Please visit the `}
+          <a href="https://earthref.org/events/MAGIC/2023/"><b>workshop website</b></a>
+          {` for the full schedule and other workshop details. We welcome you to join us at the workshop by registering using this `} 
+          <a href="https://docs.google.com/forms/d/1sCt0e-1vIwis7eNNHzDOZEm4nnUx8jcCAmyMm-NtDgg"><b>form</b></a>
+          {`. There will be a poster session and reception on the evening of the first day.`} 
+        </p>
+        <div className="ui divider"></div>
+        <h3>
+          <Image size="mini" src="/MagIC/youtube.png" floated="left"/>
+          <a href="https://www.youtube.com/playlist?list=PLirL2unikKCgUkHQ3m8nT29tMCJNBj4kj"><font color="000000">2020 MagIC Workshop Tutorial Videos</font></a>
+        </h3>
+        <p>
+        {`In lieu of the postponed 2020 MagIC Workshop, Magic hosted a series of `}
+        <a href="https://www.youtube.com/playlist?list=PLirL2unikKCgUkHQ3m8nT29tMCJNBj4kj"><b>tutorials</b></a>
+        {` over three days covering some of the material which was to be presented in the hands-on part of the workshop. The `}
+        <a href="https://youtu.be/pchdPBzSmT0"><b>first</b></a> 
+        {` was on the MagIC data model and the uploading of data to the MagIC database, the `}
+        <a href="https://youtu.be/GUjf33aNnFQ"><b>second</b></a>
+        {` was on the PmagPy Demag GUI data import, analysis, and MagIC file export software, the `}
+        <a href="https://www.youtube.com/watch?v=9yGPbATqRtI"><b>third</b></a>
+        {` was on using PmagPy and Jupyter notebooks. These tutorial videos and others can be found on the `}
+        <a href="https://www.youtube.com/playlist?list=PLirL2unikKCgUkHQ3m8nT29tMCJNBj4kj"><b>2020 MagIC Workshop Tutorial playlist</b></a>
+        {` on the `}
+        <a href="https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ"><b>MagIC YouTube Channel</b></a>
+        {`.`}
+        </p>
+        <div className="ui divider"></div>
+        <h3>
           <Image size="mini" src="https://github.com/earthref/MagIC-MagNetS/raw/master/MagnetZ_Logo.jpg" floated="left"/>
           {` Mag-NetZ`}
         </h3>
