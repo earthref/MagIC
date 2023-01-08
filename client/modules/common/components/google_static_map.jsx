@@ -24,7 +24,7 @@ export default class GoogleStaticMap extends React.Component {
     const padding = this.props.padding  || 2  ;
     const color   = this.props.color    || 'BBBBBB99';
     const border  = this.props.border   || '800080FF';
-    const weight  = this.props.weight   || 2;
+    const weight  = this.props.weight   || 10;
     const paths   = this.props.paths    || [];
     const noMap   = (
       <div style={{
