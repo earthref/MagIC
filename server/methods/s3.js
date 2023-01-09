@@ -75,7 +75,7 @@ async function s3ListObjects({bucket, prefix, limit}) {
         s3.listObjectsV2({ Bucket: bucket, Prefix: prefix, ContinuationToken: nextToken }, (error, data) => {
           if (error) {
             console.error("s3ListObjects", `Failed to retrieve S3 objects in ${bucket}/${prefix}`, error);
-            throw new Meteor.Error("s3ListObjects", `Failed to retrieve S3 objects in ${bucket}/${prefix}`);
+            // throw new Meteor.Error("s3ListObjects", `Failed to retrieve S3 objects in ${bucket}/${prefix}`);
           }
           else {
             resolve(data);

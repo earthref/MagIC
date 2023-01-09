@@ -66,43 +66,59 @@ const ageUnitsDefault = 'Ma';
 
 class Search extends React.Component {
 
-  filters = [
-    { render: this.renderPublicationYearFilter.bind(this), defaultOpen: true , name: 'publicationYear' },
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary.contribution._reference.authors._name', title: 'Author'                         , term: 'summary.contribution._reference.authors._name.raw', aggs: {buckets: {terms: {field: 'summary.contribution._reference.authors._name.raw', size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary.contribution._contributor'            , title: 'Contributor'                    , term: 'summary.contribution._contributor.raw'            , aggs: {buckets: {terms: {field: 'summary.contribution._contributor.raw'            , size: 10000}}}},
-    { render: this.renderGeospatialFilter.bind(this)     , defaultOpen: true , name: 'geospatial' },   
-    { render: this.renderAgeFilter.bind(this)            , defaultOpen: true , name: 'age' },   
-    { render: this.renderPoleFilter.bind(this)           , defaultOpen: false, name: 'pole' },   
-  //{ render: this.renderVGPFilter.bind(this)            , defaultOpen: false, name: 'VGP' },   
-    { render: this.renderIntensityFilter.bind(this)      , defaultOpen: false, name: 'intensity' },   
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.method_codes'                    , title: 'Method Code'                    , term: 'summary._all.method_codes.raw'                    , aggs: {buckets: {terms: {field: 'summary._all.method_codes.raw'                    , size: 10000}}}, cv: _.flatMap(methodCodes, (group => group.codes.map(x => x.code))) },
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.external_database_ids'           , title: 'External Database'              , term: 'summary._all.external_database_ids.key.raw'       , aggs: {buckets: {terms: {field: 'summary._all.external_database_ids.key.raw'       , size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.location_type'                   , title: 'Location Type'                  , term: 'summary._all.location_type.raw'                   , aggs: {buckets: {terms: {field: 'summary._all.location_type.raw'                   , size: 10000}}}, cv: cvs.location_type.items.map(x => x.item) },
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_type'                   , title: 'Geologic Type'                  , term: 'summary._all.geologic_types.raw'                  , aggs: {buckets: {terms: {field: 'summary._all.geologic_types.raw'                  , size: 10000}}}, cv: cvs.type.items.map(x => x.item)},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.geologic_class'                  , title: 'Geologic Class'                 , term: 'summary._all.geologic_classes.raw'                , aggs: {buckets: {terms: {field: 'summary._all.geologic_classes.raw'                , size: 10000}}}, cv: cvs.class.items.map(x => x.item)},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.lithology'                       , title: 'Lithology'                      , term: 'summary._all.lithologies.raw'                     , aggs: {buckets: {terms: {field: 'summary._all.lithologies.raw'                     , size: 10000}}}, cv: cvs.lithology.items.map(x => x.item)},
-  //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.scientists'                      , title: 'Research Scientist Name'        , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 10000}}}},
-  //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.analysts'                        , title: 'Analyst Name'                   , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 10000}}}},
-    { render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.software_packages'               , title: 'Software Package'               , term: 'summary._all.software_packages.raw'               , aggs: {buckets: {terms: {field: 'summary._all.software_packages.raw'               , size: 10000}}}},
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withAnyData'                                  , title: 'With Data in Any Table'         , summaryLevel: '_all'        , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutAnyData'                               , title: 'Without Data in Any Table'      , summaryLevel: '_all'        , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withLocationsData'                            , title: 'With Locations Table Data'      , summaryLevel: 'locations'   , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutLocationsData'                         , title: 'Without Locations Table Data'   , summaryLevel: 'locations'   , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSitesData'                                , title: 'With Sites Table Data'          , summaryLevel: 'sites'       , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSitesData'                             , title: 'Without Sites Table Data'       , summaryLevel: 'sites'       , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSamplesData'                              , title: 'With Samples Table Data'        , summaryLevel: 'samples'     , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSamplesData'                           , title: 'Without Samples Table Data'     , summaryLevel: 'samples'     , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withSpecimensData'                            , title: 'With Specimens Table Data'      , summaryLevel: 'specimens'   , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutSpecimensData'                         , title: 'Without Specimens Table Data'   , summaryLevel: 'specimens'   , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withMeasurementsData'                         , title: 'With Measurements Table Data'   , summaryLevel: 'experiments' , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutMeasurementsData'                      , title: 'Without Measurements Table Data', summaryLevel: 'experiments' , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withCriteriaData'                             , title: 'With Criteria Table Data'       , summaryLevel: 'criteria'    , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutCriteriaData'                          , title: 'Without Criteria Table Data'    , summaryLevel: 'criteria'    , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withAgesData'                                 , title: 'With Ages Table Data'           , summaryLevel: 'ages'        , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withoutAgesData'                              , title: 'Without Ages Table Data'        , summaryLevel: 'ages'        , exists: false },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withImagesData'                               , title: 'With Images Table Data'         , summaryLevel: 'images'      , exists: true  },
-    { render: this.renderWithDataFilter.bind(this)       ,                     name: 'withouImagestData'                            , title: 'Without Images Table Data'      , summaryLevel: 'images'      , exists: false },
-  ];
+  filters = {
+    '': [
+      { render: this.renderPublicationYearFilter.bind(this), defaultOpen: true, name: 'publicationYear' },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary.contribution._reference.authors._name', title: 'Author', term: 'summary.contribution._reference.authors._name.raw', aggs: { buckets: { terms: { field: 'summary.contribution._reference.authors._name.raw', size: 10000 } } } },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary.contribution._contributor', title: 'Contributor', term: 'summary.contribution._contributor.raw', aggs: { buckets: { terms: { field: 'summary.contribution._contributor.raw', size: 10000 } } } },
+      { render: this.renderGeospatialFilter.bind(this), defaultOpen: true, name: 'geospatial' },
+      { render: this.renderAgeFilter.bind(this), defaultOpen: true, name: 'age' },
+      // { render: this.renderPoleFilter.bind(this), defaultOpen: false, name: 'pole' },
+      //{ render: this.renderVGPFilter.bind(this)            , defaultOpen: false, name: 'VGP' },   
+      { render: this.renderIntensityFilter.bind(this), defaultOpen: false, name: 'intensity' },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.method_codes', title: 'Method Code', term: 'summary._all.method_codes.raw', aggs: { buckets: { terms: { field: 'summary._all.method_codes.raw', size: 10000 } } }, cv: _.flatMap(methodCodes, (group => group.codes.map(x => x.code))) },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.external_database_ids', title: 'External Database', term: 'summary._all.external_database_ids.key.raw', aggs: { buckets: { terms: { field: 'summary._all.external_database_ids.key.raw', size: 10000 } } } },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.location_type', title: 'Location Type', term: 'summary._all.location_type.raw', aggs: { buckets: { terms: { field: 'summary._all.location_type.raw', size: 10000 } } }, cv: cvs.location_type.items.map(x => x.item) },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.geologic_type', title: 'Geologic Type', term: 'summary._all.geologic_types.raw', aggs: { buckets: { terms: { field: 'summary._all.geologic_types.raw', size: 10000 } } }, cv: cvs.type.items.map(x => x.item) },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.geologic_class', title: 'Geologic Class', term: 'summary._all.geologic_classes.raw', aggs: { buckets: { terms: { field: 'summary._all.geologic_classes.raw', size: 10000 } } }, cv: cvs.class.items.map(x => x.item) },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.lithology', title: 'Lithology', term: 'summary._all.lithologies.raw', aggs: { buckets: { terms: { field: 'summary._all.lithologies.raw', size: 10000 } } }, cv: cvs.lithology.items.map(x => x.item) },
+      //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.scientists'                      , title: 'Research Scientist Name'        , term: 'summary._all.scientists.raw'                      , aggs: {buckets: {terms: {field: 'summary._all.scientists.raw'                      , size: 10000}}}},
+      //{ render: this.renderBucketsFilter.bind(this)        ,                     name: 'summary._all.analysts'                        , title: 'Analyst Name'                   , term: 'summary._all.analysts.raw'                        , aggs: {buckets: {terms: {field: 'summary._all.analysts.raw'                        , size: 10000}}}},
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.software_packages', title: 'Software Package', term: 'summary._all.software_packages.raw', aggs: { buckets: { terms: { field: 'summary._all.software_packages.raw', size: 10000 } } } },
+      { render: this.renderWithDataFilter.bind(this), name: 'withAnyData', title: 'With Data in Any Table', summaryLevel: '_all', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutAnyData', title: 'Without Data in Any Table', summaryLevel: '_all', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withLocationsData', title: 'With Locations Table Data', summaryLevel: 'locations', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutLocationsData', title: 'Without Locations Table Data', summaryLevel: 'locations', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withSitesData', title: 'With Sites Table Data', summaryLevel: 'sites', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutSitesData', title: 'Without Sites Table Data', summaryLevel: 'sites', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withSamplesData', title: 'With Samples Table Data', summaryLevel: 'samples', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutSamplesData', title: 'Without Samples Table Data', summaryLevel: 'samples', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withSpecimensData', title: 'With Specimens Table Data', summaryLevel: 'specimens', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutSpecimensData', title: 'Without Specimens Table Data', summaryLevel: 'specimens', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withMeasurementsData', title: 'With Measurements Table Data', summaryLevel: 'experiments', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutMeasurementsData', title: 'Without Measurements Table Data', summaryLevel: 'experiments', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withCriteriaData', title: 'With Criteria Table Data', summaryLevel: 'criteria', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutCriteriaData', title: 'Without Criteria Table Data', summaryLevel: 'criteria', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withAgesData', title: 'With Ages Table Data', summaryLevel: 'ages', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutAgesData', title: 'Without Ages Table Data', summaryLevel: 'ages', exists: false },
+      { render: this.renderWithDataFilter.bind(this), name: 'withImagesData', title: 'With Images Table Data', summaryLevel: 'images', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withouImagestData', title: 'Without Images Table Data', summaryLevel: 'images', exists: false },
+    ],
+    'Poles': [
+      { render: this.renderAgeFilter.bind(this), defaultOpen: true, name: 'age' },
+      { render: this.renderGeospatialFilter.bind(this), name: 'geospatial' },
+      // pole alpha 95
+      // pole n sites
+      // dir n sites
+      { render: this.renderPublicationYearFilter.bind(this), name: 'publicationYear' },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.geologic_type', title: 'Geologic Type', term: 'summary._all.geologic_types.raw', aggs: { buckets: { terms: { field: 'summary._all.geologic_types.raw', size: 10000 } } }, cv: cvs.type.items.map(x => x.item) },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.geologic_class', title: 'Geologic Class', term: 'summary._all.geologic_classes.raw', aggs: { buckets: { terms: { field: 'summary._all.geologic_classes.raw', size: 10000 } } }, cv: cvs.class.items.map(x => x.item) },
+      { render: this.renderBucketsFilter.bind(this), name: 'summary._all.lithology', title: 'Lithology', term: 'summary._all.lithologies.raw', aggs: { buckets: { terms: { field: 'summary._all.lithologies.raw', size: 10000 } } }, cv: cvs.lithology.items.map(x => x.item) },
+      // { render: this.renderWithOrWithoutDataFilter.bind(this), name: 'withOrWiithoutData', title: 'With or Without Data', summaryLevel: 'locations', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withLocationsData', title: 'With Locations Table Data', summaryLevel: 'locations', exists: true },
+      { render: this.renderWithDataFilter.bind(this), name: 'withoutLocationsData', title: 'Without Locations Table Data', summaryLevel: 'locations', exists: false },
+    ],
+  };
 
   toggleFilter(filter) {
     // console.log('toggle', filter.name, this.state);
@@ -261,7 +277,10 @@ class Search extends React.Component {
   }
 
   getESFilters(excludeFilterName) {
-    const esFilters = _.reduce(this.filters, (esFilters, filter) => {
+    const activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    const esFilters = _.reduce(this.filters[activeView.name === 'Poles' ? activeView.name : ''], (esFilters, filter) => {
       if (excludeFilterName === filter.name) return esFilters;
       if (this.state.activeBucketsFilters[filter.name])
         esFilters.push({ terms: { [filter.term]: this.state.activeBucketsFilters[filter.name] } });
@@ -471,6 +490,9 @@ class Search extends React.Component {
   render() {
     let searchQueries = this.getSearchQueries();
     let esFilters = this.getESFilters();
+    const activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
     return (
       <div className="magic-search">
         {this.renderJSONLD(searchQueries)}
@@ -561,7 +583,7 @@ class Search extends React.Component {
                 </div>
                 <div ref="filters" className="ui small basic attached segment" style={this.styles.filters}>
                   <div>
-                    { this.filters.map((filter, i) => filter.render(searchQueries, filter, i)) }
+                    { this.filters[activeView.name === 'Poles' ? activeView.name : ''].map((filter, i) => filter.render(searchQueries, filter, i)) }
                   </div>
                 </div>
               </div>
@@ -1119,6 +1141,62 @@ class Search extends React.Component {
     )
   }
 
+  renderWithOrWithoutDataFilter(searchQueries, filter, i) {
+    const esFilters = this.getESFilters(filter.name);
+    const activeView =
+      _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
+      levels[this.state.levelNumber].views[0];
+    const type = activeView && activeView.es && activeView.es.type || 'contribution';
+    const levelsName = type === 'contribution' ? 'Contributions' : (type === 'measurements' ? 'Experiments' : _.startCase(type));
+    const levelName = levelsName.substr(0, levelsName.length);
+    const tableName = _.startCase(filter.summaryLevel);
+    const model = models[_.last(versions)];
+    let labels = [];
+    let aggs = {};
+    sortedTables.forEach(tableKey => {
+      if (tableKey !== 'contribution' && (
+        filter.summaryLevel === '_all' ||
+        filter.summaryLevel === 'experiments' && tableKey === 'measurements' || 
+        filter.summaryLevel === tableKey
+      )) {
+        const table = model.tables[tableKey];        
+        _.sortBy(
+          _.keys(table.columns), columnName => table.columns[columnName].position
+        ).forEach(columnName => {
+          const key = `summary.${filter.summaryLevel}.${columnName}`;
+          const column = table.columns[columnName];
+          if (!aggs[key] && (!column.validations || !column.validations.includes('downloadOnly()'))) {
+            labels.push({
+              key,
+              label: column.label, 
+              style: 
+                Meteor.isDevelopment &&
+                !filter.exists &&
+                filter.summaryLevel !== '_all' && (
+                  column.validations && column.validations.includes('required()') && { color: 'red' } || 
+                  column.validations && column.validations.includes('recommended()') && { color: 'orange' } || 
+                  {}
+                )
+            });
+            aggs[key] = {
+              filter: filter.exists ? 
+                { exists: { field: key }}
+              :
+                { bool: {
+                  must: { exists: { field: `summary.${filter.summaryLevel}` }},
+                  must_not: { exists: { field: key }}
+                }}
+            };
+          }
+        });
+      }
+    });
+    return (
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
+      </div>
+    )
+  }
+
   renderBucketsFilter(searchQueries, filter, i) {
     const esFilters = this.getESFilters(filter.name);
     const activeView =
@@ -1180,14 +1258,6 @@ class Search extends React.Component {
           >
             {view.name}
             <div className="ui circular small basic label" style={this.styles.countLabel}>
-              {view.name === 'Sites Map' && 
-                <Count es={_.extend({}, view.es, {
-                    queries: _.concat(searchQueries, {exists: 
-                      {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
-                    }),
-                    filters: esFilters
-                })} />
-              || undefined}
               {view.name === 'Poles' && 
                 <Count es={_.extend({}, view.es, {
                     queries: _.concat(searchQueries, {exists: 
@@ -1198,7 +1268,7 @@ class Search extends React.Component {
                     filters: esFilters
                 })} />
               || undefined}
-              {view.name !== 'Sites Map' && view.name !== 'Poles' && 
+              {view.name !== 'Poles' && 
                 <Count es={_.extend({}, view.es, {
                     queries: searchQueries,
                     filters: esFilters
@@ -1285,9 +1355,7 @@ class Search extends React.Component {
       <SearchMapView
         key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
-        es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
-          {field: this.state.levelNumber < 2 ? "summary._all._geo_envelope" : "summary._all._geo_point"}
-        })})}
+        es={es}
       />
     );
     if (activeView.name === 'Images' || activeView.name === 'Plots') return (
