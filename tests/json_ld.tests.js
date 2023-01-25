@@ -1,17 +1,18 @@
 import _ from "lodash";
 import fs from "fs";
-import elasticsearch from "elasticsearch";
+import opensearch from "@opensearch-project/opensearch";
 import uuid from "uuid";
 import Promise from "bluebird";
 
-const esClient = new elasticsearch.Client({
+const esClient = new opensearch.Client({
   //log: "trace",
-  host: "http://128.193.70.68:9200",
+  node: Meteor.settings.opensearch && Meteor.settings.opensearch.node || "",
   keepAlive: false,
+  apiVersion: '6.8',
   requestTimeout: 60 * 60 * 1000 // 1 hour
 });
 
-const index = "magic_v4";
+const index = "magic";
 const minLastMod = Date.parse("07-01-2021");
 
 describe("magic.json_ld", () => {
@@ -20,11 +21,12 @@ describe("magic.json_ld", () => {
     this.timeout(0);
 
     esClient.search({
-      index: index, type: "contribution", size: 1e4, 
+      index: index, type: "_doc", size: 1e4, 
       _source: ["summary.contribution._history"],
       body: {
         "query": { "bool": { 
           "must": [
+            { "term": { "type": "contribution" }},
             { "exists": { "field": "summary.contribution._history" }},
             { "term": { "summary.contribution._is_latest": "true"}},
             { "term": { "summary.contribution._is_activated": "true"}}
@@ -33,10 +35,10 @@ describe("magic.json_ld", () => {
       }
     }).then((resp) => {
       //let xml = [];
-      //console.log(resp.hits.total, resp.hits.hits);
+      console.log(resp.body.hits, resp.body.hits.hits);
       let urls = {};
-      if (resp.hits.total > 0) {
-        xml = resp.hits.hits.forEach(hit => {
+      if (resp.body.hits.total.value > 0) {
+        xml = resp.body.hits.hits.forEach(hit => {
           const contribution = hit._source.summary.contribution._history[0];
           urls[contribution.id] = `<url>` +
             `<loc>https://earthref.org/MagIC/${contribution.id}</loc>` + 
@@ -44,7 +46,7 @@ describe("magic.json_ld", () => {
           `</url>`;
         });
       }
-      fs.writeFileSync(`C:/Users/rminn/Git/EarthRef/MagIC/public/MagIC/contributions.sitemap.xml`, 
+      fs.writeFileSync(`/home/rminnett/git/EarthRef/MagIC/public/MagIC/contributions.sitemap.xml`, 
         `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
         _.keys(urls).sort((a, b) => a - b).map(id => urls[id]).join('\n') + 
         `\n</urlset>`
