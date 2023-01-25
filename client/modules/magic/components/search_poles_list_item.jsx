@@ -68,6 +68,67 @@ class SearchSummariesListItem extends React.Component {
     return <div style={{whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden"}} dangerouslySetInnerHTML={{__html: title}}/>;
   }
 
+  renderCounts(item) {
+    let counts = [];
+    let labels = [];
+    let levels = [];
+    ['Location', 'Site', 'Sample', 'Specimen', 'Experiment'].forEach(label => {
+      let level = label.toLowerCase() + 's';
+      let name = label.toLowerCase();
+      if (item.summary && item.summary._all && item.summary._all['_n_' + level]) {
+        let count = item.summary._all['_n_' + level];
+        counts.push(count);
+        labels.push(label + (count !== 1 ? 's' : ''));
+        levels.push(level);
+      } else if (item.summary && item.summary._all && item.summary._all[name] && item.summary._all[name].length) {
+        let count = item.summary._all[name].length;
+        counts.push(count);
+        labels.push(label + (count !== 1 ? 's' : ''));
+        levels.push(level);
+      }
+    });
+    if (item.summary && item.summary._all && item.summary._all._n_measurements) {
+      let count = item.summary._all._n_measurements;
+      counts.push(count);
+      labels.push('Measurement' + (count !== 1 ? 's' : ''));
+      levels.push('measurements');
+    }
+    return (
+      <div style={{minWidth: 135, maxWidth: 135, marginRight: '1em', marginBottom: 5, fontSize:'small', lineHeight:1}}>
+        <table><tbody>
+          {counts.map((count, i) => {
+            return (
+              <tr key={i}>
+                <td style={{textAlign: 'right'}}>
+                  { levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
+                    <a onClick={() => {
+                      this.setState({ dataLevel: levels[i], showDataModal: true });
+                    }}>
+                      {numeral(count).format('0 a')}
+                    </a>
+                  :
+                    numeral(count).format('0 a')
+                  }
+                </td>
+                <td>
+                  { levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
+                    <a onClick={() => {
+                      this.setState({ dataLevel: levels[i], showDataModal: true });
+                    }}>
+                      &nbsp;{labels[i]}
+                    </a>
+                  :
+                    <span>&nbsp;{labels[i]}</span>
+                }
+                </td>
+              </tr>
+            );
+          })}
+        </tbody></table>
+      </div>
+    );
+  }
+
   renderQueuedForIndex(item) {
     return (
       <div style={{minWidth: 200, maxWidth: 200, marginRight: '1em', marginBottom: 5, fontSize:'small', color:'#AAAAAA', textAlign:'left', overflow:'hidden', textOverflow:'ellipsis'}}>
@@ -190,7 +251,6 @@ class SearchSummariesListItem extends React.Component {
 
   renderPole(item) {
   
-    console.log('pole', item);
     if (item.row.pole_lat && item.row.pole_lon){
       return (
         <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
@@ -222,7 +282,6 @@ class SearchSummariesListItem extends React.Component {
 
   renderResultNamePoleComponent(item) {
   
-    console.log('pole', item);
     if (item.row.result_name || item.row.pole_comp_name){
       return (
         <div style={{minWidth: 125, maxWidth: 125, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
@@ -381,6 +440,7 @@ class SearchSummariesListItem extends React.Component {
                       location={item && item.summary && item.summary.locations && item.summary.locations.location && item.summary.locations.location[0] }    
                       size={150}
                     />
+                    {this.renderCounts(item)}
                     {this.renderPole(item)}
                     {this.renderGeo(item)}
                     {this.renderGeology(item)}
@@ -620,6 +680,329 @@ class SearchSummariesListItem extends React.Component {
       </div>
       <GoogleMap style={{width:'100%', height:'calc(100vh - 10em)'}} docs={[item]}/>
     </div>
+    );
+  }
+  
+  renderDataModal(item) {
+    const citation = item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation;
+    const name = item.summary && item.summary.contribution && item.summary.contribution._name;
+    const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
+    return (
+      <Modal
+        onClose={() => this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })}
+        open={true}
+        style={{ width: 'calc(100vw - 4em)' }}
+      >
+        <Modal.Header>
+          <i 
+            className="close icon" 
+            onClick={() => this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })}
+            style={{ cursor:'pointer', float: 'right' }}
+          />
+          {citation || name || "Unnamed"} - Contribution Data
+        </Modal.Header>
+        <Modal.Content>
+          <div className="ui top attached tabular small menu search-tab-menu">
+            { this.state.contributionData && this.state.contributionData.locations ?
+              <a 
+                className={`${this.state.dataLevel === 'locations' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'locations' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'locations' } : 
+                  { dataLoading: true, dataLevel: 'locations' }
+                )}
+              >
+                Locations
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.locations.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'locations' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'locations' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Locations
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+            { this.state.contributionData && this.state.contributionData.sites ?
+              <a 
+                className={`${this.state.dataLevel === 'sites' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'sites' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'sites' } : 
+                  { dataLoading: true, dataLevel: 'sites' }
+              )}
+              >
+                Sites
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.sites.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'sites' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'sites' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Sites
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+            { this.state.contributionData && this.state.contributionData.samples ?
+              <a 
+                className={`${this.state.dataLevel === 'samples' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'samples' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'samples' } : 
+                  { dataLoading: true, dataLevel: 'samples' }
+                )}
+              >
+                Samples
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.samples.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'samples' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'samples' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Samples
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+            { this.state.contributionData && this.state.contributionData.specimens ?
+              <a 
+                className={`${this.state.dataLevel === 'specimens' ? 'active ' : ''}item`} 
+                style={this.state.dataLevel === 'specimens' ? {backgroundColor: '#F0F0F0'} : {}}
+                onClick={() => this.setState(this.state.dataEdited ? 
+                  { showConfirmChangeTabsEditedDataModal: true } : 
+                  { dataLoading: true, dataLevel: 'specimens', confirmChangeTabsDataLevel: 'specimens' }
+                  )}
+              >
+                Specimens
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  <Count count={ this.state.contributionData.specimens.length }/>
+                </div>
+              </a>
+            :
+              <div 
+                className={`${this.state.dataLevel === 'specimens' ? 'active ' : ''}disabled item`} 
+                style={this.state.dataLevel === 'specimens' ? {backgroundColor: '#F0F0F0'} : {}}
+              >
+                Specimens
+                <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
+                  { this.state.contributionData ? '0' : '?' }
+                </div>
+              </div>
+            }
+          </div>
+          {this.renderData(item)}
+          <Modal size="small"
+            onClose={() => this.setState({ showConfirmCloseEditedDataModal: false })}
+            open={this.state.showConfirmCloseEditedDataModal}
+            content="Closing the Contribution Data tables will cancel edits made to this table."
+            actions={[
+              { content: 'Cancel Edits and Close', key: 'cancel', negative: true, onClick: () => 
+                this.setState({ 
+                  dataEdited: false,
+                  contributionData: undefined, 
+                  contributionDataError: undefined,
+                  showDataModal: false,
+                  showConfirmCloseEditedDataModal: false,
+                  confirmChangeTabsDataLevel: undefined
+                })
+              },
+              'Continue Editing'
+            ]}
+          />
+          <Modal size="small"
+            onClose={() => this.setState({ showConfirmChangeTabsEditedDataModal: false, confirmChangeTabsDataLevel: undefined })}
+            open={this.state.showConfirmChangeTabsEditedDataModal}
+            content="Changing table tabs will cancel edits made to this table."
+            actions={[
+              { content: 'Cancel Edits and Change Tabs', key: 'cancel', negative: true, onClick: () => 
+                this.setState({ 
+                  dataEdited: false,
+                  contributionData: undefined, 
+                  contributionDataError: undefined,
+                  showConfirmChangeTabsEditedDataModal: false,
+                  confirmChangeTabsDataLevel: undefined,
+                  dataLevel: this.state.confirmChangeTabsDataLevel
+                })
+              },
+              'Continue Editing'
+            ]}
+          />
+        </Modal.Content>
+        { isPrivate && 
+          <Modal.Actions>
+            <Button color='purple' floated="left" disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
+              const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
+              if (this.state.dataEdited && data) {
+                const rowData = this.state.contributionData[this.state.dataLevel];
+                const model = models[_.last(versions)];
+                const table = model.tables[this.state.dataLevel];
+                const modelColumns = _.sortBy(
+                  _.keys(table.columns), columnName => table.columns[columnName].position
+                );
+                const tableData = this.state.contributionData[this.state.dataLevel];
+                const usedColumns = {};
+                tableData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
+                const columns = modelColumns.filter(x => usedColumns[x]);
+                const contributionData = { ...this.state.contributionData,
+                  [this.state.dataLevel]: data.map(row => {
+                    const editedRow = {};
+                    row.forEach((col, colIdx) => {
+                      editedRow[columns[colIdx]] = col
+                    });
+                    return editedRow;
+                  })
+                };
+                console.log('updating contribution', item);
+                const contributor = item.summary.contribution.contributor;
+                const _contributor = item.summary.contribution._contributor;
+                const id = item.summary.contribution.id;
+                const contribution = contributionData;
+                const summary = item.summary;
+                Meteor.call('esUpdatePrivateContribution', {
+                  index, contributor, _contributor, id, contribution, summary
+                }, (error) => {
+                  console.log('updated contribution', id, error);
+                  if (error) { this.setState({contributionDataError: error, dataSaving: false});
+                  } else { 
+                    this.setState({dataSaving: false});
+                    Meteor.call('esUpdatePrivatePreSummaries', {
+                      index, contributor, _contributor, id, contribution, summary
+                    }, (error) => {
+                      console.log('updated contribution pre-summaries', id, error);
+                      if (error) { this.setState({contributionDataError: error});
+                      } else {
+                        Meteor.call('esUpdatePrivateSummaries', {
+                          index, contributor, _contributor, id, contribution, summary
+                        });
+                      }
+                    });
+                  }
+                });
+                this.setState({
+                  dataEdited: false,
+                  dataSaving: true,
+                  contributionData
+                });
+                this.contributionDataEdited = undefined;
+              }
+            }}>
+              {this.state.dataSaving ? 'Saving' : 'Save'} Edits
+            </Button>
+            <Button color='red' disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
+              this.contributionDataEdited = undefined;
+              this.setState({ 
+                dataEdited: false,
+                contributionData: undefined, 
+                contributionDataError: undefined
+              });
+            }}>
+              Cancel Edits
+            </Button>
+            <Button onClick={() => 
+              this.setState(this.state.dataEdited ? { showConfirmCloseEditedDataModal: true } : { showDataModal: false })
+            }>
+              Close
+            </Button>
+          </Modal.Actions>
+        }
+      </Modal>
+    );
+  }
+
+  renderData(item) {
+    const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
+    if (!this.state.contributionData && item && item.summary && item.summary.contribution)
+      Meteor.call('esGetContribution', {index, id: item.summary.contribution.id, tables: ['locations', 'sites', 'samples', 'specimens']}, (error, c) => {
+        console.log('esGetContribution', error, c);
+        if (!error && c)
+          this.setState({ contributionData: c });
+        else
+          this.setState({ contributionData: {}, contributionDataError: error });
+      });
+    if (!this.state.contributionData)
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui inverted active dimmer">
+            <div className="ui text loader">Loading Contribution Data</div>
+          </div>
+        </div>
+      );
+    if (this.state.dataLoading) {
+      _.delay(() => this.setState({ dataLoading: false }));
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui inverted active dimmer">
+          <div className="ui text loader">Loading Contribution Data</div>
+        </div>
+        </div>
+      );
+    }
+    if (this.state.contributionDataError)
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui error message">
+            <div className="header">Contribution Data Error</div>
+            <p>{this.state.contributionDataError}</p>
+          </div>
+        </div>
+    );
+    if (!this.state.contributionData[this.state.dataLevel])
+      return (
+        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+          <div className="ui fluid warning message">
+            <div className="ui center aligned huge basic segment">No Rows to Display</div>
+          </div>
+        </div>
+      );
+    const model = models[_.last(versions)];
+    const table = model.tables[this.state.dataLevel];
+    const modelColumns = _.sortBy(
+      _.keys(table.columns), columnName => table.columns[columnName].position
+    );
+    const rowData = this.state.contributionData[this.state.dataLevel];
+    const usedColumns = {};
+    rowData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
+    const columns = modelColumns.filter(x => usedColumns[x]);
+    return (
+      <HotTable
+        ref="hotTableComponent"
+        className={!isPrivate ? 'handsontable-readonly' : ''}
+        style={{marginTop: -1, height:`calc(100vh - ${isPrivate ? 20 : 15}em)`, overflow: 'hidden', backgroundColor: '#EEE' }}
+        settings={{
+          licenseKey: "non-commercial-and-evaluation",
+          data: rowData,
+          readOnly: !isPrivate,
+          contextMenu: isPrivate,
+          rowHeaders: true,
+          colHeaders: columns,    
+          outsideClickDeselects: false,
+          afterChange: (changes) => {
+            if (changes) {
+              const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
+              if (data && !this.state.dataEdited) this.setState({ dataEdited: true });
+              this.contributionDataEdited = data;
+            }
+          }
+        }}
+      >
+        {columns.map((columnName, i) => 
+          <HotColumn key={i} data={columnName}></HotColumn>
+        )}
+      </HotTable>
     );
   }
 

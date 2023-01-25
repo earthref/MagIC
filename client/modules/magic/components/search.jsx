@@ -106,10 +106,11 @@ class Search extends React.Component {
     ],
     'Poles': [
       { render: this.renderAgeFilter.bind(this), defaultOpen: true, name: 'age' },
-      { render: this.renderGeospatialFilter.bind(this), name: 'geospatial' },
-      // pole alpha 95
+      { render: this.renderGeospatialFilter.bind(this), defaultOpen: true, name: 'geospatial' },
+      { render: this.renderPoleAlpha95Filter.bind(this), defaultOpen: true, name: 'poleAlpha95' },
       // pole n sites
       // dir n sites
+      // pole_vv_q
       { render: this.renderPublicationYearFilter.bind(this), name: 'publicationYear' },
       { render: this.renderBucketsFilter.bind(this), name: 'summary._all.geologic_type', title: 'Geologic Type', term: 'summary._all.geologic_types.raw', aggs: { buckets: { terms: { field: 'summary._all.geologic_types.raw', size: 10000 } } }, cv: cvs.type.items.map(x => x.item) },
       { render: this.renderBucketsFilter.bind(this), name: 'summary._all.geologic_class', title: 'Geologic Class', term: 'summary._all.geologic_classes.raw', aggs: { buckets: { terms: { field: 'summary._all.geologic_classes.raw', size: 10000 } } }, cv: cvs.class.items.map(x => x.item) },
@@ -169,6 +170,8 @@ class Search extends React.Component {
       int_unit: undefined,
       pub_yr_min: undefined,
       pub_yr_max: undefined,
+      pole_alpha95_min: undefined,
+      pole_alpha95_max: undefined,
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#792f91'},
@@ -196,7 +199,7 @@ class Search extends React.Component {
     this.handleNumericInput = _.debounce((input, value, min, max) => {
       console.log(input, value, min, max);
       let parsedValue = parseFloat(value);
-      console.log(input, value, min, max, parsedValue);
+      console.log(input, value, min, max, parsedValue, !isNaN(parsedValue), parsedValue >= min, parsedValue <= max);
       if (value === '')
         this.setState({[input]: undefined});
       else if (!isNaN(parsedValue) && parsedValue >= min && parsedValue <= max)
@@ -448,7 +451,36 @@ class Search extends React.Component {
       esFilters.push({ range: { 'summary.contribution._reference.year': {
         lte: this.state.pub_yr_max
       }}});
+     
+    if (_.isNumber(this.state.pole_alpha95_min) && _.isNumber(this.state.pole_alpha95_max))
+      esFilters.push({ range: { 'summary._all.pole_alpha95.range': {
+        gte: Math.min(this.state.pole_alpha95_min, this.state.pole_alpha95_max),
+        lte: Math.max(this.state.pole_alpha95_min, this.state.pole_alpha95_max)
+      }}});
+    else if (_.isNumber(this.state.pole_alpha95_min))
+      esFilters.push({ range: { 'summary._all.pole_alpha95.range': {
+        gte: this.state.pole_alpha95_min
+      }}});
+    else if (_.isNumber(this.state.pole_alpha95_max))
+      esFilters.push({ range: { 'summary._all.pole_alpha95.range': {
+        lte: this.state.pole_alpha95_max
+      }}});
+     
+    if (_.isNumber(this.state.pole_alpha95_min) && _.isNumber(this.state.pole_alpha95_max))
+      esFilters.push({ range: { 'summary._all.pole_alpha95.range': {
+        gte: Math.min(this.state.pole_alpha95_min, this.state.pole_alpha95_max),
+        lte: Math.max(this.state.pole_alpha95_min, this.state.pole_alpha95_max)
+      }}});
+    else if (_.isNumber(this.state.pole_alpha95_min))
+      esFilters.push({ range: { 'summary._all.pole_alpha95.range': {
+        gte: this.state.pole_alpha95_min
+      }}});
+    else if (_.isNumber(this.state.pole_alpha95_max))
+      esFilters.push({ range: { 'summary._all.pole_alpha95.range': {
+        lte: this.state.pole_alpha95_max
+      }}});
 
+    console.log('esFilters', esFilters, this.state.pole_alpha95_max);
     return esFilters;
   }
 
@@ -484,6 +516,8 @@ class Search extends React.Component {
       int_unit: undefined,
       pub_yr_min: undefined,
       pub_yr_max: undefined,
+      pole_alpha95_min: undefined,
+      pole_alpha95_max: undefined,
     });
   }
 
@@ -870,6 +904,97 @@ class Search extends React.Component {
     );
   }
 
+  renderPoleNSitesFilter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
+    return (
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+                Pole N Sites
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
+                <div className={'ui input' + (this.state.pub_yr_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder={"-Infinity"}
+                    style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('pub_yr_min', e.target.value, -Infinity, _.isNumber(this.state.pub_yr_max) ? this.state.pub_yr_max: moment().year());
+                    }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.pub_yr_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder={moment().year()}
+                    style={{borderTopLeftRadius:0, borderBottomLeftRadius:0}}
+                    onChange={(e) => {
+                      this.handleNumericInput('pub_yr_max', e.target.value, _.isNumber(this.state.pub_yr_min) ? this.state.pub_yr_min: -Infinity, moment().year());
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  renderPoleAlpha95Filter(searchQueries, filter, i) {
+    const defaultOpen = this.state.openedFilters[filter.name] ||
+      (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
+    return (
+      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
+        <div className="ui small accordion">
+          <div ref={filter.name + '_title'} className={'title' + (defaultOpen ? ' active' : '')} style={{paddingBottom: 0}}>
+            <div style={this.styles.flex}
+                onClick={() => this.toggleFilter(filter)}>
+              <i className="dropdown icon"/>
+              <div style={_.extend({}, this.styles.flexGrow, this.styles.b)}>
+              Pole α95
+              </div>
+            </div>
+            <div ref={filter.name + '_content'} className="content" style={_.extend(
+              {}, this.styles.content, defaultOpen ? {} : { display: 'none' }
+            )}>
+              <div className="ui small labeled input" style={{display: 'flex'}}>
+                <div className={'ui input' + (this.state.pole_a95_min === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}}>
+                  <input type="text" placeholder={"0"}
+                        style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('pole_alpha95_min', e.target.value, 0, _.isNumber(this.state.pole_a95_max) ? this.state.pole_a95_max: Infinity);
+                        }}
+                  />
+                </div>
+                <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
+                <div className={'ui input' + (this.state.pole_a95_max === null ? ' error' : '')}
+                    style={{flexShrink: '1', minWidth:20}} >
+                  <input type="text" placeholder={"100"}
+                        style={{borderTopLeftRadius:0, borderBottomLeftRadius:0}}
+                        onChange={(e) => {
+                          this.handleNumericInput('pole_alpha95_max', e.target.value, _.isNumber(this.state.pole_a95_min) ? this.state.pole_a95_min: 0, Infinity);
+                        }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+
   renderVGPFilter(searchQueries, filter, i) {
     const defaultOpen = this.state.openedFilters[filter.name] ||
       (this.state.openedFilters[filter.name] === undefined && filter.defaultOpen);
@@ -996,40 +1121,6 @@ class Search extends React.Component {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  renderDeclinationFilter(searchQueries, filter, i) {
-    return (
-      <div key={i + '_' + this.state.filtersTap} style={this.styles.filter}>
-        <div className="ui right floated tiny compact icon button" style={{padding:'0.25em 0.5em'}}>
-          <i className="caret right icon"/>
-        </div>
-        <div className="ui tiny header" style={this.styles.filterHeader}>
-          Declination
-        </div>
-        <div className="ui small labeled input" style={{display: 'flex'}}>
-          <div className={'ui input' + (this.state.int_min === null ? ' error' : '')}
-              style={{flexShrink: '1', minWidth:20}}>
-            <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).min}
-                  style={{borderTopRightRadius:0, borderBottomRightRadius:0}}
-                  onChange={(e) => {
-                    this.handleNumericInput('dec_min', e.target.value, 0, _.isNumber(this.state.dec_max) ? this.state.int_max : 360);
-                  }}
-            />
-          </div>
-          <div className="ui label" style={{borderRadius:0, margin:0}}>to</div>
-          <div className={'ui input' + (this.state.int_max === null ? ' error' : '')}
-              style={{flexShrink: '1', minWidth:20}} >
-            <input type="text" placeholder={_.find(intUnits, {name: this.state.int_unit || intUnitsDefault}).max}
-                  style={{borderRadius:0}}
-                  onChange={(e) => {
-                    this.handleNumericInput('dec_max', e.target.value, _.isNumber(this.state.dec_min) ? this.state.dec_min : 0, 360);
-                  }}
-            />
           </div>
         </div>
       </div>
@@ -1261,9 +1352,9 @@ class Search extends React.Component {
               {view.name === 'Poles' && 
                 <Count es={_.extend({}, view.es, {
                     queries: _.concat(searchQueries, {exists: 
-                      {field: "summary._all.pole_lat"}
+                      {field: "summary.locations.pole_lat"}
                     }, {exists: 
-                      {field: "summary._all.pole_lon"}
+                      {field: "summary.locations.pole_lon"}
                     }),
                     filters: esFilters
                 })} />
@@ -1344,9 +1435,9 @@ class Search extends React.Component {
         key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
-          {field: "summary._all.pole_lat"}
+          {field: "summary.locations.pole_lat"}
         }, {exists: 
-          {field: "summary._all.pole_lon"}
+          {field: "summary.locations.pole_lon"}
         })})}
         pageSize={5}
       />
