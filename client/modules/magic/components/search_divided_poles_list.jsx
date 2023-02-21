@@ -17,17 +17,14 @@ export default class extends React.Component {
               <div className="item" style={{padding: 0}}>
                 <div className="ui fluid warning message">
                   <div className="ui center aligned huge basic segment">
-                    { this.props.idFilter ? 
-                      "In Preparation For Publishing - Check Back Soon" : 
-                      "No Items to Display"
-                    }
+                    No Items to Display
                   </div>
                 </div>
               </div>
             :
               _.flatten(this.props.items.map((item, i) => {
                 return item.rows.map((row, j) => {
-                  return <div className="item" style={{ padding: 0 }} key={`${i}_${j}`}>
+                  return row.pole_lat === undefined || row.pole_lat.trim() === '' ? undefined : <div className="item" style={{ padding: 0 }} key={`${i}_${j}`}>
                     {(this.props.children ? React.Children.map(this.props.children, (child) => {
                         return React.cloneElement(child, { item: { ...item, row }, active: this.props.items.length === 1});
                     }) : undefined)}
