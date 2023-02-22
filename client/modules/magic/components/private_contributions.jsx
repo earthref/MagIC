@@ -17,6 +17,7 @@ import IconButton from "/client/modules/common/components/icon_button";
 import {index} from "/lib/configs/magic/search_levels.js";
 import {versions, models} from '/lib/configs/magic/data_models';
 import {cvs} from '/lib/modules/er/controlled_vocabularies';
+import { css } from "jquery";
 
 export default class extends React.Component {
 
@@ -184,10 +185,46 @@ export default class extends React.Component {
   updateLabNames(i) {
     this.privateContributions[i].updatingLabNames = true;
     this.setState({taps: this.state.taps + 1}, () =>
-      Meteor.call("esUpdateContributionLabNames", {
+      Meteor.call("esUpdateContributionData", {
         index: index,
         id: this.privateContributions[i].summary.contribution.id,
-        lab_names: this.privateContributions[i].lab_names
+        field: "lab_names",
+        list: this.privateContributions[i].lab_names,
+        delimiter: ":"
+      }, (error, c) => {
+        this.updateContributions();
+      })
+    );
+  }
+
+  updateFunding(i) {
+    this.privateContributions[i].updatingFunding = true;
+    this.setState({taps: this.state.taps + 1}, () =>
+      Meteor.call("esUpdateContributionData", {
+        index: index,
+        id: this.privateContributions[i].summary.contribution.id,
+        field: "funding",
+        list: this.privateContributions[i].funding && this.privateContributions[i].funding.map(x =>
+          `${x.title}[${x.url}]`
+        ) || [],
+        delimiter: ";"
+      }, (error, c) => {
+        this.updateContributions();
+      })
+    );
+  }
+
+  updateSupplementalLinks(i) {
+    this.privateContributions[i].updatingSupplementalLinks = true;
+    this.setState({taps: this.state.taps + 1}, () =>
+      Meteor.call("esUpdateContributionData", {
+        index: index,
+        id: this.privateContributions[i].summary.contribution.id,
+        field: "supplemental_links",
+        list: this.privateContributions[i].supplemental_links && this.privateContributions[i].supplemental_links.map(x =>
+          `${x.title}[${x.url}]`
+        ) || [],
+        delimiter: ";"
       }, (error, c) => {
         this.updateContributions();
       })
@@ -310,13 +347,35 @@ export default class extends React.Component {
           this.privateContributions.map((c,i) => {
             let hasReference = c.summary.contribution._reference && c.summary.contribution._reference.doi;
             
-            let labNames = [];
-            labNames = c.summary.contribution.lab_names && (
+            let labNames = c.lab_names || c.summary.contribution.lab_names && (
               _.isArray(c.summary.contribution.lab_names) ? 
-              c.summary.contribution.lab_names : 
-              c.summary.contribution.lab_names.split(':')
-            ) || labNames;
-            labNames = c.lab_names || labNames;
+                c.summary.contribution.lab_names : 
+                c.summary.contribution.lab_names.split(':')
+            ) || [];
+
+            let funding = c.funding || c.summary.contribution.funding && (
+              _.isArray(c.summary.contribution.funding) ? 
+                c.summary.contribution.funding.map(x => {
+                  let y = x.split('[');
+                  return {title: y[0], url: y.length > 1 && y[1].substr(0, y[1].length-1) || ''}
+                }) : 
+                c.summary.contribution.funding.split(';').map(x => {
+                  let y = x.split('[');
+                  return {title: y[0], url: y.length > 1 && y[1].substr(0, y[1].length-1) || ''}
+                })
+            ) || [];
+
+            let supplementalLinks = c.supplemental_links || c.summary.contribution.supplemental_links && (
+              _.isArray(c.summary.contribution.supplemental_links) ? 
+                c.summary.contribution.supplemental_links.map(x => {
+                  let y = x.split('[');
+                  return {title: y[0], url: y.length > 1 && y[1].substr(0, y[1].length-1) || ''}
+                }) : 
+                c.summary.contribution.supplemental_links.split(';').map(x => {
+                  let y = x.split('[');
+                  return {title: y[0], url: y.length > 1 && y[1].substr(0, y[1].length-1) || ''}
+                })
+            ) || [];
 
             //console.log("ref", c, noReference);
             return (
@@ -375,26 +434,29 @@ export default class extends React.Component {
                   </div>
                 </div>
                 <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
-                  <div style={{display: "flex", flexFlow: "row wrap"}}>
+                  <div style={{display: "flex"}}>
                     <div style={{flex: "1 1 auto"}}>
                       <div className={"ui corner labeled fluid small input" + (!labNames.length ? " error": "")}>
                         <div className={"ui label" + (!labNames.length ? " red": "")}
                           style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
                         >
-                          Laboratory Names
+                          Labs
                         </div>
                         <Dropdown multiple selection search
                           error={!labNames.length}
                           defaultValue={labNames}
-                          placeholder="Labs ordered by university or institutional name. Select one or more labs where the measurements were made (required)"
-                          options={cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
-                            return {
-                              key: item.item,
-                              text: item.item,
-                              value: item.item
-                            };
-                          })}
+                          placeholder="Select one or more labs where the measurements were made (required)"
                           style={{ borderRadius: 0, flexGrow: 1 }}
+                          header = "Ordered by University / Institution Name:"
+                          options={
+                            cvs && cvs.lab_names && cvs.lab_names.items && cvs.lab_names.items.map(item => {
+                              return {
+                                key: item.item,
+                                text: item.item,
+                                value: item.item
+                              };
+                            })
+                          }
                           onChange={(e, data) => {
                             c.lab_names = data.value;
                             this.setState({taps: this.state.taps + 1});
@@ -408,17 +470,161 @@ export default class extends React.Component {
                             (c.lab_names === undefined ? " disabled" : " red") + 
                             (c.updatingLabNames ? " disabled loading" : "")
                           }
-                          style={{ marginRight: 0 }}
+                          style={{ marginRight: 0, whiteSpace: "nowrap" }}
                           onClick={function(i, e) {
                             this.updateLabNames(i);
                           }.bind(this, i)}
                         >
-                          <i className="save link icon"/>&nbsp;Save
+                          <i className="save link icon"/> Save
                         </div>
                       </div>
                     </div>
+                    <div className="ui small purple button" style={{margin: "0 0 0 0.5em", whiteSpace: "nowrap" }}
+                      onClick={function (i, e) {
+                        c.funding = c.funding || funding;
+                        c.funding.push({ title: "", url: ""});
+                        this.updateFunding(i);
+                      }.bind(this, i)}
+                    >
+                      <i className="add icon"/>Funding
+                    </div>
+                    <div className="ui small purple button" style={{margin: "0 0 0 0.5em", whiteSpace: "nowrap" }}
+                      onClick={function (i, e) {
+                        c.supplemental_links = c.supplemental_links || supplementalLinks;
+                        c.supplemental_links.push({ title: "", url: ""});
+                        this.updateSupplementalLinks(i);
+                      }.bind(this, i)}
+                    >
+                      <i className="add icon"/>Supplement
+                    </div>
                   </div>
                 </div>
+                {funding && funding.map((funding_item, j) =>
+                  <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                    <div style={{display: "flex"}}>
+                      <div style={{flex: "1 1 auto"}}>
+                        <div className="ui labeled fluid small input">
+                          <div className="ui label" style={{position: "relative"}}>
+                            Funding
+                          </div>
+                          <input type="text" default="None"
+                            placeholder="Grant Title"
+                            value={funding_item.title} readOnly={c.updatingFunding}
+                            style={{ borderRadius: 0 }}
+                            onChange={(e) => {
+                              c.funding = c.funding || funding;
+                              c.funding[j].title = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateFunding(i);
+                            }.bind(this, i)}
+                          />
+                          <input type="text" default="None"
+                            placeholder="Grant URL"
+                            value={funding_item.url} readOnly={c.updatingFunding}
+                            style={{ borderRadius: 0 }}
+                            onChange={(e) => {
+                              c.funding = c.funding || funding;
+                              c.funding[j].url = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateFunding(i);
+                            }.bind(this, i)}
+                          />
+                          <div className={
+                              "ui small right attached icon button" + 
+                              (c.funding === undefined ? " disabled" : " red") + 
+                              (c.updatingFunding ? " disabled loading" : "")
+                            }
+                            style={{ marginRight: 0, whiteSpace: "nowrap" }}
+                            onClick={function(i, e) {
+                              c.funding = c.funding || funding;
+                              this.updateFunding(i);
+                            }.bind(this, i)}
+                          >
+                            <i className="save link icon"/> Save
+                          </div>
+                        </div>
+                      </div>
+                      <div className={"ui small purple button" + 
+                          (c.updatingFunding ? " disabled loading" : "")
+                        } style={{margin: "0 0 0 0.5em", whiteSpace: "nowrap" }}
+                        onClick={function (i, e) {
+                          c.funding = c.funding || funding;
+                          c.funding.splice(j, 1);
+                          this.updateFunding(i);
+                        }.bind(this, i)}
+                      >
+                        <i className="minus icon"/>This Funding
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {supplementalLinks && supplementalLinks.map((supplemental_link_item, j) =>
+                  <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
+                    <div style={{display: "flex"}}>
+                      <div style={{flex: "1 1 auto"}}>
+                        <div className="ui labeled fluid small input">
+                          <div className="ui label" style={{position: "relative"}}>
+                            Supplement
+                          </div>
+                          <input type="text" default="None"
+                            placeholder="Supplement Title"
+                            value={supplemental_link_item.title} readOnly={c.updateSupplementalLinks}
+                            style={{ borderRadius: 0 }}
+                            onChange={(e) => {
+                              c.supplemental_links = c.supplemental_links || supplementalLinks;
+                              c.supplemental_links[j].title = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateSupplementalLinks(i);
+                            }.bind(this, i)}
+                          />
+                          <input type="text" default="None"
+                            placeholder="Supplement URL"
+                            value={supplemental_link_item.url} readOnly={c.updatingSupplementalLinks}
+                            style={{ borderRadius: 0 }}
+                            onChange={(e) => {
+                              c.supplemental_links = c.supplemental_links || supplementalLinks;
+                              c.supplemental_links[j].url = e.target.value;
+                              this.setState({taps: this.state.taps + 1});
+                            }}
+                            onKeyPress={function(i, e) {
+                              if (e.key === "Enter") this.updateSupplementalLinks(i);
+                            }.bind(this, i)}
+                          />
+                          <div className={
+                              "ui small right attached icon button" + 
+                              (c.supplemental_links === undefined ? " disabled" : " red") + 
+                              (c.updatingSupplementalLinks ? " disabled loading" : "")
+                            }
+                            style={{ marginRight: 0, whiteSpace: "nowrap" }}
+                            onClick={function(i, e) {
+                              c.supplemental_links = c.supplemental_links || supplementalLinks;
+                              this.updateSupplementalLinks(i);
+                            }.bind(this, i)}
+                          >
+                            <i className="save link icon"/> Save
+                          </div>
+                        </div>
+                      </div>
+                      <div className={"ui small purple button" + 
+                          (c.updatingSupplementalLinks ? " disabled loading" : "")
+                        } style={{margin: "0 0 0 0.5em", whiteSpace: "nowrap" }}
+                        onClick={function (i, e) {
+                          c.supplemental_links = c.supplemental_links || supplementalLinks;
+                          c.supplemental_links.splice(j, 1);
+                          this.updateSupplementalLinks(i);
+                        }.bind(this, i)}
+                      >
+                        <i className="minus icon"/>This Supplement
+                      </div>
+                    </div>
+                  </div>
+                )}
                 <div className="ui attached secondary segment" style={{padding: "0.5em"}} ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
                   <div style={{display: "flex", flexFlow: "row wrap"}}>
                     <div style={{flex: "1 1 auto"}}>

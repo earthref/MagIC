@@ -876,11 +876,11 @@ export default function () {
       }
     },
 
-    async esUpdateContributionLabNames({index, id, lab_names}) {
-      // console.log("esUpdateContributionLabNames", index, id, lab_names);
+    async esUpdateContributionData({ index, id, field, list, delimiter }) {
+      console.log("esUpdateContributionData", index, id, field, list, delimiter);
       this.unblock();
       
-      const lab_names_list = lab_names.join(":");
+      const list_string = list.join(delimiter);
       try {
         await esClient.update({
           "index": index,
@@ -892,16 +892,16 @@ export default function () {
             "script": {
               "source": `
                 ctx._source.summary.contribution._is_valid = "false"; 
-                ctx._source.summary.contribution.lab_names = params.lab_names; 
-                ctx._source.contribution.contribution[0].lab_names = params.lab_names_list;
+                ctx._source.summary.contribution.${field} = params.list; 
+                ctx._source.contribution.contribution[0].${field} = params.list_string;
               `,
-              "params": {lab_names, lab_names_list}
+              "params": {list, list_string}
             }
           }
         });
       } catch(error) {
-        console.error("esUpdateContributionLabNames", index, id, lab_names, error.message);
-        throw new Meteor.Error("esUpdateContributionLabNames", error.message);
+        console.error("esUpdateContributionData", index, id,  field, list, delimiter, error.message);
+        throw new Meteor.Error("esUpdateContributionData", error.message);
       }
     },
 
