@@ -20,7 +20,7 @@ export default class extends React.Component {
         <p>
          <b>Software Tools</b><br/>
          <a href="https://wserv4.esc.cam.ac.uk/nanopaleomag/?page_id=31">FORCinel</a> - Calculates first order reversal curve (FORC) diagrams from raw FORC data files - Richard Harrison<br/>
-         <a href="https://earthref.org/PmagPy/cookbook/">PmagPy</a> - Open source Paleo and rock magnetic anaysis software for use on the command line, in Jupyter notebooks, or through stand alone GUIs - Lisa Tauxe and others<br/>
+         <a href="https://pmagpy.github.io/PmagPy-docs/intro.html">PmagPy</a> - Open source Paleo and rock magnetic anaysis software for use on the command line, in Jupyter notebooks, or through stand alone GUIs - Lisa Tauxe, Nick Swanson-Hysell and others<br/>
          <a href="https://www.geophysik.uni-muenchen.de/en/research/magnetism/software">ThellierTool and RockMag Analyzer</a> - Roman Leonhardt<br/>
          <a href="https://wserv4.esc.cam.ac.uk/nanopaleomag/?page_id=193">VARIFORC</a> - Additional FORC diagram visualization tool. Starts with FORCinel files - Ramon Egli<br/>
         </p>
