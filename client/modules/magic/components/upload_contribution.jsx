@@ -633,14 +633,52 @@ export default class MagICUploadContribution extends React.Component {
     saveAs(blob, file.name);
   }
 
+  downloadExcelFile(file) {    
+    const workbookBinary = XLSX.write(workbook, {bookType:'xlsx', bookSST:true, type: 'binary'});
+    const workbookBuffer = new ArrayBuffer(workbookBinary.length);
+    const workbookEncoded = new Uint8Array(workbookBuffer);
+    for (var i=0; i!=workbookBinary.length; ++i)
+      workbookEncoded[i] = workbookBinary.charCodeAt(i) & 0xFF;
+    
+    const sheet = XLSX.utils.aoa_to_sheet(file.text.split('\n').map(line => line.split('\t')));
+    const workbook = XLSX.write(sheet, {type:"array", bookType:'xlsx'});
+    const blob = new Blob([workbook], {type: "application/octet-stream"});
+    saveAs(blob, file.name);
+  }
+
   downloadExampleMagICv3() {
-    const blob = new Blob([examples['MagIC Text File in Data Model v. 3.0']], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, 'MagIC Example Text File in Data Model v. 3.0.txt');
+    this.downloadFile({
+      name: 'MagIC Example Text File in Data Model v. 3.0.txt',
+      text: examples['MagIC Text File in Data Model v. 3.0']
+    });
+  }
+
+  downloadExampleTabDelimitedSites() {
+    this.downloadFile({
+      name: 'MagIC Example Tab Delimited File with Sites Data.txt',
+      text: examples['Tab Delimited File with Sites Data']
+    });
   }
 
   downloadExampleTabDelimitedSpecimens() {
-    const blob = new Blob([examples['Tab Delimited File with Specimens Data']], {type: "text/plain;charset=utf-8"});
-    saveAs(blob, 'MagIC Example Tab Delimited File with Specimens Data.txt');
+    this.downloadFile({
+      name: 'MagIC Example Tab Delimited File with Specimens Data.txt',
+      text: examples['Tab Delimited File with Specimens Data']
+    });
+  }
+
+  downloadExampleMagICExcel() {
+    this.downloadExcelFile({
+      name: 'MagIC Example Text File in Data Model v. 3.0.xls',
+      text: examples['MagIC Text File in Data Model v. 3.0']
+    });
+  }
+
+  downloadExampleExcel() {
+    this.downloadExcelFile({
+      name: 'MagIC Example Tab Delimited File with Sites Data.xls',
+      text: examples['Tab Delimited File with Sites Data']
+    });
   }
 
   renderDataImporter(i, j, data, tableName, nHeaderRows) {
@@ -964,6 +1002,7 @@ export default class MagICUploadContribution extends React.Component {
                 >
                   <i className="icons">
                     <i className="file text outline icon"/>
+                    <i className="up circle arrow corner purple icon"/>
                   </i>
                   <div className="title">Example<br/>MagIC Text</div>
                   <div className="subtitle">Data Model v. 3.0</div>
@@ -976,6 +1015,7 @@ export default class MagICUploadContribution extends React.Component {
                 >
                   <i className="icons">
                     <i className="table icon"/>
+                    <i className="up circle arrow corner purple icon"/>
                   </i>
                   <div className="title">Example<br/>Tab Delimited</div>
                   <div className="subtitle">Sites Data</div>
@@ -988,6 +1028,7 @@ export default class MagICUploadContribution extends React.Component {
                 >
                   <i className="icons">
                     <i className="table icon"/>
+                    <i className="up circle arrow corner purple icon"/>
                   </i>
                   <div className="title">Example<br/>Comma Delimited</div>
                   <div className="subtitle">Specimens Data</div>
@@ -1000,6 +1041,7 @@ export default class MagICUploadContribution extends React.Component {
                 >
                   <i className="icons">
                     <i className="file excel outline icon"/>
+                    <i className="up circle arrow corner purple icon"/>
                   </i>
                   <div className="title">Example<br/>MagIC Excel File</div>
                   <div className="subtitle">Data Model v. 3.0</div>
@@ -1012,9 +1054,55 @@ export default class MagICUploadContribution extends React.Component {
                 >
                   <i className="icons">
                     <i className="file excel outline icon"/>
+                    <i className="up circle arrow corner purple icon"/>
                   </i>
                   <div className="title">Example<br/>Excel File</div>
                   <div className="subtitle">Sites Data</div>
+                </IconButton>
+              </div>
+              <div className="ui divider"/>
+              <h4 className="ui header" style={{marginBottom: '1em'}}>
+                Or first download the file to preview the contents and make changes before uploading:
+              </h4>
+              <div className="ui five stackable cards">
+                <IconButton
+                  className="borderless card" portal="MagIC" position="bottom left"
+                  tooltip={'Click to download this example dataset before uploading it ' +
+                  'into your private workspace.'}
+                  onClick={this.downloadExampleMagICv3.bind(this)}
+                >
+                  <i className="icons">
+                    <i className="file text outline icon"/>
+                    <i className="down circle arrow corner purple icon"/>
+                  </i>
+                  <div className="title">Example<br/>MagIC Text</div>
+                  <div className="subtitle">Data Model v. 3.0</div>
+                </IconButton>
+                <IconButton
+                  className="borderless card" portal="MagIC" position="bottom left"
+                  tooltip={'Click to download this example dataset before uploading it ' +
+                  'into your private workspace.'}
+                  onClick={this.downloadExampleTabDelimitedSites.bind(this)}
+                >
+                  <i className="icons">
+                    <i className="table icon"/>
+                    <i className="down circle arrow corner purple icon"/>
+                  </i>
+                  <div className="title">Example<br/>Tab Delimited</div>
+                  <div className="subtitle">Sites Data</div>
+                </IconButton>
+                <IconButton
+                  className="borderless card" portal="MagIC" position="bottom center"
+                  tooltip={'Click to download this example dataset before uploading it ' +
+                  'into your private workspace.'}
+                  onClick={this.downloadExampleTabDelimitedSpecimens.bind(this)}
+                >
+                  <i className="icons">
+                    <i className="table icon"/>
+                    <i className="down circle arrow corner purple icon"/>
+                  </i>
+                  <div className="title">Example<br/>Comma Delimited</div>
+                  <div className="subtitle">Specimens Data</div>
                 </IconButton>
               </div>
             </div>
@@ -1386,231 +1474,231 @@ export default class MagICUploadContribution extends React.Component {
 
 const examples = {
   'MagIC Text File in Data Model v. 3.0':
-`tab delimited\tcontribution\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-id\ttimestamp\tcontributor\tdata_model_version\treference\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-17007\t2020-12-02T22:36:16.250Z\t@agudemo5\t3\t10.1029/93JB00024\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
->>>>>>>>>>\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-tab delimited\tlocations\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-location\tlocation_type\tlocation_alternatives\tresult_name\tresult_type\tcitations\tlat_s\tlat_n\tlon_w\tlon_e\tage\tage_sigma\tage_low\tage_high\tage_unit\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_samples\tpole_lat\tpole_lon\tpole_dp\tpole_dm\tdescription\t\t\t
-Hawaii\tOutcrop\tHawaiian Holocene Lavas\tHawaiian Holocene Lavas\ta\tThis study\t19.072\t19.58\t204.44\t204.92\t0.5\t0.5\t0\t1\tYears BP\t100\t2.4\t31.6\t4.7\t40.7\t284\t86.8\t339.5\t3\t5.3\tfrom DRAGON DATABASE 10-07-07.\t\t\t
->>>>>>>>>>\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-tab delimited\tsites\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tage\tage_sigma\tage_unit\tlat\tlon\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_specimens_lines\tdir_polarity\tdir_nrm_origin\tvgp_lat\tvgp_lon\tvdm\tvdm_n_samples\tvadm\tvadm_n_samples\tint_abs\tint_abs_sigma
-01a\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t260\t210\tYears BP\t19.545\t204.91\t100\t5.5\t41.3\t1.7\t630\t12\tn\tp\t83.4\t254.6\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06
-01b\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t260\t210\tYears BP\t19.58\t204.94\t100\t3.2\t44.2\t1.4\t906\t12\tn\tp\t83\t229.2\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06
-01c\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t260\t210\tYears BP\t19.572\t204.94\t100\t3.1\t46\t2.1\t418\t12\tn\tp\t81.7\t224.1\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06
-2\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t440\t240\tYears BP\t19.552\t204.7\t100\t7.6\t36.6\t1.1\t1662\t12\tn\tp\t82.9\t287.4\t1.06E+23\t4\t1.07E+23\t4\t4.79E-05\t6.00E-07
-3\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t700\t210\tYears BP\t19.296\t204.69\t100\t2.8\t41.4\t1.2\t905\t18\tn\tp\t84.8\t234.3\t9.42E+22\t2\t9.97E+22\t2\t4.45E-05\t1.20E-06
-4\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t760\t210\tYears BP\t19.494\t204.66\t100\t353\t25.8\t1.6\t849\t11\tn\tp\t81.1\t74.5\t1.05E+23\t2\t9.86E+22\t2\t4.41E-05\t8.00E-07
-5\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t1320\t150\tYears BP\t19.564\t204.66\t100\t2.2\t18.2\t2.2\t400\t12\tn\tp\t79.6\t12.8\t1.03E+23\t4\t9.27E+22\t4\t4.15E-05\t3.60E-06
-6\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t1690\t210\tYears BP\t19.533\t204.65\t100\t355.5\t17.8\t1.9\t679\t10\tn\tp\t78.7\t48\t9.71E+22\t4\t8.71E+22\t4\t3.90E-05\t3.10E-06
-7\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t2180\t180\tYears BP\t19.118\t204.43\t100\t11.2\t14.7\t2.1\t439\t12\tn\tp\t74.1\t340\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05
-8\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t2190\t210\tYears BP\t19.455\t204.71\t100\t11.3\t15.2\t1.3\t1095\t12\tn\tp\t74\t340\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05
-9\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t2550\t240\tYears BP\t19.538\t204.66\t100\t1.2\t21\t1.5\t987\t12\tn\tp\t81.3\t16.9\t1.07E+23\t4\t9.74E+22\t4\t4.36E-05\t2.30E-06
-10\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t2890\t210\tYears BP\t19.64\t204.96\t100\t357.7\t25.7\t2.3\t370\t11\tn\tp\t83.5\t44.9\t1.24E+23\t5\t1.15E+23\t5\t5.17E-05\t1.16E-05
-11\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3480\t240\tYears BP\t19.302\t204.69\t100\t3.7\t36.4\t1.4\t1091\t12\tn\tp\t86.4\t279.5\t1.06E+23\t2\t1.07E+23\t2\t4.79E-05\t1.03E-05
-12\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4050\t150\tYears BP\t19.713\t204.88\t100\t4.5\t33.4\t1.1\t1467\t11\tn\tp\t85.5\t313.1\t1.15E+23\t3\t1.13E+23\t3\t5.06E-05\t1.70E-06
-13\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5160\t300\tYears BP\t19.161\t204.46\t100\t4.7\t27.6\t2\t493\t12\tn\tp\t83.6\t339.2\t8.54E+22\t5\t8.10E+22\t5\t3.61E-05\t2.60E-06
-14\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5650\t270\tYears BP\t19.543\t204.88\t100\t5.4\t33.7\t1.4\t958\t12\tn\tp\t84.8\t305.8\t7.67E+22\t3\t7.57E+22\t3\t3.39E-05\t2.50E-06
-15\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6160\t330\tYears BP\t19.086\t204.41\t100\t357.8\t54.9\t1.7\t819\t12\tn\tp\t73.5\t198.1\t6.41E+22\t2\t7.91E+22\t2\t3.52E-05\t3.50E-06
-16\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7300\t300\tYears BP\t19.072\t204.44\t100\t2.3\t25.4\t1.4\t914\t10\tn\tp\t83.9\t3\t6.47E+22\t4\t6.02E+22\t4\t2.70E-05\t2.10E-06
-17\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7950\t330\tYears BP\t19.145\t204.48\t100\t359.5\t33.4\t1.5\t917\t12\tn\tp\t89\t53.1\t6.97E+22\t3\t6.89E+22\t3\t3.07E-05\t1.10E-06
-18\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8740\t300\tYears BP\t19.42\t204.66\t100\t357.3\t36\t2.3\t413\t11\tn\tp\t87.4\t127.2\t9.91E+22\t5\t9.98E+22\t5\t4.46E-05\t6.90E-06
-19\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9500\t420\tYears BP\t19.418\t204.66\t100\t3\t33.7\t2.3\t351\t11\tn\tp\t87\t313.6\t9.30E+22\t5\t9.19E+22\t5\t4.11E-05\t4.90E-06
-20\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10290\t450\tYears BP\t19.101\t204.44\t100\t3.6\t31.9\t1.8\t570\t12\tn\tp\t86.1\t322\t8.26E+22\t5\t8.08E+22\t5\t3.60E-05\t8.40E-06
-21\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11780\t300\tYears BP\t18.972\t204.38\t100\t2.1\t8.7\t1.7\t738\t12\tn\tp\t75.2\t16.2\t8.55E+22\t3\t7.51E+22\t3\t3.34E-05\t5.00E-06
-22\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t13210\t570\tYears BP\t19.072\t204.44\t100\t357.5\t54.6\t1.4\t916\t11\tn\tp\t73.8\t197.2\t6.93E+22\t4\t8.51E+22\t4\t3.79E-05\t3.40E-06
->>>>>>>>>>\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-tab delimited\tsamples\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-sample\tsite\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon\tmethod_codes\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B475-2\t3\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.296\t204.69\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B487-3\t3\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.296\t204.69\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B704-1\t9\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B708-3\t9\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B710-1\t9\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B714-3\t9\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B730-1\t6\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B732-2\t6\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B733-1\t6\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B734-2\t6\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B755-1\t4\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.494\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B757-3\t4\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.494\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B416-4\t11\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.302\t204.69\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B417-1\t11\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.302\t204.69\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B437-5\t12\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B439-2\t12\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B440-2\t12\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B625-1\t8\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.455\t204.71\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B631-1\t8\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.455\t204.71\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B794-2\t01a\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.545\t204.91\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B829-2\t2\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B833-4\t2\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B835-2\t2\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B836-3\t2\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B889-4\t7\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B891-4\t7\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B896-2\t7\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B897-4\t7\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B906-1\t14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B907-2\t14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B910-3\t14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B039-2\t10\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B040-1\t10\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B041-3\t10\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B042-3\t10\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B046-3\t10\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B109-2\t5\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B110-4\t5\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B113-4\t5\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B117-2\t5\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B131-5\t01b\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.58\t204.94\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B433-5\t01c\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.572\t204.94\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B437-5\t01c\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.572\t204.94\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B445-3\t13\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B448-4\t13\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B449-2\t13\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B451-2\t13\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B454-4\t13\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B483-2\t20\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B486-4\t20\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B489-2\t20\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B490-3\t20\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B492-4\t20\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B659-2\t15\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.086\t204.41\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B660-4\t15\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.086\t204.41\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B666-3\t17\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B669-2\t17\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B670-2\t17\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B902-3\t21\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B904-2\t21\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B905-2\t21\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B937-2\t18\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B944-1\t18\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B945-3\t18\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B947-2\t18\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B948-1\t18\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B949-2\t19\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B950-3\t19\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B953-3\t19\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B955-2\t19\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B959-3\t19\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B961-2\t16\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B962-3\t16\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B964-1\t16\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B965-2\t16\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B975-2\t22\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B976-1\t22\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B977-1\t22\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B984-2\t22\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\tFS-FD\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
->>>>>>>>>>\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-tab delimited\tspecimens\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tmagn_volume\tint_corr\tint_treat_dc_field\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B475-2\t1B475-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.39\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B487-3\t1B487-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.67\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B704-1\t1B704-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.4\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B708-3\t1B708-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.04\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B710-1\t1B710-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.3\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B714-3\t1B714-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t23.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B730-1\t1B730-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.2\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B732-2\t1B732-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t27.2\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B733-1\t1B733-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t17.9\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B734-2\t1B734-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.1\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B755-1\t1B755-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.3\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-1B757-3\t1B757-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t21.1\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B416-4\t8B416-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.01\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B417-1\t8B417-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.3\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B437-5\t8B437-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.4\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B439-2\t8B439-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.7\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B440-2\t8B440-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t20\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B625-1\t8B625-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.41\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B631-1\t8B631-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.43\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B794-2\t8B794-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B829-2\t8B829-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t17.8\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B833-4\t8B833-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t22.9\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B835-2\t8B835-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t26\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B836-3\t8B836-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t20.6\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B889-4\t8B889-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B891-4\t8B891-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.7\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B896-2\t8B896-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8.95\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B897-4\t8B897-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t23.3\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B906-1\t8B906-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.25\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B907-2\t8B907-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.89\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-8B910-3\t8B910-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.57\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B039-2\t9B039-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.42\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B040-1\t9B040-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.92\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B041-3\t9B041-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.76\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B042-3\t9B042-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.96\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B046-3\t9B046-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B109-2\t9B109-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.6\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B110-4\t9B110-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.9\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B113-4\t9B113-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.02\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B117-2\t9B117-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t23.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B131-5\t9B131-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.94\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B433-5\t9B433-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3.9\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B437-5\t9B437-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3.34\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B445-3\t9B445-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.8\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B448-4\t9B448-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.1\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B449-2\t9B449-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.7\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B451-2\t9B451-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.7\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B454-4\t9B454-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.2\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B483-2\t9B483-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.39\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B486-4\t9B486-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.75\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B489-2\t9B489-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.26\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B490-3\t9B490-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8.58\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B492-4\t9B492-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.22\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B659-2\t9B659-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.39\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B660-4\t9B660-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B666-3\t9B666-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.14\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B669-2\t9B669-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.1\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B670-2\t9B670-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.8\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B902-3\t9B902-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.68\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B904-2\t9B904-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.12\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B905-2\t9B905-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8.64\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B937-2\t9B937-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t1.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B944-1\t9B944-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.2\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B945-3\t9B945-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.32\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B947-2\t9B947-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.12\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B948-1\t9B948-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.6\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B949-2\t9B949-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.27\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B950-3\t9B950-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.3\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B953-3\t9B953-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.29\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B955-2\t9B955-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.1\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B959-3\t9B959-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.5\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B961-2\t9B961-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.58\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B962-3\t9B962-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.23\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B964-1\t9B964-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.84\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B965-2\t9B965-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3.39\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B975-2\t9B975-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.8\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B976-1\t9B976-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.83\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B977-1\t9B977-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.04\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-9B984-2\t9B984-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t13.6\tu\t3.50E-05\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
->>>>>>>>>>\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-tab delimited\tages\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-location\tsite\tage\tage_sigma\tage_unit\tmethod_codes\tcitations\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t01a\t260\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t01b\t260\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t01c\t260\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t2\t440\t240\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t3\t700\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t4\t760\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t5\t1320\t150\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t6\t1690\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t7\t2180\t180\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t8\t2190\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t9\t2550\t240\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t10\t2890\t210\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t11\t3480\t240\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t12\t4050\t150\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t13\t5160\t300\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t14\t5650\t270\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t15\t6160\t330\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t16\t7300\t300\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t17\t7950\t330\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t18\t8740\t300\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t19\t9500\t420\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t20\t10290\t450\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t21\t11780\t300\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t
-Hawaii\t22\t13210\t570\tYears BP\tGM-C14\tThis study\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t`,
+`tab delimited\tcontribution
+id\tversion\ttimestamp\tcontributor\tdata_model_version\treference\tlab_names\tdescription
+19679\t10\t2023-02-24T05:45:17.575Z\t@polarwander\t3.0\t10.1029/93JB00024\tPaleomagnetic Laboratory (USGS Menlo Park, USA)\tadding location geologic_classes and lithologies for validation
+>>>>>>>>>>
+tab delimited\tlocations
+location\tlocation_type\tlocation_alternatives\tresult_name\tresult_type\tcitations\tgeologic_classes\tlithologies\tlat_s\tlat_n\tlon_w\tlon_e\tage_low\tage_high\tage_unit\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_samples\tpole_lat\tpole_lon\tpole_dp\tpole_dm\tdescription
+Hawaii\tOutcrop\tHawaiian Holocene Lavas\tHawaiian Holocene Lavas\ta\tThis study\tExtrusive\tBasalt\t19.072\t19.58\t204.44\t204.92\t260\t13210\tYears BP\t100\t2.4\t31.6\t4.7\t40.7\t284\t86.8\t339.5\t3\t5.3\tfrom DRAGON DATABASE 10-07-07.
+>>>>>>>>>>
+tab delimited\tsites
+site\tlocation\tresult_type\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon\tage\tage_sigma\tage_unit\tdir_tilt_correction\tdir_dec\tdir_inc\tdir_alpha95\tdir_k\tdir_n_specimens_lines\tdir_polarity\tdir_nrm_origin\tvgp_lat\tvgp_lon\tvdm\tvdm_n_samples\tvadm\tvadm_n_samples\tint_abs\tint_abs_sigma
+01a\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.545\t204.91\t260\t210\tYears BP\t100\t5.5\t41.3\t1.7\t630\t12\tn\tp\t83.4\t254.6\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06
+01b\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.58\t204.94\t260\t210\tYears BP\t100\t3.2\t44.2\t1.4\t906\t12\tn\tp\t83\t229.2\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06
+01c\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.572\t204.94\t260\t210\tYears BP\t100\t3.1\t46\t2.1\t418\t12\tn\tp\t81.7\t224.1\t1.11E+23\t4\t1.17E+23\t4\t5.26E-05\t5.30E-06
+2\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7\t440\t240\tYears BP\t100\t7.6\t36.6\t1.1\t1662\t12\tn\tp\t82.9\t287.4\t1.06E+23\t4\t1.07E+23\t4\t4.79E-05\t6.00E-07
+3\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.296\t204.69\t700\t210\tYears BP\t100\t2.8\t41.4\t1.2\t905\t18\tn\tp\t84.8\t234.3\t9.42E+22\t2\t9.97E+22\t2\t4.45E-05\t1.20E-06
+4\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.494\t204.66\t760\t210\tYears BP\t100\t353\t25.8\t1.6\t849\t11\tn\tp\t81.1\t74.5\t1.05E+23\t2\t9.86E+22\t2\t4.41E-05\t8.00E-07
+5\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66\t1320\t150\tYears BP\t100\t2.2\t18.2\t2.2\t400\t12\tn\tp\t79.6\t12.8\t1.03E+23\t4\t9.27E+22\t4\t4.15E-05\t3.60E-06
+6\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65\t1690\t210\tYears BP\t100\t355.5\t17.8\t1.9\t679\t10\tn\tp\t78.7\t48\t9.71E+22\t4\t8.71E+22\t4\t3.90E-05\t3.10E-06
+7\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43\t2180\t180\tYears BP\t100\t11.2\t14.7\t2.1\t439\t12\tn\tp\t74.1\t340\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05
+8\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.455\t204.71\t2190\t210\tYears BP\t100\t11.3\t15.2\t1.3\t1095\t12\tn\tp\t74\t340\t1.21E+23\t4\t1.08E+23\t4\t4.81E-05\t1.23E-05
+9\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66\t2550\t240\tYears BP\t100\t1.2\t21\t1.5\t987\t12\tn\tp\t81.3\t16.9\t1.07E+23\t4\t9.74E+22\t4\t4.36E-05\t2.30E-06
+10\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96\t2890\t210\tYears BP\t100\t357.7\t25.7\t2.3\t370\t11\tn\tp\t83.5\t44.9\t1.24E+23\t5\t1.15E+23\t5\t5.17E-05\t1.16E-05
+11\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.302\t204.69\t3480\t240\tYears BP\t100\t3.7\t36.4\t1.4\t1091\t12\tn\tp\t86.4\t279.5\t1.06E+23\t2\t1.07E+23\t2\t4.79E-05\t1.03E-05
+12\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88\t4050\t150\tYears BP\t100\t4.5\t33.4\t1.1\t1467\t11\tn\tp\t85.5\t313.1\t1.15E+23\t3\t1.13E+23\t3\t5.06E-05\t1.70E-06
+13\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46\t5160\t300\tYears BP\t100\t4.7\t27.6\t2\t493\t12\tn\tp\t83.6\t339.2\t8.54E+22\t5\t8.10E+22\t5\t3.61E-05\t2.60E-06
+14\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88\t5650\t270\tYears BP\t100\t5.4\t33.7\t1.4\t958\t12\tn\tp\t84.8\t305.8\t7.67E+22\t3\t7.57E+22\t3\t3.39E-05\t2.50E-06
+15\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.086\t204.41\t6160\t330\tYears BP\t100\t357.8\t54.9\t1.7\t819\t12\tn\tp\t73.5\t198.1\t6.41E+22\t2\t7.91E+22\t2\t3.52E-05\t3.50E-06
+16\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\t7300\t300\tYears BP\t100\t2.3\t25.4\t1.4\t914\t10\tn\tp\t83.9\t3\t6.47E+22\t4\t6.02E+22\t4\t2.70E-05\t2.10E-06
+17\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48\t7950\t330\tYears BP\t100\t359.5\t33.4\t1.5\t917\t12\tn\tp\t89\t53.1\t6.97E+22\t3\t6.89E+22\t3\t3.07E-05\t1.10E-06
+18\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66\t8740\t300\tYears BP\t100\t357.3\t36\t2.3\t413\t11\tn\tp\t87.4\t127.2\t9.91E+22\t5\t9.98E+22\t5\t4.46E-05\t6.90E-06
+19\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66\t9500\t420\tYears BP\t100\t3\t33.7\t2.3\t351\t11\tn\tp\t87\t313.6\t9.30E+22\t5\t9.19E+22\t5\t4.11E-05\t4.90E-06
+20\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44\t10290\t450\tYears BP\t100\t3.6\t31.9\t1.8\t570\t12\tn\tp\t86.1\t322\t8.26E+22\t5\t8.08E+22\t5\t3.60E-05\t8.40E-06
+21\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38\t11780\t300\tYears BP\t100\t2.1\t8.7\t1.7\t738\t12\tn\tp\t75.2\t16.2\t8.55E+22\t3\t7.51E+22\t3\t3.34E-05\t5.00E-06
+22\tHawaii\ti\tDE-BFL:GM-C14\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44\t13210\t570\tYears BP\t100\t357.5\t54.6\t1.4\t916\t11\tn\tp\t73.8\t197.2\t6.93E+22\t4\t8.51E+22\t4\t3.79E-05\t3.40E-06
+>>>>>>>>>>
+tab delimited\tsamples
+sample\tsite\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tlat\tlon
+1B475-2\t3\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.296\t204.69
+1B487-3\t3\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.296\t204.69
+1B704-1\t9\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66
+1B708-3\t9\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66
+1B710-1\t9\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66
+1B714-3\t9\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.538\t204.66
+1B730-1\t6\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65
+1B732-2\t6\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65
+1B733-1\t6\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65
+1B734-2\t6\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.533\t204.65
+1B755-1\t4\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.494\t204.66
+1B757-3\t4\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.494\t204.66
+8B416-4\t11\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.302\t204.69
+8B417-1\t11\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.302\t204.69
+8B437-5\t12\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88
+8B439-2\t12\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88
+8B440-2\t12\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.713\t204.88
+8B625-1\t8\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.455\t204.71
+8B631-1\t8\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.455\t204.71
+8B794-2\t01a\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.545\t204.91
+8B829-2\t2\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7
+8B833-4\t2\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7
+8B835-2\t2\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7
+8B836-3\t2\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.552\t204.7
+8B889-4\t7\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43
+8B891-4\t7\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43
+8B896-2\t7\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43
+8B897-4\t7\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.118\t204.43
+8B906-1\t14\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88
+8B907-2\t14\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88
+8B910-3\t14\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.543\t204.88
+9B039-2\t10\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96
+9B040-1\t10\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96
+9B041-3\t10\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96
+9B042-3\t10\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96
+9B046-3\t10\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.64\t204.96
+9B109-2\t5\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66
+9B110-4\t5\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66
+9B113-4\t5\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66
+9B117-2\t5\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.564\t204.66
+9B131-5\t01b\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.58\t204.94
+9B433-5\t01c\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.572\t204.94
+9B437-5\t01c\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.572\t204.94
+9B445-3\t13\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46
+9B448-4\t13\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46
+9B449-2\t13\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46
+9B451-2\t13\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46
+9B454-4\t13\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.161\t204.46
+9B483-2\t20\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44
+9B486-4\t20\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44
+9B489-2\t20\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44
+9B490-3\t20\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44
+9B492-4\t20\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.101\t204.44
+9B659-2\t15\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.086\t204.41
+9B660-4\t15\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.086\t204.41
+9B666-3\t17\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48
+9B669-2\t17\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48
+9B670-2\t17\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.145\t204.48
+9B902-3\t21\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38
+9B904-2\t21\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38
+9B905-2\t21\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.972\t204.38
+9B937-2\t18\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66
+9B944-1\t18\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66
+9B945-3\t18\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66
+9B947-2\t18\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66
+9B948-1\t18\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.42\t204.66
+9B949-2\t19\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66
+9B950-3\t19\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66
+9B953-3\t19\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66
+9B955-2\t19\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66
+9B959-3\t19\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.418\t204.66
+9B961-2\t16\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B962-3\t16\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B964-1\t16\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B965-2\t16\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B975-2\t22\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B976-1\t22\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B977-1\t22\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+9B984-2\t22\tFS-FD\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t19.072\t204.44
+>>>>>>>>>>
+tab delimited\tspecimens
+specimen\tsample\tresult_quality\tmethod_codes\tcitations\tgeologic_classes\tgeologic_types\tlithologies\tmagn_volume\tint_corr\tint_treat_dc_field
+1B475-2\t1B475-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.39\tu\t3.50E-05
+1B487-3\t1B487-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.67\tu\t3.50E-05
+1B704-1\t1B704-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.4\tu\t3.50E-05
+1B708-3\t1B708-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.04\tu\t3.50E-05
+1B710-1\t1B710-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.3\tu\t3.50E-05
+1B714-3\t1B714-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t23.5\tu\t3.50E-05
+1B730-1\t1B730-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.2\tu\t3.50E-05
+1B732-2\t1B732-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t27.2\tu\t3.50E-05
+1B733-1\t1B733-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t17.9\tu\t3.50E-05
+1B734-2\t1B734-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.1\tu\t3.50E-05
+1B755-1\t1B755-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.3\tu\t3.50E-05
+1B757-3\t1B757-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t21.1\tu\t3.50E-05
+8B416-4\t8B416-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.01\tu\t3.50E-05
+8B417-1\t8B417-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.3\tu\t3.50E-05
+8B437-5\t8B437-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.4\tu\t3.50E-05
+8B439-2\t8B439-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.7\tu\t3.50E-05
+8B440-2\t8B440-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t20\tu\t3.50E-05
+8B625-1\t8B625-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.41\tu\t3.50E-05
+8B631-1\t8B631-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.43\tu\t3.50E-05
+8B794-2\t8B794-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.5\tu\t3.50E-05
+8B829-2\t8B829-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t17.8\tu\t3.50E-05
+8B833-4\t8B833-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t22.9\tu\t3.50E-05
+8B835-2\t8B835-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t26\tu\t3.50E-05
+8B836-3\t8B836-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t20.6\tu\t3.50E-05
+8B889-4\t8B889-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10\tu\t3.50E-05
+8B891-4\t8B891-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.7\tu\t3.50E-05
+8B896-2\t8B896-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8.95\tu\t3.50E-05
+8B897-4\t8B897-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t23.3\tu\t3.50E-05
+8B906-1\t8B906-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.25\tu\t3.50E-05
+8B907-2\t8B907-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.89\tu\t3.50E-05
+8B910-3\t8B910-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.57\tu\t3.50E-05
+9B039-2\t9B039-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.42\tu\t3.50E-05
+9B040-1\t9B040-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.92\tu\t3.50E-05
+9B041-3\t9B041-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.76\tu\t3.50E-05
+9B042-3\t9B042-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.96\tu\t3.50E-05
+9B046-3\t9B046-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.5\tu\t3.50E-05
+9B109-2\t9B109-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.6\tu\t3.50E-05
+9B110-4\t9B110-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.9\tu\t3.50E-05
+9B113-4\t9B113-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.02\tu\t3.50E-05
+9B117-2\t9B117-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t23.5\tu\t3.50E-05
+9B131-5\t9B131-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.94\tu\t3.50E-05
+9B433-5\t9B433-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3.9\tu\t3.50E-05
+9B437-5\t9B437-5\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3.34\tu\t3.50E-05
+9B445-3\t9B445-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.8\tu\t3.50E-05
+9B448-4\t9B448-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.1\tu\t3.50E-05
+9B449-2\t9B449-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t12.7\tu\t3.50E-05
+9B451-2\t9B451-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.7\tu\t3.50E-05
+9B454-4\t9B454-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.2\tu\t3.50E-05
+9B483-2\t9B483-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.39\tu\t3.50E-05
+9B486-4\t9B486-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.75\tu\t3.50E-05
+9B489-2\t9B489-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.26\tu\t3.50E-05
+9B490-3\t9B490-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8.58\tu\t3.50E-05
+9B492-4\t9B492-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.22\tu\t3.50E-05
+9B659-2\t9B659-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.39\tu\t3.50E-05
+9B660-4\t9B660-4\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t11.5\tu\t3.50E-05
+9B666-3\t9B666-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.14\tu\t3.50E-05
+9B669-2\t9B669-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.1\tu\t3.50E-05
+9B670-2\t9B670-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t5.8\tu\t3.50E-05
+9B902-3\t9B902-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.68\tu\t3.50E-05
+9B904-2\t9B904-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.12\tu\t3.50E-05
+9B905-2\t9B905-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t8.64\tu\t3.50E-05
+9B937-2\t9B937-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t1.5\tu\t3.50E-05
+9B944-1\t9B944-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.2\tu\t3.50E-05
+9B945-3\t9B945-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.32\tu\t3.50E-05
+9B947-2\t9B947-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.12\tu\t3.50E-05
+9B948-1\t9B948-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t14.6\tu\t3.50E-05
+9B949-2\t9B949-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.27\tu\t3.50E-05
+9B950-3\t9B950-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t16.3\tu\t3.50E-05
+9B953-3\t9B953-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.29\tu\t3.50E-05
+9B955-2\t9B955-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.1\tu\t3.50E-05
+9B959-3\t9B959-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t18.5\tu\t3.50E-05
+9B961-2\t9B961-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.58\tu\t3.50E-05
+9B962-3\t9B962-3\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t7.23\tu\t3.50E-05
+9B964-1\t9B964-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t9.84\tu\t3.50E-05
+9B965-2\t9B965-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t3.39\tu\t3.50E-05
+9B975-2\t9B975-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t10.8\tu\t3.50E-05
+9B976-1\t9B976-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t6.83\tu\t3.50E-05
+9B977-1\t9B977-1\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t4.04\tu\t3.50E-05
+9B984-2\t9B984-2\tg\tLP-PI-ALT-PTRM:LP-PI-TRM\tThis study\tExtrusive:Igneous\tLava Flow\tBasalt\t13.6\tu\t3.50E-05
+>>>>>>>>>>
+tab delimited\tages
+location\tsite\tage\tage_sigma\tage_unit\tmethod_codes\tcitations
+Hawaii\t01a\t260\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t01b\t260\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t01c\t260\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t2\t440\t240\tYears BP\tGM-C14\tThis study
+Hawaii\t3\t700\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t4\t760\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t5\t1320\t150\tYears BP\tGM-C14\tThis study
+Hawaii\t6\t1690\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t7\t2180\t180\tYears BP\tGM-C14\tThis study
+Hawaii\t8\t2190\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t9\t2550\t240\tYears BP\tGM-C14\tThis study
+Hawaii\t10\t2890\t210\tYears BP\tGM-C14\tThis study
+Hawaii\t11\t3480\t240\tYears BP\tGM-C14\tThis study
+Hawaii\t12\t4050\t150\tYears BP\tGM-C14\tThis study
+Hawaii\t13\t5160\t300\tYears BP\tGM-C14\tThis study
+Hawaii\t14\t5650\t270\tYears BP\tGM-C14\tThis study
+Hawaii\t15\t6160\t330\tYears BP\tGM-C14\tThis study
+Hawaii\t16\t7300\t300\tYears BP\tGM-C14\tThis study
+Hawaii\t17\t7950\t330\tYears BP\tGM-C14\tThis study
+Hawaii\t18\t8740\t300\tYears BP\tGM-C14\tThis study
+Hawaii\t19\t9500\t420\tYears BP\tGM-C14\tThis study
+Hawaii\t20\t10290\t450\tYears BP\tGM-C14\tThis study
+Hawaii\t21\t11780\t300\tYears BP\tGM-C14\tThis study
+Hawaii\t22\t13210\t570\tYears BP\tGM-C14\tThis study`,
   'MagIC Text File in Data Model v. 2.5':
 `tab\tcontribution
 id\treference\tversion\ttimestamp\tdata_model_version\tcontributor\tauthor\tdescription

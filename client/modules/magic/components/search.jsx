@@ -36,6 +36,7 @@ const searchTerms = {
 };*/
 const searchSortOption = { name: 'Most Relevant First', sort: [{'_score': 'desc'}] };
 const sortOptions = [
+  { name: 'Most Relevant First', sort: [{'_score': 'desc'}] },
   { name: 'Recently Contributed First'  , sort: [{'summary.contribution.timestamp': 'desc'}] },
   { name: 'Recently Contributed Last'   , sort: [{'summary.contribution.timestamp': 'asc'}] },
   { name: 'Recently Published First'    , sort: [{'summary.contribution._reference.year': 'desc'}] },
