@@ -10,6 +10,7 @@ import SearchFiltersExists from '/client/modules/common/containers/search_filter
 import SearchSummariesView from '/client/modules/magic/components/search_summaries_view';
 import SearchRowsView from '/client/modules/magic/containers/search_rows_view';
 import SearchPolesView from '/client/modules/magic/components/search_poles_view';
+import SearchRMagView from '/client/modules/magic/components/search_rmag_view';
 import SearchMapView from '/client/modules/magic/components/search_map_view';
 import SearchImagesView from '/client/modules/magic/components/search_images_view';
 import SearchDownload from '/client/modules/magic/components/search_download';
@@ -1435,6 +1436,18 @@ class Search extends React.Component {
     );
     if (activeView.name === 'Poles') return (
       <SearchPolesView
+        key={this.state.levelNumber + '_' + activeView.name}
+        style={viewStyle}
+        es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 
+          {field: "summary.locations.pole_lat"}
+        }, {exists: 
+          {field: "summary.locations.pole_lon"}
+        })})}
+        pageSize={5}
+      />
+    );
+    if (activeView.name === 'Rock Magnetism') return (
+      <SearchRMagView
         key={this.state.levelNumber + '_' + activeView.name}
         style={viewStyle}
         es={_.extend({}, es, {queries: _.concat(searchQueries, {exists: 

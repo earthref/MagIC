@@ -222,11 +222,11 @@ export default class extends React.Component {
               style={{ width: 'calc(100vw - 4em)' }}
             >
               <Modal.Header>
-                <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ cursor:'pointer', float: 'right', marginRight: '-1em' }} />
+                <i className="close icon" onClick={() => this.setState({ showPlots: false })} style={{ cursor:'pointer', float: 'right' }} />
                 { specimen || sample || site || location || citation } PmagPy Plots
               </Modal.Header>
               <div className="header actions" style={{ textAlign: 'left', padding: '.5rem' }}>
-                <div className="ui small basic compact buttons">
+                <div className="ui small basic compact buttons" style={{ marginRight: '1em' }}>
                   <div className="ui active button" style={{cursor: 'default'}}>
                     <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
                       Data Model Level:
@@ -251,8 +251,34 @@ export default class extends React.Component {
                     </div> || undefined
                   )}
                 </div>
+                &nbsp;
+                <div className="ui small basic compact buttons">
+                  <div className="ui active button" style={{cursor: 'default'}}>
+                    <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
+                      { activeLevel } Level Plot Types:
+                    </span>
+                  </div>
+                  { _.keys(levels[activeLevel]).map((type, idx) => levels[activeLevel][type].length &&
+                    <div 
+                      className={"ui button" + (type === activeType ? "" : " active")}
+                      key={idx}
+                      style={type === activeType ? {cursor: 'default'} : {}}
+                      onClick={() => this.setState({ type, file: undefined, maxVisible: this.visibleIncrement })}
+                    >
+                      <span style={{fontWeight: 'bold', color: (type === activeType ? portals['MagIC'].color : 'inherit')}}>
+                        { type }
+                      </span>
+                      <div 
+                        className={"ui horizontal label" + (type === activeType ? "" : " basic")}
+                        style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (type === activeType ? portals['MagIC'].color : 'inherit') }}
+                      >
+                        { levels[activeLevel][type].length }
+                      </div>
+                    </div> || undefined
+                  )}
+                </div>
               </div>
-              <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 15em)' }}>
+              <div className="image content" style={{display:'flex', position:'relative', flexWrap:'wrap', alignContent:'flex-start', padding:'.5rem', overflowY:'scroll', height:'calc(100vh - 12em)' }}>
                 {!this.state.file && this.state.showPlots && activeFiles.length && activeFiles.slice(0, this.state.maxVisible).map((f, i) => 
                   <div key={`${activeLevel} ${activeType} ${i}`} style={modalStyle}>
                     <a href="#" onClick={() => this.setState({ file: f })} style={{display:'flex', maxWidth: plotSize, maxHeight: plotSize, margin: 'auto'}}>
@@ -293,33 +319,6 @@ export default class extends React.Component {
                     }
                   </div>
                 }
-              </div>
-              <div className="actions" style={{ textAlign: 'left', padding: '.5rem' }}>
-                <div className="ui small basic compact buttons">
-                  <div className="ui active button" style={{cursor: 'default'}}>
-                    <span style={{ fontWeight: 'bold', color: portals['MagIC'].color }}>
-                      { activeLevel } Level Plot Types:
-                    </span>
-                  </div>
-                  { _.keys(levels[activeLevel]).map((type, idx) => levels[activeLevel][type].length &&
-                    <div 
-                      className={"ui button" + (type === activeType ? "" : " active")}
-                      key={idx}
-                      style={type === activeType ? {cursor: 'default'} : {}}
-                      onClick={() => this.setState({ type, file: undefined, maxVisible: this.visibleIncrement })}
-                    >
-                      <span style={{fontWeight: 'bold', color: (type === activeType ? portals['MagIC'].color : 'inherit')}}>
-                        { type }
-                      </span>
-                      <div 
-                        className={"ui horizontal label" + (type === activeType ? "" : " basic")}
-                        style={{ margin: '-1rem -.75rem -1rem 0.75rem', padding: '.2rem .5rem', minWidth: 0, color: (type === activeType ? portals['MagIC'].color : 'inherit') }}
-                      >
-                        { levels[activeLevel][type].length }
-                      </div>
-                    </div> || undefined
-                  )}
-                </div>
               </div>
             </Modal>
           }
