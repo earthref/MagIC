@@ -144,6 +144,104 @@ export default class extends React.Component {
 						</Grid.Row>
 					</Grid>
 				</Container>
+				<Divider hidden/>
+				<Container fluid textAlign='justified'>
+					<Header size='medium' dividing>MagIC Advisory Committee</Header>
+					MagIC is advised by experts in the domains of rock- and paleomagnetism who represent the community in guiding the project.
+					<Grid padded columns={3}>
+						<Grid.Row>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Sonia Tikoo
+                  <div className="sub header">
+                    Planetary Magnetics<br />
+                    Impact Cratering Events
+                  </div>
+                </div>
+							</Grid.Column>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Sarah Slotznick
+                  <div className="sub header">
+                    Environmental Magnetism<br />
+                    Sedimentary Petrology
+                  </div>
+                </div>
+							</Grid.Column>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Courtney Sprain
+                  <div className="sub header">
+                    Rock and Paleomagnetism<br />
+                    Geochronology
+                  </div>
+                </div>
+							</Grid.Column>
+						</Grid.Row>
+						<Grid.Row>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Roger Fu
+                  <div className="sub header">
+                    Paleomagnetism<br />
+                    Quantum Diamond Magnetometer<br />
+                    Geodynamical Modeling
+                  </div>
+                </div>
+							</Grid.Column>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Mathew Domeier
+                  <div className="sub header">
+                    Geodynamics and Tectonics<br />
+                    Apparent and True Polar Wander
+                  </div>
+                </div>
+							</Grid.Column>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Peter Lippert
+                  <div className="sub header">
+                    Tectonics and Geodynamics<br />
+                    Geochronology and Paleoclimate Change<br />
+                    Crustal and Surface Processes
+                  </div>
+                </div>
+							</Grid.Column>
+						</Grid.Row>
+						<Grid.Row>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Stuard Gilder
+                  <div className="sub header">
+                    Continental Magnetostratigraphy<br />
+                    Sedimentary Magnetism<br />
+                    Rock and High Pressure Magnetism
+                  </div>
+                </div>
+							</Grid.Column>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  Douwe van Hinsbergen
+                  <div className="sub header">
+                    Tectonics<br />
+                    Geodynamics<br />
+                    Paleogeography
+                  </div>
+                </div>
+							</Grid.Column>
+							<Grid.Column>
+								<div className="ui center aligned small icon header">
+                  France Lagroix
+                  <div className="sub header">
+                    Rock and Mineral Magnetism<br />
+                    Environmental Magnetism
+                  </div>
+                </div>
+							</Grid.Column>
+						</Grid.Row>
+					</Grid>
+				</Container>
 				<Container fluid textAlign='justified'>
 					<Header size='medium' dividing>PmagPy Open-Source Software Contributors</Header>
 					<ul>
