@@ -22,9 +22,6 @@ export default class GoogleStaticMap extends React.Component {
     const width   = this.props.width    || 100;
     const height  = this.props.height   || 100;
     const padding = this.props.padding  || 2  ;
-    const color   = this.props.color    || 'BBBBBB99';
-    const border  = this.props.border   || '800080FF';
-    const weight  = this.props.weight   || 10;
     const paths   = this.props.paths    || [];
     const noMap   = (
       <div style={{
@@ -100,7 +97,7 @@ export default class GoogleStaticMap extends React.Component {
             let lon_e = p.lon_e + min_dim;
             let lon_w = p.lon_w - min_dim;
 
-            src += `&path=color:0x${border}|weight:${weight}|fillcolor:0x${color}|`;
+            src += `&markers=icon:https://bit.ly/3YYT2wz|`;
             src += lat_s.toFixed(2) + ',' + lon_w.toFixed(2) + '|' +
                    lat_s.toFixed(2) + ',' + lon_e.toFixed(2) + '|' +
                    lat_n.toFixed(2) + ',' + lon_e.toFixed(2) + '|' +
@@ -136,8 +133,5 @@ GoogleStaticMap.propTypes = {
   width:   PropTypes.number, // width in pixels
   height:  PropTypes.number, // height in pixels
   padding: PropTypes.number, // padding around paths bounding box in degrees
-  color:   PropTypes.string, // path fill color in alpha hex string
-  border:  PropTypes.string, // path border color in alpha hex string
-  weight:  PropTypes.number, // path border thickness in pixels
   paths:   PropTypes.array
 };
