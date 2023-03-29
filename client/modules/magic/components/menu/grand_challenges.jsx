@@ -4,13 +4,13 @@ import {Grid} from 'semantic-ui-react';
 export default class extends React.Component {
 
 	render() {
-		return (
-			<div>
-				<Grid verticalAlign="middle">
+    return (
+      <div>
+				<Grid verticalAlign="top">
 					<Grid.Row>
 						<Grid.Column width={3}>
-						<div className="ui small rounded image">
-							<img src="/MagIC/glatzmaierReversal.jpg"/>
+						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
+                <img src="/MagIC/glatzmaierReversal.jpg"/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>
@@ -19,7 +19,7 @@ export default class extends React.Component {
 					</Grid.Row>
 					<Grid.Row>
 						<Grid.Column width={3}>
-						<div className="ui small rounded image">
+						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
 							<img src="/MagIC/polarWanderPlumes.jpg"/>
 						</div>
 						</Grid.Column>
@@ -29,7 +29,7 @@ export default class extends React.Component {
 					</Grid.Row>
 					<Grid.Row>
 						<Grid.Column width={3}>
-						<div className="ui small rounded image">
+						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
 							<img src="/MagIC/widemereLakeCore.png"/>
 						</div>
 						</Grid.Column>
@@ -39,7 +39,7 @@ export default class extends React.Component {
 					</Grid.Row>
 					<Grid.Row>
 						<Grid.Column width={3}>
-						<div className="ui small rounded image">
+						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
 							<img src="/MagIC/pigeon.jpg"/>
 						</div>
 						</Grid.Column>
@@ -53,7 +53,7 @@ export default class extends React.Component {
 					</Grid.Row>
 					<Grid.Row>
 						<Grid.Column width={3}>
-						<div className="ui small rounded image">
+						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
 							<img src="/MagIC/loessVicksburg.jpg"/>
 						</div>
 						</Grid.Column>
@@ -63,7 +63,7 @@ export default class extends React.Component {
 					</Grid.Row>
 					<Grid.Row>
 						<Grid.Column width={3}>
-						<div className="ui small rounded image">
+						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
 							<img src="/MagIC/seymchanMeteorite.jpg"/>
 						</div>
 						</Grid.Column>

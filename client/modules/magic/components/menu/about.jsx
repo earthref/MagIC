@@ -10,9 +10,11 @@ export default class extends React.Component {
 		return (
 			<div>
 				<Container fluid textAlign='justified'>
-					The Magnetics Information Consortium (MagIC) improves research capacity in the Earth and Ocean sciences by maintaining an open community digital data repository for rock and paleomagnetic data with portals that allow users to archive, search, visualize, download, and combine these versioned datasets.
-					MagIC supports the international rock and paleomagnetic communities and endeavors to bring data out of private archives, making them accessible to all and (re-)useable for new, creative, collaborative scientific and educational activities. 
-					
+					<Header size='medium' dividing>Mission Statement</Header>
+          <p>
+            The Magnetics Information Consortium (MagIC) improves research capacity in the Earth and Ocean sciences by maintaining an open community digital data repository for rock and paleomagnetic data with portals that allow users to archive, search, visualize, download, and combine these versioned datasets.
+            MagIC supports the international rock and paleomagnetic communities and endeavors to bring data out of private archives, making them accessible to all and (re-)useable for new, creative, collaborative scientific and educational activities.
+          </p>
 				</Container>
 				<Divider hidden/>
 				<Container fluid textAlign='justified'>

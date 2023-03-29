@@ -1,4 +1,6 @@
 import React from 'react';
+import {Header} from 'semantic-ui-react';
+
 import PropTypes from 'prop-types';
 import {Link} from 'react-router-dom';
 
@@ -28,7 +30,7 @@ class Page extends React.Component {
         </Link>
         {!this.props.menu && <div className="ui divider"/>}
         {this.props.menu || undefined}
-        {this.props.title && <h3>{this.props.title}</h3>}
+        {this.props.title && <Header size='medium' dividing>{this.props.title}</Header>}
         {this.props.children}
       </Layout>
     )

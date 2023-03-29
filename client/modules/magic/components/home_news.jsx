@@ -14,15 +14,13 @@ export default class extends React.Component {
           {` 2023 MagIC Workshop`}
         </h3>
         <p>
-          {` MagIC will host its 2023 workshop from `}
+          {` MagIC hosted its 2023 workshop from `}
           <b>Feb 28th to March 2nd, 2023</b>
           {` in La Jolla, California at the Scripps Institution of Oceanography, UCSD. The workshop, "`}
           <a href="https://earthref.org/events/MAGIC/2023/"><b>Magnetism and Earth History: Field Evolution, Environmental Change and Paleogeography</b></a>
-          {`", consists of two days of science talks in four sessions and a day of MagIC related group working sessions. Please visit the `}
+          {`", consisted of two days of science talks in four sessions and a day of MagIC-related group working sessions. Please visit the `}
           <a href="https://earthref.org/events/MAGIC/2023/"><b>workshop website</b></a>
-          {` for the full schedule and other workshop details. We welcome you to join us at the workshop by registering using this `} 
-          <a href="https://docs.google.com/forms/d/1sCt0e-1vIwis7eNNHzDOZEm4nnUx8jcCAmyMm-NtDgg"><b>form</b></a>
-          {`. There will be a poster session and reception on the evening of the first day.`} 
+          {` for the full schedule and other workshop details.`}
         </p>
         <div className="ui divider"></div>
         <h3>

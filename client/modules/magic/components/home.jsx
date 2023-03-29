@@ -21,15 +21,17 @@ export default class extends React.Component {
   render() {
     return (
       <React.Fragment>
-        <Message size="small" icon floating style={{ marginBottom: '2em' }}>
-          <i className="purple users icon"></i>
-          <Message.Content>
-            <a className="ui purple header" href="https://earthref.org/events/MagIC/2023">
-              2023 MagIC Workshop: Magnetism and Earth History: Field Evolution, Environmental Change and Paleogeography
-            </a>
-            MagIC is hosting a workshop on February 28th - March 2nd, 2023 in La Jolla, CA.
-          </Message.Content>
-        </Message>
+        {false &&
+          <Message size="small" icon floating style={{ marginBottom: '2em' }}>
+            <i className="purple users icon"></i>
+            <Message.Content>
+              <a className="ui purple header" href="https://earthref.org/events/MagIC/2023">
+                2023 MagIC Workshop: Magnetism and Earth History: Field Evolution, Environmental Change and Paleogeography
+              </a>
+              MagIC is hosting a workshop on February 28th - March 2nd, 2023 in La Jolla, CA.
+            </Message.Content>
+          </Message>
+        }
         <Grid divided><Grid.Row><Grid.Column width={12}>
           <div className="ui three cards">
             <IconButton className="card" link="/MagIC/search" portal="MagIC">
