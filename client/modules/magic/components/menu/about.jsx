@@ -66,7 +66,7 @@ export default class extends React.Component {
 									<img src="/MagIC/people/akoppers.jpg" />
 								</div><br/>
 								Anthony Koppers
-								<div className="sub header">Associate Dean at<br/>CEOAS, OSU</div>
+								<div className="sub header">Professor at<br/>CEOAS, OSU</div>
 							</a>
 							</Grid.Column>
 							<Grid.Column>
