@@ -175,13 +175,14 @@ export default function () {
 
       if (d.creators && d.creators.length === 1)
         _reference.citation = d.creators[0].familyName;
-      else if (d.author && d.creators.length === 2)
+      else if (d.creators && d.creators.length === 2)
         _reference.citation = d.creators[0].familyName + ' & ' + d.creators[1].familyName;
-      else if (d.author && d.creators.length > 2)
+      else if (d.creators && d.creators.length > 2)
         _reference.citation = d.creators[0].familyName + ' et al.';
       if (_reference.year)
         _reference.citation += ' (' + _reference.year + ')';
 
+      console.log("getDataciteMetadata", d.creators);
       if (d.creators)
         _reference.authors = d.creators.map((a) => {
           let author = {};
