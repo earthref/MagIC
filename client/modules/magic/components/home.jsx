@@ -84,13 +84,6 @@ export default class extends React.Component {
               </i>
               <div className="small title">Vocabulary<br/>Lists</div>
             </IconButton>          
-            <IconButton className="borderless card" href="https://earthref.org/MagIC/dmp/" portal="MagIC">
-              <i className="icons">
-                <i className="file text icon"/>
-                <i className="corner write icon"/>
-              </i>
-              <div className="small title">D.M.P.<br/>Tool</div>
-            </IconButton>
             <IconButton className="borderless card" href="https://pmagpy.github.io/PmagPy-docs/intro.html" portal="MagIC">
               <i className="icons">
                 <i className="bar chart icon"/>
@@ -118,6 +111,13 @@ export default class extends React.Component {
                 <i className="corner headphones icon"/>
               </i>
               <div className="small title">YouTube<br/>Channel</div>
+            </IconButton>
+            <IconButton className="borderless card" href="https://api.earthref.org/" portal="MagIC">
+              <i className="icons">
+                <i className="exchange icon"/>
+                <i className="corner info icon"/>
+              </i>
+              <div className="small title">MagIC<br/>API</div>
             </IconButton>
             <IconButton className="borderless card" link="/MagIC/help" portal="MagIC">
               <i className="icons">
