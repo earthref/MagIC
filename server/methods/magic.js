@@ -132,6 +132,37 @@ export default function () {
       }
     },
 
+    async magicGetPublicContribution(id, user, attempt = 0) {
+      this.unblock();
+      console.log("magicGetPublicContribution", id, user, attempt);
+
+      try {
+        return await Meteor.call("s3GetObject", { 
+          bucket: `magic-activated-contributions/${id}`,
+          key: `magic_contribution_${id}.txt`,
+          encoding: 'utf-8'
+        });
+      } catch (e) {
+        // console.error("magicGetPrivateContribution", `Failed to retrieve private contribution for ${id}`, e);
+        throw new Meteor.Error("magicGetPrivateContribution", `Failed to retrieve private contribution for ${id}`);
+      }
+    },
+
+    async magicGetPublicContributionZip(id, user, attempt = 0) {
+      this.unblock();
+      console.log("magicGetPublicContributionZip", id, user, attempt);
+
+      try {
+        return await Meteor.call("s3GetObject", { 
+          bucket: `magic-activated-contributions/${id}`,
+          key: `magic_contribution_${id}.zip`
+        });
+      } catch (e) {
+        // console.error("magicGetPrivateContributionZip", `Failed to retrieve private contribution for ${id}`, e);
+        throw new Meteor.Error("magicGetPrivateContributionZip", `Failed to retrieve private contribution for ${id}`);
+      }
+    },
+
     async magicGetPublicContributions(ids, fileName, user, attempt = 0) {
       this.unblock();
       console.log("magicGetPublicContributions", ids, fileName, user, attempt);
