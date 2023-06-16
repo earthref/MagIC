@@ -18,6 +18,10 @@ export default class extends React.Component {
           If you would like to have live help or a walkthrough of any of the part of MagIC's uploading, searching, or downloading data procedures, please email Nick Jarboe. I can also set up a time for a live chat over video using Skype, Zoom, Google Hangouts, etc.<br/>
         </p>
         <p>
+          <b>Data Managment Plan (DMP) Tool </b><br/>
+          <Link to={"/MagIC/help/text-file-format"}>Link</Link> to the MagIC DMP tool.
+        </p>
+        <p>
           <b>MagIC File Format - What You Need to Know to Create MagIC Data Files</b><br/>
           <Link to={"/MagIC/help/text-file-format"}>The MagIC file format</Link><br/> 
           This page describes the MagIC file format, presents a short MagIC file as an example, describes 
