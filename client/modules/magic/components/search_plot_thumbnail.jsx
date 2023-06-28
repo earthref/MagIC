@@ -325,7 +325,7 @@ export default class extends React.Component {
         </div>
       );
     }
-    else if (file) {
+    else if (file && isPrivate) {
       return (
         <div style={thumbnailContainerStyle}>
           <SearchPlot style={thumbnailStyle} loadingStyle={loadingStyle} id={id} isPrivate={isPrivate} file={file}/>
