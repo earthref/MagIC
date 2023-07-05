@@ -752,6 +752,22 @@ class SearchSummariesListItem extends React.Component {
                           <i className="ui file text outline icon"/> Download
                         </button>
                       </td>
+                      <td>
+                        {(_is_activated || i > 0) &&
+                        <a style={this.styles.a}
+                          href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a>}
+                        {(!_is_activated && i == 0) &&
+                        <span>{'earthref.org/MagIC/' + v.id}</span>}
+                      </td>
+                      <td>
+                        {_is_activated && _has_data_doi &&
+                        <a style={this.styles.a}
+                          href={'http://dx.doi.org/10.7288/V4/MAGIC/' + v.id} target="_blank">{'10.7288/V4/MAGIC/' + v.id}</a>}
+                        {_is_activated && !_has_data_doi &&
+                        <span>Queued For Creation</span>}
+                        {!_is_activated &&
+                        <span>{'10.7288/V4/MAGIC/' + v.id}</span>}
+                      </td>
                       <td>{v.version}</td>
                       <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
                       <td>{moment(v.timestamp).local().format('LL')}</td>
