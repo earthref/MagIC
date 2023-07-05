@@ -117,7 +117,7 @@ export default class extends React.Component {
                 <i className="exchange icon"/>
                 <i className="corner info icon"/>
               </i>
-              <div className="small title">MagIC<br/>API</div>
+              <div className="small title">MagIC/FIESTA<br/>API</div>
             </IconButton>
             <IconButton className="borderless card" link="/MagIC/help" portal="MagIC">
               <i className="icons">
