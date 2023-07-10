@@ -93,49 +93,68 @@ class SearchSummariesListItem extends React.Component {
     if (this.props.table !== 'contribution') return undefined;
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
+    if (id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215 || id == 19602 || id == 19859))
+      return (
+        <div style={{ minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5 }}>
+          <a
+            href={`//earthref.org/MagIC/download/${id}/magic_contribution_${id}.txt`}
+            download
+          >
+            <button
+              className="ui basic tiny fluid compact icon header purple button"
+              style={{ padding: '20px 0', height: '100px' }}
+            >
+              <i className="ui file text outline icon" /> Download
+            </button>
+          </a>
+        </div>
+      );
+    if (id)
+      return (
+        <div style={{ minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5 }}>
+          <button type="submit" className="ui basic tiny fluid compact icon header purple button"
+            style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
+              document.getElementById('downloadButton' + id).className = "ui spinner loading icon";
+              Meteor.call(_is_activated ? 'magicGetPublicContributionZip' : 'magicGetPrivateContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
+                if (source) {
+                  let blob = new Blob([source], {type: "application/zip"});
+                  saveAs(blob, 'magic_contribution_' + id + '.zip');
+                  document.getElementById('downloadButton' + id).className = "ui file text outline icon";
+                } else {
+                  Meteor.call(_is_activated ? 'magicGetPublicContribution' : 'magicGetPrivateContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
+                    if (source) {
+                      let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
+                      saveAs(blob, 'magic_contribution_' + id + '.txt');
+                      document.getElementById('downloadButton' + id).className = "ui file text outline icon";
+                    } else {
+                      Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
+                        if (!error && c) {
+                          const exporter = new ExportContribution({});
+                          let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+                          saveAs(blob, 'magic_contribution_' + id + '.txt');
+                          document.getElementById('downloadButton' + id).className = "ui file text outline icon";
+                        } else {
+                          console.error(error);
+                          alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                          document.getElementById('downloadButton' + id).className = "ui file text outline icon";
+                        }
+                      }.bind(this, id));
+                    }
+                  }.bind(this, id));
+                }
+              }.bind(this, id));
+            }.bind(this, id)}>
+              <i id={'downloadButton' + id} className="ui file text outline icon"/> Download
+            </button>
+          </div>
+      );
     return (
-      <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
-        {id && 
-        <button type="submit" className="ui basic tiny fluid compact icon header purple button"
-          style={{padding: '20px 0', height: '100px'}} onClick={function (id, e) {
-            document.getElementById('downloadButton' + id).className = "ui spinner loading icon";
-            Meteor.call(_is_activated ? 'magicGetPublicContributionZip' : 'magicGetPrivateContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
-              if (source) {
-                let blob = new Blob([source], {type: "application/zip"});
-                saveAs(blob, 'magic_contribution_' + id + '.zip');
-                document.getElementById('downloadButton' + id).className = "ui file text outline icon";
-              } else {
-                Meteor.call(_is_activated ? 'magicGetPublicContribution' : 'magicGetPrivateContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
-                  if (source) {
-                    let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
-                    saveAs(blob, 'magic_contribution_' + id + '.txt');
-                    document.getElementById('downloadButton' + id).className = "ui file text outline icon";
-                  } else {
-                    Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
-                      if (!error && c) {
-                        const exporter = new ExportContribution({});
-                        let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
-                        saveAs(blob, 'magic_contribution_' + id + '.txt');
-                        document.getElementById('downloadButton' + id).className = "ui file text outline icon";
-                      } else {
-                        console.error(error);
-                        alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-                        document.getElementById('downloadButton' + id).className = "ui file text outline icon";
-                      }
-                    }.bind(this, id));
-                  }
-                }.bind(this, id));
-              }
-            }.bind(this, id));
-          }.bind(this, id)}>
-            <i id={'downloadButton' + id} className="ui file text outline icon"/> Download
-          </button>}
-        {!id &&
+      <div style={{ minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5 }}>
         <button className="ui basic tiny fluid compact icon header purple disabled button" style={{padding:'20px 0', height:'100px'}}>
           <i className="ui file text outline icon"/> Download
-        </button>}
+        </button>
       </div>
-    );
+    )
   }
 
   renderLinks(item) {
@@ -717,40 +736,58 @@ class SearchSummariesListItem extends React.Component {
                 {item.summary.contribution && item.summary.contribution._history.map((v, i) => {
                   let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
                   let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
+                  let download_button;
+                  if (v.id && (_is_activated || v.id == 16837 || v.id == 16841 || v.id == 17115 || v.id == 17129 || v.id == 19215 || v.id == 19602 || v.id == 19859))
+                    download_button = (
+                      <a
+                        href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`}
+                        download
+                      >
+                        <button
+                          className="ui basic tiny fluid compact icon purple button"
+                          style={{ marginTop: '0' }}
+                        >
+                          <i className="ui file text outline icon" /> Download
+                        </button>
+                      </a>
+                    );
+                  else if (v.id)
+                    download_button = (
+                      <button className="ui basic tiny fluid compact icon purple button"
+                          style={{ marginTop: '0' }} onClick={function (id, e) {
+                            Meteor.call('magicGetPublicContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
+                              if (source) {
+                                let blob = new Blob([source], {type: "application/zip"});
+                                saveAs(blob, 'magic_contribution_' + id + '.zip');
+                              } else {
+                                Meteor.call('magicGetPublicContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
+                                  if (source) {
+                                    let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
+                                    saveAs(blob, 'magic_contribution_' + id + '.txt');
+                                  } else {
+                                    Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
+                                      if (!error && c) {
+                                        const exporter = new ExportContribution({});
+                                        let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
+                                        saveAs(blob, 'magic_contribution_' + id + '.txt');
+                                      } else {
+                                        console.error(error);
+                                        alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                                      }
+                                    }.bind(this, id));
+                                  }
+                                }.bind(this, id));
+                              }
+                            }.bind(this, id));
+                          }.bind(this, v.id)}
+                        >
+                          <i className="ui file text outline icon"/> Download
+                      </button>
+                    );
                   return (
                     <tr key={i}>
                       <td style={{ whiteSpace: 'nowrap' }}>
-                          <button className="ui basic tiny fluid compact icon purple button"
-                            style={{ marginTop: '0' }} onClick={function (id, e) {
-                              Meteor.call('magicGetPublicContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
-                                if (source) {
-                                  let blob = new Blob([source], {type: "application/zip"});
-                                  saveAs(blob, 'magic_contribution_' + id + '.zip');
-                                } else {
-                                  Meteor.call('magicGetPublicContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
-                                    if (source) {
-                                      let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
-                                      saveAs(blob, 'magic_contribution_' + id + '.txt');
-                                    } else {
-                                      Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
-                                        if (!error && c) {
-                                          const exporter = new ExportContribution({});
-                                          let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
-                                          saveAs(blob, 'magic_contribution_' + id + '.txt');
-                                        } else {
-                                          console.error(error);
-                                          alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
-                                        }
-                                      }.bind(this, id));
-                                    }
-                                  }.bind(this, id));
-                                }
-                              }.bind(this, id));
-                            }.bind(this, v.id)
-                          }
-                        >
-                          <i className="ui file text outline icon"/> Download
-                        </button>
+                        { download_button }
                       </td>
                       <td>
                         {(_is_activated || i > 0) &&
