@@ -93,7 +93,7 @@ class SearchSummariesListItem extends React.Component {
     if (this.props.table !== 'contribution') return undefined;
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
-    if (id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215 || id == 19602 || id == 19859))
+    if (id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215 || id == 19602 || id == 19859 || id == 19872))
       return (
         <div style={{ minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5 }}>
           <a
@@ -737,7 +737,7 @@ class SearchSummariesListItem extends React.Component {
                   let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
                   let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
                   let download_button;
-                  if (v.id && (_is_activated || v.id == 16837 || v.id == 16841 || v.id == 17115 || v.id == 17129 || v.id == 19215 || v.id == 19602 || v.id == 19859))
+                  if (v.id && (_is_activated || v.id == 16837 || v.id == 16841 || v.id == 17115 || v.id == 17129 || v.id == 19215 || v.id == 19602 || v.id == 19859 || v.id == 19872))
                     download_button = (
                       <a
                         href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`}
