@@ -180,6 +180,19 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                        <img src="/MagIC/people/sgilder.jpg" />
+                                    </div><br/>
+                                    Stuart Gilder
+                                    <div className="sub header">
+                                        Continental Magnetostratigraphy<br />
+                                        Sedimentary Magnetism<br />
+                                        Rock and High Pressure Magnetism
+                                    </div>
+                                </div>
+                            </Grid.Column>
+                            <Grid.Column>
+                                <div className="ui center aligned small icon header">
+                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
                                         <img src="/MagIC/people/flagroix.jpg" />
                                     </div><br/>
                                     France Lagroix
@@ -202,6 +215,8 @@ export default class extends React.Component {
                                     </div>
                                 </div>
                             </Grid.Column>
+                        </Grid.Row>
+                        <Grid.Row>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
@@ -214,8 +229,6 @@ export default class extends React.Component {
                                     </div>
                                 </div>
                             </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui medium icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
