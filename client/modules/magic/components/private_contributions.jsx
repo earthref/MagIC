@@ -643,6 +643,7 @@ export default class extends React.Component {
                           onKeyPress={function(i, e) {
                             if (e.key === "Enter") this.updateReference(i);
                           }.bind(this, i)}
+                          title="After your paper is published, you may need to wait up to a day for the paper's DOI to register, but generally it should work an hour or two. Re-enter the DOI to try again."
                         />
                         <div className={
                             "ui small right attached icon button" + 
