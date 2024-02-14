@@ -13,9 +13,11 @@ const esClient = new opensearch.Client({
 });
 
 const index = "magic";
+
+// Minimum last modified date for contributionn pages
 const minLastMod = Date.parse("07-01-2021");
 
-describe("magic.json_ld", () => {
+describe("magic.sitemap", () => {
 
   it("should update contributions sitemap", function (done) { setTimeout(() => {
     this.timeout(0);
@@ -35,7 +37,7 @@ describe("magic.json_ld", () => {
       }
     }).then((resp) => {
       //let xml = [];
-      console.log(resp.body.hits, resp.body.hits.hits);
+      // console.log(resp.body.hits, resp.body.hits.hits);
       let urls = {};
       if (resp.body.hits.total.value > 0) {
         xml = resp.body.hits.hits.forEach(hit => {
