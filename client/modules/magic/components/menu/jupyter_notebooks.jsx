@@ -19,7 +19,7 @@ export default class extends React.Component {
         <p>
         The JuypterHub site can be found at <a href="https://jupyterhub.earthref.org">jupyterhub.earthref.org</a>.<br/>
         </p>
-        <p><b>PmagPy Fundemetals</b><br/>
+        <p><b>PmagPy Fundamentals</b><br/>
         A <a href="https://github.com/PmagPy/PmagPy/blob/master/PmagPy_online.ipynb">Juypter Notebook</a> explaining PmagPy Online. This is a tutorial on using the EarthRef JuypterHub, PmagPy, and the MagIC database.<br/>
         A presentation of the notebook by Lisa Tauxe at the EarthCube 2020 meeting can be found at <a href="https://doi.org/10.1002/essoar.10504182.1">doi.org/10.1002/essoar.10504182.1</a>.<br/>
         <br/>
