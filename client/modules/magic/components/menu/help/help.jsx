@@ -7,7 +7,7 @@ export default class extends React.Component {
     return (
       <div>
         <p>
-          For <b>FAQ</b>, see below.<br/>
+          For FAQ, see below.<br/>
           <br/>
           The MagIC website continues to evolve. Older tutorials are more likely to not match the current layout exactly, but they 
           should still be quite helpful. Please let us know if they are confusing, especially if it is due to the tutorial not 
@@ -65,18 +65,20 @@ export default class extends React.Component {
           implement a workflow for the lab that includes the creating of MagIC file formatted files.
           <br/>
         </p>
+        <div id="faq">
         <p>
           <a name="faq"></a>
           <h3>FAQ</h3>
-          <b>How do I cite a data set that I have used that is in MagIC?</b><br/>
-          Data that you have placed into MagIC as supporting data for a paper should be cited in the paper and placed in the reference
-          list. Data downloaded from MagIC should also be cited when used.<br/>
-          <br/>
+          <b>How do I cite a dataset that I have used that is in MagIC?</b><br/>
+          Data that you have placed into MagIC as supporting data for a paper should be cited in the paper and placed in the reference list. For MagIC the dataset title generally is the title of the associated paper with the text "(Dataset)" appended. Data downloaded from MagIC should also be cited when used.<br/>
+        </p>
+        <p>
           <i>General data citation form:</i><br/>
           Data Author(s)/Principal Investigator name(s) (YEAR) "Title of Dataset", publisher or distributor, data DOI<br/>
-          <br/>
+        </p>
+        <p>
           <i>Example Citation:</i><br/>
-          Jun Meng, Stuart A. Gilder, Yalin Li, Chengshan Wang, Tao Liu (2020) "Expanse of Greater India in the late Cretaceous", Magnetics Information Consortium (MagIC), doi:10.7288/V4/MAGIC/16853
+          Jun Meng, Stuart A. Gilder, Yalin Li, Chengshan Wang, Tao Liu (2020) "Expanse of Greater India in the late Cretaceous (Dataset)", Magnetics Information Consortium (MagIC), doi:10.7288/V4/MAGIC/16853
         </p>
         <p>
           <b>When should I upload my data for my journal article to MagIC?</b><br/>
@@ -105,6 +107,7 @@ export default class extends React.Component {
           If you imported the file as tab delimited, this should be the default save setting.
           <br/>
         </p>
+      </div>
       </div>
     );
   }
