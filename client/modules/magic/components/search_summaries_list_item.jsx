@@ -93,7 +93,18 @@ class SearchSummariesListItem extends React.Component {
     if (this.props.table !== 'contribution') return undefined;
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
-    if (id && (_is_activated || id == 16837 || id == 16841 || id == 17115 || id == 17129 || id == 19215 || id == 19602 || id == 19859 || id == 19872))
+    if (
+id &&
+(_is_activated ||
+id == 16837 ||
+id == 16841 ||
+id == 17115 ||
+id == 17129 ||
+id == 19215 ||
+id == 19602 ||
+id == 19859 ||
+id == 20187)
+)
       return (
         <div style={{ minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5 }}>
           <a
