@@ -1131,7 +1131,6 @@ id == 20187)
             <Button color='purple' floated="left" disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
               const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
               if (this.state.dataEdited && data) {
-                const rowData = this.state.contributionData[this.state.dataLevel];
                 const model = models[_.last(versions)];
                 const table = model.tables[this.state.dataLevel];
                 const modelColumns = _.sortBy(
@@ -1141,20 +1140,19 @@ id == 20187)
                 const usedColumns = {};
                 tableData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
                 const columns = modelColumns.filter(x => usedColumns[x]);
-                const contributionData = { ...this.state.contributionData,
-                  [this.state.dataLevel]: data.map(row => {
+                const contribution = {
+                  ...this.state.contributionData,
+                  [this.state.dataLevel]: data.map((row) => {
                     const editedRow = {};
                     row.forEach((col, colIdx) => {
-                      editedRow[columns[colIdx]] = col
+                      editedRow[columns[colIdx]] = col;
                     });
                     return editedRow;
-                  })
+                  }),
                 };
-                console.log('updating contribution', item);
                 const contributor = item.summary.contribution.contributor;
                 const _contributor = item.summary.contribution._contributor;
                 const id = item.summary.contribution.id;
-                const contribution = contributionData;
                 const summary = item.summary;
                 Meteor.call('esUpdatePrivateContribution', {
                   index, contributor, _contributor, id, contribution, summary
@@ -1179,7 +1177,7 @@ id == 20187)
                 this.setState({
                   dataEdited: false,
                   dataSaving: true,
-                  contributionData
+                  contributionData: contribution,
                 });
                 this.contributionDataEdited = undefined;
               }
@@ -1210,13 +1208,23 @@ id == 20187)
   renderData(item) {
     const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
     if (!this.state.contributionData && item && item.summary && item.summary.contribution)
-      Meteor.call('esGetContribution', {index, id: item.summary.contribution.id, tables: ['locations', 'sites', 'samples', 'specimens']}, (error, c) => {
-        console.log('esGetContribution', error, c);
-        if (!error && c)
-          this.setState({ contributionData: c });
-        else
-          this.setState({ contributionData: {}, contributionDataError: error });
-      });
+      Meteor.call(
+        "esGetContribution",
+        {
+          index,
+          id: item.summary.contribution.id,
+          tables: ["contribution", "locations", "sites", "samples", "specimens"],
+        },
+        (error, c) => {
+          console.log("esGetContribution", error, c);
+          if (!error && c) this.setState({ contributionData: c });
+          else
+            this.setState({
+              contributionData: {},
+              contributionDataError: error,
+            });
+        }
+      );
     if (!this.state.contributionData)
       return (
         <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
