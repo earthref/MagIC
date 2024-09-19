@@ -48,7 +48,7 @@ describe("magic.sitemap", () => {
           `</url>`;
         });
       }
-      fs.writeFileSync(`/home/rminnett/git/EarthRef/MagIC/public/MagIC/contributions.sitemap.xml`, 
+      fs.writeFileSync(`/Users/njarboe/git/EarthRef/MagIC/public/MagIC/contributions.sitemap.xml`, 
         `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
         _.keys(urls).sort((a, b) => a - b).map(id => urls[id]).join('\n') + 
         `\n</urlset>`
