@@ -19,6 +19,8 @@ const floatFix = (x) =>
   `${x}`
     .replace(matchZeros, "")
     .replace(matchNines, (y) => parseInt(`${y}`.substr(0, 1)) + 1);
+const normalizeLon = (x) =>
+  x < -180 ? normalizeLon(x + 360) : x > 180 ? normalizeLon(x - 360) : x;
 const htmlEncode = (x) =>
   x && x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -38,8 +40,15 @@ describe("magic.data_doi", () => {
             "summary._all.geologic_classes",
             "summary._all.geologic_types",
             "summary._all.lithologies",
-            "summary._all._geo_envelope",
             "summary._all._age_range_ybp",
+            "contribution.locations.lat_n",
+            "contribution.locations.lat_s",
+            "contribution.locations.lon_w",
+            "contribution.locations.lon_e",
+            "contribution.sites.location",
+            "contribution.sites.site",
+            "contribution.sites.lat",
+            "contribution.sites.lon",
           ],
           body: {
             query: {
@@ -132,12 +141,15 @@ describe("magic.data_doi", () => {
                     }
                     latest_version_doi = `10.7288/V4/MAGIC/${latest_version_id}`;
                   }
+
                   let related =
                     hit._source.summary.contribution._reference &&
                     hit._source.summary.contribution._reference.doi &&
                     `<relatedIdentifiers>` +
                       `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsCitedBy">` +
-                      `${htmlEncode(hit._source.summary.contribution._reference.doi)}` +
+                      `${htmlEncode(
+                        hit._source.summary.contribution._reference.doi
+                      )}` +
                       `</relatedIdentifier>` +
                       (hit._source.summary.contribution.id == 16829
                         ? '<relatedIdentifier relatedIdentifierType="DOI" relationType="IsVariantFormOf">10.5880/FIDGEO.2019.011</relatedIdentifier>'
@@ -148,7 +160,8 @@ describe("magic.data_doi", () => {
                       (latest_version_doi
                         ? `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsPreviousVersionOf">${latest_version_doi}</relatedIdentifier>`
                         : "") +
-                      `</relatedIdentifiers>`;
+                    `</relatedIdentifiers>` || "";
+                  
                   let subjects = [];
                   hit._source.summary._all &&
                     hit._source.summary._all.geologic_classes &&
@@ -227,54 +240,99 @@ describe("magic.data_doi", () => {
                     );
                   subjects =
                     subjects.length &&
-                    `<subjects>${subjects.join("")}</subjects>`;
+                    `<subjects>${subjects.join("")}</subjects>` || "";
 
                   let geos = [];
-                  hit._source.summary._all &&
-                    hit._source.summary._all._geo_envelope &&
+                  hit._source.contribution && hit._source.contribution.locations &&
                     _.sortedUniqBy(
-                      _.sortBy(hit._source.summary._all._geo_envelope, (x) =>
-                        _.flatten(x.coordinates).join("_")
+                      _.sortBy(
+                        hit._source.contribution.locations,
+                        (x) => `${x.lat_n}_${x.lat_s}_${x.lon_w}_${x.lon_e}`
                       ),
-                      (x) => _.flatten(x.coordinates).join("_")
-                    ).forEach((envelope, i) => {
+                      (x) => `${x.lat_n}_${x.lat_s}_${x.lon_w}_${x.lon_e}`
+                    ).forEach((location, i) => {
                       let n = geos.push("") - 1;
                       geos[n] += "<geoLocation>";
                       if (
-                        envelope.coordinates[0][0] ==
-                          envelope.coordinates[1][0] &&
-                        envelope.coordinates[0][1] == envelope.coordinates[1][1]
+                        location.lat_n !== undefined &&
+                        location.lon_w !== undefined &&
+                        location.lat_n !== '' &&
+                        location.lon_w !== '' &&
+                        location.lat_n === location.lat_s &&
+                        location.lon_w === location.lon_e
                       ) {
                         geos[n] += `<geoLocationPoint>
                           <pointLongitude>${floatFix(
-                            envelope.coordinates[0][0]
+                            normalizeLon(location.lon_w)
                           )}</pointLongitude>
                           <pointLatitude>${floatFix(
-                            envelope.coordinates[0][1]
+                            location.lat_n
                           )}</pointLatitude>
                         </geoLocationPoint>`;
-                      } else {
+                      } else if (
+                        location.lat_n !== undefined &&
+                        location.lat_s !== undefined &&
+                        location.lon_w !== undefined &&
+                        location.lon_e !== undefined &&
+                        location.lat_n !== '' &&
+                        location.lat_s !== '' &&
+                        location.lon_w !== '' &&
+                        location.lon_e !== ''
+                      ) {
                         geos[n] += `<geoLocationBox>
                           <westBoundLongitude>${floatFix(
-                            envelope.coordinates[0][0]
+                            normalizeLon(location.lon_w)
                           )}</westBoundLongitude>
                           <eastBoundLongitude>${floatFix(
-                            envelope.coordinates[1][0]
+                            normalizeLon(location.lon_e)
                           )}</eastBoundLongitude>
                           <southBoundLatitude>${floatFix(
-                            envelope.coordinates[0][1]
+                            location.lat_s
                           )}</southBoundLatitude>
                           <northBoundLatitude>${floatFix(
-                            envelope.coordinates[1][1]
+                            location.lat_n
                           )}</northBoundLatitude>
                         </geoLocationBox>`;
                       }
-                      geos[n] += "</geoLocation>";
+                      if (geos[n] !== "<geoLocation>")
+                        geos[n] += "</geoLocation>";
+                      else geos.pop();
+                    });
+                  hit._source.contribution &&
+                    hit._source.contribution.sites &&
+                    _.sortedUniqBy(
+                      _.sortBy(
+                        hit._source.contribution.sites,
+                        (x) => `${x.lat}_${x.lon}_${x.location}_${x.site}`
+                      ),
+                      (x) => `${x.lat}_${x.lon}_${x.location}_${x.site}`
+                    ).forEach((site, i) => {
+                      let n = geos.push("") - 1;
+                      geos[n] += "<geoLocation>";
+                      if (site.location && site.site)
+                        geos[
+                          n
+                        ] += `<geoLocationPlace>${site.location}: ${site.site}</geoLocationPlace>`;
+                      if (
+                        site.lat !== undefined &&
+                        site.lon !== undefined &&
+                        site.lat !== '' &&
+                        site.lon !== ''
+                      )
+                        geos[n] += `<geoLocationPoint>
+                          <pointLongitude>${floatFix(
+                            normalizeLon(site.lon)
+                          )}</pointLongitude>
+                          <pointLatitude>${floatFix(site.lat)}</pointLatitude>
+                        </geoLocationPoint>`;
+                      if (geos[n] !== "<geoLocation>")
+                        geos[n] += "</geoLocation>";
+                      else
+                        geos.pop();
                     });
                   geos =
                     geos.length &&
-                    `<geoLocations>${geos.join("")}</geoLocations>`;
-                  // console.log("geos", hit._source.summary._all, geos);
+                    `<geoLocations>${geos.join("")}</geoLocations>` || "";
 
                   let labNames = [];
                   if (_.isArray(hit._source.summary.contribution.lab_names))
@@ -382,8 +440,9 @@ describe("magic.data_doi", () => {
                   <titles>
                     <title>${
                       (hit._source.summary.contribution._reference &&
-                        htmlEncode(hit._source.summary.contribution._reference
-                          .title)) ||
+                        htmlEncode(
+                          hit._source.summary.contribution._reference.title
+                        )) ||
                       "In Preparation"
                     } (Dataset)</title>
                   </titles>
@@ -414,14 +473,16 @@ describe("magic.data_doi", () => {
                   <descriptions>
                     <description descriptionType="Other">Paleomagnetic, rock magnetic, or geomagnetic data found in the MagIC data repository${
                       hit._source.summary.contribution._reference.title
-                        ? ` from a paper titled: ${htmlEncode(hit._source.summary.contribution._reference.title)}`
+                        ? ` from a paper titled: ${htmlEncode(
+                            hit._source.summary.contribution._reference.title
+                          )}`
                         : "."
                     }</description>
                   </descriptions>
                   ${geos || ""}
                   ${fundings || ""}
                 </resource>`;
-                  // console.log('datacite', datacite);
+                  // console.log("datacite", datacite);
                   datacite = datacite
                     .replace(/%/g, "%25")
                     .replace(/\s*\n\s*/g, "%0A")
