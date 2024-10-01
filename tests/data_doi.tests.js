@@ -41,6 +41,7 @@ describe("magic.data_doi", () => {
             "summary._all.geologic_types",
             "summary._all.lithologies",
             "summary._all._age_range_ybp",
+            "contribution.locations.location",
             "contribution.locations.lat_n",
             "contribution.locations.lat_s",
             "contribution.locations.lon_w",
@@ -67,7 +68,7 @@ describe("magic.data_doi", () => {
                   { exists: { field: "summary.contribution.version" } },
                   { term: { "summary.contribution._is_activated": "true" } },
                 ],
-                "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
+                // "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
                 // filter: { term: { "summary.contribution.id": 19778 } },
                 // filter: { term: { "summary.contribution.id": 20193 } },
                 // filter: { terms: { "summary.contribution.id": [14489, 17454,19501,19584,19589,19562,19921,20019,20020,20176,19778,20181] } },
@@ -147,25 +148,26 @@ describe("magic.data_doi", () => {
                   }
 
                   let related =
-                    hit._source.summary.contribution._reference &&
-                    hit._source.summary.contribution._reference.doi &&
-                    `<relatedIdentifiers>` +
-                      `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsCitedBy">` +
-                      `${htmlEncode(
-                        hit._source.summary.contribution._reference.doi
-                      )}` +
-                      `</relatedIdentifier>` +
-                      (hit._source.summary.contribution.id == 16829
-                        ? '<relatedIdentifier relatedIdentifierType="DOI" relationType="IsVariantFormOf">10.5880/FIDGEO.2019.011</relatedIdentifier>'
-                        : "") +
-                      (previous_version_doi
-                        ? `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsNewVersionOf">${previous_version_doi}</relatedIdentifier>`
-                        : "") +
-                      (latest_version_doi
-                        ? `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsPreviousVersionOf">${latest_version_doi}</relatedIdentifier>`
-                        : "") +
-                    `</relatedIdentifiers>` || "";
-                  
+                    (hit._source.summary.contribution._reference &&
+                      hit._source.summary.contribution._reference.doi &&
+                      `<relatedIdentifiers>` +
+                        `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsCitedBy">` +
+                        `${htmlEncode(
+                          hit._source.summary.contribution._reference.doi
+                        )}` +
+                        `</relatedIdentifier>` +
+                        (hit._source.summary.contribution.id == 16829
+                          ? '<relatedIdentifier relatedIdentifierType="DOI" relationType="IsVariantFormOf">10.5880/FIDGEO.2019.011</relatedIdentifier>'
+                          : "") +
+                        (previous_version_doi
+                          ? `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsNewVersionOf">${previous_version_doi}</relatedIdentifier>`
+                          : "") +
+                        (latest_version_doi
+                          ? `<relatedIdentifier relatedIdentifierType="DOI" relationType="IsPreviousVersionOf">${latest_version_doi}</relatedIdentifier>`
+                          : "") +
+                        `</relatedIdentifiers>`) ||
+                    "";
+
                   let subjects = [];
                   hit._source.summary._all &&
                     hit._source.summary._all.geologic_classes &&
@@ -243,11 +245,13 @@ describe("magic.data_doi", () => {
                       >Years BP</subject>`
                     );
                   subjects =
-                    subjects.length &&
-                    `<subjects>${subjects.join("")}</subjects>` || "";
+                    (subjects.length &&
+                      `<subjects>${subjects.join("")}</subjects>`) ||
+                    "";
 
                   let geos = [];
-                  hit._source.contribution && hit._source.contribution.locations &&
+                  hit._source.contribution &&
+                    hit._source.contribution.locations &&
                     _.sortedUniqBy(
                       _.sortBy(
                         hit._source.contribution.locations,
@@ -257,11 +261,15 @@ describe("magic.data_doi", () => {
                     ).forEach((location, i) => {
                       let n = geos.push("") - 1;
                       geos[n] += "<geoLocation>";
+                      if (location.location)
+                        geos[
+                          n
+                        ] += `<geoLocationPlace>${location.location}</geoLocationPlace>`;
                       if (
                         location.lat_n !== undefined &&
                         location.lon_w !== undefined &&
-                        location.lat_n !== '' &&
-                        location.lon_w !== '' &&
+                        location.lat_n !== "" &&
+                        location.lon_w !== "" &&
                         location.lat_n === location.lat_s &&
                         location.lon_w === location.lon_e
                       ) {
@@ -278,10 +286,10 @@ describe("magic.data_doi", () => {
                         location.lat_s !== undefined &&
                         location.lon_w !== undefined &&
                         location.lon_e !== undefined &&
-                        location.lat_n !== '' &&
-                        location.lat_s !== '' &&
-                        location.lon_w !== '' &&
-                        location.lon_e !== ''
+                        location.lat_n !== "" &&
+                        location.lat_s !== "" &&
+                        location.lon_w !== "" &&
+                        location.lon_e !== ""
                       ) {
                         geos[n] += `<geoLocationBox>
                           <westBoundLongitude>${floatFix(
@@ -320,8 +328,8 @@ describe("magic.data_doi", () => {
                       if (
                         site.lat !== undefined &&
                         site.lon !== undefined &&
-                        site.lat !== '' &&
-                        site.lon !== ''
+                        site.lat !== "" &&
+                        site.lon !== ""
                       )
                         geos[n] += `<geoLocationPoint>
                           <pointLongitude>${floatFix(
@@ -331,12 +339,12 @@ describe("magic.data_doi", () => {
                         </geoLocationPoint>`;
                       if (geos[n] !== "<geoLocation>")
                         geos[n] += "</geoLocation>";
-                      else
-                        geos.pop();
+                      else geos.pop();
                     });
                   geos =
-                    geos.length &&
-                    `<geoLocations>${geos.join("")}</geoLocations>` || "";
+                    (geos.length &&
+                      `<geoLocations>${geos.join("")}</geoLocations>`) ||
+                    "";
 
                   let labNames = [];
                   if (_.isArray(hit._source.summary.contribution.lab_names))
