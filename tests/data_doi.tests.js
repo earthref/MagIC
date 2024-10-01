@@ -80,7 +80,11 @@ describe("magic.data_doi", () => {
             "Contributions without a data DOI:",
             resp.body.hits.total
           );
-          if (resp.body.hits.total.value > 0) {
+            if (resp.body.hits.total.value === 0) {
+              console.log("No contributions found without a data DOI. Exiting.");
+              done();
+            } 
+            else {
             BPromise.each(
               resp.body.hits.hits,
               (hit) => {
