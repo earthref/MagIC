@@ -20,8 +20,9 @@ export default class extends React.Component {
         </p>
         <p>
           <b>Software Tools</b><br/>
+          <a href="https://gitlab.lrz.de/michaelwack/cryomag">CryoMag</a> - Software for the measurement of magnetic moments using SQUID and spinner magnetometers. <a href="https://doi.org/10.1016/j.cageo.2010.05.002">10.1016/j.cageo.2010.05.002</a> - Micheal Wack<br/>
           <a href="https://wserv4.esc.cam.ac.uk/nanopaleomag/?page_id=31">FORCinel</a> - Calculates first order reversal curve (FORC) diagrams from raw FORC data files - Richard Harrison<br/>
-          <a href="https://pmagpy.github.io/PmagPy-docs/intro.html">PmagPy</a> - Open source Paleo and rock magnetic anaysis software for use on the command line, in Jupyter notebooks, or through stand alone GUIs - Lisa Tauxe, Nick Swanson-Hysell and others<br/>
+          <a href="https://pmagpy.github.io/PmagPy-docs/intro.html">PmagPy</a> - Open source Paleo and rock magnetic anaysis software for use on the command line, in Jupyter notebooks, or through stand alone GUIs. <a href="https://doi.org/10.1002/2016GC006307">10.1002/2016GC006307</a> - Lisa Tauxe, Nick Swanson-Hysell and others<br/>
           <a href="https://www.geophysik.uni-muenchen.de/en/research/magnetism/software">ThellierTool and RockMag Analyzer</a> - Roman Leonhardt<br/>
           <a href="https://wserv4.esc.cam.ac.uk/nanopaleomag/?page_id=193">VARIFORC</a> - Additional FORC diagram visualization tool. Starts with FORCinel files - Ramon Egli<br />
           <a href="https://apwp-online.org/">APWP Online</a> - Compute apparent polar wander paths (APWPs) from paleomagnetic data - Bram Vaes et al.<br />

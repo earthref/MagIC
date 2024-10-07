@@ -82,7 +82,7 @@ describe("magic.data_doi", () => {
             resp.body.hits.total
           );
             if (resp.body.hits.total.value === 0) {
-              console.log("No contributions found without a data DOI. Exiting.");
+              console.log("No DOIs to be minted. Exiting.");
               done();
             } 
             else {
