@@ -154,7 +154,7 @@ export default class extends React.Component {
                         <Grid.Row>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Associate Professor, University of Oslo" >
                                         <img src="/MagIC/people/mdomeier.jpg" />
                                     </div><br/>
                                     Mathew Domeier
@@ -166,7 +166,7 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Assistant Professor, Harvard University" >
                                         <img src="/MagIC/people/rfu.jpg" />
                                     </div><br/>
                                     Roger Fu
@@ -179,7 +179,7 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Professor, Ludwig Maximilians Universität" >
                                         <img src="/MagIC/people/sgilder.jpg" />
                                     </div><br/>
                                     Stuart Gilder
@@ -192,7 +192,7 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="CNRS Researcher, IPGP" >
                                         <img src="/MagIC/people/flagroix.jpg" />
                                     </div><br/>
                                     France Lagroix
@@ -204,7 +204,7 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Associate Professor, University of Utah" >
                                         <img src="/MagIC/people/plippert.jpg" />
                                     </div><br/>
                                     Peter Lippert
@@ -219,7 +219,7 @@ export default class extends React.Component {
                         <Grid.Row>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Assistant Professor, University of Florida" >
                                         <img src="/MagIC/people/csprain.jpg" />
                                     </div><br/>
                                     Courtney Sprain
@@ -231,7 +231,7 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui medium icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui medium icon bordered rounded image" data-tooltip="Assistant Professor, Dartmouth College" >
                                         <img src="/MagIC/people/sslotznick.jpg" />
                                     </div><br/>
                                     Sarah Slotznick
@@ -243,7 +243,8 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Assistant Professor, Stanford University
+" >
                                         <img src="/MagIC/people/stikoo.jpg" />
                                     </div><br/>
                                     Sonia Tikoo
@@ -255,7 +256,7 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
-                                    <div className="ui big icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
+                                    <div className="ui big icon bordered rounded image" data-tooltip="Professor, Utrecht University" >
                                         <img src="/MagIC/people/dvanhinsbergen.jpg" />
                                     </div><br/>
                                     Douwe van Hinsbergen
