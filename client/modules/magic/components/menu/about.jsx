@@ -20,7 +20,7 @@ export default class extends React.Component {
                 <Container fluid textAlign='justified'>
                     <Header size='medium' dividing>MagIC Support</Header>
                     Funded by <a href='https://www.nsf.gov/awardsearch/simpleSearchResult?queryText=%22Magnetics+Information+Consortium%22' target='_blank'>NSF since 2003</a>, MagIC forms a major part of <a href='https://earthref.org' target='_blank'>EarthRef.org</a>, which integrates four independent cyber-initiatives rooted in various parts of the Earth, Ocean and Life sciences and education. MagIC is a collaborative effort between the College of Earth, Ocean and Atmospheric Science, Oregon State University and the Scripps Institution of Oceanography, UC San Diego.
-                    <Grid padded columns={7}>
+                    <Grid padded columns={6}>
                         <Grid.Row>
                             <Grid.Column>
                             </Grid.Column>
@@ -37,11 +37,6 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <Segment>
                                     <Image src='/MagIC/orgs/ucsd_small.png'/>
-                                </Segment>
-                            </Grid.Column>
-                            <Grid.Column>
-                                <Segment>
-                                    <Image src='/MagIC/orgs/berkeley_small.png'/>
                                 </Segment>
                             </Grid.Column>
                             <Grid.Column>
@@ -71,11 +66,11 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#nswanson-hysell">
-                                <div className="ui huge icon bordered rounded image" data-tooltip="Earth and Planetary Science, Berkeley" >
+                                <div className="ui huge icon bordered rounded image" data-tooltip="Department of Earth and Environmental Sciences, University of Minnesota" >
                                     <img src="/MagIC/people/nswanson-hysell.jpg" />
                                 </div><br/>
                                 Nick Swanson-Hysell
-                                <div className="sub header">Associate Professor at<br/>EPS, Berkeley</div>
+                                <div className="sub header">Associate Professor at<br/>University of Minnesota</div>
                             </a>
                             </Grid.Column>
                             <Grid.Column>
