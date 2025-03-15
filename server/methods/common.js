@@ -141,7 +141,11 @@ export default function () {
 
     async getDataciteMetadata(doi, attempt = 1) {
       this.unblock();
-      //console.log("getDataciteMetadata", attempt, `http://api.crossref.org/works/${doi}`);
+      //console.log(
+      //  "getDataciteMetadata",
+      //  attempt,
+      //  `https://api.datacite.org/dois/${doi}`
+      //);
       let resp;
       try {
         resp = HTTP.call("GET", `https://api.datacite.org/dois/${doi}`);
@@ -182,12 +186,17 @@ export default function () {
       if (_reference.year)
         _reference.citation += ' (' + _reference.year + ')';
 
-      console.log("getDataciteMetadata", d.creators);
+      //console.log("getDataciteMetadata", d.creators);
       if (d.creators)
         _reference.authors = d.creators.map((a) => {
           let author = {};
-          author.family = (a.familyName == a.familyName.toUpperCase() ? _.startCase(_.lowerCase(a.familyName)) : a.familyName);
-          author._name = (_.trim(a.givenName) === '' ? '' : a.givenName.toUpperCase().substr(0, 1) + '. ') + a.familyName;
+          if (a.name && !a.givenName && !a.familyName) {
+            let lastSpace = a.name.lastIndexOf(' ');
+            a.familyName = a.name.substr(lastSpace + 1);
+            a.givenName = a.name.substr(0, lastSpace);
+          }
+          author.family = (a.familyName == a.familyName?.toUpperCase() ? _.startCase(_.lowerCase(a.familyName)) : a.familyName);
+          author._name = (_.trim(a.givenName) === '' ? '' : a.givenName?.toUpperCase().substr(0, 1) + '. ') + a.familyName;
           if (a.givenName) author.given = a.givenName;
           if (a.affiliation && a.affiliation.length > 0)
             author.affiliation = a.affiliation.map((affiliation) => affiliation.name);
@@ -211,7 +220,12 @@ export default function () {
         (d.DOI ? ' doi:<a href="//dx.doi.org/' + _.toUpper(d.DOI) + '">' + _.toUpper(d.DOI) + '</a>.' : '') +
         '</i>';
       _reference.html = _reference.html.replace(/"/g, "'");
-      //console.log("getReferenceMetadata", attempt, `http://api.crossref.org/works/${doi}`, _reference);
+      //console.log(
+      //  "getDataciteMetadata",
+      //  attempt,
+      //  `http://api.datacite.org/${doi}`,
+      //  _reference
+      //);
       return _reference;
     },
 
