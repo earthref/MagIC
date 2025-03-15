@@ -62,7 +62,7 @@ class SearchSummariesListItem extends React.Component {
       title = item.summary.contribution._reference.title;
     }
     if (item.summary._all.location) title += ' ⇒ ' + item.summary._all.location[0];
-    console.log('renderTitle', item.row);
+    // console.log('renderTitle', item.row);
     if (item.row && item.row.result_name)
       title += ' ⇒ <b>' + item.row.result_name + '</b>';
     return <div style={{whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden"}} dangerouslySetInnerHTML={{__html: title}}/>;
@@ -847,7 +847,6 @@ class SearchSummariesListItem extends React.Component {
             <Button color='purple' floated="left" disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
               const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
               if (this.state.dataEdited && data) {
-                const rowData = this.state.contributionData[this.state.dataLevel];
                 const model = models[_.last(versions)];
                 const table = model.tables[this.state.dataLevel];
                 const modelColumns = _.sortBy(

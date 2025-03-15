@@ -1,5 +1,10 @@
 import _ from 'lodash';
 import React from 'react';
+import * as echarts from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+import { GlobeComponent } from "echarts-gl/components"; 
+
+echarts.use([GlobeComponent, CanvasRenderer]);
 
 export default class extends React.Component {
 
@@ -7,11 +12,43 @@ export default class extends React.Component {
     return !_.isEqual(nextProps, this.props);
   }
 
+  componentDidMount() {
+    var chartDom = document.getElementById("globe");
+    var myChart = echarts.init(chartDom);
+    var option;
+
+    option = {
+      backgroundColor: "#FFF",
+      globe: {
+        baseTexture: "/MagIC/world.topo.bathy.200401.jpg",
+        heightTexture: "/MagIC/world.topo.bathy.200401.jpg",
+        // displacementScale: 0.04,
+        shading: "lambert",
+        viewControl: {
+          autoRotate: false,
+          distance: 200
+        },
+        //environment: ROOT_PATH + "/data-gl/asset/starfield.jpg",
+        light: {
+          ambient: {
+            intensity: 0.9,
+          },
+          main: {
+            intensity: 0.9,
+          },
+        },
+      },
+    };
+    
+    option && myChart.setOption(option);
+  }
+
+
   render() {
     // if (this.props.items) console.log('search divided poles list', this.props.items);
     return (
-      <div>
-        <div className="ui list" style={{padding: 0, margin: '1em 0'}}>
+      <div style={{ display: 'flex' }}>
+        <div className="ui list" style={{padding: 0, margin: '1em 0', width: '50%'}}>
           {this.props.items ?
             this.props.items.length === 0 ?
               <div className="item" style={{padding: 0}}>
@@ -42,6 +79,8 @@ export default class extends React.Component {
               </div>
             )
           }
+        </div>
+        <div id="globe" style={{ padding: 0, margin: '0', width: 800, height: 800 }}>
         </div>
       </div>
     );

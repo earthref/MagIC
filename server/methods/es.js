@@ -8,6 +8,7 @@ import moment from "moment";
 import bcrypt from "bcrypt";
 import sizeof from "object-sizeof";
 import opensearch from "@opensearch-project/opensearch";
+import request from 'request';
 
 import ExportContribution from '/lib/modules/magic/export_contribution.js';
 import SummarizeContribution from '/lib/modules/magic/summarize_contribution.js';
@@ -16,6 +17,7 @@ import {versions} from '/lib/configs/magic/data_models';
 import {levels} from '/lib/configs/magic/search_levels.js';
 import { s3UploadObject, s3DeleteKeys } from './s3';
 import { resolveTxt } from 'dns';
+
 
 const saltRounds = 10;
 
@@ -175,7 +177,7 @@ export default function () {
           "body": search,
           "timeout": "60s"
         });
-        // console.log("esPage hits:", resp.body.hits.total.value);
+        console.log("esPage hits:", resp.body.hits.total.value, resp.body.hits.hits.map(hit => hit._source).length);
         return resp.body.hits.hits.map(hit => hit._source);
 
       } catch(error) {
@@ -378,6 +380,38 @@ export default function () {
         throw new Meteor.Error("esCreatePrivateContribution", error.message);
       }
     },
+
+    // async esUpdatePrivateContribution({ index, contributor, _contributor, id, contribution, summary }) {
+    //   this.unblock();
+    // 
+    //   try {
+    //     request({
+    //       method: 'PATCH',
+    //       // uri: `https://api.earthref.org/v1/{id}/private`,
+    //       uri: `http://localhost:3100/v1/{id}/private`,
+    //       auth: {
+    //         user: process.env.EZID_USER,
+    //         pass: process.env.EZID_PASS
+    //       },
+    //       headers: {'content-type' : 'text/plain; charset=UTF-8'},
+    //       body: payload
+    //     }, function (error, response, body) {
+    //       if (error) {
+    //         done(error);
+    //       } else if (/^error: /.test(body)) {
+    //         console.error(body);
+    //         done(body);
+    //       } else {
+    //         console.log(body);
+    //         done();
+    //       }
+    //     });
+    //   
+    //   } catch(error) {
+    //     console.error("esUpdatePrivateContribution", index, contributor, _contributor, id, error.message);
+    //     throw new Meteor.Error("esUpdatePrivateContribution", error.message);
+    //   }
+    // },
 
     async esUpdatePrivateContribution({index, contributor, _contributor, id, contribution, summary}) {
       // console.log("esUpdatePrivateContribution", index, contributor, _contributor, id);
@@ -697,8 +731,8 @@ export default function () {
       // console.log("esGetPrivateContributionSummary", index, id, contributor);
       this.unblock();
       try {
-        if (!contributor || contributor === 'undefined')
-          throw new Error('Unrecognized contributor.');
+        //if (!contributor || contributor === 'undefined')
+        //  throw new Error('Unrecognized contributor.');
 
         let resp = await esClient.search({
           "index": index,
@@ -718,10 +752,10 @@ export default function () {
                   "term": {
                     "summary.contribution.id": id
                   }
-                }, {
-                  "term": {
-                    "summary.contribution.contributor.raw": contributor
-                  }
+                //}, {
+                //  "term": {
+                //    "summary.contribution.contributor.raw": contributor
+                //  }
                 }, {
                   "term": {
                     "summary.contribution._is_activated": "false"

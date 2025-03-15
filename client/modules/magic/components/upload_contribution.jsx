@@ -55,6 +55,7 @@ export default class MagICUploadContribution extends React.Component {
       uploading: false,
       uploaded: false,
       uploadError: undefined,
+      append_tables: false,
       privateContributionsLoaded: undefined,
     };
     this.summarizer = undefined;
@@ -115,7 +116,26 @@ export default class MagICUploadContribution extends React.Component {
         this.setState({fileFormats: fileFormats}, () => _.defer(() => this.parse(i)));
       }
     });
-    $('.upload-contribution .import-step-content .format-dropdown.ui-dropdown').dropdown('refresh');
+    $(
+      ".upload-contribution .import-step-content .format-dropdown.ui-dropdown"
+    ).dropdown("refresh");
+    $(
+      ".upload-contribution .import-step-content .lab-format-dropdown:not(.ui-dropdown)"
+    )
+      .addClass("ui-dropdown")
+      .dropdown({
+        onChange: (value, text, $choice) => {
+          let i = $choice.data("i");
+          let fileFormats = this.state.fileFormats;
+          fileFormats[i] = value;
+          this.setState({ fileFormats: fileFormats }, () =>
+            _.defer(() => this.parse(i))
+          );
+        },
+      });
+    $(
+      ".upload-contribution .import-step-content .lab-format-dropdown.ui-dropdown"
+    ).dropdown("refresh");
     $(this.refs['private contributions']).not('.ui-dropdown').addClass('ui-dropdown').dropdown({
       onChange: (value, text, $choice) => {
         if (value === '') {
@@ -893,21 +913,32 @@ export default class MagICUploadContribution extends React.Component {
     );
     else return (
       <div className="upload-contribution">
-        <div className="ui top attached stackable three steps" ref={(el) => el && el.style.setProperty('width', 'calc(100% + 2px)', 'important')}>
-          {(this.state.processingStep === 1 ?
+        <div
+          className="ui top attached stackable three steps"
+          ref={(el) =>
+            el && el.style.setProperty("width", "calc(100% + 2px)", "important")
+          }
+        >
+          {this.state.processingStep === 1 ? (
             <div ref="select step" className="active pointing below step">
               <i className="icons">
-                <i className="folder open outline icon"/>
+                <i className="folder open outline icon" />
               </i>
               <div className="content">
                 <div className="title">Step 1. Select</div>
-                <div className="description">Click and select or drag and drop files below.</div>
+                <div className="description">
+                  Click and select or drag and drop files below.
+                </div>
               </div>
             </div>
-          :
-            <a ref="select link step" className="pointing below step" onClick={this.restart.bind(this)}>
+          ) : (
+            <a
+              ref="select link step"
+              className="pointing below step"
+              onClick={this.restart.bind(this)}
+            >
               <i className="icons">
-                <i className="folder open outline icon"/>
+                <i className="folder open outline icon" />
               </i>
               <div className="content">
                 <div className="title">Step 1. Restart</div>
@@ -915,22 +946,31 @@ export default class MagICUploadContribution extends React.Component {
               </div>
             </a>
           )}
-          {(this.state.processingStep < 2 || step === 2 ?
-            <div ref="read step" className={(step == 2 ? 'active' : 'disabled') + ' pointing below step'}>
+          {this.state.processingStep < 2 || step === 2 ? (
+            <div
+              ref="read step"
+              className={
+                (step == 2 ? "active" : "disabled") + " pointing below step"
+              }
+            >
               <i className="icons">
-                <i className="file text outline icon"/>
+                <i className="file text outline icon" />
               </i>
               <div className="content">
                 <div className="title">Step 2. Import</div>
-                <div className="description">Read the files and check the column headers.</div>
+                <div className="description">
+                  Read the files and check the column headers.
+                </div>
               </div>
             </div>
-            :
-            <a ref="read link step"
-               className="pointing below step"
-               onClick={this.reviewImport.bind(this)}>
+          ) : (
+            <a
+              ref="read link step"
+              className="pointing below step"
+              onClick={this.reviewImport.bind(this)}
+            >
               <i className="icons">
-                <i className="file text outline icon"/>
+                <i className="file text outline icon" />
               </i>
               <div className="content">
                 <div className="title">Step 2. Import</div>
@@ -938,536 +978,1036 @@ export default class MagICUploadContribution extends React.Component {
               </div>
             </a>
           )}
-          {(this.state.processingStep < 2 || this.state.totalReadErrors > 0 || this.state.totalParseErrors > 0 || this.state.totalImportErrors > 0 || this.state.reading || this.state.parsing || step === 3 ?
-            <div ref="upload step" className={(step == 3 ? 'active' : 'disabled') + ' pointing below step'}>
+          {this.state.processingStep < 2 ||
+          this.state.totalReadErrors > 0 ||
+          this.state.totalParseErrors > 0 ||
+          this.state.totalImportErrors > 0 ||
+          this.state.reading ||
+          this.state.parsing ||
+          step === 3 ? (
+            <div
+              ref="upload step"
+              className={
+                (step == 3 ? "active" : "disabled") + " pointing below step"
+              }
+            >
               <i className="icons">
-                <i className="file text outline icon"/>
-                <i className="corner plus icon"/>
+                <i className="file text outline icon" />
+                <i className="corner plus icon" />
               </i>
               <div className="content">
                 <div className="title">Step 3. Upload</div>
-                <div className="description">Append to or create a new contribution.</div>
+                <div className="description">
+                  Append to or create a new contribution.
+                </div>
               </div>
             </div>
-            :
-            <a ref="upload link step"
-               className="pointing below step"
-               onClick={this.reviewUpload.bind(this)}>
+          ) : (
+            <a
+              ref="upload link step"
+              className="pointing below step"
+              onClick={this.reviewUpload.bind(this)}
+            >
               <i className="icons">
-                <i className="file text outline icon"/>
-                <i className="corner plus icon"/>
+                <i className="file text outline icon" />
+                <i className="corner plus icon" />
               </i>
               <div className="content">
                 <div className="title">Step 3. Upload</div>
-                <div className="description">Append to or create a new contribution.</div>
+                <div className="description">
+                  Append to or create a new contribution.
+                </div>
               </div>
             </a>
           )}
         </div>
         <div className="ui attached message upload-contribution-message">
           <div ref="accordion" className="ui accordion">
-            <div className="active title"/>
-            <div ref="select step message" className="active content select-step-content">
+            <div className="active title" />
+            <div
+              ref="select step message"
+              className="active content select-step-content"
+            >
               <div className="ui basic segment">
-              {(step === 1 ?
-                <Dropzone ref="dropzone" className="upload-dropzone" onDrop={this.readFiles.bind(this)}>
-                  <div className="ui center aligned two column relaxed grid">
-                    <div className="column">
-                      <i className="huge purple folder open outline icon"/>
-                      <h5>Click and select</h5>
-                      <h5>files to upload.</h5>
+                {step === 1 ? (
+                  <Dropzone
+                    ref="dropzone"
+                    className="upload-dropzone"
+                    onDrop={this.readFiles.bind(this)}
+                  >
+                    <div className="ui center aligned two column relaxed grid">
+                      <div className="column">
+                        <i className="huge purple folder open outline icon" />
+                        <h5>Click and select</h5>
+                        <h5>files to upload.</h5>
+                      </div>
+                      <div className="ui vertical divider">OR</div>
+                      <div className="column">
+                        <i className="huge purple external icon" />
+                        <h5>Drag and drop files</h5>
+                        <h5>here to upload.</h5>
+                      </div>
                     </div>
-                    <div className="ui vertical divider">
-                      OR
-                    </div>
-                    <div className="column">
-                      <i className="huge purple external icon"/>
-                      <h5>Drag and drop files</h5>
-                      <h5>here to upload.</h5>
-                    </div>
-                  </div>
-                </Dropzone>
-              : undefined)}
+                  </Dropzone>
+                ) : undefined}
               </div>
-              <div className="ui divider"/>
-              <h4 className="ui header" style={{marginBottom: '1em'}}>
-                If you don't have a file handy or want to try a different format, upload an example file:
+              <div className="ui divider" />
+              <h4 className="ui header" style={{ marginBottom: "1em" }}>
+                If you don't have a file handy or want to try a different
+                format, upload an example file:
               </h4>
               <div className="ui five stackable cards">
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom left"
-                  tooltip={'Click to upload this example dataset into your private ' +
-                  'workspace. You can always delete it later.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom left"
+                  tooltip={
+                    "Click to upload this example dataset into your private " +
+                    "workspace. You can always delete it later."
+                  }
                   onClick={this.uploadExampleMagICv3.bind(this)}
                 >
                   <i className="icons">
-                    <i className="file text outline icon"/>
-                    <i className="up circle arrow corner purple icon"/>
+                    <i className="file text outline icon" />
+                    <i className="up circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>MagIC Text</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    MagIC Text
+                  </div>
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom left"
-                  tooltip={'Click to upload this example dataset into your private ' +
-                  'workspace. You can always delete it later.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom left"
+                  tooltip={
+                    "Click to upload this example dataset into your private " +
+                    "workspace. You can always delete it later."
+                  }
                   onClick={this.uploadExampleTabDelimitedSites.bind(this)}
                 >
                   <i className="icons">
-                    <i className="table icon"/>
-                    <i className="up circle arrow corner purple icon"/>
+                    <i className="table icon" />
+                    <i className="up circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>Tab Delimited</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    Tab Delimited
+                  </div>
                   <div className="subtitle">Sites Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom center"
-                  tooltip={'Click to upload this example dataset into your private ' +
-                  'workspace. You can always delete it later.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom center"
+                  tooltip={
+                    "Click to upload this example dataset into your private " +
+                    "workspace. You can always delete it later."
+                  }
                   onClick={this.uploadExampleTabDelimitedSpecimens.bind(this)}
                 >
                   <i className="icons">
-                    <i className="table icon"/>
-                    <i className="up circle arrow corner purple icon"/>
+                    <i className="table icon" />
+                    <i className="up circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>Comma Delimited</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    Comma Delimited
+                  </div>
                   <div className="subtitle">Specimens Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom right"
-                  tooltip={'Click to upload this example dataset into your private ' +
-                  'workspace. You can always delete it later.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom right"
+                  tooltip={
+                    "Click to upload this example dataset into your private " +
+                    "workspace. You can always delete it later."
+                  }
                   onClick={this.uploadExampleMagICExcel.bind(this)}
                 >
                   <i className="icons">
-                    <i className="file excel outline icon"/>
-                    <i className="up circle arrow corner purple icon"/>
+                    <i className="file excel outline icon" />
+                    <i className="up circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>MagIC Excel File</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    MagIC Excel File
+                  </div>
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom right"
-                    tooltip={'Click to upload this example dataset into your private ' +
-                  'workspace. You can always delete it later.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom right"
+                  tooltip={
+                    "Click to upload this example dataset into your private " +
+                    "workspace. You can always delete it later."
+                  }
                   onClick={this.uploadExampleExcel.bind(this)}
                 >
                   <i className="icons">
-                    <i className="file excel outline icon"/>
-                    <i className="up circle arrow corner purple icon"/>
+                    <i className="file excel outline icon" />
+                    <i className="up circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>Excel File</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    Excel File
+                  </div>
                   <div className="subtitle">Sites Data</div>
                 </IconButton>
               </div>
-              <div className="ui divider"/>
-              <h4 className="ui header" style={{marginBottom: '1em'}}>
-                Or first download the file to preview the contents and make changes before uploading:
+              <div className="ui divider" />
+              <h4 className="ui header" style={{ marginBottom: "1em" }}>
+                Or first download the file to preview the contents and make
+                changes before uploading:
               </h4>
               <div className="ui five stackable cards">
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom left"
-                  tooltip={'Click to download this example dataset before uploading it ' +
-                  'into your private workspace.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom left"
+                  tooltip={
+                    "Click to download this example dataset before uploading it " +
+                    "into your private workspace."
+                  }
                   onClick={this.downloadExampleMagICv3.bind(this)}
                 >
                   <i className="icons">
-                    <i className="file text outline icon"/>
-                    <i className="down circle arrow corner purple icon"/>
+                    <i className="file text outline icon" />
+                    <i className="down circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>MagIC Text</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    MagIC Text
+                  </div>
                   <div className="subtitle">Data Model v. 3.0</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom left"
-                  tooltip={'Click to download this example dataset before uploading it ' +
-                  'into your private workspace.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom left"
+                  tooltip={
+                    "Click to download this example dataset before uploading it " +
+                    "into your private workspace."
+                  }
                   onClick={this.downloadExampleTabDelimitedSites.bind(this)}
                 >
                   <i className="icons">
-                    <i className="table icon"/>
-                    <i className="down circle arrow corner purple icon"/>
+                    <i className="table icon" />
+                    <i className="down circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>Tab Delimited</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    Tab Delimited
+                  </div>
                   <div className="subtitle">Sites Data</div>
                 </IconButton>
                 <IconButton
-                  className="borderless card" portal="MagIC" position="bottom center"
-                  tooltip={'Click to download this example dataset before uploading it ' +
-                  'into your private workspace.'}
+                  className="borderless card"
+                  portal="MagIC"
+                  position="bottom center"
+                  tooltip={
+                    "Click to download this example dataset before uploading it " +
+                    "into your private workspace."
+                  }
                   onClick={this.downloadExampleTabDelimitedSpecimens.bind(this)}
                 >
                   <i className="icons">
-                    <i className="table icon"/>
-                    <i className="down circle arrow corner purple icon"/>
+                    <i className="table icon" />
+                    <i className="down circle arrow corner purple icon" />
                   </i>
-                  <div className="title">Example<br/>Comma Delimited</div>
+                  <div className="title">
+                    Example
+                    <br />
+                    Comma Delimited
+                  </div>
                   <div className="subtitle">Specimens Data</div>
                 </IconButton>
               </div>
             </div>
-            <div className="title"/>
-            <div ref="import step message" className="content import-step-content">
-              <h3>Reading and translating the {this.files.length === 1 ? ' file' : ' files'} for uploading:</h3>
+            <div className="title" />
+            <div
+              ref="import step message"
+              className="content import-step-content"
+            >
+              <h3>
+                Reading and translating the{" "}
+                {this.files.length === 1 ? " file" : " files"} for uploading:
+              </h3>
               <div ref="files" className="ui divided items">
-                {step === 2 ? this.files.map((file, i) => {
-                  const fileFormat = this.state.fileFormats[i];
-                  const fileHasErrors = (
-                    (file.readErrors && file.readErrors.length > 0) ||
-                    (file.parseErrors && file.parseErrors.length > 0) ||
-                    (file.nImportErrors > 0)
-                  );
-                  return (
-                    <div key={i} className="item" data-file={file.name}>
-                      <div className="ui image">
-                        <div className="icon loader wrapper">
-                          <div className={(this.state.reading || this.state.parsing ? 'active ' : '') + 'ui inverted dimmer'}>
-                            <div className="ui loader"/>
+                {step === 2
+                  ? this.files.map((file, i) => {
+                      const fileFormat = this.state.fileFormats[i];
+                      const fileHasErrors =
+                        (file.readErrors && file.readErrors.length > 0) ||
+                        (file.parseErrors && file.parseErrors.length > 0) ||
+                        file.nImportErrors > 0;
+                      return (
+                        <div key={i} className="item" data-file={file.name}>
+                          <div className="ui image">
+                            <div className="icon loader wrapper">
+                              <div
+                                className={
+                                  (this.state.reading || this.state.parsing
+                                    ? "active "
+                                    : "") + "ui inverted dimmer"
+                                }
+                              >
+                                <div className="ui loader" />
+                              </div>
+                              <i className="file icons">
+                                <i className="fitted file text outline icon" />
+                                {fileHasErrors ? (
+                                  <i className="corner red warning circle icon" />
+                                ) : undefined}
+                              </i>
+                            </div>
                           </div>
-                          <i className="file icons">
-                            <i className="fitted file text outline icon"/>
-                            {(fileHasErrors ? <i className="corner red warning circle icon"/> : undefined )}
-                          </i>
-                        </div>
-                      </div>
-                      <div className="content">
-                        <div className="ui header">
-                          {file.name + ' '}
-                          <div className="ui horizontal label">{filesize(file.size)}</div>
-                          {file.format !== 'xls' ? <div className="ui horizontal label button" onClick={() => this.downloadFile(file)}>Download Original</div> : undefined}
-                          {file.readErrors && file.readErrors.length > 0 ?
-                            <div className="ui horizontal red label">
-                              {numeral(file.readErrors.length).format('0,0') + ' Read Error' + (file.readErrors.length === 1 ? '' : 's')}
-                            </div>
-                            : undefined}
-                          {file.parseErrors && file.parseErrors.length > 0 ?
-                            <div className="ui horizontal red label">
-                              {numeral(file.parseErrors.length).format('0,0') + ' Parse Error' + (file.parseErrors.length === 1 ? '' : 's')}
-                            </div>
-                            : undefined}
-                          {file.nImportErrors > 0 ?
-                            <div className="ui horizontal red label">
-                              {numeral(file.nImportErrors).format('0,0') + ' Table' + (file.nImportErrors > 1 ? 's' : '') + ' With' + (file.nImportErrors > 1 ? '' : ' an') + ' Import Error' + (file.nImportErrors > 1 ? 's' : '')}
-                            </div>
-                            : undefined}
-                        </div>
-                        <div className="description">
-                          <div className={
-                            (file.readErrors && file.readErrors.length > 0 ? 'error ' : '') +
-                            'ui tiny purple progress'
-                          }
-                               data-percent={file.readProgress}>
-                            <div className="bar"/>
-                            <div className="label">Read</div>
-                          </div>
-                          {((file.readErrors && file.readErrors.length > 0) ?
-                            <table className="ui compact table">
-                              <tbody>
-                                {file.readErrors.map((error, j) => {
-                                  return (
-                                    <tr key={j} className="error">
-                                      <td></td>
-                                      <td>{error}</td>
-                                    </tr>
-                                  );
-                                })}
-                              </tbody>
-                            </table>
-                            : undefined)}
-                          <div className="ui labeled fluid action input">
-                            <div className="ui purple label">
-                              Import File Type
-                            </div>
-                            <div className="ui fluid selection dropdown format-dropdown">
-                              <input name="format" type="hidden" value={fileFormat}/>
-                              <i className="dropdown icon"/>
-                              <div className="text">{
-                                fileFormat === "tsv" && "Tab Delimited Text File" ||
-                                fileFormat === "csv" && "Comma Delimited Text File" ||
-                                fileFormat === "xls" && "Excel File" ||
-                                "MagIC Text File"
-                              }</div>
-                              <div className="menu">
-                                <div data-i={i} data-value="magic" 
-                                     className={(fileFormat === "magic" ? "active selected " : "") + "item"}>
-                                  MagIC Text File
+                          <div className="content">
+                            <div className="ui header">
+                              {file.name + " "}
+                              <div className="ui horizontal label">
+                                {filesize(file.size)}
+                              </div>
+                              {file.format !== "xls" ? (
+                                <div
+                                  className="ui horizontal label button"
+                                  onClick={() => this.downloadFile(file)}
+                                >
+                                  Download Original
                                 </div>
-                                <div data-i={i} data-value="tsv"
-                                     className={(fileFormat === "tsv" ? "active selected " : "") + "item"}>
-                                  Tab Delimited Text File
+                              ) : undefined}
+                              {file.readErrors && file.readErrors.length > 0 ? (
+                                <div className="ui horizontal red label">
+                                  {numeral(file.readErrors.length).format(
+                                    "0,0"
+                                  ) +
+                                    " Read Error" +
+                                    (file.readErrors.length === 1 ? "" : "s")}
                                 </div>
-                                <div data-i={i} data-value="csv"
-                                     className={(fileFormat === "csv" ? "active selected " : "") + "item"}>
-                                  Comma Delimited Text File
+                              ) : undefined}
+                              {file.parseErrors &&
+                              file.parseErrors.length > 0 ? (
+                                <div className="ui horizontal red label">
+                                  {numeral(file.parseErrors.length).format(
+                                    "0,0"
+                                  ) +
+                                    " Parse Error" +
+                                    (file.parseErrors.length === 1 ? "" : "s")}
                                 </div>
-                                <div data-i={i} data-value="xls"
-                                     className={(fileFormat === "xls" ? "active selected " : "") + "item"}>
-                                  Excel File
+                              ) : undefined}
+                              {file.nImportErrors > 0 ? (
+                                <div className="ui horizontal red label">
+                                  {numeral(file.nImportErrors).format("0,0") +
+                                    " Table" +
+                                    (file.nImportErrors > 1 ? "s" : "") +
+                                    " With" +
+                                    (file.nImportErrors > 1 ? "" : " an") +
+                                    " Import Error" +
+                                    (file.nImportErrors > 1 ? "s" : "")}
+                                </div>
+                              ) : undefined}
+                            </div>
+                            <div className="description">
+                              <div
+                                className={
+                                  (file.readErrors && file.readErrors.length > 0
+                                    ? "error "
+                                    : "") + "ui tiny purple progress"
+                                }
+                                data-percent={file.readProgress}
+                              >
+                                <div className="bar" />
+                                <div className="label">Read</div>
+                              </div>
+                              {file.readErrors && file.readErrors.length > 0 ? (
+                                <table className="ui compact table">
+                                  <tbody>
+                                    {file.readErrors.map((error, j) => {
+                                      return (
+                                        <tr key={j} className="error">
+                                          <td></td>
+                                          <td>{error}</td>
+                                        </tr>
+                                      );
+                                    })}
+                                  </tbody>
+                                </table>
+                              ) : undefined}
+                              <div className="ui grid">
+                                <div className="eight wide column">
+                                  <div className="ui labeled fluid action input">
+                                    <div className="ui purple label">
+                                      Import File Type
+                                    </div>
+                                    <div className="ui fluid selection dropdown format-dropdown">
+                                      <input
+                                        name="format"
+                                        type="hidden"
+                                        value={fileFormat}
+                                      />
+                                      <i className="dropdown icon" />
+                                      <div className="text">
+                                        {(fileFormat === "tsv" &&
+                                          "Tab Delimited Text File") ||
+                                          (fileFormat === "csv" &&
+                                            "Comma Delimited Text File") ||
+                                          (fileFormat === "xls" &&
+                                            "Excel File") ||
+                                          "MagIC Text File"}
+                                      </div>
+                                      <div className="menu">
+                                        <div
+                                          data-i={i}
+                                          data-value="magic"
+                                          className={
+                                            (fileFormat === "magic"
+                                              ? "active selected "
+                                              : "") + "item"
+                                          }
+                                        >
+                                          Laboratory Format
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value="magic"
+                                          className={
+                                            (fileFormat === "magic"
+                                              ? "active selected "
+                                              : "") + "item"
+                                          }
+                                        >
+                                          MagIC Text File
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value="tsv"
+                                          className={
+                                            (fileFormat === "tsv"
+                                              ? "active selected "
+                                              : "") + "item"
+                                          }
+                                        >
+                                          Tab Delimited Text File
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value="csv"
+                                          className={
+                                            (fileFormat === "csv"
+                                              ? "active selected "
+                                              : "") + "item"
+                                          }
+                                        >
+                                          Comma Delimited Text File
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value="xls"
+                                          className={
+                                            (fileFormat === "xls"
+                                              ? "active selected "
+                                              : "") + "item"
+                                          }
+                                        >
+                                          Excel File
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="eight wide column">
+                                  <div className="ui labeled fluid action input">
+                                    <div className="ui purple label">
+                                      Format
+                                    </div>
+                                    <div className="ui fluid selection dropdown lab-format-dropdown">
+                                      <input
+                                        name="lab_format"
+                                        type="hidden"
+                                        value={"cit"}
+                                      />
+                                      <i className="dropdown icon" />
+                                      <div className="text">Caltech (CIT)</div>
+                                      <div className="menu">
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Laboratory Format
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          2G ASCII
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          2G Binary
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Princeton (AGM)
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Berkeley (BGC)
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value="cit"
+                                          className="active selected item"
+                                        >
+                                          Caltech (CIT)
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Hebrew University, Jerusalem, Israel
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Lamont-Doherty
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Liverpool
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Scripps Institution of Oceanography
+                                          (SIO)
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Thellier Tool
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Utrecht University Robot
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          AGICO Spinner JR6
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          AGICO Spinner Text
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          AGICO SUFAR (v1.2) ASCII
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          SIO KLY4S
+                                        </div>
+                                        <div
+                                          data-i={i}
+                                          data-value=""
+                                          className="item"
+                                        >
+                                          Curie Temperature Eexperiments
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                               </div>
+                              {this.files[i].parseErrors &&
+                              this.files[i].parseErrors.length > 0 ? (
+                                this.renderParseErrors(i)
+                              ) : (
+                                <div>
+                                  {fileFormat === "magic" &&
+                                  this.files[i].data &&
+                                  this.files[i].tableNames
+                                    ? this.files[i].data.map((table, j) => (
+                                        <div key={j}>
+                                          <div className="ui divider" />
+                                          {this.renderDataImporter(
+                                            i,
+                                            j,
+                                            this.files[i].data[j],
+                                            this.files[i].tableNames[j],
+                                            "2"
+                                          )}
+                                        </div>
+                                      ))
+                                    : undefined}
+                                  {fileFormat === "tsv" &&
+                                  this.files[i].data ? (
+                                    <div>
+                                      <div className="ui divider" />
+                                      {this.renderDataImporter(
+                                        i,
+                                        0,
+                                        this.files[i].data
+                                      )}
+                                    </div>
+                                  ) : undefined}
+                                  {fileFormat === "csv" &&
+                                  this.files[i].data ? (
+                                    <div>
+                                      <div className="ui divider" />
+                                      {this.renderDataImporter(
+                                        i,
+                                        0,
+                                        this.files[i].data
+                                      )}
+                                    </div>
+                                  ) : undefined}
+                                  {fileFormat === "xls" &&
+                                  this.files[i].workbook &&
+                                  this.files[i].data &&
+                                  this.files[i].tableNames
+                                    ? this.files[i].data.map((table, j) => (
+                                        <div key={j}>
+                                          <div className="ui divider" />
+                                          {this.renderDataImporter(
+                                            i,
+                                            j,
+                                            this.files[i].data[j],
+                                            this.files[i].tableNames[j]
+                                          )}
+                                        </div>
+                                      ))
+                                    : undefined}
+                                </div>
+                              )}
                             </div>
                           </div>
-                          {(this.files[i].parseErrors && this.files[i].parseErrors.length > 0 ?
-                            this.renderParseErrors(i)
-                          :
-                            <div>
-                              {(fileFormat === 'magic' && this.files[i].data && this.files[i].tableNames ?
-                                  this.files[i].data.map((table, j) =>
-                                    <div key={j}>
-                                      <div className="ui divider"/>
-                                      {this.renderDataImporter(i, j, this.files[i].data[j], this.files[i].tableNames[j], "2")}
-                                    </div>
-                                  ) : undefined
-                              )}
-                              {(fileFormat === 'tsv' && this.files[i].data ?
-                                  <div>
-                                    <div className="ui divider"/>
-                                    {this.renderDataImporter(i, 0, this.files[i].data)}
-                                  </div> : undefined
-                              )}
-                              {(fileFormat === 'csv' && this.files[i].data ?
-                                  <div>
-                                    <div className="ui divider"/>
-                                    {this.renderDataImporter(i, 0, this.files[i].data)}
-                                  </div> : undefined
-                              )}
-                              {(fileFormat === 'xls' && this.files[i].workbook && this.files[i].data && this.files[i].tableNames ?
-                                  this.files[i].data.map((table, j) =>
-                                    <div key={j}>
-                                      <div className="ui divider"/>
-                                      {this.renderDataImporter(i, j, this.files[i].data[j], this.files[i].tableNames[j])}
-                                    </div>
-                                  ) : undefined
-                              )}
-                            </div>
-                          )}
                         </div>
-                      </div>
-                    </div>
-                  );
-                }) : undefined}
+                      );
+                    })
+                  : undefined}
               </div>
             </div>
-            <div className="title"/>
-            <div ref="upload step message" className="content upload-step-content">
-              {step === 3 ? <div className="ui items">
-                <div className="item">
-                  <div className="ui image">
-                    <div className="icon loader wrapper">
-                      <div className={(this.state.summarizing || this.state.uploading ? 'active ' : '') + 'ui inverted dimmer'}>
-                        <div className="ui loader"/>
+            <div className="title" />
+            <div
+              ref="upload step message"
+              className="content upload-step-content"
+            >
+              {step === 3 ? (
+                <div className="ui items">
+                  <div className="item">
+                    <div className="ui image">
+                      <div className="icon loader wrapper">
+                        <div
+                          className={
+                            (this.state.summarizing || this.state.uploading
+                              ? "active "
+                              : "") + "ui inverted dimmer"
+                          }
+                        >
+                          <div className="ui loader" />
+                        </div>
+                        <i className="file icons">
+                          <i className="fitted file text outline icon" />
+                          {this.state.uploadErrors ? (
+                            <i className="corner red warning circle icon" />
+                          ) : this.state.uploaded ? (
+                            <i className="corner green check circle icon" />
+                          ) : (
+                            <i className="corner plus icon" />
+                          )}
+                        </i>
                       </div>
-                      <i className="file icons">
-                        <i className="fitted file text outline icon"/>
-                        {(this.state.uploadErrors ? <i className="corner red warning circle icon"/>
-                            : (this.state.uploaded ? <i className="corner green check circle icon"/> : <i className="corner plus icon"/>)
-                        )}
-                      </i>
                     </div>
-                  </div>
-                  <div className="content">
-                    <div className="ui equal width grid">
-                      <div className="column">
-                        <div className="ui labeled fluid action input">
-                          <div className="ui label">
-                            Upload To
-                          </div>
-                          <div ref="private contributions" className="ui fluid selection dropdown">
-                            <input name="_id" type="hidden" value={this.state._id}/>
-                            <i className="dropdown icon"/>
-                            <div className="text">A New Private Contribution</div>
-                            <div className="menu">
-                              <div data-value="" className="item">
+                    <div className="content">
+                      <div className="ui equal width grid">
+                        <div className="column">
+                          <div className="ui labeled fluid action input">
+                            <div className="ui label">Upload To</div>
+                            <div
+                              ref="private contributions"
+                              className="ui fluid selection dropdown"
+                            >
+                              <input
+                                name="_id"
+                                type="hidden"
+                                value={this.state._id}
+                              />
+                              <i className="dropdown icon" />
+                              <div className="text">
                                 A New Private Contribution
                               </div>
-                              {this.state.privateContributionsLoaded === true ?
-                                this.privateContributions.map((c, i) =>
-                                  <div key={i} data-value={c.summary.contribution.id} className="item">
-                                    <span className="description">{moment(c.summary.contribution.timestamp).calendar()}</span>
-                                    <span className="text">{c.summary.contribution._name}</span>
-                                  </div>
-                                )
-                              :
-                                <div data-value="loading" className="disabled item">
-                                Loading Your Private Contributions ...
+                              <div className="menu">
+                                <div data-value="" className="item">
+                                  A New Private Contribution
                                 </div>
+                                {this.state.privateContributionsLoaded ===
+                                true ? (
+                                  this.privateContributions.map((c, i) => (
+                                    <div
+                                      key={i}
+                                      data-value={c.summary.contribution.id}
+                                      className="item"
+                                    >
+                                      <span className="description">
+                                        {moment(
+                                          c.summary.contribution.timestamp
+                                        ).calendar()}
+                                      </span>
+                                      <span className="text">
+                                        {c.summary.contribution._name}
+                                      </span>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div
+                                    data-value="loading"
+                                    className="disabled item"
+                                  >
+                                    Loading Your Private Contributions ...
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        {this.state._id === "" && (
+                          <div className="column">
+                            <div
+                              className={
+                                "ui labeled fluid input column" +
+                                (this.state._name.length > 0 ? "" : " error") +
+                                (this.state._id ? " disabled" : "")
                               }
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                      {this.state._id === '' && <div className="column">
-                        <div className={"ui labeled fluid input column" + (this.state._name.length > 0 ? '' : ' error') + (this.state._id ? ' disabled' : '')}>
-                          <div className={"ui label" + (this.state._name.length > 0 ? '' : ' red')}>
-                            Private Contribution Name
-                          </div>
-                          <input ref="contribution name" type="text" default="None" value={this.state._name}
-                                 onChange={(e) => {
-                                   this.setState({_name: this.refs['contribution name'].value})}}/>
-                        </div>
-                      </div>}
-                    </div>
-                    {!this.state.summarizing && this.summary && this.summary.contribution &&
-                      <div>
-                        <div className="ui horizontal divider">
-                          <span className="content">
-                            Upload Details
-                          </span>
-                        </div>
-                        {!_.isEmpty(this.state._existing_summary) ?
-                          <div>
-                            <div className="ui basic segment">
-                              <div className="ui small header">
-                                {this.state._name} Before Upload
+                            >
+                              <div
+                                className={
+                                  "ui label" +
+                                  (this.state._name.length > 0 ? "" : " red")
+                                }
+                              >
+                                Private Contribution Name
                               </div>
-                              <br/>
-                              <DividedList items={[this.state._existing_summary]}>
-                                <SearchSummariesListItem table="contribution" collapsed/>
-                              </DividedList>
+                              <input
+                                ref="contribution name"
+                                type="text"
+                                default="None"
+                                value={this.state._name}
+                                onChange={(e) => {
+                                  this.setState({
+                                    _name: this.refs["contribution name"].value,
+                                  });
+                                }}
+                              />
                             </div>
+                          </div>
+                        )}
+                        {this.state._id !== "" && (
+                          <div className="column">
+                            <div
+                              className={
+                                "ui fluid buttons" +
+                                (this.state._name.length > 0 ? "" : " error") +
+                                (this.state._id ? " disabled" : "")
+                              }
+                            >
+                              <div
+                                className={
+                                  "ui button" +
+                                  (this.state.append_tables
+                                    ? ""
+                                    : " purple active") +
+                                  (this.state._name.length > 0 ? "" : " red")
+                                }
+                                onClick={() =>
+                                  this.setState({ append_tables: false })
+                                }
+                              >
+                                Replace Tables
+                              </div>
+                              <div
+                                className={
+                                  "ui button" +
+                                  (this.state.append_tables
+                                    ? " purple active"
+                                    : "") +
+                                  (this.state._name.length > 0 ? "" : " red")
+                                }
+                                onClick={() =>
+                                  this.setState({ append_tables: true })
+                                }
+                              >
+                                Append to Tables
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      {!this.state.summarizing &&
+                        this.summary &&
+                        this.summary.contribution && (
+                          <div>
                             <div className="ui horizontal divider">
-                              <i className="circle arrow down icon"/>
+                              <span className="content">Upload Details</span>
                             </div>
-                            <div className="ui basic segment">
-                              <div className="ui small header">
-                                {this.state._name} After Upload
+                            {!_.isEmpty(this.state._existing_summary) ? (
+                              <div>
+                                <div className="ui basic segment">
+                                  <div className="ui small header">
+                                    {this.state._name} Before Upload
+                                  </div>
+                                  <br />
+                                  <DividedList
+                                    items={[this.state._existing_summary]}
+                                  >
+                                    <SearchSummariesListItem
+                                      table="contribution"
+                                      collapsed
+                                    />
+                                  </DividedList>
+                                </div>
+                                <div className="ui horizontal divider">
+                                  <i className="circle arrow down icon" />
+                                </div>
+                                <div className="ui basic segment">
+                                  <div className="ui small header">
+                                    {this.state._name} After Upload
+                                  </div>
+                                  <br />
+                                  <DividedList
+                                    items={[this.summary.contribution]}
+                                  >
+                                    <SearchSummariesListItem
+                                      table="contribution"
+                                      collapsed
+                                    />
+                                  </DividedList>
+                                </div>
                               </div>
-                              <br/>
-                              <DividedList items={[this.summary.contribution]}>
-                                <SearchSummariesListItem table="contribution" collapsed/>
-                              </DividedList>
-                            </div>
+                            ) : (
+                              <div>
+                                <div className="ui basic segment">
+                                  <DividedList
+                                    items={[this.summary.contribution]}
+                                  >
+                                    <SearchSummariesListItem
+                                      table="contribution"
+                                      collapsed
+                                    />
+                                  </DividedList>
+                                </div>
+                              </div>
+                            )}
                           </div>
-                          :
-                          <div>
-                            <div className="ui basic segment">
-                              <DividedList items={[this.summary.contribution]}>
-                                <SearchSummariesListItem table="contribution" collapsed/>
-                              </DividedList>
-                            </div>
-                          </div>
-                        }
-                      </div>
-                    }
-                    <br/>
-                    {!this.state.uploaded &&
-                      <div className={'ui fluid purple button' + (this.state._name.length > 0 && !this.state.summarizing && !this.state.uploading ? '' : ' disabled')}
-                           onClick={this.upload.bind(this)}>
-                        Upload to {this.state._id ? 'your existing private contribution: ' + this.state._name : 'a new private contribution: ' + this.state._name}
-                      </div>
-                    }
+                        )}
+                      <br />
+                      {!this.state.uploaded && (
+                        <div
+                          className={
+                            "ui fluid purple button" +
+                            (this.state._name.length > 0 &&
+                            !this.state.summarizing &&
+                            !this.state.uploading
+                              ? ""
+                              : " disabled")
+                          }
+                          onClick={this.upload.bind(this)}
+                        >
+                          Upload to{" "}
+                          {this.state._id
+                            ? "your existing private contribution: " +
+                              this.state._name
+                            : "a new private contribution: " + this.state._name}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div> : undefined}
+              ) : undefined}
             </div>
           </div>
         </div>
-        {(step === 1 ?
+        {step === 1 ? (
           <div className="ui bottom attached icon message">
-            <i className="purple circle info icon"/>
+            <i className="purple circle info icon" />
             <div className="content">
-              The selected file or files can be partial or complete contributions.
+              The selected file or files can be partial or complete
+              contributions.
             </div>
           </div>
-          : undefined)}
-        {(step === 2 && this.state.reading ?
-        <div className="ui bottom attached icon message">
-          <i className="purple circle info icon"/>
-          <div className="content">
-            Reading the selected {this.files.length === 1 ? ' file' : ' files'} ...
-          </div>
-        </div>
-        : undefined)}
-        {(step === 2 && this.state.parsing ?
+        ) : undefined}
+        {step === 2 && this.state.reading ? (
           <div className="ui bottom attached icon message">
-            <i className="purple circle info icon"/>
+            <i className="purple circle info icon" />
             <div className="content">
-              Parsing the selected {this.files.length === 1 ? ' file' : ' files'} ...
+              Reading the selected{" "}
+              {this.files.length === 1 ? " file" : " files"} ...
             </div>
           </div>
-        : undefined)}
-        {(step === 2 && this.state.totalReadErrors > 0 ?
+        ) : undefined}
+        {step === 2 && this.state.parsing ? (
+          <div className="ui bottom attached icon message">
+            <i className="purple circle info icon" />
+            <div className="content">
+              Parsing the selected{" "}
+              {this.files.length === 1 ? " file" : " files"} ...
+            </div>
+          </div>
+        ) : undefined}
+        {step === 2 && this.state.totalReadErrors > 0 ? (
           <div className="ui bottom attached icon error message">
-            <i className="warning sign icon"/>
+            <i className="warning sign icon" />
             <div className="content">
-              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be read.
+              The selected{" "}
+              {this.files.length === 1
+                ? " file could not"
+                : " files could not all"}{" "}
+              be read.
             </div>
           </div>
-          : undefined)}
-        {(step === 2 && this.state.totalReadErrors === 0 && this.state.totalParseErrors > 0 ?
+        ) : undefined}
+        {step === 2 &&
+        this.state.totalReadErrors === 0 &&
+        this.state.totalParseErrors > 0 ? (
           <div className="ui bottom attached icon error message">
-            <i className="warning sign icon"/>
+            <i className="warning sign icon" />
             <div className="content">
-              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be parsed.
-              Please change the <b>Parse As</b> format.
+              The selected{" "}
+              {this.files.length === 1
+                ? " file could not"
+                : " files could not all"}{" "}
+              be parsed. Please change the <b>Parse As</b> format.
             </div>
           </div>
-          : undefined)}
-        {(step === 2 && this.state.totalReadErrors === 0 && this.state.totalParseErrors === 0 && this.state.totalImportErrors > 0 ?
+        ) : undefined}
+        {step === 2 &&
+        this.state.totalReadErrors === 0 &&
+        this.state.totalParseErrors === 0 &&
+        this.state.totalImportErrors > 0 ? (
           <div className="ui bottom attached icon error message">
-            <i className="warning sign icon"/>
+            <i className="warning sign icon" />
             <div className="content">
-              The selected {this.files.length === 1 ? ' file could not' : ' files could not all'} be imported.
-              Please address the list of errors.
+              The selected{" "}
+              {this.files.length === 1
+                ? " file could not"
+                : " files could not all"}{" "}
+              be imported. Please address the list of errors.
             </div>
           </div>
-          : undefined)}
-        {(step === 2 &&
-          !this.state.reading &&
-          !this.state.parsing &&
-          this.state.totalReadErrors === 0 &&
-          this.state.totalParseErrors === 0 &&
-            this.state.totalImportErrors === 0 ?
+        ) : undefined}
+        {step === 2 &&
+        !this.state.reading &&
+        !this.state.parsing &&
+        this.state.totalReadErrors === 0 &&
+        this.state.totalParseErrors === 0 &&
+        this.state.totalImportErrors === 0 ? (
           <div className="ui bottom attached icon success message">
-            <i className="check circle icon"/>
+            <i className="check circle icon" />
             <div className="content">
-              The {this.files.length === 1 ? ' file has' : ' files have'} valid column headers.
+              The {this.files.length === 1 ? " file has" : " files have"} valid
+              column headers.
             </div>
-            <div className="ui right floated purple button" onClick={this.reviewUpload.bind(this)}>
+            <div
+              className="ui right floated purple button"
+              onClick={this.reviewUpload.bind(this)}
+            >
               Upload
             </div>
           </div>
-          : undefined)}
-        {(step === 3 && !this.state.uploading && !this.state.uploadError && !this.state.uploaded ?
+        ) : undefined}
+        {step === 3 &&
+        !this.state.uploading &&
+        !this.state.uploadError &&
+        !this.state.uploaded ? (
           <div className="ui bottom attached icon message">
-            <i className="purple circle info icon"/>
+            <i className="purple circle info icon" />
             <div className="content">
-              Select where to upload the {this.files.length === 1 ? ' file' : ' files'} to in your private workspace.
+              Select where to upload the{" "}
+              {this.files.length === 1 ? " file" : " files"} to in your private
+              workspace.
             </div>
           </div>
-          : undefined)}
-        {(step === 3 && this.state.uploading ?
+        ) : undefined}
+        {step === 3 && this.state.uploading ? (
           <div className="ui bottom attached icon message">
-            <i className="purple circle info icon"/>
+            <i className="purple circle info icon" />
             <div className="content">
-              Uploading the {this.files.length === 1 ? ' file' : ' files'} to
-              {this.state._id ? ' your existing ' : ' a new '}
+              Uploading the {this.files.length === 1 ? " file" : " files"} to
+              {this.state._id ? " your existing " : " a new "}
               private contribution called <b>{this.state._name}</b> ...
             </div>
           </div>
-          : undefined)}
-        {(step === 3 && this.state.uploadError ?
+        ) : undefined}
+        {step === 3 && this.state.uploadError ? (
           <div className="ui bottom attached icon error message">
-            <i className="warning sign icon"/>
+            <i className="warning sign icon" />
             <div className="content">
-              Failed to upload the {this.files.length === 1 ? ' file' : ' files'} to
-              {this.state._id ? ' your existing ' : ' a new '}
-              private contribution called <b>{this.state._name}</b>. Error: {this.state.uploadError.message}
+              Failed to upload the{" "}
+              {this.files.length === 1 ? " file" : " files"} to
+              {this.state._id ? " your existing " : " a new "}
+              private contribution called <b>{this.state._name}</b>. Error:{" "}
+              {this.state.uploadError.message}
             </div>
           </div>
-          : undefined)}
-        {(step === 3 && this.state.uploaded ?
+        ) : undefined}
+        {step === 3 && this.state.uploaded ? (
           <div className="ui bottom attached icon success message">
-            <i className="check circle icon"/>
+            <i className="check circle icon" />
             <div className="content">
-              The {this.files.length === 1 ? ' file was' : ' files were'} uploaded successfully to
-              {this.state._id ? ' your existing ' : ' a new '}
+              The {this.files.length === 1 ? " file was" : " files were"}{" "}
+              uploaded successfully to
+              {this.state._id ? " your existing " : " a new "}
               private contribution called <b>{this.state._name}</b>.
             </div>
           </div>
-          : undefined)}
+        ) : undefined}
       </div>
-    )
+    );
   }
 
 }

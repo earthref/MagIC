@@ -66,6 +66,29 @@ const ageUnits = [
 ];
 const ageUnitsDefault = 'Ma';
 
+const missingPrefixs = {};
+
+_.keys(methodCodes).forEach(group => {
+  methodCodes[group].codes.forEach(code => {
+    // list all prefixes of code.code that end in hyphen
+    const prefixes = _.filter(_.range(1, code.code.length), i => code.code[i] === '-').map(i => code.code.slice(0, i));
+    // verify that all prefixes are in the list of codes
+    prefixes.forEach(prefix => {
+      let prefixFound = false;
+      _.keys(methodCodes).forEach(group => {
+        if (_.find(methodCodes[group].codes, { code: prefix }))
+          prefixFound = true;
+      });
+      if (!prefixFound)
+        missingPrefixs[prefix] = true;
+    });
+  });
+});
+
+_.keys(missingPrefixs).forEach(prefix => {
+  console.log(prefix);
+});
+
 class Search extends React.Component {
 
   filters = {
@@ -140,11 +163,11 @@ class Search extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      search: this.props.search || '',
-      searchInput: this.props.search || '',
+      search: this.props.search || "",
+      searchInput: this.props.search || "",
       levelNumber: this.props.levelNumber || 0,
-      view: this.props.view || '',
-      sort: 'Recently Contributed First',
+      view: this.props.view || "",
+      sort: "Recently Contributed First",
       sortDefault: true,
       activeBucketsFilters: {},
       activeExistsFilters: {},
@@ -484,7 +507,7 @@ class Search extends React.Component {
         lte: this.state.pole_alpha95_max
       }}});
 
-    console.log('esFilters', esFilters, this.state.pole_alpha95_max);
+    // console.log('esFilters', esFilters, this.state.pole_alpha95_max);
     return esFilters;
   }
 
