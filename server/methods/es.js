@@ -946,6 +946,10 @@ export default function () {
 
       timestamp = timestamp || moment().utc().toISOString();
       let doi = _.toUpper(_.trim(reference));
+      console.log("esUpdateContributionReference", doi);
+      doi = doi.replace(/https?:\/\/(dx\.)?doi\.org\//i, "")
+      console.log("esUpdateContributionReference", doi);
+    
       let _reference = {};
 
       try {
@@ -953,6 +957,8 @@ export default function () {
       } catch(error) {
         console.error("esUpdateContributionReference", index, id, contributor, _contributor, reference, description, error.message);
       }
+
+        
 
       let _history = [{
         "id": _.parseInt(id),
