@@ -7,17 +7,22 @@ import PropTypes from 'prop-types';
 import Cookies from 'js-cookie';
 import saveAs from 'save-as';
 import { HotTable, HotColumn } from "@handsontable/react";
+import { textRenderer } from 'handsontable/renderers/textRenderer';
 import "handsontable/dist/handsontable.min.css";
 
 import Clamp from '/client/modules/common/components/clamp';
-import ExportContribution from '/lib/modules/magic/export_contribution.js';
+import ExportContribution from '/lib/modules/magic/export_contribution';
 import GoogleStaticMap from '/client/modules/common/components/google_static_map';
 import GoogleMap from '/client/modules/common/components/google_map';
 import Count from '/client/modules/common/components/count';
 import SearchPlotThumbnail from '/client/modules/magic/containers/search_plot_thumbnail';
-import { Button, Modal } from 'semantic-ui-react';
-import {versions, models} from '/lib/configs/magic/data_models.js';
-import {index} from '/lib/configs/magic/search_levels.js';
+import { Button, Modal, Checkbox, Input } from 'semantic-ui-react';
+import { versions, models } from '/lib/configs/magic/data_models';
+import { methodCodes } from '/lib/configs/magic/method_codes';
+import { cvs } from '/lib/modules/er/controlled_vocabularies';
+import { index } from '/lib/configs/magic/search_levels';
+
+// import { ModalEditContribution } from '/lib/modules/fiesta/modal_view_edit_contribution';
 
 class SearchSummariesListItem extends React.Component {
 
@@ -27,15 +32,22 @@ class SearchSummariesListItem extends React.Component {
       loaded: false,
       loadMap: false,
       showDataModal: false,
+      showCVModal: false,
+      cvModalColumn: undefined,
+      cvModalColumnCV: undefined,
+      cvModalValue: undefined,
+      cvModalSearch: "",
       showConfirmCloseEditedDataModal: false,
       showConfirmChangeTabsEditedDataModal: false,
+      showEmptyColumns: true,
       confirmChangeTabsDataLevel: undefined,
       dataLoading: false,
       dataEdited: false,
       dataSaving: false,
       dataLevel: undefined,
       contributionData: undefined,
-      contributionDataError: undefined
+      contributionDataError: undefined,
+      validation: undefined,
     };
     this.styles = {
       a: {cursor: 'pointer', color: '#800080'}
@@ -94,26 +106,33 @@ class SearchSummariesListItem extends React.Component {
     let id = item.summary && item.summary.contribution && item.summary.contribution.id;
     let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
     if (
-id &&
-(_is_activated ||
-id == 16837 ||
-id == 16841 ||
-id == 17115 ||
-id == 17129 ||
-id == 19215 ||
-id == 19602 ||
-id == 19859 ||
-id == 20187)
-)
+      id &&
+      (_is_activated ||
+        id == 16837 ||
+        id == 16841 ||
+        id == 17115 ||
+        id == 17129 ||
+        id == 19215 ||
+        id == 19602 ||
+        id == 19859 ||
+        id == 20187)
+    )
       return (
-        <div style={{ minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5 }}>
+        <div
+          style={{
+            minWidth: 100,
+            maxWidth: 100,
+            marginRight: "1em",
+            marginBottom: 5,
+          }}
+        >
           <a
             href={`//earthref.org/MagIC/download/${id}/magic_contribution_${id}.txt`}
             download
           >
             <button
               className="ui basic tiny fluid compact icon header purple button"
-              style={{ padding: '20px 0', height: '100px' }}
+              style={{ padding: "20px 0", height: "100px" }}
             >
               <i className="ui file text outline icon" /> Download
             </button>
@@ -229,16 +248,30 @@ id == 20187)
       labels.push('Measurement' + (count !== 1 ? 's' : ''));
       levels.push('measurements');
     }
+    const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
     return (
       <div style={{minWidth: 135, maxWidth: 135, marginRight: '1em', marginBottom: 5, fontSize:'small', lineHeight:1}}>
         <table><tbody>
+          {counts.length == 0 && isPrivate && (
+            <tr><td colSpan={2}>
+              <a onClick={() => {
+                this.setState({ dataLevel: 'locations', showDataModal: true, 
+                  dataLoading: false,
+                  validation: undefined });
+              }}>
+                Edit New<br/>Contribution
+              </a>
+            </td></tr>
+          )}
           {counts.map((count, i) => {
             return (
               <tr key={i}>
                 <td style={{textAlign: 'right'}}>
                   { levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
                     <a onClick={() => {
-                      this.setState({ dataLevel: levels[i], showDataModal: true });
+                      this.setState({ dataLevel: levels[i], showDataModal: true, 
+                  dataLoading: false,
+                  validation: undefined });
                     }}>
                       {numeral(count).format('0 a')}
                     </a>
@@ -249,7 +282,9 @@ id == 20187)
                 <td>
                   { levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
                     <a onClick={() => {
-                      this.setState({ dataLevel: levels[i], showDataModal: true });
+                      this.setState({ dataLevel: levels[i], showDataModal: true, 
+                  dataLoading: false,
+                  validation: undefined });
                     }}>
                       &nbsp;{labels[i]}
                     </a>
@@ -516,7 +551,6 @@ id == 20187)
       age_range = age_range || max_ages_unit !== min_ages_unit                          && `${max_ages} ${max_ages_unit} - ${min_ages} ${min_ages_unit}`;
     }
 
-    console.log(tableSummary);
     return (
       <div style={{minWidth: 120, maxWidth: 120, marginRight: '1em', marginBottom: 5, fontSize:'small', overflow:'hidden', textOverflow:'ellipsis'}}>
         <b>Pole:</b><br/>
@@ -640,60 +674,165 @@ id == 20187)
     try {
       return (
         <div>
-          <div ref="accordion" className={'ui accordion search-summaries-list-item' + (this.props.active && !this.props.collapsed ? ' active' : '')} onMouseOver={(e) => {
-            clearTimeout(this.hideAccordionButtonTimeout);
-            this.showAccordionButtonTimeout = setTimeout(() => {
-              if ($(this.refs['accordion title']).hasClass('active')) {
-                $(this.refs['close accordion button']).show();
-                $(this.refs['open accordion button']).hide();
-              } else {
-                $(this.refs['open accordion button']).show();
-                $(this.refs['close accordion button']).hide();
+          <div
+            ref="accordion"
+            className={
+              "ui accordion search-summaries-list-item" +
+              (this.props.active && !this.props.collapsed ? " active" : "")
+            }
+            onMouseOver={(e) => {
+              clearTimeout(this.hideAccordionButtonTimeout);
+              this.showAccordionButtonTimeout = setTimeout(() => {
+                if ($(this.refs["accordion title"]).hasClass("active")) {
+                  $(this.refs["close accordion button"]).show();
+                  $(this.refs["open accordion button"]).hide();
+                } else {
+                  $(this.refs["open accordion button"]).show();
+                  $(this.refs["close accordion button"]).hide();
+                }
+              }, 500);
+            }}
+            onMouseLeave={(e) => {
+              clearTimeout(this.showAccordionButtonTimeout);
+              this.hideAccordionButtonTimeout = setTimeout(() => {
+                $(this.refs["open accordion button"]).hide();
+                $(this.refs["close accordion button"]).hide();
+              }, 500);
+            }}
+          >
+            <div
+              ref="accordion title"
+              className={
+                "title" +
+                (this.props.active && !this.props.collapsed ? " active" : "")
               }
-            }, 500);
-          }} onMouseLeave={(e) => {
-            clearTimeout(this.showAccordionButtonTimeout);
-            this.hideAccordionButtonTimeout = setTimeout(() => {
-              $(this.refs['open accordion button']).hide();
-              $(this.refs['close accordion button']).hide();
-            }, 500);
-          }}>
-            <div ref="accordion title" className={'title' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{padding:'0 0 0 1em'}}>
-              <i className="dropdown icon" style={{position:'relative', left:'-1.3rem', top:'-.2rem'}}/>
-              <div className="ui grid" style={{marginTop:'-1.5rem', marginBottom: '-.5em'}}>
-                <div className="row accordion-trigger" style={{display:'flex', padding:'0 1em 0.5em'}}>
-                  <span style={{
-                    fontSize:'small', fontWeight:'bold',
-                    color: !_is_activated && Meteor.isDevelopment ? '#9F3A38' : 'default'
-                  }}>
-                    {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation || 'Unknown'}
-                    {item.summary.contribution && item.summary.contribution.version && <span>&nbsp;v.&nbsp;{item.summary.contribution.version}</span>}
+              style={{ padding: "0 0 0 1em" }}
+            >
+              <i
+                className="dropdown icon"
+                style={{ position: "relative", left: "-1.3rem", top: "-.2rem" }}
+              />
+              <div
+                className="ui grid"
+                style={{ marginTop: "-1.5rem", marginBottom: "-.5em" }}
+              >
+                <div
+                  className="row accordion-trigger"
+                  style={{ display: "flex", padding: "0 1em 0.5em" }}
+                >
+                  <span
+                    style={{
+                      fontSize: "small",
+                      fontWeight: "bold",
+                      color:
+                        !_is_activated && Meteor.isDevelopment
+                          ? "#9F3A38"
+                          : "default",
+                    }}
+                  >
+                    {(item.summary.contribution &&
+                      item.summary.contribution._reference &&
+                      item.summary.contribution._reference.citation) ||
+                      "Unknown"}
+                    {item.summary.contribution &&
+                      item.summary.contribution.version && (
+                        <span>
+                          &nbsp;v.&nbsp;{item.summary.contribution.version}
+                        </span>
+                      )}
                   </span>
-                  <span style={{
-                    fontSize:'small', flex:'1', height:'1.25em', overflow:'hidden', textOverflow:'ellipsis', margin: '0 0.5em',
-                    color: !_is_activated && Meteor.isDevelopment ? '#9F3A38' : 'default'
-                  }}>
+                  <span
+                    style={{
+                      fontSize: "small",
+                      flex: "1",
+                      height: "1.25em",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      margin: "0 0.5em",
+                      color:
+                        !_is_activated && Meteor.isDevelopment
+                          ? "#9F3A38"
+                          : "default",
+                    }}
+                  >
                     {this.renderTitle(item)}
                   </span>
-                  <span className="description" style={{fontSize:'small', float:'right', textAlign:'right'}}>
-                    {item.summary.contribution && moment.utc(item.summary.contribution.timestamp).local().format('LL')}
+                  <span
+                    className="description"
+                    style={{
+                      fontSize: "small",
+                      float: "right",
+                      textAlign: "right",
+                    }}
+                  >
+                    {item.summary.contribution &&
+                      moment
+                        .utc(item.summary.contribution.timestamp)
+                        .local()
+                        .format("LL")}
                     &nbsp;by&nbsp;
-                    <b>{item.summary.contribution && item.summary.contribution._contributor}</b>
+                    <b>
+                      {item.summary.contribution &&
+                        item.summary.contribution._contributor}
+                    </b>
                   </span>
                 </div>
-                {item.summary && item.summary._incomplete_summary !== "true" ? 
-                  <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                {item.summary && item.summary._incomplete_summary !== "true" ? (
+                  <div
+                    className="row flex_row"
+                    style={{
+                      padding: "0",
+                      fontWeight: "normal",
+                      whiteSpace: "nowrap",
+                      display: "flex",
+                    }}
+                  >
                     {this.renderDownloadButton(item)}
                     {this.renderLinks(item)}
                     {this.renderCounts(item)}
                     {this.renderMapThumbnail(item)}
-                    <SearchPlotThumbnail 
-                      id={item && item.summary && item.summary.contribution && item.summary.contribution.id}
-                      citation={item && item.summary && item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.citation }
-                      location={item && item.summary && item.summary.locations && item.summary.locations.location && item.summary.locations.location[0] }
-                      site={item && item.summary && item.summary.sites && item.summary.sites.site && item.summary.sites.site[0] }
-                      sample={item && item.summary && item.summary.samples && item.summary.samples.sample && item.summary.samples.sample[0] }
-                      specimen={item && item.summary && item.summary.specimens && item.summary.specimens.specimen && item.summary.specimens.specimen[0] }
+                    <SearchPlotThumbnail
+                      id={
+                        item &&
+                        item.summary &&
+                        item.summary.contribution &&
+                        item.summary.contribution.id
+                      }
+                      citation={
+                        item &&
+                        item.summary &&
+                        item.summary.contribution &&
+                        item.summary.contribution._reference &&
+                        item.summary.contribution._reference.citation
+                      }
+                      location={
+                        item &&
+                        item.summary &&
+                        item.summary.locations &&
+                        item.summary.locations.location &&
+                        item.summary.locations.location[0]
+                      }
+                      site={
+                        item &&
+                        item.summary &&
+                        item.summary.sites &&
+                        item.summary.sites.site &&
+                        item.summary.sites.site[0]
+                      }
+                      sample={
+                        item &&
+                        item.summary &&
+                        item.summary.samples &&
+                        item.summary.samples.sample &&
+                        item.summary.samples.sample[0]
+                      }
+                      specimen={
+                        item &&
+                        item.summary &&
+                        item.summary.specimens &&
+                        item.summary.specimens.specimen &&
+                        item.summary.specimens.specimen[0]
+                      }
                     />
                     {this.renderGeo(item)}
                     {this.renderGeology(item)}
@@ -702,249 +841,503 @@ id == 20187)
                     {this.renderMethodCodes(item)}
                     {this.renderCitations(item)}
                   </div>
-                :
-                  <div className="row flex_row" style={{padding:'0', fontWeight:'normal', whiteSpace:'nowrap', display:'flex'}}>
+                ) : (
+                  <div
+                    className="row flex_row"
+                    style={{
+                      padding: "0",
+                      fontWeight: "normal",
+                      whiteSpace: "nowrap",
+                      display: "flex",
+                    }}
+                  >
                     {this.renderDownloadButton(item)}
                     {this.renderLinks(item)}
                     {this.renderCounts(item)}
                     {this.renderQueuedForIndex(item)}
-                </div>
-                }
+                  </div>
+                )}
               </div>
             </div>
-            <div className={'content' + (this.props.active && !this.props.collapsed ? ' active' : '')} style={{fontSize: 'small', paddingBottom: 0}}>
-              <div dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.html}} />
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.abstract_html}} />
-              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && item.summary.contribution._reference.keywords.join &&
+            <div
+              className={
+                "content" +
+                (this.props.active && !this.props.collapsed ? " active" : "")
+              }
+              style={{ fontSize: "small", paddingBottom: 0 }}
+            >
+              <div
+                dangerouslySetInnerHTML={{
+                  __html:
+                    item.summary.contribution &&
+                    item.summary.contribution._reference &&
+                    item.summary.contribution._reference.html,
+                }}
+              />
+              <div
+                style={{ marginTop: "0.5em" }}
+                dangerouslySetInnerHTML={{
+                  __html:
+                    item.summary.contribution &&
+                    item.summary.contribution._reference &&
+                    item.summary.contribution._reference.abstract_html,
+                }}
+              />
+              {item.summary.contribution &&
+                item.summary.contribution._reference &&
+                item.summary.contribution._reference.keywords &&
+                item.summary.contribution._reference.keywords.join && (
+                  <div
+                    style={{ marginTop: "0.5em" }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        "<b>Keywords: </b>" +
+                        item.summary.contribution._reference.keywords.join(
+                          ", "
+                        ),
+                    }}
+                  />
+                )}
+              {item.summary.contribution &&
+                item.summary.contribution._reference &&
+                item.summary.contribution._reference.keywords &&
+                !item.summary.contribution._reference.keywords.join && (
+                  <div
+                    style={{ marginTop: "0.5em" }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        "<b>Keywords: </b>" +
+                        item.summary.contribution._reference.keywords,
+                    }}
+                  />
+                )}
+              {item.summary.contribution &&
+                item.summary.contribution._reference &&
+                item.summary.contribution._reference.tags &&
+                item.summary.contribution._reference.tags.join && (
+                  <div
+                    style={{ marginTop: "0.5em" }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        "<b>Tags: </b>" +
+                        item.summary.contribution._reference.tags.join(", "),
+                    }}
+                  />
+                )}
+              {item.summary.contribution &&
+                item.summary.contribution._reference &&
+                item.summary.contribution._reference.tags &&
+                !item.summary.contribution._reference.tags.join && (
+                  <div
+                    style={{ marginTop: "0.5em" }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        "<b>Tags: </b>" +
+                        item.summary.contribution._reference.tags,
+                    }}
+                  />
+                )}
+              {item.summary.contribution &&
+                item.summary.contribution._reference &&
+                item.summary.contribution._reference.n_citations && (
+                  <div
+                    style={{ marginTop: "0.5em" }}
+                    dangerouslySetInnerHTML={{
+                      __html:
+                        '<b><a target="_blank" href="https://www.crossref.org" style="color: #800080">Crossref</a> Citation Count: </b>' +
+                        item.summary.contribution._reference.n_citations,
+                    }}
+                  />
+                )}
 
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords.join(', ')}} />}
-              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.keywords && !item.summary.contribution._reference.keywords.join &&
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Keywords: </b>' + item.summary.contribution._reference.keywords}} />}
-              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && item.summary.contribution._reference.tags.join &&
-
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags.join(', ')}} />}
-              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.tags && !item.summary.contribution._reference.tags.join &&
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b>Tags: </b>' + item.summary.contribution._reference.tags}} />}
-              {item.summary.contribution && item.summary.contribution._reference && item.summary.contribution._reference.n_citations &&
-
-              <div style={{marginTop:'0.5em'}} dangerouslySetInnerHTML={{__html: '<b><a target="_blank" href="https://www.crossref.org" style="color: #800080">Crossref</a> Citation Count: </b>' + item.summary.contribution._reference.n_citations }} />}
-
-              {this.props.table === 'contribution' && item.summary.contribution && item.summary.contribution._history &&
-              <table className="ui very basic compact collapsing table">
-                <thead>
-                <tr>
-                  <th style={{whiteSpace: 'nowrap'}}>Download</th>
-                  <th style={{whiteSpace: 'nowrap'}}>MagIC Contribution Link</th>
-                  <th style={{whiteSpace: 'nowrap'}}>EarthRef Data DOI Link</th>
-                  <th style={{whiteSpace: 'nowrap'}}>Version</th>
-                  <th style={{whiteSpace: 'nowrap'}}>Data Model</th>
-                  <th style={{whiteSpace: 'nowrap'}}>Date</th>
-                  <th style={{whiteSpace: 'nowrap'}}>Contributor</th>
-                  {_.find(item.summary.contribution._history, 'description') && <th style={{whiteSpace: 'nowrap'}}>Description</th>}
-                </tr>
-                </thead>
-                <tbody>
-                {item.summary.contribution && item.summary.contribution._history.map((v, i) => {
-                  let _is_activated = item.summary && item.summary.contribution && item.summary.contribution._is_activated === "true";
-                  let _has_data_doi = item.summary && item.summary.contribution && item.summary.contribution._has_data_doi === "true";
-                  let download_button;
-                  if (v.id && (_is_activated || v.id == 16837 || v.id == 16841 || v.id == 17115 || v.id == 17129 || v.id == 19215 || v.id == 19602 || v.id == 19859 || v.id == 19872))
-                    download_button = (
-                      <a
-                        href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`}
-                        download
-                      >
-                        <button
-                          className="ui basic tiny fluid compact icon purple button"
-                          style={{ marginTop: '0' }}
-                        >
-                          <i className="ui file text outline icon" /> Download
-                        </button>
-                      </a>
-                    );
-                  else if (v.id)
-                    download_button = (
-                      <button className="ui basic tiny fluid compact icon purple button"
-                          style={{ marginTop: '0' }} onClick={function (id, e) {
-                            Meteor.call('magicGetPublicContributionZip', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
-                              if (source) {
-                                let blob = new Blob([source], {type: "application/zip"});
-                                saveAs(blob, 'magic_contribution_' + id + '.zip');
-                              } else {
-                                Meteor.call('magicGetPublicContribution', id, '@' + Cookies.get('user_id'), Meteor.isDevelopment ? {} : { domain: '.earthref.org'}, function (id, error, source) {
-                                  if (source) {
-                                    let blob = new Blob([source], {type: "text/plain;charset=utf-8"});
-                                    saveAs(blob, 'magic_contribution_' + id + '.txt');
-                                  } else {
-                                    Meteor.call('esGetContribution', {index, id}, function (id, error, c) {
-                                      if (!error && c) {
-                                        const exporter = new ExportContribution({});
-                                        let blob = new Blob([exporter.toText(c)], {type: "text/plain;charset=utf-8"});
-                                        saveAs(blob, 'magic_contribution_' + id + '.txt');
+              {this.props.table === "contribution" &&
+                item.summary.contribution &&
+                item.summary.contribution._history && (
+                  <table className="ui very basic compact collapsing table">
+                    <thead>
+                      <tr>
+                        <th style={{ whiteSpace: "nowrap" }}>Download</th>
+                        <th style={{ whiteSpace: "nowrap" }}>
+                          MagIC Contribution Link
+                        </th>
+                        <th style={{ whiteSpace: "nowrap" }}>
+                          EarthRef Data DOI Link
+                        </th>
+                        <th style={{ whiteSpace: "nowrap" }}>Version</th>
+                        <th style={{ whiteSpace: "nowrap" }}>Data Model</th>
+                        <th style={{ whiteSpace: "nowrap" }}>Date</th>
+                        <th style={{ whiteSpace: "nowrap" }}>Contributor</th>
+                        {_.find(
+                          item.summary.contribution._history,
+                          "description"
+                        ) && (
+                          <th style={{ whiteSpace: "nowrap" }}>Description</th>
+                        )}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {item.summary.contribution &&
+                        item.summary.contribution._history.map((v, i) => {
+                          let _is_activated =
+                            item.summary &&
+                            item.summary.contribution &&
+                            item.summary.contribution._is_activated === "true";
+                          let _has_data_doi =
+                            item.summary &&
+                            item.summary.contribution &&
+                            item.summary.contribution._has_data_doi === "true";
+                          let download_button;
+                          if (
+                            v.id &&
+                            (_is_activated ||
+                              v.id == 16837 ||
+                              v.id == 16841 ||
+                              v.id == 17115 ||
+                              v.id == 17129 ||
+                              v.id == 19215 ||
+                              v.id == 19602 ||
+                              v.id == 19859 ||
+                              v.id == 19872)
+                          )
+                            download_button = (
+                              <a
+                                href={`//earthref.org/MagIC/download/${v.id}/magic_contribution_${v.id}.txt`}
+                                download
+                              >
+                                <button
+                                  className="ui basic tiny fluid compact icon purple button"
+                                  style={{ marginTop: "0" }}
+                                >
+                                  <i className="ui file text outline icon" />{" "}
+                                  Download
+                                </button>
+                              </a>
+                            );
+                          else if (v.id)
+                            download_button = (
+                              <button
+                                className="ui basic tiny fluid compact icon purple button"
+                                style={{ marginTop: "0" }}
+                                onClick={function (id, e) {
+                                  Meteor.call(
+                                    "magicGetPublicContributionZip",
+                                    id,
+                                    "@" + Cookies.get("user_id"),
+                                    Meteor.isDevelopment
+                                      ? {}
+                                      : { domain: ".earthref.org" },
+                                    function (id, error, source) {
+                                      if (source) {
+                                        let blob = new Blob([source], {
+                                          type: "application/zip",
+                                        });
+                                        saveAs(
+                                          blob,
+                                          "magic_contribution_" + id + ".zip"
+                                        );
                                       } else {
-                                        console.error(error);
-                                        alert('Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page.');
+                                        Meteor.call(
+                                          "magicGetPublicContribution",
+                                          id,
+                                          "@" + Cookies.get("user_id"),
+                                          Meteor.isDevelopment
+                                            ? {}
+                                            : { domain: ".earthref.org" },
+                                          function (id, error, source) {
+                                            if (source) {
+                                              let blob = new Blob([source], {
+                                                type: "text/plain;charset=utf-8",
+                                              });
+                                              saveAs(
+                                                blob,
+                                                "magic_contribution_" +
+                                                  id +
+                                                  ".txt"
+                                              );
+                                            } else {
+                                              Meteor.call(
+                                                "esGetContribution",
+                                                { index, id },
+                                                function (id, error, c) {
+                                                  if (!error && c) {
+                                                    const exporter =
+                                                      new ExportContribution(
+                                                        {}
+                                                      );
+                                                    let blob = new Blob(
+                                                      [exporter.toText(c)],
+                                                      {
+                                                        type: "text/plain;charset=utf-8",
+                                                      }
+                                                    );
+                                                    saveAs(
+                                                      blob,
+                                                      "magic_contribution_" +
+                                                        id +
+                                                        ".txt"
+                                                    );
+                                                  } else {
+                                                    console.error(error);
+                                                    alert(
+                                                      "Failed to find the contribution for download. Please try again soon or email MagIC using the link at the bottom of this page."
+                                                    );
+                                                  }
+                                                }.bind(this, id)
+                                              );
+                                            }
+                                          }.bind(this, id)
+                                        );
                                       }
-                                    }.bind(this, id));
+                                    }.bind(this, id)
+                                  );
+                                }.bind(this, v.id)}
+                              >
+                                <i className="ui file text outline icon" />{" "}
+                                Download
+                              </button>
+                            );
+                          return (
+                            <tr key={i}>
+                              <td style={{ whiteSpace: "nowrap" }}>
+                                {download_button}
+                              </td>
+                              <td>
+                                {(_is_activated || i > 0) && (
+                                  <a
+                                    style={this.styles.a}
+                                    href={"https://earthref.org/MagIC/" + v.id}
+                                  >
+                                    {"earthref.org/MagIC/" + v.id}
+                                  </a>
+                                )}
+                                {!_is_activated && i == 0 && (
+                                  <span>{"earthref.org/MagIC/" + v.id}</span>
+                                )}
+                              </td>
+                              <td>
+                                {_is_activated && _has_data_doi && (
+                                  <a
+                                    style={this.styles.a}
+                                    href={
+                                      "http://dx.doi.org/10.7288/V4/MAGIC/" +
+                                      v.id
+                                    }
+                                    target="_blank"
+                                  >
+                                    {"10.7288/V4/MAGIC/" + v.id}
+                                  </a>
+                                )}
+                                {_is_activated && !_has_data_doi && (
+                                  <span>Queued For Creation</span>
+                                )}
+                                {!_is_activated && (
+                                  <span>{"10.7288/V4/MAGIC/" + v.id}</span>
+                                )}
+                              </td>
+                              <td>{v.version}</td>
+                              <td>
+                                {parseFloat(v.data_model_version).toFixed(1)}
+                              </td>
+                              <td>
+                                {moment(v.timestamp).local().format("LL")}
+                              </td>
+                              <td>{v.contributor}</td>
+                              {_.find(
+                                item.summary.contribution._history,
+                                "description"
+                              ) && <td>{v.description}</td>}
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                )}
+              {Meteor.isDevelopment &&
+                this.props.table === "contribution" &&
+                item.summary.contribution && (
+                  <table className="ui compact red table">
+                    <thead>
+                      <tr>
+                        <th style={{ whiteSpace: "nowrap" }}>
+                          Developer Tasks
+                        </th>
+                        <th style={{ whiteSpace: "nowrap" }}></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {item.summary.contribution._is_activated === "true" && (
+                        <tr>
+                          <td style={{ whiteSpace: "nowrap" }}>
+                            <button
+                              className="ui basic tiny fluid compact red button"
+                              style={{ marginTop: "0" }}
+                              onClick={function (id, e) {
+                                console.log("esDeactivateContribution");
+                                Meteor.call(
+                                  "esDeactivateContribution",
+                                  { index: index, id: id },
+                                  (error) => {
+                                    console.log(
+                                      "esDeactivateContribution done"
+                                    );
                                   }
-                                }.bind(this, id));
-                              }
-                            }.bind(this, id));
-                          }.bind(this, v.id)}
-                        >
-                          <i className="ui file text outline icon"/> Download
-                      </button>
-                    );
-                  return (
-                    <tr key={i}>
-                      <td style={{ whiteSpace: 'nowrap' }}>
-                        { download_button }
-                      </td>
-                      <td>
-                        {(_is_activated || i > 0) &&
-                        <a style={this.styles.a}
-                          href={'https://earthref.org/MagIC/' + v.id}>{'earthref.org/MagIC/' + v.id}</a>}
-                        {(!_is_activated && i == 0) &&
-                        <span>{'earthref.org/MagIC/' + v.id}</span>}
-                      </td>
-                      <td>
-                        {_is_activated && _has_data_doi &&
-                        <a style={this.styles.a}
-                          href={'http://dx.doi.org/10.7288/V4/MAGIC/' + v.id} target="_blank">{'10.7288/V4/MAGIC/' + v.id}</a>}
-                        {_is_activated && !_has_data_doi &&
-                        <span>Queued For Creation</span>}
-                        {!_is_activated &&
-                        <span>{'10.7288/V4/MAGIC/' + v.id}</span>}
-                      </td>
-                      <td>{v.version}</td>
-                      <td>{parseFloat(v.data_model_version).toFixed(1)}</td>
-                      <td>{moment(v.timestamp).local().format('LL')}</td>
-                      <td>{v.contributor}</td>
-                      {_.find(item.summary.contribution._history, 'description') && <td>{v.description}</td>}
-                    </tr>
-                  );
-                })}
-                </tbody>
-              </table>}
-              {Meteor.isDevelopment && this.props.table === 'contribution' && item.summary.contribution &&
-              <table className="ui compact red table">
-                <thead>
-                  <tr>
-                    <th style={{whiteSpace: 'nowrap'}}>Developer Tasks</th>
-                    <th style={{whiteSpace: 'nowrap'}}></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {item.summary.contribution._is_activated === 'true' &&
-                    <tr>
-                      <td style={{whiteSpace: 'nowrap'}}>
-                        <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                          onClick={function(id, e) {
-                            console.log("esDeactivateContribution");
-                            Meteor.call("esDeactivateContribution", {index: index, id: id},
-                              (error) => { console.log("esDeactivateContribution done"); }
-                            );
-                          }.bind(this, item.summary.contribution.id)}
-                        >
-                          Deactivate
-                        </button>
-                      </td>
-                      <td>
-                        Deactivate the contribution (contribution and Data DOI links will be broken until activated again).
-                      </td>
-                    </tr>
-                  }
-                  {item.summary.contribution._is_activated !== 'true' &&
-                    <tr>
-                      <td style={{whiteSpace: 'nowrap'}}>
-                        <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                          onClick={function(id, e) {
-                            console.log("esActivateContribution");
-                            Meteor.call("esActivateContribution", {index: index, id: id},
-                              (error) => { console.log("esActivateContribution done"); }
-                            );
-                          }.bind(this, item.summary.contribution.id)}
-                        >
-                          Force Activate
-                        </button>
-                      </td>
-                      <td>
-                        Activate the contribution even if not validated.
-                      </td>
-                    </tr>
-                  }
-                  <tr>
-                    <td style={{whiteSpace: 'nowrap'}}>
-                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                        onClick={function(id, contributor, e) {
-                          console.log("esUpdatePrivatePreSummaries");
-                          Meteor.call("esUpdatePrivatePreSummaries", {index, id, contributor},
-                            (error) => { console.log("esUpdatePrivatePreSummaries done"); }
-                          );
-                        }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
-                      >
-                        Pre Summary
-                      </button>
-                    </td>
-                    <td>
-                      Calculate the contribution pre-summary and submit it to Elasticsearch for indexing.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td style={{whiteSpace: 'nowrap'}}>
-                      <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                        onClick={function(id, contributor, e) {
-                          console.log("esUpdatePrivateSummaries");
-                          Meteor.call("esUpdatePrivateSummaries", {index, id, contributor},
-                            (error) => { console.log("esUpdatePrivateSummaries done"); }
-                          );
-                        }.bind(this, item.summary.contribution.id, item.summary.contribution.contributor)}
-                      >
-                        Full Summary
-                      </button>
-                    </td>
-                    <td>
-                      Calculate the full contribution summary and submit it to Elasticsearch for indexing.
-                    </td>
-                  </tr>
-                  {item.summary.contribution && item.summary.contribution._history && item.summary.contribution._history.map((v, i) =>
-                    <tr key={i}>
-                      <td style={{whiteSpace: 'nowrap'}}>
-                        <button className="ui basic tiny fluid compact red button" style={{marginTop:'0'}} 
-                          onClick={function(id, e) {
-                            console.log("esUploadActivatedContributionToS3");
-                            Meteor.call("esUploadActivatedContributionToS3", {index, id},
-                              (error) => { console.log("esUploadActivatedContributionToS3 done"); }
-                            );
-                          }.bind(this,v.id)}
-                        >
-                          Upload {v.id} to S3
-                        </button>
-                      </td>
-                      <td>
-                        Upload the contribution text file to magic-contributions and/or magic-activated-contributions.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>}
+                                );
+                              }.bind(this, item.summary.contribution.id)}
+                            >
+                              Deactivate
+                            </button>
+                          </td>
+                          <td>
+                            Deactivate the contribution (contribution and Data
+                            DOI links will be broken until activated again).
+                          </td>
+                        </tr>
+                      )}
+                      {item.summary.contribution._is_activated !== "true" && (
+                        <tr>
+                          <td style={{ whiteSpace: "nowrap" }}>
+                            <button
+                              className="ui basic tiny fluid compact red button"
+                              style={{ marginTop: "0" }}
+                              onClick={function (id, e) {
+                                console.log("esActivateContribution");
+                                Meteor.call(
+                                  "esActivateContribution",
+                                  { index: index, id: id },
+                                  (error) => {
+                                    console.log("esActivateContribution done");
+                                  }
+                                );
+                              }.bind(this, item.summary.contribution.id)}
+                            >
+                              Force Activate
+                            </button>
+                          </td>
+                          <td>
+                            Activate the contribution even if not validated.
+                          </td>
+                        </tr>
+                      )}
+                      <tr>
+                        <td style={{ whiteSpace: "nowrap" }}>
+                          <button
+                            className="ui basic tiny fluid compact red button"
+                            style={{ marginTop: "0" }}
+                            onClick={function (id, contributor, e) {
+                              console.log("esUpdatePrivatePreSummaries");
+                              Meteor.call(
+                                "esUpdatePrivatePreSummaries",
+                                { index, id, contributor },
+                                (error) => {
+                                  console.log(
+                                    "esUpdatePrivatePreSummaries done"
+                                  );
+                                }
+                              );
+                            }.bind(
+                              this,
+                              item.summary.contribution.id,
+                              item.summary.contribution.contributor
+                            )}
+                          >
+                            Pre Summary
+                          </button>
+                        </td>
+                        <td>
+                          Calculate the contribution pre-summary and submit it
+                          to Elasticsearch for indexing.
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style={{ whiteSpace: "nowrap" }}>
+                          <button
+                            className="ui basic tiny fluid compact red button"
+                            style={{ marginTop: "0" }}
+                            onClick={function (id, contributor, e) {
+                              console.log("esUpdatePrivateSummaries");
+                              Meteor.call(
+                                "esUpdatePrivateSummaries",
+                                { index, id, contributor },
+                                (error) => {
+                                  console.log("esUpdatePrivateSummaries done");
+                                }
+                              );
+                            }.bind(
+                              this,
+                              item.summary.contribution.id,
+                              item.summary.contribution.contributor
+                            )}
+                          >
+                            Full Summary
+                          </button>
+                        </td>
+                        <td>
+                          Calculate the full contribution summary and submit it
+                          to Elasticsearch for indexing.
+                        </td>
+                      </tr>
+                      {item.summary.contribution &&
+                        item.summary.contribution._history &&
+                        item.summary.contribution._history.map((v, i) => (
+                          <tr key={i}>
+                            <td style={{ whiteSpace: "nowrap" }}>
+                              <button
+                                className="ui basic tiny fluid compact red button"
+                                style={{ marginTop: "0" }}
+                                onClick={function (id, e) {
+                                  console.log(
+                                    "esUploadActivatedContributionToS3"
+                                  );
+                                  Meteor.call(
+                                    "esUploadActivatedContributionToS3",
+                                    { index, id },
+                                    (error) => {
+                                      console.log(
+                                        "esUploadActivatedContributionToS3 done"
+                                      );
+                                    }
+                                  );
+                                }.bind(this, v.id)}
+                              >
+                                Upload {v.id} to S3
+                              </button>
+                            </td>
+                            <td>
+                              Upload the contribution text file to
+                              magic-contributions and/or
+                              magic-activated-contributions.
+                            </td>
+                          </tr>
+                        ))}
+                    </tbody>
+                  </table>
+                )}
             </div>
-            <div ref="open accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
-              $(this.refs['accordion']).accordion('open', 0);
-              $(this.refs['close accordion button']).show();
-              $(this.refs['open accordion button']).hide();
-            }}>
+            <div
+              ref="open accordion button"
+              className="ui grey icon button accordion-button"
+              onClick={(e) => {
+                $(this.refs["accordion"]).accordion("open", 0);
+                $(this.refs["close accordion button"]).show();
+                $(this.refs["open accordion button"]).hide();
+              }}
+            >
               <i className="caret down icon"></i>
             </div>
-            <div ref="close accordion button" className="ui grey icon button accordion-button" onClick={(e) => {
-              $(this.refs['accordion']).accordion('close', 0);
-              $(this.refs['open accordion button']).show();
-              $(this.refs['close accordion button']).hide();
-            }}>
+            <div
+              ref="close accordion button"
+              className="ui grey icon button accordion-button"
+              onClick={(e) => {
+                $(this.refs["accordion"]).accordion("close", 0);
+                $(this.refs["open accordion button"]).show();
+                $(this.refs["close accordion button"]).hide();
+              }}
+            >
               <i className="caret up icon"></i>
             </div>
             {this.state.loadMap && this.renderMapModal(item)}
             {this.state.showDataModal && this.renderDataModal(item)}
+            {this.state.showCVModal && this.renderCVModal(item)}
           </div>
         </div>
       );
@@ -987,18 +1380,18 @@ id == 20187)
         </Modal.Header>
         <Modal.Content>
           <div className="ui top attached tabular small menu search-tab-menu">
-            { this.state.contributionData && this.state.contributionData.locations ?
+            { this.state.contributionData && (isPrivate || this.state.contributionData.locations) ?
               <a 
                 className={`${this.state.dataLevel === 'locations' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'locations' ? {backgroundColor: '#F0F0F0'} : {}}
                 onClick={() => this.setState(this.state.dataEdited ? 
                   { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'locations' } : 
-                  { dataLoading: true, dataLevel: 'locations' }
+                  { dataLoading: false, validation: undefined, dataLevel: 'locations' }
                 )}
               >
                 Locations
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
-                  <Count count={ this.state.contributionData.locations.length }/>
+                  <Count count={ this.state.contributionData.locations && this.state.contributionData.locations.length || 0 }/>
                 </div>
               </a>
             :
@@ -1012,18 +1405,18 @@ id == 20187)
                 </div>
               </div>
             }
-            { this.state.contributionData && this.state.contributionData.sites ?
+            { this.state.contributionData && (isPrivate || this.state.contributionData.sites) ?
               <a 
                 className={`${this.state.dataLevel === 'sites' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'sites' ? {backgroundColor: '#F0F0F0'} : {}}
                 onClick={() => this.setState(this.state.dataEdited ? 
                   { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'sites' } : 
-                  { dataLoading: true, dataLevel: 'sites' }
+                  { dataLoading: false, validation: undefined, dataLevel: 'sites' }
               )}
               >
                 Sites
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
-                  <Count count={ this.state.contributionData.sites.length }/>
+                  <Count count={ this.state.contributionData.sites && this.state.contributionData.sites.length || 0 }/>
                 </div>
               </a>
             :
@@ -1037,18 +1430,18 @@ id == 20187)
                 </div>
               </div>
             }
-            { this.state.contributionData && this.state.contributionData.samples ?
+            { this.state.contributionData && (isPrivate || this.state.contributionData.samples) ?
               <a 
                 className={`${this.state.dataLevel === 'samples' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'samples' ? {backgroundColor: '#F0F0F0'} : {}}
                 onClick={() => this.setState(this.state.dataEdited ? 
                   { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'samples' } : 
-                  { dataLoading: true, dataLevel: 'samples' }
+                  { dataLoading: false, validation: undefined, dataLevel: 'samples' }
                 )}
               >
                 Samples
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
-                  <Count count={ this.state.contributionData.samples.length }/>
+                  <Count count={ this.state.contributionData.samples && this.state.contributionData.samples.length || 0 }/>
                 </div>
               </a>
             :
@@ -1062,18 +1455,18 @@ id == 20187)
                 </div>
               </div>
             }
-            { this.state.contributionData && this.state.contributionData.specimens ?
+            { this.state.contributionData && (isPrivate || this.state.contributionData.specimens) ?
               <a 
                 className={`${this.state.dataLevel === 'specimens' ? 'active ' : ''}item`} 
                 style={this.state.dataLevel === 'specimens' ? {backgroundColor: '#F0F0F0'} : {}}
                 onClick={() => this.setState(this.state.dataEdited ? 
-                  { showConfirmChangeTabsEditedDataModal: true } : 
-                  { dataLoading: true, dataLevel: 'specimens', confirmChangeTabsDataLevel: 'specimens' }
+                  { showConfirmChangeTabsEditedDataModal: true, confirmChangeTabsDataLevel: 'specimens' } : 
+                  { dataLoading: false, validation: undefined, dataLevel: 'specimens'}
                   )}
               >
                 Specimens
                 <div className="ui circular small basic label" style={{color: '#0C0C0C', margin: '-1em -1em -1em 0.5em', minWidth: '4em'}}>
-                  <Count count={ this.state.contributionData.specimens.length }/>
+                  <Count count={ this.state.contributionData.specimens && this.state.contributionData.specimens.length || 0 }/>
                 </div>
               </a>
             :
@@ -1087,6 +1480,18 @@ id == 20187)
                 </div>
               </div>
             }
+            <Button
+              color="purple"
+              style={{ marginLeft: 'auto', marginRight: 0, padding: '0 0.5rem', height: '2rem' }}
+              onClick={() =>
+                this.setState(
+                  { showEmptyColumns: !this.state.showEmptyColumns },
+                  () => this.refs['hotTableComponent'].hotInstance.render()
+                )
+              }
+            >
+              { this.state.showEmptyColumns ? 'Hide' : 'Show' } Empty Columns
+            </Button>
           </div>
           {this.renderData(item)}
           <Modal size="small"
@@ -1119,7 +1524,9 @@ id == 20187)
                   contributionDataError: undefined,
                   showConfirmChangeTabsEditedDataModal: false,
                   confirmChangeTabsDataLevel: undefined,
-                  dataLevel: this.state.confirmChangeTabsDataLevel
+                  dataLevel: this.state.confirmChangeTabsDataLevel,
+                  dataLoading: false,
+                  validation: undefined
                 })
               },
               'Continue Editing'
@@ -1129,27 +1536,25 @@ id == 20187)
         { isPrivate && 
           <Modal.Actions>
             <Button color='purple' floated="left" disabled={!this.state.dataEdited || this.state.dataSaving} onClick={() => {
-              const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
-              if (this.state.dataEdited && data) {
+              const newData = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
+              if (this.state.dataEdited && newData) {
                 const model = models[_.last(versions)];
                 const table = model.tables[this.state.dataLevel];
                 const modelColumns = _.sortBy(
-                  _.keys(table.columns), columnName => table.columns[columnName].position
+                  _.keys(table.columns),
+                  (columnName) => table.columns[columnName].position
                 );
-                const tableData = this.state.contributionData[this.state.dataLevel];
-                const usedColumns = {};
-                tableData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
-                const columns = modelColumns.filter(x => usedColumns[x]);
+                const tableData = newData.filter((row) => row.some((cell) => cell)).map((row) => {
+                  const editedRow = {};
+                  row.forEach((col, colIdx) => {
+                    if (col) editedRow[modelColumns[colIdx]] = col;
+                  });
+                  return editedRow;
+                });
                 const contribution = {
                   ...this.state.contributionData,
-                  [this.state.dataLevel]: data.map((row) => {
-                    const editedRow = {};
-                    row.forEach((col, colIdx) => {
-                      editedRow[columns[colIdx]] = col;
-                    });
-                    return editedRow;
-                  }),
-                };
+                  [this.state.dataLevel]: tableData
+                }
                 const contributor = item.summary.contribution.contributor;
                 const _contributor = item.summary.contribution._contributor;
                 const id = item.summary.contribution.id;
@@ -1158,14 +1563,16 @@ id == 20187)
                   index, contributor, _contributor, id, contribution, summary
                 }, (error) => {
                   console.log('updated contribution', id, error);
-                  if (error) { this.setState({contributionDataError: error, dataSaving: false});
-                  } else { 
-                    this.setState({dataSaving: false});
+                  if (error) {
+                    this.setState({ contributionDataError: error, dataSaving: false });
+                  } else {
+                    this.setState({ dataSaving: false });
                     Meteor.call('esUpdatePrivatePreSummaries', {
                       index, contributor, _contributor, id, contribution, summary
                     }, (error) => {
                       console.log('updated contribution pre-summaries', id, error);
-                      if (error) { this.setState({contributionDataError: error});
+                      if (error) {
+                        this.setState({ contributionDataError: error });
                       } else {
                         Meteor.call('esUpdatePrivateSummaries', {
                           index, contributor, _contributor, id, contribution, summary
@@ -1206,69 +1613,118 @@ id == 20187)
   }
 
   renderData(item) {
+    console.log('item', item);
     const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
     if (!this.state.contributionData && item && item.summary && item.summary.contribution)
-      Meteor.call(
-        "esGetContribution",
-        {
-          index,
-          id: item.summary.contribution.id,
-          tables: ["contribution", "locations", "sites", "samples", "specimens"],
-        },
-        (error, c) => {
-          console.log("esGetContribution", error, c);
-          if (!error && c) this.setState({ contributionData: c });
-          else
-            this.setState({
-              contributionData: {},
-              contributionDataError: error,
-            });
+      Meteor.call('esGetContribution', { index, id: item.summary.contribution.id, tables: ['locations', 'sites', 'samples', 'specimens'] }, (error, c) => {
+        console.log('esGetContribution', error, c);
+        if (!error && c) {
+          let row_id = 1;
+          ['locations', 'sites', 'samples', 'specimens'].forEach(table => {
+            if (c[table]) {
+              c[table] = c[table].map(row => {
+                row.row_id = row_id++;
+                row.contribution_id = item.summary.contribution.id;
+                return row;
+              });
+            }
+          })
+          this.setState({ dataLoading: false, validation: undefined, contributionData: c });
         }
-      );
+        else
+          this.setState({ dataLoading: false, validation: undefined, contributionData: {}, contributionDataError: error });
+      });
     if (!this.state.contributionData)
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{ overflow: 'auto', height: `calc(100vh - ${isPrivate ? 19 : 14}em)` }}>
           <div className="ui inverted active dimmer">
             <div className="ui text loader">Loading Contribution Data</div>
           </div>
         </div>
       );
     if (this.state.dataLoading) {
-      _.delay(() => this.setState({ dataLoading: false }));
+      // _.delay(() => this.setState({ dataLoading: false }));
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{ overflow: 'auto', height: `calc(100vh - ${isPrivate ? 19 : 14}em)` }}>
           <div className="ui inverted active dimmer">
-          <div className="ui text loader">Loading Contribution Data</div>
-        </div>
+            <div className="ui text loader">Loading Contribution Data</div>
+          </div>
         </div>
       );
     }
     if (this.state.contributionDataError)
       return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
+        <div className="ui bottom attached segment" style={{ overflow: 'auto', height: `calc(100vh - ${isPrivate ? 19 : 14}em)` }}>
           <div className="ui error message">
             <div className="header">Contribution Data Error</div>
             <p>{this.state.contributionDataError}</p>
           </div>
         </div>
-    );
-    if (!this.state.contributionData[this.state.dataLevel])
-      return (
-        <div className="ui bottom attached segment" style={{overflow:'auto', height:`calc(100vh - ${isPrivate ? 19 : 14}em)`}}>
-          <div className="ui fluid warning message">
-            <div className="ui center aligned huge basic segment">No Rows to Display</div>
-          </div>
-        </div>
       );
+    
+    console.log('showEmptyColumns', this.state.showEmptyColumns)
+    let showEmptyColumns = this.state.showEmptyColumns;
+    // if (this.state.contributionData && !this.state.contributionData[this.state.dataLevel])
+    //   console.log('no data, resetting showEmptyColumns to true', this.state.dataLevel, this.state.contributionData[this.state.dataLevel])
+    //   // this.state.contributionData[this.state.dataLevel] = [{ contribution_id: item.summary.contribution.id, row_id: 1 }];
+    //   if (!showEmptyColumns) this.setState({ showEmptyColumns: true });
+    
+    if (item && item.summary && item.summary.contribution && this.state.validation === undefined) {
+      this.setState({ validation: {} });
+      console.log("esValidatePrivateContribution")
+      Meteor.call("esValidatePrivateContribution", { index: index, id: item.summary.contribution.id, contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org' }) },
+        (error, validation) => {
+          console.log("esValidatePrivateContribution", validation);
+          this.setState({ validation });
+        }
+      );
+    }
+    
     const model = models[_.last(versions)];
     const table = model.tables[this.state.dataLevel];
-    const modelColumns = _.sortBy(
-      _.keys(table.columns), columnName => table.columns[columnName].position
+    const modelColumnHeaders = _.sortBy(
+      _.keys(table.columns), column => table.columns[column].position
     );
     const rowData = this.state.contributionData[this.state.dataLevel];
     const usedColumns = {};
-    rowData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; })});
-    const columns = modelColumns.filter(x => usedColumns[x]);
+    rowData && rowData.forEach(row => { _.keys(row).forEach(column => { usedColumns[column] = true; }) });
+    const isColumnReadOnly = {}
+    modelColumnHeaders.forEach(column =>
+      isColumnReadOnly[column] = !isPrivate || (table.columns[column].validations && table.columns[column].validations.some(validation => /downloadOnly\(\)/.test(validation)))
+    );
+    const modelColumnCV = {}
+    modelColumnHeaders.forEach((column, i) => {
+      table.columns[column].validations && table.columns[column].validations.forEach(validation => {
+        const match = /cv\("(.+)"\)|type\("(method_codes)"\)/.exec(validation);
+        if (match) modelColumnCV[i] = match[1] || match[2];
+      });
+    });
+    const emptyColumnsIdxs = modelColumnHeaders.reduce((columns, column, i) => {
+      return usedColumns[column] ? columns : columns.concat(i);
+    }, []);
+    const customRender = (function (instance, td, row, col, prop, value, cellProperties) {
+      textRenderer.apply(this, arguments);
+      if (isPrivate && modelColumnCV[col])
+        td.innerHTML = `${td.innerHTML} <i style="float: right; margin-right: -0.25em" class="caret down icon"></i>`;
+      if (this.state.validation && this.state.validation.errors && this.state.validation.errors[this.state.dataLevel]) {
+        if (this.state.validation.errors[this.state.dataLevel][modelColumnHeaders[col]]) {
+          // console.log('validation', this.state.validation, col, row + 1, modelColumnHeaders[col], this.state.validation.errors[this.state.dataLevel]);
+          var comment = "";
+          _.keys(this.state.validation.errors[this.state.dataLevel][modelColumnHeaders[col]]).forEach(error_msg => {
+            if (this.state.validation.errors[this.state.dataLevel][modelColumnHeaders[col]][error_msg][row + 1])
+              comment += error_msg;
+          });
+          if (comment.length > 0) {
+            td.className = 'handsontable-invalid';
+            cellProperties.comment = {
+              value: comment,
+              readOnly: true
+            }
+          }
+        }
+      }
+    }).bind(this);
+    
     return (
       <HotTable
         ref="hotTableComponent"
@@ -1277,29 +1733,289 @@ id == 20187)
         settings={{
           licenseKey: "non-commercial-and-evaluation",
           data: rowData,
-          readOnly: !isPrivate,
           contextMenu: isPrivate,
+          minSpareRows: 100,
           rowHeaders: true,
-          colHeaders: columns,    
+          colHeaders: modelColumnHeaders.map(column => {
+            return column + (modelColumnCV[column] ? ' (cv)' : '')
+          }),
+          hiddenColumns: {
+            columns: showEmptyColumns ? [] : emptyColumnsIdxs
+          },
           outsideClickDeselects: false,
+          comments: true,
           afterChange: (changes) => {
             if (changes) {
               const data = this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getData() || undefined;
-              if (data && !this.state.dataEdited) this.setState({ dataEdited: true });
+              if (data && !this.state.dataEdited) this.setState({ dataEdited: true, validation: undefined });
               this.contributionDataEdited = data;
+              console.log("contributionDataEdited", this.contributionDataEdited);
+              Meteor.call("esValidatePrivateContribution", {index: index, id: item.summary.contribution.id, contributor: "@" + Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})},
+                (error, validation) => {
+                  this.setState({validation})
+                }
+              );
+            }
+          },
+          afterInit: () => {
+            if (this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance) {
+              this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.enablePlugin('hiddenColumns');
+              this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.updateSettings();
+            }
+          },
+          beforeOnCellMouseDown: (e, cell) => {
+            if (this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.getCellMeta(cell.row, cell.col).readOnly) {
+              this.refs['hotTableComponent'] && this.refs['hotTableComponent'].hotInstance.deselectCell();
+            }
+            else if (this.refs['hotTableComponent'] && isPrivate && modelColumnCV[cell.col]) {
+              this.setState({
+                showCVModal: true,
+                cvModalColumn: modelColumnHeaders[cell.col],
+                cvModalColumnCV: modelColumnCV[cell.col],
+                cvModalValue: this.refs[
+                  "hotTableComponent"
+                ].hotInstance.getDataAtCell(cell.row, cell.col),
+                cvModalSearch: "",
+              });
             }
           }
         }}
       >
-        {columns.map((columnName, i) => 
-          <HotColumn key={i} data={columnName}></HotColumn>
+        {modelColumnHeaders.map((column, i) => 
+          <HotColumn key={i} data={column} readOnly={isColumnReadOnly[column]} renderer={customRender}>
+          </HotColumn>
         )}
       </HotTable>
     );
   }
 
+  renderCVModal(item) {
+    const cv =
+      cvs[this.state.cvModalColumnCV] ||
+      (this.state.cvModalColumnCV === "method_codes" &&
+        _.flatMap(methodCodes, (group) => group.codes.map((x) => x.code))) ||
+      undefined;
+    // console.log('renderCVModal', this.state.cvModalColumnCV, this.state.cvModalValue, cv);
+    let cvModalValues =
+      (this.state.cvModalValue || "").trim().split(/\s*:\s*/) || [];
+    const cvType =
+      models[_.last(versions)].tables[this.state.dataLevel].columns[
+        this.state.cvModalColumn
+      ].type;
+    if (!cv)
+      return (
+        <Modal
+          onClose={() => this.setState({ showCVModal: false })}
+          open={true}
+          style={{ width: "calc(100vw - 8em)", marginTop: "calc(50vh - 10em)" }}
+        >
+          <Modal.Header>
+            <i
+              className="close icon"
+              onClick={() => this.setState({ showCVModal: false })}
+              style={{
+                cursor: "pointer",
+                float: "right",
+                marginRight: "-0.5em",
+              }}
+            />
+            Unrecognized Controlled Vocabulary
+          </Modal.Header>
+          <Modal.Content>
+            <p>
+              Error: Unrecognized Controlled Vocabulary called "
+              {this.state.cvModalColumnCV}".
+            </p>
+            <p>
+              Please email{" "}
+              <a href="mailto:magic-support@earthref.org">
+                magic-support@earthref.org
+              </a>{" "}
+              to report this problem.
+            </p>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button
+              color="red"
+              basic
+              negative
+              onClick={() => this.setState({ showCVModal: false })}
+            >
+              <i className="remove icon"></i>
+              Ok
+            </Button>
+          </Modal.Actions>
+        </Modal>
+      );
+    else
+      return (
+        <Modal
+          onClose={() => this.setState({ showCVModal: false })}
+          open={true}
+          style={{ width: "calc(100vw - 16em)", marginTop: "7em" }}
+        >
+          <Modal.Header>
+            <i
+              className="close icon"
+              onClick={() => this.setState({ showCVModal: false })}
+              style={{
+                cursor: "pointer",
+                float: "right",
+                marginRight: "-0.5em",
+              }}
+            />
+            {cv.label || "Method Codes"} - Controlled Vocabulary
+          </Modal.Header>
+          <Modal.Content
+            style={{ maxHeight: "calc(100vh - 25em)", overflowY: "scroll" }}
+          >
+            <div>
+              {cvModalValues.length === 0 && <div>No Values Selected</div>}
+              {cvs[this.state.cvModalColumnCV] &&
+                cvs[this.state.cvModalColumnCV].items.map((cv, i) => {
+                  if (cvModalValues.includes(cv.item))
+                    return (
+                      <div key={cv.item}>
+                        <Checkbox
+                          checked
+                          label={cv.item + (cv.label ? `: ${cv.label}` : "")}
+                          onChange={() => {
+                            cvModalValues = cvModalValues.filter(
+                              (v) => v != cv.item
+                            );
+                            this.setState({
+                              cvModalValue: cvModalValues.join(":"),
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                })}
+              {this.state.cvModalColumnCV === "method_codes" &&
+                cv.map((code, i) => {
+                  const methodCode =
+                    methodCodes[
+                      Object.keys(methodCodes).find((group) =>
+                        methodCodes[group].codes.find((x) => x.code === code)
+                      )
+                    ].codes.find((x) => x.code === code) || {};
+                  if (cvModalValues.includes(code))
+                    return (
+                      <div key={code}>
+                        <Checkbox
+                          checked
+                          label={
+                            code +
+                            (methodCode.definition
+                              ? `: ${methodCode.definition}`
+                              : "")
+                          }
+                          onChange={() => {
+                            cvModalValues = cvModalValues.filter(
+                              (v) => v != code
+                            );
+                            this.setState({
+                              cvModalValue: cvModalValues.join(":"),
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                })}
+            </div>
+            <hr />
+            <div>
+              <Input
+                placeholder={`Find Values`}
+                defaultValue={this.state.cvSModalearch}
+                onChange={(e) => {
+                  this.setState({ cvModalSearch: e.target.value });
+                }}
+                size="large"
+                style={{ width: "100%", marginBottom: "0.5em" }}
+              />
+              {cvs[this.state.cvModalColumnCV] &&
+                cvs[this.state.cvModalColumnCV].items.map((cv, i) => {
+                  if (!cvModalValues.includes(cv.item))
+                    return (
+                      <div key={cv.item}>
+                        <Checkbox
+                          label={cv.item + (cv.label ? `: ${cv.label}` : "")}
+                          onChange={() => {
+                            cvModalValues.push(cv.item);
+                            this.setState({
+                              cvModalValue: cvModalValues.join(":"),
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                })}
+              {this.state.cvModalColumnCV === "method_codes" &&
+                cv.map((code, i) => {
+                  const methodCode =
+                    methodCodes[
+                      Object.keys(methodCodes).find((group) =>
+                        methodCodes[group].codes.find((x) => x.code === code)
+                      )
+                    ].codes.find((x) => x.code === code) || {};
+                  if (!cvModalValues.includes(code))
+                    return (
+                      <div key={code}>
+                        <Checkbox
+                          label={
+                            code +
+                            (methodCode.definition
+                              ? `: ${methodCode.definition}`
+                              : "")
+                          }
+                          onChange={() => {
+                            cvModalValues.push(code);
+                            this.setState({
+                              cvModalValue: cvModalValues.join(":"),
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                })}
+            </div>
+          </Modal.Content>
+          <Modal.Actions>
+            <Button
+              color="red"
+              basic
+              negative
+              onClick={() => this.setState({ showCVModal: false })}
+            >
+              <i className="remove icon"></i>
+              Cancel
+            </Button>
+            <Button
+              color="green"
+              basic
+              positive
+              onClick={() => {
+                const selectedCell =
+                  this.refs["hotTableComponent"].hotInstance.getSelected();
+                console.log(selectedCell);
+                this.refs["hotTableComponent"].hotInstance.setDataAtCell(
+                  selectedCell[0][0],
+                  selectedCell[0][1],
+                  this.state.cvModalValue
+                );
+                this.setState({ showCVModal: false });
+              }}
+            >
+              <i className="checkmark icon"></i>
+              Apply Changes
+            </Button>
+          </Modal.Actions>
+        </Modal>
+      );
+  }
 }
-
+  
 SearchSummariesListItem.propTypes = {
   table: PropTypes.oneOf(['contribution', 'locations', 'sites', 'samples', 'specimens', 'experiments']).isRequired,
   item:  PropTypes.object
