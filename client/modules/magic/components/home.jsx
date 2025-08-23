@@ -85,7 +85,7 @@ export default class extends React.Component {
               </div>
               <div className="ui grid">
                 <div
-                  className="four wide column"
+                  className="sixteen wide column"
                   data-tooltip="View and analyze paleomagnetic poles"
                   data-position="bottom center"
                 >
@@ -98,45 +98,6 @@ export default class extends React.Component {
                       Poles
                       <br />
                       View
-                    </div>
-                  </IconButton>
-                </div>
-                <div
-                  className="four wide column"
-                  data-tooltip="Coming Soon"
-                  data-position="bottom center"
-                >
-                  <IconButton className="tiny card" portal="MagIC" disabled>
-                    <div className="title">
-                      Day
-                      <br />
-                      Plots
-                    </div>
-                  </IconButton>
-                </div>
-                <div
-                  className="four wide column"
-                  data-tooltip="Coming Soon"
-                  data-position="bottom center"
-                >
-                  <IconButton className="tiny card" portal="MagIC" disabled>
-                    <div className="title">
-                      Zijderveld
-                      <br />
-                      Plots
-                    </div>
-                  </IconButton>
-                </div>
-                <div
-                  className="four wide column"
-                  data-tooltip="Coming Soon"
-                  data-position="bottom center"
-                >
-                  <IconButton className="tiny card" portal="MagIC" disabled>
-                    <div className="title">
-                      PmagPy
-                      <br />
-                      Plots
                     </div>
                   </IconButton>
                 </div>
