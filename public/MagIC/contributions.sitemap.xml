@@ -4437,6 +4437,7 @@
 <url><loc>https://earthref.org/MagIC/20063</loc><lastmod>2024-03-21T18:31:09.891Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20068</loc><lastmod>2024-10-15T14:09:35.714Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20072</loc><lastmod>2024-04-03T23:46:28.230Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20075</loc><lastmod>2025-09-04T00:38:13.500Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20079</loc><lastmod>2024-08-14T03:57:37.666Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20095</loc><lastmod>2024-06-19T03:43:41.092Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20098</loc><lastmod>2024-05-13T19:59:32.357Z</lastmod></url>
@@ -4451,6 +4452,7 @@
 <url><loc>https://earthref.org/MagIC/20176</loc><lastmod>2024-07-03T15:23:55.708Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20177</loc><lastmod>2024-07-04T09:01:43.740Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20181</loc><lastmod>2024-09-19T13:38:11.603Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20184</loc><lastmod>2025-09-19T17:14:03.977Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20185</loc><lastmod>2025-06-26T07:17:15.306Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20186</loc><lastmod>2025-02-10T02:27:49.522Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20187</loc><lastmod>2024-10-07T18:44:41.218Z</lastmod></url>
@@ -4470,6 +4472,9 @@
 <url><loc>https://earthref.org/MagIC/20242</loc><lastmod>2024-10-28T22:08:36.699Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20245</loc><lastmod>2025-04-28T07:45:27.934Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20252</loc><lastmod>2025-04-28T07:44:44.816Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20257</loc><lastmod>2025-08-18T14:02:28.046Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20258</loc><lastmod>2025-08-20T16:35:44.519Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20259</loc><lastmod>2025-08-04T15:21:37.970Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20260</loc><lastmod>2025-01-28T21:06:54.769Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20270</loc><lastmod>2025-04-07T03:13:46.705Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20275</loc><lastmod>2025-02-07T22:16:40.644Z</lastmod></url>
@@ -4503,6 +4508,7 @@
 <url><loc>https://earthref.org/MagIC/20304</loc><lastmod>2025-02-11T23:37:03.773Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20306</loc><lastmod>2025-02-11T23:42:48.100Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20312</loc><lastmod>2025-06-06T09:01:06.393Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20328</loc><lastmod>2025-09-03T13:24:16.243Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20330</loc><lastmod>2025-03-06T16:30:00.978Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20331</loc><lastmod>2025-02-27T00:07:20.567Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20337</loc><lastmod>2025-05-12T10:45:36.252Z</lastmod></url>
@@ -4512,7 +4518,16 @@
 <url><loc>https://earthref.org/MagIC/20357</loc><lastmod>2025-04-20T13:33:01.418Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20359</loc><lastmod>2025-04-21T08:41:25.613Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20361</loc><lastmod>2025-04-21T15:19:57.175Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20377</loc><lastmod>2025-09-16T02:39:27.363Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20384</loc><lastmod>2025-05-23T20:50:43.840Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20385</loc><lastmod>2025-09-12T06:01:24.542Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20386</loc><lastmod>2025-05-06T21:34:52.591Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20397</loc><lastmod>2025-07-12T16:54:06.135Z</lastmod></url>
 <url><loc>https://earthref.org/MagIC/20427</loc><lastmod>2025-06-03T21:33:23.331Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20473</loc><lastmod>2025-09-08T07:14:02.453Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20476</loc><lastmod>2025-07-03T10:33:52.537Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20507</loc><lastmod>2025-09-03T20:06:03.356Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20508</loc><lastmod>2025-09-04T17:38:34.584Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20510</loc><lastmod>2025-09-05T17:15:28.366Z</lastmod></url>
+<url><loc>https://earthref.org/MagIC/20511</loc><lastmod>2025-09-05T17:48:00.679Z</lastmod></url>
 </urlset>
