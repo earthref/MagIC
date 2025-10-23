@@ -1,7 +1,7 @@
 import React from 'react';
 import {compose} from '@storybook/react-komposer';
 
-import GoogleMap from '/client/modules/common/components/google_map';
+import SVGMapThumbnail from '/client/modules/common/components/svg_map_thumbnail.jsx';
 
 export const composer = ({es}, onData) => {
   let docs = [];
@@ -25,12 +25,9 @@ export const composer = ({es}, onData) => {
   });
 };
 
-export default compose(
-  composer,
-  {
-    propsToWatch: ['es'],
-    shouldSubscribe(currentProps, nextProps) {
-      return !_.isEqual(currentProps.es, nextProps.es);
-    }
-  }
-)(GoogleMap);
+export default compose(composer, {
+  propsToWatch: ["es"],
+  shouldSubscribe(currentProps, nextProps) {
+    return !_.isEqual(currentProps.es, nextProps.es);
+  },
+})(SVGMapThumbnail);

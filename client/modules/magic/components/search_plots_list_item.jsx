@@ -2,7 +2,6 @@ import _ from 'lodash';
 import numeral from 'numeral';
 import moment from 'moment';
 import React from 'react';
-import GoogleStaticMap from '/client/modules/common/components/google_static_map';
 
 export default class extends React.Component {
 

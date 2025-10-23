@@ -1159,7 +1159,7 @@ class Search extends React.Component {
     )
       esFilters.push({
         range: {
-          "summary._all.pole_alpha95.range": {
+          "summary.locations.pole_alpha95.range": {
             gte: Math.min(
               this.state.pole_alpha95_min,
               this.state.pole_alpha95_max
@@ -1174,7 +1174,7 @@ class Search extends React.Component {
     else if (_.isNumber(this.state.pole_alpha95_min))
       esFilters.push({
         range: {
-          "summary._all.pole_alpha95.range": {
+          "summary.locations.pole_alpha95.range": {
             gte: this.state.pole_alpha95_min,
           },
         },
@@ -1182,7 +1182,7 @@ class Search extends React.Component {
     else if (_.isNumber(this.state.pole_alpha95_max))
       esFilters.push({
         range: {
-          "summary._all.pole_alpha95.range": {
+          "summary.locations.pole_alpha95.range": {
             lte: this.state.pole_alpha95_max,
           },
         },
@@ -1197,7 +1197,7 @@ class Search extends React.Component {
         .filter((code) => plateBBoxPolygons[code])
         .map((code) => ({
           geo_shape: {
-            "summary._all._geo_point": {
+            "summary.locations._geo_point": {
               shape: plateBBoxPolygons[code],
               relation: "intersects",
             },
@@ -2993,7 +2993,7 @@ class Search extends React.Component {
         // by requiring pole_lat and pole_lon to exist in addition to the spatial intersects.
         const geoShapeFilter = {
           geo_shape: {
-            "summary._all._geo_point": {
+            "summary.locations._geo_point": {
               shape: geom,
               relation: "intersects",
             },

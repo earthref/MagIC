@@ -28,7 +28,9 @@
     "canvas": "^2.11.2",
     "d3-array": "^3.2.4",
     "d3-format": "^3.1.0",
+    "d3-geo": "^3.1.0",
     "d3-scale": "^4.0.2",
+    "d3-selection": "^3.0.0",
     "deepdash": "^5.3.9",
     "echarts": "^5.5.0",
     "echarts-for-react": "^3.0.2",
@@ -68,8 +70,10 @@
     "semantic-ui-react": "^2.1.5",
     "semver": "^7.6.3",
     "source-map-support": "^0.5.21",
+    "topojson-client": "^3.1.0",
     "underscore": "^1.13.7",
     "uuid": "^8.3.2",
+    "world-atlas": "^2.0.0",
     "xlsx": "^0.17.5"
   },
   "browserslist": [

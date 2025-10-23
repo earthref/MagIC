@@ -12,7 +12,7 @@ import "handsontable/dist/handsontable.min.css";
 
 import Clamp from '/client/modules/common/components/clamp';
 import ExportContribution from '/lib/modules/magic/export_contribution';
-import GoogleStaticMap from '/client/modules/common/components/google_static_map';
+import SVGMapThumbnail from '/client/modules/common/components/svg_map_thumbnail';
 import GoogleMap from '/client/modules/common/components/google_map';
 import Count from '/client/modules/common/components/count';
 import SearchPlotThumbnail from '/client/modules/magic/containers/search_plot_thumbnail';
@@ -377,10 +377,13 @@ class SearchSummariesListItem extends React.Component {
       <div style={{minWidth: 100, maxWidth: 100, marginRight: '1em', marginBottom: 5}}>
         {paths.length > 0 &&
           <a className="ui tiny image" style={{ cursor:'pointer' }} onClick={this.showMap.bind(this)}>
-            <GoogleStaticMap
+            <SVGMapThumbnail
+              markers={paths.map(p => ({
+                lat: (p.lat_s + p.lat_n) / 2,
+                lon: (p.lon_w + p.lon_e) / 2
+              }))}
               width={100}
               height={100}
-              paths={paths}
             />
           </a>}
       </div>
