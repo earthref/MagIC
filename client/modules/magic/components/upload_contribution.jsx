@@ -1344,7 +1344,7 @@ export default class MagICUploadContribution extends React.Component {
                                 </table>
                               ) : undefined}
                               <div className="ui grid">
-                                <div className="eight wide column">
+                                <div className="sixteen wide column">
                                   <div className="ui labeled fluid action input">
                                     <div className="ui purple label">
                                       Import File Type
@@ -1420,144 +1420,6 @@ export default class MagICUploadContribution extends React.Component {
                                           }
                                         >
                                           Excel File
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                </div>
-                                <div className="eight wide column">
-                                  <div className="ui labeled fluid action input">
-                                    <div className="ui purple label">
-                                      Format
-                                    </div>
-                                    <div className="ui fluid selection dropdown lab-format-dropdown">
-                                      <input
-                                        name="lab_format"
-                                        type="hidden"
-                                        value={"cit"}
-                                      />
-                                      <i className="dropdown icon" />
-                                      <div className="text">Caltech (CIT)</div>
-                                      <div className="menu">
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Laboratory Format
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          2G ASCII
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          2G Binary
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Princeton (AGM)
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Berkeley (BGC)
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value="cit"
-                                          className="active selected item"
-                                        >
-                                          Caltech (CIT)
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Hebrew University, Jerusalem, Israel
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Lamont-Doherty
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Liverpool
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Scripps Institution of Oceanography
-                                          (SIO)
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Thellier Tool
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Utrecht University Robot
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          AGICO Spinner JR6
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          AGICO Spinner Text
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          AGICO SUFAR (v1.2) ASCII
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          SIO KLY4S
-                                        </div>
-                                        <div
-                                          data-i={i}
-                                          data-value=""
-                                          className="item"
-                                        >
-                                          Curie Temperature Eexperiments
                                         </div>
                                       </div>
                                     </div>
@@ -1744,46 +1606,6 @@ export default class MagICUploadContribution extends React.Component {
                                   });
                                 }}
                               />
-                            </div>
-                          </div>
-                        )}
-                        {this.state._id !== "" && (
-                          <div className="column">
-                            <div
-                              className={
-                                "ui fluid buttons" +
-                                (this.state._name.length > 0 ? "" : " error") +
-                                (this.state._id ? " disabled" : "")
-                              }
-                            >
-                              <div
-                                className={
-                                  "ui button" +
-                                  (this.state.append_tables
-                                    ? ""
-                                    : " purple active") +
-                                  (this.state._name.length > 0 ? "" : " red")
-                                }
-                                onClick={() =>
-                                  this.setState({ append_tables: false })
-                                }
-                              >
-                                Replace Tables
-                              </div>
-                              <div
-                                className={
-                                  "ui button" +
-                                  (this.state.append_tables
-                                    ? " purple active"
-                                    : "") +
-                                  (this.state._name.length > 0 ? "" : " red")
-                                }
-                                onClick={() =>
-                                  this.setState({ append_tables: true })
-                                }
-                              >
-                                Append to Tables
-                              </div>
                             </div>
                           </div>
                         )}
