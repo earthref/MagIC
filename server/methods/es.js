@@ -108,7 +108,7 @@ export default function () {
     },
 
     async esCount({ index, type, queries, filters, countField, allVersions }) {
-      // console.log("esCount", index, type, queries, filters, countField, allVersions);
+      console.log("esCount", index, type, queries, filters, countField, allVersions);
       this.unblock();
       try {
         let search = {
@@ -192,16 +192,16 @@ export default function () {
       pageSize,
       pageNumber
     ) {
-      //console.log(
-      //  "esPage",
-      //  pageSize,
-      //  pageNumber,
-      //  index,
-      //  type,
-      //  JSON.stringify(queries, null, 2),
-      //  JSON.stringify(filters, null, 2),
-      //  sort
-      //);
+      console.log(
+        "esPage",
+        pageSize,
+        pageNumber,
+        index,
+        type,
+        JSON.stringify(queries, null, 2),
+        JSON.stringify(filters, null, 2),
+        sort
+      );
       this.unblock();
       try {
         let search = {

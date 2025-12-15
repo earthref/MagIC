@@ -257,6 +257,7 @@ export default SearchPolesView = ({ style, es }) => {
         if (error) {
           console.error("Error", error);
         } else {
+          console.log("esPage poles", pageSize, results);
           results_poles = [];
           for (item of results) {
             item.rows = item.rows || [];
@@ -293,12 +294,161 @@ export default SearchPolesView = ({ style, es }) => {
         if (error) {
           console.error("Error", error);
         } else {
+          console.log("esPage poles 1", results)
           setSelectedPoleId(0);
         }
         setPending((c) => Math.max(0, c - 1));
       }
     );
   }, [es]);
+  
+  // Helper function to check if a pole passes the current filters
+  const polePassesFilters = (pole) => {
+    if (!pole || !pole.row) return false;
+    
+    const lat = parseFloat(pole.row.pole_lat);
+    const lon = parseFloat(pole.row.pole_lon);
+    if (isNaN(lat) || isNaN(lon)) return false;
+    
+    let a95 = parseFloat(pole.row.pole_alpha95);
+    const dp = parseFloat(pole.row.pole_dp);
+    const dm = parseFloat(pole.row.pole_dm);
+
+    if (isNaN(a95) && !isNaN(dp) && !isNaN(dm)) {
+      a95 = Math.sqrt(dp * dp + dm * dm);
+    }
+
+    const a95Filter = es.filters.filter(
+      (x) => x.range?.["summary._all.pole_alpha95.range"]
+    );
+    const a95FilterMin =
+      a95Filter[0]?.range?.["summary._all.pole_alpha95.range"]?.gte;
+    const a95FilterMax =
+      a95Filter[0]?.range?.["summary._all.pole_alpha95.range"]?.lte;
+    
+    if (
+      (a95FilterMin && a95 < a95FilterMin) ||
+      (a95FilterMax && a95 > a95FilterMax)
+    ) {
+      return false;
+    }
+    
+    return true;
+  };
+
+  // Update selection when filters change if selected pole is no longer in filtered results
+  useEffect(() => {
+    if (poles.length === 0) {
+      if (selectedPoleId !== undefined) {
+        setSelectedPoleId(undefined);
+      }
+      return;
+    }
+    
+    // Check if current selection is still valid
+    const selectedPole = poles[selectedPoleId];
+    if (selectedPole && polePassesFilters(selectedPole)) {
+      return; // Current selection is still valid
+    }
+    
+    // Find first pole that passes filters
+    const firstValidPole = poles.find(polePassesFilters);
+    if (firstValidPole) {
+      setSelectedPoleId(firstValidPole.results_pole_id);
+    } else {
+      setSelectedPoleId(undefined);
+    }
+  }, [poles, es.filters, selectedPoleId]);
+
+  // Rotate globes to center selected pole on the left globe
+  useEffect(() => {
+    if (!leftChartRef.current || !rightChartRef.current) return;
+    if (selectedPoleId === undefined || !poles[selectedPoleId]) return;
+    
+    const selectedPole = poles[selectedPoleId];
+    if (!selectedPole || !selectedPole.row) return;
+    
+    const lat = parseFloat(selectedPole.row.pole_lat);
+    const lon = parseFloat(selectedPole.row.pole_lon);
+    
+    if (isNaN(lat) || isNaN(lon)) return;
+    
+    // Use requestAnimationFrame to ensure charts are ready
+    requestAnimationFrame(() => {
+      if (!leftChartRef.current || !rightChartRef.current) return;
+      
+      // Use targetCoord so ECharts computes the appropriate rotation to center the pole
+      const currentView = getView(leftChartRef.current);
+      
+      // Use current distance, or fallback to shared/stored distance, or default
+      let distance = currentView.distance;
+      if (typeof distance !== "number" || distance === undefined) {
+        distance =
+          sharedDistanceRef.current ||
+          leftViewRef.current.distance ||
+          200;
+      }
+
+      const targetCoord = [lon, lat];
+      const rightCoord = antipodalCoord(targetCoord);
+
+      syncingFromLeft.current = true;
+      applyTargetCoord(leftChartRef.current, targetCoord, distance);
+      applyTargetCoord(rightChartRef.current, rightCoord, distance);
+      leftViewRef.current = getView(leftChartRef.current);
+      rightViewRef.current = getView(rightChartRef.current);
+      syncingFromLeft.current = false;
+    });
+    
+  }, [selectedPoleId, poles]);
+
+  // Update point colors when selection changes without recreating the entire option
+  useEffect(() => {
+    if (!leftChartRef.current || !rightChartRef.current || poles.length === 0) return;
+    
+    const updateChartSeries = (chart) => {
+      try {
+        const currentOption = chart.getOption();
+        if (!currentOption || !currentOption.series || !currentOption.series[2]) return;
+        
+        // Update only the scatter3D series (index 2) with new colors
+        const updatedData = currentOption.series[2].data.map((point, idx) => {
+          if (idx >= poles.length) return point;
+          const pole = poles[idx];
+          const isSelected =
+            pole.results_pole_id == selectedPoleId &&
+            pole.summary.contribution.id ==
+              poles[selectedPoleId]?.summary.contribution.id;
+          
+          return {
+            ...point,
+            itemStyle: {
+              color: isSelected ? "#800080" : point.itemStyle?.color || "#000",
+            },
+          };
+        });
+        
+        chart.setOption(
+          {
+            series: [
+              {},
+              {},
+              {
+                data: updatedData,
+              },
+            ],
+          },
+          false // notMerge=false means merge with existing option
+        );
+      } catch (e) {
+        console.error("Error updating chart series:", e);
+      }
+    };
+    
+    updateChartSeries(leftChartRef.current);
+    updateChartSeries(rightChartRef.current);
+  }, [selectedPoleId, poles]);
+  
   // Extract age range for color mapping
   const ages = poles
     .map((pole) => {
@@ -334,12 +484,12 @@ export default SearchPolesView = ({ style, es }) => {
   function getAgeColor(age) {
     if (age === null || isNaN(age)) return "#000"; // default black for unknown age
 
-    // Normalize age to 0-1 range (0 = oldest/red, 1 = youngest/yellow)
+    // Normalize age to 0-1 range (0 = youngest/yellow, 1 = oldest/red)
     const normalized = ageRange > 0 ? (age - minAge) / ageRange : 0.5;
 
-    // Interpolate between red (255,0,0) and yellow (255,255,0)
+    // Interpolate: normalized=0 (minAge/youngest) -> yellow (255,255,0), normalized=1 (maxAge/oldest) -> red (255,0,0)
     const red = 255;
-    const green = Math.round(255 * normalized);
+    const green = Math.round(255 * (1 - normalized));
     const blue = 0;
 
     return `rgb(${red}, ${green}, ${blue})`;
@@ -427,6 +577,8 @@ export default SearchPolesView = ({ style, es }) => {
       },
     });
 
+    
+
     if (uncertainty && !isNaN(a95) && a95 > 0) {
       const uncertaintyPoints = [];
       const ellipsePoints = generateUncertaintyEllipse(lat, lon, a95);
@@ -447,12 +599,52 @@ export default SearchPolesView = ({ style, es }) => {
     }
   });
   // helpers for angle wrapping and antipodal conversion
+  function normalizeAlpha(targetAlpha, currentAlpha) {
+    // choose the shortest longitudinal path from currentAlpha to targetAlpha
+    const delta = ((targetAlpha - currentAlpha + 540) % 360) - 180;
+    return wrapTo180(currentAlpha + delta);
+  }
+  function clampBeta(beta) {
+    // beta is latitude-like; keep within visible range to avoid flipping
+    return Math.max(-89.999, Math.min(89.999, beta));
+  }
+  function applyTargetCoord(chart, coord, distance) {
+    if (!chart) return;
+    const d = typeof distance === "number" ? distance : undefined;
+    try {
+      chart.setOption(
+        { globe: { viewControl: { targetCoord: coord, distance: d } } },
+        false,
+        true,
+        true
+      );
+    } catch (e) {
+      // fallback: also try dispatchAction if supported
+      try {
+        chart.dispatchAction({
+          type: "globeChangeView",
+          targetCoord: coord,
+          distance: d,
+          componentIndex: 0,
+        });
+      } catch (e2) {
+        // no-op
+      }
+    }
+  }
+  function wrapTo180(angle) {
+    return ((angle + 180) % 360) - 180;
+  }
   function antipodalView({ alpha, beta, distance }) {
+    // True antipode: flip longitude by 180 and invert latitude
     return {
-      alpha: -alpha,
-      beta: beta + 180,
+      alpha: wrapTo180(alpha + 180),
+      beta: -beta,
       distance,
     };
+  }
+  function antipodalCoord([lon, lat]) {
+    return [wrapTo180(lon + 180), -lat];
   }
   function applyView(chart, { alpha, beta, distance }) {
     if (!chart) return;
@@ -623,12 +815,62 @@ export default SearchPolesView = ({ style, es }) => {
     ],
   };
   return (
-    <div>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {selectedPoleId !== undefined && poles.length > selectedPoleId && (
+        <div style={{ backgroundColor: "white", padding: 10, display: "flex", alignItems: "center", gap: "10px", borderBottom: "1px solid #D4D4D5" }}>
+          <Button
+            icon="chevron left"
+            size="large"
+            circular
+            disabled={selectedPoleId === 0}
+            onClick={() => {
+              if (selectedPoleId > 0) {
+                setSelectedPoleId(selectedPoleId - 1);
+              }
+            }}
+            title="Previous pole"
+          />
+          <div style={{ flex: 1 }}>
+            <SearchPolesListItem
+              table="locations"
+              item={poles[selectedPoleId]}
+              key={selectedPoleId}
+            />
+          </div>
+          <Button
+            icon="chevron right"
+            size="large"
+            circular
+            disabled={selectedPoleId >= poles.length - 1}
+            onClick={() => {
+              if (selectedPoleId < poles.length - 1) {
+                setSelectedPoleId(selectedPoleId + 1);
+              }
+            }}
+            title="Next pole"
+          />
+        </div>
+      )}
+      {(selectedPoleId == undefined || poles.length <= selectedPoleId) && pending === 0 && poles.length === 0 && (
+        <div style={{ backgroundColor: "white", padding: 10, minHeight: "193.5px", borderBottom: "1px solid #D4D4D5" }}>
+          <div className="ui fluid warning message">
+            <div className="ui center aligned huge basic segment">
+              No Items to Display
+            </div>
+          </div>
+        </div>
+      )}
+      {(selectedPoleId == undefined || poles.length <= selectedPoleId) && (pending > 0 || poles.length > 0) && (
+        <div style={{ padding: 0, minHeight: "194.5px", position: "relative", borderBottom: "1px solid #D4D4D5" }}>
+          <div className="ui active inverted dimmer">
+            <div className="ui text loader">Loading</div>
+          </div>
+        </div>
+      )}
       <div
         style={{
           display: "flex",
           flexDirection: "row",
-          borderBottom: "1px solid #D4D4D5",
         }}
       >
         <div style={chartsContainerStyle}>
@@ -915,100 +1157,55 @@ export default SearchPolesView = ({ style, es }) => {
                 <div
                   style={{
                     display: "flex",
-                    flexDirection: "column",
-                    gap: "0.2em",
+                    alignItems: "stretch",
+                    gap: "0.5em",
+                  }}
+                >
+                  {/* Gradient bar */}
+                  <div
+                    style={{
+                      width: "14px",
+                      height: "150px",
+                      background: "linear-gradient(to bottom, rgb(255, 0, 0), rgb(255, 255, 0))",
+                      border: "1px solid #ccc",
+                      borderRadius: "3px",
+                    }}
+                  ></div>
+                  {/* Age labels */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      paddingTop: "2px",
+                      paddingBottom: "2px",
+                    }}
+                  >
+                    <span>{formatAge(maxAge)}</span>
+                    <span>{formatAge(maxAge - ageRange * 0.25)}</span>
+                    <span>{formatAge(maxAge - ageRange * 0.5)}</span>
+                    <span>{formatAge(maxAge - ageRange * 0.75)}</span>
+                    <span>{formatAge(minAge)}</span>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5em",
+                    marginTop: "0.5em",
                   }}
                 >
                   <div
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5em",
+                      width: "16px",
+                      height: "16px",
+                      backgroundColor: "#000",
+                      border: "1px solid #ccc",
+                      borderRadius: "50%",
                     }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: "rgb(255, 255, 0)",
-                        border: "1px solid #ccc",
-                        borderRadius: "50%",
-                      }}
-                    ></div>
-                    <span>{formatAge(minAge)}</span>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5em",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: "rgb(255, 170, 0)",
-                        border: "1px solid #ccc",
-                        borderRadius: "50%",
-                      }}
-                    ></div>
-                    <span>{formatAge(minAge + ageRange * 0.33)}</span>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5em",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: "rgb(255, 85, 0)",
-                        border: "1px solid #ccc",
-                        borderRadius: "50%",
-                      }}
-                    ></div>
-                    <span>{formatAge(minAge + ageRange * 0.67)}</span>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5em",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: "rgb(255, 0, 0)",
-                        border: "1px solid #ccc",
-                        borderRadius: "50%",
-                      }}
-                    ></div>
-                    <span>{formatAge(maxAge)}</span>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5em",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "16px",
-                        height: "16px",
-                        backgroundColor: "#000",
-                        border: "1px solid #ccc",
-                        borderRadius: "50%",
-                      }}
-                    ></div>
-                    <span>Unknown Age</span>
-                  </div>
+                  ></div>
+                  <span>Unknown Age</span>
                 </div>
               </div>
               {/* Selected pole legend */}
@@ -1036,22 +1233,6 @@ export default SearchPolesView = ({ style, es }) => {
           </div>
         </div>
       </div>
-      {selectedPoleId !== undefined && poles.length > selectedPoleId && (
-        <div style={{ backgroundColor: "white", padding: 10 }}>
-          <SearchPolesListItem
-            table="locations"
-            item={poles[selectedPoleId]}
-            key={selectedPoleId}
-          />
-        </div>
-      )}
-      {(selectedPoleId == undefined || poles.length <= selectedPoleId) && (
-        <div style={{ padding: 0, minHeight: "194.5px", position: "relative" }}>
-          <div className="ui active inverted dimmer">
-            <div className="ui text loader">Loading</div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

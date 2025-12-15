@@ -199,7 +199,8 @@ export default class extends React.Component {
           key.substr(0, 4) !== 'age_' && 
           key.substr(0, 4) !== 'lat_' && 
           key.substr(0, 4) !== 'lon_' && 
-          all[key].range
+          all[key] && all[key].range &&
+          modelAllColumns[key]
         ) {
           //console.log(key, all[key], modelAllColumns[key]);
           json.variableMeasured = json.variableMeasured || [];

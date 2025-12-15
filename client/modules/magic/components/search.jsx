@@ -41,65 +41,7 @@ const plateGeometries = _.reduce(
   },
   {}
 );
-// build bbox polygon for each plate geometry to ensure ES-valid shapes
-const geomToBBoxPolygon = (geom) => {
-  try {
-    let lonMin = Infinity,
-      lonMax = -Infinity,
-      latMin = Infinity,
-      latMax = -Infinity;
-    const visitCoords = (coords) => {
-      if (!coords) return;
-      if (typeof coords[0] === "number" && typeof coords[1] === "number") {
-        const lon = coords[0];
-        const lat = coords[1];
-        if (!isNaN(lon) && !isNaN(lat)) {
-          lonMin = Math.min(lonMin, lon);
-          lonMax = Math.max(lonMax, lon);
-          latMin = Math.min(latMin, lat);
-          latMax = Math.max(latMax, lat);
-        }
-      } else if (Array.isArray(coords)) {
-        coords.forEach(visitCoords);
-      }
-    };
-    visitCoords(geom.coordinates);
-    if (
-      !isFinite(lonMin) ||
-      !isFinite(lonMax) ||
-      !isFinite(latMin) ||
-      !isFinite(latMax)
-    )
-      return null;
-    // clamp lats and wrap lons slightly within valid bounds
-    latMin = Math.max(-90, Math.min(90, latMin));
-    latMax = Math.max(-90, Math.min(90, latMax));
-    // build a simple polygon bbox
-    return {
-      type: "polygon",
-      coordinates: [
-        [
-          [lonMin, latMin],
-          [lonMin, latMax],
-          [lonMax, latMax],
-          [lonMax, latMin],
-          [lonMin, latMin],
-        ],
-      ],
-    };
-  } catch (e) {
-    return null;
-  }
-};
-const plateBBoxPolygons = _.reduce(
-  plateGeometries,
-  (acc, geom, code) => {
-    const bbox = geomToBBoxPolygon(geom);
-    if (bbox) acc[code] = bbox;
-    return acc;
-  },
-  {}
-);
+
 const plateOptions = _.sortBy(
   _.map(plateGeometries, (geom, code) => ({
     code,
@@ -798,6 +740,36 @@ class Search extends React.Component {
 
   componentDidUpdate() {
     this.onWindowResize();
+    // Re-initialize dropdowns when filters are re-rendered
+    let self = this;
+    if (this.refs["sort"]) {
+      $(this.refs["sort"]).dropdown({
+        onChange: function (value, text) {
+          self.setState({ sort: text, sortDefault: false });
+        },
+      });
+    }
+    if (this.refs["age_min_unit"]) {
+      $(this.refs["age_min_unit"]).dropdown({
+        onChange: function (value, text) {
+          self.setState({ age_min_unit: text });
+        },
+      });
+    }
+    if (this.refs["age_max_unit"]) {
+      $(this.refs["age_max_unit"]).dropdown({
+        onChange: function (value, text) {
+          self.setState({ age_max_unit: text });
+        },
+      });
+    }
+    if (this.refs["int_unit"]) {
+      $(this.refs["int_unit"]).dropdown({
+        onChange: function (value, text) {
+          self.setState({ int_unit: text });
+        },
+      });
+    }
   }
 
   onWindowResize() {
@@ -1194,11 +1166,11 @@ class Search extends React.Component {
       this.state.selectedPlates.length > 0
     ) {
       const plateShould = this.state.selectedPlates
-        .filter((code) => plateBBoxPolygons[code])
+        .filter((code) => plateGeometries[code])
         .map((code) => ({
           geo_shape: {
-            "summary.locations._geo_point": {
-              shape: plateBBoxPolygons[code],
+            "summary.locations._geo_envelope": {
+              shape: plateGeometries[code],
               relation: "intersects",
             },
           },
@@ -1946,7 +1918,7 @@ class Search extends React.Component {
                       <div
                         key={i}
                         className={
-                          ((this.state.age_min_unit || ageUnitsDefault) ===
+                          ((this.state.age_max_unit || ageUnitsDefault) ===
                           unit.name
                             ? "active "
                             : "") + "item"
@@ -2967,14 +2939,8 @@ class Search extends React.Component {
     const activeView =
       _.find(levels[this.state.levelNumber].views, { name: this.state.view }) ||
       levels[this.state.levelNumber].views[0];
-    const type =
-      (activeView && activeView.es && activeView.es.type) || "contribution";
-    const levelsName =
-      type === "contribution"
-        ? "Contributions"
-        : type === "measurements"
-        ? "Experiments"
-        : _.startCase(type);
+    const type = "poles";
+    const levelsName = "Poles"
     const levelName = levelsName.substr(0, levelsName.length - 1);
     const defaultOpen =
       this.state.openedFilters[filter.name] ||
@@ -2986,14 +2952,14 @@ class Search extends React.Component {
     const aggs = {};
     plateOptions.forEach((p) => {
       const key = `${p.name} (${p.code})`;
-      const geom = plateBBoxPolygons[p.code];
+      const geom = plateGeometries[p.code];
       if (geom) {
         labels.push({ key, label: key });
         // For Poles view, ensure counts reflect poles (not generic locations)
         // by requiring pole_lat and pole_lon to exist in addition to the spatial intersects.
         const geoShapeFilter = {
           geo_shape: {
-            "summary.locations._geo_point": {
+            "summary.locations._geo_envelope": {
               shape: geom,
               relation: "intersects",
             },
@@ -3116,7 +3082,7 @@ class Search extends React.Component {
           labels={labels}
           itemsName={"Values"}
           es={
-            this.state.openedFilters[filter.name] && aggs
+            defaultOpen && aggs
               ? {
                   index: index,
                   type: type,
@@ -3304,8 +3270,8 @@ class Search extends React.Component {
           es={_.extend({}, es, {
             queries: _.concat(
               searchQueries,
-              { exists: { field: "summary.locations.pole_lat" } },
-              { exists: { field: "summary.locations.pole_lon" } }
+              // { exists: { field: "summary.locations.pole_lat" } },
+              // { exists: { field: "summary.locations.pole_lon" } }
             ),
           })}
           pageSize={5}
@@ -3319,8 +3285,8 @@ class Search extends React.Component {
           es={_.extend({}, es, {
             queries: _.concat(
               searchQueries,
-              { exists: { field: "summary.locations.pole_lat" } },
-              { exists: { field: "summary.locations.pole_lon" } }
+              // { exists: { field: "summary.locations.pole_lat" } },
+              // { exists: { field: "summary.locations.pole_lon" } }
             ),
           })}
           pageSize={5}

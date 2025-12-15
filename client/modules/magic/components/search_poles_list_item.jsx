@@ -220,19 +220,27 @@ class SearchSummariesListItem extends React.Component {
       tableSummary &&
       (tableSummary._geo_envelope || tableSummary._geo_point)
     ) {
-      //if (tableSummary._geo_envelope)
-      //  _.sortedUniqBy(
-      //    _.sortBy(tableSummary._geo_envelope,
-      //      x => _.flatten(x.coordinates).join('_')),
-      //    x => _.flatten(x.coordinates).join('_'))
-      //  .forEach(envelope => {
-      //    paths.push({
-      //      lat_s: envelope.coordinates[0][1],
-      //      lat_n: envelope.coordinates[1][1],
-      //      lon_w: envelope.coordinates[0][0],
-      //      lon_e: envelope.coordinates[1][0]
-      //    });
-      //  });
+      if (tableSummary._geo_envelope)
+        _.sortedUniqBy(
+          _.sortBy(tableSummary._geo_envelope,
+            x => _.flatten(x.coordinates).join('_')),
+          x => _.flatten(x.coordinates).join('_'))
+          .forEach(envelope => {
+            if (envelope.coordinates[0].length == 2)
+              paths.push({
+                lat_s: envelope.coordinates[0][1],
+                lat_n: envelope.coordinates[1][1],
+                lon_w: envelope.coordinates[0][0],
+                lon_e: envelope.coordinates[1][0]
+              });
+            else
+              paths.push({
+                lat_s: envelope.coordinates[1],
+                lat_n: envelope.coordinates[1],
+                lon_w: envelope.coordinates[0],
+                lon_e: envelope.coordinates[0],
+              });
+        });
 
       if (tableSummary._geo_point)
         _.sortedUniqBy(
@@ -634,6 +642,7 @@ class SearchSummariesListItem extends React.Component {
   }
 
   renderGeology(item) {
+    return null;
     let geologic_classes =
       item.summary && item.summary._all && item.summary._all.geologic_classes;
     let geologic_types =
