@@ -68,7 +68,7 @@ describe("magic.data_doi", () => {
                   { exists: { field: "summary.contribution.version" } },
                   { term: { "summary.contribution._is_activated": "true" } },
                 ],
-                // "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
+                "must_not": [{ "term": { "summary.contribution._has_data_doi": "true"}}],
                 // filter: { term: { "summary.contribution.id": 19778 } },
                 // filter: { term: { "summary.contribution.id": 20193 } },
                 // filter: { terms: { "summary.contribution.id": [14489, 17454,19501,19584,19589,19562,19921,20019,20020,20176,19778,20181] } },
