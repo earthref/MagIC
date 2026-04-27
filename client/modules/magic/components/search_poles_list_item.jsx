@@ -18,6 +18,7 @@ import SearchPolePlotThumbnail from "/client/modules/magic/containers/search_pol
 import { Button, Modal } from "semantic-ui-react";
 import { versions, models } from "/lib/configs/magic/data_models.js";
 import { index } from "/lib/configs/magic/search_levels.js";
+import { EditContributionModal } from "/client/modules/fiesta/components/edit_contribution_modal";
 
 class SearchSummariesListItem extends React.Component {
   constructor(props) {
@@ -122,6 +123,12 @@ class SearchSummariesListItem extends React.Component {
       labels.push("Measurement" + (count !== 1 ? "s" : ""));
       levels.push("measurements");
     }
+    const isPrivate =
+      item.summary &&
+      item.summary.contribution &&
+      item.summary.contribution._is_activated !== "true";
+    const contributionID =
+      item.summary && item.summary.contribution && item.summary.contribution.id;
     return (
       <div
         style={{
@@ -140,36 +147,32 @@ class SearchSummariesListItem extends React.Component {
                 <tr key={i}>
                   <td style={{ textAlign: "right" }}>
                     {levels[i] !== "experiments" &&
-                    levels[i] !== "measurements" ? (
-                      <a
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          this.setState({
-                            dataLevel: levels[i],
-                            showDataModal: true,
-                          });
-                        }}
-                      >
-                        {numeral(count).format("0 a")}
-                      </a>
+                    levels[i] !== "measurements" && isPrivate ? (
+                      <EditContributionModal
+                        contributionID={contributionID}
+                        initialTable={levels[i]}
+                        trigger={
+                          <span style={{ cursor: "pointer", color: "#800080" }}>
+                            {numeral(count).format("0 a")}
+                          </span>
+                        }
+                      />
                     ) : (
                       numeral(count).format("0 a")
                     )}
                   </td>
                   <td>
                     {levels[i] !== "experiments" &&
-                    levels[i] !== "measurements" ? (
-                      <a
-                        style={{ cursor: "pointer" }}
-                        onClick={() => {
-                          this.setState({
-                            dataLevel: levels[i],
-                            showDataModal: true,
-                          });
-                        }}
-                      >
-                        &nbsp;{labels[i]}
-                      </a>
+                    levels[i] !== "measurements" && isPrivate ? (
+                      <EditContributionModal
+                        contributionID={contributionID}
+                        initialTable={levels[i]}
+                        trigger={
+                          <span style={{ cursor: "pointer", color: "#800080" }}>
+                            &nbsp;{labels[i]}
+                          </span>
+                        }
+                      />
                     ) : (
                       <span>&nbsp;{labels[i]}</span>
                     )}

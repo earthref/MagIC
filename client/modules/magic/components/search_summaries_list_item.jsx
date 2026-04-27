@@ -21,6 +21,7 @@ import { versions, models } from '/lib/configs/magic/data_models';
 import { methodCodes } from '/lib/configs/magic/method_codes';
 import { cvs } from '/lib/modules/er/controlled_vocabularies';
 import { index } from '/lib/configs/magic/search_levels';
+import { EditContributionModal } from '/client/modules/fiesta/components/edit_contribution_modal';
 
 // import { ModalEditContribution } from '/lib/modules/fiesta/modal_view_edit_contribution';
 
@@ -249,45 +250,52 @@ class SearchSummariesListItem extends React.Component {
       levels.push('measurements');
     }
     const isPrivate = item.summary && item.summary.contribution && item.summary.contribution._is_activated !== 'true';
+    const contributionID = item.summary && item.summary.contribution && item.summary.contribution.id;
     return (
       <div style={{minWidth: 135, maxWidth: 135, marginRight: '1em', marginBottom: 5, fontSize:'small', lineHeight:1}}>
         <table><tbody>
           {counts.length == 0 && isPrivate && (
             <tr><td colSpan={2}>
-              <a onClick={() => {
-                this.setState({ dataLevel: 'locations', showDataModal: true, 
-                  dataLoading: false,
-                  validation: undefined });
-              }}>
-                Edit New<br/>Contribution
-              </a>
+              <EditContributionModal
+                contributionID={contributionID}
+                initialTable="locations"
+                trigger={
+                  <span style={{cursor: 'pointer', color: '#800080'}}>
+                    Edit New<br/>Contribution
+                  </span>
+                }
+              />
             </td></tr>
           )}
           {counts.map((count, i) => {
             return (
               <tr key={i}>
                 <td style={{textAlign: 'right'}}>
-                  { levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
-                    <a onClick={() => {
-                      this.setState({ dataLevel: levels[i], showDataModal: true, 
-                  dataLoading: false,
-                  validation: undefined });
-                    }}>
-                      {numeral(count).format('0 a')}
-                    </a>
+                  { levels[i] !== 'experiments' && levels[i] !== 'measurements' && isPrivate ?
+                    <EditContributionModal
+                      contributionID={contributionID}
+                      initialTable={levels[i]}
+                      trigger={
+                        <span style={{cursor: 'pointer', color: '#800080'}}>
+                          {numeral(count).format('0 a')}
+                        </span>
+                      }
+                    />
                   :
                     numeral(count).format('0 a')
                   }
                 </td>
                 <td>
-                  { levels[i] !== 'experiments' && levels[i] !== 'measurements' ?
-                    <a onClick={() => {
-                      this.setState({ dataLevel: levels[i], showDataModal: true, 
-                  dataLoading: false,
-                  validation: undefined });
-                    }}>
-                      &nbsp;{labels[i]}
-                    </a>
+                  { levels[i] !== 'experiments' && levels[i] !== 'measurements' && isPrivate ?
+                    <EditContributionModal
+                      contributionID={contributionID}
+                      initialTable={levels[i]}
+                      trigger={
+                        <span style={{cursor: 'pointer', color: '#800080'}}>
+                          &nbsp;{labels[i]}
+                        </span>
+                      }
+                    />
                   :
                     <span>&nbsp;{labels[i]}</span>
                 }
