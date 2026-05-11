@@ -1100,7 +1100,7 @@ export default function () {
     },
 
     async esGetContribution({ index, id, tables }) {
-      // console.log("esGetContribution", index, id);
+      console.log("esGetContribution", index, id);
       this.unblock();
       try {
         let resp = await esClient.search({

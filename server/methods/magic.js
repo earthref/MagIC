@@ -157,7 +157,11 @@ export default function () {
           encoding: "utf-8",
         });
       } catch (e) {
-        // console.error("magicGetPrivateContribution", `Failed to retrieve private contribution for ${id}`, e);
+        console.log(
+          "magicGetPrivateContribution",
+          `Failed to retrieve private contribution for ${id}`,
+          e,
+        );
         throw new Meteor.Error(
           "magicGetPrivateContribution",
           `Failed to retrieve private contribution for ${id}`
@@ -175,7 +179,11 @@ export default function () {
           key: `magic_contribution_${id}.zip`,
         });
       } catch (e) {
-        // console.error("magicGetPrivateContributionZip", `Failed to retrieve private contribution for ${id}`, e);
+        console.log(
+          "magicGetPrivateContributionZip",
+          `Failed to retrieve private contribution for ${id}`,
+          e,
+        );
         throw new Meteor.Error(
           "magicGetPrivateContributionZip",
           `Failed to retrieve private contribution for ${id}`
