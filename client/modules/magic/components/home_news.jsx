@@ -9,6 +9,16 @@ export default class extends React.Component {
   render() {
     return (
       <div style={{textAlign: "justify"}}>
+        <div className="ui divider"></div>
+        <h3>
+          <Image size="mini" src="/MagIC/pmag_org_logo.png" floated="left"/>
+          {`Paleomagnetism.org file converter`}
+        </h3>
+        <p>
+          {`To facilitate direction paleomagnetic data sharing between laboratories, Paleomagnetism.org has developed a `} 
+          <a href="https://beta.paleomagnetism.org/converter"><b>File Format Converter</b></a>
+          {`. Visit the beta site and try it out. Please send comments, problem reports, or requests for additional formats to paleomagnetism.org@gmail.com`}
+        </p>
         <h3>
           <Image size="mini" src="/MagIC/agu.jpg" floated="left"/>
           {`MagIC at AGU`}
@@ -84,29 +94,6 @@ export default class extends React.Component {
         <a href="https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ"><b>MagIC YouTube Channel</b></a>
         {`.`}
         </p>
-        <div className="ui divider"></div>
-        <h3>
-          <Image size="mini" src="/MagIC/agu.jpg" floated="left"/>
-          {` MagIC at AGU`}
-        </h3>
-        <p>
-          {`MagIC presented an `}
-          <a href="https://agu.confex.com/agu/fm19/meetingapp.cgi/Paper/548126" target="_blank"><b>eLightning talk</b></a>
-          {` on Tuesday morning at 10:20 AM (`}
-          <b>IN22B-01</b>
-          {` - `}
-          <i>Thorough Annotation of Magnetics Information Consortium (MagIC) Contributions with Schema.org Structured Metadata</i>
-          {`) and a `}
-          <a href="https://agu.confex.com/agu/fm19/meetingapp.cgi/Paper/560891" target="_blank"><b>poster</b></a>
-          {` on Thursday afternoon (`}
-          <b>GP43A-0788</b>
-          {` - `}
-          <i>Magnetics Information Consortium (MagIC) Database Interoperability Improvements: ORCID, EarthCube, Google, and PmagPy</i>
-          {`) at the `}
-          <a href="https://www.agu.org/fall-meeting" target="_blank"><b>2019 AGU Fall Meeting</b></a>
-          {`.`}
-        </p>
-        <div className="ui divider"></div>
         <h3>
           <Image size="mini" src="/MagIC/ec.jpg" floated="left"/>
           {` Project 419 / GeoCODES`}
