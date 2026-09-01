@@ -1,0 +1,31 @@
+name: Deploy
+
+# Push only -- deliberately no pull_request trigger. This repo is public and
+# the runner is self-hosted on the deploy box, so a workflow from a fork PR
+# would execute untrusted code next to production credentials. Push events
+# only fire for accounts with write access.
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+# Queue rather than cancel: a superseded run should still finish its bundle
+# swap and restart instead of being killed mid-swap.
+concurrency:
+  group: deploy-magic-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, marfik-deploy]
+    timeout-minutes: 60
+    steps:
+      # No actions/checkout on purpose. The deploy host keeps its own
+      # long-lived checkouts because settings.json is gitignored and exists
+      # only there; deploy-app.sh fast-forwards them in place. It also maps
+      # main -> earthref@magic and dev -> earthref@magic-dev, so the
+      # branch convention lives in one script rather than in five repos.
+      - name: Build and deploy
+        env:
+          BRANCH: ${{ github.ref_name }}
+        run: /home/earthref/bin/deploy-app.sh magic "$BRANCH"
