@@ -6,7 +6,10 @@ name: Deploy
 # only fire for accounts with write access.
 on:
   push:
-    branches: [main, dev]
+    # main only. The dev branches stay on GitHub to collect commits before a
+    # merge to main, but nothing is built from them: staging for the EarthRef
+    # apps is the FIESTA stack on dev.earthref.org, not a second Meteor tier.
+    branches: [main]
   workflow_dispatch:
 
 # Queue rather than cancel: a superseded run should still finish its bundle
@@ -22,9 +25,8 @@ jobs:
     steps:
       # No actions/checkout on purpose. The deploy host keeps its own
       # long-lived checkouts because settings.json is gitignored and exists
-      # only there; deploy-app.sh fast-forwards them in place. It also maps
-      # main -> earthref@magic and dev -> earthref@magic-dev, so the
-      # branch convention lives in one script rather than in five repos.
+      # only there; deploy-app.sh fast-forwards them in place and deploys
+      # main -> earthref@magic. It refuses any other branch.
       - name: Build and deploy
         env:
           BRANCH: ${{ github.ref_name }}
