@@ -40,7 +40,7 @@
     "filesize": "^8.0.7",
     "get-ranges": "^5.0.0",
     "google-map-react": "^2.2.1",
-    "handsontable": "^10.0.0",
+    "handsontable": "^18.1.0",
     "history": "^5.3.0",
     "jquery": "^3.7.1",
     "js-cookie": "^3.0.5",
