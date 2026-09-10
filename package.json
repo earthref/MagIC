@@ -12,7 +12,7 @@
     "autoprefixer": "^10.4.20",
     "html-loader": "^2.1.2",
     "jsdom": "17.0",
-    "mocha": "^9.2.2"
+    "mocha": "^12.0.0"
   },
   "dependencies": {
     "@handsontable/react": "^10.0.0",
