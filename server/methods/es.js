@@ -20,9 +20,34 @@ import { resolveTxt } from "dns";
 
 const saltRounds = 10;
 
+// The client's Connection removes its 'error' listener from the underlying
+// ClientRequest as soon as the response headers arrive. A socket error while
+// the body is still streaming (ECONNRESET reading a 100 MB contribution
+// document, 2026-09-10) is then an unhandled 'error' event and kills the
+// whole process. The Transport already turns the aborted body into an error
+// for the caller; this subclass just keeps a listener on the request so the
+// late error is logged instead of fatal.
+class SafeConnection extends opensearch.Connection {
+  request(params, callback) {
+    const req = super.request(params, callback);
+    if (req && typeof req.on === "function")
+      req.on("error", (error) => {
+        console.error(
+          "opensearch request error",
+          params && params.method,
+          params && params.path,
+          error && error.code,
+          error && error.message
+        );
+      });
+    return req;
+  }
+}
+
 const esClient = new opensearch.Client({
   //log: "trace",
   node: (Meteor.settings.opensearch && Meteor.settings.opensearch.node) || "",
+  Connection: SafeConnection,
   keepAlive: false,
   apiVersion: "6.8",
   requestTimeout: 60 * 60 * 1000, // 1 hour
