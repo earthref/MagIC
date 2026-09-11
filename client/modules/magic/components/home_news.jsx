@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 import {Image, Message} from 'semantic-ui-react';
 
 import {portals} from '/lib/configs/portals.js';
+import assetUrl from '/client/lib/asset_url';
 
 export default class extends React.Component {
 
@@ -11,7 +12,7 @@ export default class extends React.Component {
       <div style={{textAlign: "justify"}}>
         <div className="ui divider"></div>
         <h3>
-          <Image size="mini" src="/MagIC/pmag_org_logo.png" floated="left"/>
+          <Image size="mini" src={assetUrl('/MagIC/pmag_org_logo.png')} floated="left"/>
           {`Paleomagnetism.org file converter`}
         </h3>
         <p>
@@ -20,7 +21,7 @@ export default class extends React.Component {
           {`. Visit the beta site and try it out. Please send comments, problem reports, or requests for additional formats to paleomagnetism.org@gmail.com`}
         </p>
         <h3>
-          <Image size="mini" src="/MagIC/agu.jpg" floated="left"/>
+          <Image size="mini" src={assetUrl('/MagIC/agu.jpg')} floated="left"/>
           {`MagIC at AGU`}
         </h3>
         <p>
@@ -58,7 +59,7 @@ export default class extends React.Component {
         </p>
         <div className="ui divider"></div>
         <h3>
-          <Image size="mini" src="/MagIC/sio.jpg" floated="left"/>
+          <Image size="mini" src={assetUrl('/MagIC/sio.jpg')} floated="left"/>
           {` 2021 MagIC Workshop`}
         </h3>
         <p>
@@ -76,7 +77,7 @@ export default class extends React.Component {
         </p>
         <div className="ui divider"></div>
         <h3>
-          <Image size="mini" src="/MagIC/youtube.png" floated="left"/>
+          <Image size="mini" src={assetUrl('/MagIC/youtube.png')} floated="left"/>
           <a href="https://www.youtube.com/playlist?list=PLirL2unikKCgUkHQ3m8nT29tMCJNBj4kj"><font color="000000">2020 MagIC Workshop Tutorial Videos</font></a>
         </h3>
         <p>
@@ -95,7 +96,7 @@ export default class extends React.Component {
         {`.`}
         </p>
         <h3>
-          <Image size="mini" src="/MagIC/ec.jpg" floated="left"/>
+          <Image size="mini" src={assetUrl('/MagIC/ec.jpg')} floated="left"/>
           {` Project 419 / GeoCODES`}
         </h3>
         <p>

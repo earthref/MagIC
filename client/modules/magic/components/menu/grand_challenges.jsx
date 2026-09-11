@@ -1,5 +1,6 @@
 import React from 'react';
 import {Grid} from 'semantic-ui-react';
+import assetUrl from '/client/lib/asset_url';
 
 export default class extends React.Component {
 
@@ -10,7 +11,7 @@ export default class extends React.Component {
 					<Grid.Row>
 						<Grid.Column width={3}>
 						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
-                <img src="/MagIC/glatzmaierReversal.jpg"/>
+                <img src={assetUrl('/MagIC/glatzmaierReversal.jpg')}/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>
@@ -20,7 +21,7 @@ export default class extends React.Component {
 					<Grid.Row>
 						<Grid.Column width={3}>
 						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
-							<img src="/MagIC/polarWanderPlumes.jpg"/>
+							<img src={assetUrl('/MagIC/polarWanderPlumes.jpg')}/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>
@@ -30,7 +31,7 @@ export default class extends React.Component {
 					<Grid.Row>
 						<Grid.Column width={3}>
 						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
-							<img src="/MagIC/widemereLakeCore.png"/>
+							<img src={assetUrl('/MagIC/widemereLakeCore.png')}/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>
@@ -40,7 +41,7 @@ export default class extends React.Component {
 					<Grid.Row>
 						<Grid.Column width={3}>
 						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
-							<img src="/MagIC/pigeon.jpg"/>
+							<img src={assetUrl('/MagIC/pigeon.jpg')}/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>
@@ -54,7 +55,7 @@ export default class extends React.Component {
 					<Grid.Row>
 						<Grid.Column width={3}>
 						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
-							<img src="/MagIC/loessVicksburg.jpg"/>
+							<img src={assetUrl('/MagIC/loessVicksburg.jpg')}/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>
@@ -64,7 +65,7 @@ export default class extends React.Component {
 					<Grid.Row>
 						<Grid.Column width={3}>
 						<div className="ui small bordered rounded image" style={{fontSize: '3em'}}>
-							<img src="/MagIC/seymchanMeteorite.jpg"/>
+							<img src={assetUrl('/MagIC/seymchanMeteorite.jpg')}/>
 						</div>
 						</Grid.Column>
 						<Grid.Column width={13} textAlign='justified'>

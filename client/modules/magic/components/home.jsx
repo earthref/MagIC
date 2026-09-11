@@ -7,6 +7,7 @@ import SearchDividedList from "/client/modules/common/containers/search_divided_
 import SearchSummariesListItem from "/client/modules/magic/containers/search_summaries_list_item";
 import News from "/client/modules/magic/components/home_news";
 import { levels } from "/lib/configs/magic/search_levels.js";
+import assetUrl from '/client/lib/asset_url';
 
 export default class extends React.Component {
   constructor(props) {
@@ -289,7 +290,7 @@ export default class extends React.Component {
                   <div className="ui tiny image">
                     <img
                       className="ui bordered image"
-                      src="/MagIC/plot.png"
+                      src={assetUrl('/MagIC/plot.png')}
                       style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                     />
                   </div>
@@ -307,7 +308,7 @@ export default class extends React.Component {
                   <div className="ui tiny image">
                     <img
                       className="ui bordered image"
-                      src="/MagIC/plot.png"
+                      src={assetUrl('/MagIC/plot.png')}
                       style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                     />
                   </div>
@@ -325,7 +326,7 @@ export default class extends React.Component {
                   <div className="ui tiny image">
                     <img
                       className="ui bordered image"
-                      src="/MagIC/plot.png"
+                      src={assetUrl('/MagIC/plot.png')}
                       style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                     />
                   </div>
@@ -343,7 +344,7 @@ export default class extends React.Component {
                   <div className="ui tiny image">
                     <img
                       className="ui bordered image"
-                      src="/MagIC/plot.png"
+                      src={assetUrl('/MagIC/plot.png')}
                       style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                     />
                   </div>
@@ -361,7 +362,7 @@ export default class extends React.Component {
                   <div className="ui tiny image">
                     <img
                       className="ui bordered image"
-                      src="/MagIC/plot.png"
+                      src={assetUrl('/MagIC/plot.png')}
                       style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                     />
                   </div>
@@ -379,7 +380,7 @@ export default class extends React.Component {
                   <div className="ui tiny image">
                     <img
                       className="ui bordered image"
-                      src="/MagIC/plot.png"
+                      src={assetUrl('/MagIC/plot.png')}
                       style={{ border: "1px solid rgba(0, 0, 0, 0.1)" }}
                     />
                   </div>

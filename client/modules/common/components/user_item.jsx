@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import {Item, Label} from 'semantic-ui-react';
 
 import { portals } from '/lib/configs/portals.js';
+import assetUrl from '/client/lib/asset_url';
 
 class UserItem extends React.Component {
 
@@ -52,7 +53,7 @@ class UserItem extends React.Component {
             }
             { users[id].orcid &&
               <Label as='a' image href={'https://orcid.org/' + users[id].orcid}>
-                <img src='/ORCIDiD_icon64x64.png'/>
+                <img src={assetUrl('/ORCIDiD_icon64x64.png')}/>
                 {'https://orcid.org/' + users[id].orcid}
               </Label>
             }

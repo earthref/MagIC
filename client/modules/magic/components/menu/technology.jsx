@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Grid, Image, Label, Segment, Container, Header, Divider } from 'semantic-ui-react';
+import assetUrl from '/client/lib/asset_url';
 
 const labelStyle = { textAlign:'center', textOverflow:'ellipsis', overflow:'hidden' };
 
@@ -15,7 +16,7 @@ export default class extends React.Component {
 					This data model, along with method codes and vocabulary lists, can be browsed via the MagIC website, downloaded as JSON files for reuse, and easily updated by the MagIC team by request from the community via either email or reporting an issue at the MagIC GitHub repository.
 				</Container>
 				<Divider hidden/>
-				<Image style={{ maxWidth:800, margin:'auto' }} src="/MagIC/technology/ecosystem.png" fluid/>
+				<Image style={{ maxWidth:800, margin:'auto' }} src={assetUrl('/MagIC/technology/ecosystem.png')} fluid/>
 				<Divider hidden/>
 				<Container fluid textAlign='justified'>
 					<Header size='medium' dividing>Technologies and Surrounding Ecosystem</Header>
@@ -29,49 +30,49 @@ export default class extends React.Component {
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>React</Label>
-									<Image src='/MagIC/technology/react.svg'/>
+									<Image src={assetUrl('/MagIC/technology/react.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Semantic UI</Label>
-									<Image src='/MagIC/technology/semantic-ui.svg'/>
+									<Image src={assetUrl('/MagIC/technology/semantic-ui.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Meteor</Label>
-									<Image src='/MagIC/technology/meteor.svg'/>
+									<Image src={assetUrl('/MagIC/technology/meteor.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>MongoDB</Label>
-									<Image src='/MagIC/technology/mongodb.svg'/>
+									<Image src={assetUrl('/MagIC/technology/mongodb.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Elasticsearch</Label>
-									<Image src='/MagIC/technology/elasticsearch.svg'/>
+									<Image src={assetUrl('/MagIC/technology/elasticsearch.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>AWS</Label>
-									<Image src='/MagIC/technology/aws.svg'/>
+									<Image src={assetUrl('/MagIC/technology/aws.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 										<Label attached='bottom' style={labelStyle}>Docker</Label>
-										<Image src='/MagIC/technology/docker.svg'/>
+										<Image src={assetUrl('/MagIC/technology/docker.svg')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Kubernetes</Label>
-									<Image src='/MagIC/technology/kubernetes.svg'/>
+									<Image src={assetUrl('/MagIC/technology/kubernetes.svg')}/>
 								</Segment>
 							</Grid.Column>
 						</Grid.Row>
@@ -87,37 +88,37 @@ export default class extends React.Component {
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Reference Metadata</Label>
-									<Image src='/MagIC/technology/crossref.png'/>
+									<Image src={assetUrl('/MagIC/technology/crossref.png')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>DOI Minting</Label>
-									<Image src='/MagIC/technology/EZID.png'/>
+									<Image src={assetUrl('/MagIC/technology/EZID.png')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Structured Data</Label>
-									<Image src='/MagIC/technology/json-ld.png'/>
+									<Image src={assetUrl('/MagIC/technology/json-ld.png')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Nature Repository</Label>
-									<Image src='/MagIC/technology/scientific data.png'/>
+									<Image src={assetUrl('/MagIC/technology/scientific data.png')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>Data DOI Metadata</Label>
-									<Image src='/MagIC/technology/datacite.png'/>
+									<Image src={assetUrl('/MagIC/technology/datacite.png')}/>
 								</Segment>
 							</Grid.Column>
 							<Grid.Column>
 								<Segment>
 									<Label attached='bottom' style={labelStyle}>ORCiD Member</Label>
-									<Image src='/MagIC/technology/orcid.png'/>
+									<Image src={assetUrl('/MagIC/technology/orcid.png')}/>
 								</Segment>
 							</Grid.Column>
 						</Grid.Row>

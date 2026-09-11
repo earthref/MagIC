@@ -5,6 +5,7 @@ import { useLocation, useHistory } from "react-router-dom";
 import Cookies from 'js-cookie';
 
 import {portals} from '/lib/configs/portals';
+import assetUrl from '/client/lib/asset_url';
 
 const orcidURL = Meteor.isDevelopment ? 'sandbox.orcid.org' : 'orcid.org';
 const orcidClientID = Meteor.isDevelopment ? 'APP-F8JQS3NCYGINEF7B' : 'APP-7V8YQW9CI7R01H1T';
@@ -43,7 +44,7 @@ export function LogIn({ openInitially, className, portal }) {
 							<Header as='h4' textAlign='center'>
 								With an ORCID iD:
 							</Header>
-							<img src='/ORCIDiD_icon64x64.png' style={{ margin: '1em auto', display: 'block' }}/>
+							<img src={assetUrl('/ORCIDiD_icon64x64.png')} style={{ margin: '1em auto', display: 'block' }}/>
 							<Button 
 								fluid 
 								color='black' 
@@ -209,7 +210,7 @@ export function ORCIDLoggingInModal({ code }) {
 				{ error &&
 					<Button as='a' href={ orcidAuthorizeURL }>
 						<img 
-							src='/ORCIDiD_icon64x64.png'
+							src={assetUrl('/ORCIDiD_icon64x64.png')}
 							style={{ margin: '-.2em 1em -.3em -.5em', height: '1.25em' }}
 						/>
 						Retry ORCID Login
