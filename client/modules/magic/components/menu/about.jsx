@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 import {Grid, Image, Container, Segment, Header, Divider} from 'semantic-ui-react';
 
 import IconButton from '/client/modules/common/components/icon_button';
+import assetUrl from '/client/lib/asset_url';
 
 export default class extends React.Component {
 
@@ -26,22 +27,22 @@ export default class extends React.Component {
                             </Grid.Column>
                             <Grid.Column>
                                 <Segment>
-                                    <Image src='/MagIC/orgs/nsf_small.png'/>
+                                    <Image src={assetUrl('/MagIC/orgs/nsf_small.png')}/>
                                 </Segment>
                             </Grid.Column>
                             <Grid.Column>
                                 <Segment>
-                                    <Image src='/MagIC/orgs/osu_small.png'/>
+                                    <Image src={assetUrl('/MagIC/orgs/osu_small.png')}/>
                                 </Segment>
                             </Grid.Column>
                             <Grid.Column>
                                 <Segment>
-                                    <Image src='/MagIC/orgs/ucsd_small.png'/>
+                                    <Image src={assetUrl('/MagIC/orgs/ucsd_small.png')}/>
                                 </Segment>
                             </Grid.Column>
                             <Grid.Column>
                                 <Segment>
-                                    <Image src='/MagIC/orgs/uminn_small.png'/>
+                                    <Image src={assetUrl('/MagIC/orgs/uminn_small.png')}/>
                                 </Segment>
                             </Grid.Column>
                             <Grid.Column>
@@ -58,7 +59,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#akoppers">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
-                                    <img src="/MagIC/people/akoppers.jpg" />
+                                    <img src={assetUrl('/MagIC/people/akoppers.jpg')} />
                                 </div><br/>
                                 Anthony Koppers
                                 <div className="sub header">Professor at<br/>CEOAS, OSU</div>
@@ -67,7 +68,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#nswanson-hysell">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="Department of Earth and Environmental Sciences, University of Minnesota" >
-                                    <img src="/MagIC/people/nswanson-hysell.jpg" />
+                                    <img src={assetUrl('/MagIC/people/nswanson-hysell.jpg')} />
                                 </div><br/>
                                 Nick Swanson-Hysell
                                 <div className="sub header">Associate Professor at<br/>University of Minnesota</div>
@@ -76,7 +77,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#mbrown">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
-                                    <img src="/MagIC/people/mbrown.jpg" />
+                                    <img src={assetUrl('/MagIC/people/mbrown.jpg')} />
                                 </div><br/>
                                 Max Brown
                                 <div class="sub header">Research Associate Professor <br/>at IRM, U. of Minnesota</div>
@@ -85,7 +86,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#jfeinberg">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="College of Science and Engineering, Earth & Environmental Sciences, IRM, University of Minnesota" >
-                                    <img src="/MagIC/people/jfeinberg.jpg" />
+                                    <img src={assetUrl('/MagIC/people/jfeinberg.jpg')} />
                                 </div><br/>
                                 Josh Feinberg
                                 <div class="sub header">Professor at <br/>IRM, U. of Minnesota</div>
@@ -94,7 +95,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#cconstable">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="Institute for Geophysics and Planetary Physics, SIO, UCSD" >
-                                    <img src="/MagIC/people/cconstable.jpg" />
+                                    <img src={assetUrl('/MagIC/people/cconstable.jpg')} />
                                 </div><br/>
                                 Cathy Constable
                                 <div className="sub header">Professor at<br/>SIO, UCSD</div>
@@ -105,7 +106,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#ltauxe">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="Geosciences Research Division, SIO, UCSD" >
-                                    <img src="/MagIC/people/ltauxe.jpg" />
+                                    <img src={assetUrl('/MagIC/people/ltauxe.jpg')} />
                                 </div><br/>
                                 Lisa Tauxe
                                 <div className="sub header">Professor Emerita<br/>at SIO, UCSD</div>
@@ -114,7 +115,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#njarboe">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
-                                    <img src="/MagIC/people/njarboe.jpg" />
+                                    <img src={assetUrl('/MagIC/people/njarboe.jpg')} />
                                 </div><br/>
                                 Nick Jarboe
                                 <div className="sub header">Data Analyst via<br/>CEOAS, OSU</div>
@@ -123,7 +124,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#rminnet">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="Marine Geology and Geophysics, CEOAS, OSU" >
-                                    <img src="/MagIC/people/rminnett.jpg" />
+                                    <img src={assetUrl('/MagIC/people/rminnett.jpg')} />
                                 </div><br/>
                                 Rupert Minnett
                                 <div className="sub header">Programmer via<br/>CEOAS, OSU</div>
@@ -132,7 +133,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <a className="ui center aligned small icon header" target="_top" href="/MagIC/contact/#psolheid">
                                 <div className="ui huge icon bordered rounded image" data-tooltip="IRM, University of Minnesota" >
-                                    <img src="/MagIC/people/psolheid.jpg" />
+                                    <img src={assetUrl('/MagIC/people/psolheid.jpg')} />
                                 </div><br/>
                                 Peat Solheid
                                 <div class="sub header">Senior Scientist at <br/>IRM, U. of Minnesota</div>
@@ -150,7 +151,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Associate Professor, University of Oslo" >
-                                        <img src="/MagIC/people/mdomeier.jpg" />
+                                        <img src={assetUrl('/MagIC/people/mdomeier.jpg')} />
                                     </div><br/>
                                     Mathew Domeier
                                     <div className="sub header">
@@ -162,7 +163,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Assistant Professor, Harvard University" >
-                                        <img src="/MagIC/people/rfu.jpg" />
+                                        <img src={assetUrl('/MagIC/people/rfu.jpg')} />
                                     </div><br/>
                                     Roger Fu
                                     <div className="sub header">
@@ -175,7 +176,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Professor, Ludwig Maximilians Universität" >
-                                        <img src="/MagIC/people/sgilder.jpg" />
+                                        <img src={assetUrl('/MagIC/people/sgilder.jpg')} />
                                     </div><br/>
                                     Stuart Gilder
                                     <div className="sub header">
@@ -188,7 +189,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="CNRS Researcher, IPGP" >
-                                        <img src="/MagIC/people/flagroix.jpg" />
+                                        <img src={assetUrl('/MagIC/people/flagroix.jpg')} />
                                     </div><br/>
                                     France Lagroix
                                     <div className="sub header">
@@ -200,7 +201,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Associate Professor, University of Utah" >
-                                        <img src="/MagIC/people/plippert.jpg" />
+                                        <img src={assetUrl('/MagIC/people/plippert.jpg')} />
                                     </div><br/>
                                     Peter Lippert
                                     <div className="sub header">
@@ -215,7 +216,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Assistant Professor, University of Florida" >
-                                        <img src="/MagIC/people/csprain.jpg" />
+                                        <img src={assetUrl('/MagIC/people/csprain.jpg')} />
                                     </div><br/>
                                     Courtney Sprain
                                     <div className="sub header">
@@ -227,7 +228,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui medium icon bordered rounded image" data-tooltip="Assistant Professor, Dartmouth College" >
-                                        <img src="/MagIC/people/sslotznick.jpg" />
+                                        <img src={assetUrl('/MagIC/people/sslotznick.jpg')} />
                                     </div><br/>
                                     Sarah Slotznick
                                     <div className="sub header">
@@ -240,7 +241,7 @@ export default class extends React.Component {
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Assistant Professor, Stanford University
 " >
-                                        <img src="/MagIC/people/stikoo.jpg" />
+                                        <img src={assetUrl('/MagIC/people/stikoo.jpg')} />
                                     </div><br/>
                                     Sonia Tikoo
                                     <div className="sub header">
@@ -252,7 +253,7 @@ export default class extends React.Component {
                             <Grid.Column>
                                 <div className="ui center aligned small icon header">
                                     <div className="ui big icon bordered rounded image" data-tooltip="Professor, Utrecht University" >
-                                        <img src="/MagIC/people/dvanhinsbergen.jpg" />
+                                        <img src={assetUrl('/MagIC/people/dvanhinsbergen.jpg')} />
                                     </div><br/>
                                     Douwe van Hinsbergen
                                     <div className="sub header">
