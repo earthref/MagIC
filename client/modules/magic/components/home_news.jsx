@@ -25,11 +25,11 @@ export default class extends React.Component {
           {`MagIC at AGU`}
         </h3>
         <p>
-          {` MagIC will be presenting a poster that this year's AGU conference. It will be in the Monday afternoon poster session `} 
+          {` MagIC presented a poster at last year's AGU conference in the Monday afternoon poster session `}
           <b>(GP13B-0307)</b>
-          {`. Please drop by and see what is new with MagIC in 2025 and talk with us about what you would like to see MagIC do for you in the future. A copy of this year's poster can be found at `}
+          {`. A copy of the 2025 poster can be found `}
           <a href="https://njarboe.com/public/JarboeMagIC2025AGUPoster.pdf"><b>here</b></a>
-          {`. See you there!`}
+          {`.`}
         </p>
         <div className="ui divider"></div>
         <h3>
@@ -60,20 +60,20 @@ export default class extends React.Component {
         <div className="ui divider"></div>
         <h3>
           <Image size="mini" src={assetUrl('/MagIC/sio.jpg')} floated="left"/>
-          {` 2021 MagIC Workshop`}
+          {` 2023 MagIC Workshop`}
         </h3>
         <p>
-          {` MagIC hosted its 2021 workshop on `}
-          <b>January 19th-21st, 2021</b>
-          {` online via Zoom and Slack with 194 participants. Titled "`}
-          <a href="https://earthref.org/events/MAGIC/2021/"><b>2021 MagIC Workshop: Rock and Paleomagnetism through Time and Space</b></a>
-          {`", it consisted of three days of science talks in four sessions. Visit the `}
-          <a href="https://earthref.org/events/MAGIC/2021/"><b>workshop website</b></a>
-          {` for the full schedule and other workshop details. The `} 
-          <a href="https://www.youtube.com/playlist?list=PLirL2unikKCi2xvyly82krC-_jWpelB0P"><b>workshop talks</b></a>
-          {` and `} 
-          <a href="https://www.youtube.com/playlist?list=PLirL2unikKChSOapeWSKBZRbj1aGiT48r"><b>poster lightning talks</b></a>
-          {` are up on our YouTube channel. The posters can be found on MagIC's Slack channel. Email Nick Jarboe (njarboe@ucsd.edu) to request an invite to the channel.`} 
+          {` MagIC hosted its 2023 workshop on `}
+          <b>February 28th - March 2nd, 2023</b>
+          {` at the Scripps Institution of Oceanography, UCSD in La Jolla, California with 61 participants. Titled "`}
+          <a href="https://earthref.org/events/MAGIC/2023/"><b>Magnetism and Earth History: Field Evolution, Environmental Change and Paleogeography</b></a>
+          {`", it consisted of two days of science talks in four sessions and a day of MagIC-related group working sessions. Visit the `}
+          <a href="https://earthref.org/events/MAGIC/2023/"><b>workshop website</b></a>
+          {` for the full schedule and other workshop details. The `}
+          <a href="https://www.youtube.com/playlist?list=PLirL2unikKCgfd7YuZ_li9V3yMsB5-_bG"><b>workshop talks</b></a>
+          {` are up on our `}
+          <a href="https://www.youtube.com/@magneticsinformationconsor5873"><b>YouTube channel</b></a>
+          {`.`}
         </p>
         <div className="ui divider"></div>
         <h3>

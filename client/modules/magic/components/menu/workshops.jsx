@@ -12,7 +12,7 @@ export default class extends React.Component {
         <Divider />
         <p>
          <h4><a href="https://earthref.org/events/MAGIC/2023/">2023 MagIC Workshop</a> (61 Participants)</h4>
-          The 2023 MagIC Workshop was took place from Feb 28th through Mar 2nd, 2023 in La Jolla, California
+          The 2023 MagIC Workshop took place from Feb 28th through Mar 2nd, 2023 in La Jolla, California
           at the Scripps Institution of Oceanography, UCSD. The workshop, "Magnetism and Earth History: Field
           Evolution, Environmental Change and Paleogeography", consisted of two days of science talks in four
           sessions and a day of MagIC-related group working sessions. Please visit the workshop
