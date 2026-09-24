@@ -14,7 +14,7 @@
     "html-loader": "^2.1.2",
     "jsdom": "17.0",
     "mocha": "^9.2.2",
-    "prettier": "^3.9.6"
+    "prettier": "3.9.6"
   },
   "dependencies": {
     "@handsontable/react": "^10.0.0",
