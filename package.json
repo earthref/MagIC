@@ -9,10 +9,12 @@
   },
   "devDependencies": {
     "@babel/runtime": "^7.25.6",
+    "acorn": "^8.18.0",
     "autoprefixer": "^10.4.20",
     "html-loader": "^2.1.2",
     "jsdom": "17.0",
-    "mocha": "^9.2.2"
+    "mocha": "^9.2.2",
+    "prettier": "3.9.6"
   },
   "dependencies": {
     "@handsontable/react": "^10.0.0",
@@ -88,6 +90,9 @@
     "build-meteor": "meteor run --port 3020 --settings settings.json",
     "build-semantic-ui": "lessc .semantic-ui/src/semantic.less public/lib/semantic-ui/compiled/2.4.2/semantic.css",
     "deploy": "meteor deploy www2.earthref.org --settings settings.json",
-    "mint-data-dois": "set TEST_WATCH=0&& set TEST_CLIENT=0&& meteor test --once --driver-package=meteortesting:mocha --port 3020 --settings settings.json"
+    "mint-data-dois": "set TEST_WATCH=0&& set TEST_CLIENT=0&& meteor test --once --driver-package=meteortesting:mocha --port 3020 --settings settings.json",
+    "data-model:build": "node .scripts/data_model/build.mjs",
+    "data-model:validate": "node .scripts/data_model/validate.mjs",
+    "data-model:test": "node --test .scripts/data_model/tests.mjs"
   }
 }

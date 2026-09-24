@@ -1,0 +1,41 @@
+name: Data model
+
+# Runs on a hosted runner with a read-only token. This is pure computation
+# over files in the repository, so unlike deploy.yml it is safe to trigger on
+# pull requests from forks. Do not add secrets or self-hosted runners here.
+on:
+  pull_request:
+    paths:
+      - "lib/configs/magic/data_models/**"
+      - "lib/modules/er/controlled_vocabularies.js"
+      - "lib/modules/er/suggested_vocabularies.js"
+      - ".scripts/data_model/**"
+      - ".github/workflows/data-model.yml"
+  push:
+    branches: [main, dev]
+    paths:
+      - "lib/configs/magic/data_models/**"
+      - ".scripts/data_model/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # Lockfile versions, so Prettier matches what developers format with (the
+      # validator fails on any formatting difference). --ignore-scripts skips
+      # the native builds (canvas, fibers) the scripts do not need.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Validate 3.0.js
+        run: node .scripts/data_model/validate.mjs
+      - name: Self-tests
+        run: node --test .scripts/data_model/tests.mjs
