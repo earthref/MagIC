@@ -172,7 +172,7 @@ export default class extends React.Component {
                 </IconButton>
                 <IconButton
                   className="borderless card"
-                  href="https://earthref.org/MagIC/books/Tauxe/Essentials/"
+                  href="https://pmagpy.github.io/Essentials-JupyterBook/"
                   portal="MagIC"
                 >
                   <i className="icons">
