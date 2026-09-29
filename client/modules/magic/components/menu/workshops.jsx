@@ -13,7 +13,7 @@ export default class extends React.Component {
         <p>
          <h4>2027 IRM–MagIC Conference and Workshop: From Magnetic Minerals to Open Data</h4>
           The 2027 IRM–MagIC Conference and Workshop, "From Magnetic Minerals to Open Data", will take
-          place from June 7th through June 10th, 2027 in Salt Lake City, Utah, hosted by the University
+          place from June 7th through June 10th, 2027 in Salt Lake City, Utah, at the University
           of Utah. More details will be posted here as they become available.
         </p>
         <Divider />
