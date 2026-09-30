@@ -7,7 +7,14 @@ export default class extends React.Component {
     return (
       <Container textAlign="justified">
         <p>
-         MagIC has hosted workshops in 2011, 2014 and 2017 at the Scripps Institution of Oceanography in La Jolla, California. The format is generally two days of science talks followed by a few days of hands-on tutorials. During the tutorials we give presentations about uploading data into the MagIC database and installing, using, and contributing to the PmagPy paleomagnetic software suite. There is plenty of time given to one-on-one interaction with the MagIC team for help or to give us suggestions. In 2020 the MagIC in-person workshop was postponed due the SARS-CoV-2 virus outbreak and was replaced by a shortened virtual meeting.<br/>
+         MagIC hosts workshops, both in person and virtually. Workshops typically combine science talks spanning rock, geo-, and paleomagnetism with hands-on tutorials and working sessions on contributing data to the MagIC database and on installing, using, and contributing to the PmagPy paleomagnetic software suite. There is time for one-on-one interaction with the MagIC team, whether for help with data or to share suggestions. Details, schedules, and recordings for each workshop are listed below.<br/>
+        </p>
+        <Divider />
+        <p>
+         <h4>2027 IRM–MagIC Conference and Workshop: From Magnetic Minerals to Open Data</h4>
+          The 2027 IRM–MagIC Conference and Workshop, "From Magnetic Minerals to Open Data", will take
+          place from June 7th through June 10th, 2027 in Salt Lake City, Utah, at the University
+          of Utah. More details will be posted here as they become available.
         </p>
         <Divider />
         <p>
