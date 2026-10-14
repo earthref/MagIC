@@ -354,6 +354,29 @@ export default class MagICUploadContribution extends React.Component {
     return data;
   }
 
+  // Combine two measurements tables of the form {columns, rows} into one, aligning
+  // the rows to the union of the two column lists.
+  appendMeasurements(existing, uploaded) {
+    const columns = _.union(existing.columns, uploaded.columns);
+    const realign = (table) => {
+      const idx = {};
+      table.columns.forEach((column, j) => { idx[column] = j; });
+      return table.rows.map(row => columns.map(column =>
+        idx[column] !== undefined && row[idx[column]] !== undefined ? row[idx[column]] : ''
+      ));
+    };
+    return {
+      columns: columns,
+      rows: realign(existing).concat(realign(uploaded))
+    };
+  }
+
+  setAppendTables(append_tables) {
+    if (this.state.summarizing || this.state.uploading) return;
+    if (append_tables === this.state.append_tables) return;
+    this.setState({ append_tables: append_tables, uploadError: undefined }, () => this.reviewUpload());
+  }
+
   reviewUpload() {
     const dataModel = models[_.last(versions)];
     this.setState({
@@ -369,22 +392,32 @@ export default class MagICUploadContribution extends React.Component {
       this.summarizer = new SummarizeContribution({});
       console.log('before merging', this.state._existing_contribution, this.state._existing_summary);
       this.contribution = _.cloneDeep(this.state._existing_contribution) || {};
-      for (let file of this.files) {
-        if (file.imported) file.imported.map((data) => {
-          if (data.table && data.columns && data.rows) {
-            if (this.contribution[data.table]) delete this.contribution[data.table];
-          }
-        });
+      // When appending, keep the existing tables and add the uploaded rows to them.
+      // Otherwise, replace any existing table that is included in the uploaded files.
+      const appendTables = this.state._id !== '' && this.state.append_tables;
+      const existingMeasurements = appendTables && this.contribution.measurements ?
+        this.contribution.measurements : undefined;
+      if (!appendTables) {
+        for (let file of this.files) {
+          if (file.imported) file.imported.map((data) => {
+            if (data.table && data.columns && data.rows) {
+              if (this.contribution[data.table]) delete this.contribution[data.table];
+            }
+          });
+        }
       }
+      // Measurements are stored as {columns, rows} rather than as row objects, so
+      // they are merged with the existing measurements after the files are imported.
+      let uploadedMeasurements = undefined;
       for (let file of this.files) {
         if (file.imported) file.imported.map((data) => {
           if (data.table && data.columns && data.rows) {
             const dataModelColumns = dataModel.tables[data.table] && dataModel.tables[data.table].columns;
             if (data.table === 'measurements') {
-              if (this.contribution.measurements !== undefined) {
+              if (uploadedMeasurements !== undefined) {
                 file.parseErrors.push('There are more than one measurement tables in this file. Please combine them before uploading.');
               } else {
-                this.contribution.measurements = {
+                uploadedMeasurements = {
                   columns: _.without(data.columns, undefined),
                   rows: data.rows.map(row => _.without(row.map((x, j) => {
                     if (data.columns[j] === undefined) return false;
@@ -463,6 +496,13 @@ export default class MagICUploadContribution extends React.Component {
             }
           }
         });
+      }
+      if (uploadedMeasurements !== undefined) {
+        if (existingMeasurements && existingMeasurements.columns && existingMeasurements.rows) {
+          this.contribution.measurements = this.appendMeasurements(existingMeasurements, uploadedMeasurements);
+        } else {
+          this.contribution.measurements = uploadedMeasurements;
+        }
       }
       let contributionOverride = {
         id: this.state._existing_summary.summary && 
@@ -1610,6 +1650,43 @@ export default class MagICUploadContribution extends React.Component {
                           </div>
                         )}
                       </div>
+                      {this.state._id !== "" && (
+                        <div style={{ marginTop: "1em" }}>
+                          <div className="ui two fluid buttons">
+                            <div
+                              className={
+                                "ui button" +
+                                (!this.state.append_tables ? " purple" : "") +
+                                (this.state.summarizing || this.state.uploading
+                                  ? " disabled"
+                                  : "")
+                              }
+                              onClick={() => this.setAppendTables(false)}
+                            >
+                              <i className="exchange icon" />
+                              Replace Tables
+                            </div>
+                            <div
+                              className={
+                                "ui button" +
+                                (this.state.append_tables ? " purple" : "") +
+                                (this.state.summarizing || this.state.uploading
+                                  ? " disabled"
+                                  : "")
+                              }
+                              onClick={() => this.setAppendTables(true)}
+                            >
+                              <i className="plus icon" />
+                              Append to Tables
+                            </div>
+                          </div>
+                          <div className="ui small basic segment" style={{ paddingTop: "0.5em", paddingBottom: 0 }}>
+                            {this.state.append_tables
+                              ? "The rows in the uploaded tables will be added to the matching tables already in this private contribution. Tables not included in the upload are kept as they are."
+                              : "Each table included in the upload will replace the matching table already in this private contribution. Tables not included in the upload are kept as they are."}
+                          </div>
+                        </div>
+                      )}
                       {!this.state.summarizing &&
                         this.summary &&
                         this.summary.contribution && (
@@ -1680,11 +1757,12 @@ export default class MagICUploadContribution extends React.Component {
                           }
                           onClick={this.upload.bind(this)}
                         >
-                          Upload to{" "}
                           {this.state._id
-                            ? "your existing private contribution: " +
+                            ? (this.state.append_tables
+                                ? "Append to your existing private contribution: "
+                                : "Replace tables in your existing private contribution: ") +
                               this.state._name
-                            : "a new private contribution: " + this.state._name}
+                            : "Upload to a new private contribution: " + this.state._name}
                         </div>
                       )}
                     </div>
