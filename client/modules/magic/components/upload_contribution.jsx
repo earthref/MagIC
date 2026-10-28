@@ -520,9 +520,13 @@ export default class MagICUploadContribution extends React.Component {
           this.state._existing_summary.summary.contribution && 
           this.state._existing_summary.summary.contribution.version || null
       };
+      // Drop null/undefined overrides so they don't clobber values from the uploaded contribution table
+      // (_.merge copies null over existing values) or block them in the summarizer (which only fills unset props).
+      contributionOverride = _.omitBy(contributionOverride, _.isNil);
       this.contribution.contribution = this.contribution.contribution || [{}];
       this.contribution.contribution[0] = _.merge({}, this.contribution.contribution[0], contributionOverride);
-      if(this.contribution.contribution[0].lab_names) this.contribution.contribution[0].lab_names = this.contribution.contribution[0].lab_names.join(":");
+      // lab_names is an array when it comes from an existing summary, but already a colon-joined string from a file
+      if (_.isArray(this.contribution.contribution[0].lab_names)) this.contribution.contribution[0].lab_names = this.contribution.contribution[0].lab_names.join(":");
       contributionOverride._contributor = this.state._contributor;
       this.summarizer.preSummarizePromise(this.contribution, { summary: { contribution: contributionOverride}}).then(() => {
         if (this.summarizer.json.contribution && 
