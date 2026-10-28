@@ -5,6 +5,7 @@ import ReactECharts from "echarts-for-react";
 import SearchPolesListItem from "/client/modules/magic/components/search_poles_list_item";
 import { Button, ButtonGroup, Input } from "semantic-ui-react";
 import plateBoundaries from "/lib/modules/er/plate_boundaries.js";
+import assetUrl from "/client/lib/asset_url";
 
 function toRadians(degrees) {
   return degrees * (Math.PI / 180);
@@ -746,7 +747,7 @@ export default SearchPolesView = ({ style, es }) => {
   const globeOption = {
     backgroundColor: "#FFF",
     globe: {
-      baseTexture: "/MagIC/global_relief_map.jpg",
+      baseTexture: assetUrl("/MagIC/global_relief_map.jpg"),
       //heightTexture: "/MagIC/global_relief_map.jpg",
       // displacementScale: 0.04,
       shading: "lambert",
