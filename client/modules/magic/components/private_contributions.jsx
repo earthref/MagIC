@@ -18,7 +18,7 @@ import {index} from "/lib/configs/magic/search_levels.js";
 import {versions, models} from '/lib/configs/magic/data_models';
 import {cvs} from '/lib/modules/er/controlled_vocabularies';
 import { css } from "jquery";
-import { EditContributionModal } from "/client/modules/fiesta/components/edit_contribution_modal";
+import { EditContributionModal, CONTRIBUTION_UPDATED_EVENT } from "/client/modules/fiesta/components/edit_contribution_modal";
 
 export default class extends React.Component {
 
@@ -47,6 +47,14 @@ export default class extends React.Component {
       }
     });
     this.updateContributions();
+    // After a contribution is edited and saved in the Edit modal, its stored _is_valid flag
+    // changes, so re-read the list to swap the Publish button back to Validate when needed.
+    this.onContributionUpdated = () => this.updateContributions({ quiet: true });
+    window.addEventListener(CONTRIBUTION_UPDATED_EVENT, this.onContributionUpdated);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener(CONTRIBUTION_UPDATED_EVENT, this.onContributionUpdated);
   }
 
   validate(id, activate) {
@@ -133,11 +141,12 @@ export default class extends React.Component {
     });
   }
 
-  updateContributions() {
+  // quiet: refresh in place without showing the loading placeholder (which would unmount the list)
+  updateContributions({ quiet = false } = {}) {
     if (!Cookies.get("user_id", Meteor.isDevelopment ? {} : { domain: '.earthref.org'})) {
       this.setState({loaded: true});
     } else {
-      this.setState({loaded: false});
+      if (!quiet) this.setState({loaded: false});
       Meteor.call(
         "esGetPrivateContributionSummaries",
         {
