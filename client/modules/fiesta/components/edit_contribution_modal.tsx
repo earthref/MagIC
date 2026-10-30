@@ -16,6 +16,12 @@ import ValidateContribution from '../../../../lib/modules/magic/validate_contrib
 const model = models[versions.slice(-1)[0]];
 const orderedTableNames = _.sortBy(_.keys(model.tables), table => model.tables[table].position);
 
+// Dispatched on window when a saved edit may have changed the contribution's stored state
+// (e.g. summary.contribution._is_valid), so pages showing it (like the Private Contributions
+// Validate/Publish button) can refresh. Only fired while the modal is closed, because a
+// listener that re-renders its list could otherwise unmount this modal mid-edit.
+export const CONTRIBUTION_UPDATED_EVENT = 'magic:contribution-updated';
+
 export const EditContributionModal = ({ contributionID, trigger, initialTable }: {
   contributionID: number,
   trigger: ReactElement,
@@ -42,6 +48,25 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
   const [validationData, setValidationData] = useState<Record<string, any>>({});
   const validationDataRef = useRef<Record<string, any>>({});
   const [validationTrigger, setValidationTrigger] = useState(0);
+  // isOpenRef mirrors isOpen for async callbacks; savedRef records that a save was started
+  // since the modal was last opened, so the parent page needs to re-read the contribution.
+  const isOpenRef = useRef(false);
+  const savedRef = useRef(false);
+  const notifyContributionUpdated = () => {
+    if (!savedRef.current || isOpenRef.current) return;
+    window.dispatchEvent(new CustomEvent(CONTRIBUTION_UPDATED_EVENT, { detail: { contributionID } }));
+  };
+  const openModal = () => {
+    isOpenRef.current = true;
+    savedRef.current = false;
+    setIsOpen(true);
+    setTable(initialTable || orderedTableNames[0]);
+  };
+  const closeModal = () => {
+    isOpenRef.current = false;
+    setIsOpen(false);
+    notifyContributionUpdated();
+  };
   const summaryQuery = useContributionSummaryQuery(contributionID, { enabled: isOpen });
   const activeTableQuery = useContributionTableQuery(contributionID, activeTable, { enabled: isOpen });
   const contributionQuery = useContributionQuery(contributionID, { enabled: isOpen && !!contributionID });
@@ -157,19 +182,22 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
       validationDataRef.current = errors;
       const hot = hotTable.current?.hotInstance;
       if (hot) setTimeout(() => hot.render(), 0);
-    }).catch(() => { /* silently ignore */ });
+    }).catch(() => { /* silently ignore */ })
+      // The server stores the validation result in _is_valid; if the user closed the modal
+      // while this was running, let the page pick up the final result.
+      .finally(() => notifyContributionUpdated());
   }, [isOpen, contributionID, validationTrigger]);
   return (
     <Modal
-      trigger={React.cloneElement(trigger, { onClick: () => { setIsOpen(true); setTable(initialTable || orderedTableNames[0]); } })}
-      onClose={() => setIsOpen(false)}
+      trigger={React.cloneElement(trigger, { onClick: openModal })}
+      onClose={closeModal}
       open={isOpen}
       style={{ width: 'calc(100vw - 4em)' }}
     >
       <Modal.Header>
         <i 
           className="close icon" 
-          onClick={() => setIsOpen(false)}
+          onClick={closeModal}
           style={{ cursor:'pointer', float: 'right', marginRight: '-0.5em' }}
         />
         {contributionID} - Contribution Data
@@ -953,6 +981,7 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
             if (!hasEdits || !contributionQuery.data) return;
             
             setIsSaving(true);
+            savedRef.current = true;
             const contributor = summaryQuery.data?.summary?.contribution?.contributor;
             const _contributor = summaryQuery.data?.summary?.contribution?._contributor;
             const id = contributionID;
@@ -1012,6 +1041,9 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
               return;
             } finally {
               setIsSaving(false);
+              // Saving sets _is_valid to "false" on the server; if the modal was closed
+              // mid-save, refresh the page now that the save has landed.
+              notifyContributionUpdated();
             }
 
             // Phase 2: Rebuild summaries after save is committed
@@ -1030,6 +1062,7 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
               alert('Error rebuilding summaries: ' + (error as Error).message);
             } finally {
               setIsResummarizing(false);
+              notifyContributionUpdated();
             }
           }}>
             {isSaving ? 'Saving...' : isResummarizing ? 'Rebuilding Summaries...' : 'Save Edits'}
@@ -1068,11 +1101,11 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
             activeTableQuery.refetch();
             summaryQuery.refetch();
             // Close modal
-            setIsOpen(false);
+            closeModal();
           }}>
             Cancel Edits
           </Button>
-          <Button onClick={() => setIsOpen(false)}>
+          <Button onClick={closeModal}>
             Close
           </Button>
         </Modal.Actions>
