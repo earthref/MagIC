@@ -10,7 +10,6 @@ export default class extends React.Component {
   render() {
     return (
       <div style={{textAlign: "justify"}}>
-        <div className="ui divider"></div>
         <h3>
           <Image size="mini" src={assetUrl('/MagIC/pmag_org_logo.png')} floated="left"/>
           {`Paleomagnetism.org file converter`}
@@ -20,6 +19,7 @@ export default class extends React.Component {
           <a href="https://beta.paleomagnetism.org/converter"><b>File Format Converter</b></a>
           {`. Visit the beta site and try it out. Please send comments, problem reports, or requests for additional formats to paleomagnetism.org@gmail.com`}
         </p>
+        <div className="ui divider"></div>
         <h3>
           <Image size="mini" src={assetUrl('/MagIC/agu.jpg')} floated="left"/>
           {`MagIC at AGU`}
@@ -95,6 +95,7 @@ export default class extends React.Component {
         <a href="https://www.youtube.com/channel/UC-DbvhEu49a6dZXdvUWorhQ"><b>MagIC YouTube Channel</b></a>
         {`.`}
         </p>
+        <div className="ui divider"></div>
         <h3>
           <Image size="mini" src={assetUrl('/MagIC/ec.jpg')} floated="left"/>
           {` Project 419 / GeoCODES`}
