@@ -12,6 +12,7 @@ import { useContributionSummaryQuery } from '../hooks/use_contribution_summary_q
 import { useContributionTableQuery } from '../hooks/use_contribution_table_query';
 import { useContributionQuery } from '../hooks/use_contribution_query';
 import ValidateContribution from '../../../../lib/modules/magic/validate_contribution';
+import { isColumnarTable, tableRowCount, rowObjectsToColumnar, omitTableColumns } from '../utils/contribution_tables';
 
 const model = models[versions.slice(-1)[0]];
 const orderedTableNames = _.sortBy(_.keys(model.tables), table => model.tables[table].position);
@@ -98,7 +99,7 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
     let rowCounter = 1;
     for (const tableName of orderedTableNames) {
       if (tableName === activeTable) break;
-      rowCounter += contributionQuery.data?.[tableName]?.length || 0;
+      rowCounter += tableRowCount(contributionQuery.data?.[tableName]);
     }
     return rows.map((row: any, i: number) => ({
       ...row,
@@ -209,7 +210,7 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
               const tableHasEdits = editedTables.has(tableName);
               const rowCount = tableHasEdits && tableCounts[tableName] !== undefined
                 ? tableCounts[tableName]
-                : (contributionQuery.isSuccess ? contributionQuery.data[tableName]?.length || 0 : '?');
+                : (contributionQuery.isSuccess ? tableRowCount(contributionQuery.data[tableName]) : '?');
               const errorRowCount = (() => {
                 const tableErrors = validationData[tableName];
                 if (!tableErrors) return 0;
@@ -480,7 +481,7 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
                           }));
                           rowCounter += next[tableName].length;
                         } else {
-                          rowCounter += contributionQuery.data?.[tableName]?.length || 0;
+                          rowCounter += tableRowCount(contributionQuery.data?.[tableName]);
                         }
                       });
 
@@ -536,7 +537,7 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
                       }));
                       rowCounter += next[tableName].length;
                     } else {
-                      rowCounter += contributionQuery.data?.[tableName]?.length || 0;
+                      rowCounter += tableRowCount(contributionQuery.data?.[tableName]);
                     }
                   });
                   editedTableDataRef.current = next;
@@ -994,9 +995,13 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
               // Update only the edited tables with cached data (strip any blank rows)
               for (const tableName of Array.from(editedTables)) {
                 if (editedTableData[tableName]) {
-                  contribution[tableName] = editedTableData[tableName].filter(
+                  const rows = editedTableData[tableName].filter(
                     (row: any) => row && Object.values(row).some((v: any) => v !== null && v !== undefined && v !== '')
                   );
+                  // Keep columnar tables (measurements) columnar; the validator and summarizer expect it
+                  contribution[tableName] = isColumnarTable(contributionQuery.data[tableName])
+                    ? rowObjectsToColumnar(rows)
+                    : rows;
                 }
               }
 
@@ -1007,11 +1012,8 @@ export const EditContributionModal = ({ contributionID, trigger, initialTable }:
                 const downloadOnlyCols = Object.keys(model.tables[tableName]?.columns || {})
                   .filter(col => model.tables[tableName].columns[col].validations?.includes('downloadOnly()'));
                 if (downloadOnlyCols.length === 0) return;
-                contribution[tableName] = contribution[tableName].map((row: any) => {
-                  const cleanRow = { ...row };
-                  downloadOnlyCols.forEach(col => delete cleanRow[col]);
-                  return cleanRow;
-                });
+                // Tables may be row objects or columnar ({ columns, rows }, e.g. measurements)
+                contribution[tableName] = omitTableColumns(contribution[tableName], downloadOnlyCols);
               });
               
               // Phase 1: Save to OpenSearch
