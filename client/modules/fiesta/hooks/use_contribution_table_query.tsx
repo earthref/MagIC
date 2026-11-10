@@ -3,6 +3,7 @@ import { Meteor } from 'meteor/meteor';
 import { useQuery } from '@tanstack/react-query';
 import { index } from '/lib/configs/magic/search_levels';
 import { versions, models } from '/lib/configs/magic/data_models';
+import { tableToRowObjects } from '../utils/contribution_tables';
 
 export const useContributionTableQuery = (contributionID: number, table: string, options) => {
   const queryOptions = {
@@ -12,7 +13,8 @@ export const useContributionTableQuery = (contributionID: number, table: string,
     ['contribution table', contributionID, table],
     async () => {
       const data = await Meteor.callAsync('esGetContribution', { index, id: contributionID, tables: [table] });
-      const rows = data?.[table] || [];
+      // Measurements are stored columnar ({ columns, rows }); the grid needs row objects
+      const rows = tableToRowObjects(data?.[table]);
       
       const model = models[versions.slice(-1)[0]];
       const orderedColumnNames = _.sortBy(_.keys(model.tables[table].columns), column => model.tables[table].columns[column].position);
