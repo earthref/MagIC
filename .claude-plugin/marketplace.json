@@ -1,0 +1,15 @@
+{
+  "name": "earthref",
+  "description": "Claude skills for the MagIC paleomagnetic and rock magnetic database (earthref.org/MagIC)",
+  "owner": {
+    "name": "EarthRef / MagIC",
+    "url": "https://earthref.org/MagIC"
+  },
+  "plugins": [
+    {
+      "name": "magic",
+      "source": "./skills/magic",
+      "description": "Build validated MagIC Data Model 3.0 upload files from published papers and their supplements"
+    }
+  ]
+}
