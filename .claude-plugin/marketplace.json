@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "magic",
-      "source": "./skills/magic",
+      "source": "./skills",
       "description": "Build validated MagIC Data Model 3.0 upload files from published papers and their supplements"
     }
   ]

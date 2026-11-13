@@ -1,6 +1,6 @@
 {
   "name": "magic",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Claude skills for the MagIC database: turn a paleomagnetic or rock magnetic paper and its supplement into a validated MagIC Data Model 3.0 upload file, with a report of every inferred value and gap.",
   "author": {
     "name": "EarthRef / MagIC",
@@ -8,5 +8,14 @@
   },
   "homepage": "https://earthref.org/MagIC",
   "repository": "https://github.com/earthref/magic",
-  "keywords": ["paleomagnetism", "rock magnetism", "MagIC", "PmagPy", "data curation"]
+  "keywords": [
+    "paleomagnetism",
+    "rock magnetism",
+    "MagIC",
+    "PmagPy",
+    "data curation"
+  ],
+  "skills": [
+    "./magic-from-paper"
+  ]
 }
