@@ -19,7 +19,7 @@ or, inside a session, `/plugin marketplace add earthref/magic`. Run `claude plug
 
 **Claude (claude.ai, desktop and mobile apps)**
 
-Download `magic-from-paper.zip` from the latest release, then go to Customize → Skills → "+" → Upload a skill. Code execution ("Create and edit files") must be on.
+Download [magic-from-paper.zip](https://github.com/earthref/magic/releases/latest/download/magic-from-paper.zip) from the latest release, then go to Customize → Skills → "+" → Upload a skill. Code execution ("Create and edit files") must be on.
 
 ## Use
 
@@ -30,9 +30,9 @@ The skill installs `pmagpy` and `json5` with pip when it runs.
 ## Layout
 
 ```
-.claude-plugin/marketplace.json      the marketplace (repository root)
-skills/magic/.claude-plugin/plugin.json
-skills/magic/skills/magic-from-paper/SKILL.md, references/, scripts/
+.claude-plugin/marketplace.json            the marketplace (repository root); its plugin "magic" is ./skills
+skills/.claude-plugin/plugin.json          the plugin; "skills" lists each skill folder
+skills/magic-from-paper/                   SKILL.md, references/, scripts/
 ```
 
-Bump `version` in `plugin.json` when you change a skill so Claude Code users receive the update, and check the layout with `claude plugin validate .` from the repository root.
+To add a skill, put its folder in `skills/` and add `"./<folder>"` to the `skills` list in `plugin.json`. Bump `version` in `plugin.json` whenever you change a skill so Claude Code users receive the update, and check the layout with `claude plugin validate .` and `claude plugin validate ./skills` from the repository root.
