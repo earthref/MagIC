@@ -523,8 +523,14 @@ export default class MagICUploadContribution extends React.Component {
       // Drop null/undefined overrides so they don't clobber values from the uploaded contribution table
       // (_.merge copies null over existing values) or block them in the summarizer (which only fills unset props).
       contributionOverride = _.omitBy(contributionOverride, _.isNil);
-      this.contribution.contribution = this.contribution.contribution || [{}];
-      this.contribution.contribution[0] = _.merge({}, this.contribution.contribution[0], contributionOverride);
+      // Only these columns are taken from the uploaded file's contribution table; everything else
+      // (id, version, contributor, timestamp, data_model_version, ...) is set by MagIC.
+      const contributionColumnsFromFile = ['reference', 'funding', 'lab_names', 'supplemental_links'];
+      const contributionFromFile = _.pick(
+        (this.contribution.contribution && this.contribution.contribution[0]) || {},
+        contributionColumnsFromFile
+      );
+      this.contribution.contribution = [_.merge({}, contributionFromFile, contributionOverride)];
       // lab_names is an array when it comes from an existing summary, but already a colon-joined string from a file
       if (_.isArray(this.contribution.contribution[0].lab_names)) this.contribution.contribution[0].lab_names = this.contribution.contribution[0].lab_names.join(":");
       contributionOverride._contributor = this.state._contributor;
