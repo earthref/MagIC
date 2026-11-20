@@ -25,12 +25,37 @@ preserved across builds.
    stamp.
 
 4. Review `git diff`, then commit.
+5. If columns were added, update the search index mapping (below) before
+   deploying.
 
 To check that the committed file matches a workbook without writing:
 
 ```
 npm run data-model:build -- "/path/to/MagIC Data Model 3.0.xlsx" --check
 ```
+
+## Updating the search index mapping
+
+The OpenSearch index is created with `dynamic: "strict"`
+(`.scripts/tests/create_index_mapping.js`), so a contribution that uses a
+column the index mapping does not know fails to index. When columns are added,
+add them to the live index mapping **before** deploying the new model:
+
+```
+npm run -s data-model:mapping -- --base HEAD > mapping.json   # before committing
+npm run -s data-model:mapping -- --base origin/main > mapping.json  # on a branch
+curl -X PUT "$OPENSEARCH/magic/_mapping" -H 'Content-Type: application/json' \
+  --data-binary @mapping.json
+```
+
+The script lists on stderr the columns in the working tree's `3.0.js` that are
+not in the model at `--base` and prints their mappings, with the same per-type
+rules as `create_index_mapping.js`. Adding fields to an existing index needs
+no reindex, and re-sending a field the index already has with the same
+definition changes nothing, so an older `--base` is safe. A column whose
+`type` changed cannot be fixed this way: it is reported, the exit status is 1,
+and it needs a new index and a reindex, so settle a new column's type before
+the first deploy.
 
 ## Validating without a workbook
 
@@ -122,6 +147,7 @@ status; pass `--legacy` to see them.
 
 - `build.mjs` reads the workbook and writes `3.0.js`.
 - `validate.mjs` checks a `3.0.js` file; also used by `build.mjs` before writing.
+- `mapping.mjs` prints the index mapping update for added columns.
 - `lib.mjs` shared parsing (acorn, literal-only evaluation), key order, and
   Prettier serialization.
 - `tests.mjs` self-tests; run with `npm run data-model:test`. Set

@@ -93,6 +93,7 @@
     "mint-data-dois": "set TEST_WATCH=0&& set TEST_CLIENT=0&& meteor test --once --driver-package=meteortesting:mocha --port 3020 --settings settings.json",
     "data-model:build": "node .scripts/data_model/build.mjs",
     "data-model:validate": "node .scripts/data_model/validate.mjs",
+    "data-model:mapping": "node .scripts/data_model/mapping.mjs",
     "data-model:test": "node --test .scripts/data_model/tests.mjs"
   }
 }
