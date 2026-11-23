@@ -530,6 +530,9 @@ export default class MagICUploadContribution extends React.Component {
         (this.contribution.contribution && this.contribution.contribution[0]) || {},
         contributionColumnsFromFile
       );
+      // Lab names in the uploaded file replace the existing contribution's; the existing ones are
+      // only kept when the file has none. Otherwise a bad stored value can never be fixed by re-uploading.
+      if (_.trim(contributionFromFile.lab_names)) delete contributionOverride.lab_names;
       this.contribution.contribution = [_.merge({}, contributionFromFile, contributionOverride)];
       // lab_names is an array when it comes from an existing summary, but already a colon-joined string from a file
       if (_.isArray(this.contribution.contribution[0].lab_names)) this.contribution.contribution[0].lab_names = this.contribution.contribution[0].lab_names.join(":");
