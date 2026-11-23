@@ -56,6 +56,64 @@ const esClient = new opensearch.Client({
 //const erUsersIndex = Meteor.isDevelopment ? 'er_users_v1_sandbox' : 'er_users_v1';
 const erUsersIndex = Meteor.isDevelopment ? "er_users" : "er_users";
 
+// Normalize a reference to the form used to match versions: uppercase DOI without a doi.org prefix.
+function normalizeDOI(reference) {
+  return _.toUpper(_.trim(reference)).replace(/https?:\/\/(dx\.)?doi\.org\//i, "");
+}
+
+// Build the version history for contribution `id` with reference `doi`: it becomes the next
+// version after the latest activated contribution with the same reference, or version 1.
+async function buildVersionHistory({ index, id, doi, _contributor, timestamp, description }) {
+  let _history = [
+    {
+      id: _.parseInt(id),
+      version: null,
+      contributor: _contributor,
+      timestamp: timestamp || moment().utc().toISOString(),
+      data_model_version: _.last(versions),
+      description: description,
+    },
+  ];
+  try {
+    let resp = await esClient.search({
+      index: index,
+      type: "_doc",
+      body: {
+        _source: {
+          includes: ["summary.contribution._history"],
+        },
+        query: {
+          bool: {
+            filter: [
+              { term: { type: "contribution" } },
+              { term: { "summary.contribution.reference.raw": doi } },
+              { term: { "summary.contribution._is_activated": "true" } },
+              { term: { "summary.contribution._is_latest": "true" } },
+            ],
+            must_not: [{ term: { "summary.contribution.id": _.parseInt(id) } }],
+          },
+        },
+      },
+    });
+    if (resp.body.hits.total.value > 0) {
+      _history[0].version =
+        parseInt(
+          resp.body.hits.hits[0]._source.summary.contribution._history[0]
+            .version
+        ) + 1;
+      _history.push(
+        ...resp.body.hits.hits[0]._source.summary.contribution._history
+      );
+    } else {
+      _history[0].version = 1;
+    }
+  } catch (error) {
+    _history[0].version = 1;
+    console.error("buildVersionHistory", index, id, doi, error.message);
+  }
+  return _history;
+}
+
 export default function () {
   Meteor.methods({
     async esBuckets({ index, type, queries, countField, filters, aggs }) {
@@ -1359,9 +1417,7 @@ export default function () {
       this.unblock();
 
       timestamp = timestamp || moment().utc().toISOString();
-      let doi = _.toUpper(_.trim(reference));
-      console.log("esUpdateContributionReference", doi);
-      doi = doi.replace(/https?:\/\/(dx\.)?doi\.org\//i, "");
+      let doi = normalizeDOI(reference);
       console.log("esUpdateContributionReference", doi);
 
       let _reference = {};
@@ -1381,78 +1437,9 @@ export default function () {
         );
       }
 
-      let _history = [
-        {
-          id: _.parseInt(id),
-          version: null,
-          contributor: _contributor,
-          timestamp: timestamp || moment().utc().toISOString(),
-          data_model_version: _.last(versions),
-          description: description,
-        },
-      ];
-
-      try {
-        let resp = await esClient.search({
-          index: index,
-          type: "_doc",
-          body: {
-            _source: {
-              includes: ["summary.contribution._history"],
-            },
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      type: "contribution",
-                    },
-                  },
-                  {
-                    term: {
-                      "summary.contribution.reference.raw": doi,
-                    },
-                  },
-                  {
-                    term: {
-                      "summary.contribution._is_activated": "true",
-                    },
-                  },
-                  {
-                    term: {
-                      "summary.contribution._is_latest": "true",
-                    },
-                  },
-                ],
-              },
-            },
-          },
-        });
-        if (resp.body.hits.total.value > 0) {
-          _history[0].version =
-            parseInt(
-              resp.body.hits.hits[0]._source.summary.contribution._history[0]
-                .version
-            ) + 1;
-          _history.push(
-            ...resp.body.hits.hits[0]._source.summary.contribution._history
-          );
-        } else {
-          _history[0].version = 1;
-        }
-      } catch (error) {
-        _history[0].version = 1;
-        console.error(
-          "esUpdateContributionReference",
-          index,
-          id,
-          contributor,
-          _contributor,
-          reference,
-          description,
-          error.message
-        );
-      }
+      let _history = await buildVersionHistory({
+        index, id, doi, _contributor, timestamp, description,
+      });
       let version = _history[0].version;
 
       try {
@@ -1639,13 +1626,58 @@ export default function () {
         )
           contributionSummary =
             resp.body.hits.hits[0]._source.summary.contribution;
+
+        // The version history is built when a reference is entered on the Private Contributions
+        // page (esUpdateContributionReference). A reference that came in with an uploaded file
+        // skips that step, leaving version null and no link to the previous version, so build it
+        // here before publishing.
         if (
-          resp.body.hits.total.value > 0 &&
-          resp.body.hits.hits[0]._source.summary.contribution._history.length >
-            1
+          contributionSummary &&
+          contributionSummary.reference &&
+          !contributionSummary.version
         ) {
-          prev_id =
-            resp.body.hits.hits[0]._source.summary.contribution._history[1].id;
+          const doi = normalizeDOI(contributionSummary.reference);
+          const _history = await buildVersionHistory({
+            index,
+            id,
+            doi,
+            _contributor: contributionSummary._contributor,
+            description: contributionSummary.description,
+          });
+          const version = _history[0].version;
+          contributionSummary.reference = doi;
+          contributionSummary.version = version;
+          contributionSummary._history = _history;
+          console.log("esActivateContribution built version history", id, doi, version);
+          // Keep the contribution table row (used for downloads) in step with the summary.
+          try {
+            await esClient.update({
+              index: index,
+              type: "_doc",
+              id: id + "_0",
+              refresh: true,
+              retryOnConflict: 5,
+              body: {
+                script: {
+                  source: `
+                    ctx._source.contribution.contribution[0].version = params.version;
+                    ctx._source.contribution.contribution[0].reference = params.doi;
+                  `,
+                  params: { version, doi },
+                },
+              },
+            });
+          } catch (error) {
+            console.error("esActivateContribution contribution row version", index, id, error.message);
+          }
+        }
+
+        if (
+          contributionSummary &&
+          contributionSummary._history &&
+          contributionSummary._history.length > 1
+        ) {
+          prev_id = contributionSummary._history[1].id;
           await esClient.updateByQuery({
             index: index,
             refresh: true,
