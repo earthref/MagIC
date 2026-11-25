@@ -216,10 +216,18 @@ const Routes = ({match}) => (
       if (window.history.replaceState)
         window.history.replaceState({}, 'MagIC Data Models | EarthRef.org', '/MagIC/data-models/' + match.params.v);    
       return (
-        <Page portal="MagIC" title="Browse the current and recent MagIC Data Models:" menu={<MagICMenu/>}>
+        <Page portal="MagIC" title="The MagIC Data Model" menu={<MagICMenu/>}>
           <Helmet>
             <title>MagIC Data Models | EarthRef.org</title>
           </Helmet>
+          <p>
+            The MagIC data model is hierarchical. Studies are based on magnetic measurements which is the bottom table of the hierarchy. Then there are specimens, samples, sites, and locations tables with a contribution table at the top.
+            The criteria, ages, and images tables allow for adding supporting data to the dataset.
+            </p>
+            <p>
+            You can do a text search of the model using the search box in the upper right above the table descriptions.
+            Clicking on the arrows open and close listings of the columns in each table. If you wish to have addtional columns added for your data or have other suggestions, contact us using the contact link in the upper right of the webpage.
+          </p>
           <MagICDataModel version={match.params.v} search={queryString.parse(location.search).q || ""}/>
         </Page>
       );
